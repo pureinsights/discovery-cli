@@ -1,0 +1,12 @@
+[
+  {
+    "expression": "0 * * * * ?",
+    "seeds": [
+      {
+        "seedId": "{{ fromName('Pipeline Example') }}",
+        "scanStrategy": "INCREMENTAL"
+      }
+    ],
+    "active": false
+  }
+]
