@@ -1,6 +1,12 @@
 import constants
 
 
+# define Python user-defined exceptions
+class DataInconsistencyException(Exception):
+    """Raised when data does not match"""
+    pass
+
+
 def replace_ids(data, id_to_name, entity_name):
     for entity in data:
         entity_id = entity['id']
