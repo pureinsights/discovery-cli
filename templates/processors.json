@@ -1,0 +1,69 @@
+[
+  {
+    "pull": {
+      "metadata": true,
+      "onlyContent": false,
+      "key": "/assetUid"
+    },
+    "name": "S3 Connector",
+    "credentialId": "{{ fromName('S3 Connector Credentials') }}",
+    "client": {
+      "connection": {
+        "timeout": 3000
+      },
+      "socket": {
+        "timeout": 6000
+      }
+    },
+    "type": "s3-connector",
+    "aws": {
+      "bucket": "replace_with_proper_bucket_name",
+      "region": "EU_WEST_1"
+    }
+  },
+  {
+    "parser": {
+      "metadata": true,
+      "key": "/s3"
+    },
+    "name": "Tika Processor",
+    "type": "tika-processor"
+  },
+  {
+    "name": "Remove tags and fields",
+    "language": "groovy",
+    "type": "scripting",
+    "script": "// Script to remove tags from content\n\n// Get the input\nvar content = data.findString(\"tika\");\nif (content.isEmpty()) {\n  // No content - do nothing\n  return;\n}\n\n// remove the tags\nvar tagged = content.get();\nStringBuffer sb = new StringBuffer();\nboolean tag = false;\nfor (int i=0; i<tagged.length(); i++) {\n  char c = tagged.charAt(i);\n  switch (c) {\n    case '<':\n      tag = true;\n      break;\n    case '>':\n      tag = false;\n      break;\n    default:\n      if (!tag)\n        sb.append(c);\n  }\n}\nvar untagged = sb.toString();\n\n// Clean up multiple white spaces\nvar clean = untagged.replaceAll(\"\\\\n+\", \"\\n\").trim();\n\nif (!clean.isEmpty()) {\n  out.put(\"cleanContent\", clean)\n}\n\nout.put(\"tika\", \"\")\nout.put(\"s3\", \"\")\n"
+  },
+  {
+    "name": "Extract Content Fields",
+    "language": "groovy",
+    "type": "scripting",
+    "script": "data.findField('content_id').ifPresent{field -> out.set('contentId', field)};\ndata.findField('duration').ifPresent{field -> out.set('duration', field)};\ndata.findField('type').ifPresent{field -> out.set('type', field)};\ndata.findField('companyId').ifPresent{field -> out.set('companyId', field)};\ndata.findField('acl').ifPresent{field -> out.set('acl', field)};\ndata.findField('communityIds').ifPresent{field -> out.set('communityIds', field)};\ndata.findField('eventOccurrences').ifPresent{ field -> out.set('eventOccurrences', field)};\ndata.findField('assetUid').ifPresent{field -> out.set('assetUid', field)};\ndata.findField('created').ifPresent{field -> out.set('created', field)};\ndata.findField('updated').ifPresent{field -> out.set('updated', field)};\ndata.findField('readingTime').ifPresent{field -> out.set('readingTime', field)};data.findField('authorName').ifPresent{field -> out.set('authorName', field)};\ndata.findField('userId').ifPresent{field -> out.set('userId', field)};\ndata.findField('viewsCount').ifPresent{field -> out.set('viewsCount', field)};\ndata.findField('likesCount').ifPresent{field -> out.set('likesCount', field)};\ndata.findField('sharesCount').ifPresent{field -> out.set('sharesCount', field)};\ndata.findField('commentsCount').ifPresent{field -> out.set('commentsCount', field)};\ndata.findField('popularity').ifPresent{field -> out.set('popularity', field)};\ndata.findField('tags').ifPresent{field -> out.set('tags', field)};\ndata.findField('topics').ifPresent{field -> out.set('topics', field)};\ndata.findField('title').ifPresent{field -> out.set('title', field)};\ndata.findField('fileType').ifPresent{field -> out.set('fileType', field)};\ndata.findField('communityNames').ifPresent{field -> out.set('communityNames', field)};\ndef languages = ['ar', 'bg',  'cs', 'da', 'et', 'de', 'el', 'en', 'es', 'fi', 'fr', 'hu', 'id', 'it', 'lv', 'lt', 'nl', 'nn', 'pt', 'ro', 'ru', 'sv', 'th', 'tr','bs', 'hr', 'fp', 'gu', 'ka', 'mk', 'me', 'ms', 'sq', 'sl', 'he', 'hr', 'sk', 'sr', 'uk', 'vi', 'zh', 'ja', 'kk', 'ko', 'pl']\ndef fields = ['title_', 'description_', 'body_', 'content_']\nfor (int i = 0; i < fields.size(); i++) {\ndef field = fields.get(i);\nfor (int n = 0; n < languages.size(); n++) {\ndef language = languages.get(n)\nif (data.findField(field + language).isPresent()) {\ndata.findField(field + language).ifPresent{property-> out.set(field + language, property)};\n}\n}\n}",
+    "timestamp": "2021-05-10T03:11:26.961553905Z"
+  },
+  {
+    "bucket": "new_content",
+    "servers": [
+      {
+        "hostname": "staging-service",
+        "port": 8081
+      }
+    ],
+    "name": "Staging Hydrator",
+    "active": true,
+    "type": "staging-hydrator",
+    "recordData": "MERGED"
+  },
+  {
+    "servers": [
+      {
+        "hostname": "fuseuniversal-es-http.default.svc.cluster.local",
+        "port": "9200"
+      }
+    ],
+    "name": "Elastic Search Hydrator",
+    "index": "new_content",
+    "type": "elasticsearch-hydrator"
+  }
+]
