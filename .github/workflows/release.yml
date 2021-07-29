@@ -3,9 +3,7 @@ name: Release
 on:
   workflow_dispatch:
   push:
-    branches: [ main, master, release*, feature* ]
-  pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [ main, master, release* ]
 jobs:
   build:
     runs-on: windows-latest
