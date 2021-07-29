@@ -7,7 +7,7 @@ Thin client around PDP Admin UI for common tasks. Intended for performing quick 
 
 ## Installing
 
-Download the distributable ZIP file from here: XXXX, unzip, and add to your Windows PATH environment variable.
+Download the latest distributable ZIP file from here: https://github.com/pureinsights/pdp-cli/releases, unzip, and add to your Windows PATH environment variable.
 
 ## Getting started
 
