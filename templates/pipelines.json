@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Extract content from S3",
+    "active": true,
+    "steps": [
+      {
+        "processorId": "{{ fromName('S3 Connector') }}",
+        "action": "process"
+      },
+      {
+        "processorId": "{{ fromName('Tika Processor') }}",
+        "action": "process"
+      },
+      {
+        "processorId": "{{ fromName('Remove tags and fields') }}",
+        "action": "process"
+      },
+      {
+        "processorId": "{{ fromName('Staging Hydrator') }}",
+        "action": "hydrate"
+      },
+      {
+        "processorId": "{{ fromName('Elastic Search Hydrator') }}",
+        "action": "hydrate"
+      }
+    ]
+  }
+]
