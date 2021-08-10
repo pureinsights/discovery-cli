@@ -59,7 +59,7 @@
     "servers": [
       {
         "hostname": "fuseuniversal-es-http.default.svc.cluster.local",
-        "port": "9200"
+        "port": 9200
       }
     ],
     "name": "Elastic Search Hydrator",

@@ -26,6 +26,6 @@
     "scanAction": "scan",
     "processAction": "process",
     "type": "rdbms-connector",
-    "pipelineId": "{{ fromName('Extract content from S3' }}"
+    "pipelineId": "{{ fromName('Extract content from S3') }}"
   }
 ]
