@@ -69,7 +69,10 @@ def run(argv, commands, configuration):
                             headers={'Content-type': 'application/json'}
                         )
 
-                        response.raise_for_status()
+                        if response.status_code == requests.codes.bad:
+                            print(f'\nError while updating entity {entity_id}: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
+                            response.raise_for_status()
+
                         print(f'Updated entity of type {entity_name[1]} with id {entity_id}')
                     else:
                         # Create
@@ -79,7 +82,10 @@ def run(argv, commands, configuration):
                             headers={'Content-type': 'application/json'}
                         )
 
-                        response.raise_for_status()
+                        if response.status_code == requests.codes.bad:
+                            print(f'\nError while creating entity: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
+                            response.raise_for_status()
+
                         entity_id = response.json()['id']
                         entity['id'] = entity_id
                         print(f'Created new entity of type {entity_name[1]} with id {entity_id}')
