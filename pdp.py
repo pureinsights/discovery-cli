@@ -1,3 +1,4 @@
+import cluster
 import deploy
 import help
 import init
@@ -8,6 +9,7 @@ import configparser
 commands = {
     'init': init,
     'deploy': deploy,
+    'cluster': cluster,
     'help': help
 }
 
