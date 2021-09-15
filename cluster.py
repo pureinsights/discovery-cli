@@ -19,37 +19,78 @@ Usage:
     pdp cluster [options]
 
     Options can be:
-    *restart-all [namespace]: restarts all pods belonging to the PDP in the given namespace. Uses the pre-configured
-     restart policy for each deployment. Does not restart stateful sets or daemon sets. 
+    * restart-all [namespace]: restarts all pods belonging to the PDP in the given namespace. Uses the pre-configured
+     restart policy for each deployment. Does not restart stateful sets or daemon sets.
+    * get-image-ids [namespace]: returns the current image SHA used by each PDP pod in the given namespace. This is useful
+     after a code push to make sure you have the correct version. 
     """)
 
 
 def run(argv, commands, configuration):
-    if len(sys.argv) < 3:
-        print('''
-            Missing argument, the namespace where to run. For help, type 'pdp help cluster'.
-        ''')
-
+    if len(argv) < 3:
+        print("Missing argument, the command to run. For help, type 'pdp help cluster'.")
         sys.exit()
 
-    namespace = sys.argv[2]
+    command = argv[2]
+
+    if len(argv) < 4:
+        print("Missing argument, the namespace to use. For help, type 'pdp help cluster'.")
+        sys.exit()
+
+    namespace = sys.argv[3]
 
     config.load_kube_config()
-    k8s_client = client.AppsV1Api()
+    print(f"Will use Kubernetes context {config.list_kube_config_contexts()[1]['name']}")
 
-    deployment_list = k8s_client.list_namespaced_deployment(namespace=namespace)
+    if command == "restart-all":
+        k8s_client = client.AppsV1Api()
 
-    if deployment_list.items:
-        print(f"Restarting all PDP pods in the namespace {namespace}...")
-    else:
-        print(f"No PDP pods in the namespace '{namespace}'.")
+        deployment_list = k8s_client.list_namespaced_deployment(namespace=namespace)
 
-    for deployment in deployment_list.items:
-        deployment_name = deployment.metadata.name
+        if deployment_list.items:
+            print(f"Restarting all PDP pods in the namespace {namespace}...")
+        else:
+            print(f"No PDP deployments in the namespace '{namespace}'.")
 
-        if deployment_name.startswith('pdp-'):
-            restart_deployment(k8s_client, deployment_name, namespace)
-            print(f"Restarted deployment {deployment_name}")
+        for deployment in deployment_list.items:
+            deployment_name = deployment.metadata.name
+
+            if deployment_name.startswith('pdp-'):
+                restart_deployment(k8s_client, deployment_name, namespace)
+                print(f"Restarted deployment {deployment_name}")
+
+        return
+
+    if command == "get-image-ids":
+        k8s_client = client.CoreV1Api()
+
+        pod_list = k8s_client.list_namespaced_pod(namespace=namespace)
+
+        if pod_list.items:
+            print(f"Found {len(pod_list.items)} pods in {namespace}...")
+        else:
+            print(f"No PDP pods in the namespace '{namespace}'.")
+
+        image_ids = set()
+
+        for pod in pod_list.items:
+            pod_name = pod.metadata.name
+
+            if pod_name.startswith('pdp-'):
+                for status in pod.status.container_statuses:
+                    image_ids.add(status.image_id)
+
+        print(f"Found {len(image_ids)} unique image ids")
+
+        for pod in image_ids:
+            print(f"Image ID: {pod}")
+        return
+
+    print('''
+        Missing argument, the command to run. For help, type 'pdp help cluster'.
+    ''')
+
+    sys.exit()
 
 
 def restart_deployment(v1_apps, deployment, namespace):
