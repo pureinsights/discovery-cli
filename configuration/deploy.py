@@ -1,34 +1,11 @@
-import common
-import constants
+from configuration import common
+from configuration import constants
 import json
 import requests
 
 from jinja2 import Template, TemplateSyntaxError
 
 name_to_id = {}
-
-
-def description():
-    return 'deploy: push configurations to a target environment'
-
-
-def print_help():
-    print("""
-Deploys project configurations to the target Admin API. Must be run within the directory from a project created with the 'init'
-command.
-
-Entities are created in this order: credentials, processors, pipelines, seeds and then cron_jobs.
-
-Will replace any name reference with IDs. Names are case insensitive.
-
-If the "id" field is missing from an entity, assumes this is a new instance.
-
-Usage:
-    pdp deploy [--ignore-ids]
-
-    *--ignore-ids: will cause existing ids to be ignored, hence everything will be created as a new 
-                   instance. This is useful when moving configs from one instance to another.
-    """)
 
 
 def from_name(name):
@@ -41,8 +18,8 @@ def from_name(name):
     return name_to_id[name]
 
 
-def run(argv, commands, configuration):
-    admin_api_url = configuration.get('AdminApiUrl')
+def run(ctx, ignore_ids):
+    admin_api_url = ctx['configuration'].get('AdminApiUrl')
 
     id_to_name = {}
 
@@ -58,7 +35,7 @@ def run(argv, commands, configuration):
                 for entity in entities:
                     entity_id = entity.get('id', None)
 
-                    if '--ignore-ids' in argv:
+                    if ignore_ids:
                         entity_id = None
 
                     if entity_id:

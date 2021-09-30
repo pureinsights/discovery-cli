@@ -1,4 +1,4 @@
-import constants
+from configuration import constants
 
 
 # define Python user-defined exceptions
