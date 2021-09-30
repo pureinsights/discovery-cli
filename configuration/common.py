@@ -1,4 +1,5 @@
-import constants
+import click
+from configuration import constants
 
 
 # define Python user-defined exceptions
@@ -30,7 +31,7 @@ def replace_id(data, k, id_to_name, context):
         if key == k:
             referenced_id = data[key]
             if referenced_id not in id_to_name:
-                print(f'Error: Id {referenced_id} does not exist while attempting to replace in {data} with {context}')
+                click.echo(f'Error: Id {referenced_id} does not exist while attempting to replace in {data} with {context}')
                 return
 
             data[key] = f"{{{{ fromName('{id_to_name[referenced_id]}') }}}}"

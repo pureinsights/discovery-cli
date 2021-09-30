@@ -1,23 +1,9 @@
-import cluster
-import deploy
-import help
-import init
-import sys
-
+import click
 import configparser
 
-commands = {
-    'init': init,
-    'deploy': deploy,
-    'cluster': cluster,
-    'help': help
-}
-
-
-def print_help():
-    print("""
-PDP Command Line Interface. Type 'pdp help' for information about available commands.
-    """)
+from cluster import commands as cluster_commands
+from configuration import commands as config_commands
+from seed import commands as seed_commands
 
 
 def load_config(config_name):
@@ -27,17 +13,21 @@ def load_config(config_name):
     config.read(config_name)
     return config['DEFAULT']
 
-
-def main():
-    if len(sys.argv) < 2:
-        print_help()
-        sys.exit()
-
-    # Get configuration
-    configuration = load_config('pdp.ini')
-
-    command = sys.argv[1]
-    commands[command].run(sys.argv, commands, configuration)
+@click.group()
+@click.option('--namespace', default="pdp", help='Namespace in which the PDP components are running. Default is "pdp".')
+@click.pass_context
+def cli(ctx, namespace):
+    # ensure that ctx.obj exists and is a dict (in case `cli()` is called
+    # by means other than the `if` block below)
+    ctx.ensure_object(dict)
+    ctx.obj['namespace'] = namespace
+    ctx.obj['configuration'] = load_config('pdp.ini')
 
 
-main()
+cli.add_command(cluster_commands.cluster)
+cli.add_command(config_commands.config)
+cli.add_command(seed_commands.seed)
+
+
+if __name__ == '__main__':
+    cli(obj={})

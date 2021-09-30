@@ -1,6 +1,7 @@
-import common
+import click
+from configuration import common
 import configparser
-import constants
+from configuration import constants
 import json
 import os
 import requests
@@ -8,38 +9,12 @@ import shutil
 import zipfile
 
 
-def description():
-    return 'init: start here, creates a new project from existing sources or from scratch.'
-
-
-def print_help():
-    print("""
-Creates a new project form existing sources or from scratch.    
-
-Usage:
-    pdp init [projectName] [--empty] --adminApiUrl=http://localhost:8080
-    
-    * projectName: the name of the resulting directory, will try to fetch existing configurations from the Admin 
-                   API referenced in ~/.pdp. **Notice that imported configs have id fields, don't change those**.
-    * adminApiUrl: the base URL for the Admin API, defaults to http://localhost:8080
-    * --empty: if it should only create an empty directory structure with basic handlebars for starting
-               a new project. 
-    """)
-
-
-def run(argv, commands, configuration):
-    if len(argv) < 3:
-        print_help()
-        return
-
-    project_name = argv[2]
-    admin_api_url = admin_api_url_from_args(argv)
-
-    if '--empty' in argv:
+def run(project_name, empty, admin_api_url):
+    if empty:
         create_empty_project(project_name)
     else:
-        # Create empty directory
-        project_path = os.path.join('./', project_name)
+        # Create directory
+        project_path = os.path.join('../', project_name)
         os.mkdir(project_path)
 
         # Download and extract zip file
@@ -56,10 +31,10 @@ def run(argv, commands, configuration):
 def create_empty_project(project_name):
     try:
         # Create sample files
-        shutil.copytree('templates', project_name)
+        shutil.copytree('configuration/templates', project_name)
         return
     except OSError as error:
-        print(f'Failed to init project due {error}')
+        click.echo(f'Failed to init project due {error}')
 
 
 def export_all(project_name, admin_api_url):
@@ -90,11 +65,3 @@ def export_all(project_name, admin_api_url):
             file.seek(0)
             json.dump(data, file, indent=2)
             file.truncate()
-
-
-def admin_api_url_from_args(argv):
-    for arg in argv:
-        if arg.startswith('--adminApiUrl'):
-            return arg[arg.index('=') + 1:len(arg)]
-
-    return 'http://localhost:8080'

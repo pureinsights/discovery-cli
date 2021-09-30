@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['pdp.py'],
-             pathex=['C:\\dev\\projects\\pdp-cli'],
+             pathex=['D:\\projects\\pdp-cli'],
              binaries=[],
              datas=[],
              hiddenimports=[],
