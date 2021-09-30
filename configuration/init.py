@@ -14,7 +14,7 @@ def run(project_name, empty, admin_api_url):
         create_empty_project(project_name)
     else:
         # Create directory
-        project_path = os.path.join('../', project_name)
+        project_path = os.path.join('./', project_name)
         os.mkdir(project_path)
 
         # Download and extract zip file
