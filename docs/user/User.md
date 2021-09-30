@@ -12,7 +12,9 @@ Download the latest distributable ZIP file from here: https://github.com/pureins
 If there are already configurations in the target environment, then you can fetch them to create your local work dir.
 
 ```bash
-pdp init hello-world --adminApiUrl=http://localhost:8080
+# Type pdp config init --help for details
+
+pdp config init --project-name hello-world --admin-api-url http://localhost:8080
 ```
 
 The above command will fetch the configurations (seeds, credentials, processors, pipelines, etc) from the target environment and create a
@@ -20,7 +22,7 @@ local directory with the layout for all existing configurations. **Notice that i
 
 If you would rather start a new project, you can do something like:
 ```bash
-pdp init hello-word --empty
+pdp config init --project-name hello-word --empty
 ```
 
 This will create an empty directory with the PDP layout for you to start working. Adjust the corresponding Admin API URL on pdp.ini.
@@ -38,5 +40,5 @@ Which will validate and upload your changes. This will perform basic tagging to 
 Access documentation by running the help command:
 
 ```bash
-pdp help
+pdp --help
 ```
