@@ -1,3 +1,4 @@
+import click
 from configuration import common
 import configparser
 from configuration import constants
@@ -33,7 +34,7 @@ def create_empty_project(project_name):
         shutil.copytree('configuration/templates', project_name)
         return
     except OSError as error:
-        print(f'Failed to init project due {error}')
+        click.echo(f'Failed to init project due {error}')
 
 
 def export_all(project_name, admin_api_url):

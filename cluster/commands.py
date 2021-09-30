@@ -14,7 +14,7 @@ def cluster(ctx):
     """
     pass
 
-@cluster.command('restartAll')
+@cluster.command('restart-all')
 @click.pass_context
 def restart_all(ctx):
     """
@@ -24,25 +24,26 @@ def restart_all(ctx):
     namespace = ctx.obj['namespace']
 
     config.load_kube_config()
-    print(f"Will use Kubernetes context {config.list_kube_config_contexts()[1]['name']}")
+    click.echo(f"Will use Kubernetes context {config.list_kube_config_contexts()[1]['name']}")
 
     k8s_client = client.AppsV1Api()
 
     deployment_list = k8s_client.list_namespaced_deployment(namespace=namespace)
 
     if deployment_list.items:
-        print(f"Restarting all PDP pods in the namespace {namespace}...")
+        click.echo(f"Restarting all PDP pods in the namespace {namespace}...")
     else:
-        print(f"No PDP deployments in the namespace '{namespace}'.")
+        click.echo(f"No PDP deployments in the namespace '{namespace}'.")
 
     for deployment in deployment_list.items:
         deployment_name = deployment.metadata.name
 
         if deployment_name.startswith('pdp-'):
             restart_deployment(k8s_client, deployment_name, namespace)
-            print(f"Restarted deployment {deployment_name}")
+            click.echo(f"Restarted deployment {deployment_name}")
 
-@cluster.command('fetchImageIds')
+
+@cluster.command('fetch-image-ids')
 @click.pass_context
 def fetch_image_ids(ctx):
     """
@@ -56,9 +57,9 @@ def fetch_image_ids(ctx):
     pod_list = k8s_client.list_namespaced_pod(namespace=namespace)
 
     if pod_list.items:
-        print(f"Found {len(pod_list.items)} pods in {namespace}...")
+        click.echo(f"Found {len(pod_list.items)} pods in {namespace}...")
     else:
-        print(f"No PDP pods in the namespace '{namespace}'.")
+        click.echo(f"No PDP pods in the namespace '{namespace}'.")
 
     image_ids = set()
 
@@ -69,7 +70,7 @@ def fetch_image_ids(ctx):
             for status in pod.status.container_statuses:
                 image_ids.add(status.image_id)
 
-    print(f"Found {len(image_ids)} unique image ids")
+    click.echo(f"Found {len(image_ids)} unique image ids")
 
     for pod in image_ids:
         print(f"Image ID: {pod}")
@@ -92,6 +93,6 @@ def restart_deployment(v1_apps, deployment, namespace):
     try:
         v1_apps.patch_namespaced_deployment(deployment, namespace, body, pretty='true')
     except ApiException as e:
-        print("Exception when calling AppsV1Api->read_namespaced_deployment_status: %s\n" % e)
+        click.echo("Exception when calling AppsV1Api->read_namespaced_deployment_status: %s\n" % e)
 
 

@@ -1,3 +1,4 @@
+import click
 from configuration import common
 from configuration import constants
 import json
@@ -19,7 +20,7 @@ def from_name(name):
 
 
 def run(ctx, ignore_ids):
-    admin_api_url = ctx['configuration'].get('AdminApiUrl')
+    admin_api_url = ctx.obj['configuration'].get('AdminApiUrl')
 
     id_to_name = {}
 
@@ -47,10 +48,11 @@ def run(ctx, ignore_ids):
                         )
 
                         if response.status_code == requests.codes.bad:
-                            print(f'\nError while updating entity {entity_id}: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
+                            click.echo(
+                                f'\nError while updating entity {entity_id}: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
                             response.raise_for_status()
 
-                        print(f'Updated entity of type {entity_name[1]} with id {entity_id}')
+                        click.echo(f'Updated entity of type {entity_name[1]} with id {entity_id}')
                     else:
                         # Create
                         response = requests.post(
@@ -60,12 +62,13 @@ def run(ctx, ignore_ids):
                         )
 
                         if response.status_code == requests.codes.bad:
-                            print(f'\nError while creating entity: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
+                            click.echo(
+                                f'\nError while creating entity: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
                             response.raise_for_status()
 
                         entity_id = response.json()['id']
                         entity['id'] = entity_id
-                        print(f'Created new entity of type {entity_name[1]} with id {entity_id}')
+                        click.echo(f'Created new entity of type {entity_name[1]} with id {entity_id}')
 
                     # Cron jobs don't have a name
                     if 'name' in entity:
@@ -78,7 +81,7 @@ def run(ctx, ignore_ids):
                 json.dump(entities, file, indent=2)
                 file.truncate()
             except ValueError as error:
-                print(f'File {entity_name[0]} is not a valid JSON. Please fix formatting issues and try again.')
+                click.echo(f'File {entity_name[0]} is not a valid JSON. Please fix formatting issues and try again.')
                 raise error
 
 
@@ -88,5 +91,5 @@ def replace_names_for_ids(data, entity_name):
         template_fields = {'fromName': from_name}
         return template.render(**template_fields)
     except TemplateSyntaxError as template_error:
-        print(f'Error: evaluating file {entity_name[0]} with detail {template_error}')
+        click.echo(f'Error: evaluating file {entity_name[0]} with detail {template_error}')
         raise template_error
