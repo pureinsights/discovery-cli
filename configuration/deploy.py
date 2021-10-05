@@ -1,3 +1,5 @@
+import asyncio
+import aiohttp
 import click
 from configuration import common
 from configuration import constants
@@ -25,54 +27,26 @@ def run(ctx, ignore_ids):
     id_to_name = {}
 
     for entity_name in constants.entity_names:
-        with open(entity_name[0], 'r+') as file:
-            data = file.read()
+        asyncio.run(deploy_entities(admin_api_url, entity_name, id_to_name, ignore_ids))
 
+
+async def deploy_entities(admin_api_url, entity_name, id_to_name, ignore_ids):
+    with open(entity_name[0], 'r+') as file:
+        data = file.read()
+
+        async with aiohttp.ClientSession() as session:
             try:
                 # Replace names for IDs if any
                 rendered = replace_names_for_ids(data, entity_name)
                 entities = json.loads(rendered)
 
+                deploy_tasks = []
+
                 for entity in entities:
-                    entity_id = entity.get('id', None)
+                    task = deploy_entity(admin_api_url, entity, entity_name, ignore_ids, session)
+                    deploy_tasks.append(task)
 
-                    if ignore_ids:
-                        entity_id = None
-
-                    if entity_id:
-                        # Update
-                        response = requests.put(
-                            f'{admin_api_url}/{entity_name[1]}/{entity_id}',
-                            data=json.dumps(entity),
-                            headers={'Content-type': 'application/json'}
-                        )
-
-                        if response.status_code == requests.codes.bad:
-                            click.echo(
-                                f'\nError while updating entity {entity_id}: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
-                            response.raise_for_status()
-
-                        click.echo(f'Updated entity of type {entity_name[1]} with id {entity_id}')
-                    else:
-                        # Create
-                        response = requests.post(
-                            f'{admin_api_url}/{entity_name[1]}',
-                            data=json.dumps(entity),
-                            headers={'Content-type': 'application/json'}
-                        )
-
-                        if response.status_code == requests.codes.bad:
-                            click.echo(
-                                f'\nError while creating entity: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
-                            response.raise_for_status()
-
-                        entity_id = response.json()['id']
-                        entity['id'] = entity_id
-                        click.echo(f'Created new entity of type {entity_name[1]} with id {entity_id}')
-
-                    # Cron jobs don't have a name
-                    if 'name' in entity:
-                        name_to_id[entity['name'].lower()] = entity_id
+                await asyncio.gather(*deploy_tasks)
 
                 # Replace new IDs in files
                 common.replace_ids(entities, id_to_name, entity_name)
@@ -83,6 +57,52 @@ def run(ctx, ignore_ids):
             except ValueError as error:
                 click.echo(f'File {entity_name[0]} is not a valid JSON. Please fix formatting issues and try again.')
                 raise error
+
+
+async def deploy_entity(admin_api_url, entity, entity_name, ignore_ids, session):
+    entity_id = entity.get('id', None)
+
+    if ignore_ids:
+        entity_id = None
+    if entity_id:
+        # Update
+        async with session.put(
+                f'{admin_api_url}/{entity_name[1]}/{entity_id}',
+                data=json.dumps(entity),
+                headers={'Content-type': 'application/json'}
+        ) as response:
+            if response.status == requests.codes.bad:
+                click.echo(
+                    f'\nError while updating entity {entity_id}: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
+                response.raise_for_status()
+
+            click.echo(f'Updated entity of type {entity_name[1]} with id {entity_id}')
+
+            # Cron jobs don't have a name
+            if 'name' in entity:
+                name_to_id[entity['name'].lower()] = entity_id
+    else:
+        # Create
+        async with session.post(
+            f'{admin_api_url}/{entity_name[1]}',
+            data=json.dumps(entity),
+            headers={'Content-type': 'application/json'}
+        ) as response:
+
+            if response.status == requests.codes.bad:
+                data = await response.json()
+                click.echo(
+                    f'\nError while creating entity: \n{json.dumps(data, indent=4, sort_keys=True)}\n')
+                response.raise_for_status()
+
+            data = await response.json()
+            entity_id = data['id']
+            entity['id'] = entity_id
+            click.echo(f'Created new entity of type {entity_name[1]} with id {entity_id}')
+
+            # Cron jobs don't have a name
+            if 'name' in entity:
+                name_to_id[entity['name'].lower()] = entity_id
 
 
 def replace_names_for_ids(data, entity_name):
