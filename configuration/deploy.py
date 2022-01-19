@@ -71,29 +71,36 @@ async def deploy_entity(admin_api_url, entity, entity_name, ignore_ids, session)
                 data=json.dumps(entity),
                 headers={'Content-type': 'application/json'}
         ) as response:
-            if response.status == requests.codes.bad:
-                click.echo(
-                    f'\nError while updating entity {entity_id}: \n{json.dumps(response.json(), indent=4, sort_keys=True)}\n')
+            if response.status != requests.codes.ok:
+                responseText = await response.json()
+                click.echo(f'Error while updating entity of type {entity_name[1]} with id {entity_id}, got code {response.status} and text "{responseText}"')
                 response.raise_for_status()
+            else:
+                click.echo(f'Updated entity of type {entity_name[1]} with id {entity_id}')
 
-            click.echo(f'Updated entity of type {entity_name[1]} with id {entity_id}')
-
-            # Cron jobs don't have a name
-            if 'name' in entity:
-                name_to_id[entity['name'].lower()] = entity_id
+                # Cron jobs don't have a name
+                if 'name' in entity:
+                    name_to_id[entity['name'].lower()] = entity_id
     else:
+        post_data = json.dumps(entity)
+
         # Create
         async with session.post(
             f'{admin_api_url}/{entity_name[1]}',
-            data=json.dumps(entity),
-            headers={'Content-type': 'application/json'}
+            data=post_data,
+            headers={
+                'Content-Type': 'application/json',
+                'Content-Length': f'{len(post_data)}'
+            }
         ) as response:
-
+            click.echo(f'Posting {entity_name[1]} with id {entity_id} and size {len(post_data)}')
             if response.status == requests.codes.bad:
                 data = await response.json()
                 click.echo(
                     f'\nError while creating entity: \n{json.dumps(data, indent=4, sort_keys=True)}\n')
                 response.raise_for_status()
+
+            response.raise_for_status()
 
             data = await response.json()
             entity_id = data['id']
