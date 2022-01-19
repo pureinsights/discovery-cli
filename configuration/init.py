@@ -31,7 +31,8 @@ def run(project_name, empty, admin_api_url):
 def create_empty_project(project_name):
     try:
         # Create sample files
-        shutil.copytree('configuration/templates', project_name)
+        templates_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
+        shutil.copytree(templates_path, project_name)
         return
     except OSError as error:
         click.echo(f'Failed to init project due {error}')

@@ -32,7 +32,7 @@ py pdp.py help
 ## Getting a .exe file for the CLI
 ```bash
 pip install pyinstaller
-pyinstaller .\pdp.py
+pyinstaller .\pdp.py --add-data "configuration/templates;configuration/templates"
 ```
 
 This will create a 'dist/pdp' folder, whose contents are the necessary run time dependencies for the CLI.
