@@ -1,31 +1,15 @@
 [
   {
     "seed": {
-      "pull": {
-        "objectSQL": "SELECT * FROM content_files WHERE id IN (?) order by id asc",
-        "id": "id"
-      },
-      "scan": {
-        "fields": {
-          "id": "id",
-          "hash": [
-            "id",
-            "asset_uid",
-            "updated_at",
-            "asset_ext"
-          ]
-        },
-        "fullScanSQL": "SELECT id, asset_uid, updated_at, asset_ext FROM uploaded_files order by id asc limit 10"
-      },
-      "url": "jdbc:mysql://localhost:3306/data?useSSL=false&allowPublicKeyRetrieval=true"
+      "records": 1000,
+      "recordSize": 8096
     },
-    "name": "Pipeline Example",
-    "active": true,
-    "credentialId": "{{ fromName('Database credentials') }}",
-    "batchSize": 5,
-    "scanAction": "scan",
-    "processAction": "process",
-    "type": "rdbms-connector",
-    "pipelineId": "{{ fromName('Extract content from S3') }}"
+    "name": "Random Generator",
+    "type": "random-generator-connector",
+    "pipelineId": "{{ fromName('Main Pipeline') }}",
+    "properties": {
+      "index": "random_generated_docs"
+    },
+    "batchSize": "100"
   }
 ]
