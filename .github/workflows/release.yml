@@ -26,10 +26,9 @@ jobs:
         run: |
           pyinstaller pdp.py
       - name: Zip dist folder
-        uses: papeloto/action-zip@v1
+        uses: montudor/action-zip@v1
         with:
-          files: dist/pdp
-          dest: pdp.zip
+          args: zip -qq -r pdp.zip dist/pdp
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
