@@ -26,9 +26,11 @@ jobs:
         run: |
           pyinstaller pdp.py
       - name: Zip dist folder
-        uses: montudor/action-zip@v1
+        uses: thedoctor0/zip-release@master
         with:
-          args: zip -qq -r pdp.zip dist/pdp
+          type: 'zip'
+          filename: 'pdp.zip'
+          exclusions: 'dist/pdp'
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
