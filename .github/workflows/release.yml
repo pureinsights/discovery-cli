@@ -25,6 +25,8 @@ jobs:
       - name: Build executable with pyinstaller
         run: |
           pyinstaller pdp.py --add-data "configuration/templates;configuration/templates"
+          dir dist
+          dir dist/pdp
       - name: Zip dist folder
         uses: thedoctor0/zip-release@master
         with:
