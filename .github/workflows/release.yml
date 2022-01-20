@@ -24,13 +24,13 @@ jobs:
           pip install pyinstaller
       - name: Build executable with pyinstaller
         run: |
-          pyinstaller pdp.py
+          pyinstaller pdp.py --add-data "configuration/templates;configuration/templates"
       - name: Zip dist folder
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
           filename: 'pdp.zip'
-          directory: 'dist/pdp'
+          directory: 'dist'
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -48,6 +48,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./pdp.zip
+          asset_path: ./dist/pdp.zip
           asset_name: pdp.zip
           asset_content_type: application/zip
