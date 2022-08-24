@@ -1,6 +1,16 @@
+# Python
 __pycache__
 dist
 build
+
+# IntelliJ
+.idea/
+.idea_modules/
 *.iml
-gradle
+*.ipr
+*.iws
+
+# Gradle
 .gradle
+build
+gradle
