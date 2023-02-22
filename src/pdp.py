@@ -8,7 +8,6 @@ def pdp():
     """
     This is the official PureInsights Discovery Platform CLI.
     """
-    pass
 
 @pdp.command()
 def health():
@@ -26,4 +25,4 @@ def health():
 pdp.add_command(config)
 
 if __name__ == '__main__':
-    pdp()
+    pdp() # pragma: no cover
