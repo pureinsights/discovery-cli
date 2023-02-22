@@ -2,6 +2,11 @@ import click
 
 @click.group()
 def config():
+    """
+    Contains all the commands to help you manage the entities of the PDP. 
+    You can create, update, delete, deploy and more.\n
+    Use --help on each command for more detailed information.
+    """
     pass
 
 @config.command()

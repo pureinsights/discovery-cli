@@ -17,3 +17,6 @@ gradle
 
 #conda
 .conda
+
+#coverage
+*coverage*
