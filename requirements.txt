@@ -1,6 +1,10 @@
-asyncio
-aiohttp
+#Development
 click
+requests
 jinja2
 kubernetes
-requests
+
+#Testing
+pytest
+pytest-cov
+behave
