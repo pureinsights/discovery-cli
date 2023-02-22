@@ -17,8 +17,8 @@ def health():
     """
     ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
     title = "Pureinsights Discovery Platform: Command Line Interface"
-    version = f"v1.5.0"
-    url = "http://pureinsights.com/"
+    version = "v1.5.0"
+    url = "https://pureinsights.com/"
     click.echo(f"{ascii_art_pdp_cli}{title}\n{version}")
     click.echo(click.style(url, fg="blue", underline=True, bold=True))
 
