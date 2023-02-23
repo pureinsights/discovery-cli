@@ -14,3 +14,9 @@ build
 .gradle
 build
 gradle
+
+#conda
+.conda
+
+#coverage
+*coverage*

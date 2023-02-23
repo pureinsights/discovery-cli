@@ -1,6 +1,12 @@
-asyncio
-aiohttp
+#Development
 click
+pyfiglet
+requests
 jinja2
 kubernetes
-requests
+
+#Testing
+pytest
+pytest-cov
+behave
+tox

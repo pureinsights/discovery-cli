@@ -1,0 +1,42 @@
+#  Copyright (c) 2023 Pureinsights Technology Ltd. All rights reserved.
+#
+#  Permission to use, copy, modify or distribute this software and its
+#  documentation for any purpose is subject to a licensing agreement with
+#  Pureinsights Technology Ltd.
+#
+#  All information contained within this file is the property of
+#  Pureinsights Technology Ltd. The distribution or reproduction of this
+#  file or any information contained within is strictly forbidden unless
+#  prior written permission has been granted by Pureinsights Technology Ltd.
+
+import click
+import pyfiglet
+
+from commands.config.command import config
+
+
+@click.group()
+def pdp():
+    """
+    This is the official PureInsights Discovery Platform CLI.
+    """
+
+
+@pdp.command()
+def health():
+    """
+    This command is used to know if PDP-CLI has been installed successfully.
+    """
+    ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
+    title = "Pureinsights Discovery Platform: Command Line Interface"
+    version = "v1.5.0"
+    url = "https://pureinsights.com/"
+    click.echo(f"{ascii_art_pdp_cli}{title}\n{version}")
+    click.echo(click.style(url, fg="blue", underline=True, bold=True))
+
+
+# Register all the commands
+pdp.add_command(config)
+
+if __name__ == '__main__':
+    pdp()  # pragma: no cover
