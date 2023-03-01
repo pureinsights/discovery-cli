@@ -4,9 +4,11 @@ pyfiglet
 requests
 jinja2
 kubernetes
+yaspin
 
 #Testing
 pytest
 pytest-cov
+pytest-mock
 behave
 tox
