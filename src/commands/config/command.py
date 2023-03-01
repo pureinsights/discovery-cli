@@ -42,20 +42,20 @@ def config(ctx):
                    'my-pdp-project.')
 @click.option('--empty/--no-empty', default=True, help='If it should only create an empty directory structure with '
                                                        'basic handlebars for starting a new project. Default is False.')
-@click.option('-u', '--product-url', 'products_url', multiple=True, default=[],
+@click.option('-u', '--product-url', 'products_url', multiple=True, default=[], type=(str, str),
               help='The base URL for the given product API. The '
                    'product URL must be provided with the following '
                    'format PRODUCT_NAME:URL. The command allows '
                    'multiple flags to define multiples products.\n '
-                   'Default are ingestion:http://localhost:8080,'
-                   'staging:http://localhost:8081,'
-                   'core:http://localhost:8082,'
-                   'discovery:http://localhost:8088.')
+                   'Default are ingestion http://localhost:8080,'
+                   'staging http://localhost:8081,'
+                   'core http://localhost:8082,'
+                   'discovery http://localhost:8088.')
 @click.option('--force/--no-force', default=False,
               help='If there is a project with the same name it will to override it. '
                    'Default is False.')
 @click.pass_context
-def init(ctx, project_name: str, empty: bool, products_url: list[str], force: bool):
+def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], force: bool):
   """
   Creates a new project from existing sources or from scratch.
   """
@@ -63,7 +63,7 @@ def init(ctx, project_name: str, empty: bool, products_url: list[str], force: bo
   for product_url in products_url:
     product: str
     url: str
-    product, url = product_url.split(":")
+    product, url = product_url
     if config.get(product.lower(), None) is None:
       print_error(f'Unrecognized product "{product}".', True)
     else:
@@ -71,10 +71,10 @@ def init(ctx, project_name: str, empty: bool, products_url: list[str], force: bo
 
   successfully_executed = run_init(project_name, empty, config, force)
   color = 'green'
-  message = 'Project {project_name_styled} created successfully.\n'
-  'Recommended commands:\n'
-  '\tcd {project_name}\n'
-  '\tpdp config deploy'
+  message = 'Project {project_name_styled} created successfully.\n' \
+            'Recommended next commands:\n' \
+            '\tcd {project_name}\n' \
+            '\tpdp config deploy'
   if not successfully_executed:
     color = 'red'
     message = 'Could not create the project {project_name_styled}.\n'

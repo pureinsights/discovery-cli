@@ -8,18 +8,19 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
-
+from commons.constants import EXCEPTION_FORMAT
 from commons.handlers import handle_exceptions
 
 
-def mock_exception():
-    raise Exception('Known exception')
+def mock_custom_exception(exception):
+  raise exception
 
 
 def test_handle_exceptions(capsys):
-    """
-    Should show an specific message for each exception handled.
-    """
-    handle_exceptions(mock_exception)
-    captured = capsys.readouterr()
-    assert "Something went wrong!." in captured.err
+  """
+  Should show a specific message for each exception handled.
+  """
+  exception = Exception("Unknown")
+  handle_exceptions(mock_custom_exception, exception)
+  captured = capsys.readouterr()
+  assert EXCEPTION_FORMAT.format(exception=type(exception).__name__, error='') in captured.err

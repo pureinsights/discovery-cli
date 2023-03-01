@@ -8,8 +8,6 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
-import os.path
-
 import pytest
 
 config_file_test_name = "pdp_test.py"
@@ -26,18 +24,10 @@ config_file_test_content = '[DEFAULT]' \
 
 
 @pytest.fixture
-def create_file(tmp_path, request):
-  params = request.node.get_closest_marker("params")
-  if params is None:
-    return
+def mock_path_exists(mocker):
+  def _mock_path_exists(ret: bool):
+    path_exists = mocker.patch('os.path.exists')
+    return_value = False
+    path_exists.return_value = ret
 
-  path = os.path.join(tmp_path, params[0])
-  with open(path, mode='w') as file:
-    file.write(params[1])
-  return path
-
-
-@pytest.fixture
-@pytest.mark.params(config_file_test_name, config_file_test_content)
-def create_test_config_file(create_file):
-  return create_file
+  return _mock_path_exists

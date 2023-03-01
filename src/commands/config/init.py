@@ -35,9 +35,10 @@ def run(project_name: str, empty: bool, apis: dict, force: bool):
                       folder with the same name.
   :rtype: bool
   :return: True if the project was created successfully, False if any error happen.
+  :raises Exception: If a project with the same name already exists.
   """
   if force and os.path.exists(project_name):
-    handler_params = { 'message': f'Can not remove {project_name.title()}.', 'raise_exception': True }
+    handler_params = { 'message': f'Can not remove {project_name.title()}.', 'show_exception': True }
     handle_and_exit(shutil.rmtree, handler_params, project_name)
 
   created_successfully = False

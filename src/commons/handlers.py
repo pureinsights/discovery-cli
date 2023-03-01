@@ -11,7 +11,7 @@
 
 import requests as req
 
-from commons.console import print_error, print_exception
+from commons.console import print_error, print_exception, stop_spinner
 
 
 def handle_exceptions(func: callable, *args, **kwargs):
@@ -27,6 +27,8 @@ def handle_exceptions(func: callable, *args, **kwargs):
     func(*args, **kwargs)
   except Exception as exception:
     print_exception(exception)
+  finally:
+    stop_spinner()
 
 
 def handle_http_response(res: req.Response) -> any:

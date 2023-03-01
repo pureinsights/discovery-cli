@@ -19,6 +19,7 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 
 import pyfiglet
+import pytest
 from click.testing import CliRunner
 
 from commons.constants import DEFAULT_CONFIG
@@ -97,6 +98,12 @@ def test_load_config_fake_profile():
   config_name = "pdp_test.ini"  # The same name must be defined in conftest.py mock_os_path_exists
   config_result = load_config(config_name, 'FAKE')
   assert { **config_result } == expected_config
+
+
+def test_load_config_invalid_profile():
+  with pytest.raises(Exception) as exception:
+    load_config("pdp_test.ini", 'NOT_EXISTS')
+  assert str(exception.value) == 'Configuration profile NOT_EXISTS was not found.'
 
 
 def test_pdp():
