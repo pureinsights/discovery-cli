@@ -11,6 +11,7 @@
 import pytest
 import requests
 
+from commons.custom_classes import DataInconsistency, PdpException
 from commons.handlers import handle_and_continue, handle_and_exit, handle_exceptions, handle_http_response
 
 
@@ -71,7 +72,7 @@ def test_handle_and_exit_successful():
 
 def test_handle_and_exit_fail():
   with pytest.raises(Exception) as exception:
-    handle_and_exit(mock_custom_exception, { }, Exception())
+    handle_and_exit(mock_custom_exception, { }, DataInconsistency(message=None))
   assert exception is not None
 
 
@@ -79,7 +80,7 @@ def test_handle_and_exit_show_exception_and_error(mocker):
   mock_print_exception = mocker.patch('commons.handlers.print_exception')
   mock_print_error = mocker.patch('commons.handlers.print_error')
   message = 'fake-error'
-  custom_exception = Exception
+  custom_exception = PdpException(message=None)
   with pytest.raises(Exception) as exception:
     handle_and_exit(mock_custom_exception, {
       'message': message,

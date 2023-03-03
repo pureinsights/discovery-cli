@@ -83,6 +83,8 @@ def replace_ids(path: str, ids=None):
       file_path = os.path.join(path, entity_type.associated_file_name)
       with open(file_path, 'r+') as file:
         entities = json.load(file)
+        if type(entities) is not list:
+          entities = [entities]
         ids = replace_ids_for_names(entity_type, entities, ids)
         file.seek(0)
         json.dump(entities, file, indent=2)
@@ -130,10 +132,11 @@ def replace_value(entity_type: PdpEntity, entity: dict, values: dict, **kwargs):
   from_field: str = kwargs.get('from_field', 'id')
   to_fields: list[str] = kwargs.get('to_fields', None)
   format_str: str = kwargs.get('format', "{{{{ fromName('{0}') }}}}")
+  parent: dict = kwargs.get('parent', None)
   if to_fields is None:
     to_fields = [ent.reference_field for ent in ENTITIES]
 
-  if (not type(dict) is dict) and (from_field is None):
+  if type(entity) is not dict or from_field is None:
     return
 
   for key in entity.keys():
@@ -145,14 +148,22 @@ def replace_value(entity_type: PdpEntity, entity: dict, values: dict, **kwargs):
           if name != entity_type.associated_file_name:
             print_error(f'{from_field.title()} "{value}" does not exist while attempting to replace in {key}. '
                         f'Entity "{name}" in file {entity_type.associated_file_name}.', True)
+          elif parent is not None:
+            name = identify_entity(parent)
+            print_error(f'{from_field.title()} "{value}" does not exist while attempting to replace in {key}. '
+                        f'Child of entity "{name}" in file {entity_type.associated_file_name}.', True)
           else:
             print_error(f'{from_field.title()} "{value}" does not exist while attempting to replace in {key}. '
-                        f' Entity has no name and no id in file {entity_type.associated_file_name}.', True)
+                        f'Entity has no name and no id in file {entity_type.associated_file_name}.', True)
 
         entity[key] = format_str.format(values[value])
     elif type(entity[key]) is dict:
+      if parent is None:
+        kwargs['parent'] = entity
       replace_value(entity_type, entity[key], values, **kwargs)
     elif type(entity[key]) is list:
+      if parent is None:
+        kwargs['parent'] = entity
       [replace_value(entity_type, nested_entity, values, **kwargs) for nested_entity in entity[key]]
 
 

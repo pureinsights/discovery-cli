@@ -36,7 +36,7 @@ CREDENTIAL = PdpEntity(CORE, 'credential', 'credentials.json')
 ENDPOINT = PdpEntity(DISCOVERY, 'endpoint', 'endpoints.json')
 ENDPOINT_PROCESSOR = PdpEntity(DISCOVERY, 'processor', 'processors.json')
 # Must be in order (based on which has fewer dependencies to another entities)
-ENTITIES = CREDENTIAL, PROCESSOR, PIPELINE, SEED, ENDPOINT_PROCESSOR, ENDPOINT
+ENTITIES = CREDENTIAL, PROCESSOR, PIPELINE, SEED, SCHEDULER, ENDPOINT_PROCESSOR, ENDPOINT
 
 # Configurations
 DEFAULT_CONFIG = {
