@@ -79,10 +79,7 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
     if error_message is not None:
       print_error(error_message, not raise_exception, prefix=prefix, suffix=suffix)
 
-    if raise_exception:
-      raise error
-
-    return False, None
+    raise error
 
 
 def handle_and_continue(func: callable, params: dict, *args, **kwargs):

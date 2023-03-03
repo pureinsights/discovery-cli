@@ -77,7 +77,7 @@ def create_project_from_template(project_name: str,
     templates_path = os.path.abspath(os.path.join(os.path.dirname(__file__), relative_template_path))
     shutil.copytree(templates_path, project_name)
     return True
-  except OSError as error:
+  except Exception as error:
     print_error(f'Failed to init project due to {error}')
     return False
 

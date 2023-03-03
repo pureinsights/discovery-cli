@@ -66,8 +66,12 @@ def spinner_ok(message: str, **kwargs):
   :key str icon: A string to show at the front of the message. Default is '✔ '.
   :param **kwargs kwargs: Keyword arguments passed to print_console.
   """
+  icon = kwargs.get('icon', '✔ ')
+  prefix = kwargs.get('prefix', '')
+  suffix = kwargs.get('suffix', '')
   if Spinner is None:
-    print_console(message)
+    print_console(message, prefix=f'{prefix}{icon}')
+    return
   global buffer
   icon = kwargs.get('icon', '✔ ')
   prefix = kwargs.get('prefix', '')
@@ -90,12 +94,13 @@ def spinner_fail(message: str, **kwargs):
   :key str icon: A string to show at the front of the message. Default is '❌ '.
   :param **kwargs kwargs: Keyword arguments passed to print_console.
   """
-  if Spinner is None:
-    print_console(message, **kwargs)
-  global buffer
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
   icon = kwargs.get('icon', '❌ ')
+  if Spinner is None:
+    print_console(message, prefix=f'{prefix}{icon}')
+    return
+  global buffer
   Spinner.text = message
   Spinner.fail(icon)
   stop_spinner()
@@ -183,6 +188,6 @@ def print_exception(exception, **kwargs):
       print_aux(exception.message, not exception.handled)
     case PdpException():
       print_aux(exception.message, not exception.handled)
-    case Exception():
+    case _:
       print_aux(prefix + EXCEPTION_FORMAT.format(exception=type(exception).__name__, error='') + suffix,
                 raise_exception)
