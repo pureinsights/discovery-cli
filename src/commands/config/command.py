@@ -34,7 +34,6 @@ def config(ctx):
   """
 
 
-# TODO: Document the all the new arguments: force, template
 @config.command()
 @click.option('-n', '--project-name', default='my-pdp-project',
               help='The name of the resulting directory, will try to fetch existing configurations from the APIs '
@@ -59,7 +58,7 @@ def config(ctx):
 @click.pass_context
 def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], force: bool, template):
   """
-  Creates a new project from existing sources or from scratch.
+  Creates a new project from existing sources or from scratch. It will create the folder structure for a PDP project.
   """
   config = ctx.obj['configuration']
   for product_url in products_url:

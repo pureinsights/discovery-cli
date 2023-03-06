@@ -95,7 +95,4 @@ def health():
 pdp.add_command(config)
 
 if __name__ == '__main__':
-  # TODO: Delete all the unnecessary code here
-  # TODO: Document all the functions
-  # handle_exceptions(pdp, ["--profile", "FAKE", "config", "init", "--no-empty", "--force"])
   handle_exceptions(pdp)  # pragma: no cover
