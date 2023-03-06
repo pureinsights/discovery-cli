@@ -22,6 +22,10 @@ from commons.pdp_products import associate_values_from_entities, export_all_enti
 
 
 def test_identify_entity_is_not_dict():
+  """
+  Test the function defined in :func:`commons.pdp_products.identify_entity`,
+  when the entity is not a dict.
+  """
   entity = 'fake-entity'
   response = identify_entity(entity)
   assert response == entity
@@ -34,11 +38,18 @@ def test_identify_entity_is_not_dict():
   ({ 'name': 'fake-name' }, 'name')
 ])
 def test_identify_entity_return_successfully(entity, property):
+  """
+  Test the function defined in :func:`commons.pdp_products.identify_entity`.
+  """
   response = identify_entity(entity)
   assert response == f'{property} {entity[property]}'
 
 
 def test_identify_entity_return_default():
+  """
+  Test the function defined in :func:`commons.pdp_products.identify_entity`,
+  when the entity does not have the property.
+  """
   entity = { }
   response = identify_entity(entity, default='fake-default')
   assert response == 'fake-default'
@@ -49,6 +60,10 @@ def test_identify_entity_return_default():
   ({ }, { 'property': 'property' })
 ])
 def test_associate_values_from_entities_raises_DataInconsistency(entity1, entity2):
+  """
+  Test the function defined in :func:`commons.pdp_products.associate_values_from_entities`,
+  when the entities do not have the properties.
+  """
   with pytest.raises(DataInconsistency) as exception:
     associate_values_from_entities(entity1, 'property', entity2, 'property')
   assert exception.value.message == f'Entity with {entity1} does not have field property.' or \
@@ -63,6 +78,9 @@ def test_associate_values_from_entities_raises_DataInconsistency(entity1, entity
   ({ 'property': 2 }, { 'property': 2 })
 ])
 def test_associate_values_from_entities_successful(entity1, entity2):
+  """
+  Test the function defined in :func:`commons.pdp_products.associate_values_from_entities`.
+  """
   response = associate_values_from_entities(entity1, 'property', entity2, 'property')
   assert (entity1['property'], entity2['property']) == response
 
@@ -76,6 +94,9 @@ def test_associate_values_from_entities_successful(entity1, entity2):
   ('Core', '[{"id":"fake-id","name":"fake-name"}]', { }, 1, None),
 ])
 def test_replace_ids(mocker, dir_name, entity_str, entities, call_count, ids):
+  """
+  Test the function defined in :func:`commons.pdp_products.replace_ids`.
+  """
   mocker.patch('builtins.open', mock_open(read_data=entity_str))
   mocker.patch('commons.pdp_products.json.load', return_value=entities)
   mock_dump = mocker.patch('commons.pdp_products.json.dump')
@@ -99,6 +120,9 @@ def test_replace_ids(mocker, dir_name, entity_str, entities, call_count, ids):
   (ENDPOINT_PROCESSOR, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], { 'fake-id4': 'fake-name4' })
 ])
 def test_replace_ids_for_names(entity_type, entities, expected_ids):
+  """
+  Test the function defined in :func:`commons.pdp_products.replace_ids_for_names`.
+  """
   ids = {
     'fake-id1': 'fake-name1',
     'fake-id2': 'fake-name2',
@@ -149,6 +173,9 @@ def test_replace_ids_for_names(entity_type, entities, expected_ids):
   (PIPELINE, 'fake-entity', 'fake-entity')
 ])
 def test_replace_value_successful(entity_type, entity, expected_entity):
+  """
+  Test the function defined in :func:`commons.pdp_products.replace_value`.
+  """
   values = {
     'fake-id1': 'fake-name1',
     'fake-id2': 'fake-name2',
@@ -183,6 +210,10 @@ def test_replace_value_successful(entity_type, entity, expected_entity):
    )
 ])
 def test_replace_value_failed(entity_type, entity, expected_message):
+  """
+  Test the function defined in :func:`commons.pdp_products.replace_value`,
+  when the value to replace is not present on the values.
+  """
   values = {
     'fake-id1': 'fake-name1',
     'fake-id2': 'fake-name2',
@@ -197,6 +228,10 @@ def test_replace_value_failed(entity_type, entity, expected_message):
 
 
 def test_export_all_entities_successful_without_extract(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.export_all_entities`,
+  without extracting the files.
+  """
   content = b'fake-content'
   mocker.patch('commons.pdp_products.get', return_value=content)
   m = mock_open()
@@ -211,6 +246,10 @@ def test_export_all_entities_successful_without_extract(mocker):
 
 
 def test_export_all_entities_successful_with_extraction(mocker, mock_path_exists):
+  """
+  Test the function defined in :func:`commons.pdp_products.export_all_entities`,
+  extracting the files.
+  """
   mock_path_exists(True)
   content = b'fake-content'
   mocker.patch('commons.pdp_products.get', return_value=content)
@@ -229,6 +268,10 @@ def test_export_all_entities_successful_with_extraction(mocker, mock_path_exists
 
 
 def test_export_all_entities_failed_with_extraction(mocker, mock_path_exists):
+  """
+  Test the function defined in :func:`commons.pdp_products.export_all_entities`,
+  when fail while trying to extract the files.
+  """
   mock_path_exists(False)
   content = b'fake-content'
   mocker.patch('commons.pdp_products.get', return_value=content)

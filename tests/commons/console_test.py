@@ -21,6 +21,9 @@ from commons.custom_classes import DataInconsistency, PdpException
 
 
 def test_create_spinner_successful(mocker):
+  """
+  Test the function defined in :func:`commons.console.create_spinner`.
+  """
   mock_spinner_start = mocker.patch('commons.console.Yaspin.start')
   create_spinner()
   mock_spinner_start.assert_called_once()
@@ -29,6 +32,9 @@ def test_create_spinner_successful(mocker):
 
 
 def test_stop_spinner_successful(mocker):
+  """
+  Test the function defined in :func:`commons.console.stop_spinner`.
+  """
   mocker.patch('commons.console.Yaspin.start')
   mock_spinner_stop = mocker.patch('commons.console.Yaspin.stop')
   create_spinner()
@@ -38,12 +44,19 @@ def test_stop_spinner_successful(mocker):
 
 
 def test_stop_spinner_spinner_is_None(mocker):
+  """
+  Test the function defined in :func:`commons.console.stop_spinner`,
+  when Spinner is None.
+  """
   mock_spinner_start = mocker.patch('commons.console.Yaspin.stop')
   stop_spinner()
   assert mock_spinner_start.call_count == 0
 
 
 def test_spinner_change_text_successful(mocker):
+  """
+  Test the function defined in :func:`commons.console.spinner_change_text`.
+  """
   mocker.patch('commons.console.Yaspin.start')
   create_spinner()
   spinner_change_text('fake-text')
@@ -52,12 +65,19 @@ def test_spinner_change_text_successful(mocker):
 
 
 def test_spinner_change_text_spinner_is_none(mocker):
+  """
+  Test the function defined in :func:`commons.console.spinner_change_text`,
+  when Spinner is None.
+  """
   mocker.patch('commons.console.Yaspin.start')
   spinner_change_text('fake-text')
   assert commons.console.Spinner is None
 
 
 def test_spinner_ok_successful(mocker):
+  """
+  Test the function defined in :func:`commons.console.spinner_ok`.
+  """
   mocker.patch('commons.console.Yaspin.start')
   mock_ok = mocker.patch('commons.console.Yaspin.ok')
   mock_stop = mocker.patch('commons.console.Yaspin.stop')
@@ -72,6 +92,10 @@ def test_spinner_ok_successful(mocker):
 
 
 def test_spinner_ok_spinner_is_none(mocker):
+  """
+  Test the function defined in :func:`commons.console.spinner_ok`,
+  when Spinner is None.
+  """
   mock_print_console = mocker.patch('commons.console.print_console')
   message = 'ok-fake'
   icon = 'fake-icon'
@@ -80,6 +104,9 @@ def test_spinner_ok_spinner_is_none(mocker):
 
 
 def test_spinner_fail_successful(mocker):
+  """
+  Test the function defined in :func:`commons.console.spinner_fail`.
+  """
   mocker.patch('commons.console.Yaspin.start')
   mock_fail = mocker.patch('commons.console.Yaspin.fail')
   mock_stop = mocker.patch('commons.console.Yaspin.stop')
@@ -94,6 +121,10 @@ def test_spinner_fail_successful(mocker):
 
 
 def test_spinner_fail_spinner_is_none(mocker):
+  """
+  Test the function defined in :func:`commons.console.spinner_fail`,
+  when Spinner is None.
+  """
   mock_print_console = mocker.patch('commons.console.print_console')
   message = 'ok-fake'
   icon = 'fake-icon'
@@ -102,6 +133,9 @@ def test_spinner_fail_spinner_is_none(mocker):
 
 
 def test_print_console_successful(mocker):
+  """
+  Test the function defined in :func:`commons.console.print_console`.
+  """
   mock_secho = mocker.patch('commons.console.click.secho')
   message = 'fake-message'
   print_console(message)
@@ -109,6 +143,10 @@ def test_print_console_successful(mocker):
 
 
 def test_print_console_spinner_is_not_none(mocker):
+  """
+  Test the function defined in :func:`commons.console.print_console`,
+  when Spinner is not None.
+  """
   mocker.patch('commons.console.Yaspin.start')
   mock_secho = mocker.patch('commons.console.click.secho')
   message = 'fake-message'
@@ -119,6 +157,9 @@ def test_print_console_spinner_is_not_none(mocker):
 
 
 def test_print_warning_successful(mocker):
+  """
+  Test the function defined in :func:`commons.console.print_warning`.
+  """
   mock_print_console = mocker.patch('commons.console.print_console')
   message = 'fake-warning'
   styled_warning = click.style(WARNING_FORMAT.format(message=message), fg='yellow')
@@ -133,6 +174,10 @@ def test_print_warning_successful(mocker):
   PdpException(message='fake-message', handled=False)
 ])
 def test_print_exception_successful_errors(mocker, exception):
+  """
+  Test the function defined in :func:`commons.console.print_exception`,
+  with error severity.
+  """
   mock_error = mocker.patch('commons.console.print_error')
   print_exception(exception)
   mock_error.assert_called_once_with(exception.message, not exception.handled)
@@ -143,12 +188,20 @@ def test_print_exception_successful_errors(mocker, exception):
   DataInconsistency(message='fake-message', handled=False, severity=WARNING_SEVERITY)
 ])
 def test_print_exception_successful_warnings(mocker, exception):
+  """
+  Test the function defined in :func:`commons.console.print_exception`,
+  with warning severity.
+  """
   mock_warning = mocker.patch('commons.console.print_warning')
   print_exception(exception)
   mock_warning.assert_called_once_with(exception.message, not exception.handled)
 
 
 def test_print_exception_connection_error(mocker):
+  """
+  Test the function defined in :func:`commons.console.print_exception`,
+  with a connection error.
+  """
   mock_error = mocker.patch('commons.console.print_error')
   fake_url = 'http://fake-url'
   custom_exception = requests.exceptions.ConnectionError()
@@ -165,6 +218,10 @@ def test_print_exception_connection_error(mocker):
   (Exception('Fake Exception'), True)
 ])
 def test_print_exception_general_exception_error(mocker, params):
+  """
+  Test the function defined in :func:`commons.console.print_exception`,
+  with any unhandled exception.
+  """
   mock_error = mocker.patch('commons.console.print_error')
   custom_exception, raise_exception = params
   print_exception(custom_exception, raise_exception=raise_exception)

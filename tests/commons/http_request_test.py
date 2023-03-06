@@ -13,6 +13,9 @@ from commons.http_requests import get
 
 
 def test_get_success(mocker):  # All the possible errors are tested in test_handle_http_response
+  """
+  Test the function defined in :func:`commons.http_requests.get`.
+  """
   expected_response = { 'status_code': 200, 'content': 'fake-content' }
   mocker.patch('requests.get', return_value=expected_response)
   mock_handler = mocker.patch('commons.http_requests.handle_http_response')

@@ -22,7 +22,7 @@ def mock_custom_exception(exception):
 
 def test_handle_exceptions_exception_handled(mocker):
   """
-  Should show a specific message for each exception handled.
+  Test the function defined in :func:`commons.handlers.handle_exceptions`.
   """
   exception = Exception()
   mock_print = mocker.patch('commons.handlers.print_exception')
@@ -34,7 +34,8 @@ def test_handle_exceptions_exception_handled(mocker):
 
 def test_handle_exceptions_no_exception_happen(mocker):
   """
-  Should show a specific message for each exception handled.
+  Test the function defined in :func:`commons.handlers.handle_exceptions`,
+  when no exception happened.
   """
   exception = None
   mock_print = mocker.patch('commons.handlers.print_exception')
@@ -44,7 +45,10 @@ def test_handle_exceptions_no_exception_happen(mocker):
   mock_stop_spinner.assert_called_once()
 
 
-def test_handle_http_response_status_distinct_2xx(mocker):
+def test_handle_http_response_status_distinct_2xx():
+  """
+  Test the function defined in :func:`commons.handlers.handle_http_response`.
+  """
   response = requests.Response()
   response.status_code = 404
   with pytest.raises(requests.exceptions.HTTPError) as exception:
@@ -53,6 +57,10 @@ def test_handle_http_response_status_distinct_2xx(mocker):
 
 
 def test_handle_http_response_no_content(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_http_response`,
+  when response was no content.
+  """
   response = requests.Response()
   response.status_code = 204
   handled_response = handle_http_response(response)
@@ -60,23 +68,38 @@ def test_handle_http_response_no_content(mocker):
 
 
 def test_handle_http_response_success(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_http_response`,
+  when no exception was raised.
+  """
   response = mocker.Mock(content=b'Hello world', status_code=200)
   handled_response = handle_http_response(response)
   assert handled_response == response.content
 
 
 def test_handle_and_exit_successful():
+  """
+  Test the function defined in :func:`commons.handlers.handle_and_exit`,
+  when no exception happened.
+  """
   response = handle_and_exit(mock_custom_exception, { }, None)
   assert response == (True, None)
 
 
 def test_handle_and_exit_fail():
+  """
+  Test the function defined in :func:`commons.handlers.handle_and_exit`.
+  """
   with pytest.raises(Exception) as exception:
     handle_and_exit(mock_custom_exception, { }, DataInconsistency(message=None))
   assert exception is not None
 
 
 def test_handle_and_exit_show_exception_and_error(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_and_exit`,
+  with configuration to show a message.
+  """
   mock_print_exception = mocker.patch('commons.handlers.print_exception')
   mock_print_error = mocker.patch('commons.handlers.print_error')
   message = 'fake-error'
@@ -91,6 +114,10 @@ def test_handle_and_exit_show_exception_and_error(mocker):
 
 
 def test_handle_and_continue_show_error_and_exception(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_and_continue`,
+  with configuration to show a message.
+  """
   mock_print_exception = mocker.patch('commons.handlers.print_exception')
   mock_print_error = mocker.patch('commons.handlers.print_error')
   message = 'fake-message'
@@ -103,5 +130,8 @@ def test_handle_and_continue_show_error_and_exception(mocker):
 
 
 def test_handle_and_exit_not_show_nothing():
+  """
+  Test the function defined in :func:`commons.handlers.handle_and_continue`.
+  """
   response = handle_and_continue(mock_custom_exception, { }, Exception)
   assert response == (False, None)

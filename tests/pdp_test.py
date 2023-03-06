@@ -30,7 +30,7 @@ cli = CliRunner()
 
 def test_ensure_configurations_all_configurations_right():
   """
-  If all configurations are present, should not change anything.
+  Test the function defined in :func:`src.pdp.ensure_configurations`.
   """
   expected_config = {
     'ingestion': 'https://ingestion-fake-url',
@@ -44,7 +44,8 @@ def test_ensure_configurations_all_configurations_right():
 
 def test_ensure_configurations_missing_configurations():
   """
-  Should use default values for those missing values.
+  Test the function defined in :func:`src.pdp.ensure_configurations`,
+  when some configurations are missing, and must use default values.
   """
   config = {
     'ingestion': 'https://ingestion-fake-url',
@@ -57,7 +58,8 @@ def test_ensure_configurations_missing_configurations():
 
 def test_ensure_configurations_all_configuration_missing():
   """
-  Should use default values for those missing values.
+  Test the function defined in :func:`src.pdp.ensure_configurations`,
+  when all the configuration are missing, and must use default values.
   """
   config = {
   }
@@ -78,7 +80,7 @@ config_return_fixture = {
 
 def test_load_config_default_profile():
   """
-  Should read the default profile correctly if a profile was not provided.
+  Test the function defined in :func:`src.pdp.load_config`.
   """
   config_name = "pdp_test.ini"  # The same name must be defined in conftest.py mock_os_path_exists
   config_result = load_config(config_name, 'DEFAULT')
@@ -87,7 +89,8 @@ def test_load_config_default_profile():
 
 def test_load_config_fake_profile():
   """
-  Should read the fake profile correctly.
+  Test the function defined in :func:`src.pdp.load_config`,
+  with a specific profile.
   """
   expected_config = {
     'ingestion': 'http://ingestion-fake',
@@ -101,6 +104,10 @@ def test_load_config_fake_profile():
 
 
 def test_load_config_invalid_profile():
+  """
+  Test the function defined in :func:`src.pdp.load_config`,
+  with a not existing profile.
+  """
   with pytest.raises(Exception) as exception:
     load_config("pdp_test.ini", 'NOT_EXISTS')
   assert str(exception.value) == 'Configuration profile NOT_EXISTS was not found.'
@@ -108,7 +115,7 @@ def test_load_config_invalid_profile():
 
 def test_pdp():
   """
-  Should end with an exit code 0.
+  Test the command defined in :func:`src.pdp.pdp`.
   """
   response = cli.invoke(pdp, [])
   assert response.exit_code == 0
@@ -116,9 +123,7 @@ def test_pdp():
 
 def test_health():
   """
-  Should show an styled message with information
-  about the version and a link to the web page of
-  pureinsights.
+  Test the command defined in :func:`src.pdp.health`.
   """
   response = cli.invoke(health)
   ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")

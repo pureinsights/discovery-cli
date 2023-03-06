@@ -18,6 +18,9 @@ from commons.constants import DEFAULT_CONFIG
 
 
 def test_run_init_created_successfully(mocker, mock_path_exists):
+  """
+  Test the command defined in :func:`commands.config.init.run`.
+  """
   mock_path_exists(False)
   mocker.patch('commands.config.init.open')
   mocker.patch('commands.config.init.create_project_from_template', return_value=True)
@@ -29,15 +32,25 @@ def test_run_init_created_successfully(mocker, mock_path_exists):
 
 
 def test_run_init_failed(mocker, mock_path_exists):
+  """
+  Test the command defined in :func:`commands.config.init.run`,
+  when can not create the project from a template.
+  """
   mock_path_exists(False)
   mocker.patch('commands.config.init.open')
   mocker.patch('commands.config.init.create_project_from_template', return_value=False)
+  mocker_configuration_write = mocker.patch('commands.config.init.configparser.RawConfigParser.write')
   project_name = 'my-pdp-project'
   success = run(project_name, True, DEFAULT_CONFIG, False)
+  assert mocker_configuration_write.call_count == 0
   assert not success
 
 
 def test_run_init_project_already_exists(mock_path_exists):
+  """
+  Test the command defined in :func:`commands.config.init.run`,
+  when the project name already exists.
+  """
   mock_path_exists(True)
   project_name = 'my-pdp-project'
   success = False
@@ -48,6 +61,10 @@ def test_run_init_project_already_exists(mock_path_exists):
 
 
 def test_run_init_project_already_exists_and_cant_force(mocker, mock_path_exists):
+  """
+  Test the command defined in :func:`commands.config.init.run`,
+  when the project name already exists and can not be removed.
+  """
   mock_path_exists(True)
   mocker.patch('commands.config.init.shutil.rmtree', side_effect=Exception)
   project_name = 'my-pdp-project'
@@ -59,6 +76,10 @@ def test_run_init_project_already_exists_and_cant_force(mocker, mock_path_exists
 
 
 def test_create_project_from_template_project_already_exists(mock_path_exists):
+  """
+  Test the command defined in :func:`commands.config.init.create_project_from_template`,
+  when the project already exists
+  """
   mock_path_exists(True)
   project_name = 'my-pdp-project'
   success = create_project_from_template(project_name)
@@ -66,29 +87,33 @@ def test_create_project_from_template_project_already_exists(mock_path_exists):
 
 
 def test_create_project_from_template_project_could_not_copy(mocker, mock_path_exists):
+  """
+  Test the command defined in :func:`commands.config.init.create_project_from_template`,
+  when can not copy the template.
+  """
   mock_path_exists(False)
-  # mocker.patch('commands.config.init.os.path.abspath', return_value='')
-  # mocker.patch('commands.config.init.os.path.join', return_value='')
-  # mocker.patch('commands.config.init.os.path.dirname', return_value='')
   mocker.patch('commands.config.init.shutil.copytree', side_effect=Exception)
   project_name = 'my-pdp-project'
   success = create_project_from_template(project_name)
   assert not success
 
 
-# TODO: Comment more this test
 def test_create_project_from_template_project_successfully(mocker, mock_path_exists):
   """
-  with default values.
+  Test the command defined in :func:`commands.config.init.create_project_from_template`.
   """
   mock_path_exists(False)
-  mocker.patch('commands.config.init.shutil.copytree')
+  mock_copytree = mocker.patch('commands.config.init.shutil.copytree')
   project_name = 'my-pdp-project'
   success = create_project_from_template(project_name)
+  mock_copytree.assert_called_once_with('templates/projects/random_generator', project_name)
   assert success
 
 
 def test_create_project_folder_structure_successful(mocker, mock_path_exists):
+  """
+  Test the command defined in :func:`commands.config.init.create_project_folder_structure`.
+  """
   mock_path_exists(False)
   mock_mkdir = mocker.patch('commands.config.init.os.mkdir')
   project_path = 'fake_path'
@@ -102,6 +127,9 @@ def test_create_project_folder_structure_successful(mocker, mock_path_exists):
 
 
 def test_create_project_from_existing_sources_successful(mocker):
+  """
+  Test the command defined in :func:`commands.config.init.create_project_from_existing_sources`.
+  """
   mocker.patch('commands.config.init.create_project_folder_structure')
   mocker.patch('commands.config.init.export_all_entities', return_value=(True, { }))
   mocker.patch('commands.config.init.create_project_folder_structure')
@@ -111,6 +139,9 @@ def test_create_project_from_existing_sources_successful(mocker):
 
 
 def test_create_project_from_existing_sources_failed(mocker):
+  """
+  Test the command defined in :func:`commands.config.init.create_project_from_existing_sources`.
+  """
   mocker.patch('commands.config.init.create_project_folder_structure')
   mocker.patch('commands.config.init.export_all_entities', return_value=(False, None))
   mocker.patch('commands.config.init.handle_and_continue', return_value=(False, None))

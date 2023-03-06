@@ -24,7 +24,7 @@ from src.pdp import pdp
 
 def test_config():
   """
-  Should end with an exit code 0.
+  Test the command defined in :func:`src.commands.config.command.config`.
   """
   response = cli.invoke(pdp, ["config"])
   assert response.exit_code == 0
@@ -32,7 +32,8 @@ def test_config():
 
 def test_init_success(mocker):
   """
-  Should show a successful message to the user. And use default values.
+  Test the command defined in :func:`src.commands.config.command.init`,
+  without arguments.
   """
   init_run_mocked = mocker.patch('commands.config.command.run_init', return_value=True)
   project_name = "my-pdp-project"
@@ -44,7 +45,8 @@ def test_init_success(mocker):
 
 def test_init_could_not_create(mocker):
   """
-  Should show an error message to the user.
+  Test the command defined in :func:`src.commands.config.command.init`,
+  when some error happens.
   """
   init_run_mocked = mocker.patch('commands.config.command.run_init', return_value=False)
   project_name = "my-pdp-project"
@@ -56,7 +58,8 @@ def test_init_could_not_create(mocker):
 
 def test_init_parse_options(mocker):
   """
-  Should show a successful message to the user. But parse correctly all the options provided.
+  Test the command defined in :func:`src.commands.config.command.init`,
+  with all the arguments provided.
   """
   init_run_mocked = mocker.patch('commands.config.command.run_init', return_value=True)
   project_name = "my-pdp-project"
@@ -80,7 +83,8 @@ def test_init_parse_options(mocker):
 
 def test_init_incorrect_option_product():
   """
-  Should show an error message to the user, about the unrecognized product.
+  Test the command defined in :func:`src.commands.config.command.init`,
+  with an unrecognized product of the argument product-url.
   """
   project_name = "my-pdp-project"
   response = cli.invoke(pdp, ["config", "init", '-u', 'fake-product',
