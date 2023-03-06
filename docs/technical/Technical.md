@@ -68,6 +68,8 @@ virtualenv venv
 
 You can use [conda](https://docs.conda.io/en/latest/) if you prefer to.
 
+You can use [conda](https://docs.conda.io/en/latest/) if you prefer to.
+
 Pull the dependencies:
 
 ```bash
