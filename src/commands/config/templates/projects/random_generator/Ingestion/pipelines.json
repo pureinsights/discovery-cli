@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Main Pipeline",
+    "active": true,
+    "steps": [
+      {
+        "processorId": "{{ fromName('Persist to Search') }}",
+        "action": "hydrate"
+      }
+    ]
+  }
+]

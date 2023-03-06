@@ -26,6 +26,8 @@ def handle_exceptions(func: callable, *args, **kwargs):
   try:
     func(*args, **kwargs)
   except Exception as exception:
+    if hasattr(exception, 'handled'):
+      exception.handled = True
     print_exception(exception)
   finally:
     stop_spinner()

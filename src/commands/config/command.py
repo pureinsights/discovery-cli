@@ -34,7 +34,7 @@ def config(ctx):
   """
 
 
-# TODO: Document the new argument
+# TODO: Document the all the new arguments: force, template
 @config.command()
 @click.option('-n', '--project-name', default='my-pdp-project',
               help='The name of the resulting directory, will try to fetch existing configurations from the APIs '
@@ -54,8 +54,10 @@ def config(ctx):
 @click.option('--force/--no-force', default=False,
               help='If there is a project with the same name it will to override it. '
                    'Default is False.')
+@click.option('--template', default=None, help='Choose the template with the project will be created.',
+              type=click.Choice(['empty', 'random_generator'], case_sensitive=False))
 @click.pass_context
-def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], force: bool):
+def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], force: bool, template):
   """
   Creates a new project from existing sources or from scratch.
   """
@@ -69,7 +71,7 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
     else:
       config[product.lower()] = url
 
-  successfully_executed = run_init(project_name, empty, config, force)
+  successfully_executed = run_init(project_name, empty, config, force, template)
   color = 'green'
   message = 'Project {project_name_styled} created successfully.\n' \
             'Recommended next commands:\n' \

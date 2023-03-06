@@ -26,7 +26,7 @@ def test_run_init_created_successfully(mocker, mock_path_exists):
   mocker.patch('commands.config.init.create_project_from_template', return_value=True)
   mocker_configuration_write = mocker.patch('commands.config.init.configparser.RawConfigParser.write')
   project_name = 'my-pdp-project'
-  success = run(project_name, True, DEFAULT_CONFIG, False)
+  success = run(project_name, True, DEFAULT_CONFIG, False, 'empty')
   mocker_configuration_write.assert_called_once()
   assert success
 
@@ -106,7 +106,10 @@ def test_create_project_from_template_project_successfully(mocker, mock_path_exi
   mock_copytree = mocker.patch('commands.config.init.shutil.copytree')
   project_name = 'my-pdp-project'
   success = create_project_from_template(project_name)
-  mock_copytree.assert_called_once_with('templates/projects/random_generator', project_name)
+  abs_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), os.path.join('templates', 'projects', 'random_generator'))).replace('tests',
+                                                                                                                'src')
+  mock_copytree.assert_called_once_with(abs_path, project_name)
   assert success
 
 

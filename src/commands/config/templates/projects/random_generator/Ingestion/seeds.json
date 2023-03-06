@@ -1,0 +1,15 @@
+[
+  {
+    "seed": {
+      "records": 1000,
+      "recordSize": 8096
+    },
+    "name": "Random Generator",
+    "type": "random-generator-connector",
+    "pipelineId": "{{ fromName('Main Pipeline') }}",
+    "properties": {
+      "index": "random_generated_docs"
+    },
+    "batchSize": "100"
+  }
+]

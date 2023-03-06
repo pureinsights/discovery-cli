@@ -72,11 +72,12 @@ def test_init_parse_options(mocker):
   }
   force = '--force'
   response = cli.invoke(pdp,
-                        ["config", "init", "-n", project_name, no_empty, force, '-u', 'ingestion',
+                        ["config", "init", "-n", project_name, no_empty, force, '--template', 'empty', '-u',
+                         'ingestion',
                          'http://ingestion-fake', '-u', 'discovery', 'http://ingestion-fake', '-u', 'core',
                          'http://ingestion-fake', '-u', 'staging', 'http://ingestion-fake'])
 
-  init_run_mocked.assert_called_once_with(project_name, False, expected_config, True)
+  init_run_mocked.assert_called_once_with(project_name, False, expected_config, True, 'empty')
   assert response.exit_code == 0
   assert f"Project {project_name} created successfully." in response.output
 

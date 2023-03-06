@@ -16,13 +16,14 @@ import shutil
 import click
 from yaspin.spinners import Spinners
 
-from commons.console import create_spinner, print_error, spinner_change_text, spinner_fail, spinner_ok
+from commons.console import create_spinner, print_exception, spinner_change_text, spinner_fail, spinner_ok
 from commons.constants import PRODUCTS, STAGING
+from commons.custom_classes import PdpException
 from commons.handlers import handle_and_continue, handle_and_exit
 from commons.pdp_products import export_all_entities
 
 
-def run(project_name: str, empty: bool, apis: dict, force: bool):
+def run(project_name: str, empty: bool, apis: dict, force: bool, template: str = None):
   """
   This is the entry point for the command 'init'. Creates a project from
   scratch or from existing sources based on empty.
@@ -33,6 +34,7 @@ def run(project_name: str, empty: bool, apis: dict, force: bool):
   :param dict apis: A dictionary containing the url for each product api. (ingestion, discovery, core and staging).
   :param bool force: If it is True it will try to override the project where you want to create it, if there is a
                       folder with the same name.
+  :param str template: The name of the template to use.
   :rtype: bool
   :return: True if the project was created successfully, False if any error happen.
   :raises Exception: If a project with the same name already exists.
@@ -43,7 +45,11 @@ def run(project_name: str, empty: bool, apis: dict, force: bool):
 
   created_successfully = False
   if empty:
-    created_successfully = create_project_from_template(project_name)
+    template_name = 'random_generator'
+    if template is not None:
+      template_name = template
+    template_path = os.path.join('templates', 'projects', template_name)
+    created_successfully = create_project_from_template(project_name, template_path)
   else:
     created_successfully = create_project_from_existing_sources(project_name, apis)
 
@@ -72,13 +78,14 @@ def create_project_from_template(project_name: str,
   """
   try:
     if os.path.exists(project_name):
-      print_error(f'Project {project_name} already exists.\n\tUse --force flag to override the project.', True)
+      raise PdpException(message=f'Project {project_name} already exists.\n\tUse --force flag to override the project.',
+                         handled=True)
     # Copy the sample files from the templates folder to the project folder
     templates_path = os.path.abspath(os.path.join(os.path.dirname(__file__), relative_template_path))
     shutil.copytree(templates_path, project_name)
     return True
   except Exception as error:
-    print_error(f'Failed to init project due to {error}')
+    print_exception(error)
     return False
 
 
@@ -97,8 +104,8 @@ def create_project_folder_structure(project_path: str,
       os.mkdir(os.path.join(project_path, folder))
   else:
     splitted_path = os.path.split(project_path)
-    print_error(f'Project {splitted_path[len(splitted_path) - 1]} already exists.'
-                '\n\tUse --force flag to override the project.', True)
+    raise PdpException(message=f'Project {splitted_path[len(splitted_path) - 1]} already exists.'
+                               '\n\tUse --force flag to override the project.', handled=True)
 
 
 def create_project_from_existing_sources(project_name: str, apis: dict):
@@ -110,28 +117,32 @@ def create_project_from_existing_sources(project_name: str, apis: dict):
   :rtype: bool
   :return: True if the project was created, False if some error happen.
   """
-  project_path = os.path.join('.', project_name)
-  create_project_folder_structure(project_path)
+  try:
+    project_path = os.path.join('.', project_name)
+    create_project_folder_structure(project_path)
 
-  # Exports from all products (excepting STAGING)
-  products = [product for product in PRODUCTS if product != STAGING]
-  ids = { }
-  successful_import = False
-  for product in products:
-    create_spinner(Spinners.dots12)
-    product_dir_name = product.title()
-    spinner_change_text(f'Importing {product_dir_name} entities...')
-    zip_path = os.path.join(project_path, product_dir_name)
-    product_api_url = apis.get(product)
-    success, new_ids = handle_and_continue(export_all_entities,
-                                           { 'show_exception': True },
-                                           product_api_url, zip_path, True, ids=ids)
-    if new_ids is not None:
-      ids = new_ids
-    if not success:
-      spinner_fail(click.style(f'Could not import the {product_dir_name} entities.', fg='red'), suffix='\n')
-    else:
-      spinner_ok(click.style(f'{product_dir_name} entities imported.', fg='green'))
-      successful_import = True
+    # Exports from all products (excepting STAGING)
+    products = [product for product in PRODUCTS if product != STAGING]
+    ids = { }
+    successful_import = False
+    for product in products:
+      create_spinner(Spinners.dots12)
+      product_dir_name = product.title()
+      spinner_change_text(f'Importing {product_dir_name} entities...')
+      zip_path = os.path.join(project_path, product_dir_name)
+      product_api_url = apis.get(product)
+      success, new_ids = handle_and_continue(export_all_entities,
+                                             { 'show_exception': True },
+                                             product_api_url, zip_path, True, ids=ids)
+      if new_ids is not None:
+        ids = new_ids
+      if not success:
+        spinner_fail(click.style(f'Could not import the {product_dir_name} entities.', fg='red'), suffix='\n')
+      else:
+        spinner_ok(click.style(f'{product_dir_name} entities imported.', fg='green'))
+        successful_import = True
 
-  return successful_import
+    return successful_import
+  except Exception as exception:
+    print_exception(exception)
+    return False
