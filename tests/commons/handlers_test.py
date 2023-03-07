@@ -24,6 +24,18 @@ def test_handle_exceptions_exception_handled(mocker):
   """
   Test the function defined in :func:`commons.handlers.handle_exceptions`.
   """
+  exception = PdpException(message='', handled=True)
+  mock_print = mocker.patch('commons.handlers.print_exception')
+  mock_stop_spinner = mocker.patch('commons.handlers.stop_spinner')
+  handle_exceptions(mock_custom_exception, exception)
+  mock_print.assert_called_once_with(exception)
+  mock_stop_spinner.assert_called_once()
+
+
+def test_handle_exceptions_exception_not_handled(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_exceptions`.
+  """
   exception = Exception()
   mock_print = mocker.patch('commons.handlers.print_exception')
   mock_stop_spinner = mocker.patch('commons.handlers.stop_spinner')
