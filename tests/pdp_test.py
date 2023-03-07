@@ -104,19 +104,20 @@ def test_load_config_invalid_profile():
   assert str(exception.value) == 'Configuration profile NOT_EXISTS was not found.'
 
 
-def test_pdp():
+def test_pdp(snapshot):
   """
   Test the command defined in :func:`src.pdp.pdp`.
   """
   response = cli.invoke(pdp, [])
   assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_pdp.snapshot')
 
 
-def test_health():
+def test_health(snapshot):
   """
   Test the command defined in :func:`src.pdp.health`.
   """
   response = cli.invoke(health)
   ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
   assert response.exit_code == 0
-  assert f"{ascii_art_pdp_cli}Pureinsights Discovery Platform: Command Line Interface\nv1.5.0\nhttps://pureinsights.com/" in response.output
+  snapshot.assert_match(response.output, 'test_health.snapshot')

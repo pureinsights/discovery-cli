@@ -1,0 +1,14 @@
+Usage: pdp [OPTIONS] COMMAND [ARGS]...
+
+  This is the official PureInsights Discovery Platform CLI.
+
+Options:
+  --namespace TEXT  Namespace in which the PDP components are running. Default
+                    is "pdp".
+  --profile TEXT    Configuration profile to load specific configurations from
+                    pdp.ini. Default is "DEFAULT"
+  --help            Show this message and exit.
+
+Commands:
+  config  Contains all the commands to help you manage the entities of the...
+  health  This command is used to know if PDP-CLI has been installed...

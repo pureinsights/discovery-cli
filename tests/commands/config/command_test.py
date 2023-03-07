@@ -12,15 +12,16 @@ from pdp_test import cli
 from src.pdp import pdp
 
 
-def test_config():
+def test_config(snapshot):
   """
   Test the command defined in :func:`src.commands.config.command.config`.
   """
   response = cli.invoke(pdp, ["config"])
   assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_config.snapshot')
 
 
-def test_init_success(mocker):
+def test_init_success(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.config.command.init`,
   without arguments.
@@ -30,23 +31,22 @@ def test_init_success(mocker):
   response = cli.invoke(pdp, ["config", "init"])
   init_run_mocked.assert_called()
   assert response.exit_code == 0
-  assert f"Project {project_name} created successfully." in response.output
+  snapshot.assert_match(response.output, 'test_init_success.snapshot')
 
 
-def test_init_could_not_create(mocker):
+def test_init_could_not_create(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.config.command.init`,
   when some error happens.
   """
   init_run_mocked = mocker.patch('commands.config.command.run_init', return_value=False)
-  project_name = "my-pdp-project"
   response = cli.invoke(pdp, ["config", "init"])
   init_run_mocked.assert_called()
   assert response.exit_code == 0
-  assert 'Could not create the project {0}.\n'.format(project_name) in response.output
+  snapshot.assert_match(response.output, 'test_init_could_not_create.snapshot')
 
 
-def test_init_parse_options(mocker):
+def test_init_parse_options(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.config.command.init`,
   with all the arguments provided.
@@ -69,10 +69,10 @@ def test_init_parse_options(mocker):
 
   init_run_mocked.assert_called_once_with(project_name, False, expected_config, True, 'empty')
   assert response.exit_code == 0
-  assert f"Project {project_name} created successfully." in response.output
+  snapshot.assert_match(response.output, 'test_init_parse_options.snapshot')
 
 
-def test_init_incorrect_option_product():
+def test_init_incorrect_option_product(snapshot):
   """
   Test the command defined in :func:`src.commands.config.command.init`,
   with an unrecognized product of the argument product-url.
@@ -81,4 +81,4 @@ def test_init_incorrect_option_product():
   response = cli.invoke(pdp, ["config", "init", '-u', 'fake-product',
                               'http://ingestion-fake'])
   assert response.exit_code == 1
-  assert f'Unrecognized product "fake-product".' in response.output
+  snapshot.assert_match(response.output, 'test_init_incorrect_option_product.snapshot')

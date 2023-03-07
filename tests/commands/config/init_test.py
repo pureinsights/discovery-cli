@@ -46,17 +46,19 @@ def test_run_init_failed(mocker, mock_path_exists):
   assert not success
 
 
-def test_run_init_project_already_exists(mock_path_exists):
+def test_run_init_project_already_exists(mocker, mock_path_exists):
   """
   Test the command defined in :func:`commands.config.init.run`,
   when the project name already exists.
   """
+  mock_print_error = mocker.patch('commons.console.print_error')
   mock_path_exists(True)
   project_name = 'my-pdp-project'
-  success = False
-  with pytest.raises(Exception) as exception:
-    success = run(project_name, False, DEFAULT_CONFIG, False)
-  assert 'Project {0} already exists.'.format(project_name) in str(exception.value)
+  success = run(project_name, False, DEFAULT_CONFIG, False)
+  mock_print_error.assert_called_once_with(
+    'Project {0} already exists.\n\tUse --force flag to override the project.'.format(project_name),
+    False
+  )
   assert not success
 
 

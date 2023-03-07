@@ -10,5 +10,6 @@ yaspin
 pytest
 pytest-cov
 pytest-mock
+pytest-snapshot
 behave
 tox
