@@ -8,8 +8,8 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+from pdp import pdp
 from pdp_test import cli
-from src.pdp import pdp
 
 
 def test_config(snapshot):

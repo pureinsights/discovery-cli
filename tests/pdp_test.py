@@ -14,7 +14,7 @@ import pytest
 from click.testing import CliRunner
 
 from commons.constants import DEFAULT_CONFIG
-from src.pdp import ensure_configurations, health, load_config, pdp
+from pdp import ensure_configurations, health, load_config, pdp
 
 cli = CliRunner()
 
