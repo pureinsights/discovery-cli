@@ -16,11 +16,14 @@ class PdpEntity:
   product: str = ''
   reference_field: str = ''
 
-  def __init__(self, product: str, type: str, file: str):
+  def __init__(self, product: str, type: str, file: str, reference_field=None):
     self.associated_file_name = file
     self.type = type
     self.product = product
-    self.reference_field = f'{type}Id'
+    if reference_field is None:
+      self.reference_field = f'{type}Id'
+    else:
+      self.reference_field = reference_field
 
 
 class DataInconsistency(Exception):

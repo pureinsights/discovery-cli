@@ -113,6 +113,8 @@ def handle_and_continue(func: callable, params: dict, *args, **kwargs):
 
   except Exception as error:
     if show_exception:
+      if hasattr(error, 'handled'):
+        error.handled = True
       print_exception(error, prefix=prefix, suffix=suffix)
 
     if error_message is not None:

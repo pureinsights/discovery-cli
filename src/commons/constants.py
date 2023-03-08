@@ -29,14 +29,14 @@ PRODUCTS = [CORE, INGESTION, DISCOVERY, STAGING]
 
 # Entities
 SCHEDULER = PdpEntity(INGESTION, 'scheduler', 'cron_jobs.json')
-PROCESSOR = PdpEntity(INGESTION, 'processor', 'processors.json')
+INGESTION_PROCESSOR = PdpEntity(INGESTION, 'processor', 'processors.json')
 PIPELINE = PdpEntity(INGESTION, 'pipeline', 'pipelines.json')
 SEED = PdpEntity(INGESTION, 'seed', 'seeds.json')
 CREDENTIAL = PdpEntity(CORE, 'credential', 'credentials.json')
 ENDPOINT = PdpEntity(DISCOVERY, 'endpoint', 'endpoints.json')
-ENDPOINT_PROCESSOR = PdpEntity(DISCOVERY, 'processor', 'processors.json')
+DISCOVERY_PROCESSOR = PdpEntity(DISCOVERY, 'processors', 'processors.json', 'processors')
 # Must be in order (based on which has fewer dependencies to another entities)
-ENTITIES = CREDENTIAL, PROCESSOR, PIPELINE, SEED, SCHEDULER, ENDPOINT_PROCESSOR, ENDPOINT
+ENTITIES = CREDENTIAL, INGESTION_PROCESSOR, PIPELINE, SEED, SCHEDULER, DISCOVERY_PROCESSOR, ENDPOINT
 
 # Configurations
 DEFAULT_CONFIG = {

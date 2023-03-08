@@ -68,7 +68,6 @@ def spinner_ok(message: str, **kwargs):
   """
   icon = kwargs.get('icon', '✔ ')
   prefix = kwargs.get('prefix', '')
-  suffix = kwargs.get('suffix', '')
   if Spinner is None:
     print_console(message, prefix=f'{prefix}{icon}')
     return
@@ -183,7 +182,7 @@ def print_exception(exception, **kwargs):
       print_aux = print_warning
   match exception:
     case req.exceptions.ConnectionError():
-      print_aux(f'ConnectionError. Can not connect with {exception.request.url}.', prefix=prefix, suffix=suffix)
+      print_aux(f'ConnectionError. Can not connect to {exception.request.url}.', prefix=prefix, suffix=suffix)
     case DataInconsistency():
       print_aux(exception.message, not exception.handled)
     case PdpException():

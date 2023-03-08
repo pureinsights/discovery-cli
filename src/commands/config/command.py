@@ -69,6 +69,6 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
             '\tpdp config deploy'
   if not successfully_executed:
     color = 'red'
-    message = 'Could not create the project {project_name_styled}.\n'
+    message = 'Could not create the project {project_name_styled}.'
   project_name_styled = click.style(project_name, fg=color)
   click.echo(message.format(project_name=project_name, project_name_styled=project_name_styled))

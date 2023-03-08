@@ -136,9 +136,22 @@ def test_handle_and_continue_show_error_and_exception(mocker):
   handle_and_continue(mock_custom_exception, {
     'message': message,
     'show_exception': True
-  }, Exception)
+  }, PdpException(message=message))
   assert mock_print_exception.call_count == 1
   mock_print_error.assert_called_once_with(message, False, prefix='', suffix='')
+
+
+def test_handle_and_continue_show_exception(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_and_continue`,
+  with configuration to show a message.
+  """
+  mock_print_exception = mocker.patch('commons.handlers.print_exception')
+  message = 'fake-message'
+  handle_and_continue(mock_custom_exception, {
+    'show_exception': True
+  }, Exception)
+  assert mock_print_exception.call_count == 1
 
 
 def test_handle_and_exit_not_show_nothing():

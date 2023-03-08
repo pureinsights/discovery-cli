@@ -12,7 +12,7 @@ import json
 import os
 import zipfile
 
-from commons.console import print_error
+from commons.console import print_exception, print_warning
 from commons.constants import ENTITIES, URL_EXPORT_ALL, WARNING_SEVERITY
 from commons.custom_classes import DataInconsistency, PdpEntity
 from commons.handlers import handle_and_continue
@@ -38,7 +38,8 @@ def identify_entity(entity: dict, fields=['name', 'id', 'description', 'type'], 
   return default_value
 
 
-def associate_values_from_entities(entity_1: dict, from_field: str, entity_2: dict, to_field: str):
+def associate_values_from_entities(entity_1: dict, from_field: str, entity_2: dict, to_field: str,
+                                   entity_type: PdpEntity = None):
   """
   Associate two values from to entities. Helpful to associate the
   id of an entity with the name of the same entity.
@@ -54,13 +55,22 @@ def associate_values_from_entities(entity_1: dict, from_field: str, entity_2: di
   value_1 = entity_1.get(from_field, None)
   value_2 = entity_2.get(to_field, None)
 
+  message = 'Entity with {entity} does not have field {field}.'
+
+  if entity_type is not None:
+    message += f' Entity on file {entity_type.associated_file_name}'
+
   if value_1 is None:
-    raise DataInconsistency(message=f'Entity with {identify_entity(entity_1)} does not have field {from_field}.',
-                            severity=WARNING_SEVERITY)
+    print_exception(
+      DataInconsistency(message=message.format(entity=identify_entity(entity_1), field=from_field),
+                        severity=WARNING_SEVERITY, handled=True)
+    )
 
   if value_2 is None:
-    raise DataInconsistency(message=f'Entity with {identify_entity(entity_2)} does not have field {to_field}.',
-                            severity=WARNING_SEVERITY)
+    print_exception(
+      DataInconsistency(message=message.format(entity=identify_entity(entity_2), field=to_field),
+                        severity=WARNING_SEVERITY, handled=True)
+    )
 
   return value_1, value_2
 
@@ -85,7 +95,10 @@ def replace_ids(path: str, ids=None):
         entities = json.load(file)
         if type(entities) is not list:
           entities = [entities]
-        ids = replace_ids_for_names(entity_type, entities, ids)
+        success, new_ids = handle_and_continue(replace_ids_for_names, { 'show_exception': True },
+                                               entity_type, entities, ids)
+        if success:
+          ids = new_ids
         file.seek(0)
         json.dump(entities, file, indent=2)
         file.truncate()
@@ -104,24 +117,35 @@ def replace_ids_for_names(entity_type: PdpEntity, entities: list[dict], ids: dic
   :rtype: dict
   :return: The ids dict with his id and his name as a key-value.
   """
-
-  def process_entity():
-    id, name = associate_values_from_entities(entity, 'id', entity, 'name')
-    ids[id] = name
-    replace_value(entity_type, entity, ids)
-
   for entity in entities:
-    handle_and_continue(process_entity, { 'show_exception': True })
+    success, response = handle_and_continue(associate_values_from_entities, { 'show_exception': True }, entity, 'id',
+                                            entity, 'name', entity_type)
+    if success:
+      _id, name = response
+      if _id is not None:
+        ids[_id] = name
+    replace_value(entity_type, entity, ids)
   return ids
 
 
-def replace_value(entity_type: PdpEntity, entity: dict, values: dict, **kwargs):
+def show_expected_error_if_value_not_found(entity_type: PdpEntity, entity: dict, from_field: str,
+                                           value: str):
+  name = identify_entity(entity, default=entity_type.associated_file_name)
+  if name != entity_type.associated_file_name:
+    print_warning(f'Value "{value}" does not exist while attempting to replace in {from_field}. '
+                  f'Entity "{name}" in file {entity_type.associated_file_name}.')
+  else:
+    print_warning(f'Value "{value}" does not exist while attempting to replace in {from_field}. '
+                  f'Entity has no name and no id in file {entity_type.associated_file_name}.')
+
+
+def replace_value(entity_type: PdpEntity, entity: any, values: dict, **kwargs):
   """
   Replaces the value from a field of an entity, for the value of another field with a
   specified format.
 
   :param PdpEntity entity_type: A class that represents the type of entity passed.
-  :param dict entity: The entity with the fields to ve replaced.
+  :param any entity: The entity with the fields to ve replaced.
   :param dict values: A dict where the keys are the value of the from_field and the value for the key
                       is the value of the to_field.
   :key from_field: The name of the field where you want to get the value to replace.
@@ -130,41 +154,40 @@ def replace_value(entity_type: PdpEntity, entity: dict, values: dict, **kwargs):
   :key format: The format that the replaced field will have. Default is "{{ fromName('{0}')"
   """
   from_field: str = kwargs.get('from_field', 'id')
-  to_fields: list[str] = kwargs.get('to_fields', None)
+  to_fields: list[str] = kwargs.get('to_fields', [ent.reference_field for ent in ENTITIES])
   format_str: str = kwargs.get('format', "{{{{ fromName('{0}') }}}}")
   parent: dict = kwargs.get('parent', None)
-  if to_fields is None:
-    to_fields = [ent.reference_field for ent in ENTITIES]
 
-  if type(entity) is not dict or from_field is None:
+  if entity is None:
     return
 
-  for key in entity.keys():
-    if key in to_fields:
-      value = entity[key]
-      if value is not None:
-        if value not in values:
-          name = identify_entity(entity, default=entity_type.associated_file_name)
-          if name != entity_type.associated_file_name:
-            print_error(f'{from_field.title()} "{value}" does not exist while attempting to replace in {key}. '
-                        f'Entity "{name}" in file {entity_type.associated_file_name}.', True)
-          elif parent is not None:
-            name = identify_entity(parent)
-            print_error(f'{from_field.title()} "{value}" does not exist while attempting to replace in {key}. '
-                        f'Child of entity "{name}" in file {entity_type.associated_file_name}.', True)
-          else:
-            print_error(f'{from_field.title()} "{value}" does not exist while attempting to replace in {key}. '
-                        f'Entity has no name and no id in file {entity_type.associated_file_name}.', True)
+  if isinstance(entity, (list, tuple, set)):
+    for index, nested_entity in enumerate(entity):
+      replace_value(entity_type, nested_entity, values, **{ **kwargs, 'index': index })
+    return
 
-        entity[key] = format_str.format(values[value])
-    elif type(entity[key]) is dict:
-      if parent is None:
-        kwargs['parent'] = entity
-      replace_value(entity_type, entity[key], values, **kwargs)
-    elif type(entity[key]) is list:
-      if parent is None:
-        kwargs['parent'] = entity
-      [replace_value(entity_type, nested_entity, values, **kwargs) for nested_entity in entity[key]]
+  if type(entity) is dict:
+    for key in entity.keys():
+      replace_value(entity_type, entity.get(key, None), values, **{ **kwargs, 'parent': entity,
+                                                                    'from_field': key, 'index': None })
+    return
+
+  if from_field not in to_fields:
+    return
+
+  value = values.get(entity, None)
+
+  if value is None:
+    if entity not in values.keys():
+      show_expected_error_if_value_not_found(entity_type, parent, from_field, entity)
+    return
+
+  index = kwargs.get('index', None)
+  if index is not None:
+    parent[from_field][index] = format_str.format(value)
+    return
+
+  parent[from_field] = format_str.format(value)
 
 
 def export_all_entities(api_url: str, path: str, extract: bool = True, **kwargs):

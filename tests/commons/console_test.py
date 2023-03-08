@@ -208,7 +208,7 @@ def test_print_exception_connection_error(mocker):
   mocker.patch.object(custom_exception, 'request')
   custom_exception.request.url = fake_url
   print_exception(custom_exception)
-  mock_error.assert_called_once_with(f'ConnectionError. Can not connect with {custom_exception.request.url}.',
+  mock_error.assert_called_once_with(f'ConnectionError. Can not connect to {custom_exception.request.url}.',
                                      prefix='',
                                      suffix='')
 

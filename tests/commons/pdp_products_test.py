@@ -13,9 +13,7 @@ from unittest.mock import mock_open
 
 import pytest
 
-from commons.constants import CREDENTIAL, ENDPOINT, ENDPOINT_PROCESSOR, PIPELINE, PROCESSOR, SCHEDULER, SEED, \
-  WARNING_SEVERITY
-from commons.custom_classes import DataInconsistency, PdpException
+from commons.constants import CREDENTIAL, DISCOVERY_PROCESSOR, ENDPOINT, INGESTION_PROCESSOR, PIPELINE, SCHEDULER, SEED
 from commons.pdp_products import associate_values_from_entities, export_all_entities, identify_entity, replace_ids, \
   replace_ids_for_names, \
   replace_value
@@ -55,20 +53,21 @@ def test_identify_entity_return_default():
   assert response == 'fake-default'
 
 
-@pytest.mark.parametrize('entity1, entity2', [
-  ({ 'property': 'property' }, { }),
-  ({ }, { 'property': 'property' })
-])
-def test_associate_values_from_entities_raises_DataInconsistency(entity1, entity2):
+def test_associate_values_from_entities_raises_DataInconsistency(mocker):
   """
   Test the function defined in :func:`commons.pdp_products.associate_values_from_entities`,
   when the entities do not have the properties.
   """
-  with pytest.raises(DataInconsistency) as exception:
-    associate_values_from_entities(entity1, 'property', entity2, 'property')
-  assert exception.value.message == f'Entity with {entity1} does not have field property.' or \
-         exception.value.message == f'Entity with {entity2} does not have field property.'
-  assert exception.value.severity == WARNING_SEVERITY
+  entity1 = { 'property': 'property' }
+  entity2 = { }
+  mocker.patch('commons.pdp_products.print_exception')
+  mock_exception = mocker.patch('commons.pdp_products.DataInconsistency')
+  associate_values_from_entities(entity1, 'property', entity2, 'property')
+  mock_exception.assert_called_with(message=f'Entity with {entity2} does not have field property.',
+                                    severity='warning', handled=True)
+  associate_values_from_entities(entity2, 'property', entity1, 'property')
+  mock_exception.assert_called_with(message=f'Entity with {entity2} does not have field property.',
+                                    severity='warning', handled=True)
 
 
 @pytest.mark.parametrize('entity1, entity2', [
@@ -106,8 +105,22 @@ def test_replace_ids(mocker, dir_name, entity_str, entities, call_count, ids):
   assert mock_replace.call_count == call_count
 
 
+def test_replace_ids_failed_replace_id(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.replace_ids`.
+  """
+  mocker.patch('builtins.open', mock_open(read_data=''))
+  mocker.patch('commons.pdp_products.json.load', return_value={ })
+  mocker.patch('commons.pdp_products.handle_and_continue', return_value=(False, { }))
+  mock_dump = mocker.patch('commons.pdp_products.json.dump')
+  mock_replace = mocker.patch('commons.pdp_products.replace_ids_for_names')
+  replace_ids('./Ingestion', { })
+  assert mock_dump.call_count == 4
+  assert mock_replace.call_count == 0
+
+
 @pytest.mark.parametrize('entity_type, entities, expected_ids', [
-  (PROCESSOR, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], { 'fake-id4': 'fake-name4' }),
+  (INGESTION_PROCESSOR, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], { 'fake-id4': 'fake-name4' }),
   (PIPELINE, [{
     'id': 'fake-id4',
     'name': 'fake-name4',
@@ -117,7 +130,7 @@ def test_replace_ids(mocker, dir_name, entity_str, entities, call_count, ids):
   (SCHEDULER, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], { 'fake-id4': 'fake-name4' }),
   (CREDENTIAL, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], { 'fake-id4': 'fake-name4' }),
   (ENDPOINT, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], { 'fake-id4': 'fake-name4' }),
-  (ENDPOINT_PROCESSOR, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], { 'fake-id4': 'fake-name4' })
+  (DISCOVERY_PROCESSOR, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], { 'fake-id4': 'fake-name4' })
 ])
 def test_replace_ids_for_names(entity_type, entities, expected_ids):
   """
@@ -130,6 +143,21 @@ def test_replace_ids_for_names(entity_type, entities, expected_ids):
   }
   expected_ids = { **expected_ids, **ids }
   response = replace_ids_for_names(entity_type, entities, ids)
+  assert response == expected_ids
+
+
+def test_replace_ids_for_names_failed_associate_values(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.replace_ids_for_names`.
+  """
+  mocker.patch('commons.pdp_products.handle_and_continue', return_value=(False, None))
+  ids = {
+    'fake-id1': 'fake-name1',
+    'fake-id2': 'fake-name2',
+    'fake-id3': 'fake-name3'
+  }
+  expected_ids = ids
+  response = replace_ids_for_names(INGESTION_PROCESSOR, [{ 'id': 'fake-id4', 'name': 'fake-name4' }], ids)
   assert response == expected_ids
 
 
@@ -170,6 +198,17 @@ def test_replace_ids_for_names(entity_type, entities, expected_ids):
      'name': 'fake-name7',
      'fake-child': { 'fake-children': [{ 'processorId': '{{ fromName(\'fake-name1\') }}' }] }
    }),
+  (PIPELINE, {
+    'id': 'fake-id7',
+    'name': 'fake-name7',
+    'fake-child': { 'fake-children': [{ 'processorId': 'fake-id12' }] },
+    'processors': ['fake-id3']
+  }, {
+     'id': 'fake-id7',
+     'name': 'fake-name7',
+     'fake-child': { 'fake-children': [{ 'processorId': 'fake-id12' }] },
+     'processors': ['{{ fromName(\'fake-name3\') }}']
+   }),
   (PIPELINE, 'fake-entity', 'fake-entity')
 ])
 def test_replace_value_successful(entity_type, entity, expected_entity):
@@ -182,7 +221,8 @@ def test_replace_value_successful(entity_type, entity, expected_entity):
     'fake-id3': 'fake-name3',
     'fake-id4': 'fake-name4',
     'fake-id5': 'fake-name5',
-    'fake-id6': 'fake-name6'
+    'fake-id6': 'fake-name6',
+    'fake-id12': None
   }
   replace_value(entity_type, entity, values)
   assert entity == expected_entity
@@ -193,27 +233,28 @@ def test_replace_value_successful(entity_type, entity, expected_entity):
     'id': 'fake-id7',
     'name': 'fake-name7',
     'steps': { 'processorId': 'fake-id8' }
-  }, f'[ERROR]: Id "fake-id8" does not exist while attempting to replace in processorId.' \
-     f' Child of entity "name fake-name7" in file pipelines.json.'
+  }, f'Value "fake-id8" does not exist while attempting to replace in processorId.' \
+     f' Entity has no name and no id in file pipelines.json.'
    ),
   (SEED, {
     'pipelineId': 'fake-id8'
-  }, f'[ERROR]: Id "fake-id8" does not exist while attempting to replace in pipelineId.' \
+  }, f'Value "fake-id8" does not exist while attempting to replace in pipelineId.' \
      f' Entity has no name and no id in file seeds.json.'
    ),
   (SCHEDULER, {
     'id': 'fake-id7',
     'name': 'fake-name7',
     'seedId': 'fake-id8'
-  }, f'[ERROR]: Id "fake-id8" does not exist while attempting to replace in seedId.' \
+  }, f'Value "fake-id8" does not exist while attempting to replace in seedId.' \
      f' Entity "name fake-name7" in file cron_jobs.json.'
    )
 ])
-def test_replace_value_failed(entity_type, entity, expected_message):
+def test_replace_value_failed(mocker, entity_type, entity, expected_message):
   """
   Test the function defined in :func:`commons.pdp_products.replace_value`,
   when the value to replace is not present on the values.
   """
+  mock_warning = mocker.patch('commons.pdp_products.print_warning')
   values = {
     'fake-id1': 'fake-name1',
     'fake-id2': 'fake-name2',
@@ -222,9 +263,8 @@ def test_replace_value_failed(entity_type, entity, expected_message):
     'fake-id5': 'fake-name5',
     'fake-id6': 'fake-name6'
   }
-  with pytest.raises(PdpException) as exception:
-    replace_value(entity_type, entity, values, to_fields=['processorId', 'pipelineId', 'seedId'])
-  assert exception.value.message == expected_message
+  replace_value(entity_type, entity, values, to_fields=['processorId', 'pipelineId', 'seedId'])
+  mock_warning.assert_called_with(expected_message)
 
 
 def test_export_all_entities_successful_without_extract(mocker):
