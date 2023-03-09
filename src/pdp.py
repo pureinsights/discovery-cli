@@ -13,7 +13,6 @@ import os.path
 from configparser import ConfigParser
 
 import click
-import git
 import pyfiglet
 
 from commands.config.command import config
@@ -77,10 +76,8 @@ def health():
   """
   ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
   title = "Pureinsights Discovery Platform: Command Line Interface"
-  repo = git.Repo(search_parent_directories=True)
-  latest_tag = repo.git.describe(tags=True)
   url = "https://pureinsights.com/"
-  click.echo(f"{ascii_art_pdp_cli}{title}\nv{latest_tag}")
+  click.echo(f"{ascii_art_pdp_cli}{title}\nv1.5.0")
   click.echo(click.style(url, fg="blue", underline=True, bold=True))
 
 
