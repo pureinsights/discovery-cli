@@ -13,6 +13,7 @@ import click
 
 from commands.config.init import run as run_init
 from commons.console import print_error
+from commons.constants import TEMPLATE_NAMES
 
 
 @click.group()
@@ -31,7 +32,7 @@ def config(ctx):
                    'referenced in ~/.pdp. Notice that imported configs have id fields, don`t change those. Default is '
                    'my-pdp-project.')
 @click.option('--empty/--no-empty', default=True, help='If it should only create an empty directory structure with '
-                                                       'basic handlebars for starting a new project. Default is False.')
+                                                       'basic handlebars for starting a new project. Default is True.')
 @click.option('-u', '--product-url', 'products_url', multiple=True, default=[], type=(str, str),
               help='The base URL for the given product API. The '
                    'product URL must be provided with the following '
@@ -45,7 +46,8 @@ def config(ctx):
               help='If there is a project with the same name it will to override it. '
                    'Default is False.')
 @click.option('--template', default=None, help='Choose the template with the project will be created.',
-              type=click.Choice(['empty', 'random_generator'], case_sensitive=False))
+              type=click.Choice(TEMPLATE_NAMES,
+                                case_sensitive=False))
 @click.pass_context
 def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], force: bool, template):
   """
@@ -61,7 +63,12 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
     else:
       config[product.lower()] = url
 
-  successfully_executed = run_init(project_name, empty, config, force, template)
+  if empty and template is None:
+    template = 'random_generator'
+  elif not empty:
+    template = None
+
+  successfully_executed = run_init(project_name, config, force, template)
   color = 'green'
   message = 'Project {project_name_styled} created successfully.\n' \
             'Recommended next commands:\n' \
@@ -72,3 +79,4 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
     message = 'Could not create the project {project_name_styled}.'
   project_name_styled = click.style(project_name, fg=color)
   click.echo(message.format(project_name=project_name, project_name_styled=project_name_styled))
+  exit(0 if successfully_executed else 1)

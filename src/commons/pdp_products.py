@@ -38,41 +38,41 @@ def identify_entity(entity: dict, fields=['name', 'id', 'description', 'type'], 
   return default_value
 
 
-def associate_values_from_entities(entity_1: dict, from_field: str, entity_2: dict, to_field: str,
+def associate_values_from_entities(from_entity: dict, from_field: str, to_entity: dict, to_field: str,
                                    entity_type: PdpEntity = None):
   """
   Associate two values from to entities. Helpful to associate the
   id of an entity with the name of the same entity.
 
-  :param dict entity_1: The entity to get the from_field.
+  :param dict from_entity: The entity to get the from_field.
   :param str from_field: The name of the field to be used as key.
-  :param dict entity_2: The entity to get the to_field.
+  :param dict to_entity: The entity to get the to_field.
   :param str to_field: The name of the field to be used as value.
   :rtype: tuple[any,any]
   :return: A tuple representing a key-value.
   :raises DataInconsistency: Where an entity doesn't have a field. It's raised as WARNING.
   """
-  value_1 = entity_1.get(from_field, None)
-  value_2 = entity_2.get(to_field, None)
+  value_from = from_entity.get(from_field, None)
+  value_to = to_entity.get(to_field, None)
 
   message = 'Entity with {entity} does not have field {field}.'
 
   if entity_type is not None:
     message += f' Entity on file {entity_type.associated_file_name}'
 
-  if value_1 is None:
+  if value_from is None:
     print_exception(
-      DataInconsistency(message=message.format(entity=identify_entity(entity_1), field=from_field),
+      DataInconsistency(message=message.format(entity=identify_entity(from_entity), field=from_field),
                         severity=WARNING_SEVERITY, handled=True)
     )
 
-  if value_2 is None:
+  if value_to is None:
     print_exception(
-      DataInconsistency(message=message.format(entity=identify_entity(entity_2), field=to_field),
+      DataInconsistency(message=message.format(entity=identify_entity(to_entity), field=to_field),
                         severity=WARNING_SEVERITY, handled=True)
     )
 
-  return value_1, value_2
+  return value_from, value_to
 
 
 def replace_ids(path: str, ids=None):

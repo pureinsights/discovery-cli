@@ -13,10 +13,11 @@ import os.path
 from configparser import ConfigParser
 
 import click
+import git
 import pyfiglet
 
 from commands.config.command import config
-from commons.constants import CORE, DEFAULT_CONFIG, DISCOVERY, INGESTION, STAGING
+from commons.constants import DEFAULT_CONFIG, PRODUCTS
 from commons.custom_classes import DataInconsistency
 from commons.handlers import handle_exceptions
 
@@ -28,7 +29,7 @@ def ensure_configurations(config: dict):
   :rtype: dict
   :return: The config dict but with defaults values on those missing configurations.
   """
-  properties: list[str] = [INGESTION, DISCOVERY, CORE, STAGING]
+  properties: list[str] = PRODUCTS
 
   for property in properties:
     if config.get(property, None) is None:
@@ -60,7 +61,7 @@ def load_config(config_name: str, profile: str = 'DEFAULT'):
 @click.pass_context
 def pdp(ctx, namespace: str, profile: str | None):
   """
-  This is the official PureInsights Discovery Platform CLI.
+  This is the official Pureinsights Discovery Platform CLI.
   """
   # ensure that ctx.obj exists and is a dict (in case `cli()` is called
   # by means other than the `if` block below)
@@ -76,9 +77,10 @@ def health():
   """
   ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
   title = "Pureinsights Discovery Platform: Command Line Interface"
-  version = "v1.5.0"
+  repo = git.Repo(search_parent_directories=True)
+  latest_tag = repo.git.describe(tags=True)
   url = "https://pureinsights.com/"
-  click.echo(f"{ascii_art_pdp_cli}{title}\n{version}")
+  click.echo(f"{ascii_art_pdp_cli}{title}\nv{latest_tag}")
   click.echo(click.style(url, fg="blue", underline=True, bold=True))
 
 

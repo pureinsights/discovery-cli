@@ -1,6 +1,6 @@
 Usage: pdp [OPTIONS] COMMAND [ARGS]...
 
-  This is the official PureInsights Discovery Platform CLI.
+  This is the official Pureinsights Discovery Platform CLI.
 
 Options:
   --namespace TEXT  Namespace in which the PDP components are running. Default

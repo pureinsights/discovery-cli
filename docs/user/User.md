@@ -20,7 +20,7 @@ pdp config init -n HelloWorld --template random_generator
 
 ## Documentation
 
-### Command PDP
+### PDP Command
 
 This is the command responsible to pass the configuration or namespace to all the other commands.
 If no argument is passed to it will use the default values.
@@ -34,7 +34,7 @@ If no argument is passed to it will use the default values.
 pdp --namespace <namespace> --profile <configuration_profile>
 ```
 
-### Command Health
+### Health Command
 
 This command is used to assure that the CLI works fine. It doesn't have any flags.
 
@@ -42,7 +42,7 @@ This command is used to assure that the CLI works fine. It doesn't have any flag
 pdp health
 ```
 
-### Command init
+### Init Command
 
 Creates a new project from existing sources or from scratch.
 It will create the folder structure for a PDP project.
@@ -50,10 +50,10 @@ It will create the folder structure for a PDP project.
 #### Flags:
 
 - **-n,--project-name**: The name of the resulting directory, will try to fetch existing configurations from the APIs
-  referenced in ~/.pdp. Notice that imported configs have id fields, don`t change those.
+  referenced in ~/.pdp. Notice that imported configs have id fields, don't change those.
   **Default is my-pdp-project**.
-- **--empty/--no-empty**: If is ```True``` it will create a project from a template (the default template)
-  If is ```False``` it will try to import the entities for the products urls.
+- **--empty/--no-empty**: If ```True``` it will create a project from a template (the default template)
+  If ```False``` it will try to import the entities for the products urls.
   **Default is False**.
 - **-u,--product-url**: The base URL for the given product API. The product URL must be provided with the following
   format **PRODUCT_NAME:URL**. The command allows multiple flags to define multiples products.
