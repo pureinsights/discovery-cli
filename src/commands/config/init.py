@@ -23,18 +23,16 @@ from commons.handlers import handle_and_continue, handle_and_exit
 from commons.pdp_products import export_all_entities
 
 
-def run(project_name: str, empty: bool, apis: dict, force: bool, template: str = None):
+def run(project_name: str, apis: dict, force: bool, template: str = None):
   """
   This is the entry point for the command 'init'. Creates a project from
   scratch or from existing sources based on empty.
 
   :param str project_name: This will be the name of the folder that will contain the structure of the project.
-  :param bool empty: If it's True it will create a project from a template, if it is False, it will export all
-                     entities from all products.
   :param dict apis: A dictionary containing the url for each product api. (ingestion, discovery, core and staging).
   :param bool force: If it is True it will try to override the project where you want to create it, if there is a
                       folder with the same name.
-  :param str template: The name of the template to use.
+  :param str template: The name of the template to use, if None then it will create a non empty project.
   :rtype: bool
   :return: True if the project was created successfully, False if any error happen.
   :raises Exception: If a project with the same name already exists.
@@ -44,11 +42,8 @@ def run(project_name: str, empty: bool, apis: dict, force: bool, template: str =
     handle_and_exit(shutil.rmtree, handler_params, project_name)
 
   created_successfully = False
-  if empty:
-    template_name = 'random_generator'
-    if template is not None:
-      template_name = template
-    template_path = os.path.join('templates', 'projects', template_name)
+  if template is not None:
+    template_path = os.path.join('templates', 'projects', template)
     created_successfully = create_project_from_template(project_name, template_path)
   else:
     created_successfully = create_project_from_existing_sources(project_name, apis)

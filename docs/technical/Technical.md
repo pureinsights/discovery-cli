@@ -4,8 +4,8 @@ This client uses [Click](https://click.palletsprojects.com/en/8.1.x/#documentati
 develop and document new commands. You can also use [Pydoc](https://docs.python.org/3/library/pydoc.html) to get the
 docstring of the CLI and has a better understanding.
 
-> **_NOTE:_** We'll goint to refer to command options (@click.option) as flags, and as arguments to the positional
-> arugments.
+> **_NOTE:_** We'll go to refer to command options (@click.option) as flags, and as arguments to the positional
+> arguments.
 
 ## Dependencies
 
@@ -15,8 +15,9 @@ docstring of the CLI and has a better understanding.
 
 ### Usage and commands documentations
 
-Click provides an auto-generated documenation for each command, the user can access by passing the --help flag. But as a
-developer we have the responsability to provide more details to these documentation through the docstrings and "help"
+Click provides an auto-generated documentation for each command, the user can access by passing the --help flag. But as
+a
+developer we have the responsibility to provide more details to these documentation through the docstrings and "help"
 parameters of Click.
 
 For example:
@@ -49,7 +50,7 @@ using meaningful names for each flag, it is easier for the user.
 
 * Always use the same short flag for the same flag. That means, if you used -d as short flag of --dry-run you can't use
   -d, even in other commands, for another flag.
-* Try always to use a meaningful short flag. A good aproach could be use the first letter of the flag name, while this
+* Try always to use a meaningful short flag. A good approach could be use the first letter of the flag name, while this
   doesn't affect the previous convention.
 
 ## Developer Getting started
@@ -65,8 +66,6 @@ virtualenv venv
 #For Linux used t he below
 #.venv/bin/activate
 ```
-
-You can use [conda](https://docs.conda.io/en/latest/) if you prefer to.
 
 You can use [conda](https://docs.conda.io/en/latest/) if you prefer to.
 
@@ -92,7 +91,7 @@ python pdp.py health
 For unit testing we'll be
 using [Pytest](https://www.bing.com/search?q=pytest&cvid=999475cf79b6410488992254b2f2dd92&aqs=edge.0.69i59l4j0l2j69i60l3j69i11004.3619j0j4&FORM=ANAB01&PC=U531).
 In the root directory there is a directory called tests, here is where we have all the tests. The test directory must
-have the same structure than the src directory.
+have the same structure as the src directory.
 
 Each test file must start with the same name of the file that you want to test and finish with "_test.py".
 

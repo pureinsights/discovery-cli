@@ -8,7 +8,10 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import os
+
 from commons.custom_classes import PdpEntity
+from commons.file_system import list_directories
 
 # Endpoints
 URL_EXPORT_ALL = '{0}/export'
@@ -54,3 +57,6 @@ EXCEPTION_FORMAT = 'Failed to execute command due to an {exception}:\n{error}'
 # Severities
 ERROR_SEVERITY = 'error'
 WARNING_SEVERITY = 'warning'
+
+TEMPLATE_NAMES = [directory.lower() for directory in list_directories(
+  os.path.join(os.path.dirname(__file__), '..', 'commands', 'config', 'templates', 'projects'))]

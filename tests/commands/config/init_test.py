@@ -26,7 +26,7 @@ def test_run_init_created_successfully(mocker, mock_path_exists):
   mocker.patch('commands.config.init.create_project_from_template', return_value=True)
   mocker_configuration_write = mocker.patch('commands.config.init.configparser.RawConfigParser.write')
   project_name = 'my-pdp-project'
-  success = run(project_name, True, DEFAULT_CONFIG, False, 'empty')
+  success = run(project_name, DEFAULT_CONFIG, False, 'empty')
   mocker_configuration_write.assert_called_once()
   assert success
 
@@ -41,7 +41,7 @@ def test_run_init_failed(mocker, mock_path_exists):
   mocker.patch('commands.config.init.create_project_from_template', return_value=False)
   mocker_configuration_write = mocker.patch('commands.config.init.configparser.RawConfigParser.write')
   project_name = 'my-pdp-project'
-  success = run(project_name, True, DEFAULT_CONFIG, False)
+  success = run(project_name, DEFAULT_CONFIG, False)
   assert mocker_configuration_write.call_count == 0
   assert not success
 
@@ -54,7 +54,7 @@ def test_run_init_project_already_exists(mocker, mock_path_exists):
   mock_print_error = mocker.patch('commons.console.print_error')
   mock_path_exists(True)
   project_name = 'my-pdp-project'
-  success = run(project_name, False, DEFAULT_CONFIG, False)
+  success = run(project_name, DEFAULT_CONFIG, False)
   mock_print_error.assert_called_once_with(
     'Project {0} already exists.\n\tUse --force flag to override the project.'.format(project_name),
     False
@@ -72,7 +72,7 @@ def test_run_init_project_already_exists_and_cant_force(mocker, mock_path_exists
   project_name = 'my-pdp-project'
   success = False
   with pytest.raises(Exception) as exception:
-    success = run(project_name, False, DEFAULT_CONFIG, True)
+    success = run(project_name, DEFAULT_CONFIG, True)
   assert 'Can not remove {project_name}.'.format(project_name=project_name.title()) in str(exception.value)
   assert not success
 
