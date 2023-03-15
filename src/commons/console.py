@@ -14,6 +14,7 @@ import click
 import requests as req
 from yaspin import yaspin
 from yaspin.core import Yaspin
+from yaspin.spinners import Spinners
 
 from commons.constants import ERROR_FORMAT, EXCEPTION_FORMAT, WARNING_FORMAT
 from commons.custom_classes import DataInconsistency, PdpException
@@ -30,19 +31,27 @@ def create_spinner(*args, **kwargs):
   :param **kwargs kwargs: The keyword arguments passed to Yaspin.yaspin.
   """
   global Spinner
-  Spinner = yaspin(*args, **kwargs)
+  if Spinner is not None:
+    stop_spinner()
+  if len(args) <= 0:
+    Spinner = yaspin(Spinners.dots12, **kwargs)
+  else:
+    Spinner = yaspin(*args, **kwargs)
   Spinner.start()
 
 
-def stop_spinner():
+def stop_spinner(prefix: str = '', suffix: str = ''):
   """
   It stops and clean the instance of the spinner.
   """
-  global Spinner
+  global Spinner, buffer
   if Spinner is None:
     return
   Spinner.stop()
   Spinner = None
+  if buffer != '':
+    print_console(f'{prefix}{buffer}{suffix}', nl=False)
+    buffer = ''
 
 
 def spinner_change_text(message: str):
@@ -71,16 +80,12 @@ def spinner_ok(message: str, **kwargs):
   if Spinner is None:
     print_console(message, prefix=f'{prefix}{icon}')
     return
-  global buffer
   icon = kwargs.get('icon', '✔ ')
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
   Spinner.text = message
   Spinner.ok(icon)
-  stop_spinner()
-  if buffer != '':
-    print_console(f'{prefix}{buffer}{suffix}', nl=False)
-    buffer = ''
+  stop_spinner(prefix, suffix)
 
 
 def spinner_fail(message: str, **kwargs):
@@ -102,26 +107,32 @@ def spinner_fail(message: str, **kwargs):
   global buffer
   Spinner.text = message
   Spinner.fail(icon)
-  stop_spinner()
-  if buffer != '':
-    print_console(f'{prefix}{buffer}{suffix}', nl=False)
-    buffer = ''
+  stop_spinner(prefix, suffix)
 
 
-def print_console(message: str, *args, **kwargs):
+def print_console(message: any, *args, **kwargs):
   """
   Prints a message to console. It avoids problems with the spinner of Yaspin.
 
-  :param str message: The message that will be printed.
+  :param any message: The message that will be printed.
   :param *args args: Positional arguments passed to click.secho.
   :param **kwargs kwargs: Keyword arguments passed to click.secho.
   """
   global buffer
+  prefix = kwargs.get('prefix', '')
+  suffix = kwargs.get('suffix', '')
+  nl = kwargs.get('nl', True)
+  new_line = ''
+  if nl:
+    new_line = '\n'
   if Spinner is not None:
     # Instead of printing the message we save it in the buffer,
     # then when the spinner stops it will print all the buffer.
-    buffer += f'{message}\n'
+    buffer += f'{prefix}{message}{suffix}{new_line}'
     return
+  kwargs.pop('prefix', None)
+  kwargs.pop('suffix', None)
+  kwargs.pop('nl', None)
   click.secho(message, *args, **kwargs)
 
 
@@ -187,6 +198,8 @@ def print_exception(exception, **kwargs):
       print_aux(exception.message, not exception.handled)
     case PdpException():
       print_aux(exception.message, not exception.handled)
+    case FileNotFoundError():
+      print_aux(f'{exception.strerror}: {exception.filename}')
     case _:
       print_aux(prefix + EXCEPTION_FORMAT.format(exception=type(exception).__name__, error='') + suffix,
                 raise_exception)

@@ -28,7 +28,7 @@ def ensure_configurations(config: dict):
   :rtype: dict
   :return: The config dict but with defaults values on those missing configurations.
   """
-  properties: list[str] = PRODUCTS
+  properties: list[str] = PRODUCTS['list']
 
   for property in properties:
     if config.get(property, None) is None:
@@ -43,7 +43,7 @@ def load_config(config_name: str, profile: str = 'DEFAULT'):
   like we do on kubectl or aws-cli). Reference: https://docs.python.org/3/library/configparser.html
   """
   config = ConfigParser()
-  configuration = { }
+  configuration = {}
   if os.path.exists(config_name):
     config.read(config_name)
     if config.has_section(profile) or profile == 'DEFAULT':
@@ -86,3 +86,4 @@ pdp.add_command(config)
 
 if __name__ == '__main__':
   handle_exceptions(pdp)  # pragma: no cover
+  # handle_exceptions(pdp, ["config", "deploy", "-d", "my-pdp-project"])

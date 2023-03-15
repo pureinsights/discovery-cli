@@ -8,10 +8,13 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import json
 
 import requests as req
+import requests.exceptions
 
 from commons.console import print_error, print_exception, stop_spinner
+from commons.custom_classes import PdpException
 
 
 def handle_exceptions(func: callable, *args, **kwargs):
@@ -42,10 +45,22 @@ def handle_http_response(res: req.Response) -> any:
   :rtype: Any
   :raises HTTPError: When the status is not a 2xx response.
   """
-  res.raise_for_status()  # raises an exception when the status is not a 2xx response
-  if res.status_code != 204:
-    return res.content
-  return None
+  if res.status_code == 404:
+    return None  # 404 is managed as if the response was None
+  try:
+    res.raise_for_status()  # raises an exception when the status is not a 2xx response
+    if res.status_code != 204:
+      return res.content
+    return None
+  except req.exceptions.HTTPError as exception:
+    response = json.loads(exception.response.content.decode('utf-8'))
+    errors = '\n\t'.join(response.get('errors', []))
+    method = exception.request.method
+    url = exception.request.url
+    content = {
+      'errors': errors
+    }
+    raise PdpException(message=f"Could not '{method}' to {url} due to:\n\t{errors}", content=content)
 
 
 def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool, any]:
@@ -112,12 +127,13 @@ def handle_and_continue(func: callable, params: dict, *args, **kwargs):
     return True, func(*args, **kwargs)
 
   except Exception as error:
+
+    if error_message is not None:
+      print_error(error_message, False, prefix=prefix, suffix=suffix)
+
     if show_exception:
       if hasattr(error, 'handled'):
         error.handled = True
       print_exception(error, prefix=prefix, suffix=suffix)
-
-    if error_message is not None:
-      print_error(error_message, False, prefix=prefix, suffix=suffix)
 
     return False, None

@@ -10,13 +10,19 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import json
 import os
+import re
 import zipfile
 
-from commons.console import print_exception, print_warning
-from commons.constants import ENTITIES, URL_EXPORT_ALL, WARNING_SEVERITY
-from commons.custom_classes import DataInconsistency, PdpEntity
+import click
+
+from commons.console import print_console, print_error, print_exception, print_warning
+from commons.constants import CORE, ENTITIES, FROM_NAME_FORMAT, INGESTION, PRODUCTS, URL_CREATE, URL_EXPORT_ALL, \
+  URL_GET_BY_ID, URL_UPDATE, WARNING_SEVERITY
+from commons.custom_classes import DataInconsistency, PdpEntity, PdpException
+from commons.file_system import read_entities
 from commons.handlers import handle_and_continue
-from commons.http_requests import get
+from commons.http_requests import get, post, put
+from commons.raisers import raise_file_not_found_error
 
 
 def identify_entity(entity: dict, fields=['name', 'id', 'description', 'type'], **kwargs):
@@ -28,18 +34,19 @@ def identify_entity(entity: dict, fields=['name', 'id', 'description', 'type'], 
   :rtype: str
   :return: The name of the field and the value. If none of the fields are in the entity itself will be returned.
   """
+  format = kwargs.get('format', '{field} "{ref}"')
   if type(entity) is not dict:
     return entity
   default_value = kwargs.get('default', entity)
   for field in fields:
     ref = entity.get(field, None)
     if ref is not None:
-      return f'{field} {ref}'
+      return format.format(field=field, ref=ref)
   return default_value
 
 
 def associate_values_from_entities(from_entity: dict, from_field: str, to_entity: dict, to_field: str,
-                                   entity_type: PdpEntity = None):
+                                   entity_type: PdpEntity = None, suppress_warnings: bool = False):
   """
   Associate two values from to entities. Helpful to associate the
   id of an entity with the name of the same entity.
@@ -60,13 +67,13 @@ def associate_values_from_entities(from_entity: dict, from_field: str, to_entity
   if entity_type is not None:
     message += f' Entity on file {entity_type.associated_file_name}'
 
-  if value_from is None:
+  if value_from is None and not suppress_warnings:
     print_exception(
       DataInconsistency(message=message.format(entity=identify_entity(from_entity), field=from_field),
                         severity=WARNING_SEVERITY, handled=True)
     )
 
-  if value_to is None:
+  if value_to is None and not suppress_warnings:
     print_exception(
       DataInconsistency(message=message.format(entity=identify_entity(to_entity), field=to_field),
                         severity=WARNING_SEVERITY, handled=True)
@@ -86,7 +93,7 @@ def replace_ids(path: str, ids=None):
   :return: The same ids dict but updated.
   """
   if ids is None:
-    ids = { }
+    ids = {}
   *_, dir_name = os.path.split(path)
   for entity_type in ENTITIES:
     if dir_name == entity_type.product.title():
@@ -95,7 +102,7 @@ def replace_ids(path: str, ids=None):
         entities = json.load(file)
         if type(entities) is not list:
           entities = [entities]
-        success, new_ids = handle_and_continue(replace_ids_for_names, { 'show_exception': True },
+        success, new_ids = handle_and_continue(replace_ids_for_names, {'show_exception': True},
                                                entity_type, entities, ids)
         if success:
           ids = new_ids
@@ -103,6 +110,27 @@ def replace_ids(path: str, ids=None):
         json.dump(entities, file, indent=2)
         file.truncate()
   return ids
+
+
+# def replace_names_for_ids_of_products(project_path: str, products: list[str]):
+#   raise_file_not_found_error(project_path)
+#   names_ids = {}
+#   if INGESTION in products and CORE not in products:
+#     products.insert(0, CORE)
+#   for product in products:
+#     entity_types = PRODUCTS.get(product, None)
+#     for entity_type in entity_types:
+#       file_path = os.path.join()
+
+
+def replace_names_by_ids(entity_type: PdpEntity, entities: list[dict], names: dict):
+  for entity in entities:
+    if 'id' not in entity:
+      name, _id = associate_values_from_entities(entity, 'name', entity, 'id', entity_type, True)
+      if name is not None:
+        names[name] = _id
+    replace_value(entity_type, entity, names, from_field='name', format='{0}')
+  return names
 
 
 def replace_ids_for_names(entity_type: PdpEntity, entities: list[dict], ids: dict):
@@ -118,7 +146,7 @@ def replace_ids_for_names(entity_type: PdpEntity, entities: list[dict], ids: dic
   :return: The ids dict with his id and his name as a key-value.
   """
   for entity in entities:
-    success, response = handle_and_continue(associate_values_from_entities, { 'show_exception': True }, entity, 'id',
+    success, response = handle_and_continue(associate_values_from_entities, {'show_exception': True}, entity, 'id',
                                             entity, 'name', entity_type)
     if success:
       _id, name = response
@@ -149,32 +177,42 @@ def replace_value(entity_type: PdpEntity, entity: any, values: dict, **kwargs):
   :param dict values: A dict where the keys are the value of the from_field and the value for the key
                       is the value of the to_field.
   :key from_field: The name of the field where you want to get the value to replace.
+                   Used just to show a correct message.
   :key to_fields: A list of the names fields where you want to replace the value with the given format
                   and the value of from_field.
   :key format: The format that the replaced field will have. Default is "{{ fromName('{0}')"
   """
   from_field: str = kwargs.get('from_field', 'id')
   to_fields: list[str] = kwargs.get('to_fields', [ent.reference_field for ent in ENTITIES])
-  format_str: str = kwargs.get('format', "{{{{ fromName('{0}') }}}}")
+  format_str: str = kwargs.get('format', FROM_NAME_FORMAT)
   parent: dict = kwargs.get('parent', None)
+
+  if not isinstance(to_fields, (list, tuple, set)):
+    to_fields = [to_fields]
 
   if entity is None:
     return
 
+  # Calls the function recursively for each entity in the array.
   if isinstance(entity, (list, tuple, set)):
     for index, nested_entity in enumerate(entity):
-      replace_value(entity_type, nested_entity, values, **{ **kwargs, 'index': index })
+      replace_value(entity_type, nested_entity, values, **{**kwargs, 'index': index})
     return
 
+  # Calls the function recursively for each nested entity in the dictionary
   if type(entity) is dict:
     for key in entity.keys():
-      replace_value(entity_type, entity.get(key, None), values, **{ **kwargs, 'parent': entity,
-                                                                    'from_field': key, 'index': None })
+      replace_value(entity_type, entity.get(key, None), values, **{**kwargs, 'parent': entity,
+                                                                   'from_field': key, 'index': None})
     return
 
+  # Manage the entity when it's a string, integer or any other primitive type
+
+  # Here from_field takes the value of the property associated with the primitive value
+  # that's why from_field most be in to_fields
   if from_field not in to_fields:
     return
-
+  entity = clear_from_name_format(entity)
   value = values.get(entity, None)
 
   if value is None:
@@ -200,7 +238,7 @@ def export_all_entities(api_url: str, path: str, extract: bool = True, **kwargs)
   :param bool extract: If is True the zip will be extracted and deleted.
   :key dict ids: A dictionary with ids of already extracted entities. Default is {}.
   """
-  ids = kwargs.get('ids', { })
+  ids = kwargs.get('ids', {})
   zip_path = os.path.join(path, 'export.zip')
   product_export_response = get(URL_EXPORT_ALL.format(api_url))
   with open(zip_path, 'wb') as zip_file:
@@ -213,9 +251,112 @@ def export_all_entities(api_url: str, path: str, extract: bool = True, **kwargs)
     if os.path.exists(zip_path):
       os.remove(zip_path)
 
-    success, new_ids = handle_and_continue(replace_ids, { 'show_exception': True }, path, ids)
+    success, new_ids = handle_and_continue(replace_ids, {'show_exception': True}, path, ids)
 
     if success:
-      return { **ids, **new_ids }
+      return {**ids, **new_ids}
 
   return ids
+
+
+def get_entity_type_per_file_name(file_name: str, path_to_file: str = None):
+  entity_type = None
+  for entity_type in ENTITIES:
+    if file_name.lower() == entity_type.associated_file_name.lower():
+      return entity_type
+  if path_to_file is not None:
+    raise PdpException(message=f'File {file_name} on {path_to_file} is not recognized as one PDP products file.',
+                       severity=WARNING_SEVERITY)
+  raise PdpException(message=f'File {file_name} is not recognized as one PDP products file.', severity=WARNING_SEVERITY)
+
+
+def clear_from_name_format(value: any):
+  if type(value) is not str:
+    return value
+  search = re.search(r"\{\{\sfromName\('(.+?)'\)\s\}\}", value)
+  if search is None or len(search.groups()) < 1:
+    return value
+  return search.group(1)
+
+
+def order_products_to_deploy(products: list[str] = []):
+  # Actually the only order that matters is that CORE must be before INGESTION
+  if INGESTION not in products:
+    return products
+
+  if CORE not in products:
+    return products
+
+  # If INGESTION and CORE are in products, then we have to assure that CORE is before INGESTION
+  core_index = products.index(CORE)
+  ingestion_old_index = products.index(INGESTION)
+  products.insert(core_index + 1, products.pop(ingestion_old_index))
+
+  return products
+
+
+def read_and_parse_to_deploy_entities_from(project_path: str, products: list[str] = []):
+  names_with_dependencies = {}
+  dependencies = []
+  entities = {}
+
+  if INGESTION in products and CORE not in products:
+    dependencies += [CORE]
+
+  def manage_entity_type_iteration(entity_type):
+    """
+      This function was made to handle_and_continue all the logic of the inner for
+      (the for on the next function).
+    """
+    entity_file_path = os.path.join(project_path, product.title(), entity_type.associated_file_name)
+    raise_file_not_found_error(entity_file_path)
+    entities_temp = read_entities(entity_file_path)
+    if product in products:
+      entities[product][entity_type.type] = entities_temp
+
+  def manage_product_iteration():
+    """
+      This function was made to handle_and_continue all the logic of the outter for
+      (the for below this function).
+    """
+    entity_types = PRODUCTS[product]['entities']
+    for entity_type in entity_types:
+      handle_and_continue(manage_entity_type_iteration, {'show_exception': True}, entity_type)
+
+  for product in order_products_to_deploy([*dependencies, *products]):
+    if product in products:
+      entities[product] = {}
+    handle_and_continue(manage_product_iteration, {'show_exception': True})
+
+  return entities
+
+
+def create_or_update_entity(product_url: str, type: str, entity: dict):
+  successful_message = '{type} {entity} has been {action} successfully with id {id}.'
+  try:
+    entity_id = entity.get('id', None)
+    if entity_id is not None:
+      old_entity = get(URL_GET_BY_ID.format(product_url, entity=type, id=entity_id))
+      if old_entity is not None:
+        res = put(URL_UPDATE.format(product_url, entity=type, id=entity_id), json=entity)
+        styled_action = click.style('updated', fg='blue')
+        styled_id = click.style(entity_id, fg='green')
+        print_console(
+          successful_message.format(type=type.title(), entity=identify_entity(entity), action=styled_action,
+                                    id=styled_id)
+        )
+        return json.loads(res).get('id', None)
+    res = post(URL_CREATE.format(product_url, entity=type), json=entity)
+    entity_id = json.loads(res).get('id', None)
+    styled_id = click.style(entity_id, fg='green')
+    styled_action = click.style('created', fg='blue')
+    print_console(
+      successful_message.format(type=type.title(), entity=identify_entity(entity), action=styled_action, id=styled_id)
+    )
+    return entity_id
+  except PdpException as exception:
+    format = "\"{ref}\""
+    print_error(
+      f'Could not create entity {identify_entity(entity, default=type, format=format)} due to:\n'
+      f'\t{exception.content.get("errors")}'
+    )

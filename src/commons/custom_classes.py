@@ -38,6 +38,7 @@ class DataInconsistency(Exception):
       super().__init__(self.message)
     self.handled = kwargs.get('handled', True)
     self.severity = kwargs.get('severity', ERROR_SEVERITY)
+    self.content = kwargs.get('content', {})
 
 
 class PdpException(Exception):
@@ -50,3 +51,4 @@ class PdpException(Exception):
     if self.message is not None:
       super().__init__(self.message)
     self.handled = kwargs.get('handled', False)
+    self.content = kwargs.get('content', {})

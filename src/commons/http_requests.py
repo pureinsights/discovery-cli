@@ -24,3 +24,29 @@ def get(url: str):
   """
   res = req.get(url)
   return handle_http_response(res)  # Calls to handle_http_response to handle any exception related with the status code
+
+
+def post(url: str, **kwargs):
+  """
+  Performs a http(s) call, method POST.
+
+  :param str url: The url where the http request will be sent.
+  :param **kwargs kwargs: Pass the arguments to the request.
+  :rtype: any
+  :return: Returns a class Response containing the http response.
+  """
+  res = req.post(url, **kwargs)
+  return handle_http_response(res)
+
+
+def put(url: str, **kwargs):
+  """
+  Performs a http(s) call, method PUT.
+
+  :param str url: The url where the http request will be sent.
+  :param **kwargs kwargs: Pass the arguments to the request.
+  :rtype: any
+  :return: Returns a class Response containing the http response.
+  """
+  res = req.put(url, **kwargs)
+  return handle_http_response(res)

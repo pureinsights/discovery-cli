@@ -8,12 +8,15 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import os
 
 import click
 
+from commands.config.deploy import run as run_deploy
 from commands.config.init import run as run_init
 from commons.console import print_error
-from commons.constants import TEMPLATE_NAMES
+from commons.constants import PRODUCTS, STAGING
+from commons.file_system import list_directories
 
 
 @click.group()
@@ -24,6 +27,10 @@ def config(ctx):
   You can create, update, delete, deploy and more.\n
   Use --help on each command for more detailed information.
   """
+
+
+TEMPLATE_NAMES = [directory.lower() for directory in list_directories(
+  os.path.join(os.path.dirname(__file__), 'templates', 'projects'))]
 
 
 @config.command()
@@ -82,5 +89,11 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
   exit(0 if successfully_executed else 1)
 
 
-def deploy():
-  pass
+# TODO: Add the help text to the options
+@config.command()
+@click.option('-d', '--dir', default='.', help='')
+@click.option('--target', 'targets', default=[product for product in PRODUCTS['list'] if product != STAGING],
+              multiple=True, help='')
+@click.pass_context
+def deploy(ctx, targets: list[str], dir: str):
+  run_deploy(ctx.obj.get('configuration'), dir, targets)
