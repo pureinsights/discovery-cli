@@ -101,9 +101,9 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
               multiple=True,
               type=click.Choice([product for product in PRODUCTS['list'] if product != STAGING], case_sensitive=False),
               help='The name of the product where you want to deploy the entities.  The command allows multiple flags '
-                   'to define multiple targets. Default is [ingestion, core, discovery]')
+                   'to define multiple targets. Default are [ingestion, core, discovery]')
 @click.option('-v', '--verbose', 'is_verbose', is_flag=True, default=False,
-              help='It will show more information about the deploy results. Default is False.')
+              help='It will show more information about the deployment results. Default is False.')
 @click.option('-g', '--ignore-ids/--no-ignore-ids', 'ignore_ids', default=False,
               help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
                    'is useful when moving configs from one instance to another. Default is False.')

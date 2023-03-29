@@ -11,10 +11,15 @@ PDP product and even migrate a project to a different environment.
 
 To create the initial structure of a PDP project run the following command.
 
+#### Make sure everything is working fine.
+
 ```bash
-# Make sure everything is working fine.
 pdp health 
-# Create a PDP project named HelloWorld with some initial entites already configured.
+```
+
+#### Create a PDP project named HelloWorld with some initial entites already configured.
+
+```bash
 pdp config init -n HelloWorld --template random_generator 
 ```
 
@@ -51,10 +56,10 @@ It will create the folder structure for a PDP project.
 
 - **-n,--project-name**: The name of the resulting directory, will try to fetch existing configurations from the APIs
   referenced in ~/.pdp. Notice that imported configs have id fields, don't change those.
-  **Default is my-pdp-project**.
+  **Default is ```my-pdp-project```**.
 - **--empty/--no-empty**: If ```True``` it will create a project from a template (the default template)
   If ```False``` it will try to import the entities for the products urls.
-  **Default is False**.
+  **Default is ```False```**.
 - **-u,--product-url**: The base URL for the given product API. The product URL must be provided with the following
   format **PRODUCT_NAME:URL**. The command allows multiple flags to define multiples products.
   Default are ```ingestion http://localhost:8080```, ```staging http://localhost:8081```,
@@ -63,9 +68,50 @@ It will create the folder structure for a PDP project.
 - **--template**: If the project will be created from a template, it will use the name of the templated provided
   by the user. Default is ```random_generator```. Available are ```empty, random_generator```.
 
+#### An example to a project from scratch
+
 ```bash
-# An example to a project from scratch
 pdp config init -n <project_name> --empty --template empty
-# An example to create a project from existing entities
+```
+
+#### An example to create a project from existing entities
+
+```bash
 pdp config init -n <project_name> --no-empty -u ingestion <ingestion_url> -u core <core_url> -u staging <staging_url> -u discovery <discovery_url>
+```
+
+### Deploy Command
+
+Deploys project configurations to the target products.
+Must be run within the directory from a project created with the 'init' command.
+Will replace any name reference with IDs. Names are case-sensitive. If the "id"
+field is missing from an entity, assumes this is a new instance.
+
+#### Flags:
+
+- **-d,--dir**: The path to a directory with the structure and the pdp.ini that init command creates. **Default
+  is ```./```**.
+- **--target**: The name of the product where you want to deploy the entities. The command allows multiple flags to
+  define multiple targets. **Default are ```[ingestion, core, discovery]```**.
+- **-v,--verbose**: It will show more information about the deployment results. **Default is ```False```**.
+- **-g,--ignore-ids/--no-ignore-ids**: Will cause existing ids to be ignored, hence everything will be created as a new
+  instance. This is useful when moving configs from one instance to another. **Default is ```False```**.
+- **-q,--quiet**: Display only the seed ids. Warnings and Errors will not be shown neither. **Default is ```False```**.
+
+#### Deploy entities to Discovery and Ingestion
+
+```bash
+pdp config deploy -d ./my-pdp-project --target discovery --target ingestion
+```
+
+#### Deploy entities ignoring ids with verbose mode
+
+```bash
+pdp config deploy -d ./my-pdp-project -g -v --target discovery --target core
+```
+
+#### Deploy entities to all targets with quiet mode
+
+```bash
+pdp config deploy -d ./my-pdp-project -q
 ```
