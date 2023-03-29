@@ -26,6 +26,20 @@ from commons.pdp_products import create_or_update_entity, identify_entity, repla
 from commons.raisers import raise_file_not_found_error
 
 
+def inject_dependencies(products: list[str]):
+  """
+  Inject the products dependencies if there is a product who needs a dependency and the dependency is not on the list.
+  :param list[str] products: The list of products
+  :rtype: list[str]
+  :return: The list with dependencies included
+  """
+  if INGESTION in products:
+    if CORE in products:
+      products.remove(CORE)
+    products.insert(products.index(INGESTION), CORE)
+  return products
+
+
 def deploy_entities(config: dict, product: str, entity_type: PdpEntity, entities: list[dict], names_ids: dict,
                     seeds: list[dict], is_target: bool, is_verbose: bool, ignore_ids: bool):
   """
@@ -50,6 +64,7 @@ def deploy_entities(config: dict, product: str, entity_type: PdpEntity, entities
         names_ids[name] = _id
     if entity_type.type == 'seed':  # If the entity is a seed, we store the entity to show the ids later.
       seeds += [entity]
+  return seeds
 
 
 def deploy_entity_types(config: dict, product: str, path: str, ids_names: dict, seeds: list[dict], is_target: bool,
@@ -111,12 +126,12 @@ def deploy_products(config: dict, products: list[str], target_products: list[str
     is_target = product in target_products
 
     if is_target:
-      verbose(
-        verbose_func=lambda: print_console(
-          f'--------------------|{product.title()} entities|--------------------',
-          prefix=new_line
+      print_console(
+        verbose(
+          verbose_func=f'--------------------|{product.title()} entities|--------------------',
+          verbose=is_verbose
         ),
-        verbose=is_verbose
+        prefix=new_line
       )
       new_line = '\n'
 
@@ -141,9 +156,8 @@ def run(config: dict, path: str, target_products: list[str], is_verbose: bool = 
   :param bool quiet: It will suppress all the warnings and errors. Only shows the ids of the seeds, separated by \n.
                      If and error occurs then no ids will be showed.
   """
-  if quiet:
-    suppress_warnings()
-    suppress_errors()
+  suppress_warnings(quiet)
+  suppress_errors(quiet)
 
   raise_file_not_found_error(path)
   products = [product for product in PRODUCTS if product in target_products]
@@ -151,10 +165,7 @@ def run(config: dict, path: str, target_products: list[str], is_verbose: bool = 
 
   # Ensures that CORE is before than INGESTION, if ingestion is in target_product.
   # Since CORE is a dependency for INGESTION.
-  if INGESTION in products:
-    if CORE in products:
-      products.remove(CORE)
-    products.insert(products.index(INGESTION), CORE)
+  products = inject_dependencies(products)
 
   deploy_products(config, products, target_products, path, seeds, is_verbose, ignore_ids)
 

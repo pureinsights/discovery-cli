@@ -282,7 +282,7 @@ def test_suppress_warnings(mocker):
   Test the function defined in :func:`commons.console.suppress_warnings`.
   """
   print_console_mock = mocker.patch("commons.console.print_console")
-  suppress_warnings()
+  suppress_warnings(True)
   print_warning("fake-warning")
   assert commons.console.is_warnings_suppressed
   assert print_console_mock.call_count == 0
@@ -293,7 +293,7 @@ def test_suppress_errors(mocker):
   Test the function defined in :func:`commons.console.suppress_errors`.
   """
   print_console_mock = mocker.patch("commons.console.print_console")
-  suppress_errors()
+  suppress_errors(True)
   print_error("")
   print_exception(Exception())
   assert commons.console.is_errors_suppressed
@@ -306,7 +306,7 @@ def test_get_number_errors_exceptions():
   """
   commons.console.printed_errors = []
   commons.console.printed_exceptions = []
-  suppress_errors()
+  suppress_errors(True)
   print_error("fake error")
   print_exception(Exception())
   assert get_number_errors_exceptions() == 2

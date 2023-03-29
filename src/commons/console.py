@@ -30,20 +30,20 @@ is_warnings_suppressed = False
 is_errors_suppressed = False
 
 
-def suppress_warnings():
+def suppress_warnings(suppress: bool):
   """
   It avoids to any warning be printed in console.
   """
   global is_warnings_suppressed
-  is_warnings_suppressed = True
+  is_warnings_suppressed = suppress
 
 
-def suppress_errors():
+def suppress_errors(suppress: bool):
   """
   It avoids to any error or exception be printed in console.
   """
   global is_errors_suppressed
-  is_errors_suppressed = True
+  is_errors_suppressed = suppress
 
 
 def get_number_errors_exceptions():

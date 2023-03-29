@@ -22,8 +22,8 @@ def test_run_deploy(test_project_path, mocker):
   mocker.patch("commands.config.deploy.create_spinner")
   mocker.patch("commands.config.deploy.print_console")
   create_update_mock = mocker.patch("commands.config.deploy.create_or_update_entity", return_value='fakeid')
-  suppress_errors()
-  suppress_warnings()
+  suppress_errors(True)
+  suppress_warnings(True)
   target_products = [product for product in PRODUCTS['list'] if product != STAGING]
   run_deploy(DEFAULT_CONFIG, test_project_path(), target_products)
   commons.console.is_errors_suppressed = False
@@ -41,8 +41,8 @@ def test_run_deploy_quiet_mode(test_project_path, mocker):
   mocker.patch("commands.config.deploy.create_spinner")
   print_mock = mocker.patch("commands.config.deploy.print_console")
   create_update_mock = mocker.patch("commands.config.deploy.create_or_update_entity", return_value='fakeid')
-  suppress_errors()
-  suppress_warnings()
+  suppress_errors(True)
+  suppress_warnings(True)
   target_products = [product for product in PRODUCTS['list'] if product != STAGING and product != CORE]
   run_deploy(DEFAULT_CONFIG, test_project_path(), target_products, False, False, True)
   commons.console.is_errors_suppressed = False
@@ -60,8 +60,8 @@ def test_run_deploy_verbose_mode(test_project_path, mocker):
   mocker.patch("commands.config.deploy.create_spinner")
   mocker.patch("commands.config.deploy.print_console")
   create_update_mock = mocker.patch("commands.config.deploy.create_or_update_entity", return_value='fakeid')
-  suppress_errors()
-  suppress_warnings()
+  suppress_errors(True)
+  suppress_warnings(True)
   target_products = [product for product in PRODUCTS['list'] if product != STAGING and product != INGESTION]
   run_deploy(DEFAULT_CONFIG, test_project_path(), target_products, True, False, False)
   commons.console.is_errors_suppressed = False
@@ -78,8 +78,8 @@ def test_run_deploy_ignoring_ids(test_project_path, mocker):
   mocker.patch("commands.config.deploy.create_spinner")
   mocker.patch("commands.config.deploy.print_console")
   create_update_mock = mocker.patch("commands.config.deploy.create_or_update_entity", return_value=None)
-  suppress_errors()
-  suppress_warnings()
+  suppress_errors(True)
+  suppress_warnings(True)
   target_products = [product for product in PRODUCTS['list'] if product != STAGING]
   run_deploy(DEFAULT_CONFIG, test_project_path(), target_products, True, True, False)
   commons.console.is_errors_suppressed = False
