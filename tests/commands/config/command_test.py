@@ -60,7 +60,7 @@ def test_init_parse_options(mocker, snapshot):
     'discovery': 'http://ingestion-fake',
     'core': 'http://ingestion-fake',
     'staging': 'http://ingestion-fake',
-    'load_config': False
+    'load_config': True
   }
   force = '--force'
   response = cli.invoke(pdp,
