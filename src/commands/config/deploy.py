@@ -17,11 +17,115 @@ from commons.console import create_spinner, get_number_errors_exceptions, print_
   spinner_change_text, spinner_ok, \
   suppress_errors, suppress_warnings, verbose
 from commons.constants import CORE, INGESTION, PRODUCTS
+from commons.custom_classes import PdpEntity
 from commons.file_system import read_entities, write_entities
 from commons.handlers import handle_and_continue
-from commons.pdp_products import create_or_update_entity, identify_entity, replace_ids, replace_ids_for_names, \
+from commons.pdp_products import create_or_update_entity, identify_entity, replace_ids, \
+  replace_ids_for_names, \
   replace_names_by_ids
 from commons.raisers import raise_file_not_found_error
+
+
+def deploy_entities(config: dict, product: str, entity_type: PdpEntity, entities: list[dict], names_ids: dict,
+                    seeds: list[dict], is_target: bool, is_verbose: bool, ignore_ids: bool):
+  """
+  This is the last auxiliary function. It iterates for each entity of the given entity_type.
+  And deploy the entity.
+  """
+  for entity in entities:
+    product_url = config.get(product)
+    # We store the id to recover it if we have to ignore the ids and the entity could not be deployed.
+    id_backup = entity.get('id', None)
+    if ignore_ids and is_target:
+      entity['id'] = None
+    _, _id = handle_and_continue(
+      create_or_update_entity, {'show_exception': True}, product_url, entity_type.type,
+      entity, verbose=is_verbose
+    )
+    _id = id_backup if _id is None else _id  # If _id is None means the entity was not created, so we use the backup.
+    name = entity.get('name', None)
+    if _id is not None:
+      entity['id'] = _id  # Updates the id of the entity, the product could create a new one
+      if name is not None:
+        names_ids[name] = _id
+    if entity_type.type == 'seed':  # If the entity is a seed, we store the entity to show the ids later.
+      seeds += [entity]
+
+
+def deploy_entity_types(config: dict, product: str, path: str, ids_names: dict, seeds: list[dict], is_target: bool,
+                        is_verbose: bool, ignore_ids: bool):
+  """
+  This is an auxiliary function. It iterates for each entity_type of a product and calls another auxiliary function.
+  """
+  names_ids = {}
+  entity_types = PRODUCTS.get(product, {'entities': []}).get('entities')
+  for index, entity_type in enumerate(entity_types):
+    file_path = os.path.join(path, product.title(), entity_type.associated_file_name)
+
+    if is_target:
+      create_spinner()
+      spinner_change_text(f'Deploying {entity_type.type}s to {product}...')
+
+    success, entities = handle_and_continue(read_entities, {'show_exception': True}, file_path)
+    if not success:
+      continue
+
+    replace_names_by_ids(entity_type, entities, names_ids)
+    # If the product is not a target then we don't deploy the entities
+    if not is_target:
+      continue
+
+    if len(entities) <= 0:
+      print_warning(
+        verbose(
+          verbose_func='There are not entities to deploy.',
+          verbose=is_verbose
+        )
+      )
+
+    deploy_entities(config, product, entity_type, entities, names_ids, seeds, is_target, is_verbose, ignore_ids)
+
+    # Once the entities are deployed, we replace the ids for the names to keep it simple to the user.
+    handle_and_continue(
+      replace_ids_for_names, {'message': 'Could not replace the ids by the entity names.'
+                                         'You might want to doit your self', 'warning': True},
+      entity_type, entities, ids_names, suppress_warnings=True
+    )
+    write_entities(file_path, entities)
+    message, icon = verbose(
+      verbose_func=(f'{click.style(entity_type.type.title() + "s", fg="cyan")}:', f'{index + 1})'),
+      not_verbose_func=('', None),  # Do not print anything but finish the spinner
+      verbose=is_verbose
+    )
+    spinner_ok(message, icon=icon)
+
+
+def deploy_products(config: dict, products: list[str], target_products: list[str], path: str, seeds: list[dict],
+                    is_verbose: bool, ignore_ids: bool):
+  """
+  This is an auxiliary function. It iterates for each product and calls another auxiliary function.
+  """
+  new_line = ''
+  ids_names = {}
+  for index, product in enumerate(products):
+    is_target = product in target_products
+
+    if is_target:
+      verbose(
+        verbose_func=lambda: print_console(
+          f'--------------------|{product.title()} entities|--------------------',
+          prefix=new_line
+        ),
+        verbose=is_verbose
+      )
+      new_line = '\n'
+
+    deploy_entity_types(config, product, path, ids_names, seeds, is_target, is_verbose, ignore_ids)
+    handle_and_continue(
+      replace_ids,
+      {},
+      path, ids_names
+    )
 
 
 def run(config: dict, path: str, target_products: list[str], is_verbose: bool = False, ignore_ids: bool = False,
@@ -40,101 +144,8 @@ def run(config: dict, path: str, target_products: list[str], is_verbose: bool = 
   if quiet:
     suppress_warnings()
     suppress_errors()
-  new_line = ''
-
-  def deploy_products():
-    """
-    This is an auxiliary function. It iterates for each product and calls another auxiliary function.
-    """
-    nonlocal new_line
-    for index, product in enumerate(products):
-      is_target = product in target_products
-      entity_types = PRODUCTS.get(product, []).get('entities')
-
-      if is_target:
-        verbose(
-          verbose_func=lambda: print_console(f'--------------------|{product.title()} entities|--------------------',
-                                             prefix=new_line),
-          verbose=is_verbose
-        )
-        new_line = '\n'
-
-      deploy_entity_types(product, entity_types, is_target, 0, seeds)
-      handle_and_continue(
-        replace_ids,
-        {},
-        path, ids_names
-      )
-
-  def deploy_entity_types(product, entity_types, is_target, step, seeds):
-    """
-    This is an auxiliary function. It iterates for each entity_type of a product and calls another auxiliary function.
-    """
-    for entity_type in entity_types:
-      step += 1
-      file_path = os.path.join(path, product.title(), entity_type.associated_file_name)
-
-      if is_target:
-        create_spinner()
-        spinner_change_text(f'Deploying {entity_type.type}s to {product}...')
-
-      success, entities = handle_and_continue(read_entities, {'show_exception': True}, file_path)
-      if not success:
-        continue
-
-      replace_names_by_ids(entity_type, entities, names_ids)
-      # If the product is not a target then we don't deploy the entities
-      if not is_target:
-        continue
-
-      if len(entities) <= 0:
-        verbose(
-          verbose_func=lambda: print_warning(f'There are not entities to deploy.'),
-          verbose=is_verbose
-        )
-
-      deploy_entities(product, entity_type, entities, is_target, seeds)
-
-      # Once the entities are deployed, we replace the ids for the names to keep it simple to the user.
-      handle_and_continue(
-        replace_ids_for_names, {'message': f'Could not replace the ids by the entity names.'
-                                           'You might want to doit your self', 'warning': True},
-        entity_type, entities, ids_names, suppress_warnings=True
-      )
-      write_entities(file_path, entities)
-      verbose(
-        verbose_func=lambda: spinner_ok(f'{click.style(entity_type.type.title() + "s", fg="cyan")}:', icon=f'{step})'),
-        not_verbose_func=lambda: spinner_ok('', icon=None),  # Do not print anything but finish the spinner
-        verbose=is_verbose
-      )
-
-  def deploy_entities(product, entity_type, entities, is_target, seeds):
-    """
-    This is the last auxiliary function. It iterates for each entity of the given entity_type.
-    And deploy the entity.
-    """
-    for entity in entities:
-      product_url = config.get(product)
-      # We store the id to recover it if we have to ignore the ids and the entity could not be deployed.
-      id_backup = entity.get('id', None)
-      if ignore_ids and is_target:
-        entity['id'] = None
-      _, _id = handle_and_continue(
-        create_or_update_entity, {'show_exception': True}, product_url, entity_type.type,
-        entity, verbose=is_verbose
-      )
-      _id = id_backup if _id is None else _id  # If _id is None means the entity was not created, so we use the backup.
-      name = entity.get('name', None)
-      if _id is not None:
-        entity['id'] = _id  # Updates the id of the entity, the product could create a new one
-        if name is not None:
-          names_ids[name] = _id
-      if entity_type.type == 'seed':  # If the entity is a seed, we store the entity to show the ids later.
-        seeds += [entity]
 
   raise_file_not_found_error(path)
-  names_ids = {}
-  ids_names = {}
   products = [product for product in PRODUCTS if product in target_products]
   seeds = []
 
@@ -145,20 +156,20 @@ def run(config: dict, path: str, target_products: list[str], is_verbose: bool = 
       products.remove(CORE)
     products.insert(products.index(INGESTION), CORE)
 
-  deploy_products()
+  deploy_products(config, products, target_products, path, seeds, is_verbose, ignore_ids)
 
   # It will show the seed ids only if, seeds is not empty,
   # is verbose or not verbose or if is quiet but no errors happened.
   if len(seeds) > 0 and (not quiet or (quiet and get_number_errors_exceptions() <= 0)):
-    format = 'Seed {name} with id {id}.'
+    print_format = 'Seed {name} with id {id}.'
     if not quiet:
       print_console(f'{click.style("Seeds", fg="cyan")} ids:', prefix='\n' if is_verbose else '')
     for seed in seeds:
-      id = seed.get("id")
+      _id = seed.get("id")
       if not quiet:
-        id = click.style(seed.get("id"), fg="green")
+        _id = click.style(seed.get("id"), fg="green")
       else:
-        format = '{id}'
+        print_format = '{id}'
       print_console(
-        format.format(name=click.style(identify_entity(seed), fg="blue"), id=id)
+        print_format.format(name=click.style(identify_entity(seed), fg="blue"), id=_id)
       )

@@ -293,7 +293,7 @@ def clear_from_name_format(value: any, regex: str = r"\{\{\s*fromName\('(.+?)'\)
   return search.group(1)
 
 
-def order_products_to_deploy(products: list[str] = []):
+def order_products_to_deploy(products: list[str] = None):
   """
   Orders a products list in order that is convenient to deployment.
   The only order that matters is that CORE must be before INGESTION
@@ -302,6 +302,9 @@ def order_products_to_deploy(products: list[str] = []):
   :return: The list of products ordered.
   """
   # Actually the only order that matters is that CORE must be before INGESTION
+  if products is None:
+    return []
+
   if INGESTION not in products or CORE not in products:
     return products
 
@@ -370,8 +373,8 @@ def create_or_update_entity(product_url: str, type: str, entity: dict, **kwargs)
     )
     return entity_id
   except PdpException as exception:
-    format = "\"{ref}\""
+    message = "\"{ref}\""
     print_error(
-      f'Could not create entity {identify_entity(entity, default=type, format=format)} due to:\n'
+      f'Could not create entity {identify_entity(entity, default=type, format=message)} due to:\n'
       f'\t{exception.content.get("errors")}'
     )
