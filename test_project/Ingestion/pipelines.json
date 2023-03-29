@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Main Pipeline",
+    "active": true,
+    "steps": [
+      {
+        "processorId": "{{ fromName('Main Pipeline') }}",
+        "action": "hydrate"
+      }
+    ],
+    "id": "fakeid"
+  }
+]

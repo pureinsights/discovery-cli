@@ -37,7 +37,7 @@ PIPELINE = PdpEntity(INGESTION, 'pipeline', 'pipelines.json')
 SEED = PdpEntity(INGESTION, 'seed', 'seeds.json')
 CREDENTIAL = PdpEntity(CORE, 'credential', 'credentials.json')
 ENDPOINT = PdpEntity(DISCOVERY, 'endpoint', 'endpoints.json')
-DISCOVERY_PROCESSOR = PdpEntity(DISCOVERY, 'processors', 'processors.json', 'processors')
+DISCOVERY_PROCESSOR = PdpEntity(DISCOVERY, 'processor', 'processors.json', 'processors')
 # Must be in order (based on which has fewer dependencies to another entities)
 ENTITIES = CREDENTIAL, INGESTION_PROCESSOR, PIPELINE, SEED, SCHEDULER, DISCOVERY_PROCESSOR, ENDPOINT
 
@@ -47,6 +47,7 @@ DEFAULT_CONFIG = {
   DISCOVERY: DISCOVERY_API_URL,
   CORE: CORE_API_URL,
   STAGING: STAGING_API_URL,
+  'load_config': True
 }
 
 PRODUCTS = {
@@ -68,7 +69,7 @@ PRODUCTS = {
 # Common messages
 WARNING_FORMAT = '[WARNING]: {message}'
 ERROR_FORMAT = '[ERROR]: {message}'
-EXCEPTION_FORMAT = 'Some thing went wrong due to an {exception}.'
+EXCEPTION_FORMAT = 'Some thing went wrong due to: {exception}.'
 
 FROM_NAME_FORMAT = "{{{{ fromName('{0}') }}}}"
 

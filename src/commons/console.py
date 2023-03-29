@@ -21,6 +21,37 @@ from commons.custom_classes import DataInconsistency, PdpException
 
 Spinner: Union[Yaspin, None] = None  # An instance of the Yaspin spinner
 buffer: str = ''  # This is a buffer to store messages that want to be printed after the spinner stops
+# This two list are useful to know if an error or warning has been shown to the user
+printed_warnings = []
+printed_errors = []
+printed_exceptions = []
+# These are variables to control the error and warning printing
+is_warnings_suppressed = False
+is_errors_suppressed = False
+
+
+def suppress_warnings():
+  """
+  It avoids to any warning be printed in console.
+  """
+  global is_warnings_suppressed
+  is_warnings_suppressed = True
+
+
+def suppress_errors():
+  """
+  It avoids to any error or exception be printed in console.
+  """
+  global is_errors_suppressed
+  is_errors_suppressed = True
+
+
+def get_number_errors_exceptions():
+  """
+  It returns a sum of the number of errors and the number of exceptions that happened.
+  """
+  global printed_errors, printed_exceptions
+  return len(printed_errors) + len(printed_exceptions)
 
 
 def create_spinner(*args, **kwargs):
@@ -80,11 +111,10 @@ def spinner_ok(message: str, **kwargs):
   if Spinner is None:
     print_console(message, prefix=f'{prefix}{icon}')
     return
-  icon = kwargs.get('icon', '✔ ')
-  prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
   Spinner.text = message
-  Spinner.ok(icon)
+  if icon is not None and icon != '':
+    Spinner.ok(icon)
   stop_spinner(prefix, suffix)
 
 
@@ -133,7 +163,7 @@ def print_console(message: any, *args, **kwargs):
   kwargs.pop('prefix', None)
   kwargs.pop('suffix', None)
   kwargs.pop('nl', None)
-  click.secho(message, *args, **kwargs)
+  click.secho(f'{prefix}{message}{suffix}', *args, nl=nl, **kwargs)
 
 
 def print_warning(message: str, *args, **kwargs):
@@ -144,6 +174,10 @@ def print_warning(message: str, *args, **kwargs):
   :key str prefix: A string that will be added in front fo the message.
   :key str suffix: A string that will be added at the end of the message.
   """
+  global printed_warnings
+  printed_warnings += [message]
+  if is_warnings_suppressed:
+    return
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
   warning_message = f'{prefix}{WARNING_FORMAT.format(message=message)}{suffix}'
@@ -162,10 +196,14 @@ def print_error(message: str, raise_exception: bool = False, **kwargs):
   :key Exception exception: An exception that will be raised if raise_exceptions is True.
   :raises PdpException: When raise_exception is True.
   """
+  global printed_errors
+  printed_errors += [message]
+  if is_errors_suppressed:
+    return
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
   error_message = f'{prefix}{ERROR_FORMAT.format(message=message)}{suffix}'
-  exception = kwargs.get('exception', PdpException(message=error_message, handled=not raise_exception))
+  exception = kwargs.get('exception', PdpException(message=message, handled=not raise_exception))
   styled_message = click.style(error_message, fg='red')
   print_console(styled_message, err=True)
   if raise_exception:
@@ -180,6 +218,10 @@ def print_exception(exception, **kwargs):
   :key str prefix: A string that will be added in front fo the message.
   :key str suffix: A string that will be added at the end of the message.
   """
+  global printed_exceptions
+  printed_exceptions += [exception]
+  if is_errors_suppressed:
+    return
   import commons.constants as constants
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
@@ -203,3 +245,25 @@ def print_exception(exception, **kwargs):
     case _:
       print_aux(prefix + EXCEPTION_FORMAT.format(exception=type(exception).__name__, error='') + suffix,
                 raise_exception)
+
+
+def verbose(**kwargs):
+  """
+  It will execute any of "verbose_func" or "not_verbose_func" based on "verbose" flag. And return
+  whatever the function returns. Helpful to manage more complex behaviors to a verbose command, rather than
+  just print some text in console.
+  :key bool verbose: The flag tha defines which function will be called.
+  :key Callable verbose_func: The function that will be called if the verbose flag is True. If is not callable
+                              then the value it will be returned instead.
+  :key Callable not_verbose_func: The function that will be called if the verbose flag is False. If is not callable
+                              then the value it will be returned instead.
+  :rtype: any
+  :return: Returns whatever the function called based on the verbose flag returns, if is not callable
+           the argument will be return instead.
+  """
+  verbose = kwargs.get('verbose', False)
+  verbose_func = kwargs.get('verbose_func', lambda: None)
+  not_verbose_func = kwargs.get('not_verbose_func', lambda: None)
+  if verbose:
+    return verbose_func() if callable(verbose_func) else verbose_func
+  return not_verbose_func() if callable(not_verbose_func) else not_verbose_func

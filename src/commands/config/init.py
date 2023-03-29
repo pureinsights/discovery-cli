@@ -31,13 +31,13 @@ def run(project_name: str, apis: dict, force: bool, template: str = None):
   :param dict apis: A dictionary containing the url for each product api. (ingestion, discovery, core and staging).
   :param bool force: If it is True it will try to override the project where you want to create it, if there is a
                       folder with the same name.
-  :param str template: The name of the template to use, if None then it will create a non empty project.
+  :param str template: The name of the template to use, if None then it will create a non-empty project.
   :rtype: bool
   :return: True if the project was created successfully, False if any error happen.
   :raises Exception: If a project with the same name already exists.
   """
   if force and os.path.exists(project_name):
-    handler_params = {'message': f'Can not remove {project_name.title()}.', 'show_exception': True}
+    handler_params = {'message': f'Can not remove {project_name.title()}.'}
     handle_and_exit(shutil.rmtree, handler_params, project_name)
 
   created_successfully = False
@@ -49,6 +49,7 @@ def run(project_name: str, apis: dict, force: bool, template: str = None):
 
   if not created_successfully:
     return False
+
   # Creates the pdp.ini configuration
   project_configuration = configparser.RawConfigParser()
   project_configuration['DEFAULT'] = apis

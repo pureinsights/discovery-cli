@@ -1,0 +1,317 @@
+[
+  {
+    "type": "post",
+    "config": {
+      "urlParameter": "url",
+      "defaultUrl": "http://localhost:9200/kerry/_search",
+      "merge": true,
+      "credentials": null,
+      "method": "POST",
+      "parameters": null
+    },
+    "id": "70ae3bac-305a-4e00-9216-e76fb5b41410",
+    "creationTimestamp": 1676042345360,
+    "lastUpdatedTimestamp": 1679433155805,
+    "name": null,
+    "description": "Post request to Elasticsearch",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "template",
+    "config": {
+      "templates": {
+        "records": {
+          "size": 0,
+          "suggest": {
+            "text": "searchTerm",
+            "description": {
+              "phrase": {
+                "field": "fieldName",
+                "size": 1,
+                "max_errors": 1,
+                "gram_size": 3,
+                "confidence": 3.0,
+                "direct_generator": [
+                  {
+                    "field": "fieldName",
+                    "suggest_mode": "always"
+                  }
+                ],
+                "collate": {
+                  "query": {
+                    "source": {
+                      "match": {
+                        "name": "{{suggestion}}"
+                      }
+                    }
+                  },
+                  "prune": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "defaultTemplate": "records",
+      "replace": true,
+      "parameter": null,
+      "variables": [
+        {
+          "name": "query_terms",
+          "paths": [
+            "/suggest/text"
+          ]
+        },
+        {
+          "name": "field_name",
+          "paths": [
+            "/suggest/description/phrase/field",
+            "/suggest/description/phrase/direct_generator/field"
+          ]
+        }
+      ]
+    },
+    "id": "f0cd6dc8-b66a-4299-a6ed-7a6ae9456012",
+    "creationTimestamp": 1676042345646,
+    "lastUpdatedTimestamp": 1679433155826,
+    "name": null,
+    "description": "Autocomplete",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "post",
+    "config": {
+      "urlParameter": "url",
+      "defaultUrl": "http://localhost:9200/autocomplete/_search",
+      "merge": true,
+      "credentials": null,
+      "method": "POST",
+      "parameters": null
+    },
+    "id": "cac2b38d-9a55-4c09-9220-6166a611dab1",
+    "creationTimestamp": 1676042345716,
+    "lastUpdatedTimestamp": 1679433155846,
+    "name": null,
+    "description": "Post request to Elasticsearch",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "logger",
+    "config": {
+      "logMissingHeaders": false,
+      "logMissingParameters": true,
+      "singleValueArray": false,
+      "group": true,
+      "noHeaders": false,
+      "noParameters": false,
+      "noBody": false,
+      "header": null,
+      "query": null,
+      "body": null
+    },
+    "id": "ff6d8cd6-ae2e-4267-bebe-62bcd014b8cb",
+    "creationTimestamp": 1676044097873,
+    "lastUpdatedTimestamp": 1679433155868,
+    "name": null,
+    "description": "logger processor",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "languageDetector",
+    "config": {
+      "languagesDetector": [
+        ""
+      ],
+      "defaultLanguage": "english",
+      "minDistance": 0.0,
+      "stripPunctuation": true,
+      "queryParameter": "q"
+    },
+    "id": "4f854af1-8572-44e7-9192-1d72e5059baf",
+    "creationTimestamp": 1676061565875,
+    "lastUpdatedTimestamp": 1679433155891,
+    "name": null,
+    "description": "Language detector description",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "languageDetector",
+    "config": {
+      "languagesDetector": [
+        "spanish",
+        "english"
+      ],
+      "defaultLanguage": "english",
+      "minDistance": 0.0,
+      "stripPunctuation": true,
+      "queryParameter": "q"
+    },
+    "id": "b13682bc-6231-4aaf-ae14-8aa9a3e4903a",
+    "creationTimestamp": 1676067749583,
+    "lastUpdatedTimestamp": 1679433155911,
+    "name": null,
+    "description": "Language detector description",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "post",
+    "config": {
+      "urlParameter": "url",
+      "defaultUrl": "http://localhost:9200/kerry/_search",
+      "merge": true,
+      "credentials": null,
+      "method": "POST",
+      "parameters": null
+    },
+    "id": "a0c09ecb-e5b7-4e01-a106-388d90191f4b",
+    "creationTimestamp": 1676301570579,
+    "lastUpdatedTimestamp": 1679433155935,
+    "name": null,
+    "description": "post processor",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "template",
+    "config": {
+      "templates": {
+        "test": {
+          "param": "term"
+        }
+      },
+      "defaultTemplate": "test",
+      "replace": true,
+      "parameter": null,
+      "variables": null
+    },
+    "id": "bbdd6650-e7b6-402f-b09b-97d5d46a8645",
+    "creationTimestamp": 1676387957570,
+    "lastUpdatedTimestamp": 1679433155955,
+    "name": null,
+    "description": "template processor",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "template",
+    "config": {
+      "templates": {
+        "query": {
+          "bool": {
+            "must": {
+              "term": {
+                "plainText": "{{term}}"
+              }
+            }
+          }
+        }
+      },
+      "defaultTemplate": "query",
+      "replace": true,
+      "parameter": null,
+      "variables": null
+    },
+    "id": "84fea1a8-0213-4704-9bf1-f74d1c89e5cf",
+    "creationTimestamp": 1676389061626,
+    "lastUpdatedTimestamp": 1679433155981,
+    "name": null,
+    "description": "template processor",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "post",
+    "config": {
+      "urlParameter": "url",
+      "defaultUrl": "http://localhost:9200/kerry/_search",
+      "merge": true,
+      "credentials": null,
+      "method": "POST",
+      "parameters": null
+    },
+    "id": "cf50dd1c-ccf5-4704-a7eb-59abb0dca63b",
+    "creationTimestamp": 1676393052387,
+    "lastUpdatedTimestamp": 1679433156006,
+    "name": null,
+    "description": "post processor",
+    "labels": {},
+    "active": true
+  },
+  {
+    "type": "template",
+    "config": {
+      "templates": {
+        "records": {
+          "track_total_hits": true,
+          "_source": "*",
+          "query": {
+            "match_all": {}
+          },
+          "size": 20,
+          "from": 0,
+          "sort": []
+        }
+      },
+      "defaultTemplate": "records",
+      "replace": true,
+      "parameter": null,
+      "variables": [
+        {
+          "name": "highlight",
+          "paths": [
+            "/query"
+          ]
+        },
+        {
+          "name": "aggs",
+          "paths": [
+            "/aggs"
+          ]
+        },
+        {
+          "name": "suggester",
+          "paths": [
+            "/suggester"
+          ]
+        },
+        {
+          "name": "query",
+          "paths": [
+            "/query"
+          ]
+        },
+        {
+          "name": "size",
+          "paths": [
+            "/size"
+          ]
+        },
+        {
+          "name": "from",
+          "paths": [
+            "/from"
+          ]
+        },
+        {
+          "name": "sort",
+          "paths": [
+            "/sort"
+          ]
+        }
+      ]
+    },
+    "id": "b6acd8ca-5040-4381-b5c1-2648e435529a",
+    "creationTimestamp": 1676042345131,
+    "lastUpdatedTimestamp": 1679433156028,
+    "name": "Proccessor 1",
+    "description": "Search",
+    "labels": {},
+    "active": true
+  }
+]

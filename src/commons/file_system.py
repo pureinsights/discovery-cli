@@ -11,6 +11,8 @@
 import json
 import os
 
+from commons.custom_classes import PdpException
+from commons.handlers import handle_and_exit
 from commons.raisers import raise_file_not_found_error
 
 
@@ -42,10 +44,17 @@ def read_entities(path: str):
   :param str path: The path to the file.
   :rtype: list[dict]
   :return: A list of entities. If the file contains just one entity it still will be returned as a list.
+  :raises FileNotFoundError: If the file does not exist.
   """
   raise_file_not_found_error(path)
   with open(path, 'r+') as file:
-    entities = json.load(file)
+    _, entities = handle_and_exit(json.load,
+                                  {
+                                    'exception': PdpException(
+                                      message=f'JSONDecodeError: Could not parse the file {path}. '
+                                              f'Please check the file has a valid JSON format.')
+                                  },
+                                  file)
     if type(entities) is not list:
       entities = [entities]
     return entities

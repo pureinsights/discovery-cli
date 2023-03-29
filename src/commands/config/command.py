@@ -61,6 +61,11 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
   Creates a new project from existing sources or from scratch. It will create the folder structure for a PDP project.
   """
   config = ctx.obj['configuration']
+  if config.get('load_config'):
+    from pdp import load_config
+    path = os.path.join('.', project_name, 'pdp.ini')
+    config = load_config(path, ctx.obj['profile'])
+
   for product_url in products_url:
     product: str
     url: str
@@ -89,11 +94,32 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
   exit(0 if successfully_executed else 1)
 
 
-# TODO: Add the help text to the options
 @config.command()
-@click.option('-d', '--dir', default='.', help='')
+@click.option('-d', '--dir', 'path', default='.', help='The path to a directory with the structure and the pdp.ini '
+                                                       'that init command creates. Default is ./.')
 @click.option('--target', 'targets', default=[product for product in PRODUCTS['list'] if product != STAGING],
-              multiple=True, help='')
+              multiple=True,
+              type=click.Choice([product for product in PRODUCTS['list'] if product != STAGING], case_sensitive=False),
+              help='The name of the product where you want to deploy the entities.  The command allows multiple flags '
+                   'to define multiple targets. Default is [ingestion, core, discovery]')
+@click.option('-v', '--verbose', 'is_verbose', is_flag=True, default=False,
+              help='It will show more information about the deploy results. Default is False.')
+@click.option('-g', '--ignore-ids/--no-ignore-ids', 'ignore_ids', default=False,
+              help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
+                   'is useful when moving configs from one instance to another. Default is False.')
+@click.option('-q', '--quiet', is_flag=True, default=False,
+              help='Display only the seed ids. Warnings and Errors will not be shown neither. Default is False.')
 @click.pass_context
-def deploy(ctx, targets: list[str], dir: str):
-  run_deploy(ctx.obj.get('configuration'), dir, targets)
+def deploy(ctx, targets: list[str], path: str, is_verbose: bool, ignore_ids: bool, quiet: bool):
+  """
+  Deploys project configurations to the target products.
+  Must be run within the directory from a project created with the 'init' command.
+  Will replace any name reference with IDs. Names are case-sensitive. If the "id" field is missing from an entity,
+  assumes this is a new instance.
+  """
+  config = ctx.obj['configuration']
+  if config.get('load_config'):
+    from pdp import load_config
+    config_path = os.path.join(path, 'pdp.ini')
+    config = load_config(config_path, ctx.obj['profile'])
+  run_deploy(config, path, targets, is_verbose and not quiet, ignore_ids, quiet)

@@ -9,4 +9,5 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  init  Creates a new project from existing sources or from scratch.
+  deploy  Deploys project configurations to the target products.
+  init    Creates a new project from existing sources or from scratch.

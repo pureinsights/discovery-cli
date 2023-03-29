@@ -13,7 +13,7 @@ import json
 import requests as req
 import requests.exceptions
 
-from commons.console import print_error, print_exception, stop_spinner
+from commons.console import print_error, print_exception, print_warning, stop_spinner
 from commons.custom_classes import PdpException
 
 
@@ -45,19 +45,23 @@ def handle_http_response(res: req.Response) -> any:
   :rtype: Any
   :raises HTTPError: When the status is not a 2xx response.
   """
-  if res.status_code == 404:
-    return None  # 404 is managed as if the response was None
+  # if res.status_code == 404:
+  #   return 404, None  # 404 is managed as if the response was None
   try:
     res.raise_for_status()  # raises an exception when the status is not a 2xx response
     if res.status_code != 204:
       return res.content
     return None
   except req.exceptions.HTTPError as exception:
-    response = json.loads(exception.response.content.decode('utf-8'))
+    content = exception.response.content
+    if content is None:
+      raise exception
+    response = json.loads(content.decode('utf-8'))
     errors = '\n\t'.join(response.get('errors', []))
     method = exception.request.method
     url = exception.request.url
     content = {
+      'status': res.status_code,
       'errors': errors
     }
     raise PdpException(message=f"Could not '{method}' to {url} due to:\n\t{errors}", content=content)
@@ -84,17 +88,17 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
   error_message = params.get('message', None)
   prefix = params.get('prefix', '')
   suffix = params.get('suffix', '')
-  raise_exception = params.get('raise_exception', False)
   show_exception = params.get('show_exception', False)
   try:
     return True, func(*args, **kwargs)
 
   except Exception as error:
+    error = params.get('exception', error)
     if show_exception:
       print_exception(error, prefix=prefix, suffix=suffix)
 
     if error_message is not None:
-      print_error(error_message, not raise_exception, prefix=prefix, suffix=suffix)
+      print_error(error_message, True, prefix=prefix, suffix=suffix)
 
     raise error
 
@@ -123,13 +127,17 @@ def handle_and_continue(func: callable, params: dict, *args, **kwargs):
   prefix = params.get('prefix', '')
   suffix = params.get('suffix', '')
   show_exception = params.get('show_exception', False)
+  warning = params.get('warning', False)
   try:
     return True, func(*args, **kwargs)
 
   except Exception as error:
 
     if error_message is not None:
-      print_error(error_message, False, prefix=prefix, suffix=suffix)
+      if warning:
+        print_warning(error_message, prefix=prefix, suffix=suffix)
+      else:
+        print_error(error_message, False, prefix=prefix, suffix=suffix)
 
     if show_exception:
       if hasattr(error, 'handled'):

@@ -8,69 +8,157 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+
 import os.path
 
 import click
 
-from commons.console import create_spinner, spinner_change_text, spinner_ok
+from commons.console import create_spinner, get_number_errors_exceptions, print_console, print_warning, \
+  spinner_change_text, spinner_ok, \
+  suppress_errors, suppress_warnings, verbose
 from commons.constants import CORE, INGESTION, PRODUCTS
 from commons.file_system import read_entities, write_entities
 from commons.handlers import handle_and_continue
-from commons.pdp_products import create_or_update_entity, replace_names_by_ids
+from commons.pdp_products import create_or_update_entity, identify_entity, replace_ids, replace_ids_for_names, \
+  replace_names_by_ids
 from commons.raisers import raise_file_not_found_error
 
 
-def run(config: dict, path: str, target_products):
-  raise_file_not_found_error(path)
-  products = [product for product in PRODUCTS if product in target_products]
-  if INGESTION in products:
-    products.insert(products.index(INGESTION), CORE)
-  names_ids = {}
-  for product in products:
-    create_spinner()
-    spinner_change_text(f'Deploying {product} entities...')
-    entity_types = PRODUCTS.get(product, []).get('entities')
+def run(config: dict, path: str, target_products: list[str], is_verbose: bool = False, ignore_ids: bool = False,
+        quiet: bool = False):
+  """
+  Deploy all the entities of the specified products with a specific behavior based on the given flags.
+
+  :param dict config: The configuration that contains the product's url.
+  :param str path: The path to the root of a pdp project.
+  :param list[str] target_products: The list of the product names to be deployed.
+  :param bool is_verbose: It will show more information while deploy the entities.
+  :param bool ignore_ids: It will ignore the ids of the entities and try to create a new one.
+  :param bool quiet: It will suppress all the warnings and errors. Only shows the ids of the seeds, separated by \n.
+                     If and error occurs then no ids will be showed.
+  """
+  if quiet:
+    suppress_warnings()
+    suppress_errors()
+  new_line = ''
+
+  def deploy_products():
+    """
+    This is an auxiliary function. It iterates for each product and calls another auxiliary function.
+    """
+    nonlocal new_line
+    for index, product in enumerate(products):
+      is_target = product in target_products
+      entity_types = PRODUCTS.get(product, []).get('entities')
+
+      if is_target:
+        verbose(
+          verbose_func=lambda: print_console(f'--------------------|{product.title()} entities|--------------------',
+                                             prefix=new_line),
+          verbose=is_verbose
+        )
+        new_line = '\n'
+
+      deploy_entity_types(product, entity_types, is_target, 0, seeds)
+      handle_and_continue(
+        replace_ids,
+        {},
+        path, ids_names
+      )
+
+  def deploy_entity_types(product, entity_types, is_target, step, seeds):
+    """
+    This is an auxiliary function. It iterates for each entity_type of a product and calls another auxiliary function.
+    """
     for entity_type in entity_types:
+      step += 1
       file_path = os.path.join(path, product.title(), entity_type.associated_file_name)
+
+      if is_target:
+        create_spinner()
+        spinner_change_text(f'Deploying {entity_type.type}s to {product}...')
+
       success, entities = handle_and_continue(read_entities, {'show_exception': True}, file_path)
       if not success:
         continue
 
       replace_names_by_ids(entity_type, entities, names_ids)
-      if product not in target_products or len(entities) <= 0:
+      # If the product is not a target then we don't deploy the entities
+      if not is_target:
         continue
 
-      for entity in entities:
-        product_url = config.get(product)
-        _, _id = handle_and_continue(create_or_update_entity, {'show_exception': True},
-                                     product_url, entity_type.type, entity)
-        name = entity.get('name', None)
-        if _id is not None and name is not None:
-          entity['id'] = _id
-          names_ids[name] = _id
-      write_entities(file_path, entities)
-      spinner_ok(f'{product.title()} {click.style(entity_type.type + "s", fg="cyan")}:', icon='->')
+      if len(entities) <= 0:
+        verbose(
+          verbose_func=lambda: print_warning(f'There are not entities to deploy.'),
+          verbose=is_verbose
+        )
 
-  # entities = read_and_parse_to_deploy_entities_from(path, target_products)
-  # entities_to_write = []
-  # names_ids = {}
-  # for product in entities.keys():
-  #   entity_types = ENTITIES.get(product, [])
-  #   if len(entities[product]) <= 0:
-  #     continue
-  #   print(f'{product.title()}: ')
-  #   for type in entities[product].keys():
-  #     entity_type = [entity_type for entity_type in entity_types if entity_type.type == type]
-  #     entity_types.remove(entity_type)  # Just to improve performance
-  #     entities_per_product = entities[product][type]
-  #     for entity in entities_per_product:
-  #       success, _id = handle_and_continue(create_or_update_entity, {'show_exception': True}, ctx.get(product), type,
-  #                                          entity)
-  #       if success:
-  #         entity['id'] = _id
-  #         entities_to_write += [entity]
-  #     # TODO: Here you must write every single type of file to update any possible change of ID
-  #     # But think about this more, because you already have all the entities in memory so looks like
-  #     # you have to find another way to update the ids, probably just by calling the method
-  #
-  # print('finished')
+      deploy_entities(product, entity_type, entities, is_target, seeds)
+
+      # Once the entities are deployed, we replace the ids for the names to keep it simple to the user.
+      handle_and_continue(
+        replace_ids_for_names, {'message': f'Could not replace the ids by the entity names.'
+                                           'You might want to doit your self', 'warning': True},
+        entity_type, entities, ids_names, suppress_warnings=True
+      )
+      write_entities(file_path, entities)
+      verbose(
+        verbose_func=lambda: spinner_ok(f'{click.style(entity_type.type.title() + "s", fg="cyan")}:', icon=f'{step})'),
+        not_verbose_func=lambda: spinner_ok('', icon=None),  # Do not print anything but finish the spinner
+        verbose=is_verbose
+      )
+
+  def deploy_entities(product, entity_type, entities, is_target, seeds):
+    """
+    This is the last auxiliary function. It iterates for each entity of the given entity_type.
+    And deploy the entity.
+    """
+    for entity in entities:
+      product_url = config.get(product)
+      # We store the id to recover it if we have to ignore the ids and the entity could not be deployed.
+      id_backup = entity.get('id', None)
+      if ignore_ids and is_target:
+        entity['id'] = None
+      _, _id = handle_and_continue(
+        create_or_update_entity, {'show_exception': True}, product_url, entity_type.type,
+        entity, verbose=is_verbose
+      )
+      _id = id_backup if _id is None else _id  # If _id is None means the entity was not created, so we use the backup.
+      name = entity.get('name', None)
+      if _id is not None:
+        entity['id'] = _id  # Updates the id of the entity, the product could create a new one
+        if name is not None:
+          names_ids[name] = _id
+      if entity_type.type == 'seed':  # If the entity is a seed, we store the entity to show the ids later.
+        seeds += [entity]
+
+  raise_file_not_found_error(path)
+  names_ids = {}
+  ids_names = {}
+  products = [product for product in PRODUCTS if product in target_products]
+  seeds = []
+
+  # Ensures that CORE is before than INGESTION, if ingestion is in target_product.
+  # Since CORE is a dependency for INGESTION.
+  if INGESTION in products:
+    if CORE in products:
+      products.remove(CORE)
+    products.insert(products.index(INGESTION), CORE)
+
+  deploy_products()
+
+  # It will show the seed ids only if, seeds is not empty,
+  # is verbose or not verbose or if is quiet but no errors happened.
+  if len(seeds) > 0 and (not quiet or (quiet and get_number_errors_exceptions() <= 0)):
+    format = 'Seed {name} with id {id}.'
+    if not quiet:
+      print_console(f'{click.style("Seeds", fg="cyan")} ids:', prefix='\n' if is_verbose else '')
+    for seed in seeds:
+      id = seed.get("id")
+      if not quiet:
+        id = click.style(seed.get("id"), fg="green")
+      else:
+        format = '{id}'
+      print_console(
+        format.format(name=click.style(identify_entity(seed), fg="blue"), id=id)
+      )

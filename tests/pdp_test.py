@@ -23,14 +23,15 @@ def test_ensure_configurations_all_configurations_right():
   """
   Test the function defined in :func:`src.pdp.ensure_configurations`.
   """
+  from copy import deepcopy
   expected_config = {
     'ingestion': 'https://ingestion-fake-url',
     'core': 'https://core-fake-url',
     'staging': 'https://staging-fake-url',
     'discovery': 'https://discovery-fake-url'
   }
-  config_result = ensure_configurations(expected_config)
-  assert expected_config == config_result
+  config_result = ensure_configurations(deepcopy(expected_config))
+  assert {**expected_config, 'load_config': True} == config_result
 
 
 def test_ensure_configurations_missing_configurations():
@@ -40,9 +41,10 @@ def test_ensure_configurations_missing_configurations():
   """
   config = {
     'ingestion': 'https://ingestion-fake-url',
-    'discovery': 'https://discovery-fake-url'
+    'discovery': 'https://discovery-fake-url',
+    'load_config': True
   }
-  expected_config = { **DEFAULT_CONFIG, **config }
+  expected_config = {**DEFAULT_CONFIG, **config}
   config_result = ensure_configurations(config)
   assert config_result == expected_config
 
@@ -59,12 +61,16 @@ def test_ensure_configurations_all_configuration_missing():
 
 
 config_return_fixture = {
-  'DEFAULT': { **DEFAULT_CONFIG },
+  'DEFAULT': {
+    **DEFAULT_CONFIG,
+    'load_config': True
+  },
   'FAKE': {
     'ingestion': 'https://ingestion-fake-url',
     'core': 'https://core-fake-url',
     'staging': 'https://staging-fake-url',
-    'discovery': 'https://discovery-fake-url'
+    'discovery': 'https://discovery-fake-url',
+    'load_config': True
   }
 }
 
@@ -75,7 +81,7 @@ def test_load_config_default_profile():
   """
   config_name = "pdp_test.ini"  # The same name must be defined in conftest.py mock_os_path_exists
   config_result = load_config(config_name, 'DEFAULT')
-  assert config_result == DEFAULT_CONFIG
+  assert config_result == {**DEFAULT_CONFIG, 'load_config': False}
 
 
 def test_load_config_fake_profile():
@@ -87,11 +93,12 @@ def test_load_config_fake_profile():
     'ingestion': 'http://ingestion-fake',
     'discovery': 'http://discovery-fake/admin',
     'core': 'http://core-fake',
-    'staging': 'http://staging-fake'
+    'staging': 'http://staging-fake',
+    'load_config': False
   }
   config_name = "pdp_test.ini"  # The same name must be defined in conftest.py mock_os_path_exists
   config_result = load_config(config_name, 'FAKE')
-  assert { **config_result } == expected_config
+  assert {**config_result} == expected_config
 
 
 def test_load_config_invalid_profile():

@@ -8,6 +8,8 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import os.path
+
 import pytest
 
 config_file_test_name = "pdp_test.py"
@@ -31,3 +33,11 @@ def mock_path_exists(mocker):
     path_exists.return_value = ret
 
   return _mock_path_exists
+
+
+@pytest.fixture
+def test_project_path():
+  def joinPath(*args):
+    return os.path.join('.', 'test_project', *args)
+
+  return joinPath

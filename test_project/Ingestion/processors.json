@@ -1,0 +1,27 @@
+[
+  {
+    "bulkSize": 300,
+    "servers": [
+      {
+        "hostname": "localhost",
+        "port": 9200
+      }
+    ],
+    "name": "Persist to Search",
+    "index": "${index}",
+    "type": "elasticsearch-hydrator",
+    "id": "fakeid"
+  },
+  {
+    "bulkSize": 300,
+    "servers": [
+      {
+        "hostname": "localhost",
+        "port": 9200
+      }
+    ],
+    "name": "Persist to Search",
+    "index": "${index}",
+    "type": "elasticsearch-hydrator"
+  }
+]
