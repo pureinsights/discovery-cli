@@ -33,14 +33,14 @@ def identify_entity(entity: dict, fields=['name', 'id', 'description', 'type'], 
   :rtype: str
   :return: The name of the field and the value. If none of the fields are in the entity itself will be returned.
   """
-  format = kwargs.get('format', '{field} "{ref}"')
+  format_str = kwargs.get('format', '{field} "{ref}"')
   if type(entity) is not dict:
     return entity
   default_value = kwargs.get('default', entity)
   for field in fields:
     ref = entity.get(field, None)
     if ref is not None:
-      return format.format(field=field, ref=ref)
+      return format_str.format(field=field, ref=ref)
 
   return default_value
 
