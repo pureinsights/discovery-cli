@@ -45,8 +45,6 @@ def handle_http_response(res: req.Response) -> any:
   :rtype: Any
   :raises HTTPError: When the status is not a 2xx response.
   """
-  # if res.status_code == 404:
-  #   return 404, None  # 404 is managed as if the response was None
   try:
     res.raise_for_status()  # raises an exception when the status is not a 2xx response
     if res.status_code != 204:

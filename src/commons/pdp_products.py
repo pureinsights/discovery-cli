@@ -41,6 +41,7 @@ def identify_entity(entity: dict, fields=['name', 'id', 'description', 'type'], 
     ref = entity.get(field, None)
     if ref is not None:
       return format.format(field=field, ref=ref)
+
   return default_value
 
 

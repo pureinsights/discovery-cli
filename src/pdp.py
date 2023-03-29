@@ -88,5 +88,3 @@ pdp.add_command(config)
 
 if __name__ == '__main__':
   handle_exceptions(pdp)  # pragma: no cover
-  # handle_exceptions(pdp, ["config", "init", "--empty", "--template", "test_template", "--force"], standalone_mode=False)
-  # handle_exceptions(pdp, ["config", "deploy", "-d", "./my-pdp-project", "-v"])
