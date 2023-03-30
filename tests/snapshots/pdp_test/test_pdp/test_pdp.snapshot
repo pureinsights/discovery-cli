@@ -7,6 +7,8 @@ Options:
                     is "pdp".
   --profile TEXT    Configuration profile to load specific configurations from
                     pdp.ini. Default is "DEFAULT"
+  -d, --dir TEXT    The path to a directory with the structure and the pdp.ini
+                    that init command creates. Default is ./.
   --help            Show this message and exit.
 
 Commands:

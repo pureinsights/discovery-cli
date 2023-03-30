@@ -8,6 +8,7 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import os
 
 from commons.custom_classes import PdpEntity
 
@@ -69,10 +70,13 @@ PRODUCTS = {
 # Common messages
 WARNING_FORMAT = '[WARNING]: {message}'
 ERROR_FORMAT = '[ERROR]: {message}'
-EXCEPTION_FORMAT = 'Some thing went wrong due to: {exception}.'
+EXCEPTION_FORMAT = 'Some thing went wrong due to: {exception}.{error}'
 
 FROM_NAME_FORMAT = "{{{{ fromName('{0}') }}}}"
 
 # Severities
 ERROR_SEVERITY = 'error'
 WARNING_SEVERITY = 'warning'
+
+# File paths
+TEMPLATES_DIRECTORY = os.path.join(os.path.dirname(__file__), '..', 'commands', 'config', 'templates')

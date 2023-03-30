@@ -57,8 +57,10 @@ def load_config(config_name: str, profile: str = 'DEFAULT'):
 @click.option('--namespace', default='pdp', help='Namespace in which the PDP components are running. Default is "pdp".')
 @click.option('--profile', default='DEFAULT',
               help='Configuration profile to load specific configurations from pdp.ini. Default is "DEFAULT"')
+@click.option('-d', '--dir', 'path', default='.', help='The path to a directory with the structure and the pdp.ini '
+                                                       'that init command creates. Default is ./.')
 @click.pass_context
-def pdp(ctx, namespace: str, profile: str):
+def pdp(ctx, namespace: str, path: str, profile: str):
   """
   This is the official Pureinsights Discovery Platform CLI.
   """
@@ -67,7 +69,8 @@ def pdp(ctx, namespace: str, profile: str):
   ctx.ensure_object(dict)
   ctx.obj['namespace'] = namespace
   ctx.obj['profile'] = profile
-  config_path = os.path.join(os.path.abspath(__file__), 'pdp.ini')
+  ctx.obj['project_path'] = path
+  config_path = os.path.join(path, 'pdp.ini')
   ctx.obj['configuration'] = load_config(config_path, profile)
 
 
@@ -87,4 +90,7 @@ def health():
 pdp.add_command(config)
 
 if __name__ == '__main__':
-  handle_exceptions(pdp)  # pragma: no cover
+  # handle_exceptions(pdp)  # pragma: no cover
+  # handle_exceptions(pdp, ["-d", "./my-pdp-project", "config", "create", "-t", "seed", "--file",
+  #                         "../my-pdp-project"])  # pragma: no cover
+  handle_exceptions(pdp, ["-d", "./my-pdp-project", "config", "deploy", "-v"])  # pragma: no cover

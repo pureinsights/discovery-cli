@@ -28,7 +28,7 @@ def test_handle_exceptions_exception_handled(mocker):
   mock_print = mocker.patch('commons.handlers.print_exception')
   mock_stop_spinner = mocker.patch('commons.handlers.stop_spinner')
   handle_exceptions(mock_custom_exception, exception)
-  mock_print.assert_called_once_with(exception)
+  assert mock_print.call_count == 0
   mock_stop_spinner.assert_called_once()
 
 

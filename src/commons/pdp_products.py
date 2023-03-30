@@ -16,9 +16,11 @@ import zipfile
 import click
 
 from commons.console import print_console, print_error, print_exception, print_warning, verbose
-from commons.constants import CORE, ENTITIES, FROM_NAME_FORMAT, INGESTION, URL_CREATE, URL_EXPORT_ALL, \
+from commons.constants import CORE, ENTITIES, FROM_NAME_FORMAT, INGESTION, PRODUCTS, STAGING, URL_CREATE, \
+  URL_EXPORT_ALL, \
   URL_GET_BY_ID, URL_UPDATE, WARNING_SEVERITY
 from commons.custom_classes import DataInconsistency, PdpEntity, PdpException
+from commons.file_system import read_entities
 from commons.handlers import handle_and_continue
 from commons.http_requests import get, post, put
 
@@ -112,7 +114,7 @@ def replace_ids(path: str, ids=None):
   return ids
 
 
-def replace_names_by_ids(entity_type: PdpEntity, entities: list[dict], names: dict):
+def replace_names_by_ids(entity_type: PdpEntity, entities: list[dict], names: dict, **kwargs):
   """
   Replaces the {{ fromName('entity_name') }} with the actual id of the entity.
 
@@ -122,17 +124,23 @@ def replace_names_by_ids(entity_type: PdpEntity, entities: list[dict], names: di
   :rtype: dict
   :return: Return the names with the names of entities associated too.
   """
+  suppress_warnings = kwargs.get('suppress_warnings', False)
   for entity in entities:
     if 'id' in entity.keys():
       name, _id = associate_values_from_entities(entity, 'name', entity, 'id', entity_type, True)
       if name is not None:
+        existing_name = names[name]
+        if existing_name is not None:
+          raise DataInconsistency(
+            message=f'Names can not be duplicated. Entities with id {names[name]} and {_id} has the same name.'
+          )
         # We let associate a name with a None to let the associate_value print a warning on further steps
         names[name] = _id
       # If _id is not None, we associate the id with the id to avoid covert the case
       # where an entity has a reference to the id and not to the name of the entity
       if _id is not None:
         names[_id] = _id
-    replace_value(entity_type, entity, names, from_field='name', format='{0}')
+    replace_value(entity_type, entity, names, from_field='name', format='{0}', suppress_warnings=suppress_warnings)
   return names
 
 
@@ -173,11 +181,13 @@ def show_expected_error_if_value_not_found(entity_type: PdpEntity, entity: dict,
   """
   name = identify_entity(entity, default=entity_type.associated_file_name)
   if name != entity_type.associated_file_name:
-    print_warning(f'Value "{value}" does not exist while attempting to replace in {from_field}. '
-                  f'Entity {name} in file {entity_type.associated_file_name}.')
+    print_warning(f'Value "{value}" does not exist while attempting to replace in field "{from_field}". '
+                  f'Entity {name} in file {entity_type.associated_file_name}.'
+                  f' That could means that the name "{value}" do not exists or the entity "{value}" do not have an Id.')
   else:
-    print_warning(f'Value "{value}" does not exist while attempting to replace in {from_field}. '
-                  f'Entity has no name and no id in file {entity_type.associated_file_name}.')
+    print_warning(f'Value "{value}" does not exist while attempting to replace in field "{from_field}". '
+                  f'Entity has no name and no id in file {entity_type.associated_file_name}.'
+                  f' That could means that the name "{value}" do not exists or the entity "{value}" do not have an Id.')
 
 
 def replace_value(entity_type: PdpEntity, entity: any, values: dict, **kwargs):
@@ -378,3 +388,37 @@ def create_or_update_entity(product_url: str, type: str, entity: dict, **kwargs)
       f'Could not create entity {identify_entity(entity, default=type, format=message)} due to:\n'
       f'\t{exception.content.get("errors")}'
     )
+
+
+def get_entity_type_by_name(entity_type_name: str):
+  filtered = [entity_type for entity_type in ENTITIES if entity_type.type == entity_type_name]
+  if len(filtered) <= 0:
+    return None
+  return filtered.pop()
+
+
+def get_all_entities_names_ids(project_path: str, entities: list[dict]):
+  ids_names = {}
+  products = [product for product in PRODUCTS['list'] if product != STAGING]
+
+  for product in order_products_to_deploy(products):
+    entity_types = PRODUCTS.get(product, {'entities': []}).get('entities')
+    for entity_type in entity_types:
+      file_path = os.path.join(project_path, product.title(), entity_type.associated_file_name)
+      success, _entities = handle_and_continue(read_entities, {'show_exception': True}, file_path)
+      if not success:
+        continue
+      entities += _entities
+
+      replace_names_by_ids(entity_type, entities, ids_names, suppress_warnings=True)
+
+  return ids_names
+
+
+def reload_configurations(project_path: str, config: dict, profile: str):
+  if config.get('load_config'):
+    from pdp import load_config
+    config_path = os.path.join(project_path, 'pdp.ini')
+    config = load_config(config_path, profile)
+
+  return config

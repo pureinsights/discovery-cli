@@ -203,7 +203,7 @@ def print_error(message: str, raise_exception: bool = False, **kwargs):
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
   error_message = f'{prefix}{ERROR_FORMAT.format(message=message)}{suffix}'
-  exception = kwargs.get('exception', PdpException(message=message, handled=not raise_exception))
+  exception = kwargs.get('exception', PdpException(message=message, handled=raise_exception))
   styled_message = click.style(error_message, fg='red')
   print_console(styled_message, err=True)
   if raise_exception:
