@@ -57,15 +57,15 @@ It will create the folder structure for a PDP project.
 - **-n,--project-name**: The name of the resulting directory, will try to fetch existing configurations from the APIs
   referenced in ~/.pdp. Notice that imported configs have id fields, don't change those.
   **Default is ```my-pdp-project```**.
-- **--empty/--no-empty**: If ```True``` it will create a project from a template (the default template)
-  If ```False``` it will try to import the entities for the products urls.
+- **--empty/--no-empty**: If ```True``` will create a project from a template (the default template)
+  If ```False``` will try to import the entities for the products urls.
   **Default is ```False```**.
 - **-u,--product-url**: The base URL for the given product API. The product URL must be provided with the following
   format **PRODUCT_NAME:URL**. The command allows multiple flags to define multiples products.
   Default are ```ingestion http://localhost:8080```, ```staging http://localhost:8081```,
   ```core http://localhost:8082```, ```discovery http://localhost:8088```.
-- **--force/--no-force**: If there is a project with the same name it will to override it. **Default is False**.
-- **--template**: If the project will be created from a template, it will use the name of the templated provided
+- **--force/--no-force**: If there is a project with the same name will to override it. **Default is False**.
+- **--template**: If the project will be created from a template, will use the name of the templated provided
   by the user. Default is ```random_generator```. Available are ```empty, random_generator```.
 
 #### An example to a project from scratch
@@ -93,7 +93,7 @@ field is missing from an entity, assumes this is a new instance.
   is ```./```**.
 - **--target**: The name of the product where you want to deploy the entities. The command allows multiple flags to
   define multiple targets. **Default are ```[ingestion, core, discovery]```**.
-- **-v,--verbose**: It will show more information about the deployment results. **Default is ```False```**.
+- **-v,--verbose**: Will show more information about the deployment results. **Default is ```False```**.
 - **-g,--ignore-ids/--no-ignore-ids**: Will cause existing ids to be ignored, hence everything will be created as a new
   instance. This is useful when moving configs from one instance to another. **Default is ```False```**.
 - **-q,--quiet**: Display only the seed ids. Warnings and Errors will not be shown neither. **Default is ```False```**.

@@ -247,7 +247,7 @@ def export_all_entities(api_url: str, path: str, extract: bool = True, **kwargs)
   Export all entities for a given product. (INGESTION, DISCOVERY or CORE)
   Downloads the zip and is extracted to the given path.
 
-  :param str api_url: The url where it will try to download the zip with the entities.
+  :param str api_url: The url where will try to download the zip with the entities.
   :param str path: The path where the zip will be downloaded.
   :param bool extract: If is True the zip will be extracted and deleted.
   :key dict ids: A dictionary with ids of already extracted entities. Default is {}.
@@ -318,13 +318,13 @@ def order_products_to_deploy(products: list[str] = None):
 
 def create_or_update_entity(product_url: str, type: str, entity: dict, **kwargs):
   """
-  It will deploy a new entity in the given product if the entity does not exist or if it has not
-  an id field. If it has an id field and the id exists in the given product, then it will be updated.
+  Will deploy a new entity in the given product if the entity does not exist or if it has not
+  an id field. If it has an id field and the id exists in the given product, then will be updated.
   :param str product_url: The URL for the product to deploy the entity.
   :param str type: The type of the entity to be deployed.
-                   It must be the same that the "create new" endpoint expects.
+                   Must be the same that the "create new" endpoint expects.
   :param dict entity: The entity to be deployed.
-  :key bool verbose: It will define the printing message strategy.
+  :key bool verbose: Will define the printing message strategy.
   """
   is_verbose = kwargs.get('verbose', False)
   successful_message = '{type} {entity} has been {action} successfully with id {id}.'
@@ -336,7 +336,7 @@ def create_or_update_entity(product_url: str, type: str, entity: dict, **kwargs)
     if entity_id is not None:
       old_entity = get(URL_GET_BY_ID.format(product_url, entity=type, id=entity_id))
 
-      # if an entity already exists with the same id, then we're going to update it
+      # If an entity already exists with the same id, then we're going to update it
       if old_entity is not None:
         res = put(URL_UPDATE.format(product_url, entity=type, id=entity_id), json=entity)
         styled_action = click.style('updated', fg='blue')

@@ -29,9 +29,9 @@ def run(project_name: str, apis: dict, force: bool, template: str = None):
 
   :param str project_name: This will be the name of the folder that will contain the structure of the project.
   :param dict apis: A dictionary containing the url for each product api. (ingestion, discovery, core and staging).
-  :param bool force: If it is True it will try to override the project where you want to create it, if there is a
+  :param bool force: If it is True will try to override the project where you want to create it, if there is a
                       folder with the same name.
-  :param str template: The name of the template to use, if None then it will create a non-empty project.
+  :param str template: The name of the template to use, if None then will create a non-empty project.
   :rtype: bool
   :return: True if the project was created successfully, False if any error happen.
   :raises Exception: If a project with the same name already exists.

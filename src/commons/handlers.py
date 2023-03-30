@@ -19,7 +19,7 @@ from commons.custom_classes import PdpException
 
 def handle_exceptions(func: callable, *args, **kwargs):
   """
-  Tries to execute the function 'func', if some exception happens it will handle it and use the
+  Tries to execute the function 'func', if some exception happens will handle it and use the
   print_exception function to print a specific message based on the exception type.
 
   :param callable func: The function th execute.
@@ -67,8 +67,8 @@ def handle_http_response(res: req.Response) -> any:
 
 def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool, any]:
   """
-  Tries to execute the given function, if an exception happens it will be handled and print the given message.
-  If raise_exception is True it will raise the same Exception that it handle.
+  Tries to execute the given function, if an exception happens will be handled and print the given message.
+  If raise_exception is True will raise the same Exception that it handle.
   It's helpful to print a specific message for a potential exception.
 
   :param callable func: The function that will be executed.
@@ -81,7 +81,7 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
                 bool show_exception: Uses the print_exception to
                 bool raise_exception: Raises the same exception that was handled.
   :rtype: None
-  :raises Exception: It can raise the same exception handled in order to be handled by an upper handler as well.
+  :raises Exception: Can raise the same exception handled in order to be handled by an upper handler as well.
   """
   error_message = params.get('message', None)
   prefix = params.get('prefix', '')
@@ -103,8 +103,8 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
 
 def handle_and_continue(func: callable, params: dict, *args, **kwargs):
   """
-  Tries to execute the given function, if an exception happens it will be handled and print the given message.
-  If an exception occurs it will be handled and then continue the execution.
+  Tries to execute the given function, if an exception happens will be handled and print the given message.
+  If an exception occurs will be handled and then continue the execution.
 
 
   :param callable func: The function that will be executed.
@@ -119,7 +119,7 @@ def handle_and_continue(func: callable, params: dict, *args, **kwargs):
   :return: Returns a tuple containing in the first position a boolean that represents if there was an exception or
            if the function was executed successfully. The second one is the return of the function or None if an
            exception happened.
-  :raises Exception: It can raise the same exception handled in order to be handled by an upper handler as well.
+  :raises Exception: Can raise the same exception handled in order to be handled by an upper handler as well.
   """
   error_message = params.get('message', None)
   prefix = params.get('prefix', '')

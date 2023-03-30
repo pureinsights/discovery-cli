@@ -32,7 +32,7 @@ is_errors_suppressed = False
 
 def suppress_warnings(suppress: bool):
   """
-  It avoids to any warning be printed in console.
+  Avoids to any warning be printed in console.
   """
   global is_warnings_suppressed
   is_warnings_suppressed = suppress
@@ -40,7 +40,7 @@ def suppress_warnings(suppress: bool):
 
 def suppress_errors(suppress: bool):
   """
-  It avoids to any error or exception be printed in console.
+  Avoids to any error or exception be printed in console.
   """
   global is_errors_suppressed
   is_errors_suppressed = suppress
@@ -48,7 +48,7 @@ def suppress_errors(suppress: bool):
 
 def get_number_errors_exceptions():
   """
-  It returns a sum of the number of errors and the number of exceptions that happened.
+  Returns a sum of the number of errors and the number of exceptions that happened.
   """
   global printed_errors, printed_exceptions
   return len(printed_errors) + len(printed_exceptions)
@@ -73,7 +73,7 @@ def create_spinner(*args, **kwargs):
 
 def stop_spinner(prefix: str = '', suffix: str = ''):
   """
-  It stops and clean the instance of the spinner.
+  Stops and clean the instance of the spinner.
   """
   global Spinner, buffer
   if Spinner is None:
@@ -98,7 +98,7 @@ def spinner_change_text(message: str):
 
 def spinner_ok(message: str, **kwargs):
   """
-  It will stop the spinner and sets a text to the success status.
+  Will stop the spinner and sets a text to the success status.
 
   :param str message: The message that will be showed.
   :key str prefix: A string that will be added in front fo the message.
@@ -120,7 +120,7 @@ def spinner_ok(message: str, **kwargs):
 
 def spinner_fail(message: str, **kwargs):
   """
-  It will stop the spinner and sets a text to the failed status.
+  Will stop the spinner and sets a text to the failed status.
 
   :param str message: The message that will be showed.
   :key str prefix: A string that will be added in front fo the message.
@@ -142,7 +142,7 @@ def spinner_fail(message: str, **kwargs):
 
 def print_console(message: any, *args, **kwargs):
   """
-  Prints a message to console. It avoids problems with the spinner of Yaspin.
+  Prints a message to console. Avoids problems with the spinner of Yaspin.
 
   :param any message: The message that will be printed.
   :param *args args: Positional arguments passed to click.secho.
@@ -249,7 +249,7 @@ def print_exception(exception, **kwargs):
 
 def verbose(**kwargs):
   """
-  It will execute any of "verbose_func" or "not_verbose_func" based on "verbose" flag. And return
+  Will execute any of "verbose_func" or "not_verbose_func" based on "verbose" flag. And return
   whatever the function returns. Helpful to manage more complex behaviors to a verbose command, rather than
   just print some text in console.
   :key bool verbose: The flag tha defines which function will be called.
