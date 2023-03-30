@@ -1,6 +1,6 @@
 Usage: pdp config [OPTIONS] COMMAND [ARGS]...
 
-  Contains all the commands to help you manage the entities of the PDP. You can
+  Contains all the commands to help you manage the entities on PDP. You can
   create, update, delete, deploy and more.
 
   Use --help on each command for more detailed information.
