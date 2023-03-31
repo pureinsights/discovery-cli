@@ -10,5 +10,5 @@ Options:
   --help            Show this message and exit.
 
 Commands:
-  config  Contains all the commands to help you manage the entities of the...
+  config  Contains all the commands to help you manage the entities on PDP.
   health  This command is used to know if PDP-CLI has been installed...

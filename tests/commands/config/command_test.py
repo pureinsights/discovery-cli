@@ -8,6 +8,7 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+from commons.constants import DEFAULT_CONFIG
 from pdp import pdp
 from pdp_test import cli
 
@@ -58,7 +59,8 @@ def test_init_parse_options(mocker, snapshot):
     'ingestion': 'http://ingestion-fake',
     'discovery': 'http://ingestion-fake',
     'core': 'http://ingestion-fake',
-    'staging': 'http://ingestion-fake'
+    'staging': 'http://ingestion-fake',
+    'load_config': True
   }
   force = '--force'
   response = cli.invoke(pdp,
@@ -82,3 +84,39 @@ def test_init_incorrect_option_product(snapshot):
                               'http://ingestion-fake'])
   assert response.exit_code == 1
   snapshot.assert_match(response.output, 'test_init_incorrect_option_product.snapshot')
+
+
+def test_init_without_load_config_on_init_command(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.init`,
+  when the configuration 'load_config' is False.
+  """
+  mocker.patch("pdp.os.path.exists", returned_value=False)
+  response = cli.invoke(pdp, ["config", "init", "-n", "fake-name", "--force"])
+  assert response.exit_code == 1
+  snapshot.assert_match(response.output, 'test_init_without_load_config_on_init_command.snapshot')
+
+
+def test_deploy_success(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.deploy`,
+  without arguments.
+  """
+  run_deploy_mock = mocker.patch("commands.config.command.run_deploy")
+  response = cli.invoke(pdp, ["config", "deploy"])
+  assert response.exit_code == 0
+  targets = ('core', 'ingestion', 'discovery')
+  run_deploy_mock.assert_called_once_with(DEFAULT_CONFIG, ".", targets, False, False, False)
+
+
+def test_deploy_without_load_config_on_deploy_command(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.deploy`,
+  without arguments.
+  """
+  mocker.patch("pdp.os.path.exists", returned_value=False)
+  run_deploy_mock = mocker.patch("commands.config.command.run_deploy")
+  response = cli.invoke(pdp, ["config", "deploy"])
+  assert response.exit_code == 0
+  targets = ('core', 'ingestion', 'discovery')
+  run_deploy_mock.assert_called_once_with({**DEFAULT_CONFIG, 'load_config': False}, ".", targets, False, False, False)

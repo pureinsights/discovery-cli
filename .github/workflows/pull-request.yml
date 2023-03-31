@@ -5,8 +5,9 @@ on:
       - master
       - main
       - release*
+      - develop
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 jobs:
   sonarcloud:
     name: SonarCloud

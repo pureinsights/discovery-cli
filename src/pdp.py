@@ -23,13 +23,13 @@ from commons.handlers import handle_exceptions
 
 def ensure_configurations(config: dict):
   """
-  It assures all configurations were loaded and if not, it uses defaults values.
+  Assures all configurations were loaded and if not, uses defaults values.
   :param dict config: The configurations to analyze.
   :rtype: dict
   :return: The config dict but with defaults values on those missing configurations.
   """
-  properties: list[str] = PRODUCTS
-
+  properties: list[str] = PRODUCTS['list']
+  config['load_config'] = config.get('load_config', True)
   for property in properties:
     if config.get(property, None) is None:
       config[property] = DEFAULT_CONFIG.get(property, None)
@@ -39,15 +39,15 @@ def ensure_configurations(config: dict):
 
 def load_config(config_name: str, profile: str = 'DEFAULT'):
   """
-  Implement profiles me with configparser (i.e. the idea is to be able to chose between profiles easily
+  Implement profiles with configparser (i.e. the idea is to be able to chose between profiles easily
   like we do on kubectl or aws-cli). Reference: https://docs.python.org/3/library/configparser.html
   """
   config = ConfigParser()
-  configuration = { }
+  configuration = {}
   if os.path.exists(config_name):
     config.read(config_name)
     if config.has_section(profile) or profile == 'DEFAULT':
-      configuration = config[profile]
+      configuration = {**config[profile], 'load_config': False}
     else:
       raise DataInconsistency(message=f'Configuration profile {profile} was not found.')
   return ensure_configurations(configuration)
@@ -55,10 +55,10 @@ def load_config(config_name: str, profile: str = 'DEFAULT'):
 
 @click.group()
 @click.option('--namespace', default='pdp', help='Namespace in which the PDP components are running. Default is "pdp".')
-@click.option('--profile',
+@click.option('--profile', default='DEFAULT',
               help='Configuration profile to load specific configurations from pdp.ini. Default is "DEFAULT"')
 @click.pass_context
-def pdp(ctx, namespace: str, profile: str | None):
+def pdp(ctx, namespace: str, profile: str):
   """
   This is the official Pureinsights Discovery Platform CLI.
   """
@@ -66,7 +66,9 @@ def pdp(ctx, namespace: str, profile: str | None):
   # by means other than the `if` block below)
   ctx.ensure_object(dict)
   ctx.obj['namespace'] = namespace
-  ctx.obj['configuration'] = load_config('pdp.ini', profile)
+  ctx.obj['profile'] = profile
+  config_path = os.path.join(os.path.abspath(__file__), 'pdp.ini')
+  ctx.obj['configuration'] = load_config(config_path, profile)
 
 
 @pdp.command()

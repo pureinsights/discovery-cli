@@ -110,4 +110,8 @@ def test_extract_entities_failed_on_extractions():
   pass  
 ```
 
+### Coverage report
+
+python -m pytest --cov=src --cov-report=html
+
 ### Integration testing

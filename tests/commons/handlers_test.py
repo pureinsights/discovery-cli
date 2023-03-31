@@ -57,13 +57,32 @@ def test_handle_exceptions_no_exception_happen(mocker):
   mock_stop_spinner.assert_called_once()
 
 
+def test_handle_http_response_HttpError(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_http_response`.
+  """
+  mock_request = mocker.MagicMock()
+  mock_request.method = 'fake-method'
+  mock_request.url = 'http://fake-url'
+  mock_content = mocker.MagicMock(decode=lambda param: '{"errors":["fake-error"]}')
+  mock_response = mocker.MagicMock()
+  mock_response.content = mock_content
+  mock_exception = requests.models.HTTPError(response=mock_response, request=mock_request)
+  response = requests.models.Response()
+  response.status_code = 500
+  response.raise_for_status = lambda: mock_custom_exception(mock_exception)
+  with pytest.raises(PdpException) as exception:
+    handle_http_response(response)
+  assert exception.value.content == {'errors': '\n\t'.join(["fake-error"]), 'status': 500}
+
+
 def test_handle_http_response_status_distinct_2xx():
   """
   Test the function defined in :func:`commons.handlers.handle_http_response`.
   """
   response = requests.Response()
   response.status_code = 404
-  with pytest.raises(requests.exceptions.HTTPError) as exception:
+  with pytest.raises(Exception) as exception:
     handle_http_response(response)
   assert exception is not None
 
@@ -94,7 +113,7 @@ def test_handle_and_exit_successful():
   Test the function defined in :func:`commons.handlers.handle_and_exit`,
   when no exception happened.
   """
-  response = handle_and_exit(mock_custom_exception, { }, None)
+  response = handle_and_exit(mock_custom_exception, {}, None)
   assert response == (True, None)
 
 
@@ -103,7 +122,7 @@ def test_handle_and_exit_fail():
   Test the function defined in :func:`commons.handlers.handle_and_exit`.
   """
   with pytest.raises(Exception) as exception:
-    handle_and_exit(mock_custom_exception, { }, DataInconsistency(message=None))
+    handle_and_exit(mock_custom_exception, {}, DataInconsistency(message=None))
   assert exception is not None
 
 
@@ -141,6 +160,23 @@ def test_handle_and_continue_show_error_and_exception(mocker):
   mock_print_error.assert_called_once_with(message, False, prefix='', suffix='')
 
 
+def test_handle_and_continue_show_warning_and_exception(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_and_continue`,
+  with configuration to show a message.
+  """
+  mock_print_exception = mocker.patch('commons.handlers.print_exception')
+  mock_print_warning = mocker.patch('commons.handlers.print_warning')
+  message = 'fake-message'
+  handle_and_continue(mock_custom_exception, {
+    'message': message,
+    'show_exception': True,
+    'warning': True
+  }, PdpException(message=message))
+  assert mock_print_exception.call_count == 1
+  mock_print_warning.assert_called_once_with(message, prefix='', suffix='')
+
+
 def test_handle_and_continue_show_exception(mocker):
   """
   Test the function defined in :func:`commons.handlers.handle_and_continue`,
@@ -158,5 +194,5 @@ def test_handle_and_exit_not_show_nothing():
   """
   Test the function defined in :func:`commons.handlers.handle_and_continue`.
   """
-  response = handle_and_continue(mock_custom_exception, { }, Exception)
+  response = handle_and_continue(mock_custom_exception, {}, Exception)
   assert response == (False, None)

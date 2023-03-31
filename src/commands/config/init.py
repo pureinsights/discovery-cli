@@ -14,7 +14,6 @@ import os
 import shutil
 
 import click
-from yaspin.spinners import Spinners
 
 from commons.console import create_spinner, print_exception, spinner_change_text, spinner_fail, spinner_ok
 from commons.constants import PRODUCTS, STAGING
@@ -30,15 +29,15 @@ def run(project_name: str, apis: dict, force: bool, template: str = None):
 
   :param str project_name: This will be the name of the folder that will contain the structure of the project.
   :param dict apis: A dictionary containing the url for each product api. (ingestion, discovery, core and staging).
-  :param bool force: If it is True it will try to override the project where you want to create it, if there is a
+  :param bool force: If it is True will try to override the project where you want to create it, if there is a
                       folder with the same name.
-  :param str template: The name of the template to use, if None then it will create a non empty project.
+  :param str template: The name of the template to use, if None then will create a non-empty project.
   :rtype: bool
   :return: True if the project was created successfully, False if any error happen.
   :raises Exception: If a project with the same name already exists.
   """
   if force and os.path.exists(project_name):
-    handler_params = { 'message': f'Can not remove {project_name.title()}.', 'show_exception': True }
+    handler_params = {'message': f'Can not remove {project_name.title()}.'}
     handle_and_exit(shutil.rmtree, handler_params, project_name)
 
   created_successfully = False
@@ -50,6 +49,7 @@ def run(project_name: str, apis: dict, force: bool, template: str = None):
 
   if not created_successfully:
     return False
+
   # Creates the pdp.ini configuration
   project_configuration = configparser.RawConfigParser()
   project_configuration['DEFAULT'] = apis
@@ -117,17 +117,17 @@ def create_project_from_existing_sources(project_name: str, apis: dict):
     create_project_folder_structure(project_path)
 
     # Exports from all products (excepting STAGING)
-    products = [product for product in PRODUCTS if product != STAGING]
-    ids = { }
+    products = [product for product in PRODUCTS['list'] if product != STAGING]
+    ids = {}
     successful_import = False
     for product in products:
-      create_spinner(Spinners.dots12)
+      create_spinner()
       product_dir_name = product.title()
       spinner_change_text(f'Importing {product_dir_name} entities...')
       zip_path = os.path.join(project_path, product_dir_name)
       product_api_url = apis.get(product)
       success, new_ids = handle_and_continue(export_all_entities,
-                                             { 'show_exception': True },
+                                             {'show_exception': True},
                                              product_api_url, zip_path, True, ids=ids)
       if new_ids is not None:
         ids = new_ids

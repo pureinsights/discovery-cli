@@ -8,13 +8,14 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
-import os
 
 from commons.custom_classes import PdpEntity
-from commons.file_system import list_directories
 
 # Endpoints
 URL_EXPORT_ALL = '{0}/export'
+URL_GET_BY_ID = '{0}/{entity}/{id}'
+URL_UPDATE = '{0}/{entity}/{id}'
+URL_CREATE = '{0}/{entity}'
 
 # URLs
 INGESTION_API_URL = 'http://localhost:8080'
@@ -28,7 +29,6 @@ INGESTION = 'ingestion'
 DISCOVERY = 'discovery'
 CORE = 'core'
 STAGING = 'staging'
-PRODUCTS = [CORE, INGESTION, DISCOVERY, STAGING]
 
 # Entities
 SCHEDULER = PdpEntity(INGESTION, 'scheduler', 'cron_jobs.json')
@@ -37,7 +37,7 @@ PIPELINE = PdpEntity(INGESTION, 'pipeline', 'pipelines.json')
 SEED = PdpEntity(INGESTION, 'seed', 'seeds.json')
 CREDENTIAL = PdpEntity(CORE, 'credential', 'credentials.json')
 ENDPOINT = PdpEntity(DISCOVERY, 'endpoint', 'endpoints.json')
-DISCOVERY_PROCESSOR = PdpEntity(DISCOVERY, 'processors', 'processors.json', 'processors')
+DISCOVERY_PROCESSOR = PdpEntity(DISCOVERY, 'processor', 'processors.json', 'processors')
 # Must be in order (based on which has fewer dependencies to another entities)
 ENTITIES = CREDENTIAL, INGESTION_PROCESSOR, PIPELINE, SEED, SCHEDULER, DISCOVERY_PROCESSOR, ENDPOINT
 
@@ -47,16 +47,32 @@ DEFAULT_CONFIG = {
   DISCOVERY: DISCOVERY_API_URL,
   CORE: CORE_API_URL,
   STAGING: STAGING_API_URL,
+  'load_config': True
+}
+
+PRODUCTS = {
+  'list': [CORE, INGESTION, DISCOVERY, STAGING],
+  INGESTION: {
+    'entities': [INGESTION_PROCESSOR, PIPELINE, SEED, SCHEDULER],
+  },
+  DISCOVERY: {
+    'entities': [DISCOVERY_PROCESSOR, ENDPOINT],
+  },
+  CORE: {
+    'entities': [CREDENTIAL],
+  },
+  STAGING: {
+    'entities': []
+  },
 }
 
 # Common messages
 WARNING_FORMAT = '[WARNING]: {message}'
 ERROR_FORMAT = '[ERROR]: {message}'
-EXCEPTION_FORMAT = 'Failed to execute command due to an {exception}:\n{error}'
+EXCEPTION_FORMAT = 'Some thing went wrong due to: {exception}.'
+
+FROM_NAME_FORMAT = "{{{{ fromName('{0}') }}}}"
 
 # Severities
 ERROR_SEVERITY = 'error'
 WARNING_SEVERITY = 'warning'
-
-TEMPLATE_NAMES = [directory.lower() for directory in list_directories(
-  os.path.join(os.path.dirname(__file__), '..', 'commands', 'config', 'templates', 'projects'))]
