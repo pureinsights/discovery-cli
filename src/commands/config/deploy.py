@@ -28,7 +28,7 @@ from commons.raisers import raise_file_not_found_error
 
 def inject_dependencies(products: list[str]):
   """
-  Inject the products dependencies if there is a product who needs a dependency and the dependency is not on the list.
+  Inject the product's dependencies if needed and not on the list.
   :param list[str] products: The list of products
   :rtype: list[str]
   :return: The list with dependencies included
@@ -151,9 +151,9 @@ def run(config: dict, path: str, target_products: list[str], is_verbose: bool = 
   :param dict config: The configuration that contains the product's url.
   :param str path: The path to the root of a pdp project.
   :param list[str] target_products: The list of the product names to be deployed.
-  :param bool is_verbose: It will show more information while deploy the entities.
-  :param bool ignore_ids: It will ignore the ids of the entities and try to create a new one.
-  :param bool quiet: It will suppress all the warnings and errors. Only shows the ids of the seeds, separated by \n.
+  :param bool is_verbose: Will show more information while deploy the entities.
+  :param bool ignore_ids: Will ignore the ids of the entities and try to create a new one.
+  :param bool quiet: Will suppress all the warnings and errors. Only shows the ids of the seeds, separated by \n.
                      If and error occurs then no ids will be showed.
   """
   suppress_warnings(quiet)
@@ -169,7 +169,7 @@ def run(config: dict, path: str, target_products: list[str], is_verbose: bool = 
 
   deploy_products(config, products, target_products, path, seeds, is_verbose, ignore_ids)
 
-  # It will show the seed ids only if, seeds is not empty,
+  # Will show the seed ids only if, seeds is not empty,
   # is verbose or not verbose or if is quiet but no errors happened.
   if len(seeds) > 0 and (not quiet or (quiet and get_number_errors_exceptions() <= 0)):
     print_format = 'Seed {name} with id {id}.'

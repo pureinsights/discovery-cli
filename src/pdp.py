@@ -23,7 +23,7 @@ from commons.handlers import handle_exceptions
 
 def ensure_configurations(config: dict):
   """
-  It assures all configurations were loaded and if not, it uses defaults values.
+  Assures all configurations were loaded and if not, uses defaults values.
   :param dict config: The configurations to analyze.
   :rtype: dict
   :return: The config dict but with defaults values on those missing configurations.
@@ -38,7 +38,7 @@ def ensure_configurations(config: dict):
 
 def load_config(config_name: str, profile: str = 'DEFAULT'):
   """
-  Implement profiles me with configparser (i.e. the idea is to be able to chose between profiles easily
+  Implement profiles with configparser (i.e. the idea is to be able to chose between profiles easily
   like we do on kubectl or aws-cli). Reference: https://docs.python.org/3/library/configparser.html
   """
   config = ConfigParser()

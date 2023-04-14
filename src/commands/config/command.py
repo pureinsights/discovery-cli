@@ -27,7 +27,7 @@ from commons.raisers import raise_for_pdp_data_inconsistencies
 @click.pass_context
 def config(ctx):
   """
-  Contains all the commands to help you manage the entities of the PDP.
+  Contains all the commands to help you manage the entities on PDP.
   You can create, update, delete, deploy and more.\n
   Use --help on each command for more detailed information.
   """
@@ -39,14 +39,14 @@ TEMPLATE_NAMES = [directory.lower() for directory in list_directories(os.path.jo
 @config.command()
 @click.option('-n', '--project-name', default='my-pdp-project',
               help='The name of the resulting directory, will try to fetch existing configurations from the APIs '
-                   'referenced in ~/.pdp. Notice that imported configs have id fields, don`t change those. Default is '
-                   'my-pdp-project.')
+                   'referenced in ~/.pdp. Notice that imported configurations have id fields, don`t change those. '
+                   'Default is my-pdp-project.')
 @click.option('--empty/--no-empty', default=True, help='If it should only create an empty directory structure with '
                                                        'basic handlebars for starting a new project. Default is True.')
 @click.option('-u', '--product-url', 'products_url', multiple=True, default=[], type=(str, str),
               help='The base URL for the given product API. The '
                    'product URL must be provided with the following '
-                   'format PRODUCT_NAME:URL. The command allows '
+                   'format PRODUCT_NAME URL. The command allows '
                    'multiple flags to define multiples products.\n '
                    'Default are ingestion http://localhost:8080,'
                    'staging http://localhost:8081,'
@@ -61,7 +61,7 @@ TEMPLATE_NAMES = [directory.lower() for directory in list_directories(os.path.jo
 @click.pass_context
 def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], force: bool, template):
   """
-  Creates a new project from existing sources or from scratch. It will create the folder structure for a PDP project.
+  Creates a new project from existing sources or from scratch. Will create the folder structure for a PDP project.
   """
   config = ctx.obj['configuration']
   for product_url in products_url:
@@ -99,12 +99,13 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
               help='The name of the product where you want to deploy the entities.  The command allows multiple flags '
                    'to define multiple targets. Default are [ingestion, core, discovery]')
 @click.option('-v', '--verbose', 'is_verbose', is_flag=True, default=False,
-              help='It will show more information about the deployment results. Default is False.')
+              help='Will show more information about the deployment results. Default is False.')
 @click.option('-g', '--ignore-ids/--no-ignore-ids', 'ignore_ids', default=False,
               help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
                    'is useful when moving configs from one instance to another. Default is False.')
 @click.option('-q', '--quiet', is_flag=True, default=False,
-              help='Display only the seed ids. Warnings and Errors will not be shown neither. Default is False.')
+
+              help='Display only the seed ids. Warnings and Errors will not be shown. Default is False.')
 @click.pass_context
 def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: bool):
   """
