@@ -134,7 +134,7 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
               help="This is the template's name of the entity to use. Default is None.")
 @click.option('--deploy', 'has_to_deploy', default=False, is_flag=True,
               help='It will deploy the entity configuration to the corresponding product. Default is False.')
-@click.option('--file', default=None,
+@click.option('--file', '_file', default=None,
               help='The path to the file that contains the configuration for the entity or entities. If the '
                    'configuration contains an id property it will be updated instead. Default is the established '
                    'configuration for each entity.')
