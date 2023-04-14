@@ -33,7 +33,7 @@ def interactive_input(placeholder: str):
   :rtype: list[dict]
   :return: Try to parse the text entered by the user in JSON format to PDP entities.
   """
-  result = click.edit(placeholder)
+  result: str | None = click.edit(placeholder)
   if result is not None:
     return json_to_pdp_entities(result)
   return json_to_pdp_entities(placeholder)
