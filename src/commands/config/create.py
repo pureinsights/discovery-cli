@@ -34,9 +34,9 @@ def interactive_input(placeholder: str):
   :return: Try to parse the text entered by the user in JSON format to PDP entities.
   """
   result = click.edit(placeholder)
-  if result is None:
-    return json_to_pdp_entities(placeholder)
-  return json_to_pdp_entities(result)
+  if result is not None:
+    return json_to_pdp_entities(result)
+  return json_to_pdp_entities(placeholder)
 
 
 def input_stage(file_path: str | None, interactive: bool) -> tuple[str, list[dict]]:
@@ -131,7 +131,7 @@ def writing_stage(project_path: str, entity_type: PdpEntity, entities: list[dict
         else:
           print_warning(
             f"Entity {identify_entity(entity)} already exists on {entity_type.associated_file_name}."
-            f" So it won't be added."
+            " So it won't be added."
           )
         is_duplicated = True
         break
@@ -178,7 +178,7 @@ def deployment_stage(config: dict, entity_type: PdpEntity, entities: list[dict],
     if _id is None:
       if verbose:
         spinner_fail(
-          f"Entity {click.style(identify_entity(entity), fg='blue')} could {click.style(f'not', fg='red')} be {action}."
+          f"Entity {click.style(identify_entity(entity), fg='blue')} could {click.style('not', fg='red')} be {action}."
         )
       continue
     if verbose:
@@ -225,7 +225,7 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
   entities_deployed = []
 
   # Read the entities to create
-  file, entities = input_stage(file, interactive)
+  _file, entities = input_stage(file, interactive)
 
   # Removes the id property if ignore-ids is activated
   if ignore_ids:

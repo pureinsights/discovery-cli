@@ -147,7 +147,7 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
               help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
                    'is useful when moving configs from one instance to another. Default is False.')
 @click.pass_context
-def create(ctx, entity_type_name: str, entity_template: str, file: str, has_to_deploy: bool, json: bool,
+def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_deploy: bool, json: bool,
            ignore_ids: bool, interactive: bool):
   """
   Add a new entity configuration to the entities on the current project. The configuration for each entity it will have
@@ -157,7 +157,7 @@ def create(ctx, entity_type_name: str, entity_template: str, file: str, has_to_d
   _config = ctx.obj['configuration']
   project_path = ctx.obj['project_path']
   entity_type = get_entity_type_by_name(entity_type_name)
-  if file is None:
+  if _file is None:
     if entity_template is not None:
       entity_type_templates_path = os.path.join(TEMPLATES_DIRECTORY, 'entities', entity_type.product, entity_type.type)
       entity_templates = [replace_file_extension(file_name, '') for file_name in list_files(entity_type_templates_path)]
@@ -165,10 +165,10 @@ def create(ctx, entity_type_name: str, entity_template: str, file: str, has_to_d
       if entity_template not in entity_templates:
         raise PdpException(message=f'Entity template "{entity_template}" not supported. Please provide one of the '
                                    f'following templates: {",".join(entity_templates)}.')
-      file = os.path.join(entity_type_templates_path, replace_file_extension(entity_template, '.json'))
+      _file = os.path.join(entity_type_templates_path, replace_file_extension(entity_template, '.json'))
 
     if not interactive and entity_template is None:
       raise PdpException(message="Entity template not provided. You must provide at least one flag to get the entity "
                                  "properties. Allowed flags: --entity-template, --file")
 
-  run_create(_config, project_path, entity_type, file, has_to_deploy, json, ignore_ids, interactive)
+  run_create(_config, project_path, entity_type, _file, has_to_deploy, json, ignore_ids, interactive)
