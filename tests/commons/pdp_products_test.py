@@ -13,14 +13,16 @@ from unittest.mock import mock_open
 
 import pytest
 
-from commons.constants import CORE, CREDENTIAL, DISCOVERY, DISCOVERY_PROCESSOR, ENDPOINT, INGESTION, \
+from commons.constants import CORE, CREDENTIAL, DISCOVERY, DISCOVERY_PROCESSOR_ENTITY, ENDPOINT, INGESTION, \
   INGESTION_PROCESSOR, \
-  PIPELINE, \
+  INGESTION_PROCESSOR_ENTITY, PIPELINE, \
   SCHEDULER, SEED, URL_CREATE, URL_GET_BY_ID, URL_UPDATE
 from commons.custom_classes import PdpException
-from commons.pdp_products import associate_values_from_entities, clear_from_name_format, create_or_update_entity, \
+from commons.pdp_products import are_same_pdp_entity, associate_values_from_entities, clear_from_name_format, \
+  create_or_update_entity, \
   export_all_entities, \
-  identify_entity, order_products_to_deploy, replace_ids, \
+  get_all_entities_names_ids, get_entity_type_by_name, identify_entity, json_to_pdp_entities, order_products_to_deploy, \
+  replace_ids, \
   replace_ids_for_names, \
   replace_names_by_ids, replace_value
 
@@ -126,7 +128,7 @@ def test_replace_ids_failed_replace_id(mocker):
 
 
 @pytest.mark.parametrize('entity_type, entities, expected_ids', [
-  (INGESTION_PROCESSOR, [{'id': 'fake-id4', 'name': 'fake-name4'}], {'fake-id4': 'fake-name4'}),
+  (INGESTION_PROCESSOR_ENTITY, [{'id': 'fake-id4', 'name': 'fake-name4'}], {'fake-id4': 'fake-name4'}),
   (PIPELINE, [{
     'id': 'fake-id4',
     'name': 'fake-name4',
@@ -136,7 +138,7 @@ def test_replace_ids_failed_replace_id(mocker):
   (SCHEDULER, [{'id': 'fake-id4', 'name': 'fake-name4'}], {'fake-id4': 'fake-name4'}),
   (CREDENTIAL, [{'id': 'fake-id4', 'name': 'fake-name4'}], {'fake-id4': 'fake-name4'}),
   (ENDPOINT, [{'id': 'fake-id4', 'name': 'fake-name4'}], {'fake-id4': 'fake-name4'}),
-  (DISCOVERY_PROCESSOR, [{'id': 'fake-id4', 'name': 'fake-name4'}], {'fake-id4': 'fake-name4'})
+  (DISCOVERY_PROCESSOR_ENTITY, [{'id': 'fake-id4', 'name': 'fake-name4'}], {'fake-id4': 'fake-name4'})
 ])
 def test_replace_ids_for_names(entity_type, entities, expected_ids):
   """
@@ -268,20 +270,26 @@ def test_replace_value_successful_with_custom_to_field():
     'id': 'fake-id7',
     'name': 'fake-name7',
     'steps': {'processorId': 'fake-id8'}
-  }, f'Value "fake-id8" does not exist while attempting to replace in processorId.' \
-     f' Entity has no name and no id in file pipelines.json.'
+  }, 'Value "fake-id8" does not exist while attempting to replace in field '
+     '"processorId". Entity has no name and no id in file pipelines.json. That '
+     'could means that the name "fake-id8" do not exists or the entity "fake-id8" '
+     'do not have an Id.'
    ),
   (SEED, {
     'pipelineId': 'fake-id8'
-  }, f'Value "fake-id8" does not exist while attempting to replace in pipelineId.' \
-     f' Entity has no name and no id in file seeds.json.'
+  }, 'Value "fake-id8" does not exist while attempting to replace in field '
+     '"pipelineId". Entity has no name and no id in file seeds.json. That could '
+     'means that the name "fake-id8" do not exists or the entity "fake-id8" do not '
+     'have an Id.'
    ),
   (SCHEDULER, {
     'id': 'fake-id7',
     'name': 'fake-name7',
     'seedId': 'fake-id8'
-  }, f'Value "fake-id8" does not exist while attempting to replace in seedId.' \
-     f' Entity name "fake-name7" in file cron_jobs.json.'
+  }, 'Value "fake-id8" does not exist while attempting to replace in field '
+     '"seedId". Entity name "fake-name7" in file cron_jobs.json. That could means '
+     'that the name "fake-id8" do not exists or the entity "fake-id8" do not have '
+     'an Id.'
    )
 ])
 def test_replace_value_failed(mocker, entity_type, entity, expected_message):
@@ -423,6 +431,16 @@ def test_order_products_to_deploy_without_core():
   assert order_products_to_deploy(products) == [INGESTION, DISCOVERY]
 
 
+def test_order_products_to_deploy_without_products():
+  """
+  Test the function defined in :func:`commons.pdp_products.order_products_to_deploy`,
+  when no products were provided.
+  """
+  # The only order that matters is that core is before ingestion
+  products = None
+  assert order_products_to_deploy(products) == []
+
+
 def test_create_or_update_entity(mocker):
   """
   Test the function defined in :func:`commons.pdp_products.create_or_update_entity`,
@@ -510,3 +528,105 @@ def test_create_or_update_entity_error_occurred(mocker, snapshot):
   id = create_or_update_entity(fake_url, fake_type, fake_entity, verbose=True)
   get_mock.assert_called_once_with(URL_GET_BY_ID.format(fake_url, entity=fake_type, id=fakeid))
   snapshot.assert_match(str(print_error_mock.call_args_list), 'test_create_or_update_entity_error_occurred.snapshot')
+
+
+def test_get_entity_type_by_name_ingestion_processor():
+  """
+  Test the function defined in :func:`commons.pdp_products.get_entity_type_by_name`,
+  when the entity name is ingestionProcessor.
+  """
+  entity_type = get_entity_type_by_name('ingestionProcessor')
+  assert entity_type == INGESTION_PROCESSOR_ENTITY
+
+
+def test_get_entity_type_by_name_discovery_processor():
+  """
+  Test the function defined in :func:`commons.pdp_products.get_entity_type_by_name`,
+  when the entity name is discoveryProcessor.
+  """
+  entity_type = get_entity_type_by_name('discoveryProcessor')
+  assert entity_type == DISCOVERY_PROCESSOR_ENTITY
+
+
+def test_get_entity_type_by_name_unrecognized_entity_name():
+  """
+  Test the function defined in :func:`commons.pdp_products.get_entity_type_by_name`,
+  when the entity name is not recognized.
+  """
+  entity_type = get_entity_type_by_name('fake_entity')
+  assert entity_type is None
+
+
+def test_get_all_entities_names_ids_bad_structure(mocker, test_project_path):
+  """
+  Test the function defined in :func:`commons.pdp_products.get_all_entities_names_ids`,
+  when the given path does not have a pdp project structure.
+  """
+  mocker.patch("commons.pdp_products.has_pdp_project_structure", return_value=False)
+  result = get_all_entities_names_ids(test_project_path(), [])
+  assert result == {}
+
+
+def test_get_all_entities_names_ids_can_not_read(mocker, test_project_path):
+  """
+  Test the function defined in :func:`commons.pdp_products.get_all_entities_names_ids`,
+  when the function can not read the entities.
+  """
+  mocker.patch("commons.pdp_products.handle_and_continue", return_value=(False, None))
+  result = get_all_entities_names_ids(test_project_path(), [])
+  assert result == {}
+
+
+def test_are_same_pdp_entity_not_same_attributes():
+  """
+  Test the function defined in :func:`commons.pdp_products.are_same_pdp_entity`,
+  when the entities have different keys.
+  """
+  assert not are_same_pdp_entity({'a': 1}, {'a': 1, 'b': 1})
+
+
+def test_are_same_pdp_entity_not_same_values():
+  """
+  Test the function defined in :func:`commons.pdp_products.are_same_pdp_entity`,
+  when the entities have the same keys but have different values.
+  """
+  assert not are_same_pdp_entity({'a': 1, 'b': 2}, {'a': 1, 'b': 1})
+
+
+def test_are_same_pdp_entity_same_values():
+  """
+  Test the function defined in :func:`commons.pdp_products.are_same_pdp_entity`,
+  when the entities have the same keys and have the same values.
+  """
+  assert are_same_pdp_entity({'a': 1, 'b': 2, 'id': 2}, {'a': 1, 'b': 2})
+
+
+def test_json_to_pdp_entities():
+  """
+  Test the function defined in :func:`commons.pdp_products.json_to_pdp_entities`.
+  """
+  entities_json = '[ { "id":"fake"} ]'
+  entities = json_to_pdp_entities(entities_json)
+  assert entities == [{"id": "fake"}]
+
+
+def test_json_to_pdp_entities_not_list():
+  """
+  Test the function defined in :func:`commons.pdp_products.json_to_pdp_entities`,
+  when the JSON just contain one entity.
+  """
+  entities_json = '{ "id":"fake"}'
+  entities = json_to_pdp_entities(entities_json)
+  assert entities == [{"id": "fake"}]
+
+
+def test_json_to_pdp_entities_bad_json():
+  """
+  Test the function defined in :func:`commons.pdp_products.json_to_pdp_entities`,
+  when the JSON doesn't have a valid format.
+  """
+  entities_json = '{ "id":"fake"'
+  with pytest.raises(PdpException) as error:
+    entities = json_to_pdp_entities(entities_json)
+  assert error.value.message == 'JSONDecodeError: Could not parse the JSON text. ' \
+                                'Please check the file has a valid JSON format.'

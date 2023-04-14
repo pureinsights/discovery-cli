@@ -47,7 +47,7 @@ def replace_file_extension(file: str, extension: str):
   :param str file: The path to the file to remove the extension.
   :param str extension: The new extension of the file.
   :rtype: str
-  :return: The new file path without the file extension.
+  :return: The new file path with the file extension replaced.
   """
   return Path(file).with_suffix(extension).name
 
@@ -66,6 +66,7 @@ def read_entities(path: str):
   with open(path, 'r+') as file:
     _, entities = handle_and_exit(json.load,
                                   {
+                                    'show_exception': True,
                                     'exception': PdpException(
                                       message=f'JSONDecodeError: Could not parse the file {path}. '
                                               f'Please check the file has a valid JSON format.')
@@ -120,5 +121,12 @@ def has_pdp_project_structure(path: str, show: str = None):
     if product.title() not in directories:
       print_aux(f"The folder {product.title()} missing on {path}. (Case sensitive).")
       has_structure = False
+      continue
+    product_path = os.path.join(path, product.title())
+    product_files = list_files(product_path)
+    for entity_type in PRODUCTS[product]['entities']:
+      if entity_type.associated_file_name not in product_files:
+        print_aux(f"The file {entity_type.associated_file_name} missing on {product_path}. (Case sensitive).")
+        has_structure = False
 
   return has_structure

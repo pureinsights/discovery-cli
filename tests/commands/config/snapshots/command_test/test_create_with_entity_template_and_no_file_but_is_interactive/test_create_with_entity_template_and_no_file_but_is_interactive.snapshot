@@ -1,0 +1,2 @@
+✔ Entity name "Pipeline" deployed with id newId.
+[WARNING]: Entity name "Pipeline" already exists on pipelines.json. So it won't be added.

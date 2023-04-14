@@ -4,10 +4,26 @@
     "active": true,
     "steps": [
       {
-        "processorId": "{{ fromName('Main Pipeline') }}",
+        "processorId": "{{ fromName('Persist to Search') }}",
         "action": "hydrate"
       }
     ],
-    "id": "fakeid"
+    "id": "fakeidP1"
+  },
+  {
+    "name": "Pipeline",
+    "active": true,
+    "steps": []
+  },
+  {
+    "name": "Custom Pipeline",
+    "active": true,
+    "steps": [
+      {
+        "processorId": "{{ fromName('Persist to Search') }}",
+        "action": "hydrate"
+      }
+    ],
+    "id": "fakeidP2"
   }
 ]

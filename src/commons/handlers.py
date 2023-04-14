@@ -33,6 +33,7 @@ def handle_exceptions(func: callable, *args, **kwargs):
     if not hasattr(exception, 'handled'):
       print_exception(exception)
     elif not exception.handled:
+      exception.handled = True
       print_exception(exception)
 
   finally:
@@ -103,6 +104,9 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
     if error_message is not None:
       print_error(error_message, True, prefix=prefix, suffix=suffix)
 
+    if params.get('exception', None) is not None:
+      raise error
+    
     raise PdpException(message=EXCEPTION_FORMAT.format(exception=type(error).__name__, error=''),
                        handled=show_exception or error_message is not None)
 

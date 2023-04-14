@@ -19,6 +19,10 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import errno
 import os
+from typing import Callable
+
+from commons.constants import PRODUCTS, STAGING
+from commons.custom_classes import DataInconsistency
 
 
 def raise_file_not_found_error(path: str):
@@ -30,3 +34,53 @@ def raise_file_not_found_error(path: str):
   if not os.path.exists(path):
     err_no = errno.ENOENT
     raise FileNotFoundError(err_no, os.strerror(err_no), path)
+
+
+def unique_fields(**kwargs):
+  """
+  Validates duplicated values among the entities.
+  :key dict entity: The entity to validate.
+  :key dict aux: A dictionary containing useful information to make the validation.
+  """
+  entity = kwargs.get('entity', None)
+  aux = kwargs.get('aux', None)
+  _unique_fields = ['id', 'name']
+  for field in _unique_fields:
+    entity_field = entity.get(field, None)
+    if entity_field is not None:
+      repeated_field = aux.get(entity_field, None)
+      if repeated_field is not None:
+        raise DataInconsistency(
+          message=f'Field "{field}" must be unique. More than one entity has the same {field}  "{entity_field}".',
+          handled=False
+        )
+      aux[entity_field] = entity
+
+  return True
+
+
+def validate_pdp_entities(requirements: list[Callable], entities: dict, aux: dict = None):
+  if aux is None:
+    aux = {}
+  for entity_type in entities.keys():
+    for entity in entities[entity_type]:
+      for requirement in requirements:
+        if not requirement(entity=entity, entities=entities, aux=aux, entity_type=entity_type):
+          return False
+  return True
+
+
+def raise_for_pdp_data_inconsistencies(project_path: str, aux: dict = None):
+  from commons.pdp_products import order_products_to_deploy
+  from commons.file_system import has_pdp_project_structure, read_entities
+  raise_file_not_found_error(project_path)
+  has_pdp_project_structure(project_path, show='error')
+  entities = {}
+  requirements = [unique_fields]
+  products = [product for product in PRODUCTS['list'] if product != STAGING]
+  for product in order_products_to_deploy(products):
+    entity_types = PRODUCTS[product].get('entities', [])
+    for entity_type in entity_types:
+      file_path = os.path.join(project_path, product.title(), entity_type.associated_file_name)
+      entities[entity_type] = read_entities(file_path)
+  validate_pdp_entities(requirements, entities, aux)

@@ -148,6 +148,8 @@ def print_console(message: any, *args, **kwargs):
   :param *args args: Positional arguments passed to click.secho.
   :param **kwargs kwargs: Keyword arguments passed to click.secho.
   """
+  if message is None:
+    return
   global buffer
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
@@ -166,7 +168,7 @@ def print_console(message: any, *args, **kwargs):
   click.secho(f'{prefix}{message}{suffix}', *args, nl=nl, **kwargs)
 
 
-def print_warning(message: str, *args, **kwargs):
+def print_warning(message: str | None, *args, **kwargs):
   """
   Prints a message with a specific format and style for warnings.
 
@@ -174,6 +176,8 @@ def print_warning(message: str, *args, **kwargs):
   :key str prefix: A string that will be added in front fo the message.
   :key str suffix: A string that will be added at the end of the message.
   """
+  if message is None:
+    return
   global printed_warnings
   printed_warnings += [message]
   if is_warnings_suppressed:
@@ -185,7 +189,7 @@ def print_warning(message: str, *args, **kwargs):
   print_console(styled_message)
 
 
-def print_error(message: str, raise_exception: bool = False, **kwargs):
+def print_error(message: str | None, raise_exception: bool = False, **kwargs):
   """
   Prints a message with a specific format and style for errors.
 
@@ -196,6 +200,8 @@ def print_error(message: str, raise_exception: bool = False, **kwargs):
   :key Exception exception: An exception that will be raised if raise_exceptions is True.
   :raises PdpException: When raise_exception is True.
   """
+  if message is None:
+    return
   global printed_errors
   printed_errors += [message]
   if is_errors_suppressed:

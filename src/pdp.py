@@ -29,7 +29,6 @@ def ensure_configurations(config: dict):
   :return: The config dict but with defaults values on those missing configurations.
   """
   properties: list[str] = PRODUCTS['list']
-  config['load_config'] = config.get('load_config', True)
   for property in properties:
     if config.get(property, None) is None:
       config[property] = DEFAULT_CONFIG.get(property, None)
@@ -47,7 +46,7 @@ def load_config(config_name: str, profile: str = 'DEFAULT'):
   if os.path.exists(config_name):
     config.read(config_name)
     if config.has_section(profile) or profile == 'DEFAULT':
-      configuration = {**config[profile], 'load_config': False}
+      configuration = {**config[profile]}
     else:
       raise DataInconsistency(message=f'Configuration profile {profile} was not found.')
   return ensure_configurations(configuration)
@@ -90,7 +89,4 @@ def health():
 pdp.add_command(config)
 
 if __name__ == '__main__':
-  # handle_exceptions(pdp)  # pragma: no cover
-  # handle_exceptions(pdp, ["-d", "./my-pdp-project", "config", "create", "-t", "seed", "--file",
-  #                         "../my-pdp-project"])  # pragma: no cover
-  handle_exceptions(pdp, ["-d", "./my-pdp-project", "config", "deploy", "-v"])  # pragma: no cover
+  handle_exceptions(pdp)  # pragma: no cover

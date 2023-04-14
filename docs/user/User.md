@@ -34,6 +34,8 @@ If no argument is passed to it will use the default values.
 
 - **--namespace**: Namespace in which the PDP components are running. **Default is "pdp"**.
 - **--profile**: Configuration profile to load specific configurations from pdp.ini. **Default is "DEFAULT"**.
+- **-d,--dir**: The path to a directory with the structure and the pdp.ini that init command creates. **Default
+  is ```./```**.
 
 ```bash
 pdp --namespace <namespace> --profile <configuration_profile>
@@ -89,8 +91,6 @@ field is missing from an entity, assumes this is a new instance.
 
 #### Flags:
 
-- **-d,--dir**: The path to a directory with the structure and the pdp.ini that init command creates. **Default
-  is ```./```**.
 - **--target**: The name of the product where you want to deploy the entities. The command allows multiple flags to
   define multiple targets. **Default are ```[ingestion, core, discovery]```**.
 - **-v,--verbose**: It will show more information about the deployment results. **Default is ```False```**.
@@ -101,17 +101,49 @@ field is missing from an entity, assumes this is a new instance.
 #### Deploy entities to Discovery and Ingestion
 
 ```bash
-pdp config deploy -d ./my-pdp-project --target discovery --target ingestion
+pdp -d ./my-pdp-project config deploy --target discovery --target ingestion
 ```
 
 #### Deploy entities ignoring ids with verbose mode
 
 ```bash
-pdp config deploy -d ./my-pdp-project -g -v --target discovery --target core
+pdp -d ./my-pdp-project config deploy -g -v --target discovery --target core
 ```
 
 #### Deploy entities to all targets with quiet mode
 
 ```bash
-pdp config deploy -d ./my-pdp-project -q
+pdp -d ./my-pdp-project config deploy -q
+```
+
+### Create Command
+
+Add a new entity configuration to the entities on the current project. The configuration for each entity it will have
+default values depending on the template name provided, or you can specify your own entity configuration with the --file
+and/or --interactive flags. You can also deploy the entities to their respective product.
+
+#### Flags
+
+- `REQUIRED`**-t, --entity-type**: This is the type of the entity that will be created. The entity types supported at
+  the moment are: ```[seed, ingestionProcessor, pipeline, Scheduler, Endpoint, discoveryProcessor]```.
+- **--entity-template**: This is the template's name of the entity to use. Default is ```None```.
+- **--deploy**: It will deploy the entity configuration to the corresponding product. Default is ```False```.
+- **--file**: The path to the file that contains the configuration for the entity or entities. If the configuration
+  contains an id property it will be updated instead. Default is ```None```.
+- **--interactive**: This is a Boolean flag. Will launch your default text editor to allow you to modify the entity
+  configuration. Default is ```False```.
+- **-j, --json**: This is a Boolean flag. Will print the results in JSON format. Default is ```False```.
+- **-g, --ignore-ids**: Will cause existing ids to be ignored, hence everything will be created as a new instance. This
+  is useful when moving configs from one instance to another. Default is ```False```.
+
+#### Add entities to a project and deploy them
+
+```bash
+pdp -d ./my-pdp-project config create --entity-type pipeline --file ./my-new-entities.json --deploy -g -j
+```
+
+#### Add entity to a project from a template and edit it.
+
+```bash
+pdp -d ./my-pdp-project config create --entity-type pipeline --entity-template empty_pipeline --interactive
 ```
