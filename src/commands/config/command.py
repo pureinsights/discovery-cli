@@ -137,7 +137,7 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
               help='The path to the file that contains the configuration for the entity or entities. If the '
                    'configuration contains an id property it will be updated instead. Default is the established '
                    'configuration for each entity.')
-@click.option('-j', '--json', is_flag=False, default=False,
+@click.option('-j', '--json', is_flag=True, default=False,
               help='This is a Boolean flag. Will print the results in JSON format. Default is False.')
 @click.option('--interactive', is_flag=True, default=False,
               help='This is a Boolean flag. Will launch your default text editor to allow you to modify the entity '
