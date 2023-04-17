@@ -10,7 +10,7 @@
     "name": "Persist to Search",
     "index": "${index}",
     "type": "elasticsearch-hydrator",
-    "id": "fakeid"
+    "id": "fakeidIP1"
   },
   {
     "bulkSize": 300,
@@ -20,7 +20,7 @@
         "port": 9200
       }
     ],
-    "name": "Persist to Search",
+    "name": "Persist to Search 2",
     "index": "${index}",
     "type": "elasticsearch-hydrator"
   }

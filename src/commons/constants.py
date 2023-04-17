@@ -8,6 +8,7 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import os
 
 from commons.custom_classes import PdpEntity
 
@@ -32,31 +33,33 @@ STAGING = 'staging'
 
 # Entities
 SCHEDULER = PdpEntity(INGESTION, 'scheduler', 'cron_jobs.json')
-INGESTION_PROCESSOR = PdpEntity(INGESTION, 'processor', 'processors.json')
+INGESTION_PROCESSOR_ENTITY = PdpEntity(INGESTION, 'processor', 'processors.json')
 PIPELINE = PdpEntity(INGESTION, 'pipeline', 'pipelines.json')
 SEED = PdpEntity(INGESTION, 'seed', 'seeds.json')
 CREDENTIAL = PdpEntity(CORE, 'credential', 'credentials.json')
 ENDPOINT = PdpEntity(DISCOVERY, 'endpoint', 'endpoints.json')
-DISCOVERY_PROCESSOR = PdpEntity(DISCOVERY, 'processor', 'processors.json', 'processors')
+DISCOVERY_PROCESSOR_ENTITY = PdpEntity(DISCOVERY, 'processor', 'processors.json', 'processors')
 # Must be in order (based on which has fewer dependencies to another entities)
-ENTITIES = CREDENTIAL, INGESTION_PROCESSOR, PIPELINE, SEED, SCHEDULER, DISCOVERY_PROCESSOR, ENDPOINT
+ENTITIES = CREDENTIAL, INGESTION_PROCESSOR_ENTITY, PIPELINE, SEED, SCHEDULER, DISCOVERY_PROCESSOR_ENTITY, ENDPOINT
+
+INGESTION_PROCESSOR = {'name': 'ingestionprocessor', 'entity': INGESTION_PROCESSOR_ENTITY}
+DISCOVERY_PROCESSOR = {'name': 'discoveryprocessor', 'entity': DISCOVERY_PROCESSOR_ENTITY}
 
 # Configurations
 DEFAULT_CONFIG = {
   INGESTION: INGESTION_API_URL,
   DISCOVERY: DISCOVERY_API_URL,
   CORE: CORE_API_URL,
-  STAGING: STAGING_API_URL,
-  'load_config': True
+  STAGING: STAGING_API_URL
 }
 
 PRODUCTS = {
   'list': [CORE, INGESTION, DISCOVERY, STAGING],
   INGESTION: {
-    'entities': [INGESTION_PROCESSOR, PIPELINE, SEED, SCHEDULER],
+    'entities': [INGESTION_PROCESSOR_ENTITY, PIPELINE, SEED, SCHEDULER],
   },
   DISCOVERY: {
-    'entities': [DISCOVERY_PROCESSOR, ENDPOINT],
+    'entities': [DISCOVERY_PROCESSOR_ENTITY, ENDPOINT],
   },
   CORE: {
     'entities': [CREDENTIAL],
@@ -69,10 +72,13 @@ PRODUCTS = {
 # Common messages
 WARNING_FORMAT = '[WARNING]: {message}'
 ERROR_FORMAT = '[ERROR]: {message}'
-EXCEPTION_FORMAT = 'Some thing went wrong due to: {exception}.'
+EXCEPTION_FORMAT = 'Some thing went wrong due to: {exception}.{error}'
 
 FROM_NAME_FORMAT = "{{{{ fromName('{0}') }}}}"
 
 # Severities
 ERROR_SEVERITY = 'error'
 WARNING_SEVERITY = 'warning'
+
+# File paths
+TEMPLATES_DIRECTORY = os.path.join(os.path.dirname(__file__), '..', 'commands', 'config', 'templates')

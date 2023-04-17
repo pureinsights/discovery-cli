@@ -28,7 +28,7 @@ def test_run_deploy(test_project_path, mocker):
   run_deploy(DEFAULT_CONFIG, test_project_path(), target_products)
   commons.console.is_errors_suppressed = False
   commons.console.is_warnings_suppressed = False
-  assert create_update_mock.call_count == 6
+  assert create_update_mock.call_count == 8
 
 
 def test_run_deploy_quiet_mode(test_project_path, mocker):
@@ -47,7 +47,7 @@ def test_run_deploy_quiet_mode(test_project_path, mocker):
   run_deploy(DEFAULT_CONFIG, test_project_path(), target_products, False, False, True)
   commons.console.is_errors_suppressed = False
   commons.console.is_warnings_suppressed = False
-  assert create_update_mock.call_count == 6
+  assert create_update_mock.call_count == 8
   print_mock.assert_called_with("fakeid")
 
 
@@ -84,4 +84,4 @@ def test_run_deploy_ignoring_ids(test_project_path, mocker):
   run_deploy(DEFAULT_CONFIG, test_project_path(), target_products, True, True, False)
   commons.console.is_errors_suppressed = False
   commons.console.is_warnings_suppressed = False
-  assert create_update_mock.call_count == 6
+  assert create_update_mock.call_count == 8

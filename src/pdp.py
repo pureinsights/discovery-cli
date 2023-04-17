@@ -29,7 +29,6 @@ def ensure_configurations(config: dict):
   :return: The config dict but with defaults values on those missing configurations.
   """
   properties: list[str] = PRODUCTS['list']
-  config['load_config'] = config.get('load_config', True)
   for property in properties:
     if config.get(property, None) is None:
       config[property] = DEFAULT_CONFIG.get(property, None)
@@ -47,7 +46,7 @@ def load_config(config_name: str, profile: str = 'DEFAULT'):
   if os.path.exists(config_name):
     config.read(config_name)
     if config.has_section(profile) or profile == 'DEFAULT':
-      configuration = {**config[profile], 'load_config': False}
+      configuration = {**config[profile]}
     else:
       raise DataInconsistency(message=f'Configuration profile {profile} was not found.')
   return ensure_configurations(configuration)
@@ -57,8 +56,10 @@ def load_config(config_name: str, profile: str = 'DEFAULT'):
 @click.option('--namespace', default='pdp', help='Namespace in which the PDP components are running. Default is "pdp".')
 @click.option('--profile', default='DEFAULT',
               help='Configuration profile to load specific configurations from pdp.ini. Default is "DEFAULT"')
+@click.option('-d', '--dir', 'path', default='.', help='The path to a directory with the structure and the pdp.ini '
+                                                       'that init command creates. Default is ./.')
 @click.pass_context
-def pdp(ctx, namespace: str, profile: str):
+def pdp(ctx, namespace: str, path: str, profile: str):
   """
   This is the official Pureinsights Discovery Platform CLI.
   """
@@ -67,7 +68,8 @@ def pdp(ctx, namespace: str, profile: str):
   ctx.ensure_object(dict)
   ctx.obj['namespace'] = namespace
   ctx.obj['profile'] = profile
-  config_path = os.path.join(os.path.abspath(__file__), 'pdp.ini')
+  ctx.obj['project_path'] = path
+  config_path = os.path.join(path, 'pdp.ini')
   ctx.obj['configuration'] = load_config(config_path, profile)
 
 

@@ -192,6 +192,16 @@ def test_print_console_spinner_is_not_none(mocker):
   assert commons.console.buffer == f'{message}\n'
 
 
+def test_print_console_no_print_if_message_is_none(mocker):
+  """
+  Test the function defined in :func:`commons.console.print_console`,
+  when the message is None.
+  """
+  secho_mock = mocker.patch("commons.console.click.secho")
+  print_console(None)
+  assert secho_mock.call_count == 0
+
+
 def test_print_warning_successful(mocker):
   """
   Test the function defined in :func:`commons.console.print_warning`.
@@ -201,6 +211,16 @@ def test_print_warning_successful(mocker):
   styled_warning = click.style(WARNING_FORMAT.format(message=message), fg='yellow')
   print_warning(message)
   mock_print_console.assert_called_once_with(styled_warning)
+
+
+def test_print_warning_no_print_if_message_is_none(mocker):
+  """
+  Test the function defined in :func:`commons.console.print_warning`,
+  when the message is None.
+  """
+  secho_mock = mocker.patch("commons.console.click.secho")
+  print_warning(None)
+  assert secho_mock.call_count == 0
 
 
 @pytest.mark.parametrize('exception', [
@@ -259,6 +279,16 @@ def test_print_exception_file_not_found_error(mocker):
   custom_exception = FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), fake_path)
   print_exception(custom_exception)
   mock_error.assert_called_once_with(f'{custom_exception.strerror}: {custom_exception.filename}')
+
+
+def test_print_error_no_print_if_message_is_none(mocker):
+  """
+  Test the function defined in :func:`commons.console.print_error`,
+  when the message is None.
+  """
+  secho_mock = mocker.patch("commons.console.click.secho")
+  print_error(None)
+  assert secho_mock.call_count == 0
 
 
 @pytest.mark.parametrize('params', [

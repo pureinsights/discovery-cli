@@ -14,6 +14,7 @@ import requests as req
 import requests.exceptions
 
 from commons.console import print_error, print_exception, print_warning, stop_spinner
+from commons.constants import EXCEPTION_FORMAT
 from commons.custom_classes import PdpException
 
 
@@ -29,9 +30,12 @@ def handle_exceptions(func: callable, *args, **kwargs):
   try:
     func(*args, **kwargs)
   except Exception as exception:
-    if hasattr(exception, 'handled'):
+    if not hasattr(exception, 'handled'):
+      print_exception(exception)
+    elif not exception.handled:
       exception.handled = True
-    print_exception(exception)
+      print_exception(exception)
+
   finally:
     stop_spinner()
 
@@ -92,13 +96,19 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
 
   except Exception as error:
     error = params.get('exception', error)
+    if hasattr(error, 'handled'):
+      error.handled = True
     if show_exception:
       print_exception(error, prefix=prefix, suffix=suffix)
 
     if error_message is not None:
       print_error(error_message, True, prefix=prefix, suffix=suffix)
 
-    raise error
+    if params.get('exception', None) is not None:
+      raise error
+
+    raise PdpException(message=EXCEPTION_FORMAT.format(exception=type(error).__name__, error=''),
+                       handled=show_exception or error_message is not None)
 
 
 def handle_and_continue(func: callable, params: dict, *args, **kwargs):

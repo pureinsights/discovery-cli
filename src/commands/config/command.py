@@ -12,11 +12,15 @@ import os
 
 import click
 
+from commands.config.create import run as run_create
 from commands.config.deploy import run as run_deploy
 from commands.config.init import run as run_init
 from commons.console import print_error
-from commons.constants import PRODUCTS, STAGING
-from commons.file_system import list_directories
+from commons.constants import ENTITIES, PRODUCTS, STAGING, TEMPLATES_DIRECTORY
+from commons.custom_classes import PdpException
+from commons.file_system import list_directories, list_files, replace_file_extension
+from commons.pdp_products import get_entity_type_by_name
+from commons.raisers import raise_for_pdp_data_inconsistencies
 
 
 @click.group()
@@ -29,8 +33,7 @@ def config(ctx):
   """
 
 
-TEMPLATE_NAMES = [directory.lower() for directory in list_directories(
-  os.path.join(os.path.dirname(__file__), 'templates', 'projects'))]
+TEMPLATE_NAMES = [directory.lower() for directory in list_directories(os.path.join(TEMPLATES_DIRECTORY, 'projects'))]
 
 
 @config.command()
@@ -61,11 +64,6 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
   Creates a new project from existing sources or from scratch. Will create the folder structure for a PDP project.
   """
   config = ctx.obj['configuration']
-  if config.get('load_config'):
-    from pdp import load_config
-    path = os.path.join('.', project_name, 'pdp.ini')
-    config = load_config(path, ctx.obj['profile'])
-
   for product_url in products_url:
     product: str
     url: str
@@ -95,8 +93,6 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
 
 
 @config.command()
-@click.option('-d', '--dir', 'path', default='.', help='The path to a directory with the structure and the pdp.ini '
-                                                       'that init command creates. Default is ./.')
 @click.option('--target', 'targets', default=[product for product in PRODUCTS['list'] if product != STAGING],
               multiple=True,
               type=click.Choice([product for product in PRODUCTS['list'] if product != STAGING], case_sensitive=False),
@@ -108,18 +104,71 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
               help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
                    'is useful when moving configs from one instance to another. Default is False.')
 @click.option('-q', '--quiet', is_flag=True, default=False,
+
               help='Display only the seed ids. Warnings and Errors will not be shown. Default is False.')
 @click.pass_context
-def deploy(ctx, targets: list[str], path: str, is_verbose: bool, ignore_ids: bool, quiet: bool):
+def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: bool):
   """
   Deploys project configurations to the target products.
   Must be run within the directory from a project created with the 'init' command.
   Will replace any name reference with IDs. Names are case-sensitive. If the "id" field is missing from an entity,
   assumes this is a new instance.
   """
+  path = ctx.obj['project_path']
   config = ctx.obj['configuration']
-  if config.get('load_config'):
-    from pdp import load_config
-    config_path = os.path.join(path, 'pdp.ini')
-    config = load_config(config_path, ctx.obj['profile'])
+  raise_for_pdp_data_inconsistencies(path)
   run_deploy(config, path, targets, is_verbose and not quiet, ignore_ids, quiet)
+
+
+@config.command()
+@click.option('-t', '--entity-type', 'entity_type_name', required=True,
+              type=click.Choice([
+                entity_type.type if entity_type.type != 'processor'
+                else f'{entity_type.product}{entity_type.type.title()}'
+                for entity_type in ENTITIES],
+                case_sensitive=False
+              ),
+              help='This is the type of the entity that will be created. The entity types supported at'
+                   'the moment are: seed, ingestionProcessor, pipeline, Scheduler, Endpoint, discoveryProcessor.')
+@click.option('--entity-template', default=None,
+              help="This is the template's name of the entity to use. Default is None.")
+@click.option('--deploy', 'has_to_deploy', default=False, is_flag=True,
+              help='It will deploy the entity configuration to the corresponding product. Default is False.')
+@click.option('--file', '_file', default=None,
+              help='The path to the file that contains the configuration for the entity or entities. If the '
+                   'configuration contains an id property it will be updated instead. Default is the established '
+                   'configuration for each entity.')
+@click.option('-j', '--json', is_flag=True, default=False,
+              help='This is a Boolean flag. Will print the results in JSON format. Default is False.')
+@click.option('--interactive', is_flag=True, default=False,
+              help='This is a Boolean flag. Will launch your default text editor to allow you to modify the entity '
+                   'configuration. Default is False.')
+@click.option('-g', '--ignore-ids/--no-ignore-ids', 'ignore_ids', default=False,
+              help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
+                   'is useful when moving configs from one instance to another. Default is False.')
+@click.pass_context
+def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_deploy: bool, json: bool,
+           ignore_ids: bool, interactive: bool):
+  """
+  Add a new entity configuration to the entities on the current project. The configuration for each entity it will have
+  default values depending on the template name provided, or you can specify your own entity configuration with the
+  --file and/or --interactive flags. You can also deploy the entities to their respective product.
+  """
+  _config = ctx.obj['configuration']
+  project_path = ctx.obj['project_path']
+  entity_type = get_entity_type_by_name(entity_type_name)
+  if _file is None:
+    if entity_template is not None:
+      entity_type_templates_path = os.path.join(TEMPLATES_DIRECTORY, 'entities', entity_type.product, entity_type.type)
+      entity_templates = [replace_file_extension(file_name, '') for file_name in list_files(entity_type_templates_path)]
+
+      if entity_template not in entity_templates:
+        raise PdpException(message=f'Entity template "{entity_template}" not supported. Please provide one of the '
+                                   f'following templates: {",".join(entity_templates)}.')
+      _file = os.path.join(entity_type_templates_path, replace_file_extension(entity_template, '.json'))
+
+    if not interactive and entity_template is None:
+      raise PdpException(message="Entity template not provided. You must provide at least one flag to get the entity "
+                                 "properties. Allowed flags: --entity-template, --file")
+
+  run_create(_config, project_path, entity_type, _file, has_to_deploy, json, ignore_ids, interactive)

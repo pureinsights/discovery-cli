@@ -8,6 +8,7 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+
 from commons.constants import DEFAULT_CONFIG
 from pdp import pdp
 from pdp_test import cli
@@ -59,8 +60,7 @@ def test_init_parse_options(mocker, snapshot):
     'ingestion': 'http://ingestion-fake',
     'discovery': 'http://ingestion-fake',
     'core': 'http://ingestion-fake',
-    'staging': 'http://ingestion-fake',
-    'load_config': True
+    'staging': 'http://ingestion-fake'
   }
   force = '--force'
   response = cli.invoke(pdp,
@@ -97,26 +97,99 @@ def test_init_without_load_config_on_init_command(mocker, snapshot):
   snapshot.assert_match(response.output, 'test_init_without_load_config_on_init_command.snapshot')
 
 
-def test_deploy_success(mocker, snapshot):
+def test_deploy_success(mocker, snapshot, test_project_path):
   """
   Test the command defined in :func:`src.commands.config.command.deploy`,
   without arguments.
   """
+  project_path = test_project_path()
   run_deploy_mock = mocker.patch("commands.config.command.run_deploy")
-  response = cli.invoke(pdp, ["config", "deploy"])
+  response = cli.invoke(pdp, ["-d", project_path, "config", "deploy"])
   assert response.exit_code == 0
   targets = ('core', 'ingestion', 'discovery')
-  run_deploy_mock.assert_called_once_with(DEFAULT_CONFIG, ".", targets, False, False, False)
+  run_deploy_mock.assert_called_once_with(DEFAULT_CONFIG, project_path, targets, False, False, False)
+  snapshot.assert_match(response.output, 'test_deploy_success.snapshot')
 
 
-def test_deploy_without_load_config_on_deploy_command(mocker, snapshot):
+def test_deploy_without_load_config_on_deploy_command(mocker, snapshot, test_project_path):
   """
   Test the command defined in :func:`src.commands.config.command.deploy`,
   without arguments.
   """
+  project_path = test_project_path()
   mocker.patch("pdp.os.path.exists", returned_value=False)
   run_deploy_mock = mocker.patch("commands.config.command.run_deploy")
-  response = cli.invoke(pdp, ["config", "deploy"])
+  response = cli.invoke(pdp, ["-d", project_path, "config", "deploy"])
   assert response.exit_code == 0
   targets = ('core', 'ingestion', 'discovery')
-  run_deploy_mock.assert_called_once_with({**DEFAULT_CONFIG, 'load_config': False}, ".", targets, False, False, False)
+  run_deploy_mock.assert_called_once_with(DEFAULT_CONFIG, project_path, targets, False, False, False)
+  snapshot.assert_match(response.output, 'test_deploy_without_load_config_on_deploy_command.snapshot')
+
+
+def test_create_successfully(mocker, snapshot, test_project_path):
+  """
+  Test the command defined in :func:`src.commands.config.command.create`,
+  when the flag --file was provided.
+  """
+  mocker.patch("commands.config.create.create_spinner")
+  mocker.patch("commands.config.create.create_or_update_entity", return_value="newId")
+  mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
+  mocker.patch("commands.config.create.write_entities")
+  response = cli.invoke(pdp, ["-d", test_project_path(), "config", "create", "--entity-type", "pipeline", "--file",
+                              test_project_path('custom_pipeline.json')])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_create_successfully.snapshot')
+
+
+def test_create_with_entity_template(mocker, snapshot, test_project_path):
+  """
+  Test the command defined in :func:`src.commands.config.command.create`,
+  when a template for an entity is provided.
+  """
+  mocker.patch("commands.config.create.create_spinner")
+  mocker.patch("commands.config.create.create_or_update_entity", return_value="newId")
+  mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
+  response = cli.invoke(pdp, ["-d", test_project_path(), "config", "create", "--entity-type", "pipeline",
+                              "--entity-template", "empty_pipeline", "--deploy", "--json"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_create_with_entity_template.snapshot')
+
+
+def test_create_with_entity_template_and_no_file(mocker, snapshot, test_project_path):
+  """
+  Test the command defined in :func:`src.commands.config.command.create`,
+  when a template and a file were not provided.
+  """
+  mocker.patch("commands.config.create.create_spinner")
+  mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
+  response = cli.invoke(pdp, ["-d", test_project_path(), "config", "create", "--entity-type", "pipeline"])
+  assert response.exit_code == 1
+  snapshot.assert_match(response.output, 'test_create_with_entity_template_and_no_file.snapshot')
+
+
+def test_create_entity_template_not_supported(mocker, snapshot, test_project_path):
+  """
+  Test the command defined in :func:`src.commands.config.command.create`,
+  when the template provided is not supported.
+  """
+  mocker.patch("commands.config.create.create_spinner")
+  mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
+  response = cli.invoke(pdp, ["-d", test_project_path(), "config", "create", "--entity-type", "pipeline",
+                              "--entity-template", "fake_template"])
+  assert response.exit_code == 1
+  snapshot.assert_match(response.output, 'test_create_entity_template_not_supported.snapshot')
+
+
+def test_create_with_entity_template_and_no_file_but_is_interactive(mocker, snapshot, test_project_path):
+  """
+  Test the command defined in :func:`src.commands.config.command.create`,
+  when a template and a file were not provided, but the flag interactive is True and also the deployment.
+  """
+  mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
+  mocker.patch("commands.config.create.click.edit", return_value='{ "name": "Pipeline", "active": true, "steps": [] }')
+  mocker.patch("commands.config.create.create_spinner")
+  mocker.patch("commands.config.create.create_or_update_entity", return_value="newId")
+  response = cli.invoke(pdp, ["-d", test_project_path(), "config", "create", "--entity-type", "pipeline",
+                              "--interactive", "--ignore-ids", "--deploy"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_create_with_entity_template_and_no_file_but_is_interactive.snapshot')

@@ -10,7 +10,10 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import json
 import os
+from pathlib import Path
 
+from commons.console import print_error, print_warning
+from commons.constants import PRODUCTS, STAGING
 from commons.custom_classes import PdpException
 from commons.handlers import handle_and_exit
 from commons.raisers import raise_file_not_found_error
@@ -38,6 +41,17 @@ def list_files(path: str):
   return [file for file in os.listdir(path) if not os.path.isdir(os.path.join(path, file))]
 
 
+def replace_file_extension(file: str, extension: str):
+  """
+  Remove the file extension of a given file path.
+  :param str file: The path to the file to remove the extension.
+  :param str extension: The new extension of the file.
+  :rtype: str
+  :return: The new file path with the file extension replaced.
+  """
+  return Path(file).with_suffix(extension).name
+
+
 def read_entities(path: str):
   """
   Reads a file in format json that contains the entities of PDP.
@@ -47,9 +61,12 @@ def read_entities(path: str):
   :raises FileNotFoundError: If the file does not exist.
   """
   raise_file_not_found_error(path)
+  if not os.path.isfile(path):
+    raise PdpException(message=f'Path "{path}" is not a file.')
   with open(path, 'r+') as file:
     _, entities = handle_and_exit(json.load,
                                   {
+                                    'show_exception': True,
                                     'exception': PdpException(
                                       message=f'JSONDecodeError: Could not parse the file {path}. '
                                               f'Please check the file has a valid JSON format.')
@@ -70,3 +87,46 @@ def write_entities(path: str, entities: list[dict]):
     file.seek(0)
     json.dump(entities, file, indent=2)
     file.truncate()
+
+
+def has_pdp_project_structure(path: str, show: str = None):
+  """
+  Validates if a given directory has a pdp project structure.
+  :param str path: The path to the directory to validate.
+  :param str show: The mode to print messages, warning, error, None. None will no print nothing and
+                   error will raise an error.
+  :rtype: bool
+  :return: True if the folder has the structure correctly, False in other case.
+  """
+  raise_file_not_found_error(path)
+  print_aux = lambda message: None
+  if show == 'warning':
+    print_aux = print_warning
+  elif show == 'error':
+    print_aux = lambda message: print_error(message, True)
+
+  if not os.path.isdir(path):
+    print_aux("The path provided is not a directory.")
+    return False
+
+  directories = list_directories(path)
+  files = list_files(path)
+  has_structure = True
+  if 'pdp.ini' not in files:
+    print_aux(f"The file pdp.ini is missing on {path}. (Case sensitive).")
+    has_structure = False
+
+  for product in PRODUCTS['list']:
+    if product == STAGING: continue
+    if product.title() not in directories:
+      print_aux(f"The folder {product.title()} missing on {path}. (Case sensitive).")
+      has_structure = False
+      continue
+    product_path = os.path.join(path, product.title())
+    product_files = list_files(product_path)
+    for entity_type in PRODUCTS[product]['entities']:
+      if entity_type.associated_file_name not in product_files:
+        print_aux(f"The file {entity_type.associated_file_name} missing on {product_path}. (Case sensitive).")
+        has_structure = False
+
+  return has_structure

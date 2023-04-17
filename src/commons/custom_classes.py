@@ -36,7 +36,7 @@ class DataInconsistency(Exception):
     self.message = kwargs.get('message', None)
     if self.message is not None:
       super().__init__(self.message)
-    self.handled = kwargs.get('handled', True)
+    self.handled = kwargs.get('handled', False)
     self.severity = kwargs.get('severity', ERROR_SEVERITY)
     self.content = kwargs.get('content', {})
 

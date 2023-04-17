@@ -148,6 +148,8 @@ def print_console(message: any, *args, **kwargs):
   :param *args args: Positional arguments passed to click.secho.
   :param **kwargs kwargs: Keyword arguments passed to click.secho.
   """
+  if message is None:
+    return
   global buffer
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
@@ -166,7 +168,7 @@ def print_console(message: any, *args, **kwargs):
   click.secho(f'{prefix}{message}{suffix}', *args, nl=nl, **kwargs)
 
 
-def print_warning(message: str, *args, **kwargs):
+def print_warning(message: str | None, *args, **kwargs):
   """
   Prints a message with a specific format and style for warnings.
 
@@ -174,6 +176,8 @@ def print_warning(message: str, *args, **kwargs):
   :key str prefix: A string that will be added in front fo the message.
   :key str suffix: A string that will be added at the end of the message.
   """
+  if message is None:
+    return
   global printed_warnings
   printed_warnings += [message]
   if is_warnings_suppressed:
@@ -185,7 +189,7 @@ def print_warning(message: str, *args, **kwargs):
   print_console(styled_message)
 
 
-def print_error(message: str, raise_exception: bool = False, **kwargs):
+def print_error(message: str | None, raise_exception: bool = False, **kwargs):
   """
   Prints a message with a specific format and style for errors.
 
@@ -196,6 +200,8 @@ def print_error(message: str, raise_exception: bool = False, **kwargs):
   :key Exception exception: An exception that will be raised if raise_exceptions is True.
   :raises PdpException: When raise_exception is True.
   """
+  if message is None:
+    return
   global printed_errors
   printed_errors += [message]
   if is_errors_suppressed:
@@ -203,7 +209,7 @@ def print_error(message: str, raise_exception: bool = False, **kwargs):
   prefix = kwargs.get('prefix', '')
   suffix = kwargs.get('suffix', '')
   error_message = f'{prefix}{ERROR_FORMAT.format(message=message)}{suffix}'
-  exception = kwargs.get('exception', PdpException(message=message, handled=not raise_exception))
+  exception = kwargs.get('exception', PdpException(message=message, handled=raise_exception))
   styled_message = click.style(error_message, fg='red')
   print_console(styled_message, err=True)
   if raise_exception:
@@ -250,6 +256,7 @@ def print_exception(exception, **kwargs):
 def verbose(**kwargs):
   """
   Will execute any of "verbose_func" or "not_verbose_func" based on "verbose" flag. And return
+
   whatever the function returns. Helpful to manage more complex behaviors to a verbose command, rather than
   just print some text in console.
   :key bool verbose: The flag tha defines which function will be called.

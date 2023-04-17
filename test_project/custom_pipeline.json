@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Custom Pipeline",
+    "active": true,
+    "steps": [
+      {
+        "processorId": "{{ fromName('Persist to Search') }}",
+        "action": "hydrate"
+      }
+    ],
+    "id": "fakeidP2"
+  }
+]

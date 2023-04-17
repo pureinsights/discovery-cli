@@ -9,5 +9,6 @@ Options:
   --help  Show this message and exit.
 
 Commands:
+  create  Add a new entity configuration to the entities on the current...
   deploy  Deploys project configurations to the target products.
   init    Creates a new project from existing sources or from scratch.
