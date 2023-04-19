@@ -397,6 +397,9 @@ def get_entity_type_by_name(entity_type_name: str) -> PdpEntity | None:
   :rtype: PdpEntity
   :return: The entity type inferred by the given name.
   """
+  if type(entity_type_name) is not str:
+    return None
+
   if entity_type_name.lower() == INGESTION_PROCESSOR['name']:
     return INGESTION_PROCESSOR['entity']
 

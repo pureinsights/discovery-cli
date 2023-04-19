@@ -1,0 +1,35 @@
+2ingestionProcessor entities found on Ingestion.
+2pipeline entities found on Ingestion.
+2seed entities found on Ingestion.
+2scheduler entities found on Ingestion.
+Entities
+--------------------|Ingestion|--------------------
+    Processor:
+       | id      | name      | description
+   ----+---------+-----------+---------------
+     0 | fake-id | fake-name | None
+     1 | fake-id | fake-name |
+    Entities found: 2
+
+    Pipeline:
+       | id      | name      | description
+   ----+---------+-----------+---------------
+     0 | fake-id | fake-name | None
+     1 | fake-id | fake-name |
+    Entities found: 2
+
+    Seed:
+       | id      | name      | description
+   ----+---------+-----------+---------------
+     0 | fake-id | fake-name | None
+     1 | fake-id | fake-name |
+    Entities found: 2
+
+    Scheduler:
+       | id      | name      | description
+   ----+---------+-----------+---------------
+     0 | fake-id | fake-name | None
+     1 | fake-id | fake-name |
+    Entities found: 2
+--------------------|Entities found: 8|--------------------
+Entities found: 8

@@ -14,7 +14,7 @@ import requests as req
 from commons.handlers import handle_http_response
 
 
-def get(url: str):
+def get(url: str, **kwargs):
   """
   Performs a http(s) call, method GET.
 
@@ -22,8 +22,10 @@ def get(url: str):
   :rtype: any
   :return: Returns a class Response containing the http response.
   """
-  res = req.get(url)
-  return handle_http_response(res)  # Calls to handle_http_response to handle any exception related with the status code
+  status_404_as_error = kwargs.pop('status_404_as_error', True)
+  res = req.get(url, **kwargs)
+  # Calls to handle_http_response to handle any exception related with the status code
+  return handle_http_response(res, status_404_as_error)
 
 
 def post(url: str, **kwargs):
@@ -35,8 +37,9 @@ def post(url: str, **kwargs):
   :rtype: any
   :return: Returns a class Response containing the http response.
   """
+  status_404_as_error = kwargs.get('status_404_as_error', True)
   res = req.post(url, **kwargs)
-  return handle_http_response(res)
+  return handle_http_response(res, status_404_as_error)
 
 
 def put(url: str, **kwargs):

@@ -20,7 +20,7 @@ def test_get_success(mocker):  # All the possible errors are tested in test_hand
   mocker.patch('requests.get', return_value=expected_response)
   mock_handler = mocker.patch('commons.http_requests.handle_http_response')
   get('http://fake-url')
-  mock_handler.assert_called_once_with(expected_response)
+  mock_handler.assert_called_once_with(expected_response, True)
 
 
 def test_post_success(mocker):  # All the possible errors are tested in test_handle_http_response
@@ -34,7 +34,7 @@ def test_post_success(mocker):  # All the possible errors are tested in test_han
   mock_handler = mocker.patch('commons.http_requests.handle_http_response')
   post(fake_url, json=fake_body)
   request_post_mock.assert_called_once_with(fake_url, json=fake_body)
-  mock_handler.assert_called_once_with(expected_response)
+  mock_handler.assert_called_once_with(expected_response, True)
 
 
 def test_put_success(mocker):  # All the possible errors are tested in test_handle_http_response
