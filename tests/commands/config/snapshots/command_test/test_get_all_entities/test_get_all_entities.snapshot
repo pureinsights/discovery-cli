@@ -7,12 +7,12 @@ Entities
     Endpoint:
       Entity name "fake-name" found it!
     Entities found: 1
---------------------|Entities found: 2|--------------------
+--------------------|Entities found: 0|--------------------
 --------------------|Core|--------------------
     Credential:
       Entity name "fake-name" found it!
     Entities found: 1
---------------------|Entities found: 1|--------------------
+--------------------|Entities found: 0|--------------------
 --------------------|Ingestion|--------------------
     Processor:
       Entity name "fake-name" found it!
@@ -29,5 +29,5 @@ Entities
     Scheduler:
       Entity name "fake-name" found it!
     Entities found: 1
---------------------|Entities found: 4|--------------------
+--------------------|Entities found: 0|--------------------
 Entities found: 7

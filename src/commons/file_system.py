@@ -97,6 +97,7 @@ def has_pdp_project_structure(path: str, show: str = None):
                    error will raise an error.
   :rtype: bool
   :return: True if the folder has the structure correctly, False in other case.
+  :raises FileNotFoundError: If path doesn't exist.
   """
   raise_file_not_found_error(path)
   print_aux = lambda message: None

@@ -19,7 +19,7 @@ from commons.constants import DISCOVERY, PRODUCTS, STAGING, URL_GET_ALL, URL_GET
 from commons.custom_classes import PdpEntity
 from commons.handlers import handle_and_continue
 from commons.http_requests import get
-from commons.pdp_products import identify_entity
+from commons.pdp_products import get_entity_type_by_name, identify_entity
 from commons.uuid_commons import is_hex_uuid, is_valid_uuid
 
 
@@ -86,24 +86,14 @@ def get_entities_by_ids(config: dict, ids: list[str], entity_types: list[PdpEnti
     if is_verbose:
       create_spinner()
       spinner_change_text(f"Searching for entity {styled_id}")
-    for entity_type in entity_types:
-      product = entity_type.product
-      # Ids with hex format are only supported by Discovery API
-      if product != DISCOVERY and is_hex_uuid(entity_id):
-        continue
+    entity_found_in, entity = get_entity_by_id(config, entity_id, entity_types, query_params)
+    if entity is None:
+      continue
 
-      entities[product] = entities.get(product, {})
-      product_url = config[entity_type.product]
-      _, res = handle_and_continue(get, {},
-                                   URL_GET_BY_ID.format(product_url, entity=entity_type.type, id=entity_id),
-                                   params=query_params, status_404_as_error=False)
-      if res is None:
-        continue  # The entity doesn't exist
-      entity = json.loads(res)
-      type_name = entity_type.type
-      entities[product][type_name] = entities[product].get(type_name, []) + [entity]
-      entity_found_in = entity_type
-      break
+    product = entity_found_in.product
+    type_name = entity_found_in.type
+    entities[product] = entities.get(product, {})
+    entities[product][type_name] = entities[product].get(type_name, []) + [entity]
     if is_verbose and entity_found_in is not None:
       spinner_ok(f"Entity {styled_id} found in {click.style(entity_found_in.user_facing_type_name(), fg='cyan')}.")
     elif is_verbose:
@@ -114,10 +104,38 @@ def get_entities_by_ids(config: dict, ids: list[str], entity_types: list[PdpEnti
   return entities
 
 
+def get_entity_by_id(config: dict, entity_id: str, entity_types: list[PdpEntity], query_params: dict = {}):
+  """
+  Try to fetch an entity from a list of entities.
+  :param dict config: The configuration containing the product's url.
+  :param str entity_id: The id of the entity to try to fetch.
+  :param list[PdpEntity] entity_types: A list of entity types from will try to fetch.
+  :param dict query_params: A dictionary containing the query params to be sent.
+  :rtype: (PdpEntity | None, dict | None)
+  :return: A tuple containing the type of the entity and the entity respectively, A tuple of None in other case.
+  """
+  for entity_type in entity_types:
+    product = entity_type.product
+    # Ids with hex format are only supported by Discovery API
+    if product != DISCOVERY and is_hex_uuid(entity_id):
+      return None, None
+
+    product_url = config[entity_type.product]
+    _, res = handle_and_continue(get, {},
+                                 URL_GET_BY_ID.format(product_url, entity=entity_type.type, id=entity_id),
+                                 params=query_params, status_404_as_error=False)
+    if res is None:
+      return None, None  # The entity doesn't exist
+
+    entity = json.loads(res)
+    return entity_type, entity
+
+
 def print_stage(entities: dict, is_verbose: bool, is_json: bool):
   """
   Prints all the entities given, depending on the flags.
   :param dict entities: A dict containing the products, entity types and inside a list with entities.
+  :param bool is_verbose: Will print the entities as a table with more information.
   :param bool is_json: Print the entities just with JSON format.
   """
   if is_json:
@@ -135,23 +153,9 @@ def print_stage(entities: dict, is_verbose: bool, is_json: bool):
     print_console(
       f"--------------------|{click.style(product.title(), fg='blue')}|--------------------",
     )
-    for index, entity_type in enumerate(entities[product].keys()):
-      if len(entities[product][entity_type]) <= 0:
-        continue
 
-      print_console(f"{click.style(entity_type.title(), fg='cyan')}:", prefix='  ' * (indentation + 2))
-      if is_verbose:
-        print_as_table(entities[product][entity_type], indentation + 3)
-      else:
-        print_entities(entities[product][entity_type], indentation + 3)
+    length += print_stage_entity_type(entities, product, indentation, is_verbose, length_product)
 
-      length_product += len(entities[product][entity_type])
-      print_console(
-        f'{click.style("Entities found:", fg="cyan")} {len(entities[product][entity_type])}',
-        prefix='  ' * (indentation + 2), suffix='\n' if index < len(entities[product].keys()) - 1 else ''
-      )
-
-    length += length_product
     print_console(
       f'--------------------|{click.style("Entities found:", fg="blue")} {length_product}|--------------------',
     )
@@ -160,6 +164,25 @@ def print_stage(entities: dict, is_verbose: bool, is_json: bool):
     f'{click.style("Entities found:", fg="green")} {length}',
     prefix='  ' * indentation
   )
+
+
+def print_stage_entity_type(entities, product, indentation, is_verbose, length_product):
+  for index, entity_type in enumerate(entities[product].keys()):
+    if len(entities[product][entity_type]) <= 0:
+      continue
+
+    print_console(f"{click.style(entity_type.title(), fg='cyan')}:", prefix='  ' * (indentation + 2))
+    if is_verbose:
+      print_as_table(entities[product][entity_type], indentation + 3)
+    else:
+      print_entities(entities[product][entity_type], indentation + 3)
+
+    length_product += len(entities[product][entity_type])
+    print_console(
+      f'{click.style("Entities found:", fg="cyan")} {len(entities[product][entity_type])}',
+      prefix='  ' * (indentation + 2), suffix='\n' if index < len(entities[product].keys()) - 1 else ''
+    )
+  return length_product
 
 
 def print_entities(entities: list[dict], indentation: int = 0):
@@ -194,12 +217,10 @@ def print_as_table(entities: list[dict], indentation: int):
       none_dict = {'empty': True}  # Represent None, we will use its reference to check if the entity has a value or not
       entity_value = entity.get(header, none_dict)  # The entity can contain a None as value, so we can't return None
       if entity_value is not none_dict:  # We compare by reference
-        if entity_value is None:
-          entity_value = 'None'
         entity_values += [entity_value]
     table_values += [entity_values]
 
-  table_str = tabulate(table_values, headers='firstrow', showindex='always', tablefmt='presto')
+  table_str = tabulate(table_values, headers='firstrow', showindex='always', tablefmt='presto', missingval='---')
   table_indented = ""
   lines = table_str.split('\n')
   for index, line in enumerate(lines):
@@ -219,15 +240,18 @@ def filter_entities(filters: list[(str, any)], entities: dict) -> dict:
     return entities
 
   filtered_entities = {}
+  entity_types = []
   for product in entities.keys():
     filtered_entities[product] = {}
-    for entity_type in entities[product].keys():
-      filtered_entities[product][entity_type] = []
-      for entity in entities[product][entity_type]:
-        for _key, value in filters:
-          entity_value = str(entity.get(_key, None))
-          if entity_value == value:
-            filtered_entities[product][entity_type] += [entity]
+    entity_types += entities[product].keys()
+  for entity_type_name in entity_types:
+    entity_type = get_entity_type_by_name(entity_type_name)
+    filtered_entities[entity_type.product][entity_type.type] = []
+    for entity in entities[entity_type.product][entity_type.type]:
+      for _key, value in filters:
+        entity_value = str(entity.get(_key, None))
+        if entity_value == value:
+          filtered_entities[entity_type.product][entity_type.type] += [entity]
   return filtered_entities
 
 

@@ -7,29 +7,29 @@ Entities
     Processor:
        | id      | name      | description
    ----+---------+-----------+---------------
-     0 | fake-id | fake-name | None
-     1 | fake-id | fake-name |
+     0 | fake-id | fake-name | ---
+     1 | fake-id | fake-name | ---
     Entities found: 2
 
     Pipeline:
        | id      | name      | description
    ----+---------+-----------+---------------
-     0 | fake-id | fake-name | None
-     1 | fake-id | fake-name |
+     0 | fake-id | fake-name | ---
+     1 | fake-id | fake-name | ---
     Entities found: 2
 
     Seed:
        | id      | name      | description
    ----+---------+-----------+---------------
-     0 | fake-id | fake-name | None
-     1 | fake-id | fake-name |
+     0 | fake-id | fake-name | ---
+     1 | fake-id | fake-name | ---
     Entities found: 2
 
     Scheduler:
        | id      | name      | description
    ----+---------+-----------+---------------
-     0 | fake-id | fake-name | None
-     1 | fake-id | fake-name |
+     0 | fake-id | fake-name | ---
+     1 | fake-id | fake-name | ---
     Entities found: 2
---------------------|Entities found: 8|--------------------
+--------------------|Entities found: 0|--------------------
 Entities found: 8

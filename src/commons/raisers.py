@@ -60,6 +60,15 @@ def unique_fields(**kwargs):
 
 
 def validate_pdp_entities(requirements: list[Callable], entities: dict, aux: dict = None):
+  """
+  Check if each given entity meets all the given requirements.
+  :param list[Callable] requirements: The list of requirements who each entity must meet.
+  :param dict entities: A dictionary containing all the entities to check.
+  :param dict aux: A dictionary containing useful information to make the validation.
+  :rtype: bool
+  :return: True if all the entities meets all the requirements, False in other case
+  :raise: Some requirements can raise exceptions.
+  """
   if aux is None:
     aux = {}
   for entity_type in entities.keys():
@@ -71,6 +80,13 @@ def validate_pdp_entities(requirements: list[Callable], entities: dict, aux: dic
 
 
 def raise_for_pdp_data_inconsistencies(project_path: str, aux: dict = None):
+  """
+  Check if a PDP project meets all the requirements to be a valid PDP project.
+  :param str project_path: The path to the project to check.
+  :param dict aux: A dictionary containing useful information to check the project.
+  :raises FileNotFoundError: If path to the project doesn't exist.
+  :raises PdpException: If the project doesn't have a valid project structure.
+  """
   from commons.pdp_products import order_products_to_deploy
   from commons.file_system import has_pdp_project_structure, read_entities
   raise_file_not_found_error(project_path)

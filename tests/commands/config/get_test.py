@@ -39,7 +39,7 @@ def test_get_entities_by_ids_invalid(mocker):
   mocker.patch("commands.config.get.create_spinner")
   mocker.patch("commands.config.get.get", return_value=None)
   assert get_entities_by_ids({'discovery': {}}, ['70ae3bac-305a-4e00-9216-e76fb5b41410'], [ENDPOINT], {}, True) \
-         == {'discovery': {}}
+         == {}
 
 
 def test_get_entities_by_ids_valid_hex_and_not_discovery(mocker):
