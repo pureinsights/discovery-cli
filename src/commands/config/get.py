@@ -88,6 +88,10 @@ def get_entities_by_ids(config: dict, ids: list[str], entity_types: list[PdpEnti
       spinner_change_text(f"Searching for entity {styled_id}")
     entity_found_in, entity = get_entity_by_id(config, entity_id, entity_types, query_params)
     if entity is None:
+      if is_verbose:
+        spinner_fail(
+          f"Entity {styled_id} not found."
+        )
       continue
 
     product = entity_found_in.product
@@ -96,10 +100,6 @@ def get_entities_by_ids(config: dict, ids: list[str], entity_types: list[PdpEnti
     entities[product][type_name] = entities[product].get(type_name, []) + [entity]
     if is_verbose and entity_found_in is not None:
       spinner_ok(f"Entity {styled_id} found in {click.style(entity_found_in.user_facing_type_name(), fg='cyan')}.")
-    elif is_verbose:
-      spinner_fail(
-        f"Entity {styled_id} not found."
-      )
 
   return entities
 

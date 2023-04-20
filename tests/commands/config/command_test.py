@@ -246,7 +246,7 @@ def test_get_entities_with_ids_and_types_json_flag(mocker, snapshot):
   snapshot.assert_match(response.output, 'test_get_entities_with_ids_and_types_json_flag.snapshot')
 
 
-def test_get_entities_by_ids_and_filtered_by_active(mocker, snapshot):
+def test_get_entities_by_ids_and_filtered_by_active_verbose(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.config.command.get`,
   when an id and a filter was provided.
@@ -262,6 +262,25 @@ def test_get_entities_by_ids_and_filtered_by_active(mocker, snapshot):
                               "--asc", "name", "--desc", "id", "-v"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_entities_by_ids_and_filtered_by_active.snapshot')
+
+
+def test_get_entities_by_ids_and_filtered_by_active_no_verbose(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.get`,
+  when an id and a filter was provided.
+  """
+  mocker.patch("commands.config.get.create_spinner")
+  mocker.patch("commands.config.get.get")
+  mocker.patch(
+    "commands.config.get.json.loads",
+    return_value={'id': '6376af03-1af2-41a2-aef6-62aefc73a870', 'name': 'fake-name1', 'description': None,
+                  'active': True}
+  )
+  response = cli.invoke(pdp, ["config", "get", "-i", "6376af03-1af2-41a2-aef6-62aefc73a870", "-i",
+                              "fake-id", "-f", "active", "True",
+                              "--asc", "name", "--desc", "id"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_entities_by_ids_and_filtered_by_active_no_verbose.snapshot')
 
 
 def test_get_invalid_type_for_product(mocker, snapshot):
