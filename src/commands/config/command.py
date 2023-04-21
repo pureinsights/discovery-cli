@@ -13,6 +13,7 @@ import os
 import click
 
 from commands.config.create import run as run_create
+from commands.config.delete import run as run_delete
 from commands.config.deploy import run as run_deploy
 from commands.config.get import run as run_get
 from commands.config.init import run as run_init
@@ -20,8 +21,8 @@ from commons.console import print_error
 from commons.constants import ENTITIES, PRODUCTS, STAGING, TEMPLATES_DIRECTORY
 from commons.custom_classes import DataInconsistency, PdpException
 from commons.file_system import list_directories, list_files, replace_file_extension
-from commons.pdp_products import get_entity_type_by_name
-from commons.raisers import raise_for_pdp_data_inconsistencies
+from commons.pdp_products import get_entity_type_by_name, order_products_to_deploy
+from commons.raisers import raise_for_inconsistent_product, raise_for_pdp_data_inconsistencies
 
 
 @click.group()
@@ -216,9 +217,7 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
   products = PRODUCTS['list']
   entity_type = get_entity_type_by_name(entity_type_name)
   if product is not None:
-    if entity_type is not None and product != entity_type.product:
-      raise DataInconsistency(
-        message=f"The entity type \"{entity_type.user_facing_type_name()}\" doesn't belong to \"{product.title()}\".")
+    raise_for_inconsistent_product(entity_type, product)
     products = [product]
   sort = []
   for asc_property in asc:
@@ -232,3 +231,71 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
   }
   run_get(obj['configuration'], products, entity_type, entity_ids, filters, query_params, is_json,
           is_verbose and not is_json)
+
+
+@config.command()
+@click.pass_obj
+@click.option('--product', default=None,
+              type=click.Choice(PRODUCTS['list'],
+                                case_sensitive=False
+                                ),
+              help="Will filter the entities based on the name entered "
+                   "(Ingestion, Core or Discovery). Default is None.")
+@click.option('-t', '--entity-type', 'entity_type_name', default=None,
+              type=click.Choice([
+                entity_type.type if entity_type.type != 'processor'
+                else f'{entity_type.product}{entity_type.type.title()}'
+                for entity_type in ENTITIES],
+                case_sensitive=False
+              ),
+              help="Will filter and only show the entities of the type entered. Default is None.")
+@click.option('-i', '--entity-id', 'entity_ids', default=[], multiple=True,
+              help="Will only retrieve information for the component specified by the ID. Default is None. "
+                   "The command allows multiple flags of -i.")
+@click.option('-a', '--all', 'delete_all', default=False, is_flag=True,
+              help="Will try to delete entities based on the given flags, that is, if the id is not provided by the "
+                   "user, it will attempt to delete all entities of the type provided by the user, and if the type of "
+                   "entity is not entered by the user, then it will attempt to delete all types of entities from "
+                   "a product, and so on.")
+@click.option('--cascade', 'cascade', default=False, is_flag=True,
+              help="Will try to delete entity on cascade. For example: If you try to delete a pipeline, then pdp will"
+                   "try to delete all the processors associated to the pipeline.")
+def delete(obj, product, entity_type_name, entity_ids, delete_all, cascade: bool):
+  configuration = obj['configuration']
+  if len(entity_ids) <= 0 and not delete_all:
+    raise DataInconsistency(message="You must to provide at least one entity-id or the -a flag to delete all entities.")
+
+  still_dependent = not delete_all and len(entity_ids) <= 0
+  products = []
+  if product is None:
+    if still_dependent:
+      raise DataInconsistency(
+        message="You must to provide the --product or the -a flag to delete all entities."
+      )
+    products = [product for product in PRODUCTS['list'] if product != STAGING]
+
+  entity_types = []
+  if entity_type_name is None:
+    if still_dependent:
+      raise DataInconsistency(
+        message="You must to provide the --entity-type or the -a flag to delete all entities."
+      )
+    products = order_products_to_deploy(products)
+    for product in products:
+      entity_types += PRODUCTS[product]['entities']
+    entity_types.reverse()
+  else:
+    entity_type = get_entity_type_by_name(entity_type_name)
+    raise_for_inconsistent_product(entity_type, product)
+    products = [entity_type.product]
+    entity_types = [entity_type]
+
+  sure_to_delete = click.prompt("Type YES if you are sure to delete the entities", default=None)
+  if sure_to_delete != 'YES':
+    print_error("Command aborted by user.", True)
+  if cascade:
+    sure_to_cascade = click.prompt("Type CASCADE if you are sure to delete the entities in cascade", default=None)
+    if sure_to_cascade != 'CASCADE':
+      print_error("Command aborted by user.", True)
+
+  run_delete(configuration, entity_types, entity_ids, cascade)

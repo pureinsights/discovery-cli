@@ -90,3 +90,4 @@ pdp.add_command(config)
 
 if __name__ == '__main__':
   handle_exceptions(pdp)  # pragma: no cover
+  # handle_exceptions(pdp, ["config", "delete", "-i", "67b58efb-1fd2-47b0-8218-9a50e3060900"])  # pragma: no cover

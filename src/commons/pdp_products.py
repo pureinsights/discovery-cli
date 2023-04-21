@@ -19,12 +19,12 @@ from commons.console import print_console, print_error, print_exception, print_w
 from commons.constants import CORE, DISCOVERY_PROCESSOR, ENTITIES, FROM_NAME_FORMAT, INGESTION, INGESTION_PROCESSOR, \
   PRODUCTS, STAGING, \
   URL_CREATE, \
-  URL_EXPORT_ALL, \
+  URL_DELETE, URL_EXPORT_ALL, \
   URL_GET_BY_ID, URL_UPDATE, WARNING_SEVERITY
 from commons.custom_classes import DataInconsistency, PdpEntity, PdpException
 from commons.file_system import has_pdp_project_structure, read_entities
 from commons.handlers import handle_and_continue, handle_and_exit
-from commons.http_requests import get, post, put
+from commons.http_requests import delete, get, post, put
 from commons.raisers import raise_file_not_found_error
 
 
@@ -483,3 +483,12 @@ def json_to_pdp_entities(entities_json: str, **kwargs) -> list[dict]:
   if type(entities) is not list:
     entities = [entities]
   return entities
+
+
+def delete_pdp_entity(config: dict, entity_type: PdpEntity, entity_id: str, cascade: bool):
+  product = entity_type.product
+  acknowledge = delete(
+    URL_DELETE.format(config[product], entity=entity_type.type, id=entity_id),
+    json={'cascade': cascade}
+  )
+  return json.loads(acknowledge).get('acknowledged', False)

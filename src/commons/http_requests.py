@@ -53,3 +53,16 @@ def put(url: str, **kwargs):
   """
   res = req.put(url, **kwargs)
   return handle_http_response(res)
+
+
+def delete(url: str, **kwargs):
+  """
+  Performs a http(s) call, method DELETE.
+
+  :param str url: The url where the http request will be sent.
+  :param **kwargs kwargs: Pass the arguments to the request.
+  :rtype: any
+  :return: Returns a class Response containing the http response.
+  """
+  res = req.delete(url, **kwargs)
+  return handle_http_response(res)
