@@ -43,10 +43,12 @@ def get_all_entities(config: dict, entity_types: list[PdpEntity], query_params: 
       )
     product = entity_type.product
     entities[product] = entities.get(product, {})
-    entities_found = get(URL_GET_ALL.format(config[product], entity=entity_type.type), params=query_params)
+    success, entities_found = handle_and_continue(get, {'show_exception': True},
+                                                  URL_GET_ALL.format(config[product], entity=entity_type.type),
+                                                  params=query_params)
 
     if entities_found is None:
-      if is_verbose:
+      if is_verbose and success:
         spinner_fail(
           f"No {click.style(entity_type.user_facing_type_name(), fg='cyan')} entities found "
           f"on {click.style(entity_type.product.title(), fg='blue')}.",
@@ -78,7 +80,6 @@ def get_entities_by_ids(config: dict, ids: list[str], entity_types: list[PdpEnti
   """
   entities = {}
   for entity_id in ids:
-    entity_found_in = None
     if not is_valid_uuid(entity_id):
       print_error(f"The id {entity_id} is not a valid uuid.", False)
       continue
@@ -121,14 +122,16 @@ def get_entity_by_id(config: dict, entity_id: str, entity_types: list[PdpEntity]
       return None, None
 
     product_url = config[entity_type.product]
-    _, res = handle_and_continue(get, {},
+    _, res = handle_and_continue(get, {'show_exception': True},
                                  URL_GET_BY_ID.format(product_url, entity=entity_type.type, id=entity_id),
                                  params=query_params, status_404_as_error=False)
     if res is None:
-      return None, None  # The entity doesn't exist
+      continue  # The entity doesn't exist
 
     entity = json.loads(res)
     return entity_type, entity
+
+  return None, None
 
 
 def print_stage(entities: dict, is_verbose: bool, is_json: bool):
