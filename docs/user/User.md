@@ -198,3 +198,50 @@ pdp config get --entity-type ingestionProcessor
 ```bash
 pdp config get -i 29a9b5e600704853983b0dd855a11cc6 -i 6376af03-1af2-41a2-aef6-62aefc73a870
 ```
+
+### Delete Command
+
+Will attempt to delete the entity or entities from the product and the configuration files.
+If an entity is referenced by another can’t be deleted.
+
+#### Flags
+
+- `DEPENDENT`**--product**: Will filter the entities based on the name entered (Ingestion, core or discovery). Default
+  is All.
+- `DEPENDENT`**-t,--entity-type**: Will filter and only show the entities of the type entered. Default is All.
+- `DEPENDENT`**-i,--entity-id**: Will delete the entity with the specified id. Default is None. The command allows
+  multiple flags of -i.
+- **-a, --all**: Will try to delete entities based on `DEPENDENT` flags, that is, if the id is not provided by the user,
+  it will attempt to delete all entities of the type provided by the user, and if the type of entity is not entered by
+  the user, then it will attempt to delete all types of entities from a product, and so on.
+- **--local**: Will delete the configuration of the entities from the PDP Project files. Default is False.
+
+### Delete all entities
+
+```bash
+pdp config delete --all
+```
+
+### Delete all entities from Ingestion
+
+```bash
+pdp config delete --product ingestion --all
+```
+
+### Delete all entities of type endpoint
+
+```bash
+pdp config delete --entity-type endpoint --all
+```
+
+### Delete entities by ids
+
+```bash
+pdp config delete -i 504821c342f4e717cb1297739a83e7e3 -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+```
+
+### Delete entity in cascade
+
+```bash
+pdp config delete -i 8e6e1674-fb03-45b3-9ffd-5bf4b780af49 --cascade
+```

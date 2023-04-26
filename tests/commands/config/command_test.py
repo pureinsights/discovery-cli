@@ -9,8 +9,8 @@
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 
-from commons.constants import DEFAULT_CONFIG
-from pdp import pdp
+from commons.constants import DEFAULT_CONFIG, PRODUCTS, SEED
+from pdp import load_config, pdp
 from pdp_test import cli
 
 
@@ -292,3 +292,194 @@ def test_get_invalid_type_for_product(mocker, snapshot):
   response = cli.invoke(pdp, ["config", "get", "--product", "discovery", "--entity-type", "credential"])
   assert response.exit_code == 1
   snapshot.assert_match(str(response.exception), 'test_get_invalid_type_for_product.snapshot')
+
+
+def test_delete_no_entities_specified():
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the user don't enter the -i or -a flag.
+  """
+  response = cli.invoke(pdp, ["config", "delete"])
+  assert response.exit_code == 1
+  assert response.exception.message == "You must to provide at least one entity-id " \
+                                       "or the -a flag to delete all entities."
+
+
+def test_delete_all_entities(mocker):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the user enters the -a flag.
+  """
+  mocker.patch("commands.config.command.click.prompt", side_effect=['YES'])
+  mock_delete = mocker.patch("commands.config.command.run_delete")
+  config = load_config('config.ini', 'DEFAULT')
+  config['project_path'] = '.'
+  entity_types = []
+  for product in PRODUCTS['list']:
+    entity_types += [*PRODUCTS[product]['entities']]
+  entity_types.reverse()
+  response = cli.invoke(pdp, ["config", "delete", "-a"])
+  assert response.exit_code == 0
+  mock_delete.assert_called_once_with(config, entity_types, [], False, False)
+
+
+def test_delete_all_entities_from_product(mocker):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the user enters the --product flag.
+  """
+  mocker.patch("commands.config.command.click.prompt", side_effect=['YES'])
+  mock_delete = mocker.patch("commands.config.command.run_delete")
+  config = load_config('config.ini', 'DEFAULT')
+  config['project_path'] = '.'
+  product = "ingestion"
+  entity_types = [*PRODUCTS[product]['entities']]
+  entity_types.reverse()
+  response = cli.invoke(pdp, ["config", "delete", "--product", product, "-a"])
+  assert response.exit_code == 0
+  mock_delete.assert_called_once_with(config, entity_types, [], False, False)
+
+
+def test_delete_all_entities_of_type(mocker):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the user enters the --entity_type flag and -i flags.
+  """
+  mocker.patch("commands.config.command.click.prompt", side_effect=['YES'])
+  mock_delete = mocker.patch("commands.config.command.run_delete")
+  config = load_config('config.ini', 'DEFAULT')
+  config['project_path'] = '.'
+  entity_types = [SEED]
+  entity_types.reverse()
+  response = cli.invoke(pdp, ["config", "delete", "--entity-type", "seed", "-i", "fakeid-1", "-i", "fakeid-2"])
+  assert response.exit_code == 0
+  mock_delete.assert_called_once_with(config, entity_types, ["fakeid-1", "fakeid-2"], False, False)
+
+
+def test_delete_aborted(mocker):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the user enters the --entity_type flag and -i flags.
+  """
+  mocker.patch("commands.config.command.click.prompt", side_effect=['fake response'])
+  mock_delete = mocker.patch("commands.config.command.run_delete")
+  config = load_config('config.ini', 'DEFAULT')
+  config['project_path'] = '.'
+  entity_types = [SEED]
+  entity_types.reverse()
+  response = cli.invoke(pdp, ["config", "delete", "--entity-type", "seed", "-i", "fakeid-1", "-i", "fakeid-2"])
+  assert response.exit_code == 1
+  assert mock_delete.call_count == 0
+  assert response.exception.message == "Command aborted by user."
+
+
+def test_delete_cascade_aborted(mocker):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the user enters the --entity_type flag and -i flags.
+  """
+  mocker.patch("commands.config.command.click.prompt", side_effect=['YES', 'fake response'])
+  mock_delete = mocker.patch("commands.config.command.run_delete")
+  config = load_config('config.ini', 'DEFAULT')
+  config['project_path'] = '.'
+  entity_types = [SEED]
+  entity_types.reverse()
+  response = cli.invoke(
+    pdp,
+    ["config", "delete", "--entity-type", "seed", "-i", "fakeid-1", "-i", "fakeid-2", "--cascade"]
+  )
+  assert response.exit_code == 1
+  assert mock_delete.call_count == 0
+  assert response.exception.message == "Command aborted by user."
+
+
+def test_delete_cascade_and_local(mocker):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the user enters the --entity_type flag and -i flags.
+  """
+  mocker.patch("commands.config.command.click.prompt", side_effect=['YES', 'CASCADE'])
+  mock_delete = mocker.patch("commands.config.command.run_delete")
+  config = load_config('config.ini', 'DEFAULT')
+  config['project_path'] = '.'
+  entity_types = [SEED]
+  entity_types.reverse()
+  response = cli.invoke(
+    pdp,
+    ["config", "delete", "--entity-type", "seed", "-i", "fakeid-1", "--cascade", "--local"]
+  )
+  assert response.exit_code == 0
+  mock_delete.assert_called_once_with(config, entity_types, ["fakeid-1"], True, True)
+
+
+def test_delete_all_entities_output(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the flag --all was passed, and entities were deleted..
+  """
+  mocker.patch("commands.config.command.click.prompt", side_effect=['YES'])
+  mocker.patch("commands.config.delete.delete_all_entities", return_value={
+    'ingestion': {
+      'seed': [{'id': 'fake1'}],
+      'pipeline': [{'id': 'fake2'}]
+    },
+    'discovery': {
+      'endpoint': [{'id': 'fake4'}, {'id': 'fake5'}]
+    }
+  })
+  response = cli.invoke(
+    pdp,
+    ["config", "delete", "--all"]
+  )
+  snapshot.assert_match(response.output, 'test_delete_all_entities_output.snapshot')
+
+
+def test_delete_entities_by_ids_output(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when -i flag was provided and entities were deleted.
+  """
+
+  def mock_delete_entities_by_ids(config, entity_ids, entity_types, cascade, local):
+    ids_to_delete = ['fake1', 'fake2', 'fake4', 'fake5']
+    for _id in ids_to_delete:
+      entity_ids.remove(_id)
+    return {
+      'ingestion': {
+        'seed': [{'id': 'fake1'}],
+        'pipeline': [{'id': 'fake2'}]
+      },
+      'discovery': {
+        'endpoint': [{'id': 'fake4'}, {'id': 'fake5'}],
+        'processor': []
+      },
+      'core': {
+
+      }
+    }
+
+  mocker.patch("commands.config.command.click.prompt", side_effect=['YES'])
+  mocker.patch("commands.config.delete.delete_entities_by_ids", side_effect=mock_delete_entities_by_ids)
+  response = cli.invoke(
+    pdp,
+    ["config", "delete", "-i", "fake1", "-i", "fake2", "-i", "fake3", "-i", "fake4", "-i", "fake5", "-i", "fake6"]
+  )
+  snapshot.assert_match(response.output, 'test_delete_entities_by_ids_output.snapshot')
+
+
+def test_delete_entities_by_ids_no_entities_deleted_output(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when -i flag was provided and no entities were deleted.
+  """
+
+  def mock_delete_entities_by_ids(config, entity_ids, entity_types, cascade, local):
+    return {}
+
+  mocker.patch("commands.config.command.click.prompt", side_effect=['YES'])
+  mocker.patch("commands.config.delete.delete_entities_by_ids", side_effect=mock_delete_entities_by_ids)
+  response = cli.invoke(
+    pdp,
+    ["config", "delete", "-i", "fake1", "-i", "fake2", "-i", "fake3", "-i", "fake4", "-i", "fake5", "-i", "fake6"]
+  )
+  snapshot.assert_match(response.output, 'test_delete_entities_by_ids_no_entities_deleted_output.snapshot')

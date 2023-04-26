@@ -30,6 +30,31 @@ class PdpEntity:
       return f'{self.product.lower()}{self.type.title()}'
     return self.type
 
+  def get_references(self):
+    from commons.constants import DISCOVERY_PROCESSOR_ENTITY, INGESTION_PROCESSOR_ENTITY, CREDENTIAL, PIPELINE, SEED
+    match self.type:
+      case 'processor':  # Both ingestionProcessors and discoveryProcessors has no entity types to reference
+        return {}
+      case 'endpoint':
+        return {
+          DISCOVERY_PROCESSOR_ENTITY.reference_field: DISCOVERY_PROCESSOR_ENTITY
+        }
+      case 'pipeline':
+        return {
+          INGESTION_PROCESSOR_ENTITY.reference_field: INGESTION_PROCESSOR_ENTITY
+        }
+      case 'seed':
+        return {
+          PIPELINE.reference_field: PIPELINE,
+          CREDENTIAL.reference_field: CREDENTIAL
+        }
+      case 'scheduler':
+        return {
+          SEED.reference_field: SEED
+        }
+      case _:
+        return {}
+
 
 class DataInconsistency(Exception):
   """

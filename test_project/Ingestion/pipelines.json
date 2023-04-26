@@ -25,5 +25,20 @@
       }
     ],
     "id": "fakeidP2"
+  },
+  {
+    "name": "Cascade Pipeline",
+    "active": true,
+    "steps": [
+      {
+        "processorId": "{{ fromName('Persist to Search') }}",
+        "action": "hydrate"
+      },
+      {
+        "processorId": "{{ fromName('Cascade Processor') }}",
+        "action": "hydrate"
+      }
+    ],
+    "id": "fakeidCascadePipeline"
   }
 ]

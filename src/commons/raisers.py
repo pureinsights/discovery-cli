@@ -22,7 +22,7 @@ import os
 from typing import Callable
 
 from commons.constants import PRODUCTS, STAGING
-from commons.custom_classes import DataInconsistency
+from commons.custom_classes import DataInconsistency, PdpEntity
 
 
 def raise_file_not_found_error(path: str):
@@ -44,7 +44,8 @@ def unique_fields(**kwargs):
   """
   entity = kwargs.get('entity', None)
   aux = kwargs.get('aux', None)
-  _unique_fields = ['id', 'name']
+  ignore_ids = aux.get('ignore_ids', False)
+  _unique_fields = ['id', 'name'] if not ignore_ids else ['name']
   for field in _unique_fields:
     entity_field = entity.get(field, None)
     if entity_field is not None:
@@ -100,3 +101,10 @@ def raise_for_pdp_data_inconsistencies(project_path: str, aux: dict = None):
       file_path = os.path.join(project_path, product.title(), entity_type.associated_file_name)
       entities[entity_type] = read_entities(file_path)
   validate_pdp_entities(requirements, entities, aux)
+
+
+def raise_for_inconsistent_product(entity_type: PdpEntity, product: str):
+  if product is not None:
+    if entity_type is not None and product != entity_type.product:
+      raise DataInconsistency(
+        message=f"The entity type \"{entity_type.user_facing_type_name()}\" doesn't belong to \"{product.title()}\".")

@@ -19,13 +19,14 @@ from commons.console import print_console, print_error, print_exception, print_w
 from commons.constants import CORE, DISCOVERY_PROCESSOR, ENTITIES, FROM_NAME_FORMAT, INGESTION, INGESTION_PROCESSOR, \
   PRODUCTS, STAGING, \
   URL_CREATE, \
-  URL_EXPORT_ALL, \
+  URL_DELETE, URL_EXPORT_ALL, \
   URL_GET_BY_ID, URL_UPDATE, WARNING_SEVERITY
 from commons.custom_classes import DataInconsistency, PdpEntity, PdpException
-from commons.file_system import has_pdp_project_structure, read_entities
+from commons.file_system import has_pdp_project_structure, read_entities, write_entities
 from commons.handlers import handle_and_continue, handle_and_exit
-from commons.http_requests import get, post, put
+from commons.http_requests import delete, get, post, put
 from commons.raisers import raise_file_not_found_error
+from commons.utils import flat_list
 
 
 def identify_entity(entity: dict, fields=['name', 'id', 'description', 'type'], **kwargs):
@@ -483,3 +484,148 @@ def json_to_pdp_entities(entities_json: str, **kwargs) -> list[dict]:
   if type(entities) is not list:
     entities = [entities]
   return entities
+
+
+def delete_pdp_entity(config: dict, entity_type: PdpEntity, entity: dict, cascade: bool, local: bool) -> bool:
+  """
+  Delete a given entity from the API and from the local project if the "local" param is true.
+  :param dict config: Contains the project path and the PDP products' url.
+  :param PdpEntity entity_type: The entity type of the entity to delete.
+  :param dict entity: The entity to delete. Used to get the id and references to other entities.
+  :param bool cascade: Will delete the entities referenced on "entity" in cascade.
+  :param bool local: Will delete the configuration of the entity from the PDP project.
+  :rtype: bool
+  :return: True if the entity was deleted, False in other case.
+  """
+  product = entity_type.product
+  entity_id = entity.get('id', None)
+  if entity_id is None:
+    return False
+
+  acknowledge = delete(
+    URL_DELETE.format(config[product], entity=entity_type.type, id=entity_id),
+    params={'cascade': cascade}
+  )
+  was_deleted = json.loads(acknowledge).get('acknowledged', False)
+  if was_deleted and local:
+    delete_entity_from_pdp_project(config, entity_type, entity, cascade)
+  return was_deleted
+
+
+def delete_entity_from_pdp_project(config: dict, entity_type: PdpEntity, entity: dict, cascade: bool):
+  """
+  Deletes an entity from the configuration files on a pdp project.
+  :param dict config: Contains the project path and the PDP products' url.
+  :param PdpEntity entity_type: The entity type of the entity to delete.
+  :param dict entity: The entity to delete. Used to get the id and references to other entities.
+  :param bool cascade: Will delete the entities referenced on "entity" in cascade.
+  """
+  path = config['project_path']
+  if not has_pdp_project_structure(path):
+    return
+
+  product = entity_type.product
+  file_path = os.path.join(path, product.title(), entity_type.associated_file_name)
+  entities = read_entities(file_path)
+  none = {'none': None}
+  index = 0
+  for _entity in entities:
+    entity_id = _entity.get('id', none)
+    if entity_id is not none and entity_id == entity.get('id'):
+      entities = entities[:index] + entities[index + 1:]
+      break
+    else:
+      index += 1
+
+  write_entities(file_path, entities)
+
+  if not cascade:
+    return
+
+  delete_references_from_entity(config, entity_type, entity, cascade)
+
+
+def delete_references_from_entity(config: dict, entity_type: PdpEntity, entity: dict, cascade: bool):
+  """
+  Deletes an entity from the configuration files on a pdp project.
+  :param dict config: Contains the project path and the PDP products' url.
+  :param PdpEntity entity_type: The entity type of the entity to delete.
+  :param dict entity: The entity to delete. Used to get the id and references to other entities.
+  :param bool cascade: Will delete the entities referenced on "entity" in cascade.
+  """
+  from commands.config.get import get_entity_by_id
+  path = config['project_path']
+  entity_references = entity_type.get_references()
+  for reference_field in entity_references.keys():
+    success, ids_found = handle_and_continue(search_value_from_entity, {}, reference_field, entity)
+    if not success:
+      continue
+    referenced_ids = [referenced_id for referenced_id in flat_list(ids_found) if referenced_id is not None]
+    for _id in referenced_ids:
+      entity_type = entity_references[reference_field]
+      success, res = handle_and_continue(get_entity_by_id, {}, config, _id, [entity_type])
+      if not success or (success and res[1] is not None):
+        continue
+      _, _entity = res
+      handle_configuration = {
+        'message': f'Could not delete entity {_id}.',
+        'show_exception': True
+      }
+      _, entity = handle_and_continue(get_entity_by_id_from_local_entities, handle_configuration, path, entity_type,
+                                      _id)
+      if entity is None:
+        continue
+      handle_and_continue(delete_entity_from_pdp_project, {}, config, entity_type, entity, cascade)
+
+
+def get_entity_by_id_from_local_entities(project_path: str, entity_type: PdpEntity, entity_id: str) -> dict | None:
+  """
+  Reads all the entities from a PDP project, and returns the entity with the same given id.
+  :param str project_path: The path to the PDP project.
+  :param PdpEntity entity_type: The entity type of the entity to search.
+  :param str entity_id: The id to search on the local entities.
+  :rtype: dict | None
+  :return: A dictionary if the entity was found, None in other case.
+  """
+  if not has_pdp_project_structure(project_path):
+    return None
+  file_path = os.path.join(project_path, entity_type.product.title(), entity_type.associated_file_name)
+  _, entities = handle_and_exit(read_entities, {}, file_path)
+  for _entity in entities:
+    if _entity.get('id', None) == entity_id:
+      ids_names = get_all_entities_names_ids(project_path, [])
+      replace_names_by_ids(entity_type, [_entity], ids_names)
+      return _entity
+  return None
+
+
+def search_value_from_entity(entity_property: str, entity: dict | list) -> list[any]:
+  """
+  Search the value for the specified property.
+  :param str entity_property: The name of the property to search for.
+  :param dict | list entity: The entity or list of entities to search the value.
+  :rtype: list[any]
+  :return: A list of possible values found. None could be one of those values.
+  """
+  if isinstance(entity, (list, set, tuple)):
+    values = []
+    for nested_entity in entity:
+      values += search_value_from_entity(entity_property, nested_entity)
+    return values
+
+  if not isinstance(entity, dict):
+    raise DataInconsistency(
+      message=f"The given vale is type {type(entity).__name__}.",
+      content={'error': 'invalid type'}
+    )
+  values = []
+  for key in entity.keys():
+    nested_entity = entity[key]
+    if key == entity_property:
+      values += [nested_entity]
+      break
+
+    if isinstance(nested_entity, (list, set, tuple, dict)):
+      values += search_value_from_entity(entity_property, nested_entity)
+
+  return values

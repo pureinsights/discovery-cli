@@ -1,0 +1,11 @@
+Ingestion:
+  Seed:
+    ✔ Entity fake1 deleted successfully.
+  Pipeline:
+    ✔ Entity fake2 deleted successfully.
+Discovery:
+  Endpoint:
+    ✔ Entity fake4 deleted successfully.
+    ✔ Entity fake5 deleted successfully.
+Entity fake3 could not be deleted.
+Entity fake6 could not be deleted.

@@ -57,3 +57,16 @@ def test_validate_pdp_entities():
   }
   result = validate_pdp_entities(requirements, entities, aux={})
   assert not result
+
+
+def test_validate_pdp_entities_aux_none():
+  """
+  Test the function defined in :func:`src.commons.raisers.validate_pdp_entities`,
+  when the aux dictionary is None.
+  """
+  requirements = [lambda **kwargs: False]
+  entities = {
+    'processor': [{'id': 'fakeid'}, {'id': 'fakeid'}]
+  }
+  result = validate_pdp_entities(requirements, entities)
+  assert not result
