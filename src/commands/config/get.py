@@ -15,7 +15,8 @@ import click
 from tabulate import tabulate
 
 from commons.console import create_spinner, print_console, print_error, spinner_change_text, spinner_fail, spinner_ok
-from commons.constants import DISCOVERY, PRODUCTS, STAGING, URL_GET_ALL, URL_GET_BY_ID
+from commons.constants import DISCOVERY, ENDPOINT, PRODUCTS, STAGING, URL_GET_ALL, \
+  URL_GET_BY_ID
 from commons.custom_classes import PdpEntity
 from commons.handlers import handle_and_continue
 from commons.http_requests import get
@@ -42,7 +43,6 @@ def get_all_entities(config: dict, entity_types: list[PdpEntity], query_params: 
         f"{click.style(entity_type.product.title(), fg='blue')}..."
       )
     product = entity_type.product
-    entities[product] = entities.get(product, {})
     success, entities_found = handle_and_continue(get, {'show_exception': True},
                                                   URL_GET_ALL.format(config[product], entity=entity_type.type),
                                                   params=query_params)
@@ -56,6 +56,7 @@ def get_all_entities(config: dict, entity_types: list[PdpEntity], query_params: 
         )
       continue
     entities_found = json.loads(entities_found).get('content', [])
+    entities[product] = entities.get(product, {})
     entities[product][entity_type.type] = entities[product].get(entity_type.type, []) + entities_found
     if is_verbose:
       spinner_ok(
@@ -87,7 +88,11 @@ def get_entities_by_ids(config: dict, ids: list[str], entity_types: list[PdpEnti
     if is_verbose:
       create_spinner()
       spinner_change_text(f"Searching for entity {styled_id}")
-    entity_found_in, entity = get_entity_by_id(config, entity_id, entity_types, query_params)
+    success, res = handle_and_continue(get_entity_by_id, {}, config, entity_id, entity_types, query_params)
+    if not success:
+      continue
+
+    entity_found_in, entity = res
     if entity is None:
       if is_verbose:
         spinner_fail(
@@ -118,7 +123,7 @@ def get_entity_by_id(config: dict, entity_id: str, entity_types: list[PdpEntity]
   for entity_type in entity_types:
     product = entity_type.product
     # Ids with hex format are only supported by Discovery API
-    if product != DISCOVERY and is_hex_uuid(entity_id):
+    if entity_type is not ENDPOINT and is_hex_uuid(entity_id):
       return None, None
 
     product_url = config[entity_type.product]

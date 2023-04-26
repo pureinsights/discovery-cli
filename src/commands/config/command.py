@@ -118,7 +118,7 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
   """
   path = ctx.obj['project_path']
   config = ctx.obj['configuration']
-  raise_for_pdp_data_inconsistencies(path)
+  raise_for_pdp_data_inconsistencies(path, {"ignore_ids": ignore_ids})
   run_deploy(config, path, targets, is_verbose and not quiet, ignore_ids, quiet)
 
 
@@ -260,26 +260,27 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
 @click.option('--cascade', 'cascade', default=False, is_flag=True,
               help="Will try to delete entity on cascade. For example: If you try to delete a pipeline, then pdp will"
                    "try to delete all the processors associated to the pipeline.")
-def delete(obj, product, entity_type_name, entity_ids, delete_all, cascade: bool):
+@click.option('--local', 'local', default=False, is_flag=True,
+              help="Will delete the configuration of the entities from the PDP Project files.")
+def delete(obj, product, entity_type_name, entity_ids: list[str], delete_all, cascade: bool, local: bool):
+  """
+  Will attempt to delete the entity or entities from the product and the configuration files.
+  If an entity is referenced by another can’t be deleted.
+  """
   configuration = obj['configuration']
+  configuration['project_path'] = obj['project_path']
   if len(entity_ids) <= 0 and not delete_all:
     raise DataInconsistency(message="You must to provide at least one entity-id or the -a flag to delete all entities.")
 
   still_dependent = not delete_all and len(entity_ids) <= 0
   products = []
   if product is None:
-    if still_dependent:
-      raise DataInconsistency(
-        message="You must to provide the --product or the -a flag to delete all entities."
-      )
     products = [product for product in PRODUCTS['list'] if product != STAGING]
+  else:
+    products = [product]
 
   entity_types = []
   if entity_type_name is None:
-    if still_dependent:
-      raise DataInconsistency(
-        message="You must to provide the --entity-type or the -a flag to delete all entities."
-      )
     products = order_products_to_deploy(products)
     for product in products:
       entity_types += PRODUCTS[product]['entities']
@@ -290,12 +291,18 @@ def delete(obj, product, entity_type_name, entity_ids, delete_all, cascade: bool
     products = [entity_type.product]
     entity_types = [entity_type]
 
-  sure_to_delete = click.prompt("Type YES if you are sure to delete the entities", default=None)
+  sure_to_delete = click.prompt(
+    f"Type {click.style('YES', fg='green')} if you are sure to {click.style('delete', fg='red')} the entities",
+    default=None)
   if sure_to_delete != 'YES':
     print_error("Command aborted by user.", True)
   if cascade:
-    sure_to_cascade = click.prompt("Type CASCADE if you are sure to delete the entities in cascade", default=None)
+    sure_to_cascade = click.prompt(
+      f"Type {click.style('CASCADE', fg='green')} if you are sure "
+      f"to {click.style('delete', fg='red')} the entities in cascade",
+      default=None
+    )
     if sure_to_cascade != 'CASCADE':
       print_error("Command aborted by user.", True)
 
-  run_delete(configuration, entity_types, entity_ids, cascade)
+  run_delete(configuration, entity_types, [*entity_ids], cascade, local)

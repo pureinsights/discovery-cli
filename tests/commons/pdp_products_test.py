@@ -20,7 +20,7 @@ from commons.constants import CORE, CREDENTIAL, DISCOVERY, DISCOVERY_PROCESSOR_E
 from commons.custom_classes import PdpException
 from commons.pdp_products import are_same_pdp_entity, associate_values_from_entities, clear_from_name_format, \
   create_or_update_entity, \
-  export_all_entities, \
+  delete_entity_from_pdp_project, delete_pdp_entity, delete_references_from_entity, export_all_entities, \
   get_all_entities_names_ids, get_entity_type_by_name, identify_entity, json_to_pdp_entities, order_products_to_deploy, \
   replace_ids, \
   replace_ids_for_names, \
@@ -638,3 +638,144 @@ def test_json_to_pdp_entities_bad_json():
     entities = json_to_pdp_entities(entities_json)
   assert error.value.message == 'JSONDecodeError: Could not parse the JSON text. ' \
                                 'Please check the file has a valid JSON format.'
+
+
+def test_delete_pdp_entity_without_id():
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_pdp_entity`,
+  when the given entity doesn't have an id.
+  """
+  assert not delete_pdp_entity({}, SEED, {}, False, False)
+
+
+def test_delete_pdp_entity_no_local(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_pdp_entity`,
+  when the given entity doesn't have an id.
+  """
+  mock_delete_from_project = mocker.patch("commons.pdp_products.delete_entity_from_pdp_project")
+  mocker.patch("commons.pdp_products.delete")
+  mocker.patch("commons.pdp_products.json.loads", return_value={'acknowledged': True})
+  assert delete_pdp_entity({'ingestion': ''}, SEED, {'id': 'fake1'}, False, False)
+  assert mock_delete_from_project.call_count == 0
+
+
+def test_delete_pdp_entity_local(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_pdp_entity`,
+  when the given entity doesn't have an id.
+  """
+  mock_delete_from_project = mocker.patch("commons.pdp_products.delete_entity_from_pdp_project")
+  mocker.patch("commons.pdp_products.delete")
+  mocker.patch("commons.pdp_products.json.loads", return_value={'acknowledged': True})
+  assert delete_pdp_entity({'ingestion': ''}, SEED, {'id': 'fake1'}, False, True)
+  assert mock_delete_from_project.call_count == 1
+
+
+def test_delete_entity_from_pdp_project_no_pdp_project_structure(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_entity_from_pdp_project`,
+  when the project path doesn't have a pdp project structure.
+  """
+  write_mock = mocker.patch("commons.pdp_products.write_entities")
+  mocker.patch("commons.pdp_products.has_pdp_project_structure", return_value=False)
+  delete_entity_from_pdp_project({'project_path': ''}, SEED, {}, False)
+  assert write_mock.call_count == 0
+
+
+def test_delete_entity_from_pdp_project(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_entity_from_pdp_project`.
+  """
+  entity = {
+    "seed": {
+      "records": 1000,
+      "recordSize": 8096
+    },
+    "name": "Cascade",
+    "type": "random-generator-connector",
+    "pipelineId": "{{ fromName('Cascade Pipeline') }}",
+    "properties": {
+      "index": "random_generated_docs"
+    },
+    "batchSize": "100",
+    "id": "fakeidCascadeSeed"
+  }
+  mocker.patch("commons.pdp_products.has_pdp_project_structure", return_value=True)
+  mocker.patch("commons.pdp_products.read_entities", return_value=[{'id': 'fake'}, entity])
+  mocker.patch("commons.pdp_products.delete_references_from_entity")
+  write_mock = mocker.patch("commons.pdp_products.write_entities")
+  delete_entity_from_pdp_project({'project_path': 'fake-path'}, SEED, entity, False)
+  file_path = os.path.join('fake-path', SEED.product.title(), SEED.associated_file_name)
+  write_mock.assert_called_once_with(file_path, [{'id': 'fake'}])
+
+
+def test_delete_entity_from_pdp_project_no_entities_read(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_pdp_entity`,
+  when the pdp project doesn't have entities.
+  """
+  entity = {
+    "seed": {
+      "records": 1000,
+      "recordSize": 8096
+    },
+    "name": "Cascade",
+    "type": "random-generator-connector",
+    "pipelineId": "{{ fromName('Cascade Pipeline') }}",
+    "properties": {
+      "index": "random_generated_docs"
+    },
+    "batchSize": "100",
+    "id": "fakeidCascadeSeed"
+  }
+  mocker.patch("commons.pdp_products.has_pdp_project_structure", return_value=True)
+  mocker.patch("commons.pdp_products.read_entities", return_value=[])
+  mock_delete_references = mocker.patch("commons.pdp_products.delete_references_from_entity")
+  write_mock = mocker.patch("commons.pdp_products.write_entities")
+  delete_entity_from_pdp_project({'project_path': 'fake-path'}, SEED, entity, True)
+  file_path = os.path.join('fake-path', SEED.product.title(), SEED.associated_file_name)
+  write_mock.assert_called_once_with(file_path, [])
+  assert mock_delete_references.call_count == 1
+
+
+def test_delete_references_from_entity(mocker, test_project_path):
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_references_from_entity`,
+  when the pdp project doesn't have entities.
+  """
+  mocker.patch("commons.pdp_products.has_pdp_project_structure", return_value=True)
+  mocker.patch("commands.config.get.get_entity_by_id", side_effect=[(None, None)])
+  mock_delete = mocker.patch("commons.pdp_products.delete_entity_from_pdp_project")
+  entity = {
+    "seed": {
+      "records": 1000,
+      "recordSize": 8096
+    },
+    "name": "Cascade",
+    "type": "random-generator-connector",
+    "pipelineId": "fakeidCascadePipeline",
+    "properties": {
+      "index": "random_generated_docs"
+    },
+    "batchSize": "100",
+    "id": "fakeidCascadeSeed"
+  }
+  config = {'project_path': test_project_path()}
+  delete_references_from_entity(config, SEED, entity, True)
+  reference_entity = {
+    "name": "Cascade Pipeline",
+    "active": True,
+    "steps": [
+      {
+        "processorId": "fakeidIP1",
+        "action": "hydrate"
+      },
+      {
+        "processorId": "fakeidCascadeProcessor",
+        "action": "hydrate"
+      }
+    ],
+    "id": "fakeidCascadePipeline"
+  }
+  mock_delete.assert_called_once_with(config, PIPELINE, reference_entity, True)

@@ -12,5 +12,19 @@
     },
     "batchSize": "100",
     "id": "fakeidS1"
+  },
+  {
+    "seed": {
+      "records": 1000,
+      "recordSize": 8096
+    },
+    "name": "Cascade",
+    "type": "random-generator-connector",
+    "pipelineId": "{{ fromName('Cascade Pipeline') }}",
+    "properties": {
+      "index": "random_generated_docs"
+    },
+    "batchSize": "100",
+    "id": "fakeidCascadeSeed"
   }
 ]

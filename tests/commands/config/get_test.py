@@ -18,7 +18,7 @@ def test_get_all_entities_entities_not_found(mocker):
   when there are no entities on the product.
   """
   mocker.patch("commands.config.get.get", return_value=None)
-  assert get_all_entities({'ingestion': {}}, [PIPELINE], {}, False) == {'ingestion': {}}
+  assert get_all_entities({'ingestion': {}}, [PIPELINE], {}, False) == {}
 
 
 def test_get_all_entities_entities_not_found_verbose(mocker):
@@ -28,7 +28,7 @@ def test_get_all_entities_entities_not_found_verbose(mocker):
   """
   mocker.patch("commands.config.get.create_spinner")
   mocker.patch("commands.config.get.get", return_value=None)
-  assert get_all_entities({'ingestion': {}}, [PIPELINE], {}, True) == {'ingestion': {}}
+  assert get_all_entities({'ingestion': {}}, [PIPELINE], {}, True) == {}
 
 
 def test_get_entities_by_ids_invalid(mocker):
@@ -49,6 +49,17 @@ def test_get_entities_by_ids_valid_hex_and_not_discovery(mocker):
   """
   mocker.patch("commands.config.get.create_spinner")
   mocker.patch("commands.config.get.get", return_value=None)
+  assert get_entities_by_ids({'ingestion': {}}, ['29a9b5e600704853983b0dd855a11cc6'], [PIPELINE], {}, False) \
+         == {}
+
+
+def test_get_entities_by_ids_error_curred(mocker, mock_custom_exception):
+  """
+  Test the function defined in :func:`commands.config.get.get_entities_by_ids`,
+  when there are no entities on the product with verbose.
+  """
+  mocker.patch("commands.config.get.create_spinner")
+  mocker.patch("commands.config.get.get_entity_by_id", side_effect=lambda: mock_custom_exception(Exception))
   assert get_entities_by_ids({'ingestion': {}}, ['29a9b5e600704853983b0dd855a11cc6'], [PIPELINE], {}, False) \
          == {}
 

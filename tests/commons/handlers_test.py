@@ -15,12 +15,7 @@ from commons.custom_classes import DataInconsistency, PdpException
 from commons.handlers import handle_and_continue, handle_and_exit, handle_exceptions, handle_http_response
 
 
-def mock_custom_exception(exception):
-  if exception is not None:
-    raise exception
-
-
-def test_handle_exceptions_exception_handled(mocker):
+def test_handle_exceptions_exception_handled(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_exceptions`.
   """
@@ -32,7 +27,7 @@ def test_handle_exceptions_exception_handled(mocker):
   mock_stop_spinner.assert_called_once()
 
 
-def test_handle_exceptions_exception_not_handled(mocker):
+def test_handle_exceptions_exception_not_handled(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_exceptions`,
   when the exception is not handled.
@@ -45,7 +40,7 @@ def test_handle_exceptions_exception_not_handled(mocker):
   mock_stop_spinner.assert_called_once()
 
 
-def test_handle_exceptions_exception(mocker):
+def test_handle_exceptions_exception(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_exceptions`,
   when the exception do not have the attribute handled.
@@ -58,7 +53,7 @@ def test_handle_exceptions_exception(mocker):
   mock_stop_spinner.assert_called_once()
 
 
-def test_handle_exceptions_no_exception_happen(mocker):
+def test_handle_exceptions_no_exception_happen(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_exceptions`,
   when no exception happened.
@@ -71,7 +66,7 @@ def test_handle_exceptions_no_exception_happen(mocker):
   mock_stop_spinner.assert_called_once()
 
 
-def test_handle_http_response_HttpError(mocker):
+def test_handle_http_response_HttpError(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_http_response`.
   """
@@ -133,7 +128,7 @@ def test_handle_http_response_success(mocker):
   assert handled_response == response.content
 
 
-def test_handle_and_exit_successful():
+def test_handle_and_exit_successful(mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_and_exit`,
   when no exception happened.
@@ -142,7 +137,7 @@ def test_handle_and_exit_successful():
   assert response == (True, None)
 
 
-def test_handle_and_exit_fail():
+def test_handle_and_exit_fail(mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_and_exit`.
   """
@@ -151,7 +146,7 @@ def test_handle_and_exit_fail():
   assert exception is not None
 
 
-def test_handle_and_exit_show_exception_and_error(mocker):
+def test_handle_and_exit_show_exception_and_error(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_and_exit`,
   with configuration to show a message.
@@ -169,7 +164,7 @@ def test_handle_and_exit_show_exception_and_error(mocker):
   mock_print_error.assert_called_once_with(message, True, prefix='', suffix='')
 
 
-def test_handle_and_continue_show_error_and_exception(mocker):
+def test_handle_and_continue_show_error_and_exception(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_and_continue`,
   with configuration to show a message.
@@ -185,7 +180,7 @@ def test_handle_and_continue_show_error_and_exception(mocker):
   mock_print_error.assert_called_once_with(message, False, prefix='', suffix='')
 
 
-def test_handle_and_continue_show_warning_and_exception(mocker):
+def test_handle_and_continue_show_warning_and_exception(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_and_continue`,
   with configuration to show a message.
@@ -202,7 +197,7 @@ def test_handle_and_continue_show_warning_and_exception(mocker):
   mock_print_warning.assert_called_once_with(message, prefix='', suffix='')
 
 
-def test_handle_and_continue_show_exception(mocker):
+def test_handle_and_continue_show_exception(mocker, mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_and_continue`,
   with configuration to show a message.
@@ -215,7 +210,7 @@ def test_handle_and_continue_show_exception(mocker):
   assert mock_print_exception.call_count == 1
 
 
-def test_handle_and_exit_not_show_nothing():
+def test_handle_and_exit_not_show_nothing(mock_custom_exception):
   """
   Test the function defined in :func:`commons.handlers.handle_and_continue`.
   """

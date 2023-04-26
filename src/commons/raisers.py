@@ -44,7 +44,8 @@ def unique_fields(**kwargs):
   """
   entity = kwargs.get('entity', None)
   aux = kwargs.get('aux', None)
-  _unique_fields = ['id', 'name']
+  ignore_ids = aux.get('ignore_ids', False)
+  _unique_fields = ['id', 'name'] if not ignore_ids else ['name']
   for field in _unique_fields:
     entity_field = entity.get(field, None)
     if entity_field is not None:

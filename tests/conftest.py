@@ -41,3 +41,12 @@ def test_project_path():
     return os.path.join('.', 'test_project', *args)
 
   return joinPath
+
+
+@pytest.fixture
+def mock_custom_exception():
+  def raise_custom_exception(exception):
+    if exception is not None:
+      raise exception
+
+  return raise_custom_exception

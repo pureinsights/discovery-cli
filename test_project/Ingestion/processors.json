@@ -23,5 +23,18 @@
     "name": "Persist to Search 2",
     "index": "${index}",
     "type": "elasticsearch-hydrator"
+  },
+  {
+    "bulkSize": 300,
+    "servers": [
+      {
+        "hostname": "localhost",
+        "port": 9200
+      }
+    ],
+    "name": "Cascade Processor",
+    "index": "${index}",
+    "type": "elasticsearch-hydrator",
+    "id": "fakeidCascadeProcessor"
   }
 ]

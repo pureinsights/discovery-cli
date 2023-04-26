@@ -9,7 +9,7 @@
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 
-from commons.http_requests import get, post, put
+from commons.http_requests import delete, get, post, put
 
 
 def test_get_success(mocker):  # All the possible errors are tested in test_handle_http_response
@@ -48,4 +48,18 @@ def test_put_success(mocker):  # All the possible errors are tested in test_hand
   mock_handler = mocker.patch('commons.http_requests.handle_http_response')
   put(fake_url, json=fake_body)
   request_put_mock.assert_called_once_with(fake_url, json=fake_body)
+  mock_handler.assert_called_once_with(expected_response)
+
+
+def test_delete_success(mocker):  # All the possible errors are tested in test_handle_http_response
+  """
+  Test the function defined in :func:`commons.http_requests.delete`.
+  """
+  fake_body = {'fake': 'body'}
+  fake_url = 'http://fake-url'
+  expected_response = {'status_code': 200, 'content': 'fake-content'}
+  request_delete_mock = mocker.patch('requests.delete', return_value=expected_response)
+  mock_handler = mocker.patch('commons.http_requests.handle_http_response')
+  delete(fake_url, params=fake_body)
+  request_delete_mock.assert_called_once_with(fake_url, params=fake_body)
   mock_handler.assert_called_once_with(expected_response)
