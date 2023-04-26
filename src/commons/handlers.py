@@ -40,16 +40,19 @@ def handle_exceptions(func: callable, *args, **kwargs):
     stop_spinner()
 
 
-def handle_http_response(res: req.Response) -> any:
+def handle_http_response(res: req.Response, status_404_as_error: bool = True) -> any:
   """
   Handle the responses for any http call. Raise an exception if the status code is not 2xx.
 
   :param requests.Response res: The response to be handled.
+  :param bool status_404_as_error: If true status 404 will raise an error, if not it will return None
   :return: Returns the content of the response.
   :rtype: Any
   :raises HTTPError: When the status is not a 2xx response.
   """
   try:
+    if res.status_code == 404 and not status_404_as_error:
+      return None
     res.raise_for_status()  # raises an exception when the status is not a 2xx response
     if res.status_code != 204:
       return res.content
@@ -111,14 +114,14 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
                        handled=show_exception or error_message is not None)
 
 
-def handle_and_continue(func: callable, params: dict, *args, **kwargs):
+def handle_and_continue(func: callable, handle_and_continue_params: dict, *args, **kwargs):
   """
   Tries to execute the given function, if an exception happens will be handled and print the given message.
   If an exception occurs will be handled and then continue the execution.
 
 
   :param callable func: The function that will be executed.
-  :param params params: A dict containing the params for the handler function.
+  :param params handle_and_continue_params: A dict containing the params for the handler function.
   :param *args args: The positional arguments for the 'func' function.
   :param **kwargs kwargs: The key-value arguments for the 'func' function.
   :type params: str message: The message to print if an exception happens.
@@ -131,11 +134,11 @@ def handle_and_continue(func: callable, params: dict, *args, **kwargs):
            exception happened.
   :raises Exception: Can raise the same exception handled in order to be handled by an upper handler as well.
   """
-  error_message = params.get('message', None)
-  prefix = params.get('prefix', '')
-  suffix = params.get('suffix', '')
-  show_exception = params.get('show_exception', False)
-  warning = params.get('warning', False)
+  error_message = handle_and_continue_params.get('message', None)
+  prefix = handle_and_continue_params.get('prefix', '')
+  suffix = handle_and_continue_params.get('suffix', '')
+  show_exception = handle_and_continue_params.get('show_exception', False)
+  warning = handle_and_continue_params.get('warning', False)
   try:
     return True, func(*args, **kwargs)
 

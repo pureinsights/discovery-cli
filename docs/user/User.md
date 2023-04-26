@@ -147,3 +147,54 @@ pdp -d ./my-pdp-project config create --entity-type pipeline --file ./my-new-ent
 ```bash
 pdp -d ./my-pdp-project config create --entity-type pipeline --entity-template empty_pipeline --interactive
 ```
+
+### Get Command
+
+Retrieves information about all the entities deployed on PDP Products. You can search by products, entity types or
+even by id. And you can filter the results by giving a property and the expected value to match the entities.
+
+#### Flags
+
+- `OPTIONAL`**--product**: Will filter the entities based on the name entered (Ingestion, Core or Discovery).
+  Default is All.
+- `OPTIONAL`**-t,--entity-type**: Will filter and only show the entities of the type entered. Default is All.
+- `OPTIONAL`**-i,--entity-id**: Will only retrieve information for the component specified by the ID. Default is None.
+  The command allows multiple flags of -i.
+- **-j,--json**: This is a boolean flag. Will print the results in JSON format. Default is False.
+- **-v,--verbose**: Will show more information. Default is False.
+- **-f,--filter**: Will filter the results by the key-value given by the user with the following format property value.
+  The command allows multiple flags of filter. Default is [].
+- **-p,--page**: The number of the page to show. Min 0. Default is 0.
+- **-s,--size**: The size of the page to show. Range 1 - 100. Default is 25.
+- **--asc**: The name of the property to sort in ascending order. Multiple flags are supported. Default is [].
+- **--desc**: The name of the property to sort in descending order. Multiple flags are supported. Default is [].
+
+#### Get all entities from all products from each entity type
+
+```bash
+pdp config get -v
+```
+
+#### Get all entities from all products from each entity type and printed as JSON
+
+```bash
+pdp config get -j
+```
+
+#### Get all entities a product
+
+```bash
+pdp config get --product ingestion
+```
+
+#### Get all entities from an entity type
+
+```bash
+pdp config get --entity-type ingestionProcessor
+```
+
+#### Get entities from ids
+
+```bash
+pdp config get -i 29a9b5e600704853983b0dd855a11cc6 -i 6376af03-1af2-41a2-aef6-62aefc73a870
+```

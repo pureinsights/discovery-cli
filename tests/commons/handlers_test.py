@@ -112,6 +112,17 @@ def test_handle_http_response_no_content(mocker):
   assert handled_response is None
 
 
+def test_handle_http_response_404_as_no_content(mocker):
+  """
+  Test the function defined in :func:`commons.handlers.handle_http_response`,
+  when the status 404 must be treated as 204.
+  """
+  response = requests.Response()
+  response.status_code = 404
+  handled_response = handle_http_response(response, False)
+  assert handled_response is None
+
+
 def test_handle_http_response_success(mocker):
   """
   Test the function defined in :func:`commons.handlers.handle_http_response`,

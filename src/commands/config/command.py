@@ -14,10 +14,11 @@ import click
 
 from commands.config.create import run as run_create
 from commands.config.deploy import run as run_deploy
+from commands.config.get import run as run_get
 from commands.config.init import run as run_init
 from commons.console import print_error
 from commons.constants import ENTITIES, PRODUCTS, STAGING, TEMPLATES_DIRECTORY
-from commons.custom_classes import PdpException
+from commons.custom_classes import DataInconsistency, PdpException
 from commons.file_system import list_directories, list_files, replace_file_extension
 from commons.pdp_products import get_entity_type_by_name
 from commons.raisers import raise_for_pdp_data_inconsistencies
@@ -172,3 +173,62 @@ def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_
                                  "properties. Allowed flags: --entity-template, --file")
 
   run_create(_config, project_path, entity_type, _file, has_to_deploy, json, ignore_ids, interactive)
+
+
+@config.command()
+@click.pass_obj
+@click.option('--product', default=None,
+              type=click.Choice(PRODUCTS['list'],
+                                case_sensitive=False
+                                ),
+              help="Will filter the entities based on the name entered (Ingestion, Core or Discovery). Default is All.")
+@click.option('-t', '--entity-type', 'entity_type_name', default=None,
+              type=click.Choice([
+                entity_type.type if entity_type.type != 'processor'
+                else f'{entity_type.product}{entity_type.type.title()}'
+                for entity_type in ENTITIES],
+                case_sensitive=False
+              ),
+              help="Will filter and only show the entities of the type entered. Default is All.")
+@click.option('-i', '--entity-id', 'entity_ids', default=[], multiple=True,
+              help="Will only retrieve information for the component specified by the ID. Default is None. "
+                   "The command allows multiple flags of -i.")
+@click.option('-j', '--json', 'is_json', is_flag=True, default=False,
+              help="This is a boolean flag. Will print the results in JSON format. Default is False.")
+@click.option('-v', '--verbose', 'is_verbose', is_flag=True, default=False,
+              help='Will show more information about the deployment results. Default is False.')
+@click.option('-f', '--filter', 'filters', multiple=True, default=[], type=(str, str),
+              help='Will show more information about the deployment results. Default is False.')
+@click.option('-p', '--page', 'page', default=0, type=int,
+              help='The number of the page to show. Min 0. Default is 0.')
+@click.option('-s', '--size', 'size', default=25, type=int,
+              help='The size of the page to show. Range 1 - 100. Default is 25.')
+@click.option('--asc', default=[], multiple=True,
+              help='The name of the property to sort in ascending order. Multiple flags are supported. Default is [].')
+@click.option('--desc', default=[], multiple=True,
+              help='The name of the property to sort in descending order. Multiple flags are supported. Default is [].')
+def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json: bool, is_verbose: bool,
+        filters: list[(str, str)], page: int, size: int, asc: list[str], desc: list[str]):
+  """
+  Retrieves information about all the entities deployed on PDP Products. You can search by products, entity types or
+  even by id. And you can filter the results by giving a property and the expected value to match the entities.
+  """
+  products = PRODUCTS['list']
+  entity_type = get_entity_type_by_name(entity_type_name)
+  if product is not None:
+    if entity_type is not None and product != entity_type.product:
+      raise DataInconsistency(
+        message=f"The entity type \"{entity_type.user_facing_type_name()}\" doesn't belong to \"{product.title()}\".")
+    products = [product]
+  sort = []
+  for asc_property in asc:
+    sort += [f'{asc_property},asc']
+  for desc_property in desc:
+    sort += [f'{desc_property},desc']
+  query_params = {
+    "page": page,
+    "size": size,
+    "sort": sort
+  }
+  run_get(obj['configuration'], products, entity_type, entity_ids, filters, query_params, is_json,
+          is_verbose and not is_json)

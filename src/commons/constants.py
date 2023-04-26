@@ -12,17 +12,19 @@ import os
 
 from commons.custom_classes import PdpEntity
 
-# Endpoints
-URL_EXPORT_ALL = '{0}/export'
-URL_GET_BY_ID = '{0}/{entity}/{id}'
-URL_UPDATE = '{0}/{entity}/{id}'
-URL_CREATE = '{0}/{entity}'
-
 # URLs
 INGESTION_API_URL = 'http://localhost:8080'
 STAGING_API_URL = 'http://localhost:8081'
 CORE_API_URL = 'http://localhost:8082'
 DISCOVERY_API_URL = 'http://localhost:8088/admin'
+
+# Endpoints
+URL_EXPORT_ALL = '{0}/export'
+URL_GET_BY_ID = '{0}/{entity}/{id}'
+URL_GET_ALL = '{0}/{entity}'
+URL_UPDATE = '{0}/{entity}/{id}'
+URL_CREATE = '{0}/{entity}'
+URL_SEARCH = f'{CORE_API_URL}/search'
 
 # Must be all in lower case
 # Products

@@ -25,6 +25,11 @@ class PdpEntity:
     else:
       self.reference_field = reference_field
 
+  def user_facing_type_name(self):
+    if self.type.lower() == 'processor':
+      return f'{self.product.lower()}{self.type.title()}'
+    return self.type
+
 
 class DataInconsistency(Exception):
   """

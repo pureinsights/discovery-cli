@@ -151,9 +151,9 @@ def print_console(message: any, *args, **kwargs):
   if message is None:
     return
   global buffer
-  prefix = kwargs.get('prefix', '')
-  suffix = kwargs.get('suffix', '')
-  nl = kwargs.get('nl', True)
+  prefix = kwargs.pop('prefix', '')
+  suffix = kwargs.pop('suffix', '')
+  nl = kwargs.pop('nl', True)
   new_line = ''
   if nl:
     new_line = '\n'
@@ -162,9 +162,6 @@ def print_console(message: any, *args, **kwargs):
     # then when the spinner stops it will print all the buffer.
     buffer += f'{prefix}{message}{suffix}{new_line}'
     return
-  kwargs.pop('prefix', None)
-  kwargs.pop('suffix', None)
-  kwargs.pop('nl', None)
   click.secho(f'{prefix}{message}{suffix}', *args, nl=nl, **kwargs)
 
 
