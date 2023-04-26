@@ -219,7 +219,7 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
   if product is not None:
     raise_for_inconsistent_product(entity_type, product)
     products = [product]
-    
+
   sort = []
   for asc_property in asc:
     sort += [f'{asc_property},asc']
@@ -241,7 +241,7 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
                                 case_sensitive=False
                                 ),
               help="Will filter the entities based on the name entered "
-                   "(Ingestion, Core or Discovery). Default is None.")
+                   "(Ingestion, Core or Discovery). Default is All.")
 @click.option('-t', '--entity-type', 'entity_type_name', default=None,
               type=click.Choice([
                 entity_type.type if entity_type.type != 'processor'
@@ -249,7 +249,7 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
                 for entity_type in ENTITIES],
                 case_sensitive=False
               ),
-              help="Will filter and only show the entities of the type entered. Default is None.")
+              help="Will filter and only show the entities of the type entered. Default is All.")
 @click.option('-i', '--entity-id', 'entity_ids', default=[], multiple=True,
               help="Will only retrieve information for the component specified by the ID. Default is None. "
                    "The command allows multiple flags of -i.")

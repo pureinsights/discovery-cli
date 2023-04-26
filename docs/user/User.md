@@ -207,7 +207,7 @@ If an entity is referenced by another can’t be deleted.
 #### Flags
 
 - `DEPENDENT`**--product**: Will filter the entities based on the name entered (Ingestion, core or discovery). Default
-  is None.
+  is All.
 - `DEPENDENT`**-t,--entity-type**: Will filter and only show the entities of the type entered. Default is All.
 - `DEPENDENT`**-i,--entity-id**: Will delete the entity with the specified id. Default is None. The command allows
   multiple flags of -i.
