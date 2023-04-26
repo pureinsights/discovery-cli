@@ -20,7 +20,7 @@ from commons.constants import CORE, CREDENTIAL, DISCOVERY, DISCOVERY_PROCESSOR_E
 from commons.custom_classes import DataInconsistency, PdpException
 from commons.pdp_products import are_same_pdp_entity, associate_values_from_entities, clear_from_name_format, \
   create_or_update_entity, \
-  delete_entity_from_pdp_project, delete_pdp_entity, delete_references_from_entity, export_all_entities, \
+  delete_entity_from_pdp_project, delete_pdp_entity, delete_references_from_entity, export_entities, \
   get_all_entities_names_ids, get_entity_by_id_from_local_entities, get_entity_type_by_name, identify_entity, \
   json_to_pdp_entities, order_products_to_deploy, \
   replace_ids, \
@@ -311,9 +311,9 @@ def test_replace_value_failed(mocker, entity_type, entity, expected_message):
   mock_warning.assert_called_with(expected_message)
 
 
-def test_export_all_entities_successful_without_extract(mocker):
+def test_export_entities_successful_without_extract(mocker):
   """
-  Test the function defined in :func:`commons.pdp_products.export_all_entities`,
+  Test the function defined in :func:`commons.pdp_products.export_entities`,
   without extracting the files.
   """
   content = b'fake-content'
@@ -323,15 +323,62 @@ def test_export_all_entities_successful_without_extract(mocker):
   api = 'http://fake-url'
   path = 'fake-path'
   ids = {'id': 'name'}
-  response = export_all_entities(api, path, False, ids=ids)
+  response = export_entities(api, path, False, ids=ids)
   m.assert_called_once_with(os.path.join(path, 'export.zip'), 'wb')
   m().write.assert_called_once_with(content)
   assert ids == response
 
 
-def test_export_all_entities_successful_with_extraction(mocker, mock_path_exists):
+def test_export_entity_by_id_successful_without_extract(mocker):
   """
-  Test the function defined in :func:`commons.pdp_products.export_all_entities`,
+  Test the function defined in :func:`commons.pdp_products.export_entities`,
+  without extracting the files and just exporting one entity.
+  """
+  content = b'fake-content'
+  get_mock = mocker.patch('commons.pdp_products.get', return_value=content)
+  m = mock_open()
+  mocker.patch('commons.pdp_products.open', m)
+  api = 'http://fake-url'
+  path = 'fake-path'
+  ids = {'id': 'name'}
+  entity_type = SEED
+  entity_id = 'fakeid'
+  response = export_entities(api, path, False, ids=ids, entity_type=entity_type, entity_id=entity_id)
+  m.assert_called_once_with(os.path.join(path, 'export.zip'), 'wb')
+  m().write.assert_called_once_with(content)
+  assert ids == response
+  get_mock.assert_called_once_with(
+    f'{api}/export/{entity_type.type}',
+    params={f'{entity_type.type}Id': entity_id, 'includeDependencies': False}
+  )
+
+
+def test_export_entities_successful_without_extract_verbose(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.export_entities`,
+  without extracting the files.
+  """
+  content = b'fake-content'
+  mocker.patch('commons.pdp_products.get', return_value=content)
+  m = mock_open()
+  mocker.patch('commons.pdp_products.open', m)
+  mocker.patch('commons.pdp_products.create_spinner')
+  mock_change_text = mocker.patch('commons.pdp_products.spinner_change_text')
+  mock_spinner_ok = mocker.patch('commons.pdp_products.spinner_ok')
+  api = 'http://fake-url'
+  path = 'fake-path'
+  ids = {'id': 'name'}
+  response = export_entities(api, path, False, ids=ids, verbose=True)
+  m.assert_called_once_with(os.path.join(path, 'export.zip'), 'wb')
+  m().write.assert_called_once_with(content)
+  assert mock_change_text.call_count == 2
+  assert mock_spinner_ok.call_count == 1
+  assert ids == response
+
+
+def test_export_entities_successful_with_extraction(mocker, mock_path_exists):
+  """
+  Test the function defined in :func:`commons.pdp_products.export_entities`,
   extracting the files.
   """
   mock_path_exists(True)
@@ -345,15 +392,15 @@ def test_export_all_entities_successful_with_extraction(mocker, mock_path_exists
   api = 'http://fake-url'
   path = 'fake-path'
   ids = {'id': 'name'}
-  response = export_all_entities(api, path, True, ids=ids)
+  response = export_entities(api, path, True, ids=ids)
   m.assert_called_once_with(os.path.join(path, 'export.zip'), 'wb')
   m().write.assert_called_once_with(content)
   assert ids == response
 
 
-def test_export_all_entities_failed_with_extraction(mocker, mock_path_exists):
+def test_export_entities_failed_with_extraction(mocker, mock_path_exists):
   """
-  Test the function defined in :func:`commons.pdp_products.export_all_entities`,
+  Test the function defined in :func:`commons.pdp_products.export_entities`,
   when fail while trying to extract the files.
   """
   mock_path_exists(False)
@@ -367,9 +414,35 @@ def test_export_all_entities_failed_with_extraction(mocker, mock_path_exists):
   api = 'http://fake-url'
   path = 'fake-path'
   ids = {'id': 'name'}
-  response = export_all_entities(api, path, True, ids=ids)
+  response = export_entities(api, path, True, ids=ids)
   m.assert_called_once_with(os.path.join(path, 'export.zip'), 'wb')
   m().write.assert_called_once_with(content)
+  assert ids == response
+
+
+def test_export_entities_successful_with_extraction_verbose(mocker, mock_path_exists):
+  """
+  Test the function defined in :func:`commons.pdp_products.export_entities`,
+  extracting the files, with verbose flag.
+  """
+  mock_path_exists(False)
+  content = b'fake-content'
+  mocker.patch('commons.pdp_products.get', return_value=content)
+  m = mock_open()
+  mocker.patch('commons.pdp_products.open', m)
+  mocker.patch('commons.pdp_products.zipfile')
+  mocker.patch('commons.pdp_products.create_spinner')
+  mock_change_text = mocker.patch('commons.pdp_products.spinner_change_text')
+  mock_spinner_ok = mocker.patch('commons.pdp_products.spinner_ok')
+  mocker.patch('commons.pdp_products.os.remove')
+  api = 'http://fake-url'
+  path = 'fake-path'
+  ids = {'id': 'name'}
+  response = export_entities(api, path, True, ids=ids, verbose=True)
+  m.assert_called_once_with(os.path.join(path, 'export.zip'), 'wb')
+  m().write.assert_called_once_with(content)
+  assert mock_change_text.call_count == 3
+  assert mock_spinner_ok.call_count == 1
   assert ids == response
 
 

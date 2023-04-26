@@ -207,7 +207,7 @@ If an entity is referenced by another can’t be deleted.
 #### Flags
 
 - `DEPENDENT`**--product**: Will filter the entities based on the name entered (Ingestion, core or discovery). Default
-  is None.
+  is All.
 - `DEPENDENT`**-t,--entity-type**: Will filter and only show the entities of the type entered. Default is All.
 - `DEPENDENT`**-i,--entity-id**: Will delete the entity with the specified id. Default is None. The command allows
   multiple flags of -i.
@@ -244,4 +244,41 @@ pdp config delete -i 504821c342f4e717cb1297739a83e7e3 -i 3b5086e9-e5bf-4c82-b23e
 
 ```bash
 pdp config delete -i 8e6e1674-fb03-45b3-9ffd-5bf4b780af49 --cascade
+```
+
+#### Export Command
+
+Will create a .zip file with the configuration files for the entities given by the user.
+
+### Flags
+
+- `OPTIONAL`**--product**: Will filter the entities based on the name entered (Ingestion, core or discovery). Default
+  is All.
+- `OPTIONAL`**-t,--entity-type**: Will filter and only export the entities of the type entered. Default is All.
+- `OPTIONAL`**-i,--entity-id**: Will only export the component specified by the ID. Default is None.
+- **--include-dependencies/--no-include-dependencies**: Will include those entities which are dependencies for the
+  entity identified with the given id. Default is False.
+
+### Export all entities
+
+```bash
+pdp config export
+```
+
+### Export all entities from a product
+
+```bash
+pdp config export --product discovery
+```
+
+### Export an entity
+
+```bash
+pdp config export --entity-type seed -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+```
+
+### Export an entity with his dependencies
+
+```bash
+pdp config export --entity-type seed -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --include-dependencies
 ```

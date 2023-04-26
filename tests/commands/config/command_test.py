@@ -8,6 +8,7 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+from unittest.mock import mock_open
 
 from commons.constants import DEFAULT_CONFIG, PRODUCTS, SEED
 from pdp import load_config, pdp
@@ -483,3 +484,68 @@ def test_delete_entities_by_ids_no_entities_deleted_output(mocker, snapshot):
     ["config", "delete", "-i", "fake1", "-i", "fake2", "-i", "fake3", "-i", "fake4", "-i", "fake5", "-i", "fake6"]
   )
   snapshot.assert_match(response.output, 'test_delete_entities_by_ids_no_entities_deleted_output.snapshot')
+
+
+def test_export(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.export`,
+  when no flags were provided.
+  """
+  mocker.patch("commons.pdp_products.get", return_value=b'fakedata')
+  m = mock_open()
+  mocker.patch('commons.pdp_products.open', m)
+  response = cli.invoke(pdp, ["config", "export"])
+  assert m().write.call_count == 3
+  snapshot.assert_match(response.output.replace('\r', ''), 'test_export.snapshot')
+
+
+def test_export_entities_from_product(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.export`,
+  when the --product flag was provided.
+  """
+  mocker.patch("commons.pdp_products.get", return_value=b'fakedata')
+  m = mock_open()
+  mocker.patch('commons.pdp_products.open', m)
+  response = cli.invoke(pdp, ["config", "export", "--product", "ingestion"])
+  assert m().write.call_count == 1
+  snapshot.assert_match(response.output.replace('\r', ''), 'test_export_entities_from_product.snapshot')
+
+
+def test_export_entity_by_id(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.export`,
+  when is required just export one entity.
+  """
+  mocker.patch("commons.pdp_products.get", return_value=b'fakedata')
+  m = mock_open()
+  mocker.patch('commons.pdp_products.open', m)
+  response = cli.invoke(pdp, ["config", "export", "--product", "ingestion", "--entity-type", "seed", "-i", "fakeid"])
+  assert m().write.call_count == 1
+  snapshot.assert_match(response.output.replace('\r', ''), 'test_export_entity_by_id.snapshot')
+
+
+def test_export_no_id_provided(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.export`,
+  when the --entity-id flag is missing.
+  """
+  mocker.patch("commons.pdp_products.get", return_value=b'fakedata')
+  m = mock_open()
+  mocker.patch('commons.pdp_products.open', m)
+  response = cli.invoke(pdp, ["config", "export", "--product", "ingestion", "--entity-type", "seed"])
+  assert m().write.call_count == 0
+  snapshot.assert_match(response.output.replace('\r', ''), 'test_export_no_id_provided.snapshot')
+
+
+def test_export_no_entity_type_provided(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command.export`,
+  when the --entity-type flag is missing.
+  """
+  mocker.patch("commons.pdp_products.get", return_value=b'fakedata')
+  m = mock_open()
+  mocker.patch('commons.pdp_products.open', m)
+  response = cli.invoke(pdp, ["config", "export", "--product", "ingestion", "-i", "fakeid"])
+  assert m().write.call_count == 0
+  snapshot.assert_match(response.output.replace('\r', ''), 'test_export_no_entity_type_provided.snapshot')

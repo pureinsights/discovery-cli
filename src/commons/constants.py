@@ -20,7 +20,7 @@ DISCOVERY_API_URL = 'http://localhost:8088/admin'
 
 # Endpoints
 GENERIC_URL = '{0}/{entity}/{id}'
-URL_EXPORT_ALL = '{0}/export'
+URL_EXPORT = '{0}/export/{entity}'
 URL_GET_BY_ID = GENERIC_URL
 URL_GET_ALL = '{0}/{entity}'
 URL_UPDATE = GENERIC_URL
