@@ -122,7 +122,6 @@ def get_entity_by_id(config: dict, entity_id: str, entity_types: list[PdpEntity]
   :return: A tuple containing the type of the entity and the entity respectively, A tuple of None in other case.
   """
   for entity_type in entity_types:
-    product = entity_type.product
     # Ids with hex format are only supported by Discovery API
     if entity_type is not ENDPOINT and is_hex_uuid(entity_id):
       return None, None

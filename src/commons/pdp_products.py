@@ -560,10 +560,8 @@ def delete_references_from_entity(config: dict, entity_type: PdpEntity, entity: 
     success, ids_found = handle_and_continue(search_value_from_entity, {}, reference_field, entity)
     if not success:
       continue
-    referenced_ids = flat_list(ids_found)
+    referenced_ids = [referenced_id for referenced_id in flat_list(ids_found) if referenced_id is not None]
     for _id in referenced_ids:
-      if _id is None:
-        continue
       entity_type = entity_references[reference_field]
       success, res = handle_and_continue(get_entity_by_id, {}, config, _id, [entity_type])
       if not success or (success and res[1] is not None):
@@ -629,6 +627,5 @@ def search_value_from_entity(entity_property: str, entity: dict | list) -> list[
 
     if isinstance(nested_entity, (list, set, tuple, dict)):
       values += search_value_from_entity(entity_property, nested_entity)
-      continue
 
   return values

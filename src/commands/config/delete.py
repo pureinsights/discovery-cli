@@ -94,6 +94,13 @@ def delete_entities_by_ids(config: dict, entity_ids: list[str], entity_types: li
   return deleted_entities
 
 
+def delete_value_from_list(value: any, _list: list[any]):
+  try:
+    _list.remove(value)
+  except ValueError:
+    pass
+
+
 def print_stage(deleted_entities: dict, entities_not_deleted: list[str]):
   """
   Prints information about which entities were deleted and which wasn't.
@@ -112,8 +119,7 @@ def print_stage(deleted_entities: dict, entities_not_deleted: list[str]):
 
       for entity in deleted_entities[product][entity_type]:
         _id = entity.get('id', None)
-        if _id in entities_not_deleted:
-          entities_not_deleted.remove(_id)
+        delete_value_from_list(_id, entities_not_deleted)
         entity_styled = click.style(entity.get('id', identify_entity(entity)), fg='green')
         print_console(f"Entity {entity_styled} deleted successfully.", prefix='    ✔ ')
 
