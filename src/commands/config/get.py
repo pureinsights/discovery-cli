@@ -93,6 +93,7 @@ def get_entities_by_ids(config: dict, ids: list[str], entity_types: list[PdpEnti
       continue
 
     entity_found_in, entity = res
+
     if entity is None:
       if is_verbose:
         spinner_fail(
@@ -135,6 +136,7 @@ def get_entity_by_id(config: dict, entity_id: str, entity_types: list[PdpEntity]
 
     entity = json.loads(res)
     return entity_type, entity
+
   return None, None
 
 

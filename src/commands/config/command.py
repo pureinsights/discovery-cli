@@ -219,6 +219,7 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
   if product is not None:
     raise_for_inconsistent_product(entity_type, product)
     products = [product]
+    
   sort = []
   for asc_property in asc:
     sort += [f'{asc_property},asc']
