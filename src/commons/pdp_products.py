@@ -557,9 +557,10 @@ def delete_references_from_entity(config: dict, entity_type: PdpEntity, entity: 
   path = config['project_path']
   entity_references = entity_type.get_references()
   for reference_field in entity_references.keys():
-    success, referenced_ids = handle_and_continue(flat_list, {}, search_value_from_entity(reference_field, entity))
+    success, ids_found = handle_and_continue(search_value_from_entity, {}, reference_field, entity)
     if not success:
       continue
+    referenced_ids = flat_list(ids_found)
     for _id in referenced_ids:
       if _id is None:
         continue
@@ -616,7 +617,7 @@ def search_value_from_entity(entity_property: str, entity: dict | list) -> list[
 
   if not isinstance(entity, dict):
     raise DataInconsistency(
-      message=f"The given vale is type {type(entity)}.",
+      message=f"The given vale is type {type(entity).__name__}.",
       content={'error': 'invalid type'}
     )
   values = []

@@ -272,7 +272,6 @@ def delete(obj, product, entity_type_name, entity_ids: list[str], delete_all, ca
   if len(entity_ids) <= 0 and not delete_all:
     raise DataInconsistency(message="You must to provide at least one entity-id or the -a flag to delete all entities.")
 
-  still_dependent = not delete_all and len(entity_ids) <= 0
   products = []
   if product is None:
     products = [product for product in PRODUCTS['list'] if product != STAGING]
@@ -288,7 +287,6 @@ def delete(obj, product, entity_type_name, entity_ids: list[str], delete_all, ca
   else:
     entity_type = get_entity_type_by_name(entity_type_name)
     raise_for_inconsistent_product(entity_type, product)
-    products = [entity_type.product]
     entity_types = [entity_type]
 
   sure_to_delete = click.prompt(

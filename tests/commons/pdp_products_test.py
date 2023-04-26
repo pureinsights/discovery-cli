@@ -17,14 +17,15 @@ from commons.constants import CORE, CREDENTIAL, DISCOVERY, DISCOVERY_PROCESSOR_E
   INGESTION_PROCESSOR, \
   INGESTION_PROCESSOR_ENTITY, PIPELINE, \
   SCHEDULER, SEED, URL_CREATE, URL_GET_BY_ID, URL_UPDATE
-from commons.custom_classes import PdpException
+from commons.custom_classes import DataInconsistency, PdpException
 from commons.pdp_products import are_same_pdp_entity, associate_values_from_entities, clear_from_name_format, \
   create_or_update_entity, \
   delete_entity_from_pdp_project, delete_pdp_entity, delete_references_from_entity, export_all_entities, \
-  get_all_entities_names_ids, get_entity_type_by_name, identify_entity, json_to_pdp_entities, order_products_to_deploy, \
+  get_all_entities_names_ids, get_entity_by_id_from_local_entities, get_entity_type_by_name, identify_entity, \
+  json_to_pdp_entities, order_products_to_deploy, \
   replace_ids, \
   replace_ids_for_names, \
-  replace_names_by_ids, replace_value
+  replace_names_by_ids, replace_value, search_value_from_entity
 
 
 def test_identify_entity_is_not_dict():
@@ -779,3 +780,83 @@ def test_delete_references_from_entity(mocker, test_project_path):
     "id": "fakeidCascadePipeline"
   }
   mock_delete.assert_called_once_with(config, PIPELINE, reference_entity, True)
+
+
+def test_delete_references_from_entity_no_references_field(mocker, test_project_path, mock_custom_exception):
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_references_from_entity`,
+  when the entity doesn't have the reference entity field.
+  """
+  mocker.patch("commons.pdp_products.has_pdp_project_structure", return_value=True)
+  mocker.patch("commons.pdp_products.search_value_from_entity",
+               side_effect=lambda *args: mock_custom_exception(Exception))
+  mock_delete = mocker.patch("commons.pdp_products.delete_entity_from_pdp_project")
+  entity = {
+    "seed": {
+      "records": 1000,
+      "recordSize": 8096
+    },
+    "name": "Cascade",
+    "type": "random-generator-connector",
+    "pipelineId": "fakeidCascadePipeline",
+    "properties": {
+      "index": "random_generated_docs"
+    },
+    "batchSize": "100",
+    "id": "fakeidCascadeSeed"
+  }
+  config = {'project_path': test_project_path()}
+  delete_references_from_entity(config, SEED, entity, True)
+  assert mock_delete.call_count == 0
+
+
+def test_delete_references_from_entity_entities_no_deleted(mocker, test_project_path, mock_custom_exception):
+  """
+  Test the function defined in :func:`commons.pdp_products.delete_references_from_entity`,
+  when some entities were not deleted from the PDP API.
+  """
+  mocker.patch("commons.pdp_products.has_pdp_project_structure", return_value=True)
+  mocker.patch(
+    "commons.pdp_products.search_value_from_entity",
+    return_value=[None, 'fakeidCascadePipeline', 'fakeid']
+  )
+  mocker.patch("commands.config.get.get_entity_by_id", side_effect=[({}, {}), (None, None)])
+  mock_delete = mocker.patch("commons.pdp_products.delete_entity_from_pdp_project")
+  entity = {
+    "seed": {
+      "records": 1000,
+      "recordSize": 8096
+    },
+    "name": "Cascade",
+    "type": "random-generator-connector",
+    "pipelineId": "fakeidCascadePipeline",
+    "properties": {
+      "index": "random_generated_docs"
+    },
+    "batchSize": "100",
+    "id": "fakeidCascadeSeed"
+  }
+  config = {'project_path': test_project_path()}
+  delete_references_from_entity(config, SEED, entity, True)
+  assert mock_delete.call_count == 0
+
+
+def test_get_entity_by_id_from_local_entities_no_project_structure(mocker):
+  """
+  Test the function defined in :func:`commons.pdp_products.get_entity_by_id_from_local_entities`,
+  when the project path doesn't have a PDP project structure
+  """
+  mocker.patch("commons.pdp_products.has_pdp_project_structure", return_value=False)
+  mock_handle_and_exit = mocker.patch("commons.pdp_products.handle_and_exit")
+  get_entity_by_id_from_local_entities("", SEED, 'fakeid')
+  assert mock_handle_and_exit.call_count == 0
+
+
+def test_search_value_from_entity_not_a_dict_or_list():
+  """
+  Test the function defined in :func:`commons.pdp_products.get_entity_by_id_from_local_entities`,
+  when the project path doesn't have a PDP project structure
+  """
+  with pytest.raises(DataInconsistency) as error:
+    search_value_from_entity('fake-property', 76)
+  assert error.value.message == "The given vale is type int."
