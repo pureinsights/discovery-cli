@@ -292,3 +292,9 @@ each product.
 
 - `REQUIRED`**--target**: Will import the given file to the specified product. (Ingestion, Core or Discovery).
 - `REQUIRED`**--zip**: The path to the zip that will be imported.
+
+### Import entities
+
+```bash
+pdp config import --product discovery --zip endpoints.zip
+```
