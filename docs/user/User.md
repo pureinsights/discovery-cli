@@ -282,3 +282,14 @@ pdp config export --entity-type seed -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 ```bash
 pdp config export --entity-type seed -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --include-dependencies
 ```
+
+#### Import Command
+
+Will import a .zip to a given product. The commands assume that the zip contains the files and structure necessary for
+each product.
+
+### Flags
+
+- `REQUIRED`**--target**: Will import the given file to the specified product. (Ingestion, Core or Discovery). Default
+  is All.
+- `REQUIRED`**--zip**: The path to the zip that will be imported.

@@ -12,6 +12,7 @@ import os
 
 import click
 
+from commands.config._import import run as run_import
 from commands.config.create import run as run_create
 from commands.config.delete import run as run_delete
 from commands.config.deploy import run as run_deploy
@@ -348,3 +349,24 @@ def export(obj: dict, product: str, entity_type_name: str, entity_id: str, inclu
     raise_for_inconsistent_product(entity_type, product)
 
   run_export(configuration, product, entity_type, entity_id, include_dependencies)
+
+
+@config.command('import')
+@click.pass_obj
+@click.option('--target', default=None, required=True,
+              type=click.Choice(PRODUCTS['list'],
+                                case_sensitive=False
+                                ),
+              help="Will import the given file to the specified product."
+                   "(Ingestion, Core or Discovery). Default is All.")
+@click.option('--zip', '_zip', default=None, required=True,
+              help="The path to the zip that will be imported.")
+def _import(obj, target: str, _zip: str):
+  """
+  Will import a .zip to a given product. The commands assume that the zip contains the files and structure
+  necessary for each product.
+  """
+  configuration = obj['configuration']
+  if not _zip.endswith('.zip'):
+    raise DataInconsistency(message=f'The path "{_zip}" is not a .zip file')
+  run_import(configuration, target, _zip)

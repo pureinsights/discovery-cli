@@ -549,3 +549,49 @@ def test_export_no_entity_type_provided(mocker, snapshot):
   response = cli.invoke(pdp, ["config", "export", "--product", "ingestion", "-i", "fakeid"])
   assert m().write.call_count == 0
   snapshot.assert_match(response.output.replace('\r', ''), 'test_export_no_entity_type_provided.snapshot')
+
+
+def test_import_entities(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command._import`.
+  """
+  mocker.patch("commands.config._import.post", return_value=b'{\
+    "processors": [{"id": "fakeid1"},{"id": "fakeid2"},{"id": "fakeid3"}],\
+    "pipelines": [{"id": "fakeid4"},{"id": "fakeid5"}]\
+  }')
+  mocker.patch("commands.config._import.read_binary_file", return_value="")
+  mocker.patch("commands.config._import.raise_file_not_found_error")
+  response = cli.invoke(pdp, ["config", "import", "--target", "ingestion", "--zip", "fake-path.zip"])
+  snapshot.assert_match(response.output, 'test_import_entities.snapshot')
+
+
+def test_import_not_a_file(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command._import`,
+  when the given path is a folder and not a file.
+  """
+  mocker.patch("commands.config._import.raise_file_not_found_error")
+  mocker.patch("commands.config._import.os.path.isdir", return_value=True)
+  response = cli.invoke(pdp, ["config", "import", "--target", "ingestion", "--zip", "fake-path.zip"])
+  snapshot.assert_match(response.exception.message, 'test_import_not_a_file.snapshot')
+
+
+def test_import_imported_failed(mocker, snapshot, mock_custom_exception):
+  """
+  Test the command defined in :func:`src.commands.config.command._import`,
+  when could not import the entities.
+  """
+  mocker.patch("commands.config._import.post", side_effect=lambda *args, **kwargs: mock_custom_exception(Exception))
+  mocker.patch("commands.config._import.read_binary_file", return_value="")
+  mocker.patch("commands.config._import.raise_file_not_found_error")
+  response = cli.invoke(pdp, ["config", "import", "--target", "ingestion", "--zip", "fake-path.zip"])
+  snapshot.assert_match(response.output, 'test_import_imported_failed.snapshot')
+
+
+def test_import_not_a_zip(snapshot):
+  """
+  Test the command defined in :func:`src.commands.config.command._import`,
+  when the given path is not a .zip file.
+  """
+  response = cli.invoke(pdp, ["config", "import", "--target", "ingestion", "--zip", "fake-path"])
+  snapshot.assert_match(response.exception.message, 'test_import_not_a_zip.snapshot')
