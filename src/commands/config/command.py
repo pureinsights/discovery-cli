@@ -358,7 +358,7 @@ def export(obj: dict, product: str, entity_type_name: str, entity_id: str, inclu
                                 case_sensitive=False
                                 ),
               help="Will import the given file to the specified product."
-                   "(Ingestion, Core or Discovery). Default is All.")
+                   "(Ingestion, Core or Discovery).")
 @click.option('--zip', '_zip', default=None, required=True,
               help="The path to the zip that will be imported.")
 def _import(obj, target: str, _zip: str):

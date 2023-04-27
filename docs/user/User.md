@@ -290,6 +290,5 @@ each product.
 
 ### Flags
 
-- `REQUIRED`**--target**: Will import the given file to the specified product. (Ingestion, Core or Discovery). Default
-  is All.
+- `REQUIRED`**--target**: Will import the given file to the specified product. (Ingestion, Core or Discovery).
 - `REQUIRED`**--zip**: The path to the zip that will be imported.
