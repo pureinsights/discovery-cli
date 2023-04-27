@@ -19,7 +19,7 @@ from commons.console import create_spinner, print_exception, spinner_change_text
 from commons.constants import PRODUCTS, STAGING
 from commons.custom_classes import PdpException
 from commons.handlers import handle_and_continue, handle_and_exit
-from commons.pdp_products import export_all_entities
+from commons.pdp_products import export_entities
 
 
 def run(project_name: str, apis: dict, force: bool, template: str = None):
@@ -126,7 +126,7 @@ def create_project_from_existing_sources(project_name: str, apis: dict):
       spinner_change_text(f'Importing {product_dir_name} entities...')
       zip_path = os.path.join(project_path, product_dir_name)
       product_api_url = apis.get(product)
-      success, new_ids = handle_and_continue(export_all_entities,
+      success, new_ids = handle_and_continue(export_entities,
                                              {'show_exception': True},
                                              product_api_url, zip_path, True, ids=ids)
       if new_ids is not None:

@@ -136,10 +136,10 @@ def test_create_project_from_existing_sources_successful(mocker):
   Test the command defined in :func:`commands.config.init.create_project_from_existing_sources`.
   """
   mocker.patch('commands.config.init.create_project_folder_structure')
-  mocker.patch('commands.config.init.export_all_entities', return_value=(True, { }))
+  mocker.patch('commands.config.init.export_entities', return_value=(True, {}))
   mocker.patch('commands.config.init.create_project_folder_structure')
   project_name = 'project-name'
-  success = create_project_from_existing_sources(project_name, { })
+  success = create_project_from_existing_sources(project_name, {})
   assert success
 
 
@@ -148,9 +148,9 @@ def test_create_project_from_existing_sources_failed(mocker):
   Test the command defined in :func:`commands.config.init.create_project_from_existing_sources`.
   """
   mocker.patch('commands.config.init.create_project_folder_structure')
-  mocker.patch('commands.config.init.export_all_entities', return_value=(False, None))
+  mocker.patch('commands.config.init.export_entities', return_value=(False, None))
   mocker.patch('commands.config.init.handle_and_continue', return_value=(False, None))
   mocker.patch('commands.config.init.create_project_folder_structure')
   project_name = 'project-name'
-  success = create_project_from_existing_sources(project_name, { })
+  success = create_project_from_existing_sources(project_name, {})
   assert not success

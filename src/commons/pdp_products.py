@@ -15,12 +15,12 @@ import zipfile
 
 import click
 
-from commons.console import print_console, print_error, print_exception, print_warning, verbose
+from commons.console import create_spinner, print_console, print_error, print_exception, print_warning, \
+  spinner_change_text, spinner_ok, verbose
 from commons.constants import CORE, DISCOVERY_PROCESSOR, ENTITIES, FROM_NAME_FORMAT, INGESTION, INGESTION_PROCESSOR, \
   PRODUCTS, STAGING, \
   URL_CREATE, \
-  URL_DELETE, URL_EXPORT_ALL, \
-  URL_GET_BY_ID, URL_UPDATE, WARNING_SEVERITY
+  URL_DELETE, URL_EXPORT, URL_GET_BY_ID, URL_UPDATE, WARNING_SEVERITY
 from commons.custom_classes import DataInconsistency, PdpEntity, PdpException
 from commons.file_system import has_pdp_project_structure, read_entities, write_entities
 from commons.handlers import handle_and_continue, handle_and_exit
@@ -253,7 +253,7 @@ def replace_value(entity_type: PdpEntity, entity: any, values: dict, **kwargs):
   parent[from_field] = format_str.format(value)
 
 
-def export_all_entities(api_url: str, path: str, extract: bool = True, **kwargs):
+def export_entities(api_url: str, path: str, extract: bool = True, **kwargs):
   """
   Export all entities for a given product. (INGESTION, DISCOVERY or CORE)
   Downloads the zip and is extracted to the given path.
@@ -264,12 +264,30 @@ def export_all_entities(api_url: str, path: str, extract: bool = True, **kwargs)
   :key dict ids: A dictionary with ids of already extracted entities. Default is {}.
   """
   ids = kwargs.get('ids', {})
-  zip_path = os.path.join(path, 'export.zip')
-  product_export_response = get(URL_EXPORT_ALL.format(api_url))
+  entity_type = kwargs.get('entity_type', None)
+  entity_id = kwargs.get('entity_id', '')
+  zip_name = kwargs.get('zip_name', 'export.zip')
+  include_dependencies = kwargs.get('include_dependencies', False)
+  is_verbose = kwargs.get('verbose', False)
+  params = {}
+  entity_str = ''
+  verbose_message = 'Exporting entities...'
+  if entity_type is not None and entity_id != '':
+    entity_str = entity_type.type
+    params = {f'{entity_type.type}Id': entity_id, 'includeDependencies': include_dependencies}
+    verbose_message = f'Exporting entity {entity_id}...'
+  zip_path = os.path.join(path, zip_name)
+  if is_verbose:
+    create_spinner()
+    spinner_change_text(verbose_message)
+  url = URL_EXPORT.format(api_url, entity=entity_str)
+  product_export_response = get(url, params=params)
+  verbose(verbose_func=lambda: spinner_change_text(f'Creating the {zip_name}'), verbose=is_verbose)
   with open(zip_path, 'wb') as zip_file:
     zip_file.write(product_export_response)
 
   if extract:
+    verbose(verbose_func=lambda: spinner_change_text(f'Extracting the {zip_name}'), verbose=is_verbose)
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
       zip_ref.extractall(path)
 
@@ -279,8 +297,10 @@ def export_all_entities(api_url: str, path: str, extract: bool = True, **kwargs)
     success, new_ids = handle_and_continue(replace_ids, {'show_exception': True}, path, ids)
 
     if success:
+      verbose(verbose_func=lambda: spinner_ok("Exported..."), verbose=is_verbose)
       return {**ids, **new_ids}
 
+  verbose(verbose_func=lambda: spinner_ok("Exported..."), verbose=is_verbose)
   return ids
 
 

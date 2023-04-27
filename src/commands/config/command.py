@@ -15,6 +15,7 @@ import click
 from commands.config.create import run as run_create
 from commands.config.delete import run as run_delete
 from commands.config.deploy import run as run_deploy
+from commands.config.export import run as run_export
 from commands.config.get import run as run_get
 from commands.config.init import run as run_init
 from commons.console import print_error
@@ -305,3 +306,45 @@ def delete(obj, product, entity_type_name, entity_ids: list[str], delete_all, ca
       print_error("Command aborted by user.", True)
 
   run_delete(configuration, entity_types, [*entity_ids], cascade, local)
+
+
+@config.command()
+@click.pass_obj
+@click.option('--product', default=None,
+              type=click.Choice(PRODUCTS['list'],
+                                case_sensitive=False
+                                ),
+              help="Will filter the entities based on the name entered "
+                   "(Ingestion, Core or Discovery). Default is All.")
+@click.option('-t', '--entity-type', 'entity_type_name', default=None,
+              type=click.Choice([
+                entity_type.type if entity_type.type != 'processor'
+                else f'{entity_type.product}{entity_type.type.title()}'
+                for entity_type in ENTITIES],
+                case_sensitive=False
+              ),
+              help="Will filter and only show the entities of the type entered. Default is All.")
+@click.option('-i', '--entity-id', 'entity_id', default=None,
+              help="Will only export the component specified by the ID. Default is None.")
+@click.option('--include-dependencies/--no-include-dependencies', 'include_dependencies', default=False, is_flag=True,
+              help="Will include those entities which are dependencies for "
+                   "the entity identified with the given id. Default is False")
+def export(obj: dict, product: str, entity_type_name: str, entity_id: str, include_dependencies: bool):
+  """
+  Will create a .zip file with the configuration files for the entities given by the user.
+  """
+  configuration = obj['configuration']
+  configuration['project_path'] = obj['project_path']
+  entity_type = None
+  if entity_type_name is not None:
+    entity_type = get_entity_type_by_name(entity_type_name)
+    if entity_id is None:
+      raise DataInconsistency(message="You must provide the --entity-id flag when you specified a --entity-type flag.")
+
+  if entity_id is not None and entity_type_name is None:
+    raise DataInconsistency(message="You must provide the --entity-type flag when you specified a --entity-id flag.")
+
+  if product is not None:
+    raise_for_inconsistent_product(entity_type, product)
+
+  run_export(configuration, product, entity_type, entity_id, include_dependencies)
