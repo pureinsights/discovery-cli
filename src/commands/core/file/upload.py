@@ -15,7 +15,7 @@ import click
 
 from commons.console import print_console
 from commons.constants import CORE, URL_UPLOAD_FILE
-from commons.file_system import read_binary_file, replace_file_extension
+from commons.file_system import read_binary_file
 from commons.handlers import handle_and_continue
 from commons.http_requests import put
 
@@ -31,7 +31,7 @@ def run(config: dict, name: str, file_path: str):
   file_name = name
   if name is None:
     split_path = os.path.split(file_path)
-    file_name = replace_file_extension(split_path[len(split_path) - 1], '')
+    file_name = split_path[len(split_path) - 1]
 
   handle_configuration = {
     'message': f'Could not upload the file "{file_path}".',
