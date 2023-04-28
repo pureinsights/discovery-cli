@@ -46,6 +46,9 @@ def upload(obj, path: str, name: str):
               help='The path where the file will be written. Default is ./Core/files/ if you are in a PDP project, '
                    'if not, default is ./.')
 def download(obj, name: str, path: str):
+  """
+  Will try to download a file previously uploaded to the Core API.
+  """
   configuration = obj['configuration']
   configuration['project_path'] = obj['project_path']
   run_download(configuration, name, path)

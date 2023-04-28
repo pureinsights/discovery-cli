@@ -321,3 +321,31 @@ pdp core file upload --name seed --path ./seed_entities.json
 # The name of the file will be entities
 pdp core file upload --path ./entities.zip
 ```
+
+#### Download Command
+
+Will try to download a file previously uploaded to the Core API.
+
+### Flags
+
+- `REQUIRED`**--name**: The name of the file that you want to download.
+- **--path**: The path where the file will be written. Default is ./Core/files/ if you are in a PDP project, if not,
+  default is ./.
+
+### Download a file
+
+```bash
+pdp core file download --name entities.json --path ./my-entities/
+```
+
+### Download a file and rename it
+
+```bash
+pdp core file download --name entities.json --path ./my-entities/pdp_entities.json
+```
+
+### Download a file on the current folder
+
+```bash
+pdp core file download --name entities.json
+```

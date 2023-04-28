@@ -6,5 +6,5 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  download
+  download  Will try to download a file previously uploaded to the Core API.
   upload    Try to upload the provided file to the Core API.
