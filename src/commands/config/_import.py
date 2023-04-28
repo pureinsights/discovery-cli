@@ -16,7 +16,7 @@ import click
 from commons.console import print_console
 from commons.constants import URL_IMPORT
 from commons.custom_classes import DataInconsistency
-from commons.file_system import read_binary_file
+from commons.file_system import read_binary_file, replace_file_extension
 from commons.handlers import handle_and_continue
 from commons.http_requests import post
 from commons.raisers import raise_file_not_found_error
@@ -51,9 +51,11 @@ def run(config: dict, target: str, file_path: str):
     'message': f'Could not import the file "{file_path}" to {target}.',
     'show_exception': True
   }
+  split_path = os.path.split(file_path)
+  file_name = replace_file_extension(split_path[len(split_path) - 1], '')
   success, result = handle_and_continue(
     post, handle_configuration, URL_IMPORT.format(config[target]),
-    files={'file': ('Seed', binary_data, 'multipart/form-data')}
+    files={'file': (file_name, binary_data, 'multipart/form-data')}
   )
 
   if not success:
