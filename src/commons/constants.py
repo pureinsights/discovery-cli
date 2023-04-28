@@ -27,7 +27,8 @@ URL_GET_ALL = '{0}/{entity}'
 URL_UPDATE = GENERIC_URL
 URL_CREATE = '{0}/{entity}'
 URL_DELETE = GENERIC_URL
-URL_SEARCH = f'{CORE_API_URL}/search'
+URL_SEARCH = '{0}/search'
+URL_UPLOAD_FILE = '{0}/files'
 
 # Must be all in lower case
 # Products
