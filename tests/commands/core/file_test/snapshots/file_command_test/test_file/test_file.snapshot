@@ -1,0 +1,10 @@
+Usage: pdp core file [OPTIONS] COMMAND [ARGS]...
+
+  Encloses all the commands related with files within the Core API.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  download
+  upload    Try to upload the provided file to the Core API.

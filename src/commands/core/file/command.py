@@ -11,6 +11,7 @@
 
 import click
 
+from commands.core.file.download import run as run_download
 from commands.core.file.upload import run as run_upload
 
 
@@ -35,3 +36,16 @@ def upload(obj, path: str, name: str):
   """
   configuration = obj['configuration']
   run_upload(configuration, name, path)
+
+
+@file.command()
+@click.pass_obj
+@click.option('--name', required=True,
+              help='The name of the file to download form Core API.')
+@click.option('--path', default=None,
+              help='The path where the file will be written. Default is ./Core/files/ if you are in a PDP project, '
+                   'if not, default is ./.')
+def download(obj, name: str, path: str):
+  configuration = obj['configuration']
+  configuration['project_path'] = obj['project_path']
+  run_download(configuration, name, path)

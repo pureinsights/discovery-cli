@@ -1,8 +1,0 @@
-[ERROR]: The id fake-id is not a valid uuid.
-Entities
---------------------|Discovery|--------------------
-    Processor:
-      Entity name "fake-name1" found it!
-    Entities found: 1
---------------------|Entities found: 0|--------------------
-Entities found: 1

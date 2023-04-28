@@ -29,6 +29,7 @@ URL_CREATE = '{0}/{entity}'
 URL_DELETE = GENERIC_URL
 URL_SEARCH = '{0}/search'
 URL_UPLOAD_FILE = '{0}/files'
+URL_DOWNLOAD_FILE = '{0}/files/download'
 
 # Must be all in lower case
 # Products

@@ -141,3 +141,13 @@ def read_binary_file(path: str):
   raise_file_not_found_error(path)
   with open(path, mode='rb') as file:
     return file.read()
+
+
+def write_binary_file(path: str, data: bytes):
+  """
+  Writes binary data to a file to the file system.
+  :param str path: The path where the file will be written.
+  :param bytes data: The data to be written in the files.
+  """
+  with open(path, mode='wb') as file:
+    file.write(data)
