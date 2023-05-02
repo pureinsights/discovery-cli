@@ -13,4 +13,5 @@ Options:
 
 Commands:
   config  Contains all the commands to help you manage the entities on PDP.
+  core    Encloses all the commands related with the Core API.
   health  This command is used to know if PDP-CLI has been installed...

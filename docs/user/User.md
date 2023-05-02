@@ -298,3 +298,26 @@ each product.
 ```bash
 pdp config import --product discovery --zip endpoints.zip
 ```
+
+#### Upload Command
+
+Try to upload the provided file to the Core API.
+
+### Flags
+
+- **--name**: The name of the file, if no name is provided, then the name will be the name found in the path.
+- `REQUIRED` **--path**: The path where the file is located. If just a name is passed instead of a path to the file the
+  cli will try to find the file in the ./Core/files/.
+
+### Upload a file with a specific name
+
+```bash
+pdp core file upload --name seed --path ./seed_entities.json
+```
+
+### Upload a file without specified the name
+
+```bash
+# The name of the file will be entities
+pdp core file upload --path ./entities.zip
+```
