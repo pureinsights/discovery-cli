@@ -13,7 +13,7 @@ from unittest.mock import mock_open
 import pytest
 
 from commons.custom_classes import PdpException
-from commons.file_system import has_pdp_project_structure, list_files, read_entities, write_entities
+from commons.file_system import has_pdp_project_structure, list_files, read_binary_file, read_entities, write_entities
 
 
 def test_list_files(test_project_path):
@@ -130,3 +130,13 @@ def test_has_pdp_project_structure_missing_folder(mocker, test_project_path):
   has_structure = has_pdp_project_structure(path, 'error')
   assert not has_structure
   print_error_mock.assert_called()
+
+
+def test_read_binary_file(mocker):
+  """
+  Test the function defined in :func:`commons.files_system.read_binary_file`.
+  """
+  mocker.patch('commons.file_system.open', mock_open(read_data=b"fakedata"))
+  mocker.patch("commons.file_system.raise_file_not_found_error")
+  bytes_read = read_binary_file('fake_path')
+  assert bytes_read == b"fakedata"

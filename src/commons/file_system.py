@@ -131,3 +131,13 @@ def has_pdp_project_structure(path: str, show: str = None):
         has_structure = False
 
   return has_structure
+
+
+def read_binary_file(path: str):
+  """
+  Reads a file from the file system as binary data.
+  :param str path: The path of the file to read.
+  """
+  raise_file_not_found_error(path)
+  with open(path, mode='rb') as file:
+    return file.read()
