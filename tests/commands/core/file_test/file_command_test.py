@@ -8,8 +8,19 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import os
+
 from pdp import pdp
 from pdp_test import cli
+
+
+def test_file(snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.file.command.file`.
+  """
+  response = cli.invoke(pdp, ["core", "file"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_file.snapshot')
 
 
 def test_upload_file(mocker, snapshot):
@@ -61,3 +72,60 @@ def test_upload_failed(mocker, snapshot, mock_custom_exception):
   response = cli.invoke(pdp, ["core", "file", "upload", "--path", "fake-path"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_upload_failed.snapshot')
+
+
+def test_download_file(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.download`.
+  """
+  mocker.patch("commands.core.file.download.get", return_value=b'{"acknowledged": true }')
+  mock_write = mocker.patch("commands.core.file.download.write_binary_file")
+  response = cli.invoke(pdp, ["core", "file", "download", "--name", "seeds", "--path", "./fake-path/seed.json"])
+  mock_write.assert_called_once_with("./fake-path/seed.json", b'{"acknowledged": true }')
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_download_file.snapshot')
+
+
+def test_download_file_without_rename(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.download`,
+  when the given path is a folder.
+  """
+  mocker.patch("commands.core.file.download.get", return_value=b'{"acknowledged": true }')
+  mocker.patch("commands.core.file.download.os.path.isdir", return_value=True)
+  mock_write = mocker.patch("commands.core.file.download.write_binary_file")
+  response = cli.invoke(pdp, ["core", "file", "download", "--name", "seeds", "--path", "./fake-path/"])
+  mock_write.assert_called_once_with("./fake-path/seeds", b'{"acknowledged": true }')
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_download_file_without_rename.snapshot')
+
+
+def test_download_file_without_path(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.download`,
+  when no path was entered.
+  """
+  mocker.patch("commands.core.file.download.get", return_value=b'{"acknowledged": true }')
+  mocker.patch("commands.core.file.download.os.path.isdir", return_value=True)
+  mock_write = mocker.patch("commands.core.file.download.write_binary_file")
+  response = cli.invoke(pdp, ["core", "file", "download", "--name", "seeds"])
+  expected_path = os.path.join(".", "seeds")
+  mock_write.assert_called_once_with(expected_path, b'{"acknowledged": true }')
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_download_file_without_path.snapshot')
+
+
+def test_download_file_within_pdp_project(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.download`,
+  when the given path is a PDP project.
+  """
+  mocker.patch("commands.core.file.download.get", return_value=b'{"acknowledged": true }')
+  mocker.patch("commands.core.file.download.os.path.isdir", return_value=True)
+  mocker.patch("commands.core.file.download.has_pdp_project_structure", return_value=True)
+  mock_write = mocker.patch("commands.core.file.download.write_binary_file")
+  response = cli.invoke(pdp, ["core", "file", "download", "--name", "seeds"])
+  expected_path = os.path.join(".", "Core", "files", "seeds")
+  mock_write.assert_called_once_with(expected_path, b'{"acknowledged": true }')
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_download_file_within_pdp_project.snapshot')

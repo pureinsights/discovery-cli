@@ -13,7 +13,8 @@ from unittest.mock import mock_open
 import pytest
 
 from commons.custom_classes import PdpException
-from commons.file_system import has_pdp_project_structure, list_files, read_binary_file, read_entities, write_entities
+from commons.file_system import has_pdp_project_structure, list_files, read_binary_file, read_entities, \
+  write_binary_file, write_entities
 
 
 def test_list_files(test_project_path):
@@ -140,3 +141,13 @@ def test_read_binary_file(mocker):
   mocker.patch("commons.file_system.raise_file_not_found_error")
   bytes_read = read_binary_file('fake_path')
   assert bytes_read == b"fakedata"
+
+
+def test_write_binary_file(mocker):
+  """
+  Test the function defined in :func:`commons.files_system.read_binary_file`.
+  """
+  m = mock_open()
+  mocker.patch('commons.file_system.open', m)
+  write_binary_file('fake_path', b'data')
+  m.return_value.write.assert_called_once_with(b'data')

@@ -72,14 +72,14 @@ def handle_http_response(res: req.Response, status_404_as_error: bool = True) ->
     raise PdpException(message=f"Could not '{method}' to {url} due to:\n\t{errors}", content=content)
 
 
-def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool, any]:
+def handle_and_exit(func: callable, handle_and_exit_params: dict, *args, **kwargs) -> tuple[bool, any]:
   """
   Tries to execute the given function, if an exception happens will be handled and print the given message.
   If raise_exception is True will raise the same Exception that it handle.
   It's helpful to print a specific message for a potential exception.
 
   :param callable func: The function that will be executed.
-  :param params params: A dict containing the params for the handler function.
+  :param params handle_and_exit_params: A dict containing the params for the handler function.
   :param *args args: The positional arguments for the 'func' function.
   :param **kwargs kwargs: The key-value arguments for the 'func' function.
   :type params: str message: The message to print if an exception happens.
@@ -90,15 +90,15 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
   :rtype: None
   :raises Exception: Can raise the same exception handled in order to be handled by an upper handler as well.
   """
-  error_message = params.get('message', None)
-  prefix = params.get('prefix', '')
-  suffix = params.get('suffix', '')
-  show_exception = params.get('show_exception', False)
+  error_message = handle_and_exit_params.get('message', None)
+  prefix = handle_and_exit_params.get('prefix', '')
+  suffix = handle_and_exit_params.get('suffix', '')
+  show_exception = handle_and_exit_params.get('show_exception', False)
   try:
     return True, func(*args, **kwargs)
 
   except Exception as error:
-    error = params.get('exception', error)
+    error = handle_and_exit_params.get('exception', error)
     if hasattr(error, 'handled'):
       error.handled = True
     if show_exception:
@@ -107,7 +107,7 @@ def handle_and_exit(func: callable, params: dict, *args, **kwargs) -> tuple[bool
     if error_message is not None:
       print_error(error_message, True, prefix=prefix, suffix=suffix)
 
-    if params.get('exception', None) is not None:
+    if handle_and_exit_params.get('exception', None) is not None:
       raise error
 
     raise PdpException(message=EXCEPTION_FORMAT.format(exception=type(error).__name__, error=''),

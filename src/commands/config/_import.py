@@ -51,7 +51,7 @@ def run(config: dict, target: str, file_path: str):
     'message': f'Could not import the file "{file_path}" to {target}.',
     'show_exception': True
   }
-  
+
   success, result = handle_and_continue(
     post, handle_configuration, URL_IMPORT.format(config[target]),
     files={'file': ('Seed', binary_data, 'multipart/form-data')}
