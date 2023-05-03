@@ -17,7 +17,7 @@ To create the initial structure of a PDP project run the following command.
 pdp health 
 ```
 
-#### Create a PDP project named HelloWorld with some initial entites already configured.
+#### Create a PDP project named HelloWorld with some initial entities already configured.
 
 ```bash
 pdp config init -n HelloWorld --template random_generator 
@@ -364,4 +364,17 @@ Will delete a file from the Core API.
   --local flag. The command allows multiple flags of -n.
 - `DEPENDENT`**--local**: This is a boolean flag, it will try to delete the file from your pc too. It will use the path
   provided by the flag name, if just a name was passed and not a path it will search for the file on the ./core/files.
-  Default is False. 
+  Default is False.
+
+#### Delete files
+
+```bash
+pdp core file delete --name file_name --name another_file
+```
+
+#### Delete file from local too
+
+```bash
+pdp core file delete --name file_name --local
+```
+
