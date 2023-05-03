@@ -11,6 +11,7 @@
 
 import click
 
+from commands.core.file.delete import run as run_delete
 from commands.core.file.download import run as run_download
 from commands.core.file.upload import run as run_upload
 
@@ -25,7 +26,7 @@ def file(ctx):
 
 @file.command()
 @click.pass_obj
-@click.option('--name', default=None,
+@click.option('-n', '--name', default=None,
               help='The name of the file, if no name is provided, then the name will be the name found in the path.')
 @click.option('--path', required=True,
               help='The path where the file is located. If just a name is passed instead of a path to the '
@@ -40,7 +41,7 @@ def upload(obj, path: str, name: str):
 
 @file.command()
 @click.pass_obj
-@click.option('--name', required=True,
+@click.option('-n', '--name', required=True,
               help='The name of the file to download form Core API.')
 @click.option('--path', default=None,
               help='The path where the file will be written. Default is ./Core/files/ if you are in a PDP project, '
@@ -52,3 +53,21 @@ def download(obj, name: str, path: str):
   configuration = obj['configuration']
   configuration['project_path'] = obj['project_path']
   run_download(configuration, name, path)
+
+
+@file.command()
+@click.pass_obj
+@click.option('-n', '--name', 'names', required=True, multiple=True,
+              help='The name of the file you want to delete. You can provide a full path too to use it with the --local'
+                   ' flag. The command allows multiple flags of -n.')
+@click.option('--local', default=False, is_flag=True,
+              help='This is a boolean flag, it will try to delete the file from your pc too. It will use the path '
+                   'provided by the flag name, if just a name was passed and not a path it will search for the file on '
+                   'the ./core/files. Default is False.')
+def delete(obj, names: list[str], local: bool):
+  """
+  Will delete the files from the Core API.
+  """
+  configuration = obj['configuration']
+  configuration['project_path'] = obj['project_path']
+  run_delete(configuration, names, local)

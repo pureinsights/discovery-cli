@@ -14,7 +14,7 @@ import pytest
 
 from commands.config.init import create_project_folder_structure, create_project_from_existing_sources, \
   create_project_from_template, run
-from commons.constants import DEFAULT_CONFIG
+from commons.constants import CORE, DEFAULT_CONFIG, FILES_FOLDER, PRODUCTS, STAGING
 
 
 def test_run_init_created_successfully(mocker, mock_path_exists):
@@ -122,7 +122,8 @@ def test_create_project_folder_structure_successful(mocker, mock_path_exists):
   mock_path_exists(False)
   mock_mkdir = mocker.patch('commands.config.init.os.mkdir')
   project_path = 'fake_path'
-  folders = ['Discovery', 'Core', 'Core/Files', 'Ingestion']
+  folders = [product.title() for product in PRODUCTS['list'] if product != STAGING] + \
+            [os.path.join(CORE.title(), FILES_FOLDER)]
   create_project_folder_structure(project_path)
   calls = []
   for folder in folders:

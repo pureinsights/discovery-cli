@@ -16,7 +16,7 @@ import shutil
 import click
 
 from commons.console import create_spinner, print_exception, spinner_change_text, spinner_fail, spinner_ok
-from commons.constants import PRODUCTS, STAGING
+from commons.constants import CORE, FILES_FOLDER, PRODUCTS, STAGING
 from commons.custom_classes import PdpException
 from commons.handlers import handle_and_continue, handle_and_exit
 from commons.pdp_products import export_entities
@@ -85,7 +85,7 @@ def create_project_from_template(project_name: str,
 
 
 def create_project_folder_structure(project_path: str,
-                                    folders: list[str] = ['Discovery', 'Core', 'Core/Files', 'Ingestion']):
+                                    folders: list[str] = None):
   """
   Create empty folders. The default list of folders are ['Discovery', 'Core', 'Core/Files', 'Ingestion']
   but you can pass a custom folder structure.
@@ -93,6 +93,9 @@ def create_project_folder_structure(project_path: str,
   :param str project_path: The path where the project will be created.
   :param list[str] folders: A list of relative paths to the project_path.
   """
+  if folders is None:
+    folders = [product.title() for product in PRODUCTS['list'] if product != STAGING] + \
+              [os.path.join(CORE.title(), FILES_FOLDER)]
   if not os.path.exists(project_path):
     os.mkdir(project_path)
     for folder in folders:

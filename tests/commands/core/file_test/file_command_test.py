@@ -129,3 +129,40 @@ def test_download_file_within_pdp_project(mocker, snapshot):
   mock_write.assert_called_once_with(expected_path, b'{"acknowledged": true }')
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_download_file_within_pdp_project.snapshot')
+
+
+def test_delete_files(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.delete`,
+  when the given path is a PDP project.
+  """
+  mocker.patch("commands.core.file.delete.create_spinner")
+  mocker.patch("commands.core.file.delete.has_pdp_project_structure", side_effect=[True, True, False])
+  mocker.patch("commands.core.file.delete.handle_and_continue",
+               side_effect=[(True, b'{"acknowledged": true }'), (True, b'{"acknowledged": false }'), (False, None)])
+  ok_mock = mocker.patch("commands.core.file.delete.spinner_ok")
+  fail_mock = mocker.patch("commands.core.file.delete.spinner_fail")
+  response = cli.invoke(pdp, ["core", "file", "delete", "--name", "fake-name1", "--name", "fake-name2", "--name",
+                              "fake-name3"])
+  assert response.exit_code == 0
+  assert ok_mock.call_count == 1
+  assert fail_mock.call_count == 2
+
+
+def test_delete_files_locally(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.delete`,
+  when the given path is a PDP project.
+  """
+  mocker.patch("commands.core.file.delete.create_spinner")
+  mocker.patch("commands.core.file.delete.os.remove")
+  mocker.patch("commands.core.file.delete.has_pdp_project_structure", side_effect=[True, True, False])
+  mocker.patch("commands.core.file.delete.handle_and_continue",
+               side_effect=[(True, b'{"acknowledged": true }'), (True, b'{"acknowledged": false }'), (False, None)])
+  ok_mock = mocker.patch("commands.core.file.delete.spinner_ok")
+  fail_mock = mocker.patch("commands.core.file.delete.spinner_fail")
+  response = cli.invoke(pdp, ["core", "file", "delete", "--name", "fake-name1", "--name", "fake-name2", "--name",
+                              "fake-name3", "--local"])
+  assert response.exit_code == 0
+  assert ok_mock.call_count == 1
+  assert fail_mock.call_count == 2

@@ -14,7 +14,7 @@ import os.path
 import click
 
 from commons.console import print_console
-from commons.constants import CORE, URL_UPLOAD_FILE
+from commons.constants import CORE, URL_GENERIC_FILE
 from commons.file_system import read_binary_file
 from commons.handlers import handle_and_continue
 from commons.http_requests import put
@@ -38,7 +38,7 @@ def run(config: dict, name: str, file_path: str):
     'show_exception': True
   }
   _, acknowledged = handle_and_continue(
-    put, handle_configuration, URL_UPLOAD_FILE.format(config[CORE]),
+    put, handle_configuration, URL_GENERIC_FILE.format(config[CORE]),
     params={"name": file_name}, files={'file': (file_name, binary_data, 'multipart/form-data')}
   )
   if acknowledged is None:

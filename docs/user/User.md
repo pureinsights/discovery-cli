@@ -299,53 +299,69 @@ each product.
 pdp config import --product discovery --zip endpoints.zip
 ```
 
-#### Upload Command
+### Core Command
+
+#### File Command
+
+##### Upload Command
 
 Try to upload the provided file to the Core API.
 
-### Flags
+#### Flags
 
 - **--name**: The name of the file, if no name is provided, then the name will be the name found in the path.
 - `REQUIRED` **--path**: The path where the file is located. If just a name is passed instead of a path to the file the
   cli will try to find the file in the ./Core/files/.
 
-### Upload a file with a specific name
+#### Upload a file with a specific name
 
 ```bash
 pdp core file upload --name seed --path ./seed_entities.json
 ```
 
-### Upload a file without specified the name
+#### Upload a file without specified the name
 
 ```bash
 # The name of the file will be entities
 pdp core file upload --path ./entities.zip
 ```
 
-#### Download Command
+##### Download Command
 
 Will try to download a file previously uploaded to the Core API.
 
-### Flags
+#### Flags
 
 - `REQUIRED`**--name**: The name of the file that you want to download.
 - **--path**: The path where the file will be written. Default is ./Core/files/ if you are in a PDP project, if not,
   default is ./.
 
-### Download a file
+#### Download a file
 
 ```bash
 pdp core file download --name entities.json --path ./my-entities/
 ```
 
-### Download a file and rename it
+#### Download a file and rename it
 
 ```bash
 pdp core file download --name entities.json --path ./my-entities/pdp_entities.json
 ```
 
-### Download a file on the current folder
+#### Download a file on the current folder
 
 ```bash
 pdp core file download --name entities.json
 ```
+
+##### Delete Command
+
+Will delete a file from the Core API.
+
+#### Flags
+
+- `REQUIRED`**-n, --name**: The name of the file you want to delete. You can provide a full path too to use it with the
+  --local flag. The command allows multiple flags of -n.
+- `DEPENDENT`**--local**: This is a boolean flag, it will try to delete the file from your pc too. It will use the path
+  provided by the flag name, if just a name was passed and not a path it will search for the file on the ./core/files.
+  Default is False. 
