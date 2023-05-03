@@ -1,1 +1,1 @@
-b'["fake-file", "fake-file2"]'
+['fake-file', 'fake-file2']
