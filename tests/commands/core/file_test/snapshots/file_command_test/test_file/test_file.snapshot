@@ -8,4 +8,5 @@ Options:
 Commands:
   delete    Will delete the files from the Core API.
   download  Will try to download a file previously uploaded to the Core API.
+  ls        Show the list of files uploaded to the Core API.
   upload    Try to upload the provided file to the Core API.

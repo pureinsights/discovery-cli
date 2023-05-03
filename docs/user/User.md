@@ -378,3 +378,22 @@ pdp core file delete --name file_name --name another_file
 pdp core file delete --name file_name --local
 ```
 
+##### Ls Command
+
+Show the list of files uploaded to the Core API.
+
+#### Flags
+
+- **--json**: This is a boolean flag. Will print the results in JSON format. Default is False.
+
+#### Show files from Core API
+
+```bash
+pdp core file ls
+```
+
+#### Show files from Core API as JSON format
+
+```bash
+pdp core file ls --json
+```

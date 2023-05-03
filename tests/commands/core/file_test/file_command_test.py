@@ -151,8 +151,7 @@ def test_delete_files(mocker, snapshot):
 
 def test_delete_files_locally(mocker, snapshot):
   """
-  Test the command defined in :func:`src.commands.core.command.delete`,
-  when the given path is a PDP project.
+  Test the command defined in :func:`src.commands.core.command.delete`.
   """
   mocker.patch("commands.core.file.delete.create_spinner")
   mocker.patch("commands.core.file.delete.os.remove")
@@ -166,3 +165,35 @@ def test_delete_files_locally(mocker, snapshot):
   assert response.exit_code == 0
   assert ok_mock.call_count == 1
   assert fail_mock.call_count == 2
+
+
+def test_list(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.ls`.
+  """
+  mocker.patch("commands.core.file.list.get", return_value=b'["fake-file", "fake-file2"]')
+  response = cli.invoke(pdp, ["core", "file", "ls"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_list.snapshot')
+
+
+def test_list_empty(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.ls`,
+  when the list of files is empty.
+  """
+  mocker.patch("commands.core.file.list.get", return_value=b'[]')
+  response = cli.invoke(pdp, ["core", "file", "ls"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_list_empty.snapshot')
+
+
+def test_list_json(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.ls`,
+  when the --json flag is True.
+  """
+  mocker.patch("commands.core.file.list.get", return_value=b'["fake-file", "fake-file2"]')
+  response = cli.invoke(pdp, ["core", "file", "ls", "--json"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_list_json.snapshot')
