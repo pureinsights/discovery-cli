@@ -84,4 +84,3 @@ def ls(obj, is_json: bool):
   """
   configuration = obj['configuration']
   run_ls(configuration, is_json)
-

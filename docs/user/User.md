@@ -216,41 +216,41 @@ If an entity is referenced by another can’t be deleted.
   the user, then it will attempt to delete all types of entities from a product, and so on.
 - **--local**: Will delete the configuration of the entities from the PDP Project files. Default is False.
 
-### Delete all entities
+#### Delete all entities
 
 ```bash
 pdp config delete --all
 ```
 
-### Delete all entities from Ingestion
+#### Delete all entities from Ingestion
 
 ```bash
 pdp config delete --product ingestion --all
 ```
 
-### Delete all entities of type endpoint
+#### Delete all entities of type endpoint
 
 ```bash
 pdp config delete --entity-type endpoint --all
 ```
 
-### Delete entities by ids
+#### Delete entities by ids
 
 ```bash
 pdp config delete -i 504821c342f4e717cb1297739a83e7e3 -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 ```
 
-### Delete entity in cascade
+#### Delete entity in cascade
 
 ```bash
 pdp config delete -i 8e6e1674-fb03-45b3-9ffd-5bf4b780af49 --cascade
 ```
 
-#### Export Command
+### Export Command
 
 Will create a .zip file with the configuration files for the entities given by the user.
 
-### Flags
+#### Flags
 
 - `OPTIONAL`**--product**: Will filter the entities based on the name entered (Ingestion, core or discovery). Default
   is All.
@@ -259,41 +259,41 @@ Will create a .zip file with the configuration files for the entities given by t
 - **--include-dependencies/--no-include-dependencies**: Will include those entities which are dependencies for the
   entity identified with the given id. Default is False.
 
-### Export all entities
+#### Export all entities
 
 ```bash
 pdp config export
 ```
 
-### Export all entities from a product
+#### Export all entities from a product
 
 ```bash
 pdp config export --product discovery
 ```
 
-### Export an entity
+#### Export an entity
 
 ```bash
 pdp config export --entity-type seed -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 ```
 
-### Export an entity with his dependencies
+#### Export an entity with his dependencies
 
 ```bash
 pdp config export --entity-type seed -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --include-dependencies
 ```
 
-#### Import Command
+### Import Command
 
 Will import a .zip to a given product. The commands assume that the zip contains the files and structure necessary for
 each product.
 
-### Flags
+#### Flags
 
 - `REQUIRED`**--target**: Will import the given file to the specified product. (Ingestion, Core or Discovery).
 - `REQUIRED`**--zip**: The path to the zip that will be imported.
 
-### Import entities
+#### Import entities
 
 ```bash
 pdp config import --product discovery --zip endpoints.zip
@@ -315,11 +315,13 @@ Try to upload the provided file to the Core API.
 
 #### Upload a file with a specific name
 
+
 ```bash
 pdp core file upload --name seed --path ./seed_entities.json
 ```
 
 #### Upload a file without specified the name
+
 
 ```bash
 # The name of the file will be entities
@@ -331,6 +333,7 @@ pdp core file upload --path ./entities.zip
 Will try to download a file previously uploaded to the Core API.
 
 #### Flags
+
 
 - `REQUIRED`**--name**: The name of the file that you want to download.
 - **--path**: The path where the file will be written. Default is ./Core/files/ if you are in a PDP project, if not,
@@ -368,11 +371,13 @@ Will delete a file from the Core API.
 
 #### Delete files
 
+
 ```bash
 pdp core file delete --name file_name --name another_file
 ```
 
 #### Delete file from local too
+
 
 ```bash
 pdp core file delete --name file_name --local
@@ -396,5 +401,28 @@ pdp core file ls
 
 ```bash
 pdp core file ls --json
+```
+
+### Seed-Exec Command
+
+#### Start Command
+
+Try to start the scanning process of a seed. Note that a seed can only have one active execution at a time.
+
+##### Flags
+
+- `REQUIRED`**--seed**: The id of the seed to start the scanning process.
+- **--scan-type**: The strategy to apply during the scan phase. Values supported INCREMENTAL and FULL. Default is FULL.
+
+##### Start execution of a seed
+
+```bash
+pdp seed-exec start --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+```
+
+##### Start execution of a seed with a specific scan type
+
+```bash
+pdp seed-exec start --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --scan-type incremental
 ```
 

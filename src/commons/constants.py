@@ -30,6 +30,7 @@ URL_DELETE = GENERIC_URL
 URL_SEARCH = '{0}/search'
 URL_GENERIC_FILE = '{0}/files'
 URL_DOWNLOAD_FILE = '{0}/files/download'
+URL_SEED_START = '{0}/seed/{id}'
 
 # Must be all in lower case
 # Products

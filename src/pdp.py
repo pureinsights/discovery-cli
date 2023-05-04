@@ -18,6 +18,7 @@ import pyfiglet
 from commands.config.command import config
 from commands.core.command import core
 from commands.core.file.command import file
+from commands.execution.command import seed_exec
 from commons.constants import DEFAULT_CONFIG, PRODUCTS
 from commons.custom_classes import DataInconsistency
 from commons.handlers import handle_exceptions
@@ -90,8 +91,10 @@ def health():
 # Register all the commands
 pdp.add_command(config)
 pdp.add_command(core)
+pdp.add_command(seed_exec)
 
 core.add_command(file)
 
 if __name__ == '__main__':
   handle_exceptions(pdp)  # pragma: no cover
+  # handle_exceptions(pdp, ["seed-exec", "start", "--seed", "f0c3f36c-59ef-42e3-a025-b9de65e7241e"])  # pragma: no cover
