@@ -13,7 +13,6 @@ import click
 from commands.execution.reset import run as run_reset
 from commands.execution.start import run as run_start
 
-
 @click.group("seed-exec")
 @click.pass_context
 def seed_exec(ctx):
