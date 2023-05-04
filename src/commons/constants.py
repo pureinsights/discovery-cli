@@ -31,6 +31,7 @@ URL_SEARCH = '{0}/search'
 URL_GENERIC_FILE = '{0}/files'
 URL_DOWNLOAD_FILE = '{0}/files/download'
 URL_SEED_START = '{0}/seed/{id}'
+URL_SEED_RESTART = '{0}/seed/{id}/reset'
 
 # Must be all in lower case
 # Products
