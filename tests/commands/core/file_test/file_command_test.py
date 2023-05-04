@@ -151,7 +151,10 @@ def test_delete_files(mocker, snapshot):
 
 def test_delete_files_locally(mocker, snapshot):
   """
-  Test the command defined in :func:`src.commands.core.command.delete`.
+
+  Test the command defined in :func:`src.commands.core.command.delete`,
+  when the given path is a PDP project.
+
   """
   mocker.patch("commands.core.file.delete.create_spinner")
   mocker.patch("commands.core.file.delete.os.remove")
