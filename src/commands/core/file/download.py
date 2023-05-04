@@ -11,7 +11,7 @@
 import os.path
 
 from commons.console import print_console
-from commons.constants import CORE, URL_DOWNLOAD_FILE
+from commons.constants import CORE, FILES_FOLDER, URL_DOWNLOAD_FILE
 from commons.file_system import has_pdp_project_structure, write_binary_file
 from commons.handlers import handle_and_exit
 from commons.http_requests import get
@@ -27,7 +27,7 @@ def run(config: dict, name: str, path: str | None):
   if path is None:
     path = config['project_path']
     if has_pdp_project_structure(path):
-      path = os.path.join(path, CORE.title(), 'files')
+      path = os.path.join(path, CORE.title(), FILES_FOLDER)
 
   if os.path.isdir(path):
     path = os.path.join(path, name)

@@ -28,7 +28,7 @@ URL_UPDATE = GENERIC_URL
 URL_CREATE = '{0}/{entity}'
 URL_DELETE = GENERIC_URL
 URL_SEARCH = '{0}/search'
-URL_UPLOAD_FILE = '{0}/files'
+URL_GENERIC_FILE = '{0}/files'
 URL_DOWNLOAD_FILE = '{0}/files/download'
 
 # Must be all in lower case
@@ -37,6 +37,7 @@ INGESTION = 'ingestion'
 DISCOVERY = 'discovery'
 CORE = 'core'
 STAGING = 'staging'
+FILES_FOLDER = 'files'
 
 # Entities
 SCHEDULER = PdpEntity(INGESTION, 'scheduler', 'cron_jobs.json')
