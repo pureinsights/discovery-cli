@@ -434,3 +434,18 @@ Reset all the associated data of the given seed.
 ```bash
 pdp seed-exec reset --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 ```
+
+#### Control Command
+
+Triggers and action on all active executions for the given seed.
+
+##### Flags
+
+- `REQUIRED`**--seed**: The id of the seed to trigger the action.
+- **--action**: The action you want to trigger. Values supported HALT, PAUSE and RESUME. Default is HALT.
+
+##### Control the execution of a seed
+
+```bash
+pdp seed-exec control --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --action halt
+```

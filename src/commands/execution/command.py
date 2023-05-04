@@ -10,6 +10,7 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import click
 
+from commands.execution.control import run as run_control
 from commands.execution.reset import run as run_reset
 from commands.execution.start import run as run_start
 
@@ -48,3 +49,18 @@ def reset(obj, seed):
   """
   configuration = obj['configuration']
   run_reset(configuration, seed)
+
+
+@seed_exec.command()
+@click.pass_obj
+@click.option('--seed', required=True,
+              help='The id of the seed to trigger the action.')
+@click.option('--action', default='HALT',
+              type=click.Choice(['HALT', 'PAUSE', 'RESUME'], case_sensitive=False),
+              help='The action you want to trigger. Values supported HALT, PAUSE and RESUME. Default is HALT.')
+def control(obj, seed, action):
+  """
+  Triggers and action on all active executions for the given seed.
+  """
+  configuration = obj['configuration']
+  run_control(configuration, seed, action)

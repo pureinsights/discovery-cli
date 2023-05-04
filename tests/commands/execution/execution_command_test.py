@@ -41,3 +41,24 @@ def test_reset_failed(mocker, snapshot):
   response = cli.invoke(pdp, ["seed-exec", "reset", "--seed", "fake-id"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_reset_failed.snapshot')
+
+
+def test_control(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.control`.
+  """
+  mocker.patch("commands.execution.control.put", return_value=b'{"acknowledged": true}')
+  response = cli.invoke(pdp, ["seed-exec", "control", "--seed", "fake-id", "--action", "HALT"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_control.snapshot')
+
+
+def test_control_failed(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.control`,
+  when the api returns an acknowledged false.
+  """
+  mocker.patch("commands.execution.control.put", return_value=b'{"acknowledged": false}')
+  response = cli.invoke(pdp, ["seed-exec", "control", "--seed", "fake-id", "--action", "RESUME"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_control_failed.snapshot')
