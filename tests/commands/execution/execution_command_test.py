@@ -12,10 +12,11 @@ from pdp import pdp
 from pdp_test import cli
 
 
-def test_core(snapshot):
+def test_start(mocker, snapshot):
   """
-  Test the command defined in :func:`src.commands.core.command.core`.
+  Test the command defined in :func:`src.commands.execution.command.start`.
   """
-  response = cli.invoke(pdp, ["core"])
+  mocker.patch("commands.execution.start.post", return_value=b'{"id": "fake-execution-id"}')
+  response = cli.invoke(pdp, ["seed-exec", "start", "--seed", "fake-id", "--scan-type", "incremental"])
   assert response.exit_code == 0
-  snapshot.assert_match(response.output, 'test_core.snapshot')
+  snapshot.assert_match(response.output, 'test_start.snapshot')
