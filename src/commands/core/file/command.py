@@ -13,6 +13,7 @@ import click
 
 from commands.core.file.delete import run as run_delete
 from commands.core.file.download import run as run_download
+from commands.core.file.list import run as run_ls
 from commands.core.file.upload import run as run_upload
 
 
@@ -71,3 +72,16 @@ def delete(obj, names: list[str], local: bool):
   configuration = obj['configuration']
   configuration['project_path'] = obj['project_path']
   run_delete(configuration, names, local)
+
+
+@file.command()
+@click.pass_obj
+@click.option('--json', 'is_json', default=False, is_flag=True,
+              help='This is a boolean flag. Will print the results in JSON format. Default is False.')
+def ls(obj, is_json: bool):
+  """
+  Show the list of files uploaded to the Core API.
+  """
+  configuration = obj['configuration']
+  run_ls(configuration, is_json)
+
