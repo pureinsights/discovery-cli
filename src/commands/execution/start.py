@@ -10,6 +10,8 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import json
 
+import click
+
 from commons.console import print_console
 from commons.constants import INGESTION, URL_SEED_START
 from commons.http_requests import post
@@ -24,4 +26,4 @@ def run(config: dict, seed: str, scan_type: str):
   """
   res = post(URL_SEED_START.format(config[INGESTION], id=seed), params={"scanType": scan_type})
   execution_id = json.loads(res).get("id")
-  print_console(f"The execution was started with id {execution_id}.")
+  print_console(f"The execution was started with id {click.style(execution_id, fg='green')}.")
