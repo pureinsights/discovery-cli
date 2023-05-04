@@ -10,19 +10,21 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import json
 
+import click
 
 from commons.console import print_console
-from commons.constants import INGESTION, URL_SEED_START
+from commons.constants import INGESTION, URL_SEED_RESTART
 from commons.http_requests import post
 
 
-def run(config: dict, seed: str, scan_type: str):
+def run(config: dict, seed: str):
   """
-  Will start the execution for the given seed id.
+  Will reset the given seed.
   :param dict config: The configuration containing the url products.
-  :param str seed: The id of the seed to start the execution.
-  :param str scan_type: The strategy to use in the scan phase of the execution.
+  :param str seed: The id of the seed to reset.
   """
-  res = post(URL_SEED_START.format(config[INGESTION], id=seed), params={"scanType": scan_type})
-  execution_id = json.loads(res).get("id")
-  print_console(f"The execution was started with id {execution_id}.")
+  res = post(URL_SEED_RESTART.format(config[INGESTION], id=seed))
+  if json.loads(res).get("acknowledged", False):
+    print_console(f"The seed {click.style(seed, fg='green')} was reset successfully.")
+    return
+  print_console(f"Couldn't reset the seed {click.style(seed, fg='green')}.")

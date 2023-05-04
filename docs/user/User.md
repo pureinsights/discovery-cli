@@ -307,20 +307,19 @@ pdp config import --product discovery --zip endpoints.zip
 
 Try to upload the provided file to the Core API.
 
-#### Flags
+###### Flags
 
 - **--name**: The name of the file, if no name is provided, then the name will be the name found in the path.
 - `REQUIRED` **--path**: The path where the file is located. If just a name is passed instead of a path to the file the
   cli will try to find the file in the ./Core/files/.
 
-#### Upload a file with a specific name
-
+###### Upload a file with a specific name
 
 ```bash
 pdp core file upload --name seed --path ./seed_entities.json
 ```
 
-#### Upload a file without specified the name
+###### Upload a file without specified the name
 
 
 ```bash
@@ -332,26 +331,26 @@ pdp core file upload --path ./entities.zip
 
 Will try to download a file previously uploaded to the Core API.
 
-#### Flags
-
+###### Flags
 
 - `REQUIRED`**--name**: The name of the file that you want to download.
 - **--path**: The path where the file will be written. Default is ./Core/files/ if you are in a PDP project, if not,
   default is ./.
 
-#### Download a file
+###### Download a file
 
 ```bash
 pdp core file download --name entities.json --path ./my-entities/
 ```
 
-#### Download a file and rename it
+###### Download a file and rename it
+
 
 ```bash
 pdp core file download --name entities.json --path ./my-entities/pdp_entities.json
 ```
 
-#### Download a file on the current folder
+###### Download a file on the current folder
 
 ```bash
 pdp core file download --name entities.json
@@ -361,7 +360,7 @@ pdp core file download --name entities.json
 
 Will delete a file from the Core API.
 
-#### Flags
+###### Flags
 
 - `REQUIRED`**-n, --name**: The name of the file you want to delete. You can provide a full path too to use it with the
   --local flag. The command allows multiple flags of -n.
@@ -369,15 +368,13 @@ Will delete a file from the Core API.
   provided by the flag name, if just a name was passed and not a path it will search for the file on the ./core/files.
   Default is False.
 
-#### Delete files
-
+###### Delete files
 
 ```bash
 pdp core file delete --name file_name --name another_file
 ```
 
-#### Delete file from local too
-
+###### Delete file from local too
 
 ```bash
 pdp core file delete --name file_name --local
@@ -387,17 +384,18 @@ pdp core file delete --name file_name --local
 
 Show the list of files uploaded to the Core API.
 
-#### Flags
+###### Flags
 
 - **--json**: This is a boolean flag. Will print the results in JSON format. Default is False.
 
-#### Show files from Core API
+###### Show files from Core API
+
 
 ```bash
 pdp core file ls
 ```
 
-#### Show files from Core API as JSON format
+###### Show files from Core API as JSON format
 
 ```bash
 pdp core file ls --json
@@ -426,3 +424,16 @@ pdp seed-exec start --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 pdp seed-exec start --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --scan-type incremental
 ```
 
+#### Reset Command
+
+Reset all the associated data of the given seed.
+
+##### Flags
+
+- `REQUIRED`**--seed**: The id of the seed to reset the associated data.
+
+##### Reset associated data of a seed
+
+```bash
+pdp seed-exec reset --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+```
