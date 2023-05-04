@@ -20,3 +20,24 @@ def test_start(mocker, snapshot):
   response = cli.invoke(pdp, ["seed-exec", "start", "--seed", "fake-id", "--scan-type", "incremental"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_start.snapshot')
+
+
+def test_reset(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.reset`.
+  """
+  mocker.patch("commands.execution.reset.post", return_value=b'{"acknowledged": true}')
+  response = cli.invoke(pdp, ["seed-exec", "reset", "--seed", "fake-id"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_reset.snapshot')
+
+
+def test_reset_failed(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.reset`,
+  when could not reset the seed.
+  """
+  mocker.patch("commands.execution.reset.post", return_value=b'{"acknowledged": false}')
+  response = cli.invoke(pdp, ["seed-exec", "reset", "--seed", "fake-id"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_reset_failed.snapshot')

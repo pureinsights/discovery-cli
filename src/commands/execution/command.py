@@ -10,6 +10,7 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import click
 
+from commands.execution.reset import run as run_reset
 from commands.execution.start import run as run_start
 
 
@@ -35,3 +36,15 @@ def start(obj, seed, scan_type):
   """
   configuration = obj['configuration']
   run_start(configuration, seed, scan_type)
+
+
+@seed_exec.command()
+@click.pass_obj
+@click.option('--seed', required=True,
+              help='The id of the seed to reset the associated data.')
+def reset(obj, seed):
+  """
+  Reset all the associated data of the given seed.
+  """
+  configuration = obj['configuration']
+  run_reset(configuration, seed)

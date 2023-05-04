@@ -420,3 +420,17 @@ pdp seed-exec start --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 ```bash
 pdp seed-exec start --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --scan-type incremental
 ```
+
+#### Reset Command
+
+Reset all the associated data of the given seed.
+
+##### Flags
+
+- `REQUIRED`**--seed**: The id of the seed to reset the associated data.
+
+##### Reset associated data of a seed
+
+```bash
+pdp seed-exec reset --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+```
