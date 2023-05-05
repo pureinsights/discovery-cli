@@ -14,7 +14,6 @@ from commands.execution.control import run as run_control
 from commands.execution.reset import run as run_reset
 from commands.execution.start import run as run_start
 
-
 @click.group("seed-exec")
 @click.pass_context
 def seed_exec(ctx):
@@ -64,3 +63,4 @@ def control(obj, seed, action):
   """
   configuration = obj['configuration']
   run_control(configuration, seed, action)
+

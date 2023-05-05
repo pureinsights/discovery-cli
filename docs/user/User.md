@@ -321,6 +321,7 @@ pdp core file upload --name seed --path ./seed_entities.json
 
 ###### Upload a file without specified the name
 
+
 ```bash
 # The name of the file will be entities
 pdp core file upload --path ./entities.zip
@@ -343,6 +344,7 @@ pdp core file download --name entities.json --path ./my-entities/
 ```
 
 ###### Download a file and rename it
+
 
 ```bash
 pdp core file download --name entities.json --path ./my-entities/pdp_entities.json
@@ -387,6 +389,7 @@ Show the list of files uploaded to the Core API.
 - **--json**: This is a boolean flag. Will print the results in JSON format. Default is False.
 
 ###### Show files from Core API
+
 
 ```bash
 pdp core file ls
@@ -449,3 +452,4 @@ Triggers and action on all active executions for the given seed.
 ```bash
 pdp seed-exec control --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --action halt
 ```
+

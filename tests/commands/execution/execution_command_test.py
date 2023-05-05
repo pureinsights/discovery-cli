@@ -62,3 +62,4 @@ def test_control_failed(mocker, snapshot):
   response = cli.invoke(pdp, ["seed-exec", "control", "--seed", "fake-id", "--action", "RESUME"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_control_failed.snapshot')
+
