@@ -1,0 +1,6 @@
+Executions of seed fake-id: 
+    | id            | status   | pipelineId   | jobId   |   steps
+----+---------------+----------+--------------+---------+---------
+  0 | execution-id1 | ---      | pipeline-id  | job-id  |       3
+  1 | execution-id2 | ---      | pipeline-id  | job-id  |       1
+  2 | execution-id3 | ---      | pipeline-id  | job-id  |       2
