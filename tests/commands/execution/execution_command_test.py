@@ -63,3 +63,103 @@ def test_control_failed(mocker, snapshot):
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_control_failed.snapshot')
 
+
+def test_get(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.get`.
+  """
+  mocker.patch(
+    "commands.execution.get.get",
+    return_value=b'{"content": ['
+                 b'{"id":"execution-id1", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{},{}]},'
+                 b'{"id":"execution-id2", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{},{}]},'
+                 b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{},{}]}'
+                 b']}'
+  )
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get.snapshot')
+
+
+def test_get_verbose(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.get`,
+  when the verbose flag is True.
+  """
+  mocker.patch(
+    "commands.execution.get.get",
+    return_value=b'{"content": ['
+                 b'{"id":"execution-id1", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{},{}]},'
+                 b'{"id":"execution-id2", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{}]},'
+                 b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{}]}'
+                 b']}'
+  )
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "-v"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_verbose.snapshot')
+
+
+def test_get_json(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.get`,
+  when the json flag is True.
+  """
+  mocker.patch(
+    "commands.execution.get.get",
+    return_value=b'{"content": ['
+                 b'{"id":"execution-id1", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{},{}]},'
+                 b'{"id":"execution-id2", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{}]},'
+                 b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{}]}'
+                 b']}'
+  )
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "-j"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_json.snapshot')
+
+
+def test_get_by_ids(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.get`,
+  when execution ids were provided.
+  """
+  mocker.patch(
+    "commands.execution.get.get",
+    side_effect=[
+      b'{"id":"execution-id1", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{},{}]}',
+      b'{"id":"execution-id2", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{}]}',
+      b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{}]}'
+    ]
+  )
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "--execution", "execution-id1", "--execution",
+                              "execution-id2", "--execution", "execution-id3"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_by_ids.snapshot')
+
+
+def test_get_emtpy_executions_by_ids(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.get`,
+  when the seed doesn't have executions.
+  """
+  mocker.patch(
+    "commands.execution.get.get",
+    side_effect=[]
+  )
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "--execution", "execution-id1", "--execution",
+                              "execution-id2", "--execution", "execution-id3"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_emtpy_executions_by_ids.snapshot')
+
+
+def test_get_emtpy_executions(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.get`,
+  when the seed doesn't have executions.
+  """
+  mocker.patch(
+    "commands.execution.get.get",
+    return_value=None
+  )
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", '--asc', 'pipelineId', '--desc', 'status'])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_emtpy_executions.snapshot')

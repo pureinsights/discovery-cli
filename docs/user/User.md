@@ -321,7 +321,6 @@ pdp core file upload --name seed --path ./seed_entities.json
 
 ###### Upload a file without specified the name
 
-
 ```bash
 # The name of the file will be entities
 pdp core file upload --path ./entities.zip
@@ -344,7 +343,6 @@ pdp core file download --name entities.json --path ./my-entities/
 ```
 
 ###### Download a file and rename it
-
 
 ```bash
 pdp core file download --name entities.json --path ./my-entities/pdp_entities.json
@@ -389,7 +387,6 @@ Show the list of files uploaded to the Core API.
 - **--json**: This is a boolean flag. Will print the results in JSON format. Default is False.
 
 ###### Show files from Core API
-
 
 ```bash
 pdp core file ls
@@ -453,3 +450,42 @@ Triggers and action on all active executions for the given seed.
 pdp seed-exec control --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --action halt
 ```
 
+#### Get Command
+
+Retrieves the executions of a given seed.
+
+##### Flags
+
+- `REQUIRED`**--seed**: The id of the seed you want to get the active executions.
+- **--execution**: The id of the execution you want to get information. Default is None. The command allows multiple
+  flags of --execution.
+- **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+- **-v, --verbose**: It will show more information about the deploy results. Default is False.
+- **-p, --page**: The number of the page to show. Min 0. Default is 0.
+- **-s, --size**: The size of the page to show. Range 1 - 100. Default is 25.
+- **--asc**: The name of the property to sort in ascending order. Multiple flags are supported. Default is [].
+- **--desc**: The name of the property to sort in descending order. Multiple flags are supported. Default is [].
+
+##### Get executions from a seed
+
+```bash
+pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+```
+
+##### Get executions from a seed with parameters
+
+```bash
+pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --page 2 --size 1 --asc pipelineId --desc status -v
+```
+
+##### Get executions from a seed by id
+
+```bash
+pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --execution ac5086e9-e5bf-4c82-b23e-358036bc4a23 --execution ac5086e9-e5bf-4c82-b23e-358036bc4b2a -v
+```
+
+##### Get executions from a seed in JSON format
+
+```bash
+pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b -j
+```
