@@ -97,4 +97,3 @@ core.add_command(file)
 
 if __name__ == '__main__':
   handle_exceptions(pdp)  # pragma: no cover
-  # handle_exceptions(pdp, ["seed-exec", "start", "--seed", "f0c3f36c-59ef-42e3-a025-b9de65e7241e"])  # pragma: no cover
