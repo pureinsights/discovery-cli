@@ -1,0 +1,1 @@
+{'core': {'other': [{'id': '6376af03-1af2-41a2-aef6-62aefc73a870', 'name': 'fake-name1', 'description': None, 'active': True}, {'id': '6376af03-1af2-41a2-aef6-62aefc73a871', 'name': 'fake-name2', 'description': 'Entity 2', 'active': False}]}}
