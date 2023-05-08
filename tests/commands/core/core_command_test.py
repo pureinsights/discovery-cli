@@ -85,7 +85,7 @@ def test_log_level(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.core.command.log_level`.
   """
-  post_mock = mocker.patch("commands.core.log_level.post", return_value=b'{ "acknowledged": true }')
+  mocker.patch("commands.core.log_level.post", return_value=b'{ "acknowledged": true }')
   response = cli.invoke(pdp, ["core", "log-level", "--component", "fake-component", "--level", "warn"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_log_level.snapshot')
@@ -94,9 +94,20 @@ def test_log_level(mocker, snapshot):
 def test_log_level_failed(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.core.command.log_level`,
-  when the response is None or acknowledged false.
+  when the response is acknowledged false.
   """
-  post_mock = mocker.patch("commands.core.log_level.post", return_value=b'{ "acknowledged": false }')
+  mocker.patch("commands.core.log_level.post", return_value=b'{ "acknowledged": false }')
   response = cli.invoke(pdp, ["core", "log-level", "--component", "fake-component", "--level", "warn"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_log_level_failed.snapshot')
+
+
+def test_log_level_response_none(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.log_level`,
+  when the response is None.
+  """
+  mocker.patch("commands.core.log_level.post", return_value=None)
+  response = cli.invoke(pdp, ["core", "log-level", "--component", "fake-component", "--level", "info"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_log_level_response_none.snapshot')

@@ -29,7 +29,7 @@ def run(config: dict, component: str, level: str, logger_name: str):
     URL_LOG_LEVEL.format(config[CORE]),
     params={'componentName': component, 'level': level, 'loggerName': logger_name}
   )
-  if res is None or (res is not None and not json.loads(res).get('acknowledged', False)):
+  if res is None or not json.loads(res).get('acknowledged', False):
     return print_error(f'Could not change the level log of "{component}".')
 
   print_console(
