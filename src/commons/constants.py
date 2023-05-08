@@ -33,7 +33,7 @@ URL_DOWNLOAD_FILE = '{0}/files/download'
 URL_SEED_START = '{0}/seed/{id}'
 URL_SEED_RESTART = '{0}/seed/{id}/reset'
 URL_SEED_CONTROL = '{0}/seed/{id}/control'
-
+URL_LOG_LEVEL = '{0}/maintenance/log'
 
 # Must be all in lower case
 # Products
@@ -81,6 +81,8 @@ PRODUCTS = {
     'entities': []
   },
 }
+
+LOGGER_LEVELS = ['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE']
 
 # Common messages
 WARNING_FORMAT = '[WARNING]: {message}'
