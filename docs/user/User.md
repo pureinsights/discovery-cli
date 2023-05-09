@@ -335,6 +335,28 @@ pdp core search -t ingestion:processor -t discovery:processor
 ```bash
 pdp core search -q entity_name --page 2 --size 5 --asc id --desc name
 ```
+  
+#### Log-Level Command
+
+Change the logging level of a component.
+
+##### Flags
+
+- `REQURIED`**--component**: The name of the component that you want to change the log level.
+- `REQUIRED`**--level**: The level log you want to change to. Values supported ERROR,WARN, INFO,DEBUG and TRACE.
+- **--logger**: The of the logger. Default is None.
+
+##### Change the log leve of a component
+
+```bash
+pdp core log-level --component component_name --level ERROR
+```
+
+##### Change the log leve of a logger from component
+
+```bash
+pdp core log-level --component component_name --level ERROR --logger logger_name
+```
 
 #### File Command
 

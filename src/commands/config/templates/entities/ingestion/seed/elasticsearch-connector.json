@@ -18,5 +18,5 @@
   },
   "name": "ElasticSearch Connector",
   "type": "elasticsearch-connector",
-  "pipelineId": "{{ fromName('Main Pipeline') }}"
+  "pipelineId": "{{ fromName('<Pipeline name>') }}"
 }

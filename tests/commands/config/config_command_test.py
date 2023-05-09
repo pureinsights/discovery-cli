@@ -150,8 +150,9 @@ def test_create_with_entity_template(mocker, snapshot, test_project_path):
   mocker.patch("commands.config.create.create_spinner")
   mocker.patch("commands.config.create.create_or_update_entity", return_value="newId")
   mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
+  mocker.patch("commands.config.create.writing_stage", return_value=[])
   response = cli.invoke(pdp, ["-d", test_project_path(), "config", "create", "--entity-type", "pipeline",
-                              "--entity-template", "empty_pipeline", "--deploy", "--json"])
+                              "--entity-template", "pipeline", "--deploy", "--json"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_create_with_entity_template.snapshot')
 
