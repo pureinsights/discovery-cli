@@ -301,6 +301,41 @@ pdp config import --product discovery --zip endpoints.zip
 
 ### Core Command
 
+#### Search Command
+
+Search for entities of all products Ingestion, Core and Discovery. And also, is a group command to chain the 'replace'
+command and replace the entities on the search results.
+
+##### Flags
+
+- **-l,--label**: Label key or label key and value of the entity. Format: <key>:<value> | <key>. Multiple label flags
+  are supported. Default is None.
+- **-t,--entity-type**: Type of the entity. Format <product>:<entityType>. Product values supported Ingestion and
+  Discovery. Default is None.
+- **-q**: The name or description of the entity. Default is None.
+- **-p,--page**: The number of the page to show. Min 0. Default is 0.
+- **-s,--size**: The size of the page to show. Range 1 - 100. Default is 25.
+- **--asc**: The name of the property to sort in ascending order. Multiple flags are supported. Default is [].
+- **--desc**: The name of the property to sort in descending order. Multiple flags are supported. Default is [].
+
+##### Search for all entities
+
+```bash
+pdp core search
+```
+
+##### Search for all entities of types
+
+```bash
+pdp core search -t ingestion:processor -t discovery:processor
+```
+
+##### Search for entities with filters
+
+```bash
+pdp core search -q entity_name --page 2 --size 5 --asc id --desc name
+```
+
 #### File Command
 
 ##### Upload Command
