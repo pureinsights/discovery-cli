@@ -11,6 +11,7 @@
 
 import click
 
+
 from commands.core.log_level import run as run_log_level
 from commands.core.search import run as run_search
 from commons.constants import LOGGER_LEVELS
@@ -82,3 +83,4 @@ def log_level(obj, component: str, level: str, logger: str):
   """
   configuration = obj['configuration']
   run_log_level(configuration, component, level, logger)
+

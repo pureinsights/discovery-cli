@@ -34,6 +34,8 @@ URL_SEED_START = '{0}/seed/{id}'
 URL_SEED_RESTART = '{0}/seed/{id}/reset'
 URL_SEED_CONTROL = '{0}/seed/{id}/control'
 URL_LOG_LEVEL = '{0}/maintenance/log'
+URL_SEED_EXECUTION = '{0}/seed/{id}/execution/{execution}'
+
 
 # Must be all in lower case
 # Products

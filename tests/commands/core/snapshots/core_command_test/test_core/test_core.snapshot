@@ -9,3 +9,4 @@ Commands:
   file       Encloses all the commands related with files within the Core API.
   log-level  Change the logging level of a component.
   search     Search for entities of all products Ingestion, Core and...
+
