@@ -10,7 +10,6 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import json
 
-
 from commons.console import print_console
 from commons.constants import INGESTION, URL_SEED_START
 from commons.http_requests import post
