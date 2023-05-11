@@ -9,6 +9,7 @@
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import os
+import sys
 
 import click
 
@@ -78,7 +79,7 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
       config[product.lower()] = url
 
   if empty and template is None:
-    template = 'random_generator'
+    template = 'random-generator'
   elif not empty:
     template = None
 
@@ -93,7 +94,7 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
     message = 'Could not create the project {project_name_styled}.'
   project_name_styled = click.style(project_name, fg=color)
   click.echo(message.format(project_name=project_name, project_name_styled=project_name_styled))
-  exit(0 if successfully_executed else 1)
+  sys.exit(0 if successfully_executed else 1)
 
 
 @config.command()

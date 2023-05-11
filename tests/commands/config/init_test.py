@@ -14,7 +14,7 @@ import pytest
 
 from commands.config.init import create_project_folder_structure, create_project_from_existing_sources, \
   create_project_from_template, run
-from commons.constants import CORE, DEFAULT_CONFIG, FILES_FOLDER, PRODUCTS, STAGING
+from commons.constants import CORE, DEFAULT_CONFIG, FILES_FOLDER, PRODUCTS, STAGING, TEMPLATES_DIRECTORY
 
 
 def test_run_init_created_successfully(mocker, mock_path_exists):
@@ -108,9 +108,7 @@ def test_create_project_from_template_project_successfully(mocker, mock_path_exi
   mock_copytree = mocker.patch('commands.config.init.shutil.copytree')
   project_name = 'my-pdp-project'
   success = create_project_from_template(project_name)
-  abs_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), os.path.join('templates', 'projects', 'random_generator'))).replace('tests',
-                                                                                                                'src')
+  abs_path = os.path.join(TEMPLATES_DIRECTORY, 'projects', 'random-generator')
   mock_copytree.assert_called_once_with(abs_path, project_name)
   assert success
 
