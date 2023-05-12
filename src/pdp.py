@@ -19,6 +19,8 @@ from commands.config.command import config
 from commands.core.command import core
 from commands.core.file.command import file
 from commands.execution.command import seed_exec
+from commands.staging.command import staging
+from commands.staging.item.command import item
 from commons.constants import DEFAULT_CONFIG, PRODUCTS
 from commons.custom_classes import DataInconsistency
 from commons.handlers import handle_exceptions
@@ -92,8 +94,10 @@ def health():
 pdp.add_command(config)
 pdp.add_command(core)
 pdp.add_command(seed_exec)
+pdp.add_command(staging)
 
 core.add_command(file)
+staging.add_command(item)
 
 if __name__ == '__main__':
   handle_exceptions(pdp)  # pragma: no cover
