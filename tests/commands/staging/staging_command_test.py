@@ -148,6 +148,7 @@ def test_add_item_no_id(mocker, snapshot):
                                                              b'"checksum": "23b5c58d597754037351ebdc5497882b"'
                                                              b'}')
   mock_edit = mocker.patch("commands.staging.item.add.click.edit", return_value='{\n"fake":"property"\n}')
+  mocker.patch("commands.staging.item.command.uuid.uuid4", return_value="autogenerate-fake")
   response = cli.invoke(pdp,
                         ["staging", "item", "add", "--bucket", "fake-bucket", "--interactive"])
   assert response.exit_code == 0
