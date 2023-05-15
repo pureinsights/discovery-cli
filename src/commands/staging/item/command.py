@@ -8,6 +8,8 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import uuid
+
 import click
 
 from commands.staging.item.add import run as run_add
@@ -26,7 +28,7 @@ def item(ctx):
 @click.pass_obj
 @click.option('--bucket', required=True,
               help='The name of the bucket where the item will be added.')
-@click.option('--item-id', 'item_id', required=True,
+@click.option('--item-id', 'item_id',
               help='The id of the new item. If no id is provided, then an auto-generated hash will be set. '
                    'Default is None.')
 @click.option('--parent', default=None,
@@ -45,6 +47,8 @@ def add(obj: dict, bucket: str, item_id: str, parent: str, _file: str, interacti
   Adds a new item to a given bucket within the staging API. If the bucket doesn't exist, will be created.
   """
   configuration = obj['configuration']
+  if item_id is None:
+    item_id = str(uuid.uuid4())
   run_add(configuration, bucket, item_id, _file, interactive, parent, _json, verbose)
 
 

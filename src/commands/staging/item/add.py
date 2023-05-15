@@ -26,21 +26,25 @@ def input_stage(path: str | None, interactive: bool):
   :param str path: The path to read the item's content.\
   :param bool interactive: If true will launch your default text editor to allow you to modify the contents of the item.
   """
+  # Messages
+  can_not_be_empty = "The content of the item can not be empty."
+  save_before_close = "If you wrote something, you must save it before close, otherwise the content won't be added."
+
   if path is None:
     if not interactive:
-      raise DataInconsistency(message="The content of the item can not be empty.")
-    content_str = click.edit('{\n\n}')
+      raise DataInconsistency(message=can_not_be_empty)
+    content_str: str | None = click.edit('{\n\n}')
     if content_str is None:
-      print_warning("If you wrote something, you must save it before close, otherwise the content won't be added.")
-      raise DataInconsistency(message="The content of the item can not be empty.")
+      print_warning(save_before_close)
+      raise DataInconsistency(message=can_not_be_empty)
     return json.loads(content_str)
 
   content_str = read_binary_file(path).decode('utf-8')
   if interactive:
-    content_str = click.edit(content_str)
+    content_str: str | None = click.edit(content_str)
     if content_str is None:
-      print_warning("If you wrote something, you must save it before close, otherwise the content won't be added.")
-      raise DataInconsistency(message="The content of the item can not be empty.")
+      print_warning(save_before_close)
+      raise DataInconsistency(message=can_not_be_empty)
 
   return json.loads(content_str)
 
@@ -69,7 +73,7 @@ def run(config: dict, bucket: str, item_id: str, content_path: str | None, inter
   if is_json:
     return print_console(json.loads(res))
 
-  print_console(click.style(f"The item was added successfully.", fg='green'))
+  print_console(click.style("The item was added successfully.", fg='green'))
   if verbose:
     res = json.loads(res)
     headers = res.keys()
