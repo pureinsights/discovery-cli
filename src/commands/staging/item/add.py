@@ -73,7 +73,7 @@ def run(config: dict, bucket: str, item_id: str, content_path: str | None, inter
   if is_json:
     return print_console(json.loads(res))
 
-  print_console(click.style("The item was added successfully.", fg='green'))
+  print_console(f"The item was added successfully with id {click.style(item_id, fg='green')}.")
   if verbose:
     res = json.loads(res)
     headers = res.keys()
