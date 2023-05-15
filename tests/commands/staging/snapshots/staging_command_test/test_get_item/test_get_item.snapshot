@@ -1,0 +1,9 @@
+Items content: 
+{
+  "fake-id": {
+    "fake": "content"
+  },
+  "fake-id2": {
+    "fake": "content"
+  }
+}

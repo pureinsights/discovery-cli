@@ -14,7 +14,7 @@ import click
 from tabulate import tabulate
 
 from commons.console import print_console, print_error, print_warning
-from commons.constants import STAGING, URL_ITEM_ADD
+from commons.constants import STAGING, URL_GENERIC_ITEM
 from commons.custom_classes import DataInconsistency
 from commons.file_system import read_binary_file
 from commons.http_requests import put
@@ -60,7 +60,7 @@ def run(config: dict, bucket: str, item_id: str, content_path: str | None, inter
   """
   content = input_stage(content_path, interactive)
 
-  res = put(URL_ITEM_ADD.format(config[STAGING], bucket=bucket, content_id=item_id), params={'parentId': parent_id},
+  res = put(URL_GENERIC_ITEM.format(config[STAGING], bucket=bucket, content_id=item_id), params={'parentId': parent_id},
             json=content)
 
   if res is None:
