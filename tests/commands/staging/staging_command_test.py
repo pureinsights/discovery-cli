@@ -134,6 +134,27 @@ def test_add_item_interactive(mocker, snapshot):
   snapshot.assert_match(response.output, 'test_add_item_interactive.snapshot')
 
 
+def test_add_item_no_id(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.add`,
+  when the --item-id was not provided.
+  """
+  mocker.patch("commands.staging.item.add.put", return_value=b'{'
+                                                             b'"transactionId": "645e9901c8e408abf7e1a194",'
+                                                             b'"timestamp": "2023-05-12T19:52:33.245Z",'
+                                                             b'"action": "ADD",'
+                                                             b'"bucket": "test",'
+                                                             b'"contentId": "test3",'
+                                                             b'"checksum": "23b5c58d597754037351ebdc5497882b"'
+                                                             b'}')
+  mock_edit = mocker.patch("commands.staging.item.add.click.edit", return_value='{\n"fake":"property"\n}')
+  response = cli.invoke(pdp,
+                        ["staging", "item", "add", "--bucket", "fake-bucket", "--interactive"])
+  assert response.exit_code == 0
+  mock_edit.assert_called_once_with("{\n\n}")
+  snapshot.assert_match(response.output, 'test_add_item_interactive.snapshot')
+
+
 def test_add_item_interactive_no_content(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.item.command.add`,
