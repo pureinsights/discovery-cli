@@ -12,6 +12,40 @@ from pdp import pdp
 from pdp_test import cli
 
 
+def test_get_bucket(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.get`.
+  """
+  mocker.patch('commands.staging.bucket.get.get', return_value=b'{'
+                                                               b'"transactionId": "645e9901c8e408abf7e1a194",'
+                                                               b'"timestamp": "2023-05-12T19:52:33.245Z",'
+                                                               b'"action": "ADD",'
+                                                               b'"bucket": "test",'
+                                                               b'"contentId": "test3",'
+                                                               b'"checksum": "23b5c58d597754037351ebdc5497882b"'
+                                                               b'}')
+  response = cli.invoke(pdp, ["staging", "bucket", "get", "--bucket", "fake"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_bucket.snapshot')
+
+
+def test_get_bucket_json(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.get`.
+  """
+  mocker.patch('commands.staging.bucket.get.get', return_value=b'{'
+                                                               b'"transactionId": "645e9901c8e408abf7e1a194",'
+                                                               b'"timestamp": "2023-05-12T19:52:33.245Z",'
+                                                               b'"action": "ADD",'
+                                                               b'"bucket": "test",'
+                                                               b'"contentId": "test3",'
+                                                               b'"checksum": "23b5c58d597754037351ebdc5497882b"'
+                                                               b'}')
+  response = cli.invoke(pdp, ["staging", "bucket", "get", "--bucket", "fake", "--json"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_bucket_json.snapshot')
+
+
 def test_add_item(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.item.command.add`.

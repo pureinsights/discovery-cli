@@ -549,6 +549,31 @@ pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b -j
 
 ### Staging Command
 
+#### Bucket Command
+
+This command encloses all commands that let you perform actions on a bucket on the staging API.
+
+##### Get Command
+
+Retrieves all the items for a given bucket.
+
+###### Flags
+
+- `REQUIRED` **--bucket**:The name for the bucket to get the items.
+- **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+
+###### Get all the items of the bucket
+
+```bash
+pdp staging bucket get --bucket bucket_test
+```
+
+###### Get all the items of the bucket in JSON format
+
+```bash
+pdp staging bucket get --bucket bucket_test -j
+```
+
 #### Item Command
 
 This command encloses all commands that let you perform actions on an item on the staging API.
@@ -608,3 +633,4 @@ pdp staging item get --bucket bucket --item item_id --content-type metadata
 ```bash
 pdp staging item get --bucket bucket --item item_id --content-type both
 ```
+
