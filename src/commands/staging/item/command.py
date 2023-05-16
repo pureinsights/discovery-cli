@@ -56,9 +56,8 @@ def add(obj: dict, bucket: str, item_id: str, parent: str, _file: str, interacti
 @click.pass_obj
 @click.option('--bucket', required=True,
               help='The name of the bucket where the item will be added.')
-@click.option('--item-id', 'item_id', required=True, multiple=True,
-              help='The id of the new item. If no id is provided, then an auto-generated hash will be set. '
-                   'Default is None.')
+@click.option('-i', '--item-id', 'item_id', required=True, multiple=True,
+              help='The id of the item to show. Default is []. The command allows multiple flags of -i.')
 @click.option('--content-type', 'content_type', default='CONTENT',
               type=click.Choice(['CONTENT', 'METADATA', 'BOTH'], case_sensitive=False),
               help='The content-type of the query. Default is CONTENT.')
