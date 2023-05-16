@@ -555,11 +555,18 @@ This command encloses all commands that let you perform actions on a bucket on t
 
 ##### Get Command
 
-Retrieves all the items for a given bucket.
+Retrieves all the items for a given bucket. You can filter or use pagination, but just once at time. If you provide
+--token or --content-type will prioritize the filter over pagination.
 
 ###### Flags
 
 - `REQUIRED` **--bucket**:The name for the bucket to get the items.
+- **--token**: The token of the contents you want to filter.
+- **--content-type**: The content-type of the query. Default is CONTENT.
+- **--page**: The number of the page to query.
+- **--size**: The size of the page to query.
+- **--asc**: The name of the property to sort in ascending order. Multiple flags are supported. Default is [].
+- **--desc**: The name of the property to sort in descending order. Multiple flags are supported. Default is [].
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
 
 ###### Get all the items of the bucket
@@ -572,6 +579,18 @@ pdp staging bucket get --bucket bucket_test
 
 ```bash
 pdp staging bucket get --bucket bucket_test -j
+```
+
+###### Filter the bucket items
+
+```bash
+pdp staging bucket get --bucket bucket_test --token token_id --content-type BOTH --size 25
+```
+
+###### Use pagination on the bucket items
+
+```bash
+pdp staging bucket get --bucket bucket_test --page 2 --size 25 --asc property
 ```
 
 #### Item Command
