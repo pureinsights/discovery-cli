@@ -347,8 +347,8 @@ def test_delete_item_filter_failed(mocker, snapshot):
   )
   response = cli.invoke(pdp,
                         ["staging", "item", "delete", "--bucket", "fake-bucket", "--filter"])
-  assert response.exit_code == 1
-  snapshot.assert_match(response.exception.message, 'test_delete_item_filter_failed.snapshot')
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete_item_filter_failed.snapshot')
 
 
 def test_delete_item_filter_no_criteria(mocker, snapshot):
