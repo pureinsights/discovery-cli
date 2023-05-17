@@ -271,6 +271,28 @@ def test_delete_item_all(mocker, snapshot):
   snapshot.assert_match(response.output, 'test_delete_item_all.snapshot')
 
 
+def test_delete_item_empty(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`,
+  when try to delete all the items, but the bucket is empty.
+  """
+  mocker.patch("commands.staging.item.delete.create_spinner")
+  mocker.patch("commands.staging.item.delete.get", return_value='{'
+                                                                '"token":"fake-token",'
+                                                                '"content": [ ],'
+                                                                '"empty": true'
+                                                                '}')
+  mocker.patch("commands.staging.item.delete.delete", side_effect=[
+    '{"transactionId": "fake-transaction1"}',
+    None,
+    '{"transactionId": "fake-transaction3"}'
+  ])
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket", "--all"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete_item_empty.snapshot')
+
+
 def test_delete_items(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.item.command.delete`,
