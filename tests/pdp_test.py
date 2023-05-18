@@ -8,6 +8,7 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import os.path
 
 import pyfiglet
 import pytest
@@ -78,12 +79,8 @@ def test_ensure_templates_directory(mocker):
   Ensures that the templates directory path is the correct.
   """
   mocker.patch("commons.file_system.os.path.exists", return_value=True)
-  mocker.patch("commons.file_system.os.path.dirname", return_value='fake-dirname')
-  mock_split = mocker.patch("commons.file_system.os.path.split")
-  mock_join = mocker.patch("commons.file_system.os.path.join", return_value="fake-join")
-  get_templates_directory()
-  mock_join.assert_called_with('fake-dirname', '..', 'templates')
-  assert mock_split.call_count == 0
+  path_list = os.path.split(get_templates_directory())
+  assert path_list[len(path_list) - 1] == 'templates' and path_list[len(path_list) - 2].endswith('src')
 
 
 def test_ensure_templates_directory_second_path(mocker):
@@ -91,10 +88,8 @@ def test_ensure_templates_directory_second_path(mocker):
   Ensures that the templates directory path is the correct, when the first path doesn't exist.
   """
   mocker.patch("commons.file_system.os.path.exists", return_value=False)
-  mocker.patch("commons.file_system.os.path.split", return_value=['fake', 'main', 'split', 'file.name'])
-  mock_join = mocker.patch("commons.file_system.os.path.join", return_value="fake-join")
-  get_templates_directory()
-  mock_join.assert_called_with('fake', 'main', 'split', 'templates')
+  path_list = os.path.split(get_templates_directory())
+  assert path_list[len(path_list) - 1] == 'templates' and not path_list[len(path_list) - 2].endswith('src')
 
 
 def test_load_config_default_profile():
