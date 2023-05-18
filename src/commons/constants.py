@@ -8,7 +8,6 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
-import os
 
 from commons.custom_classes import PdpEntity
 
@@ -96,6 +95,3 @@ FROM_NAME_FORMAT = "{{{{ fromName('{0}') }}}}"
 # Severities
 ERROR_SEVERITY = 'error'
 WARNING_SEVERITY = 'warning'
-
-# File paths
-TEMPLATES_DIRECTORY = os.path.join(os.path.dirname(__file__), '..', 'commands', 'config', 'templates')

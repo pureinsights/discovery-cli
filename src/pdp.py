@@ -100,4 +100,5 @@ core.add_command(file)
 staging.add_command(item)
 
 if __name__ == '__main__':
+  os.system("")  # pragma: no cover
   handle_exceptions(pdp)  # pragma: no cover
