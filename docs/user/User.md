@@ -549,6 +549,50 @@ pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b -j
 
 ### Staging Command
 
+#### Bucket Command
+
+This command encloses all commands that let you perform actions on a bucket on the staging API.
+
+##### Get Command
+
+Retrieves all the items for a given bucket. You can filter or use pagination, but just once at time. If you provide
+--token or --content-type will prioritize the filter over pagination.
+
+###### Flags
+
+- `REQUIRED` **--bucket**:The name for the bucket to get the items.
+- **--token**: The token of the contents you want to filter.
+- **--content-type**: The content-type of the query. Default is CONTENT.
+- **--page**: The number of the page to query.
+- **--size**: The size of the page to query.
+- **--asc**: The name of the property to sort in ascending order. Multiple flags are supported. Default is [].
+- **--desc**: The name of the property to sort in descending order. Multiple flags are supported. Default is [].
+- **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+
+###### Get all the items of the bucket
+
+```bash
+pdp staging bucket get --bucket bucket_test
+```
+
+###### Get all the items of the bucket in JSON format
+
+```bash
+pdp staging bucket get --bucket bucket_test -j
+```
+
+###### Filter the bucket items
+
+```bash
+pdp staging bucket get --bucket bucket_test --token token_id --content-type BOTH --size 25
+```
+
+###### Use pagination on the bucket items
+
+```bash
+pdp staging bucket get --bucket bucket_test --page 2 --size 25 --asc property
+```
+
 #### Item Command
 
 This command encloses all commands that let you perform actions on an item on the staging API.
@@ -578,4 +622,33 @@ pdp staging item add --bucket bucket --item-id item_id --file item.json
 
 ```bash
  pdp staging item add --bucket bucket --file item.json --interactive
+```
+
+##### Get Command
+
+Retrieves the information of the given item.
+
+###### Flags
+
+- `REQURIED`**--bucket**: The name of the bucket where the item will be added.
+- `REQURIED`**--item-id**: The id of the new item. Default is None.
+- **--content-type**: The content-type of the query. Default is CONTENT. Allowed are CONTENT, METADATA, BOTH.
+- **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+
+###### Get the content of the item within a bucket
+
+```bash
+pdp staging item get --bucket bucket --item item_id
+```
+
+###### Get the metadata of the item within a bucket
+
+```bash
+pdp staging item get --bucket bucket --item item_id --content-type metadata
+```
+
+###### Get the content and the metadata of the item within a bucket
+
+```bash
+pdp staging item get --bucket bucket --item item_id --content-type both
 ```
