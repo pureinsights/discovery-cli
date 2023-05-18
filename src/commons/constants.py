@@ -8,8 +8,6 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
-import __main__
-import os
 
 from commons.custom_classes import PdpEntity
 
@@ -96,9 +94,3 @@ FROM_NAME_FORMAT = "{{{{ fromName('{0}') }}}}"
 # Severities
 ERROR_SEVERITY = 'error'
 WARNING_SEVERITY = 'warning'
-
-# File paths
-TEMPLATES_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'templates'))
-if not os.path.exists(TEMPLATES_DIRECTORY):
-  MAIN_FILE_PATH_LIST = os.path.split(__main__.__file__)
-  TEMPLATES_DIRECTORY = os.path.join(*MAIN_FILE_PATH_LIST[:len(MAIN_FILE_PATH_LIST) - 1], 'templates')

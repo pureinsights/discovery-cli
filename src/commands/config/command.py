@@ -21,9 +21,9 @@ from commands.config.export import run as run_export
 from commands.config.get import run as run_get
 from commands.config.init import run as run_init
 from commons.console import print_error
-from commons.constants import ENTITIES, PRODUCTS, STAGING, TEMPLATES_DIRECTORY
+from commons.constants import ENTITIES, PRODUCTS, STAGING
 from commons.custom_classes import DataInconsistency, PdpException
-from commons.file_system import list_directories, list_files, replace_file_extension
+from commons.file_system import get_templates_directory, list_directories, list_files, replace_file_extension
 from commons.pdp_products import get_entity_type_by_name, order_products_to_deploy
 from commons.raisers import raise_for_inconsistent_product, raise_for_pdp_data_inconsistencies
 
@@ -38,7 +38,8 @@ def config(ctx):
   """
 
 
-TEMPLATE_NAMES = [directory.lower() for directory in list_directories(os.path.join(TEMPLATES_DIRECTORY, 'projects'))]
+TEMPLATE_NAMES = [directory.lower() for directory in
+                  list_directories(os.path.join(get_templates_directory(), 'projects'))]
 
 
 @config.command()
@@ -164,7 +165,8 @@ def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_
   entity_type = get_entity_type_by_name(entity_type_name)
   if _file is None:
     if entity_template is not None:
-      entity_type_templates_path = os.path.join(TEMPLATES_DIRECTORY, 'entities', entity_type.product, entity_type.type)
+      entity_type_templates_path = os.path.join(get_templates_directory(), 'entities', entity_type.product,
+                                                entity_type.type)
       entity_templates = [replace_file_extension(file_name, '') for file_name in list_files(entity_type_templates_path)]
 
       if entity_template not in entity_templates:

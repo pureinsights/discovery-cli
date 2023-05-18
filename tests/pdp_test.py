@@ -14,6 +14,7 @@ import pytest
 from click.testing import CliRunner
 
 from commons.constants import DEFAULT_CONFIG
+from commons.file_system import get_templates_directory
 from pdp import ensure_configurations, health, load_config, pdp
 
 cli = CliRunner()
@@ -70,6 +71,28 @@ config_return_fixture = {
     'discovery': 'https://discovery-fake-url'
   }
 }
+
+
+def test_ensure_templates_directory(mocker):
+  """
+  Ensures that the templates directory path is the correct.
+  """
+  mock_join = mocker.patch("commons.file_system.os.path.join", return_value="fake-join")
+  mocker.patch("commons.file_system.os.path.exists", return_value=True)
+  mocker.patch("commons.file_system.os.path.dirname", return_value='fake-dirname')
+  get_templates_directory()
+  mock_join.assert_called_once_with('fake-dirname', '..', 'templates')
+
+
+def test_ensure_templates_directory_second_path(mocker):
+  """
+  Ensures that the templates directory path is the correct, when the first path doesn't exist.
+  """
+  mocker.patch("commons.file_system.os.path.exists", return_value=False)
+  mocker.patch("commons.file_system.os.path.split", return_value=['fake', 'main', 'split', 'file.name'])
+  mock_join = mocker.patch("commons.file_system.os.path.join", return_value="fake-join")
+  get_templates_directory()
+  mock_join.assert_called_with('fake', 'main', 'split', 'templates')
 
 
 def test_load_config_default_profile():

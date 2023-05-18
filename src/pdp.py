@@ -96,5 +96,5 @@ pdp.add_command(seed_exec)
 core.add_command(file)
 
 if __name__ == '__main__':
-  os.system("")
+  os.system("")  # pragma: no cover
   handle_exceptions(pdp)  # pragma: no cover

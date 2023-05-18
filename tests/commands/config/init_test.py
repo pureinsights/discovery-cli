@@ -14,7 +14,7 @@ import pytest
 
 from commands.config.init import create_project_folder_structure, create_project_from_existing_sources, \
   create_project_from_template, run
-from commons.constants import CORE, DEFAULT_CONFIG, FILES_FOLDER, PRODUCTS, STAGING, TEMPLATES_DIRECTORY
+from commons.constants import CORE, DEFAULT_CONFIG, FILES_FOLDER, PRODUCTS, STAGING
 
 
 def test_run_init_created_successfully(mocker, mock_path_exists):
@@ -106,9 +106,23 @@ def test_create_project_from_template_project_successfully(mocker, mock_path_exi
   """
   mock_path_exists(False)
   mock_copytree = mocker.patch('commands.config.init.shutil.copytree')
+  mocker.patch("commands.config.init.get_templates_directory", return_value="templates/directory/fake")
   project_name = 'my-pdp-project'
   success = create_project_from_template(project_name)
-  abs_path = os.path.join(TEMPLATES_DIRECTORY, 'projects', 'random-generator')
+  abs_path = os.path.join('templates/directory/fake', 'projects', 'random-generator')
+  mock_copytree.assert_called_once_with(abs_path, project_name)
+  assert success
+
+
+def test_create_project_from_template_project_successfully_specific_relative_path(mocker, mock_path_exists):
+  """
+  Test the command defined in :func:`commands.config.init.create_project_from_template`.
+  """
+  mock_path_exists(False)
+  mock_copytree = mocker.patch('commands.config.init.shutil.copytree')
+  project_name = 'my-pdp-project'
+  success = create_project_from_template(project_name, "templates/directory/fake")
+  abs_path = os.path.join('templates/directory/fake')
   mock_copytree.assert_called_once_with(abs_path, project_name)
   assert success
 

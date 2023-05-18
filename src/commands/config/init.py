@@ -16,8 +16,9 @@ import shutil
 import click
 
 from commons.console import create_spinner, print_exception, spinner_change_text, spinner_fail, spinner_ok
-from commons.constants import CORE, FILES_FOLDER, PRODUCTS, STAGING, TEMPLATES_DIRECTORY
+from commons.constants import CORE, FILES_FOLDER, PRODUCTS, STAGING
 from commons.custom_classes import PdpException
+from commons.file_system import get_templates_directory
 from commons.handlers import handle_and_continue, handle_and_exit
 from commons.pdp_products import export_entities
 
@@ -42,7 +43,7 @@ def run(project_name: str, apis: dict, force: bool, template: str = None):
 
   created_successfully = False
   if template is not None:
-    template_path = os.path.join(TEMPLATES_DIRECTORY, 'projects', template)
+    template_path = os.path.join(get_templates_directory(), 'projects', template)
     created_successfully = create_project_from_template(project_name, template_path)
   else:
     created_successfully = create_project_from_existing_sources(project_name, apis)
@@ -61,8 +62,7 @@ def run(project_name: str, apis: dict, force: bool, template: str = None):
 
 
 def create_project_from_template(project_name: str,
-                                 relative_template_path: str = os.path.join(TEMPLATES_DIRECTORY, 'projects',
-                                                                            'random-generator')):
+                                 relative_template_path: str = None):
   """
   Copies the folder structure of the given template on a new directory called as the given project_name
   parameter.
@@ -72,6 +72,8 @@ def create_project_from_template(project_name: str,
   :rtype: bool
   :return: True if the project was created, False if some error happen.
   """
+  if relative_template_path is None:
+    relative_template_path = os.path.join(get_templates_directory(), 'projects', 'random-generator')
   try:
     if os.path.exists(project_name):
       raise PdpException(message=f'Project {project_name} already exists.\n\tUse --force flag to override the project.',
