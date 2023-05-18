@@ -579,3 +579,32 @@ pdp staging item add --bucket bucket --item-id item_id --file item.json
 ```bash
  pdp staging item add --bucket bucket --file item.json --interactive
 ```
+
+##### Get Command
+
+Retrieves the information of the given item.
+
+###### Flags
+
+- `REQURIED`**--bucket**: The name of the bucket where the item will be added.
+- `REQURIED`**-i, --item-id**: The id of the item to show. Default is []. The command allows multiple flags of -i.
+- **--content-type**: The content-type of the query. Default is CONTENT. Allowed are CONTENT, METADATA, BOTH.
+- **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+
+###### Get the content of the item within a bucket
+
+```bash
+pdp staging item get --bucket bucket --item item_id
+```
+
+###### Get the metadata of the item within a bucket
+
+```bash
+pdp staging item get --bucket bucket --item item_id --content-type metadata
+```
+
+###### Get the content and the metadata of the item within a bucket
+
+```bash
+pdp staging item get --bucket bucket --item item_id --content-type both
+```

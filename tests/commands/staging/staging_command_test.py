@@ -207,3 +207,41 @@ def test_add_item_could_not_add(mocker, snapshot):
                         ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--file", "fake"])
   assert response.exit_code == 1
   snapshot.assert_match(response.output, 'test_add_item_interactive.snapshot')
+
+
+def test_get_item(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.get`.
+  """
+  mocker.patch("commands.staging.item.get.get", return_value=b'{"fake":"content"}')
+  response = cli.invoke(pdp,
+                        ["staging", "item", "get", "--bucket", "fake-bucket", "--item-id", "fake-id", "--item-id",
+                         "fake-id2", "--content-type", "metadata"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_item.snapshot')
+
+
+def test_get_item_json(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.get`,
+  when the --json flag was provided.
+  """
+  mocker.patch("commands.staging.item.get.get", return_value=b'{"fake":"content"}')
+  response = cli.invoke(pdp,
+                        ["staging", "item", "get", "--bucket", "fake-bucket", "--item-id", "fake-id", "--content-type",
+                         "both", "-j"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_item_json.snapshot')
+
+
+def test_get_item_failed(mocker, snapshot, mock_custom_exception):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.get`,
+  when something went wrong.
+  """
+  mocker.patch("commands.staging.item.get.get", side_effect=lambda *args, **kwargs: mock_custom_exception(Exception))
+  response = cli.invoke(pdp,
+                        ["staging", "item", "get", "--bucket", "fake-bucket", "--item-id", "fake-id", "--content-type",
+                         "both"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_item_failed.snapshot')
