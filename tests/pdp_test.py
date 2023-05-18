@@ -77,11 +77,13 @@ def test_ensure_templates_directory(mocker):
   """
   Ensures that the templates directory path is the correct.
   """
-  mock_join = mocker.patch("commons.file_system.os.path.join", return_value="fake-join")
   mocker.patch("commons.file_system.os.path.exists", return_value=True)
   mocker.patch("commons.file_system.os.path.dirname", return_value='fake-dirname')
+  mock_split = mocker.patch("commons.file_system.os.path.split")
+  mock_join = mocker.patch("commons.file_system.os.path.join", return_value="fake-join")
   get_templates_directory()
   mock_join.assert_called_once_with('fake-dirname', '..', 'templates')
+  assert mock_split.call_count == 0
 
 
 def test_ensure_templates_directory_second_path(mocker):
