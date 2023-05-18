@@ -49,9 +49,9 @@ def deploy_entities(config: dict, product: str, entity_type: PdpEntity, entities
   for entity in entities:
     product_url = config.get(product)
     # We store the id to recover it if we have to ignore the ids and the entity could not be deployed.
-    id_backup = entity.get('id', None)
+    id_backup = None
     if ignore_ids and is_target:
-      entity['id'] = None
+      id_backup = entity.pop('id', None)
     _, _id = handle_and_continue(
       create_or_update_entity, {'show_exception': True}, product_url, entity_type.type,
       entity, verbose=is_verbose
