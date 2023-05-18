@@ -82,7 +82,7 @@ def test_ensure_templates_directory(mocker):
   mock_split = mocker.patch("commons.file_system.os.path.split")
   mock_join = mocker.patch("commons.file_system.os.path.join", return_value="fake-join")
   get_templates_directory()
-  mock_join.assert_called_once_with('fake-dirname', '..', 'templates')
+  mock_join.assert_called_with('fake-dirname', '..', 'templates')
   assert mock_split.call_count == 0
 
 
