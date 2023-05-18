@@ -52,18 +52,22 @@ def deploy_entities(config: dict, product: str, entity_type: PdpEntity, entities
     id_backup = None
     if ignore_ids and is_target:
       id_backup = entity.pop('id', None)
-    _, _id = handle_and_continue(
+    _, new_id = handle_and_continue(
       create_or_update_entity, {'show_exception': True}, product_url, entity_type.type,
       entity, verbose=is_verbose
     )
-    _id = id_backup if _id is None else _id  # If _id is None means the entity was not created, so we use the backup.
+    # If _id is None means the entity was not created, so we use the backup.
+    _id = id_backup if new_id is None else new_id
     name = entity.get('name', None)
     if _id is not None:
       entity['id'] = _id  # Updates the id of the entity, the product could create a new one
       if name is not None:
         names_ids[name] = _id
-    if entity_type.type == 'seed':  # If the entity is a seed, we store the entity to show the ids later.
+
+    # If the entity is a seed, we store the entity to show the ids later.
+    if entity_type.type == 'seed' and new_id is not None:
       seeds += [entity]
+
   return seeds
 
 
