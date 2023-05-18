@@ -16,3 +16,4 @@ Commands:
   core       Encloses all the commands related with the Core API.
   health     This command is used to know if PDP-CLI has been installed...
   seed-exec  Encloses all the commands related with the seed execution.
+  staging    Encloses all related commands with the Staging API.

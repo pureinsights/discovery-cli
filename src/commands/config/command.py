@@ -110,7 +110,6 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
               help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
                    'is useful when moving configs from one instance to another. Default is False.')
 @click.option('-q', '--quiet', is_flag=True, default=False,
-
               help='Display only the seed ids. Warnings and Errors will not be shown. Default is False.')
 @click.pass_context
 def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: bool):
