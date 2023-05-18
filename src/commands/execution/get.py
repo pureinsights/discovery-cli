@@ -58,11 +58,12 @@ def get_execution_by_id(config: dict, seed: str, execution: str):
   return json.loads(res)
 
 
-def print_stage(seed: str, executions: list[dict], is_json: bool, is_verbose: bool):
+def print_stage(seed: str, executions: list[dict], given_executions: list[str], is_json: bool, is_verbose: bool):
   """
   Shows the information from active executions of a given seed.
   :param str seed: The seed to get the executions.
   :param list[dict] executions: A list of executions to show the information.
+  :param list[str] given_executions: A list of executions ids given by the user to search for.
   :param bool is_json: Will show the executions in JSON format.
   :param bool is_verbose: Will show more information about the executions.
   """
@@ -70,7 +71,10 @@ def print_stage(seed: str, executions: list[dict], is_json: bool, is_verbose: bo
     return print_console(executions)
 
   if len(executions) <= 0:
-    return print_console(f"The seed {seed} doesn't have executions.")
+    if len(given_executions) <= 0:
+      return print_console(f"The seed {seed} doesn't have executions.")
+
+    return print_console(f"The seed {seed} doesn't have the executions: {','.join(given_executions)}.")
 
   if is_verbose:
     return print_executions_verbose(executions, seed)
@@ -119,4 +123,4 @@ def run(config: dict, seed: str, execution: list[str], is_json: bool, is_verbose
   else:
     executions = get_all_executions(config, seed, query_params)
 
-  print_stage(seed, executions, is_json, is_verbose)
+  print_stage(seed, executions, execution, is_json, is_verbose)
