@@ -37,6 +37,7 @@ URL_LOG_LEVEL = '{0}/maintenance/log'
 URL_SEED_EXECUTION = '{0}/seed/{id}/execution/{execution}'
 URL_GENERIC_ITEM = '{0}/content/{bucket}/{content_id}'
 URL_GENERIC_BUCKET = '{0}/content/{bucket}'
+URL_BUCKET_BATCH = '{0}/content/{bucket}/batch'
 
 # Must be all in lower case
 # Products
