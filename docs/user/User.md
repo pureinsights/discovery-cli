@@ -682,3 +682,4 @@ pdp stating item delete --bucket bucket --item-id item_id1 --item-id item_id2
 ```bash
 pdp stating item delete --bucket bucket --filter
 ```
+

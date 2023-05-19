@@ -18,6 +18,7 @@ from commands.staging.item.get import run as run_get
 from commons.custom_classes import PdpException
 
 
+
 @click.group()
 @click.pass_context
 def item(ctx):
@@ -94,3 +95,4 @@ def delete(obj: dict, bucket: str, item_ids: list[str], _all: bool, filter: bool
 
   configuration = obj['configuration']
   run_delete(configuration, bucket, item_ids, filter)
+
