@@ -652,7 +652,7 @@ Retrieves the information of the given item.
 ###### Flags
 
 - `REQURIED`**--bucket**: The name of the bucket where the item will be added.
-- `REQURIED`**--item-id**: The id of the new item. Default is None.
+- `REQURIED`**-i, --item-id**: The id of the item to show. Default is []. The command allows multiple flags of -i.
 - **--content-type**: The content-type of the query. Default is CONTENT. Allowed are CONTENT, METADATA, BOTH.
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
 
