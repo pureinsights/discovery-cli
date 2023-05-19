@@ -22,7 +22,7 @@ def run(config: dict, buckets: list[str]):
   """
   Delete the given bucket.
   :param dict config: The configuration containing the pdp products' url.
-  :param str buckets: The list of names of the buckets to delete.
+  :param list[str] buckets: The list of names of the buckets to delete.
   """
   for bucket in buckets:
     create_spinner()
