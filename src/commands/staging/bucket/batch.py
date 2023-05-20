@@ -55,11 +55,11 @@ def run(config: dict, bucket: str, file_path: str, interactive: bool, is_json: b
   res = post(URL_BUCKET_BATCH.format(config[STAGING], bucket=bucket), json=body)
 
   if res is None:
-    print_console("The batch couldn't be processed.")
+    return print_console("The batch couldn't be processed.")
 
   res = json.loads(res)
   if is_json:
-    print_console(res)
+    return print_console(res)
 
   res = json.dumps(res, indent=2)
   print_console(res)

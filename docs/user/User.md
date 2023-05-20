@@ -645,6 +645,41 @@ pdp staging bucket status --bucket bucket_name
 pdp staging bucket status --bucket bucket_name --json
 ``` 
 
+##### Batch Command
+
+Performs a list of actions such as ADD and DELETE to a given bucket within the Staging API.
+
+###### Flags
+
+- `REQUIRED`**--bucket**: The name of the bucket to perform the actions.
+- **--file**: The path to the file that contains the body for the query on a JSON format.
+- **--interactive**: Will open a text editor to let you write the body for the request.
+- **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+
+###### Process a batch of actions from a file
+
+```bash
+pdp staging bucket batch --bucket bucket_name --file file/path
+```
+
+###### Process a batch of actions interactively
+
+```bash
+pdp staging bucket batch --bucket bucket_name --interactive
+```
+
+###### Process a batch of actions from a file and edit its contents
+
+```bash
+pdp staging bucket batch --bucket bucket_name --file file/path --interactive
+```
+
+###### Process a batch of actions from a file and print the results in JSON format
+
+```bash
+pdp staging bucket batch --bucket bucket_name --file file/path -j
+``` 
+
 #### Item Command
 
 This command encloses all commands that let you perform actions on an item on the staging API.
