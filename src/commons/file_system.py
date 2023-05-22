@@ -8,6 +8,7 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import __main__
 import json
 import os
 from pathlib import Path
@@ -151,3 +152,15 @@ def write_binary_file(path: str, data: bytes):
   """
   with open(path, mode='wb') as file:
     file.write(data)
+
+
+def get_templates_directory():
+  """
+  Returns the path to the TEMPLATES directory, in development or production environment.
+  """
+  templates_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'templates'))
+  if not os.path.exists(templates_directory):
+    main_file_path_list = os.path.split(__main__.__file__)
+    return os.path.join(*main_file_path_list[:len(main_file_path_list) - 1], 'templates')
+
+  return templates_directory

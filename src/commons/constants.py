@@ -8,7 +8,6 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
-import os
 
 from commons.custom_classes import PdpEntity
 
@@ -37,6 +36,7 @@ URL_LOG_LEVEL = '{0}/maintenance/log'
 URL_SEED_EXECUTION = '{0}/seed/{id}/execution/{execution}'
 URL_GENERIC_ITEM = '{0}/content/{bucket}/{content_id}'
 URL_GENERIC_BUCKET = '{0}/content/{bucket}'
+
 
 # Must be all in lower case
 # Products
@@ -97,6 +97,3 @@ FROM_NAME_FORMAT = "{{{{ fromName('{0}') }}}}"
 # Severities
 ERROR_SEVERITY = 'error'
 WARNING_SEVERITY = 'warning'
-
-# File paths
-TEMPLATES_DIRECTORY = os.path.join(os.path.dirname(__file__), '..', 'commands', 'config', 'templates')
