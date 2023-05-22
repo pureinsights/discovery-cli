@@ -12,93 +12,6 @@ from pdp import pdp
 from pdp_test import cli
 
 
-def test_get_bucket(mocker, snapshot):
-  """
-  Test the command defined in :func:`src.commands.staging.bucket.command.get`.
-  """
-  mocker.patch('commands.staging.bucket.get.get', return_value=b'{'
-                                                               b'"transactionId": "645e9901c8e408abf7e1a194",'
-                                                               b'"timestamp": "2023-05-12T19:52:33.245Z",'
-                                                               b'"action": "ADD",'
-                                                               b'"bucket": "test",'
-                                                               b'"contentId": "test3",'
-                                                               b'"checksum": "23b5c58d597754037351ebdc5497882b"'
-                                                               b'}')
-  response = cli.invoke(pdp, ["staging", "bucket", "get", "--bucket", "fake"])
-  assert response.exit_code == 0
-  snapshot.assert_match(response.output, 'test_get_bucket.snapshot')
-
-
-def test_get_bucket_filter(mocker, snapshot):
-  """
-  Test the command defined in :func:`src.commands.staging.bucket.command.get`,
-  when the user wants to filter the data.
-  """
-  mock_post = mocker.patch(
-    'commands.staging.bucket.get.post',
-    return_value=b'{'
-                 b'"transactionId": "645e9901c8e408abf7e1a194",'
-                 b'"timestamp": "2023-05-12T19:52:33.245Z",'
-                 b'"action": "ADD",'
-                 b'"bucket": "test",'
-                 b'"contentId": "test3",'
-                 b'"checksum": "23b5c58d597754037351ebdc5497882b"'
-                 b'}'
-  )
-  response = cli.invoke(pdp, ["staging", "bucket", "get", "--bucket", "fake", "--page", "2", "--token", "fake-token",
-                              "--content-type",
-                              "CONTENT"])
-  assert response.exit_code == 0
-  mock_post.assert_called_once_with(
-    'http://localhost:8081/content/fake/filter',
-    query_params={'token': 'fake-token', 'contentType': 'CONTENT', 'size': None}
-  )
-  snapshot.assert_match(response.output, 'test_get_bucket_filter.snapshot')
-
-
-def test_get_bucket_pagination(mocker, snapshot):
-  """
-  Test the command defined in :func:`src.commands.staging.bucket.command.get`,
-  when the user wants to use pagination on the data.
-  """
-  mock_post = mocker.patch(
-    'commands.staging.bucket.get.post',
-    return_value=b'{'
-                 b'"transactionId": "645e9901c8e408abf7e1a194",'
-                 b'"timestamp": "2023-05-12T19:52:33.245Z",'
-                 b'"action": "ADD",'
-                 b'"bucket": "test",'
-                 b'"contentId": "test3",'
-                 b'"checksum": "23b5c58d597754037351ebdc5497882b"'
-                 b'}'
-  )
-  response = cli.invoke(pdp, ["staging", "bucket", "get", "--bucket", "fake", "--page", "2", "--asc",
-                              "CONTENT", "--desc", "fake-property"])
-  assert response.exit_code == 0
-  mock_post.assert_called_once_with(
-    'http://localhost:8081/content/fake/query',
-    query_params={'page': '2', 'sort': ['CONTENT,asc', 'fake-property,desc'], 'size': None}
-  )
-  snapshot.assert_match(response.output, 'test_get_bucket_filter.snapshot')
-
-
-def test_get_bucket_json(mocker, snapshot):
-  """
-  Test the command defined in :func:`src.commands.staging.bucket.command.get`.
-  """
-  mocker.patch('commands.staging.bucket.get.get', return_value=b'{'
-                                                               b'"transactionId": "645e9901c8e408abf7e1a194",'
-                                                               b'"timestamp": "2023-05-12T19:52:33.245Z",'
-                                                               b'"action": "ADD",'
-                                                               b'"bucket": "test",'
-                                                               b'"contentId": "test3",'
-                                                               b'"checksum": "23b5c58d597754037351ebdc5497882b"'
-                                                               b'}')
-  response = cli.invoke(pdp, ["staging", "bucket", "get", "--bucket", "fake", "--json"])
-  assert response.exit_code == 0
-  snapshot.assert_match(response.output, 'test_get_bucket_json.snapshot')
-
-
 def test_add_item(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.item.command.add`.
@@ -332,3 +245,141 @@ def test_get_item_failed(mocker, snapshot, mock_custom_exception):
                          "both"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_item_failed.snapshot')
+
+
+def test_delete_item_all(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`.
+  """
+  mocker.patch("commands.staging.item.delete.create_spinner")
+  mocker.patch("commands.staging.item.delete.get", return_value='{'
+                                                                '"token":"fake-token",'
+                                                                '"content": ['
+                                                                '{"contentId":"fake-id1"},'
+                                                                '{"contentId":"fake-id2"},'
+                                                                '{"contentId":"fake-id3"}'
+                                                                '] '
+                                                                '}')
+  mocker.patch("commands.staging.item.delete.delete", side_effect=[
+    '{"transactionId": "fake-transaction1"}',
+    None,
+    '{"transactionId": "fake-transaction3"}'
+  ])
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket", "--all"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete_item_all.snapshot')
+
+
+def test_delete_item_empty(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`,
+  when try to delete all the items, but the bucket is empty.
+  """
+  mocker.patch("commands.staging.item.delete.create_spinner")
+  mocker.patch("commands.staging.item.delete.get", return_value='{'
+                                                                '"token":"fake-token",'
+                                                                '"content": [ ],'
+                                                                '"empty": true'
+                                                                '}')
+  mocker.patch("commands.staging.item.delete.delete", side_effect=[
+    '{"transactionId": "fake-transaction1"}',
+    None,
+    '{"transactionId": "fake-transaction3"}'
+  ])
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket", "--all"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete_item_empty.snapshot')
+
+
+def test_delete_items(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`,
+  when one or more --item-id flags were provided.
+  """
+  mocker.patch("commands.staging.item.delete.create_spinner")
+  mock_get = mocker.patch("commands.staging.item.delete.get")
+  mocker.patch("commands.staging.item.delete.delete", side_effect=[
+    '{"transactionId": "fake-transaction1"}',
+    None
+  ])
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket", "-i", "fake1", "-i", "fake2"])
+  assert mock_get.call_count == 0
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete_items.snapshot')
+
+
+def test_delete_item_not_allowed(snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`,
+  when no --item-id and --all flags were provided.
+  """
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket"])
+  assert response.exit_code == 1
+  snapshot.assert_match(response.exception.message, 'test_delete_item_not_allowed.snapshot')
+
+
+def test_delete_item_filter(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`,
+  when the user wants to delete by filter.
+  """
+  mocker.patch("commands.staging.item.delete.click.edit", return_value="{}")
+  mocker.patch(
+    "commands.staging.item.delete.delete",
+    return_value='['
+                 '{"transactionId": "fake-transaction1", "contentId": "fake-content1"},'
+                 '{"transactionId": "fake-transaction2", "contentId": "fake-content2"}'
+                 ']'
+  )
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket", "--filter"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete_item_filter.snapshot')
+
+
+def test_delete_item_filter_no_deleted(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`,
+  when the filter doesn't match with any item.
+  """
+  mocker.patch("commands.staging.item.delete.click.edit", return_value="{}")
+  mocker.patch(
+    "commands.staging.item.delete.delete",
+    return_value='[]'
+  )
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket", "--filter"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete_item_filter_no_deleted.snapshot')
+
+
+def test_delete_item_filter_failed(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`,
+  when the call to delete filter fails.
+  """
+  mocker.patch("commands.staging.item.delete.click.edit", return_value="{}")
+  mocker.patch(
+    "commands.staging.item.delete.delete",
+    return_value=None
+  )
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket", "--filter"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete_item_filter_failed.snapshot')
+
+
+def test_delete_item_filter_no_criteria(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.item.command.delete`,
+  when the user don't provide the filter criteria.
+  """
+  mocker.patch("commands.staging.item.delete.click.edit", return_value=None)
+  response = cli.invoke(pdp,
+                        ["staging", "item", "delete", "--bucket", "fake-bucket", "--filter"])
+  assert response.exit_code == 1
+  snapshot.assert_match(response.exception.message, 'test_delete_item_filter_no_criteria.snapshot')
