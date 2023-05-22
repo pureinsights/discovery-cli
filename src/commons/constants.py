@@ -34,7 +34,9 @@ URL_SEED_RESTART = '{0}/seed/{id}/reset'
 URL_SEED_CONTROL = '{0}/seed/{id}/control'
 URL_LOG_LEVEL = '{0}/maintenance/log'
 URL_SEED_EXECUTION = '{0}/seed/{id}/execution/{execution}'
-URL_ITEM_ADD = '{0}/content/{bucket}/{content_id}'
+URL_GENERIC_ITEM = '{0}/content/{bucket}/{content_id}'
+URL_GENERIC_BUCKET = '{0}/content/{bucket}'
+
 
 # Must be all in lower case
 # Products
