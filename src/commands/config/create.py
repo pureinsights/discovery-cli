@@ -232,13 +232,12 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
     for entity in entities:
       entity.pop('id', None)
 
+  if has_to_deploy and has_pdp_project_structure(project_path):
+    # Replace all the {{ fromName }} template, with the respective ids.
+    entities = parsing_stage(project_path, entity_type, entities, file)
+
   # If the flag is true, then deploys the entities to the products
   if has_to_deploy:
-
-    if has_pdp_project_structure(project_path) and not ignore_ids:
-      # Replace all the {{ fromName }} template, with the respective ids.
-      entities = parsing_stage(project_path, entity_type, entities, file)
-
     entities_copy = [{**entity} for entity in entities]
     # Deploys the entities list
     entities_deployed = deployment_stage(config, entity_type, entities_copy, ignore_ids, not _json)
