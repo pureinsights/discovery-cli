@@ -102,4 +102,5 @@ staging.add_command(item)
 staging.add_command(bucket)
 
 if __name__ == '__main__':
+  os.system("")  # pragma: no cover
   handle_exceptions(pdp)  # pragma: no cover
