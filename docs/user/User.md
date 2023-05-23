@@ -593,6 +593,7 @@ pdp staging bucket get --bucket bucket_test --token token_id --content-type BOTH
 pdp staging bucket get --bucket bucket_test --page 2 --size 25 --asc property
 ```
 
+
 ##### Delete Command
 
 Will delete the given bucket from the Staging API.
@@ -613,6 +614,7 @@ pdp staging bucket delete --bucket bucket_name
 ```bash
 pdp staging bucket delete --bucket bucket_name1 --bucket bucket_name2 --bucket bucket_name3
 ```
+
 
 ##### Status Command
 
@@ -644,6 +646,7 @@ pdp staging bucket status --bucket bucket_name
 ```bash 
 pdp staging bucket status --bucket bucket_name --json
 ``` 
+
 
 #### Item Command
 
@@ -704,6 +707,7 @@ pdp staging item get --bucket bucket --item item_id --content-type metadata
 ```bash
 pdp staging item get --bucket bucket --item item_id --content-type both
 ```
+
 
 ##### Delete Command
 
