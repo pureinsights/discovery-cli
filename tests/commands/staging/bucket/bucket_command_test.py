@@ -10,6 +10,7 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 
 import json
+
 from pdp import pdp
 from pdp_test import cli
 
@@ -241,7 +242,8 @@ def test_batch_failed(mocker, snapshot):
                         ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_batch_failed.snapshot')
-=======
+
+
 def test_get_bucket(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.bucket.command.get`.
