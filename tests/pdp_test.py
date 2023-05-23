@@ -8,12 +8,14 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import os.path
 
 import pyfiglet
 import pytest
 from click.testing import CliRunner
 
 from commons.constants import DEFAULT_CONFIG
+from commons.file_system import get_templates_directory
 from pdp import ensure_configurations, health, load_config, pdp
 
 cli = CliRunner()
@@ -70,6 +72,24 @@ config_return_fixture = {
     'discovery': 'https://discovery-fake-url'
   }
 }
+
+
+def test_ensure_templates_directory(mocker):
+  """
+  Ensures that the templates directory path is the correct.
+  """
+  mocker.patch("commons.file_system.os.path.exists", return_value=True)
+  path_list = os.path.split(get_templates_directory())
+  assert path_list[len(path_list) - 1] == 'templates' and path_list[len(path_list) - 2].endswith('src')
+
+
+def test_ensure_templates_directory_second_path(mocker):
+  """
+  Ensures that the templates directory path is the correct, when the first path doesn't exist.
+  """
+  mocker.patch("commons.file_system.os.path.exists", return_value=False)
+  path_list = os.path.split(get_templates_directory())
+  assert path_list[len(path_list) - 1] == 'templates' and not path_list[len(path_list) - 2].endswith('src')
 
 
 def test_load_config_default_profile():
