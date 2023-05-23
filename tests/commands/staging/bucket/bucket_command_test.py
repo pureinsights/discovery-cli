@@ -8,6 +8,9 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+
+import json
+
 from pdp import pdp
 from pdp_test import cli
 
@@ -77,6 +80,168 @@ def test_status_failed(mocker, snapshot):
                         ["staging", "bucket", "status", "--bucket", "fake1", "--asc", "bucket", "--desc", "bucket"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_status_specific_bucket.snapshot')
+
+
+def test_batch(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.batch`.
+  """
+  output_example = [
+    {
+      "contentId": "string",
+      "transaction": {
+        "transactionId": "string",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "action": "ADD",
+        "bucket": "string",
+        "contentId": "string",
+        "checksum": "string"
+      },
+      "errorMessage": "string"
+    }
+  ]
+  mocker.patch("commands.staging.bucket.batch.post", return_value=json.dumps(output_example))
+  mocker.patch("commands.staging.bucket.batch.read_binary_file", return_value=b'[{\n\n}]')
+  response = cli.invoke(pdp,
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_batch.snapshot')
+
+
+def test_batch_json(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.batch`,
+  when the user provide the --json flag.
+  """
+  output_example = [
+    {
+      "contentId": "string",
+      "transaction": {
+        "transactionId": "string",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "action": "ADD",
+        "bucket": "string",
+        "contentId": "string",
+        "checksum": "string"
+      },
+      "errorMessage": "string"
+    }
+  ]
+  mocker.patch("commands.staging.bucket.batch.post", return_value=json.dumps(output_example))
+  mocker.patch("commands.staging.bucket.batch.read_binary_file", return_value=b'[{\n\n}]')
+  response = cli.invoke(pdp,
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path", "-j"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_batch_json.snapshot')
+
+
+def test_batch_interactive(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.batch`,
+  when the user provide the --interactive flag.
+  """
+  output_example = [
+    {
+      "contentId": "string",
+      "transaction": {
+        "transactionId": "string",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "action": "ADD",
+        "bucket": "string",
+        "contentId": "string",
+        "checksum": "string"
+      },
+      "errorMessage": "string"
+    }
+  ]
+  mocker.patch("commands.staging.bucket.batch.post", return_value=json.dumps(output_example))
+  mock_edit = mocker.patch("commands.staging.bucket.batch.click.edit", return_value=b'[{\n\n}]')
+  response = cli.invoke(pdp,
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--interactive"])
+  mock_edit.assert_called_once_with("[\n\n]")
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_batch_interactive.snapshot')
+
+
+def test_batch_interactive_file(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.batch`,
+  when the user provide the --interactive flag.
+  """
+  output_example = [
+    {
+      "contentId": "string",
+      "transaction": {
+        "transactionId": "string",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "action": "ADD",
+        "bucket": "string",
+        "contentId": "string",
+        "checksum": "string"
+      },
+      "errorMessage": "string"
+    }
+  ]
+  mocker.patch("commands.staging.bucket.batch.post", return_value=json.dumps(output_example))
+  mocker.patch("commands.staging.bucket.batch.read_binary_file", return_value=b'{\n\n}')
+  mock_edit = mocker.patch("commands.staging.bucket.batch.click.edit", return_value=b'[{\n\n}]')
+  response = cli.invoke(pdp,
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path", "--interactive"])
+  mock_edit.assert_called_once_with("{\n\n}")
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_batch_interactive_file.snapshot')
+
+
+def test_batch_no_body(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.batch`,
+  when the user provide the --interactive flag.
+  """
+  output_example = [
+    {
+      "contentId": "string",
+      "transaction": {
+        "transactionId": "string",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "action": "ADD",
+        "bucket": "string",
+        "contentId": "string",
+        "checksum": "string"
+      },
+      "errorMessage": "string"
+    }
+  ]
+  mocker.patch("commands.staging.bucket.batch.post", return_value=json.dumps(output_example))
+  mock_edit = mocker.patch("commands.staging.bucket.batch.click.edit", return_value=None)
+  response = cli.invoke(pdp,
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--interactive"])
+  mock_edit.assert_called_once_with("[\n\n]")
+  assert response.exit_code == 1
+  snapshot.assert_match(response.output, 'test_batch_interactive_file.snapshot')
+
+
+def test_batch_no_flags(snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.batch`,
+  when the user don't provide the --interactive and --file flag.
+  """
+  response = cli.invoke(pdp,
+                        ["staging", "bucket", "batch", "--bucket", "fake1"])
+  assert response.exit_code == 1
+  snapshot.assert_match(response.exception.message, 'test_batch_no_flags.snapshot')
+
+
+def test_batch_failed(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.batch`,
+  when the post request fail.
+  """
+  mocker.patch("commands.staging.bucket.batch.post", return_value=None)
+  mocker.patch("commands.staging.bucket.batch.read_binary_file", return_value=b'[{\n\n}]')
+  response = cli.invoke(pdp,
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_batch_failed.snapshot')
 
 
 def test_get_bucket(mocker, snapshot):
