@@ -13,6 +13,7 @@ import click
 
 from commands.staging.bucket.delete import run as run_delete
 from commands.staging.bucket.get import run as run_get
+from commands.staging.bucket.status import run as run_status
 
 
 @click.group('bucket')
@@ -87,3 +88,37 @@ def delete(obj, buckets: list[str]):
   """
   configuration = obj['configuration']
   run_delete(configuration, buckets)
+
+
+
+@bucket_command.command()
+@click.pass_obj
+@click.option('--bucket', default='',
+              help='The name of the bucket to get the status. Default is None.')
+@click.option('-p', '--page', 'page', default=0, type=int,
+              help='The number of the page to show. Min 0. Default is 0.')
+@click.option('-s', '--size', 'size', default=25, type=int,
+              help='The size of the page to show. Range 1 - 100. Default is 25.')
+@click.option('--asc', default=[], multiple=True,
+              help='The name of the property to sort in ascending order. Multiple flags are supported. Default is [].')
+@click.option('--desc', default=[], multiple=True,
+              help='The name of the property to sort in descending order. Multiple flags are supported. Default is [].')
+@click.option('-j', '--json', 'is_json', is_flag=True, default=False,
+              help="This is a boolean flag. Will print the results in JSON format. Default is False.")
+def status(obj, bucket: str, page: int, size: int, asc: list[str], desc: list[str], is_json: bool):
+  """
+  Retrieves the status for all the buckets or a given bucket by the user.
+  """
+  configuration = obj['configuration']
+  sort = []
+  for asc_property in asc:
+    sort += [f'{asc_property},asc']
+  for desc_property in desc:
+    sort += [f'{desc_property},desc']
+  query_params = {
+    "page": page,
+    "size": size,
+    "sort": sort
+  }
+  run_status(configuration, bucket, query_params, is_json)
+

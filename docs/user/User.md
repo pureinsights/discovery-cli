@@ -616,6 +616,38 @@ pdp staging bucket delete --bucket bucket_name1 --bucket bucket_name2 --bucket b
 ```
 
 
+##### Status Command
+
+Retrieves the status for all the buckets or a given bucket by the user.
+
+###### Flags
+
+- **--bucket**: The name of the bucket to get the status. Default is None.
+- **-p, --page**: The number of the page to show. Min 0. Default is 0.
+- **-s, --size**: The size of the page to show. Range 1 - 100. Default is 25.
+- **--asc**: The name of the property to sort in ascending order. Multiple flags are supported. Default is [].
+- **--desc**: The name of the property to sort in descending order. Multiple flags are supported. Default is [].
+- **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+
+###### Get the status for all the buckets
+
+```bash 
+pdp staging bucket status --page 0 --size 1 --asc property --desc property2
+```
+
+###### Get the status for a specific bucket
+
+```bash 
+pdp staging bucket status --bucket bucket_name
+```
+
+###### Get the status for a specific bucket in JSON format
+
+```bash 
+pdp staging bucket status --bucket bucket_name --json
+``` 
+
+
 #### Item Command
 
 This command encloses all commands that let you perform actions on an item on the staging API.

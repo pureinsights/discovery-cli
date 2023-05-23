@@ -37,6 +37,7 @@ URL_SEED_EXECUTION = '{0}/seed/{id}/execution/{execution}'
 URL_ITEM_ADD = '{0}/content/{bucket}/{content_id}'
 URL_GENERIC_ITEM = '{0}/content/{bucket}/{content_id}'
 URL_GENERIC_BUCKET = '{0}/content/{bucket}'
+URL_BUCKET_STATUS = '{0}/status/{bucket}'
 
 
 # Must be all in lower case
