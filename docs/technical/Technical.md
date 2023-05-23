@@ -115,3 +115,14 @@ def test_extract_entities_failed_on_extractions():
 python -m pytest --cov=src --cov-report=html
 
 ### Integration testing
+
+### Getting a .exe for the CLI
+
+```bash
+pip install pyinstaller
+pyinstaller ./src/pdp.py --add-data "src/templates;templates" --collect-all pyfiglet --collect-all yaspin
+```
+
+This will create a 'dist/pdp' folder, whose contents are the necessary run time dependencies for the CLI.
+
+This can be zipped and shared, and then to install, just add that folder to your Windows PATH.

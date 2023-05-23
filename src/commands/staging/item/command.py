@@ -13,7 +13,10 @@ import uuid
 import click
 
 from commands.staging.item.add import run as run_add
+from commands.staging.item.delete import run as run_delete
 from commands.staging.item.get import run as run_get
+from commons.custom_classes import PdpException
+
 
 
 @click.group()
@@ -69,3 +72,27 @@ def get(obj: dict, bucket: str, item_id: list[str], content_type: str, is_json: 
   """
   configuration = obj['configuration']
   run_get(configuration, bucket, item_id, content_type, is_json)
+
+
+@item.command()
+@click.pass_obj
+@click.option('--bucket', required=True,
+              help='The name of the bucket where the item will be added.')
+@click.option('-i', '--item-id', 'item_ids', multiple=True,
+              help='The id of the item that you want to delete. Default is []. '
+                   'The command allows multiple flags of -i.')
+@click.option('-a', '--all', '_all', is_flag=True,
+              help='Will try to delete all the items if the -i flag was not provided. If neither of them is provided '
+                   'an error will be raised. Default is False.')
+@click.option('--filter', 'filter', is_flag=True, default=False,
+              help='Will open a text editor to capture the query to filter the data.')
+def delete(obj: dict, bucket: str, item_ids: list[str], _all: bool, filter: bool):
+  """
+  Will delete a given item or all items in case that you don’t provide one or more item ids.
+  """
+  if len(item_ids) <= 0 and not _all and not filter:
+    raise PdpException(message="You must to provide the --all flag if you want to delete all the entities.")
+
+  configuration = obj['configuration']
+  run_delete(configuration, bucket, item_ids, filter)
+

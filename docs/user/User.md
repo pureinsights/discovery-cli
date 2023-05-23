@@ -593,6 +593,7 @@ pdp staging bucket get --bucket bucket_test --token token_id --content-type BOTH
 pdp staging bucket get --bucket bucket_test --page 2 --size 25 --asc property
 ```
 
+
 ##### Delete Command
 
 Will delete the given bucket from the Staging API.
@@ -613,6 +614,7 @@ pdp staging bucket delete --bucket bucket_name
 ```bash
 pdp staging bucket delete --bucket bucket_name1 --bucket bucket_name2 --bucket bucket_name3
 ```
+
 
 ##### Status Command
 
@@ -644,6 +646,7 @@ pdp staging bucket status --bucket bucket_name
 ```bash 
 pdp staging bucket status --bucket bucket_name --json
 ``` 
+
 
 ##### Batch Command
 
@@ -680,6 +683,7 @@ pdp staging bucket batch --bucket bucket_name --file file/path --interactive
 pdp staging bucket batch --bucket bucket_name --file file/path -j
 ``` 
 
+                       
 #### Item Command
 
 This command encloses all commands that let you perform actions on an item on the staging API.
@@ -739,3 +743,35 @@ pdp staging item get --bucket bucket --item item_id --content-type metadata
 ```bash
 pdp staging item get --bucket bucket --item item_id --content-type both
 ```
+
+
+##### Delete Command
+
+Will delete a given item or all items in case that you don’t provide an item id.
+
+###### Flags
+
+- **--bucket**: The name of the bucket where you want to delete the item.
+- **-i, --item-id**: The id of the item that you want to delete. Default is []. The command allows multiple flags of -i.
+- **-a, --all**: Will try to delete all the items if the --item-id flag was not provided. If neither of them is provided
+  an error will be raised. Default is False.
+- **--filter**: Will open a text editor to capture the query to filter the data.
+
+###### Delete all items of a bucket
+
+```bash
+pdp stating item delete --bucket bucket --all
+```
+
+###### Delete one or more items of a bucket
+
+```bash
+pdp stating item delete --bucket bucket --item-id item_id1 --item-id item_id2
+```
+
+###### Delete items of a bucket by filter
+
+```bash
+pdp stating item delete --bucket bucket --filter
+```
+
