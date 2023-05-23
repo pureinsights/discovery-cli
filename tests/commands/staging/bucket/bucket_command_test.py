@@ -12,6 +12,18 @@ from pdp import pdp
 from pdp_test import cli
 
 
+def test_delete(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.staging.bucket.command.delete`.
+  """
+  mocker.patch("commands.staging.bucket.delete.create_spinner")
+  mocker.patch("commands.staging.bucket.delete.delete", side_effect=[None, '{"acknowledged":true}'])
+  response = cli.invoke(pdp,
+                        ["staging", "bucket", "delete", "--bucket", "fake-bucket1", "--bucket", "fake-bucket2"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_delete.snapshot')
+
+
 def test_get_bucket(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.bucket.command.get`.
@@ -97,3 +109,4 @@ def test_get_bucket_json(mocker, snapshot):
   response = cli.invoke(pdp, ["staging", "bucket", "get", "--bucket", "fake", "--json"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_bucket_json.snapshot')
+

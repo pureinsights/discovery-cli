@@ -10,6 +10,8 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import click
 
+
+from commands.staging.bucket.delete import run as run_delete
 from commands.staging.bucket.get import run as run_get
 
 
@@ -72,3 +74,16 @@ def get(obj: dict, bucket: str, token: str, content_type: str, page: int, size: 
 
   configuration = obj['configuration']
   run_get(configuration, bucket, query_params, query, _json)
+
+
+@bucket_command.command()
+@click.pass_obj
+@click.option('--bucket', 'buckets', required=True, multiple=True, default=[],
+              help='The name of the bucket to delete. If this flag is not provided the flag --all must be provided, '
+                   'otherwise an error will be raised. The command allows multiple flags of --bucket. Default is [].')
+def delete(obj, buckets: list[str]):
+  """
+  Will delete the given bucket from the Staging API.
+  """
+  configuration = obj['configuration']
+  run_delete(configuration, buckets)

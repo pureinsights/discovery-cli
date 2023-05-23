@@ -593,6 +593,29 @@ pdp staging bucket get --bucket bucket_test --token token_id --content-type BOTH
 pdp staging bucket get --bucket bucket_test --page 2 --size 25 --asc property
 ```
 
+
+##### Delete Command
+
+Will delete the given bucket from the Staging API.
+
+###### Flags
+
+- **--bucket**: The name of the bucket to delete. If this flag is not provided an error will be raised. The command
+  allows multiple flags of --bucket. Default is [].
+
+###### Delete a bucket
+
+```bash
+pdp staging bucket delete --bucket bucket_name
+```
+
+###### Delete more than one bucket at once
+
+```bash
+pdp staging bucket delete --bucket bucket_name1 --bucket bucket_name2 --bucket bucket_name3
+```
+
+
 #### Item Command
 
 This command encloses all commands that let you perform actions on an item on the staging API.
@@ -652,6 +675,7 @@ pdp staging item get --bucket bucket --item item_id --content-type metadata
 ```bash
 pdp staging item get --bucket bucket --item item_id --content-type both
 ```
+
 
 ##### Delete Command
 
