@@ -10,10 +10,11 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import click
 
-
+from commands.staging.bucket.batch import run as run_batch
 from commands.staging.bucket.delete import run as run_delete
 from commands.staging.bucket.get import run as run_get
 from commands.staging.bucket.status import run as run_status
+from commons.custom_classes import DataInconsistency
 
 
 @click.group('bucket')
@@ -79,6 +80,27 @@ def get(obj: dict, bucket: str, token: str, content_type: str, page: int, size: 
 
 @bucket_command.command()
 @click.pass_obj
+@click.option('--bucket', required=True,
+              help='The name for the bucket to get the items.')
+@click.option('--file', default=None,
+              help='The path to the file that contains the body for the query on a JSON format.')
+@click.option('--interactive', default=False, is_flag=True,
+              help='Will open a text editor to let you write the body for the request.')
+@click.option('-j', '--json', 'is_json', is_flag=True, default=False,
+              help='This is a boolean flag. It will print the results in JSON format. Default is False.')
+def batch(obj, bucket: str, file: str, interactive: bool, is_json: bool):
+  """
+  Performs a list of actions such as ADD and DELETE to a given bucket within the Staging API.
+  """
+  if file is None and not interactive:
+    raise DataInconsistency(message='You must to provide the --file or --interactive flag.')
+
+  configuration = obj['configuration']
+  run_batch(configuration, bucket, file, interactive, is_json)
+
+
+@bucket_command.command()
+@click.pass_obj
 @click.option('--bucket', 'buckets', required=True, multiple=True, default=[],
               help='The name of the bucket to delete. If this flag is not provided the flag --all must be provided, '
                    'otherwise an error will be raised. The command allows multiple flags of --bucket. Default is [].')
@@ -88,7 +110,6 @@ def delete(obj, buckets: list[str]):
   """
   configuration = obj['configuration']
   run_delete(configuration, buckets)
-
 
 
 @bucket_command.command()
@@ -121,4 +142,3 @@ def status(obj, bucket: str, page: int, size: int, asc: list[str], desc: list[st
     "sort": sort
   }
   run_status(configuration, bucket, query_params, is_json)
-
