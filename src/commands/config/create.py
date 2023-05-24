@@ -232,7 +232,7 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
     for entity in entities:
       entity.pop('id', None)
 
-  if has_pdp_project_structure(project_path):
+  if has_to_deploy and has_pdp_project_structure(project_path):
     # Replace all the {{ fromName }} template, with the respective ids.
     entities = parsing_stage(project_path, entity_type, entities, file)
 
