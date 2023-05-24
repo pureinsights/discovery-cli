@@ -8,13 +8,17 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import json
+
 import click
 
 from commands.staging.bucket.batch import run as run_batch
 from commands.staging.bucket.delete import run as run_delete
 from commands.staging.bucket.get import run as run_get
 from commands.staging.bucket.status import run as run_status
-from commons.custom_classes import DataInconsistency
+from commons.console import print_warning
+from commons.custom_classes import DataInconsistency, PdpException
+from commons.handlers import handle_and_exit
 
 
 @click.group('bucket')
@@ -34,6 +38,8 @@ def bucket_command(ctx):
 @click.option('--content-type', 'content_type', default=None,
               type=click.Choice(['CONTENT', 'METADATA', 'BOTH'], case_sensitive=False),
               help='The content-type of the query. Default is CONTENT.')
+@click.option('--filter', 'filter', is_flag=True, default=False,
+              help='Will open a text editor to capture the query to filter the data.')
 @click.option('--page', default=None,
               help='The number of the page to query.')
 @click.option('--size', default=None,
@@ -45,23 +51,32 @@ def bucket_command(ctx):
 @click.option('-j', '--json', '_json', is_flag=True, default=False,
               help='This is a boolean flag. It will print the results in JSON format. Default is False.')
 def get(obj: dict, bucket: str, token: str, content_type: str, page: int, size: int, asc: list[str], desc: list[str],
-        _json: bool):
+        _json: bool, filter: bool):
   """
   Retrieves all the items for a given bucket. You can filter or use pagination, but just once at time.
   If you provide --token or --content-type will prioritize the filter over pagination.
   """
-  query_params = {}
+  query_params = {
+    'token': token,
+    'contentType': content_type,
+    'size': size
+  }
+  filter_body = {}
   # This could be '', 'query' or 'filter' and is the last segment of the url URL/content/{bucket}/<query_value>
   # Help to decide which endpoint to call
   query = ''
-  if token is not None or content_type is not None:
+  if filter:
     query = 'filter'
-    query_params = {
-      'token': token,
-      'contentType': content_type,
-      'size': size
-    }
-  elif page is not None or size is not None or len(asc) > 0 or len(desc) > 0:
+    filter_criteria: str | None = click.edit('{\n\n}')
+    if filter_criteria is None:
+      print_warning('If you wrote some criteria, please be sure you save before close the text editor.')
+      raise PdpException(message="The filter criteria can't be empty.")
+    _, filter_body = handle_and_exit(
+      json.loads,
+      {'message': "The filter criteria entered doesn't have a valid JSON format."},
+      filter_criteria
+    )
+  elif page is not None or len(asc) > 0 or len(desc) > 0:
     sort = []
     for asc_property in asc:
       sort += [f'{asc_property},asc']
@@ -75,7 +90,7 @@ def get(obj: dict, bucket: str, token: str, content_type: str, page: int, size: 
     }
 
   configuration = obj['configuration']
-  run_get(configuration, bucket, query_params, query, _json)
+  run_get(configuration, bucket, query_params, filter_body, query, _json)
 
 
 @bucket_command.command()
