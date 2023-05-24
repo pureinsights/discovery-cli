@@ -1,0 +1,12 @@
+{
+  "name": "Staging Hydrator",
+  "active": true,
+  "type": "staging-hydrator",
+  "servers": [
+    {
+      "host": "localhost",
+      "port": 8081
+    }
+  ],
+  "bucket": "${index}"
+}

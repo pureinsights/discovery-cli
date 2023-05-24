@@ -1,6 +1,15 @@
 # PDP-CLI - **User Documentation**
 
-## Installing
+## Installation (Windows)
+
+Go to Link to the release .zip and download the .zip file. Extract its contents to the folder where you want to install
+the CLI (remember this folder).
+
+Then open the Environment Variables Editor by typing “Environment Variables” on the windows search left down corner. In
+the section of User Variables double-click on Path and add the path to the folder where you installed the CLI.
+
+Now open a terminal and write “pdp health” to make sure that you install the CLI correctly, and you should see the
+banner of the CLI.
 
 ## Getting started
 
@@ -593,7 +602,6 @@ pdp staging bucket get --bucket bucket_test --token token_id --content-type BOTH
 pdp staging bucket get --bucket bucket_test --page 2 --size 25 --asc property
 ```
 
-
 ##### Delete Command
 
 Will delete the given bucket from the Staging API.
@@ -614,7 +622,6 @@ pdp staging bucket delete --bucket bucket_name
 ```bash
 pdp staging bucket delete --bucket bucket_name1 --bucket bucket_name2 --bucket bucket_name3
 ```
-
 
 ##### Status Command
 
@@ -646,7 +653,6 @@ pdp staging bucket status --bucket bucket_name
 ```bash 
 pdp staging bucket status --bucket bucket_name --json
 ``` 
-
 
 ##### Batch Command
 
@@ -683,7 +689,6 @@ pdp staging bucket batch --bucket bucket_name --file file/path --interactive
 pdp staging bucket batch --bucket bucket_name --file file/path -j
 ``` 
 
-                       
 #### Item Command
 
 This command encloses all commands that let you perform actions on an item on the staging API.
@@ -743,7 +748,6 @@ pdp staging item get --bucket bucket --item item_id --content-type metadata
 ```bash
 pdp staging item get --bucket bucket --item item_id --content-type both
 ```
-
 
 ##### Delete Command
 
