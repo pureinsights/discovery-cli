@@ -301,8 +301,8 @@ def delete(obj, product, entity_type_name, entity_ids: list[str], delete_all, ca
     default=None)
   if sure_to_delete != 'YES':
     print_error("Command aborted by user.", True)
-  if cascade:
-    sure_to_cascade = 'CASCADE' if yes else click.prompt(
+  if cascade and not yes:
+    sure_to_cascade = click.prompt(
       f"Type {click.style('CASCADE', fg='green')} if you are sure "
       f"to {click.style('delete', fg='red')} the entities in cascade",
       default=None
