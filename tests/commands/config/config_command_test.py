@@ -150,7 +150,19 @@ def test_create_with_entity_template(mocker, snapshot, test_project_path):
   mocker.patch("commands.config.create.create_spinner")
   mocker.patch("commands.config.create.create_or_update_entity", return_value="newId")
   mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
-  mocker.patch("commands.config.create.writing_stage", return_value=[])
+  mocker.patch("commands.config.create.input_stage",
+               return_value=("fake-file", [{
+                 'id': 'fakeid',
+                 'name': 'Pipeline',
+                 'active': True,
+                 'steps': [{'processorId': "{{ fromName('<Processor Name>') }}", 'action': 'hydrate'}]
+               }]))
+  mocker.patch("commands.config.create.writing_stage", return_value=[{
+    'id': 'fakeid',
+    'name': 'Pipeline',
+    'active': True,
+    'steps': [{'processorId': "{{ fromName('<Processor Name>') }}", 'action': 'hydrate'}]
+  }])
   response = cli.invoke(pdp, ["-d", test_project_path(), "config", "create", "--entity-type", "pipeline",
                               "--entity-template", "pipeline", "--deploy", "--json"])
   assert response.exit_code == 0

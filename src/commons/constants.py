@@ -39,7 +39,7 @@ URL_GENERIC_ITEM = '{0}/content/{bucket}/{content_id}'
 URL_GENERIC_BUCKET = '{0}/content/{bucket}'
 URL_BUCKET_BATCH = '{0}/content/{bucket}/batch'
 URL_BUCKET_STATUS = '{0}/status/{bucket}'
-
+URL_GENERIC_TRANSACTION = '{0}/transaction/{bucket}'
 
 # Must be all in lower case
 # Products

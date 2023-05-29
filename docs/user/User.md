@@ -786,3 +786,35 @@ pdp stating item delete --bucket bucket --item-id item_id1 --item-id item_id2
 pdp stating item delete --bucket bucket --filter
 ```
 
+#### Transaction Command
+
+This command encloses all commands that let you perform actions on a transaction on the staging API.
+
+##### Get Command
+
+Retrieves all the transactions for a given bucket.
+
+###### Flags
+
+- `REQURIED`**--bucket**: The name for the bucket to get the items.
+- **-i, --id**: Will retrieve all the transactions after the given one. Useful to make pagination. Default is None.
+- **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+- **-s, --size**: The number of transactions to fetch. Default is None.
+
+###### Get all the transactions for a bucket
+
+```bash
+pdp staging transaction get --bucket bucket
+```
+
+###### Get 3 transactions for a bucket as JSON
+
+```bash
+pdp staging transaction get --bucket bucket --size 3 --json
+```
+
+###### Get transactions with pagination
+
+```bash
+pdp staging transaction get --bucket bucket --id transaction_id
+```

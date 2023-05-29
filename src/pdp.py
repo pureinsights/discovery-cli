@@ -22,6 +22,7 @@ from commands.execution.command import seed_exec
 from commands.staging.bucket.command import bucket_command as bucket
 from commands.staging.command import staging
 from commands.staging.item.command import item
+from commands.staging.transaction.command import transaction
 from commons.constants import DEFAULT_CONFIG, PRODUCTS
 from commons.custom_classes import DataInconsistency
 from commons.handlers import handle_exceptions
@@ -100,6 +101,7 @@ pdp.add_command(staging)
 core.add_command(file)
 staging.add_command(item)
 staging.add_command(bucket)
+staging.add_command(transaction)
 
 if __name__ == '__main__':
   os.system("")  # pragma: no cover
