@@ -675,6 +675,14 @@ def test_are_same_pdp_entity_same_values():
   assert are_same_pdp_entity({'a': 1, 'b': 2, 'id': 2}, {'a': 1, 'b': 2})
 
 
+def test_are_same_pdp_entity_same_ids():
+  """
+  Test the function defined in :func:`commons.pdp_products.are_same_pdp_entity`,
+  when the entities have the same keys and have the same values.
+  """
+  assert are_same_pdp_entity({'b': 2, 'id': 2}, {'a': 1, 'b': 2, 'id': 2})
+
+
 def test_are_same_pdp_entity_equal_entities():
   """
   Test the function defined in :func:`commons.pdp_products.are_same_pdp_entity`,

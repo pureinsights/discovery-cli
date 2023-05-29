@@ -8,7 +8,7 @@
   },
   "name": "Website Connector",
   "type": "website-connector",
-  "pipelineId": "{{ fromName('Main Pipeline') }}",
+  "pipelineId": "{{ fromName('<Pipeline name>') }}",
   "properties": {
     "index": "website_connector"
   }
