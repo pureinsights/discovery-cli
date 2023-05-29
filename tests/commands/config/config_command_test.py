@@ -414,6 +414,24 @@ def test_delete_cascade_and_local(mocker):
   mock_delete.assert_called_once_with(config, entity_types, ["fakeid-1"], True, True)
 
 
+def test_delete_without_confirmation(mocker):
+  """
+  Test the command defined in :func:`src.commands.config.command.delete`,
+  when the user enters the --yes flag.
+  """
+  mock_delete = mocker.patch("commands.config.command.run_delete")
+  config = load_config('config.ini', 'DEFAULT')
+  config['project_path'] = '.'
+  entity_types = [SEED]
+  entity_types.reverse()
+  response = cli.invoke(
+    pdp,
+    ["config", "delete", "--entity-type", "seed", "-i", "fakeid-1", "--cascade", "--local", "--yes"]
+  )
+  assert response.exit_code == 0
+  mock_delete.assert_called_once_with(config, entity_types, ["fakeid-1"], True, True)
+
+
 def test_delete_all_entities_output(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.config.command.delete`,

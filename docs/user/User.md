@@ -224,6 +224,7 @@ If an entity is referenced by another can’t be deleted.
   it will attempt to delete all entities of the type provided by the user, and if the type of entity is not entered by
   the user, then it will attempt to delete all types of entities from a product, and so on.
 - **--local**: Will delete the configuration of the entities from the PDP Project files. Default is False.
+- **-y, --yes**: Will automatically confirm the execution of the command without write "YES" or "CASCADE".
 
 #### Delete all entities
 
@@ -253,6 +254,12 @@ pdp config delete -i 504821c342f4e717cb1297739a83e7e3 -i 3b5086e9-e5bf-4c82-b23e
 
 ```bash
 pdp config delete -i 8e6e1674-fb03-45b3-9ffd-5bf4b780af49 --cascade
+```
+
+#### Delete entity in cascade without confirmation
+
+```bash
+pdp config delete -i 8e6e1674-fb03-45b3-9ffd-5bf4b780af49 --cascade --yes
 ```
 
 ### Export Command

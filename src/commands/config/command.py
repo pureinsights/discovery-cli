@@ -267,7 +267,9 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
                    "try to delete all the processors associated to the pipeline.")
 @click.option('--local', 'local', default=False, is_flag=True,
               help="Will delete the configuration of the entities from the PDP Project files.")
-def delete(obj, product, entity_type_name, entity_ids: list[str], delete_all, cascade: bool, local: bool):
+@click.option('-y', '--yes', default=False, is_flag=True,
+              help='Will automatically confirm the execution of the command without write "YES" or "CASCADE".')
+def delete(obj, product, entity_type_name, entity_ids: list[str], delete_all, cascade: bool, local: bool, yes: bool):
   """
   Will attempt to delete the entity or entities from the product and the configuration files.
   If an entity is referenced by another can’t be deleted.
@@ -294,12 +296,12 @@ def delete(obj, product, entity_type_name, entity_ids: list[str], delete_all, ca
     raise_for_inconsistent_product(entity_type, product)
     entity_types = [entity_type]
 
-  sure_to_delete = click.prompt(
+  sure_to_delete = 'YES' if yes else click.prompt(
     f"Type {click.style('YES', fg='green')} if you are sure to {click.style('delete', fg='red')} the entities",
     default=None)
   if sure_to_delete != 'YES':
     print_error("Command aborted by user.", True)
-  if cascade:
+  if cascade and not yes:
     sure_to_cascade = click.prompt(
       f"Type {click.style('CASCADE', fg='green')} if you are sure "
       f"to {click.style('delete', fg='red')} the entities in cascade",
