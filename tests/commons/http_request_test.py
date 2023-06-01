@@ -62,4 +62,4 @@ def test_delete_success(mocker):  # All the possible errors are tested in test_h
   mock_handler = mocker.patch('commons.http_requests.handle_http_response')
   delete(fake_url, params=fake_body)
   request_delete_mock.assert_called_once_with(fake_url, params=fake_body)
-  mock_handler.assert_called_once_with(expected_response)
+  mock_handler.assert_called_once_with(expected_response, True)
