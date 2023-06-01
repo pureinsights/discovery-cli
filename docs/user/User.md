@@ -818,3 +818,34 @@ pdp staging transaction get --bucket bucket --size 3 --json
 ```bash
 pdp staging transaction get --bucket bucket --id transaction_id
 ```
+
+##### Delete Command
+
+Deletes one or more transactions for a given bucket.
+
+###### Flags
+
+- **--bucket**: The name of the bucket where you want to delete the transaction.
+- **-i, --id**: The id of the transaction you want to delete. Default is []. The command allows multiple flags of -i.
+- **-a, --all**: Will try to delete all the transactions if the -i flag was not provided. If neither of them are
+  provided an error will be raised. Default is False.
+- **--purge**: Will delete all the transactions starting from the first transaction until the one specified by the -i
+  flag. Default is False.
+
+###### Delete all the transactions
+
+```bash
+pdp staging transaction delete --bucket bucket --all
+```
+
+###### Delete one or more specific transactions
+
+```bash
+pdp staging transaction delete --bucket bucket --id transaction1 --id transaction2
+```
+
+###### Purge all the transactions until a specific one
+
+```bash
+pdp staging transaction delete --bucket bucket --id transaction_id --purge
+```

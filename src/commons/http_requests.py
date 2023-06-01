@@ -37,7 +37,7 @@ def post(url: str, **kwargs):
   :rtype: any
   :return: Returns a class Response containing the http response.
   """
-  status_404_as_error = kwargs.get('status_404_as_error', True)
+  status_404_as_error = kwargs.pop('status_404_as_error', True)
   res = req.post(url, **kwargs)
   return handle_http_response(res, status_404_as_error)
 
@@ -64,5 +64,6 @@ def delete(url: str, **kwargs):
   :rtype: any
   :return: Returns a class Response containing the http response.
   """
+  status_404_as_error = kwargs.pop('status_404_as_error', True)
   res = req.delete(url, **kwargs)
-  return handle_http_response(res)
+  return handle_http_response(res, status_404_as_error)
