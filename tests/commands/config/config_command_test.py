@@ -603,9 +603,9 @@ def test_import_not_a_file(mocker, snapshot):
   """
   mocker.patch("commands.config._import.raise_file_not_found_error")
   mocker.patch("commands.config._import.os.path.isdir", return_value=True)
+  mocker.patch("commands.config._import.os.path.isabs", return_value=True)
   response = cli.invoke(pdp, ["config", "import", "--target", "ingestion", "--zip", "fake-path.zip"])
-  message = response.exception.message.replace('\\', '/')
-  snapshot.assert_match(message, 'test_import_not_a_file.snapshot')
+  snapshot.assert_match(response.exception.message, 'test_import_not_a_file.snapshot')
 
 
 def test_import_imported_failed(mocker, snapshot, mock_custom_exception):
