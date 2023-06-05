@@ -22,15 +22,13 @@ def run(config: dict, is_json: bool):
   :param bool is_json: Will show the entities in JSON format.
   """
   files = get(URL_GENERIC_FILE.format(config[CORE]))
-  files = json.loads(files)
-  
-  if is_json:
-    print_console(files)
-    return
 
-  if len(files) <= 0:
-    print_console("There are not files on the Core API.")
-    return
+  if files is None:
+    return print_console("There are not files on the Core API to show.")
+
+  files = json.loads(files)
+  if is_json:
+    return print_console(files)
 
   print_console("Files: ")
   for file in files:

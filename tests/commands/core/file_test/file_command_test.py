@@ -182,7 +182,7 @@ def test_list_empty(mocker, snapshot):
   Test the command defined in :func:`src.commands.core.command.ls`,
   when the list of files is empty.
   """
-  mocker.patch("commands.core.file.list.get", return_value=b'[]')
+  mocker.patch("commands.core.file.list.get", return_value=None)
   response = cli.invoke(pdp, ["core", "file", "ls"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_list_empty.snapshot')
