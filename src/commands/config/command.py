@@ -377,4 +377,6 @@ def _import(obj, target: str, _zip: str):
   configuration = obj['configuration']
   if not _zip.endswith('.zip'):
     raise DataInconsistency(message=f'The path "{_zip}" is not a .zip file')
+  if not os.path.isabs(_zip):
+    _zip = os.path.join(obj['project_path'], _zip)
   run_import(configuration, target, _zip)

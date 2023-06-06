@@ -24,7 +24,10 @@ def test_list_files(test_project_path):
   path = test_project_path()
   files = list_files(path)
   assert len(files) == 2
-  assert files == ['custom_pipeline.json', 'pdp.ini']
+  expected_files = ['custom_pipeline.json', 'pdp.ini']
+  expected_files.sort()
+  files.sort()
+  assert files == expected_files
 
 
 def test_read_entities(test_project_path, mocker):

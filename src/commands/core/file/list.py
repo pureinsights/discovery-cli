@@ -23,8 +23,11 @@ def run(config: dict, is_json: bool, pretty: bool):
   :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   """
   files = get(URL_GENERIC_FILE.format(config[CORE]))
-  files = json.loads(files)
 
+  if files is None:
+    files = "[]"
+
+  files = json.loads(files)
   if pretty:
     return print_console(json.dumps(files, indent=2))
 
