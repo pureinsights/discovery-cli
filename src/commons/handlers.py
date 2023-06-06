@@ -62,14 +62,18 @@ def handle_http_response(res: req.Response, status_404_as_error: bool = True) ->
     if content is None:
       raise exception
     response = json.loads(content.decode('utf-8'))
-    errors = '\n\t'.join(response.get('errors', []))
+    errors_list = response.get('errors', None)
+    if errors_list is not None:
+      response = '\n\t'.join(errors_list)
+    else:
+      response = json.dumps(response, indent=2)
     method = exception.request.method
     url = exception.request.url
     content = {
       'status': res.status_code,
-      'errors': errors
+      'errors': response
     }
-    raise PdpException(message=f"Could not '{method}' to {url} due to:\n\t{errors}", content=content)
+    raise PdpException(message=f"Could not '{method}' to {url} due to:\n\t{response}", content=content)
 
 
 def handle_and_exit(func: callable, handle_and_exit_params: dict, *args, **kwargs) -> tuple[bool, any]:
