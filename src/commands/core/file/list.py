@@ -15,22 +15,24 @@ from commons.constants import CORE, URL_GENERIC_FILE
 from commons.http_requests import get
 
 
-def run(config: dict, is_json: bool):
+def run(config: dict, is_json: bool, pretty: bool):
   """
   Show all the files on the Core API.
   :param dict config: The configuration containing the url of the products.
   :param bool is_json: Will show the entities in JSON format.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   """
   files = get(URL_GENERIC_FILE.format(config[CORE]))
   files = json.loads(files)
-  
+
+  if pretty:
+    return print_console(json.dumps(files, indent=2))
+
   if is_json:
-    print_console(files)
-    return
+    return print_console(files)
 
   if len(files) <= 0:
-    print_console("There are not files on the Core API.")
-    return
+    return print_console("There are not files on the Core API.")
 
   print_console("Files: ")
   for file in files:

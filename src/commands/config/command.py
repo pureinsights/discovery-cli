@@ -145,6 +145,8 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
                    'configuration for each entity.')
 @click.option('-j', '--json', is_flag=True, default=False,
               help='This is a Boolean flag. Will print the results in JSON format. Default is False.')
+@click.option('--pretty', is_flag=True, default=False,
+              help='This is a Boolean flag. Will print the results in human readable JSON format. Default is False.')
 @click.option('--interactive', is_flag=True, default=False,
               help='This is a Boolean flag. Will launch your default text editor to allow you to modify the entity '
                    'configuration. Default is False.')
@@ -152,7 +154,7 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
               help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
                    'is useful when moving configs from one instance to another. Default is False.')
 @click.pass_context
-def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_deploy: bool, json: bool,
+def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_deploy: bool, json: bool, pretty: bool,
            ignore_ids: bool, interactive: bool):
   """
   Add a new entity configuration to the entities on the current project. The configuration for each entity it will have
@@ -177,7 +179,7 @@ def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_
       raise PdpException(message="Entity template not provided. You must provide at least one flag to get the entity "
                                  "properties. Allowed flags: --entity-template, --file")
 
-  run_create(_config, project_path, entity_type, _file, has_to_deploy, json, ignore_ids, interactive)
+  run_create(_config, project_path, entity_type, _file, has_to_deploy, json, pretty, ignore_ids, interactive)
 
 
 @config.command()
@@ -200,6 +202,8 @@ def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_
                    "The command allows multiple flags of -i.")
 @click.option('-j', '--json', 'is_json', is_flag=True, default=False,
               help="This is a boolean flag. Will print the results in JSON format. Default is False.")
+@click.option('--pretty', is_flag=True, default=False,
+              help='This is a Boolean flag. Will print the results in human readable JSON format. Default is False.')
 @click.option('-v', '--verbose', 'is_verbose', is_flag=True, default=False,
               help='Will show more information about the deployment results. Default is False.')
 @click.option('-f', '--filter', 'filters', multiple=True, default=[], type=(str, str),
@@ -212,7 +216,7 @@ def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_
               help='The name of the property to sort in ascending order. Multiple flags are supported. Default is [].')
 @click.option('--desc', default=[], multiple=True,
               help='The name of the property to sort in descending order. Multiple flags are supported. Default is [].')
-def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json: bool, is_verbose: bool,
+def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json: bool, pretty: bool, is_verbose: bool,
         filters: list[(str, str)], page: int, size: int, asc: list[str], desc: list[str]):
   """
   Retrieves information about all the entities deployed on PDP Products. You can search by products, entity types or
@@ -234,7 +238,7 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
     "size": size,
     "sort": sort
   }
-  run_get(obj['configuration'], products, entity_type, entity_ids, filters, query_params, is_json,
+  run_get(obj['configuration'], products, entity_type, entity_ids, filters, query_params, is_json, pretty,
           is_verbose and not is_json)
 
 

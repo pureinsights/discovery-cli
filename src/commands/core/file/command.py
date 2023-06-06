@@ -78,9 +78,11 @@ def delete(obj, names: list[str], local: bool):
 @click.pass_obj
 @click.option('--json', 'is_json', default=False, is_flag=True,
               help='This is a boolean flag. Will print the results in JSON format. Default is False.')
-def ls(obj, is_json: bool):
+@click.option('--pretty', is_flag=True, default=False,
+              help='This is a Boolean flag. Will print the results in human readable JSON format. Default is False.')
+def ls(obj, is_json: bool, pretty: bool):
   """
   Show the list of files uploaded to the Core API.
   """
   configuration = obj['configuration']
-  run_ls(configuration, is_json)
+  run_ls(configuration, is_json, pretty)

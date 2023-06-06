@@ -1,0 +1,15 @@
+[WARNING]: Value "<Processor Name>" does not exist while attempting to replace in field "processorId". Entity has no name and no id in file C:\Users\AaronVargas\Documents\Repos\pdp-cli\src\templates\entities\ingestion\pipeline\pipeline.json. That could means that the name "<Processor Name>" do not exists or the entity "<Processor Name>" do not have an Id.
+✔ Entity name "Pipeline" updated with id newId.
+[
+  {
+    "id": "fakeid",
+    "name": "Pipeline",
+    "active": true,
+    "steps": [
+      {
+        "processorId": "{{ fromName('<Processor Name>') }}",
+        "action": "hydrate"
+      }
+    ]
+  }
+]
