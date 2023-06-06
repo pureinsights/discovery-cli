@@ -175,6 +175,7 @@ def test_create_with_entity_template_pretty(mocker, snapshot, test_project_path)
   when the flag pretty was provided.
   """
   mocker.patch("commands.config.create.create_spinner")
+  mocker.patch("commons.pdp_products.print_warning")
   mocker.patch("commands.config.create.create_or_update_entity", return_value="newId")
   mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
   mocker.patch("commands.config.create.input_stage",
