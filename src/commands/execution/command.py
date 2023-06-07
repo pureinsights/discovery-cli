@@ -71,7 +71,7 @@ def control(obj, seed, action):
 @click.pass_obj
 @click.option('--seed-id', 'seed', required=True,
               help='The id of the seed you want to get the active executions.')
-@click.option('--execution-id', 'execution', 'executions', default=[], multiple=True,
+@click.option('--execution-id', 'executions', default=[], multiple=True,
               help='The id of the execution you want to get information. Default is None. The command allows '
                    'multiple flags of --execution.')
 @click.option('-j', '--json', 'is_json', is_flag=True, default=False,

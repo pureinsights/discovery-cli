@@ -97,7 +97,7 @@ def get(obj: dict, bucket: str, token: str, content_type: str, page: int, size: 
 @click.pass_obj
 @click.option('--bucket', required=True,
               help='The name for the bucket to get the items.')
-@click.option('--path', default=None,
+@click.option('--path', 'file', default=None,
               help='The path to the file that contains the body for the query on a JSON format.')
 @click.option('--interactive', default=False, is_flag=True,
               help='Will open a text editor to let you write the body for the request.')
