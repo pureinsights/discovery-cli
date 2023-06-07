@@ -251,7 +251,6 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
   """
   suppress_errors(_json)
   suppress_warnings(_json)
-  entities_deployed = []
 
   # Read the entities to create
   _file, entities = input_stage(file, interactive)
