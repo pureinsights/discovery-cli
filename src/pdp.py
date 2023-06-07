@@ -60,11 +60,10 @@ def load_config(config_name: str, profile: str = 'DEFAULT'):
 
 
 @click.group()
-@click.option('--namespace', default='pdp', help='Namespace in which the PDP components are running. Default is "pdp".')
 @click.option('--profile', default='DEFAULT',
               help='Configuration profile to load specific configurations from pdp.ini. Default is "DEFAULT"')
-@click.option('-d', '--dir', 'path', default='.', help='The path to a directory with the structure and the pdp.ini '
-                                                       'that init command creates. Default is ./.')
+@click.option('--path', default='.', help='The path to a directory with the structure and the pdp.ini '
+                                          'that init command creates. Default is ./.')
 @click.pass_context
 def pdp(ctx, namespace: str, path: str, profile: str):
   """

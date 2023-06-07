@@ -30,7 +30,7 @@ def item(ctx):
 @click.pass_obj
 @click.option('--bucket', required=True,
               help='The name of the bucket where the item will be added.')
-@click.option('--item-id', 'item_id',
+@click.option('-i', '--item-id', 'item_id',
               help='The id of the new item. If no id is provided, then an auto-generated hash will be set. '
                    'Default is None.')
 @click.option('--parent', default=None,
@@ -38,7 +38,7 @@ def item(ctx):
 @click.option('--interactive', is_flag=True, default=False,
               help='This is a Boolean flag. Will launch your default text editor to allow you to modify the entity '
                    'configuration. Default is False.')
-@click.option('--file', '_file', default=None,
+@click.option('--path', '_file', default=None,
               help='The path to the file that contains the content of the item. Default is None.')
 @click.option('-v', '--verbose', is_flag=True, default=False,
               help='Will show more information about the item upload. Default is False.')

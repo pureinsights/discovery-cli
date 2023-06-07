@@ -97,7 +97,7 @@ def get(obj: dict, bucket: str, token: str, content_type: str, page: int, size: 
 @click.pass_obj
 @click.option('--bucket', required=True,
               help='The name for the bucket to get the items.')
-@click.option('--file', default=None,
+@click.option('--path', default=None,
               help='The path to the file that contains the body for the query on a JSON format.')
 @click.option('--interactive', default=False, is_flag=True,
               help='Will open a text editor to let you write the body for the request.')
@@ -108,7 +108,7 @@ def batch(obj, bucket: str, file: str, interactive: bool, is_json: bool):
   Performs a list of actions such as ADD and DELETE to a given bucket within the Staging API.
   """
   if file is None and not interactive:
-    raise DataInconsistency(message='You must to provide the --file or --interactive flag.')
+    raise DataInconsistency(message='You must to provide the --path or --interactive flag.')
 
   configuration = obj['configuration']
   run_batch(configuration, bucket, file, interactive, is_json)
