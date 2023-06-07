@@ -142,6 +142,7 @@ and/or --interactive flags. You can also deploy the entities to their respective
 - **--interactive**: This is a Boolean flag. Will launch your default text editor to allow you to modify the entity
   configuration. Default is ```False```.
 - **-j, --json**: This is a Boolean flag. Will print the results in JSON format. Default is ```False```.
+- **--pretty**: This is a Boolean flag. Will print the results in a human-readable JSON format. Default is ```False```.
 - **-g, --ignore-ids**: Will cause existing ids to be ignored, hence everything will be created as a new instance. This
   is useful when moving configs from one instance to another. Default is ```False```.
 
@@ -169,7 +170,8 @@ even by id. And you can filter the results by giving a property and the expected
 - `OPTIONAL`**-t,--entity-type**: Will filter and only show the entities of the type entered. Default is All.
 - `OPTIONAL`**-i,--entity-id**: Will only retrieve information for the component specified by the ID. Default is None.
   The command allows multiple flags of -i.
-- **-j,--json**: This is a boolean flag. Will print the results in JSON format. Default is False.
+- **-j, --json**: This is a boolean flag. Will print the results in JSON format. Default is False.
+- **--pretty**: This is a Boolean flag. Will print the results in a human-readable JSON format. Default is ```False```.
 - **-v,--verbose**: Will show more information. Default is False.
 - **-f,--filter**: Will filter the results by the key-value given by the user with the following format property value.
   The command allows multiple flags of filter. Default is [].
@@ -333,6 +335,8 @@ command and replace the entities on the search results.
 - **-s,--size**: The size of the page to show. Range 1 - 100. Default is 25.
 - **--asc**: The name of the property to sort in ascending order. Multiple flags are supported. Default is [].
 - **--desc**: The name of the property to sort in descending order. Multiple flags are supported. Default is [].
+- **-j, --json**: This is a boolean flag. Will print the results in JSON format. Default is False.
+- **--pretty**: This is a Boolean flag. Will print the results in a human-readable JSON format. Default is False.
 
 ##### Search for all entities
 
@@ -457,7 +461,8 @@ Show the list of files uploaded to the Core API.
 
 ###### Flags
 
-- **--json**: This is a boolean flag. Will print the results in JSON format. Default is False.
+- **-j, --json**: This is a boolean flag. Will print the results in JSON format. Default is False.
+- **--pretty**: This is a Boolean flag. Will print the results in a human-readable JSON format. Default is ```False```.
 
 ###### Show files from Core API
 
@@ -533,6 +538,7 @@ Retrieves the executions of a given seed.
 - **--execution-id**: The id of the execution you want to get information. Default is None. The command allows multiple
   flags of --execution-id.
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
+- **--pretty**: This is a Boolean flag. Will print the results in a human-readable JSON format. Default is False.
 - **-v, --verbose**: It will show more information about the deploy results. Default is False.
 - **-p, --page**: The number of the page to show. Min 0. Default is 0.
 - **-s, --size**: The size of the page to show. Range 1 - 100. Default is 25.

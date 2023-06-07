@@ -11,7 +11,6 @@
 
 import click
 
-
 from commands.core.log_level import run as run_log_level
 from commands.core.search import run as run_search
 from commons.constants import LOGGER_LEVELS
@@ -45,8 +44,10 @@ def core(ctx):
               help='The name of the property to sort in descending order. Multiple flags are supported. Default is [].')
 @click.option('-j', '--json', 'is_json', default=False, is_flag=True,
               help='This is a boolean flag. Will print the results in JSON format. Default is False.')
+@click.option('--pretty', is_flag=True, default=False,
+              help='This is a Boolean flag. Will print the results in human readable JSON format. Default is False.')
 def search(obj, label: list[str], entity_types: list[str], q: str, page: int, size: int, asc: list[str],
-           desc: list[str], is_json: bool):
+           desc: list[str], is_json: bool, pretty: bool):
   """
   Search for entities of all products Ingestion, Core and Discovery. And also, is a group command to chain the 'replace'
   command and replace the entities on the search results.
@@ -65,7 +66,7 @@ def search(obj, label: list[str], entity_types: list[str], q: str, page: int, si
     "size": size,
     "sort": sort
   }
-  run_search(configuration, query_params, is_json)
+  run_search(configuration, query_params, is_json, pretty)
 
 
 @core.command('log-level')
@@ -83,4 +84,3 @@ def log_level(obj, component: str, level: str, logger: str):
   """
   configuration = obj['configuration']
   run_log_level(configuration, component, level, logger)
-
