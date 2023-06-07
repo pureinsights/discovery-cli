@@ -43,7 +43,7 @@ TEMPLATE_NAMES = [directory.lower() for directory in
 
 
 @config.command()
-@click.option('-n', '--project-name', default='my-pdp-project',
+@click.option('-n', '--name', default='my-pdp-project',
               help='The name of the resulting directory, will try to fetch existing configurations from the APIs '
                    'referenced in ~/.pdp. Notice that imported configurations have id fields, don`t change those. '
                    'Default is my-pdp-project.')
@@ -66,7 +66,7 @@ TEMPLATE_NAMES = [directory.lower() for directory in
               type=click.Choice(TEMPLATE_NAMES,
                                 case_sensitive=False))
 @click.pass_context
-def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], force: bool, template):
+def init(ctx, name: str, empty: bool, products_url: list[(str, str)], force: bool, template):
   """
   Creates a new project from existing sources or from scratch. Will create the folder structure for a PDP project.
   """
@@ -85,7 +85,7 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
   elif not empty:
     template = None
 
-  successfully_executed = run_init(project_name, config, force, template)
+  successfully_executed = run_init(name, config, force, template)
   color = 'green'
   message = 'Project {project_name_styled} created successfully.\n' \
             'Recommended next commands:\n' \
@@ -94,13 +94,13 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
   if not successfully_executed:
     color = 'red'
     message = 'Could not create the project {project_name_styled}.'
-  project_name_styled = click.style(project_name, fg=color)
-  click.echo(message.format(project_name=project_name, project_name_styled=project_name_styled))
+  name_styled = click.style(name, fg=color)
+  click.echo(message.format(project_name=name, project_name_styled=name_styled))
   sys.exit(0 if successfully_executed else 1)
 
 
 @config.command()
-@click.option('--target', 'targets', default=[product for product in PRODUCTS['list'] if product != STAGING],
+@click.option('--product', 'products', default=[product for product in PRODUCTS['list'] if product != STAGING],
               multiple=True,
               type=click.Choice([product for product in PRODUCTS['list'] if product != STAGING], case_sensitive=False),
               help='The name of the product where you want to deploy the entities.  The command allows multiple flags '
@@ -113,7 +113,7 @@ def init(ctx, project_name: str, empty: bool, products_url: list[(str, str)], fo
 @click.option('-q', '--quiet', is_flag=True, default=False,
               help='Display only the seed ids. Warnings and Errors will not be shown. Default is False.')
 @click.pass_context
-def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: bool):
+def deploy(ctx, products: list[str], is_verbose: bool, ignore_ids: bool, quiet: bool):
   """
   Deploys project configurations to the target products.
   Must be run within the directory from a project created with the 'init' command.
@@ -123,7 +123,7 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
   path = ctx.obj['project_path']
   config = ctx.obj['configuration']
   raise_for_pdp_data_inconsistencies(path, {"ignore_ids": ignore_ids})
-  run_deploy(config, path, targets, is_verbose and not quiet, ignore_ids, quiet)
+  run_deploy(config, path, products, is_verbose and not quiet, ignore_ids, quiet)
 
 
 @config.command()
@@ -140,12 +140,14 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
               help="This is the template's name of the entity to use. Default is None.")
 @click.option('--deploy', 'has_to_deploy', default=False, is_flag=True,
               help='It will deploy the entity configuration to the corresponding product. Default is False.')
-@click.option('--file', '_file', default=None,
+@click.option('--path', '_file', default=None,
               help='The path to the file that contains the configuration for the entity or entities. If the '
                    'configuration contains an id property it will be updated instead. Default is the established '
                    'configuration for each entity.')
 @click.option('-j', '--json', is_flag=True, default=False,
               help='This is a Boolean flag. Will print the results in JSON format. Default is False.')
+@click.option('--pretty', is_flag=True, default=False,
+              help='This is a Boolean flag. Will print the results in human readable JSON format. Default is False.')
 @click.option('--interactive', is_flag=True, default=False,
               help='This is a Boolean flag. Will launch your default text editor to allow you to modify the entity '
                    'configuration. Default is False.')
@@ -153,7 +155,7 @@ def deploy(ctx, targets: list[str], is_verbose: bool, ignore_ids: bool, quiet: b
               help='Will cause existing ids to be ignored, hence everything will be created as a new instance. This '
                    'is useful when moving configs from one instance to another. Default is False.')
 @click.pass_context
-def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_deploy: bool, json: bool,
+def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_deploy: bool, json: bool, pretty: bool,
            ignore_ids: bool, interactive: bool):
   """
   Add a new entity configuration to the entities on the current project. The configuration for each entity it will have
@@ -178,7 +180,7 @@ def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_
       raise PdpException(message="Entity template not provided. You must provide at least one flag to get the entity "
                                  "properties. Allowed flags: --entity-template, --file")
 
-  run_create(_config, project_path, entity_type, _file, has_to_deploy, json, ignore_ids, interactive)
+  run_create(_config, project_path, entity_type, _file, has_to_deploy, json, pretty, ignore_ids, interactive)
 
 
 @config.command()
@@ -201,6 +203,8 @@ def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_
                    "The command allows multiple flags of -i.")
 @click.option('-j', '--json', 'is_json', is_flag=True, default=False,
               help="This is a boolean flag. Will print the results in JSON format. Default is False.")
+@click.option('--pretty', is_flag=True, default=False,
+              help='This is a Boolean flag. Will print the results in human readable JSON format. Default is False.')
 @click.option('-v', '--verbose', 'is_verbose', is_flag=True, default=False,
               help='Will show more information about the deployment results. Default is False.')
 @click.option('-f', '--filter', 'filters', multiple=True, default=[], type=(str, str),
@@ -213,7 +217,7 @@ def create(ctx, entity_type_name: str, entity_template: str, _file: str, has_to_
               help='The name of the property to sort in ascending order. Multiple flags are supported. Default is [].')
 @click.option('--desc', default=[], multiple=True,
               help='The name of the property to sort in descending order. Multiple flags are supported. Default is [].')
-def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json: bool, is_verbose: bool,
+def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json: bool, pretty: bool, is_verbose: bool,
         filters: list[(str, str)], page: int, size: int, asc: list[str], desc: list[str]):
   """
   Retrieves information about all the entities deployed on PDP Products. You can search by products, entity types or
@@ -235,7 +239,7 @@ def get(obj, product: str, entity_type_name: str, entity_ids: list[str], is_json
     "size": size,
     "sort": sort
   }
-  run_get(obj['configuration'], products, entity_type, entity_ids, filters, query_params, is_json,
+  run_get(obj['configuration'], products, entity_type, entity_ids, filters, query_params, is_json, pretty,
           is_verbose and not is_json)
 
 
@@ -358,15 +362,15 @@ def export(obj: dict, product: str, entity_type_name: str, entity_id: str, inclu
 
 @config.command('import')
 @click.pass_obj
-@click.option('--target', default=None, required=True,
+@click.option('--product', default=None, required=True,
               type=click.Choice(PRODUCTS['list'],
                                 case_sensitive=False
                                 ),
               help="Will import the given file to the specified product."
                    "(Ingestion, Core or Discovery).")
-@click.option('--zip', '_zip', default=None, required=True,
+@click.option('--path', '_zip', default=None, required=True,
               help="The path to the zip that will be imported.")
-def _import(obj, target: str, _zip: str):
+def _import(obj, product: str, _zip: str):
   """
   Will import a .zip to a given product. The commands assume that the zip contains the files and structure
   necessary for each product.
@@ -374,4 +378,7 @@ def _import(obj, target: str, _zip: str):
   configuration = obj['configuration']
   if not _zip.endswith('.zip'):
     raise DataInconsistency(message=f'The path "{_zip}" is not a .zip file')
-  run_import(configuration, target, _zip)
+
+  if not os.path.isabs(_zip):
+    _zip = os.path.join(obj['project_path'], _zip)
+  run_import(configuration, product, _zip)

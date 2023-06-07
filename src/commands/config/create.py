@@ -191,16 +191,19 @@ def deployment_stage(config: dict, entity_type: PdpEntity, entities: list[dict],
   return deployed_entities
 
 
-def printing_stage(entity_type: PdpEntity, entities: list[dict], _json: bool):
+def printing_stage(entity_type: PdpEntity, entities: list[dict], _json: bool, pretty: bool):
   """
   This stage is the responsible to print the information related with the creation of the entities.
   :param PdpEntity entity_type: The entity type of the entities.
   :param list[dict] entities: The list of entities to print.
   :param bool _json: If True, the stage will only print an array with JSON objects. Warnings and errors are suppressed.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   """
+  if pretty:
+    return print_console(json.dumps(entities, indent=2))
+  
   if _json:
-    print_console(entities)
-    return
+    return print_console(entities)
 
   for entity in entities:
     entity_str = click.style(identify_entity(entity), fg='blue')
@@ -208,7 +211,7 @@ def printing_stage(entity_type: PdpEntity, entities: list[dict], _json: bool):
 
 
 def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_to_deploy: bool,
-        _json: bool, ignore_ids: bool, interactive: bool):
+        _json: bool, pretty: bool, ignore_ids: bool, interactive: bool):
   """
   Add to a project and deploy entities from different sources. Templates, files and interactive mode.
   :param dict config: The configuration of the project, containing the url of the products APIs.
@@ -217,6 +220,7 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
   :param str file: The path to the location of the entities' configuration.
   :param bool has_to_deploy: If True, the entities will be deployed to the respective product API.
   :param bool _json: If True, the result will be showed as a JSON.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   :param bool ignore_ids: If True, will try to create new instances of the entities.
   :param bool interactive: Will open a text editor with a placeholder of the entity configuration.
   """
@@ -257,4 +261,4 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
   entities = writing_stage(project_path, entity_type, entities)
 
   # Show the entities deployed or entities read
-  printing_stage(entity_type, entities, _json)
+  printing_stage(entity_type, entities, _json, pretty)

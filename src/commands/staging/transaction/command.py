@@ -27,7 +27,7 @@ def transaction(ctx):
 @click.pass_obj
 @click.option('--bucket', required=True,
               help='The name for the bucket to get the transactions.')
-@click.option('-i', '--id', '_id', default=None,
+@click.option('-i', '--transaction-id', '_id', default=None,
               help='Will retrieve all the transactions after the given one. Useful to make pagination. '
                    'Default is None.')
 @click.option('--size', default=100,
@@ -50,7 +50,7 @@ def get(obj, bucket: str, _id: str, size: int, _json: bool):
 @click.pass_obj
 @click.option('--bucket', required=True,
               help='The name for the bucket to delete the transactions.')
-@click.option('-i', '--id', 'transaction_ids', default=[], multiple=True,
+@click.option('-i', '--transaction-id', 'transaction_ids', default=[], multiple=True,
               help='Will delete the transaction with the specific id. Default is []. '
                    'The command allows multiple flags of -i.')
 @click.option('-a', '--all', '_all', is_flag=True,

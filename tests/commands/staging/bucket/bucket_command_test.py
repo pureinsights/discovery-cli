@@ -103,7 +103,7 @@ def test_batch(mocker, snapshot):
   mocker.patch("commands.staging.bucket.batch.post", return_value=json.dumps(output_example))
   mocker.patch("commands.staging.bucket.batch.read_binary_file", return_value=b'[{\n\n}]')
   response = cli.invoke(pdp,
-                        ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path"])
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--path", "fake-path"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_batch.snapshot')
 
@@ -130,7 +130,7 @@ def test_batch_json(mocker, snapshot):
   mocker.patch("commands.staging.bucket.batch.post", return_value=json.dumps(output_example))
   mocker.patch("commands.staging.bucket.batch.read_binary_file", return_value=b'[{\n\n}]')
   response = cli.invoke(pdp,
-                        ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path", "-j"])
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--path", "fake-path", "-j"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_batch_json.snapshot')
 
@@ -186,7 +186,7 @@ def test_batch_interactive_file(mocker, snapshot):
   mocker.patch("commands.staging.bucket.batch.read_binary_file", return_value=b'{\n\n}')
   mock_edit = mocker.patch("commands.staging.bucket.batch.click.edit", return_value=b'[{\n\n}]')
   response = cli.invoke(pdp,
-                        ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path", "--interactive"])
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--path", "fake-path", "--interactive"])
   mock_edit.assert_called_once_with("{\n\n}")
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_batch_interactive_file.snapshot')
@@ -223,7 +223,7 @@ def test_batch_no_body(mocker, snapshot):
 def test_batch_no_flags(snapshot):
   """
   Test the command defined in :func:`src.commands.staging.bucket.command.batch`,
-  when the user don't provide the --interactive and --file flag.
+  when the user don't provide the --interactive and --path flag.
   """
   response = cli.invoke(pdp,
                         ["staging", "bucket", "batch", "--bucket", "fake1"])
@@ -239,7 +239,7 @@ def test_batch_failed(mocker, snapshot):
   mocker.patch("commands.staging.bucket.batch.post", return_value=None)
   mocker.patch("commands.staging.bucket.batch.read_binary_file", return_value=b'[{\n\n}]')
   response = cli.invoke(pdp,
-                        ["staging", "bucket", "batch", "--bucket", "fake1", "--file", "fake-path"])
+                        ["staging", "bucket", "batch", "--bucket", "fake1", "--path", "fake-path"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_batch_failed.snapshot')
 

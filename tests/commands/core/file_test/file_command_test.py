@@ -182,7 +182,7 @@ def test_list_empty(mocker, snapshot):
   Test the command defined in :func:`src.commands.core.command.ls`,
   when the list of files is empty.
   """
-  mocker.patch("commands.core.file.list.get", return_value=b'[]')
+  mocker.patch("commands.core.file.list.get", return_value=None)
   response = cli.invoke(pdp, ["core", "file", "ls"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_list_empty.snapshot')
@@ -197,3 +197,14 @@ def test_list_json(mocker, snapshot):
   response = cli.invoke(pdp, ["core", "file", "ls", "--json"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_list_json.snapshot')
+
+
+def test_list_pretty(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.core.command.ls`,
+  when the --json flag is True.
+  """
+  mocker.patch("commands.core.file.list.get", return_value=b'["fake-file", "fake-file2"]')
+  response = cli.invoke(pdp, ["core", "file", "ls", "--pretty"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_list_pretty.snapshot')

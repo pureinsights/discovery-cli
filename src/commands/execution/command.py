@@ -26,7 +26,7 @@ def seed_exec(ctx):
 
 @seed_exec.command()
 @click.pass_obj
-@click.option('--seed', required=True,
+@click.option('-i', '--seed-id', 'seed', required=True,
               help='The id of the seed to start the scanning process.')
 @click.option('--scan-type', 'scan_type', default='FULL',
               type=click.Choice(['FULL', 'INCREMENTAL'], case_sensitive=False),
@@ -42,7 +42,7 @@ def start(obj, seed, scan_type):
 
 @seed_exec.command()
 @click.pass_obj
-@click.option('--seed', required=True,
+@click.option('-i', '--seed-id', 'seed', required=True,
               help='The id of the seed to reset the associated data.')
 def reset(obj, seed):
   """
@@ -54,7 +54,7 @@ def reset(obj, seed):
 
 @seed_exec.command()
 @click.pass_obj
-@click.option('--seed', required=True,
+@click.option('-i', '--seed-id', 'seed', required=True,
               help='The id of the seed to trigger the action.')
 @click.option('--action', default='HALT',
               type=click.Choice(['HALT', 'PAUSE', 'RESUME'], case_sensitive=False),
@@ -69,13 +69,15 @@ def control(obj, seed, action):
 
 @seed_exec.command()
 @click.pass_obj
-@click.option('--seed', required=True,
+@click.option('--seed-id', 'seed', required=True,
               help='The id of the seed you want to get the active executions.')
-@click.option('--execution', 'executions', default=[], multiple=True,
+@click.option('--execution-id', 'executions', default=[], multiple=True,
               help='The id of the execution you want to get information. Default is None. The command allows '
                    'multiple flags of --execution.')
 @click.option('-j', '--json', 'is_json', is_flag=True, default=False,
               help='This is a boolean flag. It will print the results in JSON format. Default is False.')
+@click.option('--pretty', is_flag=True, default=False,
+              help='This is a Boolean flag. Will print the results in human readable JSON format. Default is False.')
 @click.option('-v', '--verbose', 'is_verbose', is_flag=True, default=False,
               help='It will show more information about the deploy results. Default is False.')
 @click.option('-p', '--page', 'page', default=0, type=int,
@@ -86,7 +88,8 @@ def control(obj, seed, action):
               help='The name of the property to sort in ascending order. Multiple flags are supported. Default is [].')
 @click.option('--desc', default=[], multiple=True,
               help='The name of the property to sort in descending order. Multiple flags are supported. Default is [].')
-def get(obj, seed, executions: list[str], is_json: bool, is_verbose: bool, page: int, size: int, asc: list[str],
+def get(obj, seed, executions: list[str], is_json: bool, pretty: bool, is_verbose: bool, page: int, size: int,
+        asc: list[str],
         desc: list[str]):
   """
   Retrieves the executions of a given seed.
@@ -102,4 +105,4 @@ def get(obj, seed, executions: list[str], is_json: bool, is_verbose: bool, page:
     "size": size,
     "sort": sort
   }
-  run_get(configuration, seed, executions, is_json, is_verbose and not is_json, query_params)
+  run_get(configuration, seed, executions, is_json, pretty, is_verbose and not is_json, query_params)
