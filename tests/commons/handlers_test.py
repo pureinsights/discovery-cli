@@ -8,6 +8,8 @@
 #  Pureinsights Technology Ltd. The distribution or reproduction of this
 #  file or any information contained within is strictly forbidden unless
 #  prior written permission has been granted by Pureinsights Technology Ltd.
+import json
+
 import pytest
 import requests
 
@@ -83,6 +85,25 @@ def test_handle_http_response_HttpError(mocker, mock_custom_exception):
   with pytest.raises(PdpException) as exception:
     handle_http_response(response)
   assert exception.value.content == {'errors': '\n\t'.join(["fake-error"]), 'status': 500}
+
+
+def test_handle_http_response_HttpError_without_errors(mocker, mock_custom_exception):
+  """
+  Test the function defined in :func:`commons.handlers.handle_http_response`.
+  """
+  mock_request = mocker.MagicMock()
+  mock_request.method = 'fake-method'
+  mock_request.url = 'http://fake-url'
+  mock_content = mocker.MagicMock(decode=lambda param: '{"messages":["fake-error"]}')
+  mock_response = mocker.MagicMock()
+  mock_response.content = mock_content
+  mock_exception = requests.models.HTTPError(response=mock_response, request=mock_request)
+  response = requests.models.Response()
+  response.status_code = 500
+  response.raise_for_status = lambda: mock_custom_exception(mock_exception)
+  with pytest.raises(PdpException) as exception:
+    handle_http_response(response)
+  assert exception.value.content == {'errors': json.dumps({"messages": ["fake-error"]}, indent=2), 'status': 500}
 
 
 def test_handle_http_response_status_distinct_2xx():

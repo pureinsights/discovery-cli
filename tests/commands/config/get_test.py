@@ -70,5 +70,5 @@ def test_print_stage_empty_entities(mocker):
   when a product doesn't have entities.
   """
   print_console_mock = mocker.patch("commands.config.get.print_console")
-  print_stage({'discovery': {}}, False, False)
+  print_stage({'discovery': {}}, False, False, False)
   assert print_console_mock.call_count == 2

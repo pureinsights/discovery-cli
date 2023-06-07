@@ -58,15 +58,20 @@ def get_execution_by_id(config: dict, seed: str, execution: str):
   return json.loads(res)
 
 
-def print_stage(seed: str, executions: list[dict], given_executions: list[str], is_json: bool, is_verbose: bool):
+def print_stage(seed: str, executions: list[dict], given_executions: list[str], is_json: bool, pretty: bool,
+                is_verbose: bool):
   """
   Shows the information from active executions of a given seed.
   :param str seed: The seed to get the executions.
   :param list[dict] executions: A list of executions to show the information.
   :param list[str] given_executions: A list of executions ids given by the user to search for.
   :param bool is_json: Will show the executions in JSON format.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   :param bool is_verbose: Will show more information about the executions.
   """
+  if pretty:
+    return print_console(json.dumps(executions, indent=2))
+
   if is_json:
     return print_console(executions)
 
@@ -107,13 +112,15 @@ def print_executions_verbose(executions: list[dict], seed: str):
   print_console(table)
 
 
-def run(config: dict, seed: str, execution: list[str], is_json: bool, is_verbose: bool, query_params: dict):
+def run(config: dict, seed: str, execution: list[str], is_json: bool, pretty: bool, is_verbose: bool,
+        query_params: dict):
   """
   Retrieves the information from active executions of a given seed.
   :param dict config: The configuration containing the product's url.
   :param str seed: The seed to get the executions.
   :param list[str] execution: A list of ids of executions to get information.
   :param bool is_json: Will show the executions in JSON format.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   :param bool is_verbose: Will show more information about the executions.
   :param dict query_params: Query params used when no ids where passed.
   """
@@ -123,4 +130,4 @@ def run(config: dict, seed: str, execution: list[str], is_json: bool, is_verbose
   else:
     executions = get_all_executions(config, seed, query_params)
 
-  print_stage(seed, executions, execution, is_json, is_verbose)
+  print_stage(seed, executions, execution, is_json, pretty, is_verbose)
