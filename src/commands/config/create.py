@@ -201,7 +201,7 @@ def printing_stage(entity_type: PdpEntity, entities: list[dict], _json: bool, pr
   """
   if pretty:
     return print_console(json.dumps(entities, indent=2))
-  
+
   if _json:
     return print_console(entities)
 
@@ -256,6 +256,9 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
           entities.remove(entity)
           break
     entities = entities_to_write
+
+  if not has_pdp_project_structure(project_path) and not has_to_deploy:
+    print_warning('The command create must be called within a PDP project to add the entity to the files.')
 
   # Writes the entities to the pdp project
   entities = writing_stage(project_path, entity_type, entities)
