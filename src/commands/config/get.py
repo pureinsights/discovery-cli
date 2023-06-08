@@ -139,16 +139,19 @@ def get_entity_by_id(config: dict, entity_id: str, entity_types: list[PdpEntity]
   return None, None
 
 
-def print_stage(entities: dict, is_verbose: bool, is_json: bool):
+def print_stage(entities: dict, is_verbose: bool, is_json: bool, pretty: bool):
   """
   Prints all the entities given, depending on the flags.
   :param dict entities: A dict containing the products, entity types and inside a list with entities.
   :param bool is_verbose: Will print the entities as a table with more information.
   :param bool is_json: Print the entities just with JSON format.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   """
+  if pretty:
+    return print_console(json.dumps(entities, indent=2))
+
   if is_json:
-    print_console(entities)
-    return
+    return print_console(entities)
 
   length = 0
   indentation = 0
@@ -264,7 +267,7 @@ def filter_entities(filters: list[(str, any)], entities: dict) -> dict:
 
 
 def run(config: dict, products: list[str], entity_type: PdpEntity | None, entity_ids: list[str],
-        filters: list[(str, str)], query_param: dict, is_json: bool, is_verbose: bool):
+        filters: list[(str, str)], query_param: dict, is_json: bool, pretty: bool, is_verbose: bool):
   """
   Fetch information of entities and printed to console.
   :param dict config: The configuration containing the pdp products' url.
@@ -277,6 +280,7 @@ def run(config: dict, products: list[str], entity_type: PdpEntity | None, entity
                                    values will be returned.
   :param dict query_param: Are the query param accepted by the "get all entities" endpoint of each product.
   :param bool is_json: Will show the entities in a JSON format.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   :param bool is_verbose: Will show more information to the user.
   """
   entities = {}
@@ -298,4 +302,4 @@ def run(config: dict, products: list[str], entity_type: PdpEntity | None, entity
     entities = get_all_entities(config, entity_types, query_param, is_verbose)
 
   entities = filter_entities(filters, entities)
-  print_stage(entities, is_verbose, is_json)
+  print_stage(entities, is_verbose, is_json, pretty)

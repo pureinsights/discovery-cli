@@ -1,0 +1,14 @@
+✔ Entity name "Pipeline" updated with id newId.
+[
+  {
+    "id": "fakeid",
+    "name": "Pipeline",
+    "active": true,
+    "steps": [
+      {
+        "processorId": "{{ fromName('<Processor Name>') }}",
+        "action": "hydrate"
+      }
+    ]
+  }
+]

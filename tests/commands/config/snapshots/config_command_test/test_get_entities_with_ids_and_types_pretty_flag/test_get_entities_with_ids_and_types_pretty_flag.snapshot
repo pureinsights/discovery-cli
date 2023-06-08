@@ -1,0 +1,10 @@
+{
+  "ingestion": {
+    "pipeline": [
+      {
+        "id": "fake-id",
+        "name": "fake-name"
+      }
+    ]
+  }
+}
