@@ -129,7 +129,9 @@ pdp -d ./my-pdp-project config deploy -q
 
 Add a new entity configuration to the entities on the current project. The configuration for each entity it will have
 default values depending on the template name provided, or you can specify your own entity configuration with the --file
-and/or --interactive flags. You can also deploy the entities to their respective product.
+and/or --interactive flags. You can also deploy the entities to their respective product. If you call the command from
+outside a PDP project and use the --deploy flag, those entities referenced on the configuration will be searched with
+the search endpoint of the Core API. (This feature may not work properly with credentials in PDP v1.x.x).
 
 #### Flags
 

@@ -15,14 +15,17 @@ import os.path
 
 import click
 
+from commands.core.search import search_entity
 from commons.console import create_spinner, print_console, print_warning, spinner_change_text, spinner_fail, spinner_ok, \
   suppress_errors, suppress_warnings
+from commons.constants import CORE
 from commons.custom_classes import PdpEntity
 from commons.file_system import has_pdp_project_structure, read_entities, write_entities
 from commons.handlers import handle_and_continue, handle_and_exit
-from commons.pdp_products import are_same_pdp_entity, create_or_update_entity, get_all_entities_names_ids, \
+from commons.pdp_products import are_same_pdp_entity, clear_from_name_format, create_or_update_entity, \
+  get_all_entities_names_ids, \
   identify_entity, \
-  json_to_pdp_entities, replace_ids, replace_names_by_ids
+  json_to_pdp_entities, replace_ids, replace_names_by_ids, search_value_from_entity
 from commons.raisers import raise_for_pdp_data_inconsistencies
 
 
@@ -70,9 +73,10 @@ def input_stage(file_path: str | None, interactive: bool) -> tuple[str, list[dic
   return file_path, entities
 
 
-def parsing_stage(project_path: str, entity_type: PdpEntity, entities: list[dict], file_path: str) -> list[dict]:
+def parsing_stage(config: dict, project_path: str, entity_type: PdpEntity, entities: list[dict], file_path: str):
   """
   This stage is responsible to prepare the entities to the deployment (replace names by ids).
+  :param dict config: The configuration of the project, containing the url of the products APIs.
   :param str project_path: The path to the root of the project.
   :param PdpEntity entity_type: The entity type of the entities that will be parsed.
   :param list[dict] entities: The entities that will be parsed.
@@ -81,6 +85,23 @@ def parsing_stage(project_path: str, entity_type: PdpEntity, entities: list[dict
   :return: The entities with all template names replaced by the respective ids.
   """
   if not has_pdp_project_structure(project_path):
+    ids_names = {}
+    references = entity_type.get_references()
+    for reference in references.keys():
+      for entity in entities:
+        values = search_value_from_entity(reference, entity)
+        if values is None or len(values) <= 0:
+          continue
+        for value in values:
+          entity_name = clear_from_name_format(value)
+          product = references[reference].product.lower()
+          type = references[reference].type.lower()
+          entities_found = search_entity(config[CORE], {'q': entity_name, 'type': f'{product}:{type}'})
+          if entities_found is None or len(entities_found) <= 0:
+            continue
+          entity_id = entities_found[0].get('id', None)
+          ids_names[entity_name] = entity_id
+    replace_names_by_ids(entity_type, entities, ids_names)
     return entities
 
   ids_names = {}
@@ -260,12 +281,10 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
     for entity in entities:
       entity.pop('id', None)
 
-  if has_to_deploy and has_pdp_project_structure(project_path):
-    # Replace all the {{ fromName }} template, with the respective ids.
-    entities = parsing_stage(project_path, entity_type, entities, file)
-
   # If the flag is true, then deploys the entities to the products
   if has_to_deploy:
+    # Replace all the {{ fromName }} template, with the respective ids.
+    entities = parsing_stage(config, project_path, entity_type, entities, file)
     entities = run_deployment(config, entity_type, entities, ignore_ids, _json)
 
   if not has_pdp_project_structure(project_path) and not has_to_deploy:
