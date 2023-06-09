@@ -16,11 +16,12 @@ from commons.constants import CORE, URL_SEARCH
 from commons.http_requests import post
 
 
-def print_stage(entities: list[dict], is_json: bool):
+def print_stage(entities: list[dict], is_json: bool, pretty: bool):
   """
   Print the entities as JSON or as table.
   :param list[dict] entities: A list of entities to print.
   :param bool is_json: Will print the entities in JSON format.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   """
   if len(entities) <= 0:
     return print_console("No entities were found...")
@@ -31,15 +32,16 @@ def print_stage(entities: list[dict], is_json: bool):
     product_entities[product] = product_entities.get(product, {})
     product_entities[product][entity_type] = product_entities[product].get(entity_type, []) + [entity]
 
-  print_entities(product_entities, not is_json, is_json)
+  print_entities(product_entities, not is_json, is_json, pretty)
 
 
-def run(config: dict, query_params: dict, is_json: bool):
+def run(config: dict, query_params: dict, is_json: bool, pretty: bool):
   """
   Will search entities based on the query_params given.
   :param dict config: A dictionary containing the product's url.
   :param dict query_params: The criteria for search the entities.
   :param bool is_json: Will print the entities in JSON format.
+  :param bool pretty: If True, the result will be showed in  a human-readable JSON format.
   """
   create_spinner()
   spinner_change_text("Searching for entities...")
@@ -50,4 +52,4 @@ def run(config: dict, query_params: dict, is_json: bool):
   entities = json.loads(res).get('content', [])
   if not is_json:
     spinner_ok('Some entities found...')
-  print_stage(entities, is_json)
+  print_stage(entities, is_json, pretty)

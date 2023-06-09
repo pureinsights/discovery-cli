@@ -117,6 +117,24 @@ def test_get_json(mocker, snapshot):
   snapshot.assert_match(response.output, 'test_get_json.snapshot')
 
 
+def test_get_pretty(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.commands.execution.command.get`,
+  when the pretty flag is True.
+  """
+  mocker.patch(
+    "commands.execution.get.get",
+    return_value=b'{"content": ['
+                 b'{"id":"execution-id1", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{},{}]},'
+                 b'{"id":"execution-id2", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{}]},'
+                 b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{}]}'
+                 b']}'
+  )
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "--pretty"])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_get_pretty.snapshot')
+
+
 def test_get_by_ids(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.execution.command.get`,

@@ -132,7 +132,7 @@ def test_run_no_pdp_project_structure(mocker):
   parsing_stage_mock = mocker.patch("commands.config.create.parsing_stage")
   writing_stage_mock = mocker.patch("commands.config.create.writing_stage")
   printing_stage_mock = mocker.patch("commands.config.create.printing_stage")
-  run_create({}, 'fake-path', PIPELINE, 'fake-path', True, False, False, False)
+  run_create({}, 'fake-path', PIPELINE, 'fake-path', True, False, False, False, False)
   assert parsing_stage_mock.call_count == 0
   writing_stage_mock.assert_called_once_with('fake-path', PIPELINE, [])
   printing_stage_mock.assert_called_once()
