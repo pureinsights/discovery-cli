@@ -73,6 +73,36 @@ def input_stage(file_path: str | None, interactive: bool) -> tuple[str, list[dic
   return file_path, entities
 
 
+def parse_from_apis(config: dict, entity_type: PdpEntity, entities: list[dict]):
+  """
+  This stage is responsible to prepare the entities to the deployment (replace names by ids),
+  but it searches the entities deploy instead on the configuration files on a PDP project.
+  :param dict config: The configuration of the project, containing the url of the products APIs.
+  :param PdpEntity entity_type: The entity type of the entities that will be parsed.
+  :param list[dict] entities: The entities that will be parsed.
+  :rtype: list[dict]
+  :return: The entities with all template names replaced by the respective ids.
+  """
+  ids_names = {}
+  references = entity_type.get_references()
+  for reference in references.keys():
+    for entity in entities:
+      values = search_value_from_entity(reference, entity)
+      if values is None or len(values) <= 0:
+        continue
+      for value in values:
+        entity_name = clear_from_name_format(value)
+        product = references[reference].product.lower()
+        reference_type = references[reference].type.lower()
+        entities_found = search_entity(config[CORE], {'q': entity_name, 'type': f'{product}:{reference_type}'})
+        if entities_found is None or len(entities_found) <= 0:
+          continue
+        entity_id = entities_found[0].get('id', None)
+        ids_names[entity_name] = entity_id
+  replace_names_by_ids(entity_type, entities, ids_names)
+  return entities
+
+
 def parsing_stage(config: dict, project_path: str, entity_type: PdpEntity, entities: list[dict], file_path: str):
   """
   This stage is responsible to prepare the entities to the deployment (replace names by ids).
@@ -85,24 +115,7 @@ def parsing_stage(config: dict, project_path: str, entity_type: PdpEntity, entit
   :return: The entities with all template names replaced by the respective ids.
   """
   if not has_pdp_project_structure(project_path):
-    ids_names = {}
-    references = entity_type.get_references()
-    for reference in references.keys():
-      for entity in entities:
-        values = search_value_from_entity(reference, entity)
-        if values is None or len(values) <= 0:
-          continue
-        for value in values:
-          entity_name = clear_from_name_format(value)
-          product = references[reference].product.lower()
-          type = references[reference].type.lower()
-          entities_found = search_entity(config[CORE], {'q': entity_name, 'type': f'{product}:{type}'})
-          if entities_found is None or len(entities_found) <= 0:
-            continue
-          entity_id = entities_found[0].get('id', None)
-          ids_names[entity_name] = entity_id
-    replace_names_by_ids(entity_type, entities, ids_names)
-    return entities
+    return parse_from_apis(config, entity_type, entities)
 
   ids_names = {}
   for entity in entities:
