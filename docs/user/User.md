@@ -2,8 +2,8 @@
 
 ## Installation (Windows)
 
-Go to Link to the release .zip and download the .zip file. Extract its contents to the folder where you want to install
-the CLI (remember this folder).
+Go to the [Link of the release](https://github.com/pureinsights/pdp-cli/releases) .zip and download the .zip file.
+Extract its contents to the folder where you want to install the CLI (remember this folder).
 
 Then open the Environment Variables Editor by typing “Environment Variables” on the windows search left down corner. In
 the section of User Variables double-click on Path and add the path to the folder where you installed the CLI.

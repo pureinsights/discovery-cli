@@ -183,7 +183,7 @@ def deployment_stage(config: dict, entity_type: PdpEntity, entities: list[dict],
       continue
     if verbose:
       spinner_ok(
-        f"Entity {click.style(identify_entity(entity), fg='blue')} {action} with id {click.style(_id, fg='green')}."
+        f"Entity {click.style(identify_entity(entity), fg='blue')} {action} with id {click.style(_id, fg='green')}"
       )
     entity['id'] = _id
     deployed_entities += [entity]
@@ -201,7 +201,7 @@ def printing_stage(entity_type: PdpEntity, entities: list[dict], _json: bool, pr
   """
   if pretty:
     return print_console(json.dumps(entities, indent=2))
-  
+
   if _json:
     return print_console(entities)
 

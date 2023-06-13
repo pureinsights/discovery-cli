@@ -30,7 +30,8 @@ def run(config: dict, buckets: list[str]):
     bucket_str = click.style(bucket, fg='cyan')
     _, acknowledged = handle_and_continue(
       delete, {'show_exception': True},
-      URL_GENERIC_BUCKET.format(config[STAGING], bucket=bucket)
+      URL_GENERIC_BUCKET.format(config[STAGING], bucket=bucket),
+      status_404_as_error=False
     )
     if acknowledged is None or not json.loads(acknowledged).get('acknowledged', False):
       spinner_fail(f"Couldn't delete the bucket {bucket_str}.")

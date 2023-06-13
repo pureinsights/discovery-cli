@@ -176,7 +176,7 @@ def run(config: dict, path: str, target_products: list[str], is_verbose: bool = 
   # Will show the seed ids only if, seeds is not empty,
   # is verbose or not verbose or if is quiet but no errors happened.
   if len(seeds) > 0 and (not quiet or (quiet and get_number_errors_exceptions() <= 0)):
-    print_format = 'Seed {name} with id {id}.'
+    print_format = 'Seed {name} with id {id}'
     if not quiet:
       print_console(f'{click.style("Seeds", fg="cyan")} ids:', prefix='\n' if is_verbose else '')
     for seed in seeds:
