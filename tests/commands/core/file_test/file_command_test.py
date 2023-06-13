@@ -121,8 +121,9 @@ def test_download_file_within_pdp_project(mocker, snapshot):
   when the given path is a PDP project.
   """
   mocker.patch("commands.core.file.download.get", return_value=b'{"acknowledged": true }')
-  mocker.patch("commands.core.file.download.os.path.isdir", return_value=True)
+  mocker.patch("commands.core.file.download.os.path.isdir", return_value=False)
   mocker.patch("commands.core.file.download.has_pdp_project_structure", return_value=True)
+  mocker.patch("commands.core.file.download.os.mkdir")
   mock_write = mocker.patch("commands.core.file.download.write_binary_file")
   response = cli.invoke(pdp, ["core", "file", "download", "--name", "seeds"])
   expected_path = os.path.join(".", "Core", "files", "seeds")
