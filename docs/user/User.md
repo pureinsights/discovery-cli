@@ -43,7 +43,7 @@ If no argument is passed to it will use the default values.
 
 - **--namespace**: Namespace in which the PDP components are running. **Default is "pdp"**.
 - **--profile**: Configuration profile to load specific configurations from pdp.ini. **Default is "DEFAULT"**.
-- **-d,--dir**: The path to a directory with the structure and the pdp.ini that init command creates. **Default
+- **--path**: The path to a directory with the structure and the pdp.ini that init command creates. **Default
   is ```./```**.
 
 ```bash
@@ -65,7 +65,7 @@ It will create the folder structure for a PDP project.
 
 #### Flags:
 
-- **-n,--project-name**: The name of the resulting directory, will try to fetch existing configurations from the APIs
+- **-n,--name**: The name of the resulting directory, will try to fetch existing configurations from the APIs
   referenced in ~/.pdp. Notice that imported configs have id fields, don't change those.
   **Default is ```my-pdp-project```**.
 - **--empty/--no-empty**: If ```True``` will create a project from a template (the default template)
@@ -100,7 +100,7 @@ field is missing from an entity, assumes this is a new instance.
 
 #### Flags:
 
-- **--target**: The name of the product where you want to deploy the entities. The command allows multiple flags to
+- **--product**: The name of the product where you want to deploy the entities. The command allows multiple flags to
   define multiple targets. **Default are ```[ingestion, core, discovery]```**.
 - **-v,--verbose**: Will show more information about the deployment results. **Default is ```False```**.
 - **-g,--ignore-ids/--no-ignore-ids**: Will cause existing ids to be ignored, hence everything will be created as a new
@@ -110,13 +110,13 @@ field is missing from an entity, assumes this is a new instance.
 #### Deploy entities to Discovery and Ingestion
 
 ```bash
-pdp -d ./my-pdp-project config deploy --target discovery --target ingestion
+pdp -d ./my-pdp-project config deploy --product discovery --product ingestion
 ```
 
 #### Deploy entities ignoring ids with verbose mode
 
 ```bash
-pdp -d ./my-pdp-project config deploy -g -v --target discovery --target core
+pdp -d ./my-pdp-project config deploy -g -v --product discovery --product core
 ```
 
 #### Deploy entities to all targets with quiet mode
@@ -137,7 +137,7 @@ and/or --interactive flags. You can also deploy the entities to their respective
   the moment are: ```[seed, ingestionProcessor, pipeline, Scheduler, Endpoint, discoveryProcessor]```.
 - **--entity-template**: This is the template's name of the entity to use. Default is ```None```.
 - **--deploy**: It will deploy the entity configuration to the corresponding product. Default is ```False```.
-- **--file**: The path to the file that contains the configuration for the entity or entities. If the configuration
+- **--path**: The path to the file that contains the configuration for the entity or entities. If the configuration
   contains an id property it will be updated instead. Default is ```None```.
 - **--interactive**: This is a Boolean flag. Will launch your default text editor to allow you to modify the entity
   configuration. Default is ```False```.
@@ -149,7 +149,7 @@ and/or --interactive flags. You can also deploy the entities to their respective
 #### Add entities to a project and deploy them
 
 ```bash
-pdp -d ./my-pdp-project config create --entity-type pipeline --file ./my-new-entities.json --deploy -g -j
+pdp -d ./my-pdp-project config create --entity-type pipeline --path ./my-new-entities.json --deploy -g -j
 ```
 
 #### Add entity to a project from a template and edit it.
@@ -308,13 +308,13 @@ each product.
 
 #### Flags
 
-- `REQUIRED`**--target**: Will import the given file to the specified product. (Ingestion, Core or Discovery).
-- `REQUIRED`**--zip**: The path to the zip that will be imported.
+- `REQUIRED`**--product**: Will import the given file to the specified product. (Ingestion, Core or Discovery).
+- `REQUIRED`**--path**: The path to the zip that will be imported.
 
 #### Import entities
 
 ```bash
-pdp config import --product discovery --zip endpoints.zip
+pdp config import --product discovery --path endpoints.zip
 ```
 
 ### Core Command
@@ -484,19 +484,19 @@ Try to start the scanning process of a seed. Note that a seed can only have one 
 
 ##### Flags
 
-- `REQUIRED`**--seed**: The id of the seed to start the scanning process.
+- `REQUIRED`**-i, --seed-id**: The id of the seed to start the scanning process.
 - **--scan-type**: The strategy to apply during the scan phase. Values supported INCREMENTAL and FULL. Default is FULL.
 
 ##### Start execution of a seed
 
 ```bash
-pdp seed-exec start --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+pdp seed-exec start --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 ```
 
 ##### Start execution of a seed with a specific scan type
 
 ```bash
-pdp seed-exec start --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --scan-type incremental
+pdp seed-exec start --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --scan-type incremental
 ```
 
 #### Reset Command
@@ -505,12 +505,12 @@ Reset all the associated data of the given seed.
 
 ##### Flags
 
-- `REQUIRED`**--seed**: The id of the seed to reset the associated data.
+- `REQUIRED`**-i, --seed-id**: The id of the seed to reset the associated data.
 
 ##### Reset associated data of a seed
 
 ```bash
-pdp seed-exec reset --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+pdp seed-exec reset --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 ```
 
 #### Control Command
@@ -519,13 +519,13 @@ Triggers and action on all active executions for the given seed.
 
 ##### Flags
 
-- `REQUIRED`**--seed**: The id of the seed to trigger the action.
+- `REQUIRED`**-i, --seed-id**: The id of the seed to trigger the action.
 - **--action**: The action you want to trigger. Values supported HALT, PAUSE and RESUME. Default is HALT.
 
 ##### Control the execution of a seed
 
 ```bash
-pdp seed-exec control --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --action halt
+pdp seed-exec control --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --action halt
 ```
 
 #### Get Command
@@ -534,9 +534,9 @@ Retrieves the executions of a given seed.
 
 ##### Flags
 
-- `REQUIRED`**--seed**: The id of the seed you want to get the active executions.
-- **--execution**: The id of the execution you want to get information. Default is None. The command allows multiple
-  flags of --execution.
+- `REQUIRED`**--seed-id**: The id of the seed you want to get the active executions.
+- **--execution-id**: The id of the execution you want to get information. Default is None. The command allows multiple
+  flags of --execution-id.
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
 - **--pretty**: This is a Boolean flag. Will print the results in a human-readable JSON format. Default is False.
 - **-v, --verbose**: It will show more information about the deploy results. Default is False.
@@ -548,25 +548,25 @@ Retrieves the executions of a given seed.
 ##### Get executions from a seed
 
 ```bash
-pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+pdp seed-exec get --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
 ```
 
 ##### Get executions from a seed with parameters
 
 ```bash
-pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --page 2 --size 1 --asc pipelineId --desc status -v
+pdp seed-exec get --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --page 2 --size 1 --asc pipelineId --desc status -v
 ```
 
 ##### Get executions from a seed by id
 
 ```bash
-pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --execution ac5086e9-e5bf-4c82-b23e-358036bc4a23 --execution ac5086e9-e5bf-4c82-b23e-358036bc4b2a -v
+pdp seed-exec get --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --execution-id ac5086e9-e5bf-4c82-b23e-358036bc4a23 --execution-id ac5086e9-e5bf-4c82-b23e-358036bc4b2a -v
 ```
 
 ##### Get executions from a seed in JSON format
 
 ```bash
-pdp seed-exec get --seed 3b5086e9-e5bf-4c82-b23e-358036bc4a1b -j
+pdp seed-exec get --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b -j
 ```
 
 ### Staging Command
@@ -674,14 +674,14 @@ Performs a list of actions such as ADD and DELETE to a given bucket within the S
 ###### Flags
 
 - `REQUIRED`**--bucket**: The name of the bucket to perform the actions.
-- **--file**: The path to the file that contains the body for the query on a JSON format.
+- **--path**: The path to the file that contains the body for the query on a JSON format.
 - **--interactive**: Will open a text editor to let you write the body for the request.
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
 
 ###### Process a batch of actions from a file
 
 ```bash
-pdp staging bucket batch --bucket bucket_name --file file/path
+pdp staging bucket batch --bucket bucket_name --path file/path
 ```
 
 ###### Process a batch of actions interactively
@@ -693,13 +693,13 @@ pdp staging bucket batch --bucket bucket_name --interactive
 ###### Process a batch of actions from a file and edit its contents
 
 ```bash
-pdp staging bucket batch --bucket bucket_name --file file/path --interactive
+pdp staging bucket batch --bucket bucket_name --path file/path --interactive
 ```
 
 ###### Process a batch of actions from a file and print the results in JSON format
 
 ```bash
-pdp staging bucket batch --bucket bucket_name --file file/path -j
+pdp staging bucket batch --bucket bucket_name --path file/path -j
 ``` 
 
 #### Item Command
@@ -713,24 +713,25 @@ Adds a new item to a given bucket within the staging API. If the bucket doesn't 
 ###### Flags
 
 - `REQURIED`**--bucket**: The name of the bucket where the item will be added.
-- **--item-id**: The id of the new item. If no id is provided, then an auto-generated hash will be set. Default is None.
+- **-i, --item-id**: The id of the new item. If no id is provided, then an auto-generated hash will be set. Default is
+  None.
 - **--parent**: This allows you to add an item within an existing item. Default is None.
 - **--interactive**: This is a Boolean flag. Will launch your default text editor to allow you to modify the entity
   configuration. Default is False.
-- **--file**: The path to the file that contains the content of the item. Default is None.
+- **--path**: The path to the file that contains the content of the item. Default is None.
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
 - **-v, --verbose**: It will show more information about the item upload. Default is False.
 
 ###### Add an item
 
 ```bash
-pdp staging item add --bucket bucket --item-id item_id --file item.json
+pdp staging item add --bucket bucket --item-id item_id --path item.json
 ```
 
 ###### Add an item interactively and with an autogenerated id
 
 ```bash
- pdp staging item add --bucket bucket --file item.json --interactive
+ pdp staging item add --bucket bucket --path item.json --interactive
 ```
 
 ##### Get Command
@@ -803,7 +804,8 @@ Retrieves all the transactions for a given bucket.
 ###### Flags
 
 - `REQURIED`**--bucket**: The name for the bucket to get the items.
-- **-i, --id**: Will retrieve all the transactions after the given one. Useful to make pagination. Default is None.
+- **-i, --transaction-id**: Will retrieve all the transactions after the given one. Useful to make pagination. Default
+  is None.
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
 - **-s, --size**: The number of transactions to fetch. Default is None.
 
@@ -822,7 +824,7 @@ pdp staging transaction get --bucket bucket --size 3 --json
 ###### Get transactions with pagination
 
 ```bash
-pdp staging transaction get --bucket bucket --id transaction_id
+pdp staging transaction get --bucket bucket --transaction-id transaction_id
 ```
 
 ##### Delete Command
@@ -832,7 +834,8 @@ Deletes one or more transactions for a given bucket.
 ###### Flags
 
 - **--bucket**: The name of the bucket where you want to delete the transaction.
-- **-i, --id**: The id of the transaction you want to delete. Default is []. The command allows multiple flags of -i.
+- **-i, --transaction-id**: The id of the transaction you want to delete. Default is []. The command allows multiple
+  flags of -i.
 - **-a, --all**: Will try to delete all the transactions if the -i flag was not provided. If neither of them are
   provided an error will be raised. Default is False.
 - **--purge**: Will delete all the transactions starting from the first transaction until the one specified by the -i
@@ -847,11 +850,11 @@ pdp staging transaction delete --bucket bucket --all
 ###### Delete one or more specific transactions
 
 ```bash
-pdp staging transaction delete --bucket bucket --id transaction1 --id transaction2
+pdp staging transaction delete --bucket bucket --transaction-id transaction1 --transaction-id transaction2
 ```
 
 ###### Purge all the transactions until a specific one
 
 ```bash
-pdp staging transaction delete --bucket bucket --id transaction_id --purge
+pdp staging transaction delete --bucket bucket --transaction-id transaction_id --purge
 ```

@@ -52,7 +52,7 @@ def test_get_transaction_json(mocker, snapshot):
 def test_delete_no_all_or_id_flags(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.transaction.command.delete`,
-  when the user don't provide the flag --all or --id.
+  when the user don't provide the flag --all or --transaction-id.
   """
   delete_mock = mocker.patch("commands.staging.transaction.delete.delete", return_value='{"acknowledged": false}')
   mocker.patch("commands.staging.transaction.delete.create_spinner")
@@ -90,14 +90,15 @@ def test_delete_all_transactions_failed(mocker, snapshot):
 def test_delete_specific_transactions(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.transaction.command.delete`,
-  when the user provides one or more --id flags.
+  when the user provides one or more --transaction-id flags.
   """
   delete_mock = mocker.patch("commands.staging.transaction.delete.delete",
                              side_effect=['{"acknowledged": true}', '{"acknowledged": false}',
                                           '{"acknowledged": true}'])
   mocker.patch("commands.staging.transaction.delete.create_spinner")
-  response = cli.invoke(pdp, ["staging", "transaction", "delete", "--bucket", "fake-bucket", '--id', 'fake-id1', '--id',
-                              'fake-id2', '--id', 'fake-id3'])
+  response = cli.invoke(pdp,
+                        ["staging", "transaction", "delete", "--bucket", "fake-bucket", '--transaction-id', 'fake-id1',
+                         '--transaction-id', 'fake-id2', '--transaction-id', 'fake-id3'])
   assert delete_mock.call_args_list == [
     call(URL_DELETE_TRANSACTION.format(STAGING_API_URL, bucket="fake-bucket", transaction='fake-id1'),
          params={'transactionId': 'fake-id1'}),

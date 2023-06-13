@@ -25,7 +25,7 @@ def test_add_item(mocker, snapshot):
                                                              b'"checksum": "23b5c58d597754037351ebdc5497882b"'
                                                              b'}')
   mocker.patch("commands.staging.item.add.read_binary_file", return_value=b"{}")
-  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--file",
+  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--path",
                               "fake-path"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_add_item.snapshot')
@@ -44,7 +44,7 @@ def test_add_item_verbose(mocker, snapshot):
                                                              b'"checksum": "23b5c58d597754037351ebdc5497882b"'
                                                              b'}')
   mocker.patch("commands.staging.item.add.read_binary_file", return_value=b"{}")
-  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--file",
+  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--path",
                               "fake-path", "-v"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_add_item_verbose.snapshot')
@@ -63,7 +63,7 @@ def test_add_item_json(mocker, snapshot):
                                                              b'"checksum": "23b5c58d597754037351ebdc5497882b"'
                                                              b'}')
   mocker.patch("commands.staging.item.add.read_binary_file", return_value=b"{}")
-  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--file",
+  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--path",
                               "fake-path", "-j"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_add_item_json.snapshot')
@@ -72,7 +72,7 @@ def test_add_item_json(mocker, snapshot):
 def test_add_item_from_file_and_interactive(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.item.command.add`,
-  when the --file and --interactive flags were provided.
+  when the --path and --interactive flags were provided.
   """
   mocker.patch("commands.staging.item.add.put", return_value=b'{'
                                                              b'"transactionId": "645e9901c8e408abf7e1a194",'
@@ -84,7 +84,7 @@ def test_add_item_from_file_and_interactive(mocker, snapshot):
                                                              b'}')
   mocker.patch("commands.staging.item.add.read_binary_file", return_value=b'{\n\n}')
   mock_edit = mocker.patch("commands.staging.item.add.click.edit", return_value='{\n"fake":"property"\n}')
-  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--file",
+  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--path",
                               "fake-path", "--interactive"])
   assert response.exit_code == 0
   mock_edit.assert_called_once_with("{\n\n}")
@@ -94,7 +94,7 @@ def test_add_item_from_file_and_interactive(mocker, snapshot):
 def test_add_item_from_file_and_interactive_no_content(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.item.command.add`,
-  when the --file and --interactive flags were provided.
+  when the --path and --interactive flags were provided.
   """
   mocker.patch("commands.staging.item.add.put", return_value=b'{'
                                                              b'"transactionId": "645e9901c8e408abf7e1a194",'
@@ -106,7 +106,7 @@ def test_add_item_from_file_and_interactive_no_content(mocker, snapshot):
                                                              b'}')
   mocker.patch("commands.staging.item.add.read_binary_file", return_value=b'{\n\n}')
   mock_edit = mocker.patch("commands.staging.item.add.click.edit", return_value=None)
-  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--file",
+  response = cli.invoke(pdp, ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--path",
                               "fake-path", "--interactive"])
   assert response.exit_code == 1
   mock_edit.assert_called_once_with("{\n\n}")
@@ -180,7 +180,7 @@ def test_add_item_interactive_no_content(mocker, snapshot):
 def test_add_item_no_content(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.item.command.add`,
-  when the --interactive or --file flags were not provided.
+  when the --interactive or --path flags were not provided.
   """
   mocker.patch("commands.staging.item.add.put", return_value=b'{'
                                                              b'"transactionId": "645e9901c8e408abf7e1a194",'
@@ -199,12 +199,12 @@ def test_add_item_no_content(mocker, snapshot):
 def test_add_item_could_not_add(mocker, snapshot):
   """
   Test the command defined in :func:`src.commands.staging.item.command.add`,
-  when the --interactive or --file flags were not provided.
+  when the --interactive or --path flags were not provided.
   """
   mocker.patch("commands.staging.item.add.read_binary_file", return_value=b'{\n\n}')
   mocker.patch("commands.staging.item.add.put", return_value=None)
   response = cli.invoke(pdp,
-                        ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--file", "fake"])
+                        ["staging", "item", "add", "--bucket", "fake-bucket", "--item-id", "fake-id", "--path", "fake"])
   assert response.exit_code == 1
   snapshot.assert_match(response.output, 'test_add_item_interactive.snapshot')
 
