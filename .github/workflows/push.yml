@@ -1,0 +1,56 @@
+name: Build, publish and bump versions
+
+on:
+  push:
+    branches:
+      - develop
+      - hotfix
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      old-version: ${{ steps.bump-version.outputs.old-version }}
+      new-version: ${{ steps.bump-version.outputs.new-version }}
+      branch-ref: ${{ steps.commit-version.outputs.branch-ref }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Bump Version
+        id: bump-version
+        run: ci-tools/bump-version.sh
+
+      - name: Run unit tests
+        run: tox -e py
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            # TODO: Hacer un archivo para no tener que copiar en todos los yml
+            -Dsonar.organization=pureinsights-1
+            -Dsonar.projectKey=pureinsights_pdp_cli
+
+
+      - name: Commit Version
+        id: commit-version
+        run: |
+          ci-tools/commit-version-bump.sh \
+            -o "${{ steps.bump-version.outputs.old-version }}" \
+            -n "${{ steps.bump-version.outputs.new-version }}"
