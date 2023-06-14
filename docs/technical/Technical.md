@@ -120,7 +120,7 @@ python -m pytest --cov=src --cov-report=html
 
 ```bash
 pip install pyinstaller
-pyinstaller ./src/pdp.py --add-data "src/templates;templates" --collect-all pyfiglet --collect-all yaspin
+pyinstaller ./src/pdp.py --add-data "src/templates;templates" --add-data "semver.properties;." --collect-all pyfiglet --collect-all yaspin -y
 ```
 
 This will create a 'dist/pdp' folder, whose contents are the necessary run time dependencies for the CLI.

@@ -25,6 +25,7 @@ from commands.staging.item.command import item
 from commands.staging.transaction.command import transaction
 from commons.constants import DEFAULT_CONFIG, PRODUCTS
 from commons.custom_classes import DataInconsistency
+from commons.file_system import read_binary_file
 from commons.handlers import handle_exceptions
 
 
@@ -88,8 +89,24 @@ def health():
   ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
   title = "Pureinsights Discovery Platform: Command Line Interface"
   url = "https://pureinsights.com/"
-  click.echo(f"{ascii_art_pdp_cli}{title}\nv1.5.0")
+  version = get_cli_version()
+  click.echo(f"{ascii_art_pdp_cli}{title}\nv{version}")
   click.echo(click.style(url, fg="blue", underline=True, bold=True))
+
+
+def get_cli_version():
+  file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'semver.properties'))
+  text = read_binary_file(file_path).decode(
+    'utf-8').replace('\r', '')
+  for line in text.splitlines():
+    property_value = line.split('=')
+    if len(property_value) <= 1:
+      continue
+
+    if property_value[0] == 'version.semver':
+      return property_value[1]
+
+  return '0.0.0'
 
 
 # Register all the commands

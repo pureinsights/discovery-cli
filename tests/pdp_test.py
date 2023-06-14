@@ -136,11 +136,38 @@ def test_pdp(snapshot):
   snapshot.assert_match(response.output, 'test_pdp.snapshot')
 
 
-def test_health(snapshot):
+def test_health(mocker, snapshot):
   """
   Test the command defined in :func:`src.pdp.health`.
   """
+  mocker.patch(
+    'pdp.read_binary_file',
+    return_value=b'version.buildmeta=\n'
+                 b'version.major=1\n'
+                 b'version.minor=8\n'
+                 b'version.patch=0\n'
+                 b'version.prerelease=\n'
+                 b'version.semver=1.8.0\n\n'
+  )
   response = cli.invoke(health)
   ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_health.snapshot')
+
+
+def test_health_bad_semver(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.pdp.health`.
+  """
+  mocker.patch(
+    'pdp.read_binary_file',
+    return_value=b'version.buildmeta=\n'
+                 b'version.major=1\n'
+                 b'version.minor\n'
+                 b'version.patch=0\n'
+                 b'version.prerelease=\n'
+  )
+  response = cli.invoke(health)
+  ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_health_bad_semver.snapshot')
