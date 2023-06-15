@@ -20,7 +20,7 @@ env:
 
 jobs:
   version:
-    if: github.event.pull_request.merged == true
+    #    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.define-version.outputs.release-version }}
@@ -69,7 +69,7 @@ jobs:
           fi
 
   validate:
-    if: github.event.pull_request.merged == true
+    #    if: github.event.pull_request.merged == true
     needs: version
     runs-on: ubuntu-latest
     steps:
@@ -96,7 +96,7 @@ jobs:
         run: ci-tools/validate-release-version.sh -v ${{ needs.version.outputs.release-version }}
 
   build:
-    if: github.event.pull_request.merged == true
+    #    if: github.event.pull_request.merged == true
     needs:
       - validate
       - version
@@ -169,7 +169,7 @@ jobs:
           asset_content_type: application/zip
 
   tag-release:
-    if: github.event.pull_request.merged == true
+    #    if: github.event.pull_request.merged == true
     needs:
       - build
       - version
@@ -209,9 +209,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         with:
           configuration: "ci-tools/release-notes.json"
-          # TODO: Ask what's and from where are those tags get it
-          fromTag: 559681ca77657e24808ba8e1b1d299646ef2cde9
-          toTag: 725141f9387623fe1b97886b3e540c3abf45b4c3
+          toTag: 1df4b6d471f748ef8e3876a449e5183d7027def9
 
       - name: Tag and publish the release
         env:
@@ -222,7 +220,7 @@ jobs:
             -n "${{ steps.release-notes.outputs.changelog }}"
 
   merge-to-develop:
-    if: github.event.pull_request.merged == true
+    #    if: github.event.pull_request.merged == true
     needs:
       - version
       - build
