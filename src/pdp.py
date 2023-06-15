@@ -13,7 +13,6 @@ import os.path
 from configparser import ConfigParser
 
 import click
-import pyfiglet
 
 from commands.config.command import config
 from commands.core.command import core
@@ -23,6 +22,7 @@ from commands.staging.bucket.command import bucket_command as bucket
 from commands.staging.command import staging
 from commands.staging.item.command import item
 from commands.staging.transaction.command import transaction
+from commons.console import print_console
 from commons.constants import DEFAULT_CONFIG, PRODUCTS
 from commons.custom_classes import DataInconsistency
 from commons.file_system import read_binary_file
@@ -86,27 +86,11 @@ def health():
   """
   This command is used to know if PDP-CLI has been installed successfully.
   """
-  ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
-  title = "Pureinsights Discovery Platform: Command Line Interface"
-  url = "https://pureinsights.com/"
-  version = get_cli_version()
-  click.echo(f"{ascii_art_pdp_cli}{title}\nv{version}")
-  click.echo(click.style(url, fg="blue", underline=True, bold=True))
-
-
-def get_cli_version():
-  file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'semver.properties'))
-  text = read_binary_file(file_path).decode(
-    'utf-8').replace('\r', '')
-  for line in text.splitlines():
-    property_value = line.split('=')
-    if len(property_value) <= 1:
-      continue
-
-    if property_value[0] == 'version.semver':
-      return property_value[1]
-
-  return '0.0.0'
+  file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'micronaut-banner.txt'))
+  message = 'Banner not available.'
+  if os.path.exists(file_path) and os.path.isfile(file_path):
+    message = read_binary_file(file_path).decode('utf-8')
+  print_console(message)
 
 
 # Register all the commands
