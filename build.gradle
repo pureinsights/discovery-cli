@@ -30,7 +30,6 @@ buildscript {
 }
 
 apply plugin: 'com.pureinsights.pdp.build.root-project'
-apply plugin: 'com.pureinsights.pdp.build.application'
 
 description 'Pureinsights Discovery Platform: Command Line Interface'
 group 'com.pureinsights.pdp.cli'
