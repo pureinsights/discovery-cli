@@ -123,7 +123,9 @@ jobs:
 
       - name: Commit version
         id: commit-version
-        run: ci-tools/commit-release-version.sh -v ${{ needs.version.outputs.release-version }}
+        run: |
+          .\gradlew ciTools
+          .\ci-tools/commit-release-version.sh -v ${{ needs.version.outputs.release-version }}
 
       - name: Install dependencies
         run: |
