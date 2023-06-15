@@ -10,7 +10,6 @@
 #  prior written permission has been granted by Pureinsights Technology Ltd.
 import os.path
 
-import pyfiglet
 import pytest
 from click.testing import CliRunner
 
@@ -136,11 +135,32 @@ def test_pdp(snapshot):
   snapshot.assert_match(response.output, 'test_pdp.snapshot')
 
 
-def test_health(snapshot):
+def test_health(mocker, snapshot):
+  """
+  Test the command defined in :func:`src.pdp.health`.
+  """
+  mocker.patch('pdp.os.path.exists', return_value=True)
+  mocker.patch('pdp.os.path.isfile', return_value=True)
+  mocker.patch(
+    'pdp.read_binary_file',
+    return_value=b' ____  ____  ____\n'
+                 b'|  _ \\|  _ \\|  _ \\\n'
+                 b'| |_) | | | | |_) |\n'
+                 b'|  __/| |_| |  __/\n'
+                 b'|_|   |____/|_|\n'
+                 b'Pureinsights Discovery Platform: Command Line Interface\n'
+                 b'v1.8.0\n'
+                 b'http://pureinsights.com/'
+  )
+  response = cli.invoke(health)
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_health.snapshot')
+
+
+def test_health_no_banner(snapshot):
   """
   Test the command defined in :func:`src.pdp.health`.
   """
   response = cli.invoke(health)
-  ascii_art_pdp_cli = pyfiglet.figlet_format("PDP - CLI")
   assert response.exit_code == 0
-  snapshot.assert_match(response.output, 'test_health.snapshot')
+  snapshot.assert_match(response.output, 'test_health_no_banner.snapshot')
