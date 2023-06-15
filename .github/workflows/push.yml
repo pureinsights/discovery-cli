@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - develop
-      - feature/PDP-1367
     paths:
       - '.github/workflows/push.yml'
       - 'src/**'
