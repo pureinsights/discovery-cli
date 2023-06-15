@@ -1,20 +1,28 @@
 name: Build, publish and bump versions
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - develop
       - hotfix
+    paths:
+      - '.github/workflows/push.yml'
+      - 'src/**'
+      - 'gradle/**'
+      - 'build.gradle'
+      - 'gradle.properties'
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     outputs:
       old-version: ${{ steps.bump-version.outputs.old-version }}
       new-version: ${{ steps.bump-version.outputs.new-version }}
       branch-ref: ${{ steps.commit-version.outputs.branch-ref }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout the code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -23,11 +31,22 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          ./gradlew ciTools
+          chmod -R +x ci-tools
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
 
       - name: Bump Version
         id: bump-version
@@ -36,17 +55,18 @@ jobs:
       - name: Run unit tests
         run: tox -e py
 
+        # Temporal step to avoid conflict between build.gradle and SonarCloud
+      - name: Rename gradle file
+        run: mv build.gradle build.gradle.temp
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            # TODO: Hacer un archivo para no tener que copiar en todos los yml
-            -Dsonar.organization=pureinsights-1
-            -Dsonar.projectKey=pureinsights_pdp_cli
 
+      - name: Rename gradle file to original name
+        run: mv build.gradle.temp build.gradle
 
       - name: Commit Version
         id: commit-version

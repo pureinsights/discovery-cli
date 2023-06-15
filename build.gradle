@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) 2023 Pureinsights Technology Ltd. All rights reserved.
+ *
+ * Permission to use, copy, modify or distribute this software and its
+ * documentation for any purpose is subject to a licensing agreement with
+ * Pureinsights Technology Ltd.
+ *
+ * All information contained within this file is the property of
+ * Pureinsights Technology Ltd. The distribution or reproduction of this
+ * file or any information contained within is strictly forbidden unless
+ * prior written permission has been granted by Pureinsights Technology Ltd.
+ */
+
+buildscript {
+  repositories {
+    gradlePluginPortal()
+
+    maven {
+      url = 'https://maven.pkg.github.com/pureinsights/pdp-gradle-plugins'
+      credentials {
+        username = System.getenv("GITHUB_PACKAGE_REGISTRY_USER")
+        password = System.getenv("GITHUB_PACKAGE_REGISTRY_API_KEY")
+      }
+    }
+
+    dependencies {
+      classpath "com.pureinsights.pdp.build:pdp-gradle-plugins:${gradlePluginsVersion}"
+    }
+  }
+}
+
+apply plugin: 'com.pureinsights.pdp.build.root-project'
+
+description 'Pureinsights Discovery Platform: Command Line Interface'
+group 'com.pureinsights.pdp.cli'
+
