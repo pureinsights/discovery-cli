@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('src/templates', 'templates')]
+datas = [('src/templates', 'templates'), ('build/resources/main/micronaut-banner.txt', '.')]
 binaries = []
 hiddenimports = []
 tmp_ret = collect_all('pyfiglet')
