@@ -29,7 +29,7 @@ pdp health
 #### Create a PDP project named HelloWorld with some initial entities already configured.
 
 ```bash
-pdp config init -n HelloWorld --template random_generator 
+pdp config init -n HelloWorld --template random-generator 
 ```
 
 ## Documentation
@@ -77,7 +77,7 @@ It will create the folder structure for a PDP project.
   ```core http://localhost:8082```, ```discovery http://localhost:8088```.
 - **--force/--no-force**: If there is a project with the same name will to override it. **Default is False**.
 - **--template**: If the project will be created from a template, will use the name of the templated provided
-  by the user. Default is ```random_generator```. Available are ```empty, random_generator```.
+  by the user. Default is ```random-generator```. Available are ```empty, random-generator```.
 
 #### An example to a project from scratch
 
@@ -157,7 +157,7 @@ pdp -d ./my-pdp-project config create --entity-type pipeline --path ./my-new-ent
 #### Add entity to a project from a template and edit it.
 
 ```bash
-pdp -d ./my-pdp-project config create --entity-type pipeline --entity-template empty_pipeline --interactive
+pdp -d ./my-pdp-project config create --entity-type pipeline --entity-template pipeline --interactive
 ```
 
 ### Get Command
