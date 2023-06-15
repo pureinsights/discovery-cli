@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - develop
+      - feature/PDP-1368
 
 concurrency:
   group: release
