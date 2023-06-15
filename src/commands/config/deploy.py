@@ -76,12 +76,11 @@ def deploy_entity_types(config: dict, product: str, path: str, ids_names: dict, 
   """
   This is an auxiliary function. It iterates for each entity_type of a product and calls another auxiliary function.
   """
-  names_ids = {}
   entity_types = PRODUCTS.get(product, {'entities': []}).get('entities')
   for index, entity_type in enumerate(entity_types):
     file_path = os.path.join(path, product.title(), entity_type.associated_file_name)
 
-    if is_target:
+    if is_target and is_verbose:
       create_spinner()
       spinner_change_text(f'Deploying {entity_type.type}s to {product}...')
 
@@ -89,7 +88,7 @@ def deploy_entity_types(config: dict, product: str, path: str, ids_names: dict, 
     if not success:
       continue
 
-    replace_names_by_ids(entity_type, entities, names_ids)
+    replace_names_by_ids(entity_type, entities, ids_names)
     # If the product is not a target then we don't deploy the entities
     if not is_target:
       continue
@@ -102,7 +101,7 @@ def deploy_entity_types(config: dict, product: str, path: str, ids_names: dict, 
         )
       )
 
-    deploy_entities(config, product, entity_type, entities, names_ids, seeds, is_target, is_verbose, ignore_ids)
+    deploy_entities(config, product, entity_type, entities, ids_names, seeds, is_target, is_verbose, ignore_ids)
 
     # Once the entities are deployed, we replace the ids for the names to keep it simple to the user.
     handle_and_continue(
@@ -116,7 +115,8 @@ def deploy_entity_types(config: dict, product: str, path: str, ids_names: dict, 
       not_verbose_func=('', None),  # Do not print anything but finish the spinner
       verbose=is_verbose
     )
-    spinner_ok(message, icon=icon)
+    if is_target and is_verbose:
+      spinner_ok(message, icon=icon)
 
 
 def deploy_products(config: dict, products: list[str], target_products: list[str], path: str, seeds: list[dict],
