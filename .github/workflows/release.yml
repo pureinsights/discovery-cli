@@ -137,11 +137,11 @@ jobs:
         run: .\gradlew banner
 
       - name: Build executable with pyinstaller
-        run: >
-          pyinstaller 
-            ./src/pdp.py 
-            --collect-all yaspin -y 
-            --add-data "src/templates;templates" 
+        run: |
+          pyinstaller `
+            ./src/pdp.py `
+            --collect-all yaspin -y `
+            --add-data "src/templates;templates" `
             --add-data "build/resources/main/micronaut-banner.txt;."
 
       - name: Zip dist folder
