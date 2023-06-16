@@ -192,7 +192,6 @@ def test_create_with_entity_template_pretty(mocker, snapshot, test_project_path)
     'steps': [{'processorId': "{{ fromName('<Processor Name>') }}", 'action': 'hydrate'}]
   }])
   response = cli.invoke(pdp, ["--path", test_project_path(), "config", "create", "--entity-type", "pipeline",
-
                               "--entity-template", "pipeline", "--deploy", "--pretty"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_create_with_entity_template_pretty.snapshot')

@@ -362,7 +362,7 @@ Change the logging level of a component.
 
 ##### Flags
 
-- `REQURIED`**--component**: The name of the component that you want to change the log level.
+- `REQUIRED`**--component**: The name of the component that you want to change the log level.
 - `REQUIRED`**--level**: The level log you want to change to. Values supported ERROR,WARN, INFO,DEBUG and TRACE.
 - **--logger**: The of the logger. Default is None.
 
@@ -712,7 +712,7 @@ Adds a new item to a given bucket within the staging API. If the bucket doesn't 
 
 ###### Flags
 
-- `REQURIED`**--bucket**: The name of the bucket where the item will be added.
+- `REQUIRED`**--bucket**: The name of the bucket where the item will be added.
 - **-i, --item-id**: The id of the new item. If no id is provided, then an auto-generated hash will be set. Default is
   None.
 - **--parent**: This allows you to add an item within an existing item. Default is None.
@@ -740,8 +740,8 @@ Retrieves the information of the given item.
 
 ###### Flags
 
-- `REQURIED`**--bucket**: The name of the bucket where the item will be added.
-- `REQURIED`**-i, --item-id**: The id of the item to show. Default is []. The command allows multiple flags of -i.
+- `REQUIRED`**--bucket**: The name of the bucket where the item will be added.
+- `REQUIRED`**-i, --item-id**: The id of the item to show. Default is []. The command allows multiple flags of -i.
 - **--content-type**: The content-type of the query. Default is CONTENT. Allowed are CONTENT, METADATA, BOTH.
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
 
@@ -803,7 +803,7 @@ Retrieves all the transactions for a given bucket.
 
 ###### Flags
 
-- `REQURIED`**--bucket**: The name for the bucket to get the items.
+- `REQUIRED`**--bucket**: The name for the bucket to get the items.
 - **-i, --transaction-id**: Will retrieve all the transactions after the given one. Useful to make pagination. Default
   is None.
 - **-j, --json**: This is a boolean flag. It will print the results in JSON format. Default is False.
