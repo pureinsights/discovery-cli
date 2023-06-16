@@ -209,7 +209,7 @@ jobs:
 
       - uses: actions/download-artifact@master
         with:
-          name: my-artifact
+          name: cli-binaries
           path: ./dist/pdp.zip
 
       - name: Upload binaries
