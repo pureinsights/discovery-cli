@@ -163,7 +163,7 @@ jobs:
     #    if: github.event.pull_request.merged == true
     needs:
       - build
-      - version
+    #      - version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -228,7 +228,7 @@ jobs:
   merge-to-develop:
     #    if: github.event.pull_request.merged == true
     needs:
-      - version
+      #      - version
       - build
     runs-on: ubuntu-latest
     steps:
