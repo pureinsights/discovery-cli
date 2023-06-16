@@ -197,11 +197,8 @@ jobs:
             --add-data "build/resources/main/micronaut-banner.txt:."
 
       - name: Zip dist folder
-        uses: thedoctor0/zip-release@master
-        with:
-          type: 'zip'
-          filename: 'linux-pdp.zip'
-          directory: './dist/linux-pdp.zip'
+        run: |
+          zip -rq ./dist/linux-pdp.zip ./dist/pdp
 
       - uses: actions/upload-artifact@master
         with:
