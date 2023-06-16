@@ -1,0 +1,84 @@
+name: Build, publish and bump versions
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+    paths:
+      - '.github/workflows/push.yml'
+      - 'src/**'
+      - 'gradle/**'
+      - 'build.gradle'
+      - 'gradle.properties'
+
+concurrency:
+  group: push-${{ github.ref }}
+
+env:
+  GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USER }}
+  GITHUB_PACKAGE_REGISTRY_API_KEY: ${{ secrets.CI_TOKEN }}
+  CI_SIGNING_KEY: ${{ secrets.CI_SIGNING_KEY }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      old-version: ${{ steps.bump-version.outputs.old-version }}
+      new-version: ${{ steps.bump-version.outputs.new-version }}
+      branch-ref: ${{ steps.commit-version.outputs.branch-ref }}
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          token: ${{ secrets.CI_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          ./gradlew ciTools
+          chmod -R +x ci-tools
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Bump Version
+        id: bump-version
+        run: ci-tools/bump-version.sh
+
+      - name: Run unit tests
+        run: tox -e py
+
+        # Temporal step to avoid conflict between build.gradle and SonarCloud
+      - name: Rename gradle file
+        run: mv build.gradle build.gradle.temp
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Rename gradle file to original name
+        run: mv build.gradle.temp build.gradle
+
+      - name: Commit Version
+        id: commit-version
+        run: |
+          ci-tools/commit-version-bump.sh \
+            -o "${{ steps.bump-version.outputs.old-version }}" \
+            -n "${{ steps.bump-version.outputs.new-version }}"

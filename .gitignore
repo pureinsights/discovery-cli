@@ -13,7 +13,6 @@ build
 # Gradle
 .gradle
 build
-gradle
 
 #conda
 .conda
