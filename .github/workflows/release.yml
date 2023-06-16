@@ -157,7 +157,7 @@ jobs:
           path: ./dist/pdp.zip
 
       - name: show directories
-        run: ls -l
+        run: dir
 
   tag-release:
     #    if: github.event.pull_request.merged == true
