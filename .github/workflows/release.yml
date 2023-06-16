@@ -149,7 +149,7 @@ jobs:
         with:
           type: 'zip'
           filename: 'pdp.zip'
-          directory: 'dist'
+          directory: './dist'
 
       - uses: actions/upload-artifact@master
         with:
