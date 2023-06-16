@@ -34,3 +34,12 @@ apply plugin: 'com.pureinsights.pdp.build.application'
 
 description 'Pureinsights Discovery Platform: Command Line Interface'
 group 'com.pureinsights.pdp.cli'
+
+project.afterEvaluate {
+  dockerPrepare.dependsOn -= dockerfile
+}
+
+docker {
+  name "pureinsights/${project.name}"
+
+}
