@@ -134,7 +134,7 @@ jobs:
           pip install pyinstaller
 
       - name: Create the PDP Banner for the CLI
-        run: gradle banner
+        run: .\gradlew banner
 
       - name: Build executable with pyinstaller
         run: |
