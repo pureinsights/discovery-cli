@@ -193,8 +193,8 @@ jobs:
           pyinstaller \
             ./src/pdp.py \
             --collect-all yaspin -y \
-            --add-data "src/templates;templates" \
-            --add-data "build/resources/main/micronaut-banner.txt;."
+            --add-data "src/templates:templates" \
+            --add-data "build/resources/main/micronaut-banner.txt:."
 
       - name: Zip dist folder
         uses: thedoctor0/zip-release@master
