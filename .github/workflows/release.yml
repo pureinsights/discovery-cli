@@ -151,27 +151,10 @@ jobs:
           filename: 'pdp.zip'
           directory: 'dist'
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      - uses: actions/upload-artifact@master
         with:
-          tag_name: ${{ github.run_id }}
-          release_name: Release ${{ github.run_id }}
-          draft: true
-          prerelease: false
-
-      - name: Upload release assets
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./dist/pdp.zip
-          asset_name: pdp.zip
-          asset_content_type: application/zip
+          name: cli-binaries
+          path: ./dist/pdp.zip
 
   tag-release:
     #    if: github.event.pull_request.merged == true
@@ -223,6 +206,19 @@ jobs:
           ci-tools/publish-release.sh \
             -v "${{ needs.version.outputs.release-version }}" \
             -n "${{ steps.release-notes.outputs.changelog }}"
+
+      - uses: actions/download-artifact@master
+        with:
+          name: my-artifact
+          path: ./dist/pdp.zip
+
+      - name: Upload binaries
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          latestRelease=`ci-tools/find-latest-release.sh`
+          gh release upload ${latestRelease} ./dist/pdp.zip
+  
 
   merge-to-develop:
     #    if: github.event.pull_request.merged == true
