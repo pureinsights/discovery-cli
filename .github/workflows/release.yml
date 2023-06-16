@@ -216,8 +216,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         run: |
-          latestRelease=`ci-tools/find-latest-release.sh`
-          gh release upload ${latestRelease} ./dist/pdp.zip
+          gh release upload ${{ needs.version.outputs.release-version }} ./dist/pdp.zip
   
 
   merge-to-develop:
