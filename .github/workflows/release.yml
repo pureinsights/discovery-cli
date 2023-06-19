@@ -260,7 +260,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         with:
           configuration: "ci-tools/release-notes.json"
-          toTag: 1df4b6d471f748ef8e3876a449e5183d7027def9
+          toTag: cfcaeee27ee9ffab9cae7153e5699963ac6c1b81
 
       - name: Tag and publish the release
         env:
