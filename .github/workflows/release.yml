@@ -274,13 +274,13 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: cli-linux-binaries
-          path: ./dist/linux-pdp.zip
+          path: ./dist
 
       - name: Downloading windows binaries
         uses: actions/download-artifact@master
         with:
           name: cli-windows-binaries
-          path: ./dist/windows-pdp.zip
+          path: ./dist
 
       - name: Upload binaries
         env:
