@@ -19,87 +19,87 @@ env:
   CI_SIGNING_KEY: ${{ secrets.CI_SIGNING_KEY }}
 
 jobs:
-  #  version:
-  #    #    if: github.event.pull_request.merged == true
-  #    runs-on: ubuntu-latest
-  #    outputs:
-  #      release-version: ${{ steps.define-version.outputs.release-version }}
-  #      release-type: ${{ steps.define-version.outputs.release-type }}
-  #      trigger-dependencies: ${{ steps.downstream-trigger.outputs.trigger-dependencies }}
-  #    steps:
-  #      - name: Checkout code
-  #        uses: actions/checkout@v3
-  #        with:
-  #          ref: ${{ github.base_ref }}
-  #
-  #      - name: Set up JDK 17
-  #        uses: actions/setup-java@v3
-  #        with:
-  #          distribution: 'temurin'
-  #          java-version: '17'
-  #
-  #      - name: Set execution permissions
-  #        run: |
-  #          chmod +x ./gradlew
-  #          ./gradlew ciTools
-  #          chmod -R +x ci-tools
-  #
-  #      - name: Define version
-  #        id: define-version
-  #        run: |
-  #          ./gradlew -Dversion.prerelease="" -Dversion.buildmeta=""
-  #
-  #          releaseVersion=$(ci-tools/read-version.sh)
-  #          echo "Configuring version for Release ${releaseVersion}"
-  #          echo "release-version=${releaseVersion}" >> $GITHUB_OUTPUT
-  #
-  #          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:major') }} == true ]]; then
-  #            echo "release-type=major" >> $GITHUB_OUTPUT
-  #          elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
-  #            echo "release-type=minor" >> $GITHUB_OUTPUT
-  #          fi
-  #
-  #      - name: Define downstream trigger
-  #        id: downstream-trigger
-  #        run: |
-  #          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:major') }} == true ]]; then
-  #            echo "trigger-dependencies=major" >> $GITHUB_OUTPUT
-  #          elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
-  #            echo "trigger-dependencies=minor" >> $GITHUB_OUTPUT
-  #          fi
-  #
-  #  validate:
-  #    #    if: github.event.pull_request.merged == true
-  #    needs: version
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - name: Checkout code
-  #        uses: actions/checkout@v3
-  #        with:
-  #          ref: ${{ github.base_ref }}
-  #
-  #      - name: Set up JDK 17
-  #        uses: actions/setup-java@v3
-  #        with:
-  #          distribution: 'temurin'
-  #          java-version: '17'
-  #
-  #      - name: Set execution permissions
-  #        run: |
-  #          chmod +x ./gradlew
-  #          ./gradlew ciTools
-  #          chmod -R +x ci-tools
-  #
-  #      - name: Validate release number
-  #        env:
-  #          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
-  #        run: ci-tools/validate-release-version.sh -v ${{ needs.version.outputs.release-version }}
+  version:
+    #    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      release-version: ${{ steps.define-version.outputs.release-version }}
+      release-type: ${{ steps.define-version.outputs.release-type }}
+      trigger-dependencies: ${{ steps.downstream-trigger.outputs.trigger-dependencies }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          ./gradlew ciTools
+          chmod -R +x ci-tools
+
+      - name: Define version
+        id: define-version
+        run: |
+          ./gradlew -Dversion.prerelease="" -Dversion.buildmeta=""
+          
+          releaseVersion=$(ci-tools/read-version.sh)
+          echo "Configuring version for Release ${releaseVersion}"
+          echo "release-version=${releaseVersion}" >> $GITHUB_OUTPUT
+          
+          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:major') }} == true ]]; then
+            echo "release-type=major" >> $GITHUB_OUTPUT
+          elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
+            echo "release-type=minor" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Define downstream trigger
+        id: downstream-trigger
+        run: |
+          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:major') }} == true ]]; then
+            echo "trigger-dependencies=major" >> $GITHUB_OUTPUT
+          elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
+            echo "trigger-dependencies=minor" >> $GITHUB_OUTPUT
+          fi
+
+  validate:
+    #    if: github.event.pull_request.merged == true
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          ./gradlew ciTools
+          chmod -R +x ci-tools
+
+      - name: Validate release number
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: ci-tools/validate-release-version.sh -v ${{ needs.version.outputs.release-version }}
 
   windows-build:
     #    if: github.event.pull_request.merged == true
-    #    needs:
-    #      - validate
-    #      - version
+    needs:
+      - validate
+      - version
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -156,9 +156,9 @@ jobs:
 
   linux-build:
     #    if: github.event.pull_request.merged == true
-    #    needs:
-    #      - validate
-    #      - version
+    needs:
+      - validate
+      - version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -206,11 +206,6 @@ jobs:
           cd ./dist/
           zip -rq ./linux-pdp.zip ./pdp
 
-      - name: Show binaries
-        run: |
-          cd ./dist/
-          ls 
-
       - uses: actions/upload-artifact@master
         with:
           name: cli-linux-binaries
@@ -221,7 +216,7 @@ jobs:
     needs:
       - linux-build
       - windows-build
-    #      - version
+      - version
     runs-on: ubuntu-latest
     outputs:
       branch-ref: ${{ steps.commit-version.outputs.branch-ref }}
@@ -287,9 +282,6 @@ jobs:
           name: cli-windows-binaries
           path: ./dist/windows-pdp.zip
 
-      - name: show directories
-        run: ls ./dist -l
-
       - name: Upload binaries
         env:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
@@ -300,7 +292,7 @@ jobs:
   merge-to-develop:
     #    if: github.event.pull_request.merged == true
     needs:
-      #      - version
+      - version
       - linux-build
       - windows-build
     runs-on: ubuntu-latest
