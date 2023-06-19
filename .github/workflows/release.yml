@@ -422,7 +422,7 @@ jobs:
         uses: geekyeggo/delete-artifact@v1
         with:
           name: |
-            pdp-cli-${{ needs.version.outputs.release-version }}-windows
-            pdp-cli-${{ needs.version.outputs.release-version }}-linux
+            pdp-cli-${{ needs.version.outputs.release-version }}-Windows
+            pdp-cli-${{ needs.version.outputs.release-version }}-Linux
             banner-cli-${{ needs.version.outputs.release-version }}
           failOnError: false
