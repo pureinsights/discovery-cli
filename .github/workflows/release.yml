@@ -141,7 +141,12 @@ jobs:
         with:
           type: 'zip'
           filename: 'windows-pdp.zip'
-          directory: './dist/pdp'
+          directory: './dist'
+          path: './pdp'
+
+      - name: Shows the CLI binaries
+        run: |
+          dir ./dist
 
       - uses: actions/upload-artifact@master
         with:
@@ -198,7 +203,13 @@ jobs:
 
       - name: Zip dist folder
         run: |
-          zip -rq ./dist/linux-pdp.zip ./dist/pdp
+          cd ./dist/
+          zip -rq ./linux-pdp.zip ./pdp
+
+      - name: Show binaries
+        run: |
+          cd ./dist/
+          ls 
 
       - uses: actions/upload-artifact@master
         with:
@@ -218,7 +229,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ steps.commit-version.outputs.branch-ref }}
+          ref: ${{ github.base_ref }}
           token: ${{ secrets.CI_TOKEN }}
 
       - name: Set up JDK 17
