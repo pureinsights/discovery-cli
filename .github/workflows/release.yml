@@ -95,11 +95,43 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         run: ci-tools/validate-release-version.sh -v ${{ needs.version.outputs.release-version }}
 
-  windows-build:
-    #    if: github.event.pull_request.merged == true
+  cli-banner:
     needs:
       - validate
       - version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.CI_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          ./gradlew ciTools
+          chmod -R +x ci-tools
+
+      - name: Create the PDP Banner for the CLI
+        run: ./gradlew banner
+
+      - name: Uploading the CLI banner
+        uses: actions/upload-artifact@master
+        with:
+          name: banner-cli-${{ needs.version.outputs.release-version }}
+          path: ./build/resources/main/micronaut-banner.txt
+
+  windows-build:
+    #    if: github.event.pull_request.merged == true
+    needs:
+      - cli-banner
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -125,8 +157,14 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Create the PDP Banner for the CLI
-        run: .\gradlew banner
+      - name: Downloading the cli banner
+        uses: actions/download-artifact@master
+        with:
+          name: banner-cli-${{ needs.version.outputs.release-version }}
+          path: ./build/resources/main/
+
+      - name: Run unit tests
+        run: tox -e py
 
       - name: Build executable with pyinstaller
         run: |
@@ -140,25 +178,19 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: 'windows-pdp.zip'
+          filename: pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip
           directory: './dist'
           path: './pdp'
 
-      - name: Shows the CLI binaries
-        run: |
-          dir ./dist
-
       - uses: actions/upload-artifact@master
         with:
-          name: cli-windows-binaries
-          path: ./dist/windows-pdp.zip
-
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}
+          path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip
 
   linux-build:
     #    if: github.event.pull_request.merged == true
     needs:
-      - validate
-      - version
+      - cli-banner
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -190,8 +222,14 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Create the PDP Banner for the CLI
-        run: ./gradlew banner
+      - name: Downloading the cli banner
+        uses: actions/download-artifact@master
+        with:
+          name: banner-cli-${{ needs.version.outputs.release-version }}
+          path: ./build/resources/main/
+
+      - name: Run unit tests
+        run: tox -e py
 
       - name: Build executable with pyinstaller
         run: |
@@ -204,12 +242,63 @@ jobs:
       - name: Zip dist folder
         run: |
           cd ./dist/
-          zip -rq ./linux-pdp.zip ./pdp
+          tar -czf pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.tar.gz  ./pdp
 
       - uses: actions/upload-artifact@master
         with:
-          name: cli-linux-binaries
-          path: ./dist/linux-pdp.zip
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}
+          path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip
+
+  #  documentation:
+  #    #    if: github.event.pull_request.merged == true
+  #    needs:
+  #      - linux-build
+  #      - windows-build
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - name: Checkout the code
+  #        uses: actions/checkout@v3
+  #
+  #      - name: Make gradlew executable
+  #        run: chmod +x ./gradlew
+  #
+  #      - name: Set up JDK 17
+  #        uses: actions/setup-java@v3
+  #        with:
+  #          distribution: 'temurin'
+  #          java-version: '17'
+  #
+  #      - name: Publish to Confluence
+  #        env:
+  #          CONFLUENCE_EMAIL: ${{ secrets.confluence_email }}
+  #          CONFLUENCE_TOKEN: ${{ secrets.confluence_token }}
+  #        run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
+
+  sonarcloud:
+    #    if: github.event.pull_request.merged == true
+    needs:
+      - linux-build
+      - windows-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.CI_TOKEN }}
+
+        # Temporal step to avoid conflict between build.gradle and SonarCloud
+      - name: Rename gradle file
+        run: mv build.gradle build.gradle.temp
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Rename gradle file to original name
+        run: mv build.gradle.temp build.gradle
 
   tag-release:
     #    if: github.event.pull_request.merged == true
@@ -252,7 +341,6 @@ jobs:
           latestRelease=`ci-tools/find-latest-release.sh`
           echo "from-commit=$(ci-tools/find-bump-commit.sh -b develop -v ${latestRelease})" >> $GITHUB_OUTPUT
           echo "to-commit=$(ci-tools/find-bump-commit.sh -b develop -v ${{ needs.version.outputs.release-version }})" >> $GITHUB_OUTPUT
-          echo "to-commit" ${{ steps.find-commits.outputs.to-commit }}
 
       - name: Release Notes
         id: release-notes
@@ -275,13 +363,13 @@ jobs:
       - name: Downloading linux binaries
         uses: actions/download-artifact@master
         with:
-          name: cli-linux-binaries
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-linux
           path: ./dist
 
       - name: Downloading windows binaries
         uses: actions/download-artifact@master
         with:
-          name: cli-windows-binaries
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-windows
           path: ./dist
 
       - name: Upload binaries
@@ -334,3 +422,19 @@ jobs:
             -s "${MAIN_BRANCH}" \
             -t "${DEVELOP_BRANCH}" \
             -i "${{ github.run_id }}"
+
+  artifacts-cleanup:
+    needs:
+      - linux-build
+      - windows-build
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Clean up artifacts
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            pdp-cli-${{ needs.version.outputs.release-version }}-windows
+            pdp-cli-${{ needs.version.outputs.release-version }}-linux
+            banner-cli-${{ needs.version.outputs.release-version }}
+          failOnError: false
