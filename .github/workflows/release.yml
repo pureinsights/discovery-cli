@@ -252,6 +252,7 @@ jobs:
           latestRelease=`ci-tools/find-latest-release.sh`
           echo "from-commit=$(ci-tools/find-bump-commit.sh -b develop -v ${latestRelease})" >> $GITHUB_OUTPUT
           echo "to-commit=$(ci-tools/find-bump-commit.sh -b develop -v ${{ needs.version.outputs.release-version }})" >> $GITHUB_OUTPUT
+          echo "to-commit" ${{ steps.find-commits.outputs.to-commit }}
 
       - name: Release Notes
         id: release-notes
@@ -289,7 +290,7 @@ jobs:
           gh release upload ${{ needs.version.outputs.release-version }} ./dist/windows-pdp.zip
           gh release upload ${{ needs.version.outputs.release-version }} ./dist/linux-pdp.zip
   
-
+  
   merge-to-develop:
     #    if: github.event.pull_request.merged == true
     needs:
