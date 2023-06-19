@@ -54,9 +54,10 @@ TEMPLATE_NAMES = [directory.lower() for directory in
                    'product URL must be provided with the following '
                    'format PRODUCT_NAME URL. The command allows '
                    'multiple flags to define multiples products.\n '
-                   'Default are ingestion http://localhost:8080,'
-                   'staging http://localhost:8081,'
-                   'core http://localhost:8082,'
+                   'Default are                                 '
+                   'ingestion http://localhost:8080,         '
+                   'staging http://localhost:8081,           '
+                   'core http://localhost:8082,            '
                    'discovery http://localhost:8088.')
 @click.option('--force/--no-force', default=False,
               help='If there is a project with the same name it will to override it. '
@@ -381,4 +382,3 @@ def _import(obj, product: str, _zip: str):
   if not os.path.isabs(_zip):
     _zip = os.path.join(obj['project_path'], _zip)
   run_import(configuration, product, _zip)
-
