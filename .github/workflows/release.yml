@@ -131,6 +131,7 @@ jobs:
   windows-build:
     #    if: github.event.pull_request.merged == true
     needs:
+      - version
       - cli-banner
     runs-on: windows-latest
     steps:
@@ -190,6 +191,7 @@ jobs:
   linux-build:
     #    if: github.event.pull_request.merged == true
     needs:
+      - version
       - cli-banner
     runs-on: ubuntu-latest
     steps:
