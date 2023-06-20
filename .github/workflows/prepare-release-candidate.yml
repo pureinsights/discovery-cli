@@ -52,7 +52,7 @@ jobs:
     #    needs: validate
     runs-on: ubuntu-latest
     outputs:
-      release-version: ${{ steps.define-version.outputs.release-version }}
+      release-version: minor
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
