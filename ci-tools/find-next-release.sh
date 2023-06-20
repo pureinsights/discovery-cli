@@ -46,7 +46,7 @@ fi
 git fetch
 
 echo "Finding current version on default branch"
-git checkout -b "ci/master" --track "origin/${MAIN_BRANCH}"
+git checkout -b "ci/mstr" --track "origin/${MAIN_BRANCH}"
 cp -f semver.properties semver.properties.bkp
 
 if [[ ${type} == 'minor' ]]; then

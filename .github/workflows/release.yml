@@ -35,8 +35,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          chmod +x ./gradlew
-          ./gradlew ciTools
+          +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Define version
@@ -72,8 +71,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          chmod +x ./gradlew
-          ./gradlew ciTools
+          +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Validate release number
@@ -109,8 +107,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          chmod +x ./gradlew
-          ./gradlew ciTools
+          +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Create the PDP Banner for the CLI
@@ -301,8 +298,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          chmod +x ./gradlew
-          ./gradlew ciTools
+          +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Commit version
@@ -369,8 +365,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          chmod +x ./gradlew
-          ./gradlew ciTools
+          +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Bump base branch
