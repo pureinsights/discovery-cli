@@ -17,7 +17,7 @@ def test_start(mocker, snapshot):
   Test the command defined in :func:`src.commands.execution.command.start`.
   """
   mocker.patch("commands.execution.start.post", return_value=b'{"id": "fake-execution-id"}')
-  response = cli.invoke(pdp, ["seed-exec", "start", "--seed", "fake-id", "--scan-type", "incremental"])
+  response = cli.invoke(pdp, ["seed-exec", "start", "--seed-id", "fake-id", "--scan-type", "incremental"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_start.snapshot')
 
@@ -27,7 +27,7 @@ def test_reset(mocker, snapshot):
   Test the command defined in :func:`src.commands.execution.command.reset`.
   """
   mocker.patch("commands.execution.reset.post", return_value=b'{"acknowledged": true}')
-  response = cli.invoke(pdp, ["seed-exec", "reset", "--seed", "fake-id"])
+  response = cli.invoke(pdp, ["seed-exec", "reset", "--seed-id", "fake-id"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_reset.snapshot')
 
@@ -38,7 +38,7 @@ def test_reset_failed(mocker, snapshot):
   when could not reset the seed.
   """
   mocker.patch("commands.execution.reset.post", return_value=b'{"acknowledged": false}')
-  response = cli.invoke(pdp, ["seed-exec", "reset", "--seed", "fake-id"])
+  response = cli.invoke(pdp, ["seed-exec", "reset", "--seed-id", "fake-id"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_reset_failed.snapshot')
 
@@ -48,7 +48,7 @@ def test_control(mocker, snapshot):
   Test the command defined in :func:`src.commands.execution.command.control`.
   """
   mocker.patch("commands.execution.control.put", return_value=b'{"acknowledged": true}')
-  response = cli.invoke(pdp, ["seed-exec", "control", "--seed", "fake-id", "--action", "HALT"])
+  response = cli.invoke(pdp, ["seed-exec", "control", "--seed-id", "fake-id", "--action", "HALT"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_control.snapshot')
 
@@ -59,7 +59,7 @@ def test_control_failed(mocker, snapshot):
   when the api returns an acknowledged false.
   """
   mocker.patch("commands.execution.control.put", return_value=b'{"acknowledged": false}')
-  response = cli.invoke(pdp, ["seed-exec", "control", "--seed", "fake-id", "--action", "RESUME"])
+  response = cli.invoke(pdp, ["seed-exec", "control", "--seed-id", "fake-id", "--action", "RESUME"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_control_failed.snapshot')
 
@@ -76,7 +76,7 @@ def test_get(mocker, snapshot):
                  b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{},{}]}'
                  b']}'
   )
-  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id"])
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed-id", "fake-id"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get.snapshot')
 
@@ -94,7 +94,7 @@ def test_get_verbose(mocker, snapshot):
                  b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{}]}'
                  b']}'
   )
-  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "-v"])
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed-id", "fake-id", "-v"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_verbose.snapshot')
 
@@ -112,7 +112,7 @@ def test_get_json(mocker, snapshot):
                  b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{}]}'
                  b']}'
   )
-  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "-j"])
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed-id", "fake-id", "-j"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_json.snapshot')
 
@@ -130,7 +130,7 @@ def test_get_pretty(mocker, snapshot):
                  b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{}]}'
                  b']}'
   )
-  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "--pretty"])
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed-id", "fake-id", "--pretty"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_pretty.snapshot')
 
@@ -148,8 +148,8 @@ def test_get_by_ids(mocker, snapshot):
       b'{"id":"execution-id3", "pipelineId":"pipeline-id", "jobId":"job-id", "steps" : [{},{}]}'
     ]
   )
-  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "--execution", "execution-id1", "--execution",
-                              "execution-id2", "--execution", "execution-id3"])
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed-id", "fake-id", "--execution-id", "execution-id1",
+                              "--execution-id", "execution-id2", "--execution-id", "execution-id3"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_by_ids.snapshot')
 
@@ -163,8 +163,8 @@ def test_get_emtpy_executions_by_ids(mocker, snapshot):
     "commands.execution.get.get",
     side_effect=[]
   )
-  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", "--execution", "execution-id1", "--execution",
-                              "execution-id2", "--execution", "execution-id3"])
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed-id", "fake-id", "--execution-id", "execution-id1",
+                              "--execution-id", "execution-id2", "--execution-id", "execution-id3"])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_emtpy_executions_by_ids.snapshot')
 
@@ -178,6 +178,6 @@ def test_get_emtpy_executions(mocker, snapshot):
     "commands.execution.get.get",
     return_value=None
   )
-  response = cli.invoke(pdp, ["seed-exec", "get", "--seed", "fake-id", '--asc', 'pipelineId', '--desc', 'status'])
+  response = cli.invoke(pdp, ["seed-exec", "get", "--seed-id", "fake-id", '--asc', 'pipelineId', '--desc', 'status'])
   assert response.exit_code == 0
   snapshot.assert_match(response.output, 'test_get_emtpy_executions.snapshot')
