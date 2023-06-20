@@ -250,30 +250,30 @@ jobs:
       - name: Rename gradle file to original name
         run: mv build.gradle.temp build.gradle
 
-    documentation:
-      if: github.event.pull_request.merged == true
-      needs:
-        - linux-build
-        - windows-build
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout the code
-          uses: actions/checkout@v3
-
-        - name: Make gradlew executable
-          run: chmod +x ./gradlew
-
-        - name: Set up JDK 17
-          uses: actions/setup-java@v3
-          with:
-            distribution: 'temurin'
-            java-version: '17'
-
-        - name: Publish to Confluence
-          env:
-            CONFLUENCE_EMAIL: ${{ secrets.confluence_email }}
-            CONFLUENCE_TOKEN: ${{ secrets.confluence_token }}
-          run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
+  #    documentation:
+  #      if: github.event.pull_request.merged == true
+  #      needs:
+  #        - linux-build
+  #        - windows-build
+  #      runs-on: ubuntu-latest
+  #      steps:
+  #        - name: Checkout the code
+  #          uses: actions/checkout@v3
+  #
+  #        - name: Make gradlew executable
+  #          run: chmod +x ./gradlew
+  #
+  #        - name: Set up JDK 17
+  #          uses: actions/setup-java@v3
+  #          with:
+  #            distribution: 'temurin'
+  #            java-version: '17'
+  #
+  #        - name: Publish to Confluence
+  #          env:
+  #            CONFLUENCE_EMAIL: ${{ secrets.confluence_email }}
+  #            CONFLUENCE_TOKEN: ${{ secrets.confluence_token }}
+  #          run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
 
   tag-release:
     if: github.event.pull_request.merged == true
@@ -380,6 +380,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         run: |
+
           . ci-tools/config-branches.sh
           ci-tools/merge-pull-request.sh \
             -s "${MAIN_BRANCH}" \
