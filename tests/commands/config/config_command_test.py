@@ -142,6 +142,21 @@ def test_create_successfully(mocker, snapshot, test_project_path):
   snapshot.assert_match(response.output, 'test_create_successfully.snapshot')
 
 
+def test_create_without_deploy_out_pdp_project(mocker, snapshot, test_project_path):
+  """
+  Test the command defined in :func:`src.commands.config.command.create`,
+  when the flag --path was provided.
+  """
+  mocker.patch("commands.config.create.create_spinner")
+  mocker.patch("commands.config.create.create_or_update_entity", return_value="newId")
+  mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
+  mocker.patch("commands.config.create.write_entities")
+  response = cli.invoke(pdp, ["config", "create", "--entity-type", "pipeline", "--path",
+                              test_project_path('custom_pipeline.json')])
+  assert response.exit_code == 0
+  snapshot.assert_match(response.output, 'test_create_without_deploy_out_pdp_project.snapshot')
+
+
 def test_create_with_entity_template(mocker, snapshot, test_project_path):
   """
   Test the command defined in :func:`src.commands.config.command.create`,
