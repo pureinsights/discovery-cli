@@ -4,7 +4,7 @@ on:
   pull_request:
     types:
       - closed
-    branches: [ ci/mn, ci/mstr, rls* ]
+    branches: [ mn, mstr, rls* ]
 
 concurrency:
   group: release
