@@ -5,22 +5,40 @@ on:
       - master
       - main
       - release*
+      - develop
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 jobs:
   sonarcloud:
     name: SonarCloud
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout the code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install tox
+        run: pip install -r requirements.txt
+
+      - name: Run tox
+        run: tox -e py
+
+      # Temporal step to avoid conflict between build.gradle and SonarCloud
+      - name: Rename gradle file
+        run: mv build.gradle build.gradle.temp
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=pureinsights-1
-            -Dsonar.projectKey=pureinsights_pdp_cli
+
+      - name: Rename gradle file to original name
+        run: mv build.gradle.temp build.gradle
+

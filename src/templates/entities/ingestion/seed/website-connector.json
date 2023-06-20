@@ -1,0 +1,15 @@
+{
+  "seed": {
+    "crawlUrls": [
+      "https://pureinsights.com/"
+    ],
+    "userAgent": "pureinsights-website-connector",
+    "maxDepth": "1"
+  },
+  "name": "Website Connector",
+  "type": "website-connector",
+  "pipelineId": "{{ fromName('<Pipeline name>') }}",
+  "properties": {
+    "index": "website_connector"
+  }
+}

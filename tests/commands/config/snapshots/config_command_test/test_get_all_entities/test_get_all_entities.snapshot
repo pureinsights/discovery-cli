@@ -1,0 +1,33 @@
+Entities
+--------------------|Discovery|--------------------
+    Processor:
+      Entity name "fake-name" found it!
+    Entities found: 1
+
+    Endpoint:
+      Entity name "fake-name" found it!
+    Entities found: 1
+--------------------|Entities found: 0|--------------------
+--------------------|Core|--------------------
+    Credential:
+      Entity name "fake-name" found it!
+    Entities found: 1
+--------------------|Entities found: 0|--------------------
+--------------------|Ingestion|--------------------
+    Processor:
+      Entity name "fake-name" found it!
+    Entities found: 1
+
+    Pipeline:
+      Entity name "fake-name" found it!
+    Entities found: 1
+
+    Seed:
+      Entity name "fake-name" found it!
+    Entities found: 1
+
+    Scheduler:
+      Entity name "fake-name" found it!
+    Entities found: 1
+--------------------|Entities found: 0|--------------------
+Entities found: 7

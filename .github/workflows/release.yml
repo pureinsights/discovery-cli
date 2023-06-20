@@ -1,53 +1,403 @@
-name: Release
+name: Release (TEST)
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [ main, master, release* ]
-jobs:
-  build:
-    runs-on: windows-latest
+  pull_request:
+    types:
+      - closed
+    branches: [ ci/mn, ci/mstr, rls* ]
 
+concurrency:
+  group: release
+
+env:
+  GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USER }}
+  GITHUB_PACKAGE_REGISTRY_API_KEY: ${{ secrets.CI_TOKEN }}
+  CI_SIGNING_KEY: ${{ secrets.CI_SIGNING_KEY }}
+
+jobs:
+  version:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      release-version: ${{ steps.define-version.outputs.release-version }}
+      release-type: ${{ steps.define-version.outputs.release-type }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          chmod -R +x ci-tools
+
+      - name: Define version
+        id: define-version
+        run: |
+          ./gradlew -Dversion.prerelease="" -Dversion.buildmeta=""
+          
+          releaseVersion=$(ci-tools/read-version.sh)
+          echo "Configuring version for Release ${releaseVersion}"
+          echo "release-version=${releaseVersion}" >> $GITHUB_OUTPUT
+          
+          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:major') }} == true ]]; then
+            echo "release-type=major" >> $GITHUB_OUTPUT
+          elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
+            echo "release-type=minor" >> $GITHUB_OUTPUT
+          fi
+
+  validate:
+    if: github.event.pull_request.merged == true
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          chmod -R +x ci-tools
+
+      - name: Validate release number
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: ci-tools/validate-release-version.sh -v ${{ needs.version.outputs.release-version }}
+
+  cli-banner:
+    if: github.event.pull_request.merged == true
+    needs:
+      - validate
+      - version
+    runs-on: ubuntu-latest
+    outputs:
+      python-version: ${{ steps.set-python-version.outputs.python-version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v1
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.CI_TOKEN }}
+
+      - name: Setting the Python version
+        id: set-python-version
+        run: |
+          echo "python-version=3.11" >> $GITHUB_OUTPUT
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          python-version: 3.9
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          chmod -R +x ci-tools
+
+      - name: Create the PDP Banner for the CLI
+        run: ./gradlew banner
+
+      - name: Uploading the CLI banner
+        uses: actions/upload-artifact@master
+        with:
+          name: cli-banner-${{ needs.version.outputs.release-version }}
+          path: ./build/resources/main/micronaut-banner.txt
+
+  windows-build:
+    if: github.event.pull_request.merged == true
+    needs:
+      - version
+      - cli-banner
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.CI_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ needs.cli-banner.outputs.python-version }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+
+      - name: Downloading the cli banner
+        uses: actions/download-artifact@master
+        with:
+          name: cli-banner-${{ needs.version.outputs.release-version }}
+          path: ./build/resources/main/
+
+      - name: Run unit tests
+        run: tox -e py
+
       - name: Build executable with pyinstaller
         run: |
-          pyinstaller --onefile pdp.py --add-data "configuration/templates;configuration/templates"
+          pyinstaller `
+            ./src/pdp.py `
+            --collect-all yaspin -y `
+            --add-data "src/templates;templates" `
+            --add-data "build/resources/main/micronaut-banner.txt;."
+
       - name: Zip dist folder
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: 'pdp.zip'
-          directory: 'dist'
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          filename: pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip
+          directory: './dist'
+          path: './pdp'
+
+      - uses: actions/upload-artifact@master
         with:
-          tag_name: ${{ github.run_id }}
-          release_name: Release ${{ github.run_id }}
-          draft: false
-          prerelease: false
-      - name: Upload release assets
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}
+          path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip
+
+  linux-build:
+    if: github.event.pull_request.merged == true
+    needs:
+      - version
+      - cli-banner
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./dist/pdp.zip
-          asset_name: pdp.zip
-          asset_content_type: application/zip
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.CI_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ needs.cli-banner.outputs.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Downloading the cli banner
+        uses: actions/download-artifact@master
+        with:
+          name: cli-banner-${{ needs.version.outputs.release-version }}
+          path: ./build/resources/main/
+
+      - name: Run unit tests
+        run: tox -e py
+
+      - name: Build executable with pyinstaller
+        run: |
+          pyinstaller \
+            ./src/pdp.py \
+            --collect-all yaspin -y \
+            --add-data "src/templates:templates" \
+            --add-data "build/resources/main/micronaut-banner.txt:."
+
+      - name: Zip dist folder
+        run: |
+          cd ./dist/
+          tar -czf pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.tar.gz  ./pdp
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}
+          path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.tar.gz
+
+  sonarcloud:
+    if: github.event.pull_request.merged == true
+    needs:
+      - linux-build
+      - windows-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.CI_TOKEN }}
+
+        # Temporal step to avoid conflict between build.gradle and SonarCloud
+      - name: Rename gradle file
+        run: mv build.gradle build.gradle.temp
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Rename gradle file to original name
+        run: mv build.gradle.temp build.gradle
+
+    documentation:
+      if: github.event.pull_request.merged == true
+      needs:
+        - linux-build
+        - windows-build
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout the code
+          uses: actions/checkout@v3
+
+        - name: Make gradlew executable
+          run: chmod +x ./gradlew
+
+        - name: Set up JDK 17
+          uses: actions/setup-java@v3
+          with:
+            distribution: 'temurin'
+            java-version: '17'
+
+        - name: Publish to Confluence
+          env:
+            CONFLUENCE_EMAIL: ${{ secrets.confluence_email }}
+            CONFLUENCE_TOKEN: ${{ secrets.confluence_token }}
+          run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
+
+  tag-release:
+    if: github.event.pull_request.merged == true
+    needs:
+      - sonarcloud
+      - version
+    runs-on: ubuntu-latest
+    outputs:
+      branch-ref: ${{ steps.commit-version.outputs.branch-ref }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.CI_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          chmod -R +x ci-tools
+
+      - name: Commit version
+        id: commit-version
+        run: |
+          ./ci-tools/commit-release-version.sh -v ${{ needs.version.outputs.release-version }}
+
+      - name: Release Notes
+        id: release-notes
+        uses: mikepenz/release-changelog-builder-action@v3.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        with:
+          configuration: "ci-tools/release-notes.json"
+          toTag: 836278b993329d4374c6264bf95bc9be0bd12586
+          fromTag: f040320e74d2cee69026c4b6f7ef8ef04e78ed54
+
+      - name: Tag and publish the release
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          echo "Release note failed: ${{ steps.release-notes.outputs.failed }}"
+          ci-tools/publish-release.sh \
+            -v "${{ needs.version.outputs.release-version }}" \
+            -n "${{ steps.release-notes.outputs.changelog }}"
+
+      - name: Downloading linux binaries
+        uses: actions/download-artifact@master
+        with:
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-Linux
+          path: ./dist
+
+      - name: Downloading windows binaries
+        uses: actions/download-artifact@master
+        with:
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-Windows
+          path: ./dist
+
+      - name: Upload binaries
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          gh release upload ${{ needs.version.outputs.release-version }} ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-Windows.zip
+          gh release upload ${{ needs.version.outputs.release-version }} ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-Linux.tar.gz
+  
+  
+  merge-to-develop:
+    if: github.event.pull_request.merged == true
+    needs:
+      - version
+      - sonarcloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.CI_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          chmod -R +x ci-tools
+
+      - name: Bump base branch
+        if: ${{ needs.version.outputs.release-type == 'major' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          . ci-tools/config-branches.sh
+          ci-tools/set-version.sh -c -b "${DEVELOP_BRANCH}" -v "${{ needs.version.outputs.release-version }}"
+
+      - name: Create PR with changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          . ci-tools/config-branches.sh
+          ci-tools/merge-pull-request.sh \
+            -s "${MAIN_BRANCH}" \
+            -t "${DEVELOP_BRANCH}" \
+            -i "${{ github.run_id }}"
+
+  artifacts-cleanup:
+    needs:
+      - tag-release
+      - version
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Clean up artifacts
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            pdp-cli-${{ needs.version.outputs.release-version }}-Windows
+            pdp-cli-${{ needs.version.outputs.release-version }}-Linux
+            cli-banner-${{ needs.version.outputs.release-version }}
+          failOnError: false

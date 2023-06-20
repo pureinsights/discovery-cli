@@ -1,0 +1,3 @@
+✔ Item fake-id1 deleted successfully. Transaction id fake-transaction1.
+❌ Couldn't delete the item fake-id2.
+✔ Item fake-id3 deleted successfully. Transaction id fake-transaction3.

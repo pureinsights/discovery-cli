@@ -1,0 +1,17 @@
+Usage: pdp [OPTIONS] COMMAND [ARGS]...
+
+  This is the official Pureinsights Discovery Platform CLI.
+
+Options:
+  --profile TEXT  Configuration profile to load specific configurations from
+                  pdp.ini. Default is "DEFAULT"
+  --path TEXT     The path to a directory with the structure and the pdp.ini
+                  that init command creates. Default is ./.
+  --help          Show this message and exit.
+
+Commands:
+  config     Contains all the commands to help you manage the entities on PDP.
+  core       Encloses all the commands related with the Core API.
+  health     This command is used to know if PDP-CLI has been installed...
+  seed-exec  Encloses all the commands related with the seed execution.
+  staging    Encloses all related commands with the Staging API.
