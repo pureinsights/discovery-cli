@@ -13,5 +13,5 @@
 # prior written permission has been granted by Pureinsights Technology Ltd.
 #
 
-export MAIN_BRANCH=ci/mstr
-export DEVELOP_BRANCH=ci/dvlp
+export MAIN_BRANCH=mstr
+export DEVELOP_BRANCH=dvlp
