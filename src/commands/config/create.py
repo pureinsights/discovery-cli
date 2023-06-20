@@ -201,13 +201,38 @@ def printing_stage(entity_type: PdpEntity, entities: list[dict], _json: bool, pr
   """
   if pretty:
     return print_console(json.dumps(entities, indent=2))
-  
+
   if _json:
     return print_console(entities)
 
   for entity in entities:
     entity_str = click.style(identify_entity(entity), fg='blue')
     print_console(f'Entity {entity_str} added to {click.style(entity_type.associated_file_name, fg="green")}.')
+
+
+def run_deployment(config: dict, entity_type: PdpEntity, entities: list[dict], ignore_ids: bool, _json: bool):
+  """
+  Runs the deployment stage and returns the entities which should be written.
+  :param dict config: The configuration of the project, containing the url of the products APIs.
+  :param PdpEntity entity_type: The entity type of the entities that will be added to the project.
+  :param list[dict] entities: A list with the entities to deploy.
+  :param bool _json: If True, the result will be showed as a JSON.
+  :param bool ignore_ids: If True, will try to create new instances of the entities.
+  """
+  entities_copy = [{**entity} for entity in entities]
+  # Deploys the entities list
+  entities_deployed = deployment_stage(config, entity_type, entities_copy, ignore_ids, not _json)
+
+  entities_to_write = []
+  for entity_deployed in entities_deployed:
+    for entity in entities:
+      # If entity contains all the attributes with the same value as entity_deployed, then is the same entity
+      if are_same_pdp_entity(entity, entity_deployed):
+        entity['id'] = entity_deployed.get('id', None)
+        entities_to_write += [entity]
+        entities.remove(entity)
+        break
+  return entities_to_write
 
 
 def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_to_deploy: bool,
@@ -226,7 +251,6 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
   """
   suppress_errors(_json)
   suppress_warnings(_json)
-  entities_deployed = []
 
   # Read the entities to create
   _file, entities = input_stage(file, interactive)
@@ -242,20 +266,10 @@ def run(config: dict, project_path: str, entity_type: PdpEntity, file: str, has_
 
   # If the flag is true, then deploys the entities to the products
   if has_to_deploy:
-    entities_copy = [{**entity} for entity in entities]
-    # Deploys the entities list
-    entities_deployed = deployment_stage(config, entity_type, entities_copy, ignore_ids, not _json)
+    entities = run_deployment(config, entity_type, entities, ignore_ids, _json)
 
-    entities_to_write = []
-    for entity_deployed in entities_deployed:
-      for entity in entities:
-        # If entity contains all the attributes with the same value as entity_deployed, then is the same entity
-        if are_same_pdp_entity(entity, entity_deployed):
-          entity['id'] = entity_deployed.get('id', None)
-          entities_to_write += [entity]
-          entities.remove(entity)
-          break
-    entities = entities_to_write
+  if not has_pdp_project_structure(project_path) and not has_to_deploy:
+    print_warning('The command create must be called within a PDP project to add the entity to the files.')
 
   # Writes the entities to the pdp project
   entities = writing_stage(project_path, entity_type, entities)
