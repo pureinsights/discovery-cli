@@ -17,6 +17,10 @@ on:
         type: boolean
         default: false
 
+  push:
+    branches:
+      - feature/PDP-1368
+
 env:
   GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USER }}
   GITHUB_PACKAGE_REGISTRY_API_KEY: ${{ secrets.CI_TOKEN }}
