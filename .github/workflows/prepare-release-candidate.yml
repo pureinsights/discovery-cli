@@ -52,7 +52,7 @@ jobs:
     #    needs: validate
     runs-on: ubuntu-latest
     outputs:
-      release-version: minor
+      release-version: ${{ steps.define-version.outputs.release-version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -71,7 +71,7 @@ jobs:
 
       - name: Define version
         id: define-version
-        run: ci-tools/find-next-release.sh -t "${{ github.event.inputs.release-type }}"
+        run: ci-tools/find-next-release.sh -t "minor"
 
   branch:
     needs: version
@@ -143,7 +143,7 @@ jobs:
           ci-tools/release-candidate-pull-request.sh \
             -b ${{ needs.branch.outputs.branch-name }} \
             -v ${{ needs.version.outputs.release-version }} \
-            -t ${{ github.event.inputs.release-type }}
+            -t minor
 
   bump-base:
     if: ${{ github.event.inputs.release-type != 'major' && needs.branch.outputs.branch-heads == 0 }}
