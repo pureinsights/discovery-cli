@@ -320,15 +320,6 @@ jobs:
         run: |
           ./ci-tools/commit-release-version.sh -v ${{ needs.version.outputs.release-version }}
 
-      - name: Find commits
-        id: find-commits
-        env:
-          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
-        run: |
-          latestRelease=`ci-tools/find-latest-release.sh`
-          echo "from-commit=$(ci-tools/find-bump-commit.sh -b develop -v ${latestRelease})" >> $GITHUB_OUTPUT
-          echo "to-commit=$(ci-tools/find-bump-commit.sh -b develop -v ${{ needs.version.outputs.release-version }})" >> $GITHUB_OUTPUT
-
       - name: Release Notes
         id: release-notes
         uses: mikepenz/release-changelog-builder-action@v3.4.0
@@ -336,7 +327,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         with:
           configuration: "ci-tools/release-notes.json"
-          toTag: 3a40658e38d96592d52ac913cd708c5128f48796
+          toTag: 836278b993329d4374c6264bf95bc9be0bd12586
+          fromTag: f040320e74d2cee69026c4b6f7ef8ef04e78ed54
 
       - name: Tag and publish the release
         env:
