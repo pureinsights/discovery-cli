@@ -382,4 +382,3 @@ def _import(obj, product: str, _zip: str):
   if not os.path.isabs(_zip):
     _zip = os.path.join(obj['project_path'], _zip)
   run_import(configuration, product, _zip)
-
