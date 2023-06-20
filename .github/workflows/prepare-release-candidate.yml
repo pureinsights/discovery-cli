@@ -65,7 +65,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          +x ./gradlew
+          chmod +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Define version
@@ -94,7 +94,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          +x ./gradlew
+          chmod +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Define release branch
@@ -134,7 +134,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          +x ./gradlew
+          chmod +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Create pull request
@@ -167,7 +167,7 @@ jobs:
 
       - name: Set execution permissions
         run: |
-          +x ./gradlew
+          chmod +x ./gradlew
           chmod -R +x ci-tools
 
       - name: Bump Version
