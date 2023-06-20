@@ -1,0 +1,22 @@
+{
+  "scan": {
+    "query": {
+      "match_all": {}
+    },
+    "idField": "name",
+    "index": "seed",
+    "scrollTimeout": "30",
+    "servers": [
+      {
+        "host": "test-es",
+        "port": "9200"
+      }
+    ],
+    "connection": {
+      "timeout": "30s"
+    }
+  },
+  "name": "ElasticSearch Connector",
+  "type": "elasticsearch-connector",
+  "pipelineId": "{{ fromName('<Pipeline name>') }}"
+}

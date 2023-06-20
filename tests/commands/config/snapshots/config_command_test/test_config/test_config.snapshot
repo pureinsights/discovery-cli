@@ -1,0 +1,18 @@
+Usage: pdp config [OPTIONS] COMMAND [ARGS]...
+
+  Contains all the commands to help you manage the entities on PDP. You can
+  create, update, delete, deploy and more.
+
+  Use --help on each command for more detailed information.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  create  Add a new entity configuration to the entities on the current...
+  delete  Will attempt to delete the entity or entities from the product...
+  deploy  Deploys project configurations to the target products.
+  export  Will create a .zip file with the configuration files for the...
+  get     Retrieves information about all the entities deployed on PDP...
+  import  Will import a .zip to a given product.
+  init    Creates a new project from existing sources or from scratch.

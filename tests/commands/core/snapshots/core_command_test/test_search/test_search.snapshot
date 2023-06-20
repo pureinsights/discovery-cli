@@ -1,0 +1,11 @@
+✔ Some entities found...
+Entities
+--------------------|Core|--------------------
+    Other:
+       | id                                   | name       | description   | active
+   ----+--------------------------------------+------------+---------------+----------
+     0 | 6376af03-1af2-41a2-aef6-62aefc73a870 | fake-name1 | ---           | True
+     1 | 6376af03-1af2-41a2-aef6-62aefc73a871 | fake-name2 | Entity 2      | False
+    Entities found: 2
+--------------------|Entities found: 0|--------------------
+Entities found: 2

@@ -1,0 +1,1 @@
+[{'id': 'fakeid', 'name': 'Pipeline', 'active': True, 'steps': [{'processorId': "{{ fromName('<Processor Name>') }}", 'action': 'hydrate'}]}]

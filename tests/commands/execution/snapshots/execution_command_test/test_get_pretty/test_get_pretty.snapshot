@@ -1,0 +1,29 @@
+[
+  {
+    "id": "execution-id1",
+    "pipelineId": "pipeline-id",
+    "jobId": "job-id",
+    "steps": [
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "id": "execution-id2",
+    "pipelineId": "pipeline-id",
+    "jobId": "job-id",
+    "steps": [
+      {}
+    ]
+  },
+  {
+    "id": "execution-id3",
+    "pipelineId": "pipeline-id",
+    "jobId": "job-id",
+    "steps": [
+      {},
+      {}
+    ]
+  }
+]
