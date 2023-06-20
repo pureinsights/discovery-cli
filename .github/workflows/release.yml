@@ -1,10 +1,10 @@
-name: Release
+name: Release (TEST)
 
 on:
   pull_request:
     types:
       - closed
-    branches: [ main, master, release* ]
+    branches: [ ci/mn, ci/mstr, ci/rls* ]
 
 concurrency:
   group: release
@@ -21,7 +21,6 @@ jobs:
     outputs:
       release-version: ${{ steps.define-version.outputs.release-version }}
       release-type: ${{ steps.define-version.outputs.release-type }}
-      trigger-dependencies: ${{ steps.downstream-trigger.outputs.trigger-dependencies }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -53,15 +52,6 @@ jobs:
             echo "release-type=major" >> $GITHUB_OUTPUT
           elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
             echo "release-type=minor" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Define downstream trigger
-        id: downstream-trigger
-        run: |
-          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:major') }} == true ]]; then
-            echo "trigger-dependencies=major" >> $GITHUB_OUTPUT
-          elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
-            echo "trigger-dependencies=minor" >> $GITHUB_OUTPUT
           fi
 
   validate:
