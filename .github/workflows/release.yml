@@ -20,7 +20,7 @@ env:
 
 jobs:
   version:
-    #    if: github.event.pull_request.merged == true
+    #if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.define-version.outputs.release-version }}
@@ -69,7 +69,7 @@ jobs:
           fi
 
   validate:
-    #    if: github.event.pull_request.merged == true
+    #if: github.event.pull_request.merged == true
     needs: version
     runs-on: ubuntu-latest
     steps:
@@ -96,6 +96,7 @@ jobs:
         run: ci-tools/validate-release-version.sh -v ${{ needs.version.outputs.release-version }}
 
   cli-banner:
+    #if: github.event.pull_request.merged == true
     needs:
       - validate
       - version
@@ -132,11 +133,11 @@ jobs:
       - name: Uploading the CLI banner
         uses: actions/upload-artifact@master
         with:
-          name: banner-cli-${{ needs.version.outputs.release-version }}
+          name: cli-banner-${{ needs.version.outputs.release-version }}
           path: ./build/resources/main/micronaut-banner.txt
 
   windows-build:
-    #    if: github.event.pull_request.merged == true
+    #if: github.event.pull_request.merged == true
     needs:
       - version
       - cli-banner
@@ -162,7 +163,7 @@ jobs:
       - name: Downloading the cli banner
         uses: actions/download-artifact@master
         with:
-          name: banner-cli-${{ needs.version.outputs.release-version }}
+          name: cli-banner-${{ needs.version.outputs.release-version }}
           path: ./build/resources/main/
 
       - name: Run unit tests
@@ -190,7 +191,7 @@ jobs:
           path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip
 
   linux-build:
-    #    if: github.event.pull_request.merged == true
+    #if: github.event.pull_request.merged == true
     needs:
       - version
       - cli-banner
@@ -216,7 +217,7 @@ jobs:
       - name: Downloading the cli banner
         uses: actions/download-artifact@master
         with:
-          name: banner-cli-${{ needs.version.outputs.release-version }}
+          name: cli-banner-${{ needs.version.outputs.release-version }}
           path: ./build/resources/main/
 
       - name: Run unit tests
@@ -241,7 +242,7 @@ jobs:
           path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.tar.gz
 
   sonarcloud:
-    #    if: github.event.pull_request.merged == true
+    #if: github.event.pull_request.merged == true
     needs:
       - linux-build
       - windows-build
@@ -267,7 +268,7 @@ jobs:
         run: mv build.gradle.temp build.gradle
 
   #  documentation:
-  #    #    if: github.event.pull_request.merged == true
+  #    #if: github.event.pull_request.merged == true
   #    needs:
   #      - linux-build
   #      - windows-build
@@ -292,7 +293,7 @@ jobs:
   #        run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
 
   tag-release:
-    #    if: github.event.pull_request.merged == true
+    #if: github.event.pull_request.merged == true
     needs:
       - sonarcloud
       - version
@@ -371,7 +372,7 @@ jobs:
   
   
   merge-to-develop:
-    #    if: github.event.pull_request.merged == true
+    #if: github.event.pull_request.merged == true
     needs:
       - version
       - sonarcloud
@@ -425,5 +426,5 @@ jobs:
           name: |
             pdp-cli-${{ needs.version.outputs.release-version }}-Windows
             pdp-cli-${{ needs.version.outputs.release-version }}-Linux
-            banner-cli-${{ needs.version.outputs.release-version }}
+            cli-banner-${{ needs.version.outputs.release-version }}
           failOnError: false
