@@ -238,7 +238,7 @@ jobs:
       - uses: actions/upload-artifact@master
         with:
           name: pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}
-          path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip
+          path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.tar.gz
 
   sonarcloud:
     #    if: github.event.pull_request.merged == true
@@ -353,21 +353,21 @@ jobs:
       - name: Downloading linux binaries
         uses: actions/download-artifact@master
         with:
-          name: pdp-cli-${{ needs.version.outputs.release-version }}-linux
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-Linux
           path: ./dist
 
       - name: Downloading windows binaries
         uses: actions/download-artifact@master
         with:
-          name: pdp-cli-${{ needs.version.outputs.release-version }}-windows
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-Windows
           path: ./dist
 
       - name: Upload binaries
         env:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         run: |
-          gh release upload ${{ needs.version.outputs.release-version }} ./dist/windows-pdp.zip
-          gh release upload ${{ needs.version.outputs.release-version }} ./dist/linux-pdp.zip
+          gh release upload ${{ needs.version.outputs.release-version }} ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-Windows.zip
+          gh release upload ${{ needs.version.outputs.release-version }} ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-Linux.tar.gz
   
   
   merge-to-develop:
@@ -415,6 +415,7 @@ jobs:
   artifacts-cleanup:
     needs:
       - tag-release
+      - version
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
