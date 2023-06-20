@@ -1,14 +1,10 @@
 name: Release
 
 on:
-  #  pull_request:
-  #    types:
-  #      - closed
-  #    branches: [ main, master, release* ]
-  workflow_dispatch:
-  push:
-    branches:
-      - feature/PDP-1368
+  pull_request:
+    types:
+      - closed
+    branches: [ main, master, release* ]
 
 concurrency:
   group: release
@@ -20,7 +16,7 @@ env:
 
 jobs:
   version:
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.define-version.outputs.release-version }}
@@ -69,7 +65,7 @@ jobs:
           fi
 
   validate:
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     needs: version
     runs-on: ubuntu-latest
     steps:
@@ -96,7 +92,7 @@ jobs:
         run: ci-tools/validate-release-version.sh -v ${{ needs.version.outputs.release-version }}
 
   cli-banner:
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     needs:
       - validate
       - version
@@ -137,7 +133,7 @@ jobs:
           path: ./build/resources/main/micronaut-banner.txt
 
   windows-build:
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     needs:
       - version
       - cli-banner
@@ -191,7 +187,7 @@ jobs:
           path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip
 
   linux-build:
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     needs:
       - version
       - cli-banner
@@ -242,7 +238,7 @@ jobs:
           path: ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.tar.gz
 
   sonarcloud:
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     needs:
       - linux-build
       - windows-build
@@ -267,33 +263,33 @@ jobs:
       - name: Rename gradle file to original name
         run: mv build.gradle.temp build.gradle
 
-  #  documentation:
-  #    #if: github.event.pull_request.merged == true
-  #    needs:
-  #      - linux-build
-  #      - windows-build
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - name: Checkout the code
-  #        uses: actions/checkout@v3
-  #
-  #      - name: Make gradlew executable
-  #        run: chmod +x ./gradlew
-  #
-  #      - name: Set up JDK 17
-  #        uses: actions/setup-java@v3
-  #        with:
-  #          distribution: 'temurin'
-  #          java-version: '17'
-  #
-  #      - name: Publish to Confluence
-  #        env:
-  #          CONFLUENCE_EMAIL: ${{ secrets.confluence_email }}
-  #          CONFLUENCE_TOKEN: ${{ secrets.confluence_token }}
-  #        run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
+  documentation:
+    if: github.event.pull_request.merged == true
+    needs:
+      - linux-build
+      - windows-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Publish to Confluence
+        env:
+          CONFLUENCE_EMAIL: ${{ secrets.confluence_email }}
+          CONFLUENCE_TOKEN: ${{ secrets.confluence_token }}
+        run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
 
   tag-release:
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     needs:
       - sonarcloud
       - version
@@ -372,7 +368,7 @@ jobs:
   
   
   merge-to-develop:
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     needs:
       - version
       - sonarcloud
