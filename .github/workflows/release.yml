@@ -21,7 +21,6 @@ jobs:
     outputs:
       release-version: ${{ steps.define-version.outputs.release-version }}
       release-type: ${{ steps.define-version.outputs.release-type }}
-      trigger-dependencies: ${{ steps.downstream-trigger.outputs.trigger-dependencies }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -53,15 +52,6 @@ jobs:
             echo "release-type=major" >> $GITHUB_OUTPUT
           elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
             echo "release-type=minor" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Define downstream trigger
-        id: downstream-trigger
-        run: |
-          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:major') }} == true ]]; then
-            echo "trigger-dependencies=major" >> $GITHUB_OUTPUT
-          elif [[ ${{ contains(github.event.pull_request.labels.*.name, 'release:minor') }} == true ]]; then
-            echo "trigger-dependencies=minor" >> $GITHUB_OUTPUT
           fi
 
   validate:
@@ -124,7 +114,9 @@ jobs:
           chmod -R +x ci-tools
 
       - name: Create the PDP Banner for the CLI
-        run: ./gradlew banner
+        run: |
+          ./gradlew -Dversion.semver="${{ needs.version.outputs.release-version }}"
+          ./gradlew banner
 
       - name: Uploading the CLI banner
         uses: actions/upload-artifact@master
@@ -263,30 +255,30 @@ jobs:
       - name: Rename gradle file to original name
         run: mv build.gradle.temp build.gradle
 
-    documentation:
-      if: github.event.pull_request.merged == true
-      needs:
-        - linux-build
-        - windows-build
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout the code
-          uses: actions/checkout@v3
+  documentation:
+    if: github.event.pull_request.merged == true
+    needs:
+      - linux-build
+      - windows-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
 
-        - name: Make gradlew executable
-          run: chmod +x ./gradlew
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
-        - name: Set up JDK 17
-          uses: actions/setup-java@v3
-          with:
-            distribution: 'temurin'
-            java-version: '17'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-        - name: Publish to Confluence
-          env:
-            CONFLUENCE_EMAIL: ${{ secrets.confluence_email }}
-            CONFLUENCE_TOKEN: ${{ secrets.confluence_token }}
-          run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
+      - name: Publish to Confluence
+        env:
+          CONFLUENCE_EMAIL: ${{ secrets.confluence_email }}
+          CONFLUENCE_TOKEN: ${{ secrets.confluence_token }}
+        run: ./gradlew -PconfluenceEmail=${CONFLUENCE_EMAIL} -PconfluenceToken=${CONFLUENCE_TOKEN} confluence
 
   tag-release:
     if: github.event.pull_request.merged == true
