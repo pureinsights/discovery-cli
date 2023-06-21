@@ -108,7 +108,6 @@ jobs:
           ci-tools/release-candidate-branch.sh \
             -b "${{ steps.release-branch.outputs.branch-name }}" \
             -v "${{ needs.version.outputs.release-version }}"
-          echo "Version ${ci-tools/read-version.sh}"
 
       - name: Mark to close
         if: ${{ github.event.inputs.close-release == 'true' }}
@@ -174,6 +173,4 @@ jobs:
 
       - name: Bump Version
         id: bump-version
-        run: |
-          ci-tools/set-version.sh -c -v "${{ needs.version.outputs.release-version }}"
-          echo "Version ${ci-tools/read-version.sh}"
+        run: ci-tools/set-version.sh -c -v "${{ needs.version.outputs.release-version }}"
