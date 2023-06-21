@@ -5,7 +5,7 @@ on:
     types:
       - closed
     branches: [ mn, mstr, rls* ]
- 
+
 concurrency:
   group: release
 
@@ -111,7 +111,9 @@ jobs:
           chmod -R +x ci-tools
 
       - name: Create the PDP Banner for the CLI
-        run: ./gradlew banner
+        run: |
+          ./gradlew -Dversion.semver="${{ needs.version.outputs.release-version }}"
+          ./gradlew banner
 
       - name: Uploading the CLI banner
         uses: actions/upload-artifact@master
