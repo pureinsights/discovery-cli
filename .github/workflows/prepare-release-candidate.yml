@@ -177,3 +177,4 @@ jobs:
         run: |
           ci-tools/set-version.sh -c -v "${{ needs.version.outputs.release-version }}"
           echo "Version ${ci-tools/read-version.sh}"
+
