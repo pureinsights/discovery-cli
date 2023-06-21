@@ -120,7 +120,7 @@ python -m pytest --cov=src --cov-report=html
 
 ```bash
 pip install pyinstaller
-pyinstaller ./src/pdp.py --add-data "src/templates;templates" --add-data "build/resources/main/micronaut-banner.txt;." \
+pyinstaller ./src/pdp.py --add-data "src/templates;templates" --add-data "build/resources/main/banner.txt;." \
 --collect-all yaspin -y
 ```
 
