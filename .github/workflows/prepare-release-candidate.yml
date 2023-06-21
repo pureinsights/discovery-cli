@@ -70,7 +70,7 @@ jobs:
 
       - name: Define version
         id: define-version
-        run: ci-tools/find-next-release.sh -t "minor"
+        run: ci-tools/find-next-release.sh -t "major"
 
   branch:
     if: contains(github.event.head_commit.message, 'test')
@@ -111,7 +111,7 @@ jobs:
           echo "Version ${ci-tools/read-version.sh}"
 
       - name: Mark to close
-        if: ${{ github.event.inputs.close-release == 'true' }}
+        #        if: ${{ github.event.inputs.close-release == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         run: ci-tools/release-candidate-ready.sh -b "${{ steps.release-branch.outputs.branch-name }}"
@@ -146,7 +146,7 @@ jobs:
           ci-tools/release-candidate-pull-request.sh \
             -b ${{ needs.branch.outputs.branch-name }} \
             -v ${{ needs.version.outputs.release-version }} \
-            -t minor
+            -t major
 
   bump-base:
     if: ${{ github.event.inputs.release-type != 'major' && needs.branch.outputs.branch-heads == 0 }}
