@@ -73,7 +73,7 @@ It will create the folder structure for a PDP project.
   **Default is ```False```**.
 - **-u,--product-url**: The base URL for the given product API. The product URL must be provided with the following
   format **PRODUCT_NAME:URL**. The command allows multiple flags to define multiples products.
-  Default are ```ingestion http://localhost:8080```, ```staging http://localhost:8081```,
+  Defaults are ```ingestion http://localhost:8080```, ```staging http://localhost:8081```,
   ```core http://localhost:8082```, ```discovery http://localhost:8088```.
 - **--force/--no-force**: If there is a project with the same name will to override it. **Default is False**.
 - **--template**: If the project will be created from a template, will use the name of the templated provided
@@ -101,7 +101,7 @@ field is missing from an entity, assumes this is a new instance.
 #### Flags:
 
 - **--product**: The name of the product where you want to deploy the entities. The command allows multiple flags to
-  define multiple targets. **Default are ```[ingestion, core, discovery]```**.
+  define multiple targets. **Defaults are ```[ingestion, core, discovery]```**.
 - **-v,--verbose**: Will show more information about the deployment results. **Default is ```False```**.
 - **-g,--ignore-ids/--no-ignore-ids**: Will cause existing ids to be ignored, hence everything will be created as a new
   instance. This is useful when moving configs from one instance to another. **Default is ```False```**.
