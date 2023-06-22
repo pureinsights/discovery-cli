@@ -49,7 +49,7 @@ def test_parsing_stage_no_pdp_project_structure(mocker):
   when the project doesn't have a pdp project structure.
   """
   mocker.patch("commands.config.create.has_pdp_project_structure", return_value=False)
-  assert parsing_stage('fake path', PIPELINE, [{'fake': True}], 'fake path') == [{'fake': True}]
+  assert parsing_stage({}, 'fake path', PIPELINE, [{'fake': True}], 'fake path') == [{'fake': True}]
 
 
 def test_parsing_stage_no_name_and_id(mocker):
@@ -60,8 +60,8 @@ def test_parsing_stage_no_name_and_id(mocker):
   mocker.patch("commands.config.create.has_pdp_project_structure", return_value=True)
   mocker.patch("commands.config.create.raise_for_pdp_data_inconsistencies")
   mocker.patch("commands.config.create.get_all_entities_names_ids", return_value={})
-  assert parsing_stage('fake path', PIPELINE, [{'fake': True}, {'fake2': False}], 'fake path') == [{'fake': True},
-                                                                                                   {'fake2': False}]
+  assert parsing_stage({}, 'fake path', PIPELINE, [{'fake': True}, {'fake2': False}], 'fake path') == [{'fake': True},
+                                                                                                       {'fake2': False}]
 
 
 def test_writing_stage_no_pdp_project_structure(mocker):
@@ -126,13 +126,56 @@ def test_run_no_pdp_project_structure(mocker):
   mocker.patch("commands.config.create.are_same_pdp_entity", return_value=False)
   mocker.patch("commands.config.create.has_pdp_project_structure", return_value=False)
   mocker.patch("commands.config.create.input_stage",
-               return_value=('fake-path', [{'fake': 'fake-value', 'id': 'fakeid'}]))
+               return_value=(
+                 'fake-path',
+                 [
+                   {
+                     'fake': 'fake-value1',
+                     'id': 'fakeid1',
+                     'steps': [
+                       {'processorId': "{{ fromName('processor1') }}", 'name': 'processor1'}
+                     ]
+                   },
+                   {
+                     'fake': 'fake-value2',
+                     'id': 'fakeid2',
+                     'steps': [
+                       {'processorId': "{{ fromName('processor2') }}", 'name': 'processor2'}
+                     ]
+                   }
+                 ]
+               ))
   mocker.patch("commands.config.create.deployment_stage",
-               return_value=[{'fake': 'fake-value1', 'id': 'fakeid'}])
-  parsing_stage_mock = mocker.patch("commands.config.create.parsing_stage")
+               return_value=[{'fake': 'fake-value1', 'id': 'fakeid1'}])
+  mock_search_entity = mocker.patch("commands.config.create.search_entity",
+                                    side_effect=[
+                                      [{'id': 1, 'name': 'processor1'}, {'id': 2, 'name': 'processor2'}],
+                                      []
+                                    ])
   writing_stage_mock = mocker.patch("commands.config.create.writing_stage")
   printing_stage_mock = mocker.patch("commands.config.create.printing_stage")
-  run_create({}, 'fake-path', PIPELINE, 'fake-path', True, False, False, False, False)
-  assert parsing_stage_mock.call_count == 0
+  replace_mock = mocker.patch("commands.config.create.replace_names_by_ids")
+  run_create({'core': 'fake-url'}, 'fake-path', PIPELINE, 'fake-path', True, False, False, False, False)
+  replace_mock.assert_called_once_with(
+    PIPELINE,
+    [
+      {
+        'fake': 'fake-value1',
+        'id': 'fakeid1',
+        'steps': [
+          {'processorId': "{{ fromName('processor1') }}", 'name': 'processor1'}
+        ]
+      },
+      {
+        'fake': 'fake-value2',
+        'id': 'fakeid2',
+        'steps': [
+          {'processorId': "{{ fromName('processor2') }}", 'name': 'processor2'}
+        ]
+      }
+    ],
+    {'processor1': 1}
+  )
+  assert mock_search_entity.call_count == 2
   writing_stage_mock.assert_called_once_with('fake-path', PIPELINE, [])
   printing_stage_mock.assert_called_once()

@@ -129,7 +129,9 @@ pdp -d ./my-pdp-project config deploy -q
 
 Add a new entity configuration to the entities on the current project. The configuration for each entity it will have
 default values depending on the template name provided, or you can specify your own entity configuration with the --file
-and/or --interactive flags. You can also deploy the entities to their respective product.
+and/or --interactive flags. You can also deploy the entities to their respective product. If you call the command from
+outside a PDP project and use the --deploy flag, those entities referenced on the configuration will be searched with
+the search endpoint of the Core API. (This feature may not work properly with credentials in PDP v1.x.x).
 
 #### Flags
 
@@ -712,6 +714,7 @@ Adds a new item to a given bucket within the staging API. If the bucket doesn't 
 
 ###### Flags
 
+
 - `REQUIRED`**--bucket**: The name of the bucket where the item will be added.
 - **-i, --item-id**: The id of the new item. If no id is provided, then an auto-generated hash will be set. Default is
   None.
@@ -802,6 +805,7 @@ This command encloses all commands that let you perform actions on a transaction
 Retrieves all the transactions for a given bucket.
 
 ###### Flags
+
 
 - `REQUIRED`**--bucket**: The name for the bucket to get the items.
 - **-i, --transaction-id**: Will retrieve all the transactions after the given one. Useful to make pagination. Default
