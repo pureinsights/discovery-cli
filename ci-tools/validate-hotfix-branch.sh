@@ -37,7 +37,7 @@ if [[ -n "${type}" ]]; then
   fi
 else
   branch=$( git branch --show-current )
-  if [[ ${branch} != hotfix/* ]]; then
+  if [[ ${branch} != htfx/* ]]; then
     echo "The branch is not a hotfix"
     exit 1
   fi

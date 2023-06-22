@@ -40,4 +40,4 @@ hotfixVersion=$( ci-tools/read-version.sh )
 echo "Configuring version for Hotfix ${hotfixVersion}"
 echo "hotfix-version=${hotfixVersion}" >> $GITHUB_OUTPUT
 
-ci-tools/find-branch.sh -b "hotfix/${releaseVersion}"
+ci-tools/find-branch.sh -b "htfx/${releaseVersion}"
