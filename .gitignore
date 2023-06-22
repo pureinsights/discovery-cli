@@ -22,3 +22,5 @@ build
 
 *my-pdp-project*
 tests/test_project
+
+*ci-tools/*
