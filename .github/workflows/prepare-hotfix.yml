@@ -88,7 +88,7 @@ jobs:
 
       - name: Define release branch
         id: hotfix-branch
-        run: ci-tools/find-branch.sh -b "htfx/${{ needs.version.outputs.hotfix-version }}" #TODO: Change htfx to hotfix
+        run: ci-tools/find-branch.sh -b "htfx/${{ needs.version.outputs.hotfix-version }}"
 
       - name: Create branch for the hotfix
         if: ${{ steps.hotfix-branch.outputs.branch-heads == 0 }}
