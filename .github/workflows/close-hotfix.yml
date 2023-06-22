@@ -265,6 +265,26 @@ jobs:
             -v "${{ needs.version.outputs.release-version }}" \
             -n "${{ steps.release-notes.outputs.changelog }}"
 
+      - name: Downloading linux binaries
+        uses: actions/download-artifact@master
+        with:
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-Linux
+          path: ./dist
+
+      - name: Downloading windows binaries
+        uses: actions/download-artifact@master
+        with:
+          name: pdp-cli-${{ needs.version.outputs.release-version }}-Windows
+          path: ./dist
+
+      - name: Upload binaries
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          gh release upload ${{ needs.version.outputs.release-version }} ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-Windows.zip
+          gh release upload ${{ needs.version.outputs.release-version }} ./dist/pdp-cli-${{ needs.version.outputs.release-version }}-Linux.tar.gz
+  
+
   merge-to-develop:
     needs:
       - version
