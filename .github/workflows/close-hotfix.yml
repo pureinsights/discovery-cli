@@ -2,6 +2,9 @@ name: Close Hotfix
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - htfx/1.8.1
 
 concurrency:
   group: release

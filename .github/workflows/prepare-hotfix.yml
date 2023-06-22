@@ -2,9 +2,6 @@ name: Prepare Hotfix
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - POC/PDP-1375-TEST
 
 env:
   GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USER }}
