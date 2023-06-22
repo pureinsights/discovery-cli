@@ -120,8 +120,8 @@ python -m pytest --cov=src --cov-report=html
 
 ```bash
 pip install pyinstaller
-pyinstaller ./src/pdp.py --add-data "src/templates;templates" --add-data "build/resources/main/micronaut-banner.txt;." \
---collect-all pyfiglet --collect-all yaspin -y
+pyinstaller ./src/pdp.py --add-data "src/templates;templates" --add-data "build/resources/main/banner.txt;." \
+--collect-all yaspin -y
 ```
 
 This will create a 'dist/pdp' folder, whose contents are the necessary run time dependencies for the CLI.
