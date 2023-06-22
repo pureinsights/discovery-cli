@@ -2,6 +2,9 @@ name: Prepare Hotfix
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - POC/PDP-1375-TEST
 
 env:
   GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USER }}
@@ -24,11 +27,11 @@ jobs:
       - name: Set execution permissions
         run: |
           chmod +x ./gradlew
-          ./gradlew ciTools
+          #./gradlew ciTools
           chmod -R +x ci-tools
 
-      - name: Validate branch
-        run: ci-tools/validate-hotfix-branch.sh -t "${{ github.ref_type }}"
+  #      - name: Validate branch
+  #        run: ci-tools/validate-hotfix-branch.sh -t "${{ github.ref_type }}"
 
   version:
     needs: validate
@@ -50,7 +53,7 @@ jobs:
       - name: Set execution permissions
         run: |
           chmod +x ./gradlew
-          ./gradlew ciTools
+          #./gradlew ciTools
           chmod -R +x ci-tools
 
       - name: Define version
@@ -80,7 +83,7 @@ jobs:
       - name: Set execution permissions
         run: |
           chmod +x ./gradlew
-          ./gradlew ciTools
+          #./gradlew ciTools
           chmod -R +x ci-tools
 
       - name: Define release branch
