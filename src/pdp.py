@@ -84,7 +84,7 @@ def health():
   """
   This command is used to know if PDP-CLI has been installed successfully.
   """
-  file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'micronaut-banner.txt'))
+  file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'banner.txt'))
   message = 'Banner not available.'
   if os.path.exists(file_path) and os.path.isfile(file_path):
     message = read_binary_file(file_path).decode('utf-8')
