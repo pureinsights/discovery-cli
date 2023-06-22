@@ -325,6 +325,7 @@ jobs:
       - linux-build
       - windows-build
       - cli-banner
+      - version
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
