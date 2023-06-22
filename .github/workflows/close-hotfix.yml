@@ -254,8 +254,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         with:
           configuration: "ci-tools/release-notes.json"
-          fromTag: ${{ steps.find-commits.outputs.from-commit }} #TODO: Hardcode the commit id
-          toTag: ${{ needs.build.outputs.branch-ref }} #TODO: Hardcode the commit id
+          fromTag: f040320e74d2cee69026c4b6f7ef8ef04e78ed54
+          toTag: 836278b993329d4374c6264bf95bc9be0bd12586
 
       - name: Tag and publish the release
         env:
