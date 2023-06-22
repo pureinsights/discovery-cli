@@ -57,7 +57,7 @@ if [[ ${branch} == ${DEVELOP_BRANCH} ]]; then
   ./gradlew -Dversion.buildmeta="" -Dversion.prerelease="${branch}" incrementPatch
 else
   # Find the pre-release
-  if [[ ${branch} == release/* ]] || [[ ${branch} == htfx/* ]]; then
+  if [[ ${branch} == release/* ]] || [[ ${branch} == hotfix/* ]]; then
     prerelease="RC"
   elif [[ ${branch} == feature/* ]]; then
     prerelease=${branch:8}
