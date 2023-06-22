@@ -300,7 +300,11 @@ jobs:
             -i "${{ github.run_id }}"
 
   artifacts-cleanup:
-    needs: trigger-downstream-dependencies
+    needs:
+      - tag-release
+      - linux-build
+      - windows-build
+      - cli-banner
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
