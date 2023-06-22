@@ -159,7 +159,7 @@ jobs:
             --add-data "build/resources/main/banner.txt;."
 
       - name: Zip dist folder
-        run:
+        run: |
           cd ./dist/
           7z a -tzip pdp-cli-${{ needs.version.outputs.release-version }}-${{ runner.os }}.zip ./pdp
 
