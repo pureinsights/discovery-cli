@@ -217,7 +217,7 @@ def deployment_stage(config: dict, entity_type: PdpEntity, entities: list[dict],
       continue
     if verbose:
       spinner_ok(
-        f"Entity {click.style(identify_entity(entity), fg='blue')} {action} with id {click.style(_id, fg='green')}."
+        f"Entity {click.style(identify_entity(entity), fg='blue')} {action} with id {click.style(_id, fg='green')}"
       )
     entity['id'] = _id
     deployed_entities += [entity]

@@ -27,4 +27,4 @@ def run(config: dict, seed: str):
   if json.loads(res).get("acknowledged", False):
     print_console(f"The seed {click.style(seed, fg='green')} was reset successfully.")
     return
-  print_console(f"Couldn't reset the seed {click.style(seed, fg='green')}.")
+  print_console(f"Couldn't reset the seed {click.style(seed, fg='green')}")

@@ -2,8 +2,8 @@
 
 ## Installation (Windows)
 
-Go to Link to the release .zip and download the .zip file. Extract its contents to the folder where you want to install
-the CLI (remember this folder).
+Go to the [Link of the release](https://github.com/pureinsights/pdp-cli/releases) .zip and download the .zip file.
+Extract its contents to the folder where you want to install the CLI (remember this folder).
 
 Then open the Environment Variables Editor by typing “Environment Variables” on the windows search left down corner. In
 the section of User Variables double-click on Path and add the path to the folder where you installed the CLI.
@@ -209,7 +209,7 @@ pdp config get --entity-type ingestionProcessor
 #### Get entities from ids
 
 ```bash
-pdp config get -i 29a9b5e600704853983b0dd855a11cc6 -i 6376af03-1af2-41a2-aef6-62aefc73a870
+pdp config get -i <entity_id> -i <entity_id>
 ```
 
 ### Delete Command
@@ -251,19 +251,19 @@ pdp config delete --entity-type endpoint --all
 #### Delete entities by ids
 
 ```bash
-pdp config delete -i 504821c342f4e717cb1297739a83e7e3 -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+pdp config delete -i <entity_id> -i <entity_id>
 ```
 
 #### Delete entity in cascade
 
 ```bash
-pdp config delete -i 8e6e1674-fb03-45b3-9ffd-5bf4b780af49 --cascade
+pdp config delete -i <entity_id> --cascade
 ```
 
 #### Delete entity in cascade without confirmation
 
 ```bash
-pdp config delete -i 8e6e1674-fb03-45b3-9ffd-5bf4b780af49 --cascade --yes
+pdp config delete -i <entity_id> --cascade --yes
 ```
 
 ### Export Command
@@ -294,13 +294,13 @@ pdp config export --product discovery
 #### Export an entity
 
 ```bash
-pdp config export --entity-type seed -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+pdp config export --entity-type seed -i <entity_id>
 ```
 
 #### Export an entity with his dependencies
 
 ```bash
-pdp config export --entity-type seed -i 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --include-dependencies
+pdp config export --entity-type seed -i <entity_id> --include-dependencies
 ```
 
 ### Import Command
@@ -316,7 +316,7 @@ each product.
 #### Import entities
 
 ```bash
-pdp config import --product discovery --path endpoints.zip
+pdp config import --product discovery --path <file_path>
 ```
 
 ### Core Command
@@ -355,7 +355,7 @@ pdp core search -t ingestion:processor -t discovery:processor
 ##### Search for entities with filters
 
 ```bash
-pdp core search -q entity_name --page 2 --size 5 --asc id --desc name
+pdp core search -q entity_name --page 2 --size 5 --asc id --desc <property>
 ```
 
 #### Log-Level Command
@@ -371,13 +371,13 @@ Change the logging level of a component.
 ##### Change the log leve of a component
 
 ```bash
-pdp core log-level --component component_name --level ERROR
+pdp core log-level --component <component_name> --level ERROR
 ```
 
 ##### Change the log leve of a logger from component
 
 ```bash
-pdp core log-level --component component_name --level ERROR --logger logger_name
+pdp core log-level --component <component_name> --level ERROR --logger <logger_name>
 ```
 
 #### File Command
@@ -395,14 +395,14 @@ Try to upload the provided file to the Core API.
 ###### Upload a file with a specific name
 
 ```bash
-pdp core file upload --name seed --path ./seed_entities.json
+pdp core file upload --name <name> --path <file_path>
 ```
 
 ###### Upload a file without specified the name
 
 ```bash
 # The name of the file will be entities
-pdp core file upload --path ./entities.zip
+pdp core file upload --path <file_path>
 ```
 
 ##### Download Command
@@ -418,19 +418,19 @@ Will try to download a file previously uploaded to the Core API.
 ###### Download a file
 
 ```bash
-pdp core file download --name entities.json --path ./my-entities/
+pdp core file download --name <file_name> --path <path>
 ```
 
 ###### Download a file and rename it
 
 ```bash
-pdp core file download --name entities.json --path ./my-entities/pdp_entities.json
+pdp core file download --name <name> --path <path>
 ```
 
 ###### Download a file on the current folder
 
 ```bash
-pdp core file download --name entities.json
+pdp core file download --name <name>
 ```
 
 ##### Delete Command
@@ -448,13 +448,13 @@ Will delete a file from the Core API.
 ###### Delete files
 
 ```bash
-pdp core file delete --name file_name --name another_file
+pdp core file delete --name <file_name> --name <file_name>
 ```
 
 ###### Delete file from local too
 
 ```bash
-pdp core file delete --name file_name --local
+pdp core file delete --name <file_name> --local
 ```
 
 ##### Ls Command
@@ -492,13 +492,13 @@ Try to start the scanning process of a seed. Note that a seed can only have one 
 ##### Start execution of a seed
 
 ```bash
-pdp seed-exec start --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+pdp seed-exec start --seed-id <seed_id>
 ```
 
 ##### Start execution of a seed with a specific scan type
 
 ```bash
-pdp seed-exec start --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --scan-type incremental
+pdp seed-exec start --seed-id <seed_id> --scan-type incremental
 ```
 
 #### Reset Command
@@ -512,7 +512,7 @@ Reset all the associated data of the given seed.
 ##### Reset associated data of a seed
 
 ```bash
-pdp seed-exec reset --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+pdp seed-exec reset --seed-id <seed_id>
 ```
 
 #### Control Command
@@ -527,7 +527,7 @@ Triggers and action on all active executions for the given seed.
 ##### Control the execution of a seed
 
 ```bash
-pdp seed-exec control --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --action halt
+pdp seed-exec control --seed-id <seed_id> --action halt
 ```
 
 #### Get Command
@@ -550,25 +550,25 @@ Retrieves the executions of a given seed.
 ##### Get executions from a seed
 
 ```bash
-pdp seed-exec get --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b
+pdp seed-exec get --seed-id <seed_id>
 ```
 
 ##### Get executions from a seed with parameters
 
 ```bash
-pdp seed-exec get --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --page 2 --size 1 --asc pipelineId --desc status -v
+pdp seed-exec get --seed-id <seed_id> --page 2 --size 1 --asc pipelineId --desc status -v
 ```
 
 ##### Get executions from a seed by id
 
 ```bash
-pdp seed-exec get --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b --execution-id ac5086e9-e5bf-4c82-b23e-358036bc4a23 --execution-id ac5086e9-e5bf-4c82-b23e-358036bc4b2a -v
+pdp seed-exec get --seed-id <seed_id> --execution-id <seed_id> --execution-id <execution_id> -v
 ```
 
 ##### Get executions from a seed in JSON format
 
 ```bash
-pdp seed-exec get --seed-id 3b5086e9-e5bf-4c82-b23e-358036bc4a1b -j
+pdp seed-exec get --seed-id <seed_id> -j
 ```
 
 ### Staging Command
@@ -596,25 +596,25 @@ Retrieves all the items for a given bucket. You can filter or use pagination, bu
 ###### Get all the items of the bucket
 
 ```bash
-pdp staging bucket get --bucket bucket_test
+pdp staging bucket get --bucket <bucket_name>
 ```
 
 ###### Get all the items of the bucket in JSON format
 
 ```bash
-pdp staging bucket get --bucket bucket_test -j
+pdp staging bucket get --bucket <bucket_name> -j
 ```
 
 ###### Filter the bucket items
 
 ```bash
-pdp staging bucket get --bucket bucket_test --token token_id --content-type BOTH --size 25
+pdp staging bucket get --bucket <bucket_name> --token <token_id> --content-type BOTH --size 25
 ```
 
 ###### Use pagination on the bucket items
 
 ```bash
-pdp staging bucket get --bucket bucket_test --page 2 --size 25 --asc property
+pdp staging bucket get --bucket <bucket_name> --page 2 --size 25 --asc <property>
 ```
 
 ##### Delete Command
@@ -629,13 +629,13 @@ Will delete the given bucket from the Staging API.
 ###### Delete a bucket
 
 ```bash
-pdp staging bucket delete --bucket bucket_name
+pdp staging bucket delete --bucket <bucket_name>
 ```
 
 ###### Delete more than one bucket at once
 
 ```bash
-pdp staging bucket delete --bucket bucket_name1 --bucket bucket_name2 --bucket bucket_name3
+pdp staging bucket delete --bucket <bucket_name1> --bucket <bucket_name2> --bucket <bucket_name3>
 ```
 
 ##### Status Command
@@ -654,19 +654,19 @@ Retrieves the status for all the buckets or a given bucket by the user.
 ###### Get the status for all the buckets
 
 ```bash 
-pdp staging bucket status --page 0 --size 1 --asc property --desc property2
+pdp staging bucket status --page 0 --size 1 --asc <property> --desc <property2>
 ```
 
 ###### Get the status for a specific bucket
 
 ```bash 
-pdp staging bucket status --bucket bucket_name
+pdp staging bucket status --bucket <bucket_name>
 ```
 
 ###### Get the status for a specific bucket in JSON format
 
 ```bash 
-pdp staging bucket status --bucket bucket_name --json
+pdp staging bucket status --bucket <bucket_name> --json
 ``` 
 
 ##### Batch Command
@@ -683,25 +683,25 @@ Performs a list of actions such as ADD and DELETE to a given bucket within the S
 ###### Process a batch of actions from a file
 
 ```bash
-pdp staging bucket batch --bucket bucket_name --path file/path
+pdp staging bucket batch --bucket <bucket_name> --path <file_path>
 ```
 
 ###### Process a batch of actions interactively
 
 ```bash
-pdp staging bucket batch --bucket bucket_name --interactive
+pdp staging bucket batch --bucket <bucket_name> --interactive
 ```
 
 ###### Process a batch of actions from a file and edit its contents
 
 ```bash
-pdp staging bucket batch --bucket bucket_name --path file/path --interactive
+pdp staging bucket batch --bucket <bucket_name> --path <file_path> --interactive
 ```
 
 ###### Process a batch of actions from a file and print the results in JSON format
 
 ```bash
-pdp staging bucket batch --bucket bucket_name --path file/path -j
+pdp staging bucket batch --bucket <bucket_name> --path <file_path> -j
 ``` 
 
 #### Item Command
@@ -713,7 +713,6 @@ This command encloses all commands that let you perform actions on an item on th
 Adds a new item to a given bucket within the staging API. If the bucket doesn't exist, will be created.
 
 ###### Flags
-
 
 - `REQUIRED`**--bucket**: The name of the bucket where the item will be added.
 - **-i, --item-id**: The id of the new item. If no id is provided, then an auto-generated hash will be set. Default is
@@ -728,13 +727,13 @@ Adds a new item to a given bucket within the staging API. If the bucket doesn't 
 ###### Add an item
 
 ```bash
-pdp staging item add --bucket bucket --item-id item_id --path item.json
+pdp staging item add --bucket <bucket_name> --item-id <item_id> --path <file_path>
 ```
 
 ###### Add an item interactively and with an autogenerated id
 
 ```bash
- pdp staging item add --bucket bucket --path item.json --interactive
+ pdp staging item add --bucket <bucket_name> --path <file_path> --interactive
 ```
 
 ##### Get Command
@@ -751,19 +750,19 @@ Retrieves the information of the given item.
 ###### Get the content of the item within a bucket
 
 ```bash
-pdp staging item get --bucket bucket --item item_id
+pdp staging item get --bucket <bucket_name> --item <item_id>
 ```
 
 ###### Get the metadata of the item within a bucket
 
 ```bash
-pdp staging item get --bucket bucket --item item_id --content-type metadata
+pdp staging item get --bucket <bucket_name> --item <item_id> --content-type metadata
 ```
 
 ###### Get the content and the metadata of the item within a bucket
 
 ```bash
-pdp staging item get --bucket bucket --item item_id --content-type both
+pdp staging item get --bucket <bucket_name> --item <item_id> --content-type both
 ```
 
 ##### Delete Command
@@ -781,19 +780,19 @@ Will delete a given item or all items in case that you don’t provide an item i
 ###### Delete all items of a bucket
 
 ```bash
-pdp stating item delete --bucket bucket --all
+pdp stating item delete --bucket <bucket_name> --all
 ```
 
 ###### Delete one or more items of a bucket
 
 ```bash
-pdp stating item delete --bucket bucket --item-id item_id1 --item-id item_id2
+pdp stating item delete --bucket <bucket_name> --item-id <item_id1> --item-id <item_id2>
 ```
 
 ###### Delete items of a bucket by filter
 
 ```bash
-pdp stating item delete --bucket bucket --filter
+pdp stating item delete --bucket <bucket_name> --filter
 ```
 
 #### Transaction Command
@@ -816,19 +815,19 @@ Retrieves all the transactions for a given bucket.
 ###### Get all the transactions for a bucket
 
 ```bash
-pdp staging transaction get --bucket bucket
+pdp staging transaction get --bucket <bucket_name>
 ```
 
 ###### Get 3 transactions for a bucket as JSON
 
 ```bash
-pdp staging transaction get --bucket bucket --size 3 --json
+pdp staging transaction get --bucket <bucket_name> --size 3 --json
 ```
 
 ###### Get transactions with pagination
 
 ```bash
-pdp staging transaction get --bucket bucket --transaction-id transaction_id
+pdp staging transaction get --bucket <bucket_name> --transaction-id <transaction_id>
 ```
 
 ##### Delete Command
@@ -848,17 +847,17 @@ Deletes one or more transactions for a given bucket.
 ###### Delete all the transactions
 
 ```bash
-pdp staging transaction delete --bucket bucket --all
+pdp staging transaction delete --bucket <bucket_name> --all
 ```
 
 ###### Delete one or more specific transactions
 
 ```bash
-pdp staging transaction delete --bucket bucket --transaction-id transaction1 --transaction-id transaction2
+pdp staging transaction delete --bucket <bucket_name> --transaction-id <transaction-id1> --transaction-id <transaction-id2>
 ```
 
 ###### Purge all the transactions until a specific one
 
 ```bash
-pdp staging transaction delete --bucket bucket --transaction-id transaction_id --purge
+pdp staging transaction delete --bucket <bucket_name> --transaction-id <transaction_id> --purge
 ```

@@ -27,7 +27,11 @@ def run(config: dict, name: str, path: str | None):
   if path is None:
     path = config['project_path']
     if has_pdp_project_structure(path):
-      path = os.path.join(path, CORE.title(), FILES_FOLDER)
+      files_folder_path = os.path.join(path, CORE.title(), FILES_FOLDER)
+      path = os.path.join(files_folder_path, name)
+
+      if not os.path.exists(files_folder_path):
+        os.mkdir(files_folder_path)
 
   if os.path.isdir(path):
     path = os.path.join(path, name)
