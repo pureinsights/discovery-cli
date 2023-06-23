@@ -35,6 +35,19 @@ def print_stage(entities: list[dict], is_json: bool, pretty: bool):
   print_entities(product_entities, not is_json, is_json, pretty)
 
 
+def search_entity(core_url: str, query_params: dict):
+  """
+  Calls to the CORE API search endpoint and returns the result.
+  :param str core_url: The url to the Core API.
+  :param dict query_params: A dictionary containing the query params of the request.
+  """
+  res = post(URL_SEARCH.format(core_url), params=query_params)
+  if res is None:
+    return None
+
+  return json.loads(res).get('content', [])
+
+
 def run(config: dict, query_params: dict, is_json: bool, pretty: bool):
   """
   Will search entities based on the query_params given.
@@ -45,11 +58,10 @@ def run(config: dict, query_params: dict, is_json: bool, pretty: bool):
   """
   create_spinner()
   spinner_change_text("Searching for entities...")
-  res = post(URL_SEARCH.format(config[CORE]), params=query_params)
-  if res is None:
+  entities = search_entity(config[CORE], query_params)
+  if entities is None:
     return spinner_fail("No entities match the given criteria.")
 
-  entities = json.loads(res).get('content', [])
   if not is_json:
     spinner_ok('Some entities found...')
   print_stage(entities, is_json, pretty)

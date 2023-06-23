@@ -30,4 +30,4 @@ def run(config: dict, seed: str, action: str):
       f"The seed {click.style(seed, fg='green')} was {click.style(f'{action.upper()}', fg='magenta')} successfully."
     )
     return
-  print_console(f"Couldn't {click.style(action.upper(), fg='magenta')} the seed {click.style(seed, fg='green')}.")
+  print_console(f"Couldn't {click.style(action.upper(), fg='magenta')} the seed {click.style(seed, fg='green')}")

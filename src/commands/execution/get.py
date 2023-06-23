@@ -79,7 +79,7 @@ def print_stage(seed: str, executions: list[dict], given_executions: list[str], 
     if len(given_executions) <= 0:
       return print_console(f"The seed {seed} doesn't have executions.")
 
-    return print_console(f"The seed {seed} doesn't have the executions: {','.join(given_executions)}.")
+    return print_console(f"The seed {seed} doesn't have the executions: {','.join(given_executions)}")
 
   if is_verbose:
     return print_executions_verbose(executions, seed)
@@ -88,7 +88,7 @@ def print_stage(seed: str, executions: list[dict], given_executions: list[str], 
   for index, execution in enumerate(executions):
     executions_str += (', ' if index != 0 else '') + execution.get('id', '')
 
-  print_console(f"Executions of seed {seed}: {executions_str}.")
+  print_console(f"Executions of seed {seed}: {executions_str}")
 
 
 def print_executions_verbose(executions: list[dict], seed: str):
