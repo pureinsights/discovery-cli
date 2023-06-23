@@ -81,6 +81,11 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Run unit tests
         run: tox -e py
 
@@ -89,7 +94,7 @@ jobs:
         if: always()
         with:
           check_name: 'Windows Tests Report'
-          report_paths: './coverage.xml'
+          report_paths: './pytest.xml'
 
   linux-build:
     if: ${{ needs.validate.outputs.code-changes == 'true' }}
@@ -106,6 +111,11 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Run unit tests
         run: tox -e py
 
@@ -114,7 +124,7 @@ jobs:
         if: always()
         with:
           check_name: 'Linux Tests Report'
-          report_paths: './coverage.xml'
+          report_paths: './pytest.xml'
 
   sonarcloud:
     if: ${{ needs.validate.outputs.code-changes == 'true' }}
@@ -157,7 +167,7 @@ jobs:
 
   automerge:
     if: ${{ github.actor == 'ci-pureinsights' && (startsWith(github.head_ref, 'bot/') || contains(github.event.pull_request.labels.*.name, 'automerge')) }}
-    needs: build
+    needs: sonarcloud
     runs-on: ubuntu-latest
     steps:
       - name: Approve changes
