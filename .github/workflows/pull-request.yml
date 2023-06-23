@@ -6,6 +6,11 @@ on:
       - opened
       - reopened
       - synchronize
+  push:
+    branches:
+      - POC/PDP-1383-TEST
+    paths:
+      - '.github/workflows/pull-request.yml'
 
 env:
   GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USER }}
@@ -13,6 +18,19 @@ env:
   CI_SIGNING_KEY: ${{ secrets.CI_SIGNING_KEY }}
 
 jobs:
+  #TODO: Delete this step, is just for test purposes
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          gh pr create \
+            --assignee "@me" \
+            --base "refs/heads/dvlp" \
+            --title "[TEST] Pull request workflow" 
+
   validate:
     runs-on: ubuntu-latest
     outputs:
