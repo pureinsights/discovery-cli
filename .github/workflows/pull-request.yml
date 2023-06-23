@@ -28,7 +28,7 @@ jobs:
         run: |
           gh pr create \
             --assignee "@me" \
-            --base "refs/heads/dvlp" \
+            --base "dvlp" \
             --title "[TEST] Pull request workflow" \
             --body "Just a test"
 
