@@ -36,7 +36,7 @@ jobs:
         run: |
           gh pr create \
             --assignee "@me" \
-            --base "dvlp ${{ runner.id }}" \
+            --base "dvlp" \
             --title "[TEST] Pull request workflow" \
             --body "Just a test"
 
