@@ -175,7 +175,7 @@ jobs:
 
   automerge:
     if: ${{ github.actor == 'ci-pureinsights' && (startsWith(github.head_ref, 'bot/') || contains(github.event.pull_request.labels.*.name, 'automerge')) }}
-    needs: build
+    needs: sonarcloud
     runs-on: ubuntu-latest
     steps:
       - name: Approve changes
