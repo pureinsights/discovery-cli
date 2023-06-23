@@ -30,7 +30,7 @@ jobs:
             --assignee "@me" \
             --base "refs/heads/dvlp" \
             --title "[TEST] Pull request workflow" \
-            --boyd "Just a test"
+            --body "Just a test"
 
   validate:
     runs-on: ubuntu-latest
