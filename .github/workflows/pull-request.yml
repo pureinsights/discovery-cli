@@ -122,7 +122,7 @@ jobs:
         if: always()
         with:
           check_name: 'Windows Tests Report'
-          report_paths: './coverage.xml'
+          report_paths: './pytest.xml'
 
   linux-build:
     if: ${{ needs.validate.outputs.code-changes == 'true' }}
@@ -152,7 +152,7 @@ jobs:
         if: always()
         with:
           check_name: 'Linux Tests Report'
-          report_paths: './coverage.xml'
+          report_paths: './pytest.xml'
 
   sonarcloud:
     if: ${{ needs.validate.outputs.code-changes == 'true' }}
