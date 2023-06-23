@@ -20,13 +20,15 @@ env:
 jobs:
   #TODO: Delete this step, is just for test purposes
   create-pr:
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
         with:
+          ref: POC/PDP-1383-TEST
           fetch-depth: 0
-          
+
       - name: Create pull request
         env:
           GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
@@ -38,6 +40,7 @@ jobs:
             --body "Just a test"
 
   validate:
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     needs: create-pr
     outputs:
