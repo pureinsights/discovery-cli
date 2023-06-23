@@ -11,6 +11,7 @@ on:
       - POC/PDP-1383-TEST
     paths:
       - '.github/workflows/pull-request.yml'
+      - 'pdp_test.ini'
 
 env:
   GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USER }}
@@ -35,7 +36,7 @@ jobs:
         run: |
           gh pr create \
             --assignee "@me" \
-            --base "dvlp" \
+            --base "dvlp ${{ runner.id }}" \
             --title "[TEST] Pull request workflow" \
             --body "Just a test"
 
