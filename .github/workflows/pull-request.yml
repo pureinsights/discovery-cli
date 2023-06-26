@@ -1,35 +1,145 @@
-name: Build
+name: Pull Request
+
 on:
-  push:
-    branches:
-      - master
-      - main
-      - release*
-      - develop
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+env:
+  GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USER }}
+  GITHUB_PACKAGE_REGISTRY_API_KEY: ${{ secrets.CI_TOKEN }}
+  CI_SIGNING_KEY: ${{ secrets.CI_SIGNING_KEY }}
+
 jobs:
-  sonarcloud:
-    name: SonarCloud
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      code-changes: ${{ steps.changes.outputs.code }}
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set execution permissions
+        run: |
+          chmod +x ./gradlew
+          ./gradlew ciTools
+          chmod -R +x ci-tools
+
+      - name: Check base branch
+        id: check-branch
+        run: |
+          prerelease=${{ startsWith(github.head_ref, 'hotfix/') || startsWith(github.head_ref, 'release/')}}
+          
+          if [[ ${{ github.base_ref }} == 'master' ]] && ! ${prerelease} ]]; then
+            echo "Pull requests against master can only be created from release or hotfix branches"
+            exit 1
+          fi
+
+      - name: Find snapshots
+        if: github.base_ref == 'master'
+        run: ci-tools/find-snapshots.sh
+
+      - name: Filter changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            code:
+              - '**/src/**'
+              - 'gradle/**'
+              - 'build.gradle'
+              - '**/build.gradle'
+              - 'settings.gradle'
+              - 'gradle.properties'
+              - '**/gradle.properties'
+              - '.github/workflows/pull-request.yml'
+              - '**/tests/**'
+              - 'test_project/**' 
+
+  windows-build:
+    if: ${{ needs.validate.outputs.code-changes == 'true' }}
+    needs: validate
+    runs-on: windows-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: tox -e py
+
+      - name: Publish Tests Report
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          check_name: 'Windows Tests Report'
+          report_paths: './pytest.xml'
+
+  linux-build:
+    if: ${{ needs.validate.outputs.code-changes == 'true' }}
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.11
 
-      - name: Install tox
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run tox
+      - name: Run unit tests
         run: tox -e py
 
-      # Temporal step to avoid conflict between build.gradle and SonarCloud
+      - name: Publish Tests Report
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          check_name: 'Linux Tests Report'
+          report_paths: './pytest.xml'
+
+  sonarcloud:
+    if: ${{ needs.validate.outputs.code-changes == 'true' }}
+    needs:
+      - linux-build
+      - windows-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.CI_TOKEN }}
+
+        # Temporal step to avoid conflict between build.gradle and SonarCloud
       - name: Rename gradle file
         run: mv build.gradle build.gradle.temp
 
@@ -42,3 +152,35 @@ jobs:
       - name: Rename gradle file to original name
         run: mv build.gradle.temp build.gradle
 
+  checks:
+    if: ${{ needs.validate.outputs.code-changes != 'true' }}
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: SonarCloud analysis for untracked changes
+        uses: LouisBrunner/checks-action@v1.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: SonarCloud Code Analysis
+          conclusion: success
+
+
+  automerge:
+    if: ${{ github.actor == 'ci-pureinsights' && (startsWith(github.head_ref, 'bot/') || contains(github.event.pull_request.labels.*.name, 'automerge')) }}
+    needs: sonarcloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Approve changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr review ${{ github.event.number }} --repo ${{ github.event.repository.full_name }} --approve
+
+      - name: Merge changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          gh pr merge ${{ github.event.number }} \
+            --repo ${{ github.event.repository.full_name }} \
+            --squash \
+            --admin \
+            --delete-branch

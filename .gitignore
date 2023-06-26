@@ -19,6 +19,7 @@ build
 
 #coverage
 *coverage*
+./pytest.xml
 
 *my-pdp-project*
 tests/test_project
