@@ -1,6 +1,0 @@
-asyncio
-aiohttp
-click
-jinja2
-kubernetes
-requests
