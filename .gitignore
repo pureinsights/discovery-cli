@@ -1,7 +1,14 @@
-# Python
-__pycache__
-dist
-build
+# Binaries for programs and plugins
+*.exe
+*.exe~
+build/*
+
+# Go workspace file
+go.work
+
+# Test binary and output of the go coverage tool
+*.test
+*.out
 
 # IntelliJ
 .idea/
@@ -9,8 +16,3 @@ build
 *.iml
 *.ipr
 *.iws
-
-# Gradle
-.gradle
-build
-gradle

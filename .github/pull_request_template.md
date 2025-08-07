@@ -5,4 +5,4 @@
 - [ ] The formatting of the code follows the defined rules.
 - [ ] All new/updated files have the latest version of the [copyright](https://pureinsights.atlassian.net/wiki/spaces/DEVGUIDE/pages/91160785/IntelliJ+IDEA#Copyright).
 - [ ] Any relevant change have been documented in its corresponding place (i.e. `README.md`). Also, **all** methods have their corresponding documentation.
-- [ ] Any new library is added to the `requirements.txt` file.
+- [ ] Any new library is added to the `go.mod` file.
