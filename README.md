@@ -15,8 +15,8 @@ We can leverage the fields provided by the `cobra.Command` struct as follows:
 
 ```go
 cobra.Command{
-		Use:   "command [options] [flags]", // Follow the recommended syntax by cobra: https://pkg.go.dev/github.com/spf13/cobra#Command
-		Short: "A short description for the command, shown in the 'help' output.",
+    Use:   "command [options] [flags]", // Follow the recommended syntax by cobra: https://pkg.go.dev/github.com/spf13/cobra#Command
+    Short: "A short description for the command, shown in the 'help' output.",
     Long: `A more detailed and long description, shown in the 'help' of the specific command.
     Can be multiple lines.`,
     Example: `
