@@ -88,10 +88,11 @@ jobs:
         run: |
           go get .
 
-        run: go build -v ./...
-
       - name: Vet
         run: go vet ./...
+
+      - name: Install dependencies
+        run: go build -v ./...
 
       - name: Unit tests (race + coverage)
         run: |
