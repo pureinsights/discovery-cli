@@ -121,6 +121,8 @@ jobs:
             -Dsonar.organization=pureinsights-1
             -Dsonar.projectKey=pureinsights_pdp_cli
             -Dsonar.go.coverage.reportPaths=coverage.out
+            -Dsonar.tests=.
+            -Dsonar.test.inclusions=**/*_test.go
 
   checks:
     if: ${{ needs.validate.outputs.code-changes != 'true' }}
