@@ -28,10 +28,6 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Set execution permissions
-        run: |
-          chmod -R +x ci-tools
-
       - name: Check base branch
         id: check-branch
         run: |
@@ -41,10 +37,6 @@ jobs:
             echo "Pull requests against master can only be created from release or hotfix branches"
             exit 1
           fi
-
-      - name: Find snapshots
-        if: github.base_ref == 'master'
-        run: ci-tools/find-snapshots.sh
 
       - name: Filter changes
         uses: dorny/paths-filter@v3
@@ -79,10 +71,6 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-
-      - name: Set execution permissions
-        run: |
-          chmod -R +x ci-tools
 
       - name: Install dependencies
         run: |
@@ -133,9 +121,6 @@ jobs:
         with:
           path: flyway*/**
           key: ${{ runner.os }}-flyway
-
-      - name: Initialize Database
-        run: ci-tools/migrate-database.sh
 
       - name: Save Flyway cache
         id: cache-flyway-save
