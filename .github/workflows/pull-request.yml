@@ -112,23 +112,6 @@ jobs:
           username: ${{ secrets.AWS_ACCESS_KEY_ID }}
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Start Dependencies
-        run: ./gradlew dockerComposeUp
-
-      - name: Restore cached Flyway
-        id: cache-flyway-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: flyway*/**
-          key: ${{ runner.os }}-flyway
-
-      - name: Save Flyway cache
-        id: cache-flyway-save
-        uses: actions/cache/save@v4
-        with:
-          path: flyway*/**
-          key: ${{ steps.cache-flyway-restore.outputs.cache-primary-key }}
-
       - name: Publish Tests Report
         uses: mikepenz/action-junit-report@v4
         if: always()
