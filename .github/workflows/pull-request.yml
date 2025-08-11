@@ -111,6 +111,7 @@ jobs:
         with:
           check_name: 'Tests Report'
           report_paths: '**/build/results/tests/**/*.xml'
+          
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.3.0
         env:
