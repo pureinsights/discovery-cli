@@ -1,0 +1,13 @@
+mode: set
+github.com/pureinsights/pdp-cli/discovery/client.go:22.43,26.2 3 1
+github.com/pureinsights/pdp-cli/discovery/client.go:30.49,34.2 3 1
+github.com/pureinsights/pdp-cli/discovery/client.go:42.85,45.20 2 1
+github.com/pureinsights/pdp-cli/discovery/client.go:45.20,47.3 1 1
+github.com/pureinsights/pdp-cli/discovery/client.go:49.2,50.16 2 1
+github.com/pureinsights/pdp-cli/discovery/client.go:50.16,55.3 1 1
+github.com/pureinsights/pdp-cli/discovery/client.go:57.2,57.24 1 1
+github.com/pureinsights/pdp-cli/discovery/client.go:57.24,62.3 1 1
+github.com/pureinsights/pdp-cli/discovery/client.go:64.2,64.38 1 1
+github.com/pureinsights/pdp-cli/discovery/client.go:64.38,66.3 1 1
+github.com/pureinsights/pdp-cli/discovery/client.go:68.2,68.29 1 1
+github.com/pureinsights/pdp-cli/discovery/errors.go:16.31,18.2 1 1
