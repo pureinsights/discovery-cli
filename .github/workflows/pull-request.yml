@@ -69,20 +69,11 @@ jobs:
         run: |
           go get .
 
+      - name: Vet
+        run: go vet ./...
+
       - name: Install dependencies
         run: go build -v ./...
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=pureinsights-1
-            -Dsonar.projectKey=pureinsights_pdp_cli
-            -Dsonar.sources=.
-            -Dsonar.exclusions=**/*_test.go
 
       - name: Unit tests (race + coverage)
         run: |
@@ -121,7 +112,18 @@ jobs:
           check_name: 'Tests Report'
           report_paths: '**/build/results/tests/**/*.xml'
           
-      
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=pureinsights-1
+            -Dsonar.projectKey=pureinsights_pdp_cli
+            -Dsonar.go.coverage.reportPaths=coverage.out
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/*_test.go
 
   checks:
     if: ${{ needs.validate.outputs.code-changes != 'true' }}
