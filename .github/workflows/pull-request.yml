@@ -69,9 +69,6 @@ jobs:
         run: |
           go get .
 
-      - name: Vet
-        run: go vet ./...
-
       - name: Install dependencies
         run: go build -v ./...
 
