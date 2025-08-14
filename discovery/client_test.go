@@ -12,7 +12,7 @@ import (
 )
 
 // TestNewClient_BaseURLAndAPIKey tests the function to create a new client.
-// It verifies that the ALI Key and base URL correctly match.
+// It verifies that the API Key and base URL correctly match.
 func TestNewClient_BaseURLAndAPIKey(t *testing.T) {
 	url := "http://localhost:8080"
 	apiKey := "secret-key"
