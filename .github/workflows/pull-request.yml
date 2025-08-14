@@ -72,7 +72,7 @@ jobs:
 
       - name: Unit tests (race + coverage)
         run: |
-          go test ./... -race -coverprofile=coverage.out -covermode=atomic | go-junit-report -set-exit-code > report.xml
+          go test ./... -v -race -coverprofile=coverage.out -covermode=atomic | go-junit-report -set-exit-code > report.xml
           
       - name: Publish Tests Report
         uses: mikepenz/action-junit-report@v4
