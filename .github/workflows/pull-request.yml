@@ -62,6 +62,7 @@ jobs:
       - name: Install dependencies
         run: |
           go get .
+          go install github.com/jstemmer/go-junit-report/v2@latest
           
       - name: Run Go Vet Tool
         run: go vet ./...
@@ -71,13 +72,8 @@ jobs:
 
       - name: Unit tests (race + coverage)
         run: |
-          go test ./... -race -coverprofile=coverage.out -covermode=atomic
+          go test ./... -race -coverprofile=coverage.out -covermode=atomic | go-junit-report -set-exit-code > report.xml
           
-      - name: Run JUnit Test
-        run: |
-          go install github.com/jstemmer/go-junit-report/v2@latest
-          go test  -v ./... | go-junit-report -set-exit-code > report.xml
-
       - name: Publish Tests Report
         uses: mikepenz/action-junit-report@v4
         if: always()
