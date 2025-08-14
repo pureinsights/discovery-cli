@@ -14,7 +14,7 @@ func FizzBuzz(n int) string {
 	case n%15 == 0:
 		return "FizzBuzz"
 	case n%3 == 0:
-		return "Fizz"
+		return "bizz"
 	case n%5 == 0:
 		return "Buzz"
 	default:
