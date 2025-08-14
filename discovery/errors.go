@@ -6,7 +6,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Error represents an error with an HTTP status and a JSON body.
+// Error represents an error response with an HTTP status and a JSON body.
 type Error struct {
 	Status int
 	Body   gjson.Result
