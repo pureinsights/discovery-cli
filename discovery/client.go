@@ -8,7 +8,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-type RequestOption func(*resty.Request) Error
+type RequestOption func(*resty.Request) error
 
 // Client is a struct that contains the API Key to connect to Discovery and the Resty Client to execute the requests.
 type client struct {
