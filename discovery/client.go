@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/tidwall/gjson"
@@ -18,9 +19,26 @@ func WithResult[T any]() RequestOption {
 	}
 }
 
-// func WithQueryParameters(params map[string][]string) RequestOption {
+func WithQueryParameters(params map[string][]string) RequestOption {
+	return func(r *resty.Request) error {
+		r.SetQueryParamsFromValues(params)
+		return nil
+	}
+}
 
-// }
+func WithBody(body any) RequestOption {
+	return func(r *resty.Request) error {
+		r.SetBody(body)
+		return nil
+	}
+}
+
+func WithFile(name, path string) RequestOption {
+	return func(r *resty.Request) error {
+		r.SetFile(name, path)
+		return nil
+	}
+}
 
 // Client is a struct that contains the API Key to connect to Discovery and the Resty Client to execute the requests.
 type client struct {
@@ -58,6 +76,12 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 		request.SetHeader("X-API-Key", c.ApiKey)
 	}
 
+	for _, opt := range options {
+		if err := opt(request); err != nil {
+			return nil, err
+		}
+	}
+
 	response, err := request.Execute(method, c.client.BaseURL+path)
 
 	if response.IsError() {
@@ -79,4 +103,19 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 	}
 
 	return response.Body(), nil
+}
+
+func execute[T any](client client, method, path string, options ...RequestOption) (T, error) {
+	options = append(options, WithResult[T]())
+	response, err := client.execute(method, path, options...)
+	if err != nil {
+		var zeroValue T
+		return zeroValue, err
+	}
+	tResponse, ok := response.(T)
+	if !ok {
+		var zeroValue T
+		return zeroValue, fmt.Errorf("expected type %T, but got type %T", zeroValue, response)
+	}
+	return tResponse, nil
 }
