@@ -8,7 +8,19 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-type RequestOption func(*resty.Request) Error
+type RequestOption func(*resty.Request) error
+
+func WithResult[T any]() RequestOption {
+	return func(r *resty.Request) error {
+		var zeroValue T
+		r.SetResult(zeroValue)
+		return nil
+	}
+}
+
+// func WithQueryParameters(params map[string][]string) RequestOption {
+
+// }
 
 // Client is a struct that contains the API Key to connect to Discovery and the Resty Client to execute the requests.
 type client struct {
