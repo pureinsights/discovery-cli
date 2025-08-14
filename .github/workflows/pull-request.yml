@@ -80,7 +80,7 @@ jobs:
         if: always()
         with:
           check_name: 'Tests Report'
-          report_paths: '**/*.xml'
+          report_paths: 'report.xml'
           
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.3.0
