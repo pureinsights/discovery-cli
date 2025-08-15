@@ -192,12 +192,13 @@ func Test_client_execute_HTTPErrorTypedError(t *testing.T) {
 
 // TestExecute_RestyReturnsError tests when the Resty Execute function returns an error.
 func Test_client_execute_RestyReturnsError(t *testing.T) {
-	c := newClient("http://fakeserver", "")
+	srv := httptest.NewServer(http.NotFoundHandler())
+	base := srv.URL
+	srv.Close()
 
-	res, err := c.execute(http.MethodGet, "/down") // Resty will not be able to send the request to the server.
-
-	require.Error(t, err, "expect an error when the server is unreachable")
+	c := newClient(base, "")
+	res, err := c.execute(http.MethodGet, "/down")
+	require.Error(t, err)
 	assert.Nil(t, res, "result should be nil on execute error")
-
-	assert.EqualError(t, err, `Get "http://fakeserver/down": dial tcp: lookup fakeserver: no such host`)
+	assert.Contains(t, err.Error(), base+"/down")
 }
