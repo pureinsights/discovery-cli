@@ -5,20 +5,38 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 )
 
 func TestError_ErrorString_StringBody(t *testing.T) {
-	body := gjson.Parse(`"connection refused"`) // gjson.Result.String() => connection refused
-	e := Error{
-		Status: 500,
-		Body:   body,
+	tests := []struct {
+		name   string
+		status int
+		json   string
+	}{
+		{
+			name:   "JSON object body",
+			status: 418,
+			json:   `{"error":"request failed","status":500}`,
+		},
+		{
+			name:   "JSON array body",
+			status: 400,
+			json:   `["error1","error2","error3"]`,
+		},
+		{
+			name:   "JSON string body",
+			status: 400,
+			json:   `"connection refused"`,
+		},
 	}
 
-	real := e.Error()
-	expected := fmt.Sprintf("Status: %d, Body: %s", 500, body.String())
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			body := gjson.Parse(tc.json)
+			e := Error{Status: tc.status, Body: body}
 
-	require.NotEmpty(t, real)
-	assert.Equal(t, expected, real)
+			assert.EqualError(t, e, fmt.Sprintf("status: %d, body: %s", tc.status, body.String()))
+		})
+	}
 }

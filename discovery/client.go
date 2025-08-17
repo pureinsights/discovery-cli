@@ -2,13 +2,15 @@ package discovery
 
 import (
 	"fmt"
-	"net/http"
+	"strings"
 
 	"github.com/tidwall/gjson"
 
 	"github.com/go-resty/resty/v2"
 )
 
+// RequestOption is a type definition used for the functional options pattern.
+// It modifies the request, like setting the type of the expected result, adding query parameters, and setting the body.
 type RequestOption func(*resty.Request) error
 
 func WithResult[T any]() RequestOption {
@@ -58,8 +60,9 @@ func newClient(url, apiKey string) client {
 // NewSubClient returns an instance of a [client] struct whose base URL is the parent client’s base URL with an added path.
 // For example, http://localhost:8080/seed
 func newSubClient(c client, path string) client {
+	newUrl := strings.TrimRight(c.client.BaseURL, "/") + "/" + strings.TrimLeft(path, "/")
 	subClient := resty.New()
-	subClient.SetBaseURL(c.client.BaseURL + path)
+	subClient.SetBaseURL(newUrl)
 	return client{c.ApiKey, subClient}
 }
 
@@ -84,17 +87,14 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 
 	response, err := request.Execute(method, c.client.BaseURL+path)
 
+	if err != nil {
+		return nil, err
+	}
+
 	if response.IsError() {
 		return nil, Error{
 			Status: response.StatusCode(),
 			Body:   gjson.ParseBytes(response.Body()),
-		}
-	}
-
-	if err != nil {
-		return nil, Error{
-			Status: http.StatusInternalServerError,
-			Body:   gjson.Parse(`{"error":"` + err.Error() + `"}`),
 		}
 	}
 

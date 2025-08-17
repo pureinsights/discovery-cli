@@ -31,12 +31,12 @@ cobra.Command{
 
 Names should use `kebab` case, so those names with two or more words must be separated by `-`, e.g `--my-flag`. 
 
-Whenever is possible flags should have a short flag form, e.g `--flag` `-f`.
+Whenever possible, flags should have a short form, e.g., `--flag` and `-f`.
 
 Always use the same short flag for the same flag, across all the commands. That means, if you used `-f` as short flag of `--flag`, you 
 shouldn't use `-f` as short flag of any other flag that is not `--flag` in any command.
 
-Try to use meaningful short flags. A good approach could be use the first letter of the flag name, as long as the short flag doesn't conflict with other short flags for other flags.
+Try to use meaningful short flags. A good approach could be to use the first letter of the flag name, as long as the short flag doesn't conflict with other short flags for other flags.
 
 
 ### User documentation 
@@ -137,7 +137,7 @@ go get github.com/spf13/cobra
 
 ### Unit Tests
 
-To create unit tests you create a `*_test.go` file in the same package with functions with the form `func Test*(t *testing.T)` so Go can now that those functions are tests.
+To create unit tests, you create a `*_test.go` file in the same package with functions with the form `func Test*(t *testing.T)` so Go can now that those functions are tests.
 
 Example:
 
@@ -188,8 +188,8 @@ go tool cover -html=coverage.out
 
 #### Naming convention
 
-As mentioned before, the name of the file and the test function must follow a specific form in order to Go detected as tests, but to make tests names more readable, were
-going to follow the next name conventions:
+As mentioned before, the name of the file and the test function must follow a specific form so that Go can detect them as tests, but to make test names more readable, we are
+going to follow the next naming conventions:
 
 ##### Testing functions
 
