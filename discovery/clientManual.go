@@ -96,7 +96,7 @@ func secretCRUD() {
 func fileCRUD() {
 	core := newClient("http://localhost:8080/v2", "")
 
-	file, err := core.execute("PUT", "/file", WithFile("test.txt", "discovery/testFile.txt"))
+	file, err := core.execute("PUT", "/file/test.txt", WithFile("test.txt", "discovery/testFile.txt"))
 
 	if err != nil {
 		fmt.Println(err)
