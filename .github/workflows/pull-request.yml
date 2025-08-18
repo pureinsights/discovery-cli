@@ -98,24 +98,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: SonarCloud Code Analysis
           conclusion: success
-
-
-  automerge:
-    if: ${{ github.actor == 'ci-pureinsights' && (startsWith(github.head_ref, 'bot/') || contains(github.event.pull_request.labels.*.name, 'automerge')) }}
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Approve changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr review ${{ github.event.number }} --repo ${{ github.event.repository.full_name }} --approve
-
-      - name: Merge changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
-        run: |
-          gh pr merge ${{ github.event.number }} \
-            --repo ${{ github.event.repository.full_name }} \
-            --squash \
-            --admin \
-            --delete-branch
