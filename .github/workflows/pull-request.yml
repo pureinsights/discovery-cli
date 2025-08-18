@@ -46,7 +46,7 @@ jobs:
   build:
     if: ${{ needs.validate.outputs.code-changes == 'true' }}
     needs: validate
-    runs-on: ubuntu-latest-4core
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
@@ -62,16 +62,16 @@ jobs:
       - name: Install dependencies
         run: |
           go get .
-          go install github.com/jstemmer/go-junit-report/v2@latest
           
       - name: Run Go Vet Tool
         run: go vet ./...
 
-      - name: Install dependencies
+      - name: Build the Go application
         run: go build -v ./...
 
       - name: Unit tests (race + coverage)
         run: |
+          go install github.com/jstemmer/go-junit-report/v2@latest
           go test ./... -v -race -coverprofile=coverage.out -covermode=atomic | go-junit-report -set-exit-code > report.xml
           
       - name: Publish Tests Report
