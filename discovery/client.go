@@ -42,6 +42,14 @@ func WithFile(name, path string) RequestOption {
 	}
 }
 
+func WithContentType(contentType string) RequestOption {
+	fmt.Println("hola")
+	return func(r *resty.Request) error {
+		r.SetHeader("Content-Type", contentType)
+		return nil
+	}
+}
+
 // Client is a struct that contains the API Key to connect to Discovery and the Resty Client to execute the requests.
 type client struct {
 	ApiKey string
@@ -85,6 +93,7 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 		}
 	}
 
+	fmt.Println(request)
 	response, err := request.Execute(method, c.client.BaseURL+path)
 
 	if err != nil {
