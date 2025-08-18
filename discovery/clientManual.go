@@ -7,7 +7,7 @@ import (
 )
 
 func Manual() {
-	fileCRUD()
+	codesTest()
 }
 
 func tutorialTest() {
@@ -96,11 +96,69 @@ func secretCRUD() {
 func fileCRUD() {
 	core := newClient("http://localhost:8080/v2", "")
 
-	file, err := core.execute("PUT", "/file/test.txt", WithFile("test.txt", "discovery/testFile.txt"))
+	file1, err := core.execute("PUT", "/file/test.txt", WithFile("discovery/files/testFile.txt"))
 
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println(string(file.([]byte)))
+		fmt.Println("PUT Test File 1: " + string(file1.([]byte)))
+	}
+
+	file1, err = core.execute("GET", "/file/test.txt")
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("GET Test File 1: " + string(file1.([]byte)))
+	}
+
+	file2, err := core.execute("PUT", "/file/test.txt", WithFile("discovery/files/testFile2.txt"))
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("PUT Test file 2: " + string(file2.([]byte)))
+	}
+
+	file2, err = core.execute("GET", "/file/test.txt")
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("GET Test file 2: " + string(file2.([]byte)))
+	}
+
+	if string(file1.([]byte)) != string(file2.([]byte)) {
+		fmt.Println("The files are different.")
+	}
+
+	file2, err = core.execute("DELETE", "/file/test.txt")
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("DELETE Test file: " + string(file2.([]byte)))
+	}
+
+	_, err = core.execute("GET", "/file/test.txt")
+
+	if err != nil {
+		fmt.Println("Error in GET: " + err.Error())
+	}
+}
+
+func codesTest() {
+	queryflow := newClient("http://localhost:8088/v2/api", "")
+
+	noContent := newSubClient(queryflow, "/blogs-search")
+
+	mass, err := noContent.execute("GET", "", WithQueryParameters(map[string][]string{
+		"q": {"google"},
+	}))
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(string(mass.([]byte)))
 	}
 }

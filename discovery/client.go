@@ -35,15 +35,14 @@ func WithBody(body any) RequestOption {
 	}
 }
 
-func WithFile(name, path string) RequestOption {
+func WithFile(path string) RequestOption {
 	return func(r *resty.Request) error {
-		r.SetFile(name, path)
+		r.SetFile("file", path)
 		return nil
 	}
 }
 
 func WithContentType(contentType string) RequestOption {
-	fmt.Println("hola")
 	return func(r *resty.Request) error {
 		r.SetHeader("Content-Type", contentType)
 		return nil
@@ -93,7 +92,6 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 		}
 	}
 
-	fmt.Println(request)
 	response, err := request.Execute(method, c.client.BaseURL+path)
 
 	if err != nil {
