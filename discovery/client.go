@@ -15,8 +15,7 @@ type RequestOption func(*resty.Request) error
 
 func WithResult[T any]() RequestOption {
 	return func(r *resty.Request) error {
-		var zeroValue T
-		r.SetResult(zeroValue)
+		r.SetResult(new(T))
 		return nil
 	}
 }
@@ -105,6 +104,7 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 		}
 	}
 
+	fmt.Println(response.Status())
 	if r := response.Result(); r != nil {
 		return r, nil
 	}
@@ -119,10 +119,10 @@ func execute[T any](client client, method, path string, options ...RequestOption
 		var zeroValue T
 		return zeroValue, err
 	}
-	tResponse, ok := response.(T)
+	tResponse, ok := response.(*T)
 	if !ok {
 		var zeroValue T
 		return zeroValue, fmt.Errorf("expected type %T, but got type %T", zeroValue, response)
 	}
-	return tResponse, nil
+	return *tResponse, nil
 }
