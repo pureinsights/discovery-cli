@@ -2,12 +2,14 @@ package discovery
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/gjson"
 )
 
 // Test_newClient_BaseURLAndAPIKey tests the function to create a new client.
@@ -114,8 +116,7 @@ func Test_client_execute_SendsAPIKeyReturnsBody(t *testing.T) {
 
 	assert.IsType(t, []byte(nil), res)
 
-	body, _ := res.([]byte)
-	assert.Equal(t, `{"ok":true}`, string(body))
+	assert.Equal(t, `{"ok":true}`, string(res))
 }
 
 // Test_client_execute_HTTPErrorTypedError tests when the response is an error.
@@ -201,4 +202,52 @@ func Test_client_execute_RestyReturnsError(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, res, "result should be nil on execute error")
 	assert.Contains(t, err.Error(), base+"/down")
+}
+
+func TestRequestOption_FunctionalOptions(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "Google", r.URL.Query().Get("q"))
+		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+		body, _ := io.ReadAll(r.Body)
+		fmt.Println(string(body))
+		assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"ok":true}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := c.execute("POST", "", WithQueryParameters(map[string][]string{"q": {"Google"}}),
+		WithHeader("Content-Type", "application/json"),
+		WithBody(`{
+		"name": "test-secret",
+		"active": true
+		}`))
+	if err != nil {
+		fmt.Println("The request with functional options has failed")
+	} else {
+		require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
+	}
+}
+
+func TestRequestOption_FileOption(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Contains(t, "multipart/form-data", r.Header.Get("Content-Type"))
+		body, _ := io.ReadAll(r.Body)
+		fmt.Println(string(body))
+		assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"ok":true}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := c.execute("PUT", "", WithFile("files/testFile.txt"))
+	if err != nil {
+		fmt.Println("The File Upload has failed")
+	} else {
+		require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
+	}
 }

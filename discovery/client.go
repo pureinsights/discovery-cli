@@ -13,13 +13,6 @@ import (
 // It modifies the request, like setting the type of the expected result, adding query parameters, and setting the body.
 type RequestOption func(*resty.Request) error
 
-func WithResult[T any]() RequestOption {
-	return func(r *resty.Request) error {
-		r.SetResult(new(T))
-		return nil
-	}
-}
-
 func WithQueryParameters(params map[string][]string) RequestOption {
 	return func(r *resty.Request) error {
 		r.SetQueryParamsFromValues(params)
@@ -41,9 +34,9 @@ func WithFile(path string) RequestOption {
 	}
 }
 
-func WithContentType(contentType string) RequestOption {
+func WithHeader(header, contentType string) RequestOption {
 	return func(r *resty.Request) error {
-		r.SetHeader("Content-Type", contentType)
+		r.SetHeader(header, contentType)
 		return nil
 	}
 }
@@ -78,7 +71,7 @@ func newSubClient(c client, path string) client {
 // The request is modified with the specified request options.
 // If set, the client's API key is set as the X-API-Key header.
 // This function returns the response with its correct type if it was set, the raw response if not, and an error if any occured.
-func (c client) execute(method, path string, options ...RequestOption) (any, error) {
+func (c client) execute(method, path string, options ...RequestOption) ([]byte, error) {
 	request := c.client.R()
 
 	if c.ApiKey != "" {
@@ -104,25 +97,17 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 		}
 	}
 
-	fmt.Println(response.Status())
-	if r := response.Result(); r != nil {
-		return r, nil
-	}
-
 	return response.Body(), nil
 }
 
-func execute[T any](client client, method, path string, options ...RequestOption) (T, error) {
-	options = append(options, WithResult[T]())
+func execute(client client, method, path string, options ...RequestOption) (gjson.Result, error) {
 	response, err := client.execute(method, path, options...)
 	if err != nil {
-		var zeroValue T
-		return zeroValue, err
+		return gjson.Result{}, err
 	}
-	tResponse, ok := response.(*T)
-	if !ok {
-		var zeroValue T
-		return zeroValue, fmt.Errorf("expected type %T, but got type %T", zeroValue, response)
-	}
-	return *tResponse, nil
+	fmt.Println(string(response))
+	resultJson := gjson.ParseBytes(response)
+	fmt.Println(resultJson.Str)
+	fmt.Println(resultJson.String())
+	return resultJson, nil
 }
