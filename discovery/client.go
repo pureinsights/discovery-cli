@@ -50,7 +50,6 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 	}
 
 	response, err := request.Execute(method, c.client.BaseURL+path)
-
 	if err != nil {
 		return nil, err
 	}
