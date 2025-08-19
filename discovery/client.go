@@ -42,7 +42,7 @@ func newSubClient(c client, path string) client {
 // The request is modified with the specified request options.
 // If set, the client's API key is set as the X-API-Key header.
 // This function returns the response with its correct type if it was set, the raw response if not, and an error if any occured.
-func (c client) execute(method, path string, options ...RequestOption) (any, error) {
+func (c client) execute(method, path string, options ...RequestOption) ([]byte, error) {
 	request := c.client.R()
 
 	if c.ApiKey != "" {
@@ -59,10 +59,6 @@ func (c client) execute(method, path string, options ...RequestOption) (any, err
 			Status: response.StatusCode(),
 			Body:   gjson.ParseBytes(response.Body()),
 		}
-	}
-
-	if r := response.Result(); r != nil {
-		return r, nil
 	}
 
 	return response.Body(), nil

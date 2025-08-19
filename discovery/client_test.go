@@ -108,8 +108,7 @@ func Test_client_execute_SendsAPIKeyReturnsBody(t *testing.T) {
 
 	assert.IsType(t, []byte(nil), res)
 
-	body, _ := res.([]byte)
-	assert.Equal(t, `{"ok":true}`, string(body))
+	assert.Equal(t, `{"ok":true}`, string(res))
 }
 
 // Test_client_execute_HTTPErrorTypedError tests when the response is an error.
