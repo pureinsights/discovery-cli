@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/go-resty/resty/v2"
@@ -253,15 +254,30 @@ func TestRequestOption_FileOption(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.Header.Get("Content-Type"), "multipart/form-data")
 		body, _ := io.ReadAll(r.Body)
-		assert.Contains(t, string(body), "Esto es un archivo de prueba")
+		assert.Contains(t, string(body), "This is a test file")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"ok":true}`))
 	}))
 	t.Cleanup(srv.Close)
 
+	tmpfile, err := os.CreateTemp("", "testFile.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer os.Remove(tmpfile.Name())
+
+	if _, err := tmpfile.Write([]byte("This is a test file")); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := tmpfile.Close(); err != nil {
+		t.Fatal(err)
+	}
+
 	c := newClient(srv.URL, "")
-	response, err := c.execute("PUT", "", WithFile("test_files/testFile.txt"))
+	response, err := c.execute("PUT", "", WithFile(tmpfile.Name()))
 	require.NoError(t, err)
 	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
 }
