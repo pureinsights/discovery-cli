@@ -1,6 +1,3 @@
-//go:build ignore
-// +build ignore
-
 package discovery
 
 import (
@@ -15,6 +12,7 @@ func Manual() {
 }
 
 func tutorialTest() {
+	fmt.Println("Tutorial test wiki search")
 	queryflow := newClient("http://localhost:8088/v2/api", "")
 
 	wiki := newSubClient(queryflow, "/wikis-search")
@@ -31,6 +29,7 @@ func tutorialTest() {
 }
 
 func secretCRUD() {
+	fmt.Println("\nTEST: Secret Create")
 	core := newClient("http://localhost:8080/v2", "")
 
 	secret, err := execute(core, "POST", "/secret", WithJSONBody(`{
@@ -50,6 +49,7 @@ func secretCRUD() {
 		fmt.Println(secret.String())
 	}
 
+	fmt.Println("\nTEST: GET created secret")
 	secretId := secret.Get("id").String()
 
 	getSecret, err := core.execute("GET", "/secret/"+secretId, []RequestOption{}...)
@@ -61,6 +61,7 @@ func secretCRUD() {
 		fmt.Println(string(getSecret))
 	}
 
+	fmt.Println("\nTEST: PUT to update secret")
 	putSecret, err := core.execute("PUT", "/secret/"+secretId, WithJSONBody(`{
 	"name": "test-secret-2",
 	"active": true,
@@ -78,6 +79,7 @@ func secretCRUD() {
 		fmt.Println(string(putSecret))
 	}
 
+	fmt.Println("\nTEST: GET updated secret")
 	getSecret, err = core.execute("GET", "/secret/"+secretId, []RequestOption{}...)
 
 	if err != nil {
@@ -87,6 +89,7 @@ func secretCRUD() {
 		fmt.Println(string(getSecret))
 	}
 
+	fmt.Println("\nTEST: DELETE secret")
 	deleteSecret, err := core.execute("DELETE", "/secret/"+secretId, []RequestOption{}...)
 
 	if err != nil {
@@ -96,6 +99,7 @@ func secretCRUD() {
 		fmt.Println(string(deleteSecret))
 	}
 
+	fmt.Println("\nTEST: GET deleted secret")
 	_, err = core.execute("GET", "/secret/"+secretId, []RequestOption{}...)
 
 	if err != nil {
@@ -105,6 +109,7 @@ func secretCRUD() {
 }
 
 func fileCRUD() {
+	fmt.Println("\nTEST: Create file")
 	core := newClient("http://localhost:8080/v2", "")
 
 	file1, err := core.execute("PUT", "/file/test.txt", WithFile("discovery/files/testFile.txt"))
@@ -116,6 +121,7 @@ func fileCRUD() {
 		fmt.Println("PUT Test File 1: " + string(file1))
 	}
 
+	fmt.Println("\nTEST: GET created file")
 	file1, err = core.execute("GET", "/file/test.txt")
 
 	if err != nil {
@@ -125,6 +131,7 @@ func fileCRUD() {
 		fmt.Println("GET Test File 1: " + string(file1))
 	}
 
+	fmt.Println("\nTEST: PUT update file")
 	file2, err := core.execute("PUT", "/file/test.txt", WithFile("discovery/files/testFile2.txt"))
 
 	if err != nil {
@@ -134,6 +141,7 @@ func fileCRUD() {
 		fmt.Println("PUT Test file 2: " + string(file2))
 	}
 
+	fmt.Println("\nTEST: GET updated file")
 	file2, err = core.execute("GET", "/file/test.txt")
 
 	if err != nil {
@@ -147,6 +155,7 @@ func fileCRUD() {
 		fmt.Println("The files are different.")
 	}
 
+	fmt.Println("\nTEST: DELETE file")
 	file2, err = core.execute("DELETE", "/file/test.txt")
 
 	if err != nil {
@@ -156,6 +165,7 @@ func fileCRUD() {
 		fmt.Println("DELETE Test file: " + string(file2))
 	}
 
+	fmt.Println("\nTEST: GET deleted file")
 	_, err = core.execute("GET", "/file/test.txt")
 
 	if err != nil {
@@ -166,6 +176,7 @@ func fileCRUD() {
 
 func codesTest() {
 	// The Ingestion API must have no pipelines and run on the port 8081
+	fmt.Println("\nTEST: No Content")
 	ingestion := newClient("http://localhost:8081/v2/pipeline", "")
 
 	noContent, err := ingestion.execute("GET", "")
@@ -186,6 +197,7 @@ func codesTest() {
 
 	core := newClient("http://localhost:8080/v2", "")
 
+	fmt.Println("\nTEST: GET 404 Not Found")
 	_, err = core.execute("GET", "/secret/5f125024-1e5e-4591-9fee-365dc20eeeed")
 
 	if err != nil {
@@ -201,6 +213,7 @@ func codesTest() {
 		}
 	}
 
+	fmt.Println("\nTEST: POST: Duplicated name")
 	putSecret, err := core.execute("POST", "/secret", WithJSONBody(`{
   "name": "mongo-secret",
   "active": true,
@@ -228,6 +241,7 @@ func codesTest() {
 		return
 	}
 
+	fmt.Println("\nTEST: PUT Method not allowed")
 	putSecret, err = core.execute("PUT", "/secret", WithJSONBody(`{
   "name": "mongo-secret",
   "active": true,
@@ -255,6 +269,7 @@ func codesTest() {
 		return
 	}
 
+	fmt.Println("\nTEST: GET unauthorized request")
 	twitterAPI := newClient("https://api.twitter.com/2/users/me", "")
 
 	_, err = twitterAPI.execute("GET", "")
