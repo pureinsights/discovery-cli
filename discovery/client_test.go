@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -204,12 +205,32 @@ func Test_client_execute_RestyReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), base+"/down")
 }
 
+// Test_client_execute_FunctionalOptionsFail tests when one of the functional options returns an error.
+func Test_client_execute_FunctionalOptionsFail(t *testing.T) {
+	failingOption := func(r *resty.Request) error {
+		return Error{
+			Status: http.StatusBadRequest,
+			Body:   gjson.Parse(`{"error": "RequestOption Failed"}`),
+		}
+	}
+	srv := httptest.NewServer(http.NotFoundHandler())
+	base := srv.URL
+	srv.Close()
+
+	c := newClient(base, "")
+	res, err := c.execute(http.MethodGet, "/down", failingOption)
+	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusBadRequest, []byte(`{"error": "RequestOption Failed"}`)))
+	assert.Nil(t, res, "result should be nil on execute error")
+}
+
+// TestRequestOption_FunctionalOptions tests the WithQueryParameters() and WithJSONBody() options.
+// It tests WithQueryParameters() with a single value and an array.
 func TestRequestOption_FunctionalOptions(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "Google", r.URL.Query().Get("q"))
+		assert.Equal(t, []string{"item1", "item2", "item3"}, r.URL.Query()["items"])
 		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 		body, _ := io.ReadAll(r.Body)
-		fmt.Println(string(body))
 		assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -218,25 +239,21 @@ func TestRequestOption_FunctionalOptions(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
-	response, err := c.execute("POST", "", WithQueryParameters(map[string][]string{"q": {"Google"}}),
-		WithHeader("Content-Type", "application/json"),
-		WithBody(`{
+	response, err := c.execute("POST", "", WithQueryParameters(map[string][]string{"q": {"Google"}, "items": {"item1", "item2", "item3"}}),
+		WithJSONBody(`{
 		"name": "test-secret",
 		"active": true
 		}`))
-	if err != nil {
-		fmt.Println("The request with functional options has failed")
-	} else {
-		require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
-	}
+	require.NoError(t, err)
+	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
 }
 
+// TestRequestOption_FileOption tests the WithFile() option.
 func TestRequestOption_FileOption(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Contains(t, "multipart/form-data", r.Header.Get("Content-Type"))
+		assert.Contains(t, r.Header.Get("Content-Type"), "multipart/form-data")
 		body, _ := io.ReadAll(r.Body)
-		fmt.Println(string(body))
-		assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
+		assert.Contains(t, string(body), "Esto es un archivo de prueba")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"ok":true}`))
@@ -245,9 +262,56 @@ func TestRequestOption_FileOption(t *testing.T) {
 
 	c := newClient(srv.URL, "")
 	response, err := c.execute("PUT", "", WithFile("files/testFile.txt"))
-	if err != nil {
-		fmt.Println("The File Upload has failed")
-	} else {
-		require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
-	}
+	require.NoError(t, err)
+	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
+}
+
+// Tests the execute() function when gjson correctly parses the response.
+func Test_execute_ParsedResult(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+		"name": "test-secret",
+		"active": true,
+		"content": { 
+			"username": "user"
+		}
+		}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := execute(c, "GET", "")
+	require.NoError(t, err)
+	assert.Equal(t, "test-secret", response.Get("name").String())
+	assert.Equal(t, "user", response.Get("content.username").String())
+}
+
+// Test_execute_HTTPError tests the execute function when the response is an error.
+func Test_execute_HTTPError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte(`{"message":"missing"}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := execute(c, "GET", "")
+	assert.Equal(t, response, gjson.Result{})
+	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"message":"missing"}`)))
+}
+
+// Test_execute_RestyReturnsError tests the execute function when Resty returns an error.
+func Test_execute_RestyReturnsError(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	base := srv.URL
+	srv.Close()
+
+	c := newClient(base, "")
+	response, err := execute(c, http.MethodGet, "/down")
+	require.Error(t, err)
+	assert.Equal(t, response, gjson.Result{})
+	assert.Contains(t, err.Error(), base+"/down")
 }

@@ -8,6 +8,9 @@ import (
 )
 
 func Manual() {
+	tutorialTest()
+	secretCRUD()
+	fileCRUD()
 	codesTest()
 }
 
@@ -30,7 +33,7 @@ func tutorialTest() {
 func secretCRUD() {
 	core := newClient("http://localhost:8080/v2", "")
 
-	secret, err := execute(core, "POST", "/secret", WithBody(`{
+	secret, err := execute(core, "POST", "/secret", WithJSONBody(`{
   "name": "test-secret",
   "active": true,
   "content": {
@@ -38,7 +41,7 @@ func secretCRUD() {
     "username": "user",
     "password": "password"
   }
-}`), WithHeader("Content-Type", "application/json"))
+}`))
 
 	if err != nil {
 		fmt.Println(err)
@@ -58,7 +61,7 @@ func secretCRUD() {
 		fmt.Println(string(getSecret))
 	}
 
-	putSecret, err := core.execute("PUT", "/secret/"+secretId, WithBody(`{
+	putSecret, err := core.execute("PUT", "/secret/"+secretId, WithJSONBody(`{
 	"name": "test-secret-2",
 	"active": true,
 	"content": {
@@ -66,7 +69,7 @@ func secretCRUD() {
 		"username": "user",
 		"password": "password"
 	}
-	}`), WithHeader("Content-Type", "application/json"))
+	}`))
 
 	if err != nil {
 		fmt.Println(err)
@@ -198,7 +201,7 @@ func codesTest() {
 		}
 	}
 
-	putSecret, err := core.execute("POST", "/secret", WithBody(`{
+	putSecret, err := core.execute("POST", "/secret", WithJSONBody(`{
   "name": "mongo-secret",
   "active": true,
   "content": {
@@ -206,7 +209,7 @@ func codesTest() {
     "username": "user",
     "password": "password"
   }
-}`), WithHeader("Content-Type", "application/json"))
+}`))
 
 	if err != nil {
 		fmt.Println("Error in POST: " + err.Error())
@@ -225,7 +228,7 @@ func codesTest() {
 		return
 	}
 
-	putSecret, err = core.execute("PUT", "/secret", WithBody(`{
+	putSecret, err = core.execute("PUT", "/secret", WithJSONBody(`{
   "name": "mongo-secret",
   "active": true,
   "content": {
@@ -233,7 +236,7 @@ func codesTest() {
     "username": "user",
     "password": "password"
   }
-}`), WithHeader("Content-Type", "application/json"))
+}`))
 
 	if err != nil {
 		fmt.Println("Error in PUT: " + err.Error())
