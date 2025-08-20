@@ -261,7 +261,7 @@ func TestRequestOption_FileOption(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
-	response, err := c.execute("PUT", "", WithFile("files/testFile.txt"))
+	response, err := c.execute("PUT", "", WithFile("test_files/testFile.txt"))
 	require.NoError(t, err)
 	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
 }
