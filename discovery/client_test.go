@@ -1,0 +1,197 @@
+package discovery
+
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+// Test_newClient_BaseURLAndAPIKey tests the function to create a new client.
+// It verifies that the API Key and base URL correctly match.
+func Test_newClient_BaseURLAndAPIKey(t *testing.T) {
+	url := "http://localhost:8080"
+	apiKey := "secret-key"
+	c := newClient(url, apiKey)
+
+	assert.Equal(t, apiKey, c.ApiKey, "ApiKey should be stored")
+	assert.Equal(t, url, c.client.BaseURL, "BaseURL should match server URL")
+}
+
+func Test_newSubClient_BaseURLJoin(t *testing.T) {
+	tests := []struct {
+		name string
+		base string
+		path string
+		want string
+	}{
+		{
+			name: "no slashes",
+			base: "http://localhost",
+			path: "api",
+			want: "http://localhost/api",
+		},
+		{
+			name: "base has trailing slash",
+			base: "http://localhost/",
+			path: "api",
+			want: "http://localhost/api",
+		},
+		{
+			name: "path has leading slash",
+			base: "http://localhost",
+			path: "/api",
+			want: "http://localhost/api",
+		},
+		{
+			name: "both have slashes",
+			base: "http://localhost/",
+			path: "/api",
+			want: "http://localhost/api",
+		},
+		{
+			name: "collapse multiple slashes and keep trailing on path",
+			base: "http://localhost///",
+			path: "/api/",
+			want: "http://localhost/api",
+		},
+		{
+			name: "nested base path",
+			base: "http://localhost/v2",
+			path: "api",
+			want: "http://localhost/v2/api",
+		},
+		{
+			name: "localhost without scheme and extra slashes",
+			base: "localhost///",
+			path: "/v2",
+			want: "localhost/v2",
+		},
+		{
+			name: "empty path keeps base",
+			base: "http://localhost/",
+			path: "",
+			want: "http://localhost",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			parent := newClient(tc.base, "apiKey")
+			got := newSubClient(parent, tc.path)
+
+			assert.Equalf(t, parent.ApiKey, got.ApiKey, "API Key not inherited")
+			assert.Equalf(t, tc.want, got.client.BaseURL, "Base URL is different:\n")
+		})
+	}
+}
+
+// Test_client_execute_SendsAPIKeyReturnsBody tests when execute() sets the API key and returns the response's body.
+func Test_client_execute_SendsAPIKeyReturnsBody(t *testing.T) {
+	const apiKey = "api-key"
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "/seed", r.URL.Path)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"ok":true}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, apiKey)
+
+	res, err := c.execute(http.MethodGet, "/seed")
+	require.NoError(t, err)
+
+	assert.IsType(t, []byte(nil), res)
+
+	assert.Equal(t, `{"ok":true}`, string(res))
+}
+
+// Test_client_execute_HTTPErrorTypedError tests when the response is an error.
+func Test_client_execute_HTTPErrorTypedError(t *testing.T) {
+	type tc struct {
+		name        string
+		status      int
+		contentType string
+		body        []byte
+		expectBody  string
+	}
+
+	tests := []tc{
+		{
+			name:        "403 with JSON string body",
+			status:      http.StatusForbidden,
+			contentType: "text/plain",
+			body:        []byte(`"Forbidden"`),
+			expectBody:  "Forbidden",
+		},
+		{
+			name:        "404 with JSON object",
+			status:      http.StatusNotFound,
+			contentType: "application/json",
+			body:        []byte(`{"message":"missing"}`),
+			expectBody:  `{"message":"missing"}`,
+		},
+		{
+			name:        "415 with JSON array",
+			status:      http.StatusUnsupportedMediaType,
+			contentType: "application/json",
+			body:        []byte(`["a","b"]`),
+			expectBody:  `["a","b"]`,
+		},
+		{
+			name:        "500 with empty body",
+			status:      http.StatusInternalServerError,
+			contentType: "application/json",
+			body:        nil,
+			expectBody:  "",
+		},
+		{
+			name:        "400 with invalid JSON/plain text",
+			status:      http.StatusBadRequest,
+			contentType: "text/plain",
+			body:        []byte(`Forbidden`),
+			expectBody:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				if tt.contentType != "" {
+					w.Header().Set("Content-Type", tt.contentType)
+				}
+				w.WriteHeader(tt.status)
+				if tt.body != nil {
+					_, _ = w.Write(tt.body)
+				}
+			}))
+			t.Cleanup(srv.Close)
+
+			c := newClient(srv.URL, "")
+
+			res, err := c.execute(http.MethodGet, "/fail")
+			assert.Nil(t, res, "result should be nil on response error")
+			require.Error(t, err, "expected an error")
+
+			assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tt.status, tt.expectBody))
+		})
+	}
+}
+
+// TestExecute_RestyReturnsError tests when the Resty Execute function returns an error.
+func Test_client_execute_RestyReturnsError(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	base := srv.URL
+	srv.Close()
+
+	c := newClient(base, "")
+	res, err := c.execute(http.MethodGet, "/down")
+	require.Error(t, err)
+	assert.Nil(t, res, "result should be nil on execute error")
+	assert.Contains(t, err.Error(), base+"/down")
+}
