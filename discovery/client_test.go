@@ -83,8 +83,8 @@ func Test_newSubClient_BaseURLJoin(t *testing.T) {
 			parent := newClient(tc.base, "apiKey")
 			got := newSubClient(parent, tc.path)
 
-			assert.Equalf(t, parent.ApiKey, got.ApiKey, "API Key not inherited: got %q expected %q", got.ApiKey, parent.ApiKey)
-			assert.Equalf(t, tc.want, got.client.BaseURL, "Base URL is different:\n  base=%q path=%q\n  got=%q\n  expected=%q", tc.base, tc.path, got.client.BaseURL, tc.want)
+			assert.Equalf(t, parent.ApiKey, got.ApiKey, "API Key not inherited")
+			assert.Equalf(t, tc.want, got.client.BaseURL, "Base URL is different:\n")
 		})
 	}
 }
