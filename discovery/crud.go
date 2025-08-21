@@ -26,7 +26,7 @@ func (getter getter) GetAll() ([]gjson.Result, error) {
 	if err != nil {
 		return []gjson.Result{}, err
 	} else {
-		return response.Array(), nil
+		return response.Get("content").Array(), nil
 	}
 }
 

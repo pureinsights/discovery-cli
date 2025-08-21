@@ -40,7 +40,7 @@ func TestCRUD(t *testing.T) {
 			method:     http.MethodGet,
 			path:       "/",
 			statusCode: http.StatusOK,
-			response:   `[{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"test-secret"}, {"name": "mongo-secret", "id": "cfa0ef51-1fd9-47e2-8fdb-262ac9712781"}]`,
+			response:   `{"content":[{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"test-secret"}, {"name": "mongo-secret", "id": "cfa0ef51-1fd9-47e2-8fdb-262ac9712781"}]}`,
 			testFunc: func(t *testing.T, c crud) {
 				results, err := c.GetAll()
 				require.NoError(t, err)
@@ -52,7 +52,7 @@ func TestCRUD(t *testing.T) {
 			method:     http.MethodGet,
 			path:       "/",
 			statusCode: http.StatusNoContent,
-			response:   `[]`,
+			response:   `{"content": []}`,
 			testFunc: func(t *testing.T, c crud) {
 				results, err := c.GetAll()
 				require.NoError(t, err)
@@ -115,18 +115,6 @@ func TestCRUD(t *testing.T) {
 			},
 		},
 		{
-			name:       "GetAll returns a JSON, not an Array",
-			method:     http.MethodGet,
-			path:       "/",
-			statusCode: http.StatusOK,
-			response:   `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
-			testFunc: func(t *testing.T, c crud) {
-				results, err := c.GetAll()
-				require.NoError(t, err)
-				assert.Equal(t, []gjson.Result{gjson.Parse(`{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`)}, results)
-			},
-		},
-		{
 			name:       "GetAll returns a 401 Unauthorized",
 			method:     http.MethodGet,
 			path:       "/",
@@ -136,6 +124,18 @@ func TestCRUD(t *testing.T) {
 				response, err := c.GetAll()
 				assert.Equal(t, []gjson.Result{}, response)
 				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusUnauthorized, []byte(`{"error":"unauthorized"}`)))
+			},
+		},
+		{
+			name:       "GetAll has no content field",
+			method:     http.MethodGet,
+			path:       "/",
+			statusCode: http.StatusNoContent,
+			response:   `[]`,
+			testFunc: func(t *testing.T, c crud) {
+				results, err := c.GetAll()
+				require.NoError(t, err)
+				assert.Len(t, results, 0)
 			},
 		},
 		{
@@ -182,7 +182,6 @@ func TestCRUD(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// Setup mock server
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, tc.path, r.URL.Path)
@@ -192,7 +191,6 @@ func TestCRUD(t *testing.T) {
 			}))
 			defer srv.Close()
 
-			// Create client pointing to mock server
 			c := crud{getter{newClient(srv.URL, "")}}
 			tc.testFunc(t, c)
 		})
