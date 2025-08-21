@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/google/uuid"
@@ -40,11 +41,53 @@ func TestCRUD(t *testing.T) {
 			method:     http.MethodGet,
 			path:       "/",
 			statusCode: http.StatusOK,
-			response:   `{"content":[{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"test-secret"}, {"name": "mongo-secret", "id": "cfa0ef51-1fd9-47e2-8fdb-262ac9712781"}]}`,
+			response: `{
+			"content": [
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 12,
+			"totalPages": 4,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`,
 			testFunc: func(t *testing.T, c crud) {
 				results, err := c.GetAll()
 				require.NoError(t, err)
-				assert.Len(t, results, 2)
+				assert.Len(t, results, 12)
 			},
 		},
 		{
@@ -195,4 +238,134 @@ func TestCRUD(t *testing.T) {
 			tc.testFunc(t, c)
 		})
 	}
+}
+
+// Test_getter_GetAll_ErrorInSecondPage tests when GetAll fails in a request while trying to get every content from every page.
+func Test_getter_GetAll_ErrorInSecondPage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		w.Header().Set("Content-Type", "application/json")
+		if pageNumber > 0 {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(`{"error":"Internal Server Error"}`))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"content": [
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 12,
+			"totalPages": 4,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	c := crud{getter{newClient(srv.URL, "")}}
+
+	response, err := c.GetAll()
+	assert.Equal(t, []gjson.Result{}, response)
+	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, []byte(`{"error":"Internal Server Error"}`)))
+}
+
+// Test_getter_GetAll_NoContentInSecondPage tests what happens if one of the later pages returns No Content
+func Test_getter_GetAll_NoContentInSecondPage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		w.Header().Set("Content-Type", "application/json")
+		if pageNumber > 0 {
+			w.WriteHeader(http.StatusNoContent)
+			_, _ = w.Write([]byte(`[]`))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"content": [
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 6,
+			"totalPages": 2,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	c := crud{getter{newClient(srv.URL, "")}}
+
+	response, err := c.GetAll()
+	require.NoError(t, err)
+	assert.Len(t, response, 3)
 }
