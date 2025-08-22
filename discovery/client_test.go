@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -87,14 +88,8 @@ func Test_newSubClient_BaseURLJoin(t *testing.T) {
 			parent := newClient(tc.base, "apiKey")
 			got := newSubClient(parent, tc.path)
 
-			if got.ApiKey != parent.ApiKey {
-				t.Fatalf("API Key not inherited: got %q want %q", got.ApiKey, parent.ApiKey)
-			}
-
-			if got.client.BaseURL != tc.want {
-				t.Fatalf("Base URL is different:\n  base=%q path=%q\n  got =%q\n  want=%q",
-					tc.base, tc.path, got.client.BaseURL, tc.want)
-			}
+			assert.Equalf(t, parent.ApiKey, got.ApiKey, "API Key not inherited")
+			assert.Equalf(t, tc.want, got.client.BaseURL, "Base URL is different:\n")
 		})
 	}
 }
@@ -107,7 +102,7 @@ func Test_client_execute_SendsAPIKeyReturnsBody(t *testing.T) {
 		assert.Equal(t, "/seed", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"ok":true}`))
+		w.Write([]byte(`{"ok":true}`))
 	}))
 	t.Cleanup(srv.Close)
 
@@ -177,7 +172,7 @@ func Test_client_execute_HTTPErrorTypedError(t *testing.T) {
 				}
 				w.WriteHeader(tt.status)
 				if tt.body != nil {
-					_, _ = w.Write(tt.body)
+					w.Write(tt.body)
 				}
 			}))
 			t.Cleanup(srv.Close)
@@ -209,10 +204,7 @@ func Test_client_execute_RestyReturnsError(t *testing.T) {
 // Test_client_execute_FunctionalOptionsFail tests when one of the functional options returns an error.
 func Test_client_execute_FunctionalOptionsFail(t *testing.T) {
 	failingOption := func(r *resty.Request) error {
-		return Error{
-			Status: http.StatusBadRequest,
-			Body:   gjson.Parse(`{"error": "RequestOption Failed"}`),
-		}
+		return errors.New("The option failed")
 	}
 	srv := httptest.NewServer(http.NotFoundHandler())
 	base := srv.URL
@@ -220,7 +212,7 @@ func Test_client_execute_FunctionalOptionsFail(t *testing.T) {
 
 	c := newClient(base, "")
 	res, err := c.execute(http.MethodGet, "/down", failingOption)
-	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusBadRequest, []byte(`{"error": "RequestOption Failed"}`)))
+	assert.EqualError(t, err, "The option failed")
 	assert.Nil(t, res, "result should be nil on execute error")
 }
 
@@ -235,7 +227,7 @@ func TestRequestOption_FunctionalOptions(t *testing.T) {
 		assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"ok":true}`))
+		w.Write([]byte(`{"ok":true}`))
 	}))
 	t.Cleanup(srv.Close)
 
@@ -257,7 +249,7 @@ func TestRequestOption_FileOption(t *testing.T) {
 		assert.Contains(t, string(body), "This is a test file")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"ok":true}`))
+		w.Write([]byte(`{"ok":true}`))
 	}))
 	t.Cleanup(srv.Close)
 
@@ -287,7 +279,7 @@ func Test_execute_ParsedResult(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{
+		w.Write([]byte(`{
 		"name": "test-secret",
 		"active": true,
 		"content": { 
@@ -309,7 +301,7 @@ func Test_execute_HTTPError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(`{"message":"missing"}`))
+		w.Write([]byte(`{"message":"missing"}`))
 	}))
 	t.Cleanup(srv.Close)
 
