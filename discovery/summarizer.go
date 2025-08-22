@@ -13,20 +13,10 @@ type summarizer struct {
 
 func (s summarizer) Summarize(seedId, executionId uuid.UUID) (gjson.Result, error) {
 
-	recordSummarySeed, err := execute(s.client, http.MethodGet, "/"+seedId.String()+"/execution/"+executionId.String()+"/job/summary")	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	jobSummaryExecution, err := execute(s.client, http.MethodGet, "/"+seedId.String()+"/execution/"+executionId.String()+"/job/summary")
+	summary, err := execute(s.client, http.MethodGet, "/"+seedId.String()+"/summary")
 	if err != nil {
 		return gjson.Result{}, err
 	}
 
-	recordSummaryExecution, err := execute(s.client, http.MethodGet, "/"+seedId.String()+"/execution/"+executionId.String()+"/job/summary")
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-
-	return response, nil
+	return summary, nil
 }
