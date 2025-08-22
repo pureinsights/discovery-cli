@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/pureinsights/pdp-cli/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -47,7 +48,7 @@ func TestCloner(t *testing.T) {
 			},
 		},
 
-		// Error cases
+		// Error case
 		{
 			name:       "Get by ID returns 404 Not Found",
 			method:     http.MethodPost,
@@ -65,13 +66,12 @@ func TestCloner(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(tc.statusCode)
-				_, _ = w.Write([]byte(tc.response))
-			}))
+			srv := httptest.NewServer(http.HandlerFunc(
+				testutils.HttpHandler(func(r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, tc.path, r.URL.Path)
+				},
+					tc.statusCode, "application/json", tc.response)))
 			defer srv.Close()
 
 			c := cloner{client: newClient(srv.URL, "")}
