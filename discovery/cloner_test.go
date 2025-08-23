@@ -50,7 +50,7 @@ func TestCloner(t *testing.T) {
 
 		// Error case
 		{
-			name:       "Get by ID returns 404 Not Found",
+			name:       "Clone returns 404 Not Found",
 			method:     http.MethodPost,
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
 			statusCode: http.StatusNotFound,
