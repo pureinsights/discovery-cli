@@ -24,8 +24,8 @@ func TestSummarizer(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:       "Search returns object",
-			method:     http.MethodPost,
+			name:       "Summarizer returns results",
+			method:     http.MethodGet,
 			path:       "/summary",
 			statusCode: http.StatusOK,
 			response: `{
@@ -34,22 +34,21 @@ func TestSummarizer(t *testing.T) {
 			testFunc: func(t *testing.T, s summarizer) {
 				response, err := s.Summarize()
 				require.NoError(t, err)
-				assert.Equal(t, "mongo2", response.Get("name").String())
-				assert.Equal(t, "mongo-secret", response.Get("secret").String())
+				assert.Equal(t, 8, int(response.Get("DONE").Int()))
 			},
 		},
 
 		// Error case
 		{
-			name:       "Get by ID returns 404 Not Found",
-			method:     http.MethodPost,
+			name:       "Summary fails",
+			method:     http.MethodGet,
 			path:       "/summary",
 			statusCode: http.StatusNotFound,
 			response:   `{"messages": ["Seed execution not found: 9ababe08-0b74-4672-bb7c-e7a8225d6d4"]}`,
 			testFunc: func(t *testing.T, s summarizer) {
 				response, err := s.Summarize()
 				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)))
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"messages": ["Seed execution not found: 9ababe08-0b74-4672-bb7c-e7a8225d6d4"]}`)))
 			},
 		},
 	}
