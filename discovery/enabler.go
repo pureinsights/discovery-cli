@@ -12,8 +12,7 @@ type enabler struct {
 }
 
 func (e enabler) Enable(id uuid.UUID) (gjson.Result, error) {
-
-	enabled, err := execute(e.client, http.MethodGet, id.String()+"/enable")
+	enabled, err := execute(e.client, http.MethodPatch, "/"+id.String()+"/enable")
 	if err != nil {
 		return gjson.Result{}, err
 	}
@@ -22,11 +21,10 @@ func (e enabler) Enable(id uuid.UUID) (gjson.Result, error) {
 }
 
 func (e enabler) Disable(id uuid.UUID) (gjson.Result, error) {
-
-	enabled, err := execute(e.client, http.MethodGet, id.String()+"/disable")
+	disabled, err := execute(e.client, http.MethodPatch, "/"+id.String()+"/disable")
 	if err != nil {
 		return gjson.Result{}, err
 	}
 
-	return enabled, nil
+	return disabled, nil
 }
