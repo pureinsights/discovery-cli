@@ -12,7 +12,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestCloner has table-driven tests to test the cloner methods.
+// TestSummarizer has table-driven tests to test the Summarize method.
 func TestSummarizer(t *testing.T) {
 	tests := []struct {
 		name       string
