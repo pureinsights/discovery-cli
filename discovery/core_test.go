@@ -46,7 +46,7 @@ func TestCore(t *testing.T) {
 			name:       "Ping returns an error",
 			method:     http.MethodGet,
 			path:       "/v2/server/f6950327-3175-4a98-a570-658df852424a/ping",
-			statusCode: http.StatusNotFound,
+			statusCode: http.StatusBadGateway,
 			response: `{
 					"status": 502,
 					"code": 8002,
@@ -59,7 +59,14 @@ func TestCore(t *testing.T) {
 				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
 				response, err := c.Clone(id, map[string][]string{"name": {"mongo2"}})
 				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)))
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{
+					"status": 502,
+					"code": 8002,
+					"messages": [
+							"An error occurred while pinging the Mongo client."
+					],
+					"timestamp": "2025-08-26T20:42:26.372708600Z"
+			}`)))
 			},
 		},
 	}
