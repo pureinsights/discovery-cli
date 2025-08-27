@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/pureinsights/pdp-cli/internal/fileutils"
 	"github.com/pureinsights/pdp-cli/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -240,7 +241,7 @@ func TestRequestOption_FileOption(t *testing.T) {
 		}))
 	t.Cleanup(srv.Close)
 
-	tmpFile, err := testutils.CreateTemporaryFile("", "testFile.txt", "This is a test file")
+	tmpFile, err := fileutils.CreateTemporaryFile("", "testFile.txt", "This is a test file")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -253,7 +254,7 @@ func TestRequestOption_FileOption(t *testing.T) {
 	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
 }
 
-// Tests the execute() function when gjson correctly parses the response.
+// Test_execute_ParsedResult tests the execute() function when gjson correctly parses the response.
 func Test_execute_ParsedResult(t *testing.T) {
 	srv := httptest.NewServer(
 		testutils.HttpHandler(t, http.StatusOK, "application/json", `{
@@ -270,6 +271,30 @@ func Test_execute_ParsedResult(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "test-secret", response.Get("name").String())
 	assert.Equal(t, "user", response.Get("content.username").String())
+}
+
+// Test_execute_NoContent tests the execute() function when it receives a No Content Response.
+func Test_execute_NoContent(t *testing.T) {
+	srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := execute(c, "GET", "")
+	require.NoError(t, err)
+	assert.Equal(t, gjson.Null, response.Type)
+	assert.Equal(t, "", response.Raw)
+}
+
+// Test_client_execute_NoContent tests the client.execute() function when it receives a No Content Response.
+func Test_client_execute_NoContent(t *testing.T) {
+	srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := execute(c, "GET", "")
+	require.NoError(t, err)
+	assert.Equal(t, gjson.Null, response.Type)
+	assert.Equal(t, "", response.Raw)
 }
 
 // Test_execute_HTTPError tests the execute function when the response is an error.
