@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/pureinsights/pdp-cli/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -225,13 +226,12 @@ func TestCRUD(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(tc.statusCode)
-				_, _ = w.Write([]byte(tc.response))
-			}))
+			srv := httptest.NewServer(testutils.HttpHandler(t,
+				tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, tc.path, r.URL.Path)
+				}))
+
 			defer srv.Close()
 
 			c := crud{getter{newClient(srv.URL, "")}}
@@ -242,16 +242,17 @@ func TestCRUD(t *testing.T) {
 
 // Test_getter_GetAll_ErrorInSecondPage tests when GetAll fails in a request while trying to get every content from every page.
 func Test_getter_GetAll_ErrorInSecondPage(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, http.MethodGet, r.Method)
-		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
-		w.Header().Set("Content-Type", "application/json")
-		if pageNumber > 0 {
-			w.WriteHeader(http.StatusInternalServerError)
-			_, _ = w.Write([]byte(`{"error":"Internal Server Error"}`))
-		} else {
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{
+	srv := httptest.NewServer(http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, http.MethodGet, r.Method)
+			pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+			w.Header().Set("Content-Type", "application/json")
+			if pageNumber > 0 {
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(`{"error":"Internal Server Error"}`))
+			} else {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{
 			"content": [
 				{
 				"type": "mongo",
@@ -294,8 +295,8 @@ func Test_getter_GetAll_ErrorInSecondPage(t *testing.T) {
 			"numberOfElements": 3,
 			"pageNumber": 0
 			}`))
-		}
-	}))
+			}
+		}))
 	t.Cleanup(srv.Close)
 
 	c := crud{getter{newClient(srv.URL, "")}}
