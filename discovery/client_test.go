@@ -99,10 +99,10 @@ func Test_newSubClient_BaseURLJoin(t *testing.T) {
 func Test_client_execute_SendsAPIKeyReturnsBody(t *testing.T) {
 	const apiKey = "api-key"
 
-	srv := httptest.NewServer(http.HandlerFunc(
-		testutils.HttpHandler(func(r *http.Request) {
+	srv := httptest.NewServer(testutils.HttpHandler(t, http.StatusOK, "application/json", `{"ok":true}`,
+		func(t *testing.T, r *http.Request) {
 			assert.Equal(t, "/seed", r.URL.Path)
-		}, http.StatusOK, "application/json", `{"ok":true}`)))
+		}))
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, apiKey)
@@ -165,9 +165,8 @@ func Test_client_execute_HTTPErrorTypedError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			srv := httptest.NewServer(http.HandlerFunc(
-				testutils.HttpHandler(func(r *http.Request) {},
-					tt.status, tt.contentType, tt.body)))
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tt.status, tt.contentType, tt.body, nil))
 			t.Cleanup(srv.Close)
 
 			c := newClient(srv.URL, "")
@@ -212,12 +211,13 @@ func Test_client_execute_FunctionalOptionsFail(t *testing.T) {
 // TestRequestOption_FunctionalOptions tests the WithQueryParameters() and WithJSONBody() options.
 // It tests WithQueryParameters() with a single value and an array.
 func TestRequestOption_FunctionalOptions(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(
-		testutils.HttpHandler(func(r *http.Request) {
-			body, _ := io.ReadAll(r.Body)
-			assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
-		},
-			http.StatusOK, "application/json", `{"ok":true}`)))
+	srv := httptest.NewServer(
+		testutils.HttpHandler(t,
+			http.StatusOK, "application/json", `{"ok":true}`,
+			func(t *testing.T, r *http.Request) {
+				body, _ := io.ReadAll(r.Body)
+				assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
+			}))
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
@@ -232,13 +232,12 @@ func TestRequestOption_FunctionalOptions(t *testing.T) {
 
 // TestRequestOption_FileOption tests the WithFile() option.
 func TestRequestOption_FileOption(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(
-		testutils.HttpHandler(func(r *http.Request) {
+	srv := httptest.NewServer(testutils.HttpHandler(t, http.StatusOK, "application/json", `{"ok":true}`,
+		func(t *testing.T, r *http.Request) {
 			assert.Contains(t, r.Header.Get("Content-Type"), "multipart/form-data")
 			body, _ := io.ReadAll(r.Body)
 			assert.Contains(t, string(body), "This is a test file")
-		},
-			http.StatusOK, "application/json", `{"ok":true}`)))
+		}))
 	t.Cleanup(srv.Close)
 
 	tmpFile, err := testutils.CreateTemporaryFile("", "testFile.txt", "This is a test file")
@@ -256,15 +255,14 @@ func TestRequestOption_FileOption(t *testing.T) {
 
 // Tests the execute() function when gjson correctly parses the response.
 func Test_execute_ParsedResult(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(
-		testutils.HttpHandler(func(r *http.Request) {},
-			http.StatusOK, "application/json", `{
+	srv := httptest.NewServer(
+		testutils.HttpHandler(t, http.StatusOK, "application/json", `{
 		"name": "test-secret",
 		"active": true,
 		"content": { 
 			"username": "user"
 		}
-		}`)))
+		}`, nil))
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
@@ -276,9 +274,8 @@ func Test_execute_ParsedResult(t *testing.T) {
 
 // Test_execute_HTTPError tests the execute function when the response is an error.
 func Test_execute_HTTPError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(
-		testutils.HttpHandler(func(r *http.Request) {},
-			http.StatusNotFound, "application/json", `{"message":"missing"}`)))
+	srv := httptest.NewServer(testutils.HttpHandler(t,
+		http.StatusNotFound, "application/json", `{"message":"missing"}`, nil))
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
