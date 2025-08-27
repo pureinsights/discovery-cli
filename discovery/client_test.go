@@ -273,28 +273,40 @@ func Test_execute_ParsedResult(t *testing.T) {
 	assert.Equal(t, "user", response.Get("content.username").String())
 }
 
-// Test_execute_NoContent tests the execute() function when it receives a No Content Response.
-func Test_execute_NoContent(t *testing.T) {
-	srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
-	t.Cleanup(srv.Close)
+// Test_NoContent tests the execute() and client.execute() functions when they receive a No Content Response.
+func Test_NoContent(t *testing.T) {
+	tests := []struct {
+		name     string
+		testFunc func(t *testing.T, c client)
+	}{
+		{
+			name: "execute() returns no content",
+			testFunc: func(t *testing.T, c client) {
+				response, err := execute(c, http.MethodGet, "")
+				require.NoError(t, err)
+				assert.Equal(t, gjson.Null, response.Type)
+				assert.Equal(t, "", response.Raw)
+			},
+		},
+		{
+			name: "Client.execute() returns no content",
+			testFunc: func(t *testing.T, c client) {
+				response, err := c.execute(http.MethodGet, "")
+				require.NoError(t, err)
+				assert.Len(t, response, 0)
+			},
+		},
+	}
 
-	c := newClient(srv.URL, "")
-	response, err := execute(c, "GET", "")
-	require.NoError(t, err)
-	assert.Equal(t, gjson.Null, response.Type)
-	assert.Equal(t, "", response.Raw)
-}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
+			defer srv.Close()
 
-// Test_client_execute_NoContent tests the client.execute() function when it receives a No Content Response.
-func Test_client_execute_NoContent(t *testing.T) {
-	srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
-	t.Cleanup(srv.Close)
-
-	c := newClient(srv.URL, "")
-	response, err := execute(c, "GET", "")
-	require.NoError(t, err)
-	assert.Equal(t, gjson.Null, response.Type)
-	assert.Equal(t, "", response.Raw)
+			c := newClient(srv.URL, "")
+			tc.testFunc(t, c)
+		})
+	}
 }
 
 // Test_execute_HTTPError tests the execute function when the response is an error.
