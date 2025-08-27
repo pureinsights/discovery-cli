@@ -8,14 +8,16 @@ import (
 // HttpHandler returns a handler that performs given assertions and responds
 // with the provided status, content type, and body.
 func HttpHandler(
-	assertions func(*http.Request),
+	t *testing.T,
 	statusCode int,
 	contentType string,
 	body string,
+	assertions func(*testing.T, *http.Request),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		assertions(r)
-
+		if assertions != nil {
+			assertions(t, r)
+		}
 		w.Header().Set("Content-Type", contentType)
 		w.WriteHeader(statusCode)
 		w.Write([]byte(body))
@@ -26,13 +28,12 @@ func HttpHandler(
 // with a NoContent response.
 func HttpNoContentHandler(
 	t *testing.T,
-	assertions []func(*testing.T, *http.Request),
+	assertions func(*testing.T, *http.Request),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		for _, check := range assertions {
-			check(t, r)
+		if assertions != nil {
+			assertions(t, r)
 		}
-
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

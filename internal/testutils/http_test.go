@@ -10,39 +10,130 @@ import (
 )
 
 // TestHttpHandler tests that the HttpHandler function actually sets the information and runs the assertions.
-func TestHttpHandler(t *testing.T) {
-	expectedBody := `{"ok":true}`
-	expectedContentType := "application/json"
-	expectedStatus := http.StatusOK
+// func TestHttpHandler(t *testing.T) {
+// 	expectedBody := `{"ok":true}`
+// 	expectedContentType := "application/json"
+// 	expectedStatus := http.StatusOK
 
-	assertions := func(r *http.Request) {
-		assert.Equal(t, "/test", r.URL.Path)
-		assert.Equal(t, http.MethodGet, r.Method)
+// 	assertions := func(test *testing.T, r *http.Request) {
+// 		assert.Equal(test, "/test", r.URL.Path)
+// 		assert.Equal(test, http.MethodGet, r.Method)
+// 	}
+
+// 	handler := HttpHandler(t, expectedStatus, expectedContentType, expectedBody, assertions)
+// 	request := httptest.NewRequest(http.MethodGet, "/test", nil)
+// 	responseRecorder := httptest.NewRecorder()
+
+// 	handler.ServeHTTP(responseRecorder, request)
+
+//		response := responseRecorder.Result()
+//		actualBody, _ := io.ReadAll(response.Body)
+//		assert.Equal(t, expectedStatus, response.StatusCode)
+//		assert.Equal(t, expectedContentType, response.Header.Get("Content-Type"))
+//		body := string(actualBody)
+//		assert.Equal(t, expectedBody, body)
+//	}
+func TestHttpHandler_Table(t *testing.T) {
+	tests := []struct {
+		name           string
+		expectedStatus int
+		expectedCT     string
+		expectedBody   string
+		reqMethod      string
+		reqPath        string
+		assertions     func(test *testing.T, r *http.Request)
+	}{
+		{
+			name:           "OK JSON response with assertions",
+			expectedStatus: http.StatusOK,
+			expectedCT:     "application/json",
+			expectedBody:   `{"ok":true}`,
+			reqMethod:      http.MethodGet,
+			reqPath:        "/test",
+			assertions: func(test *testing.T, r *http.Request) {
+				assert.Equal(test, "/test", r.URL.Path)
+				assert.Equal(test, http.MethodGet, r.Method)
+			},
+		},
+		{
+			name:           "OK JSON response with nil assertions",
+			expectedStatus: http.StatusOK,
+			expectedCT:     "application/json",
+			expectedBody:   `{"ok":true}`,
+			reqMethod:      http.MethodGet,
+			reqPath:        "/test",
+			assertions:     nil,
+		},
+		{
+			name:           "Error JSON response with nil assertions",
+			expectedStatus: http.StatusNotFound,
+			expectedCT:     "application/json",
+			expectedBody:   `{"error": "Not found"}`,
+			reqMethod:      http.MethodGet,
+			reqPath:        "/test",
+			assertions:     nil,
+		},
+		{
+			name:           "String response with assertions",
+			expectedStatus: http.StatusNotFound,
+			expectedCT:     "text/plain",
+			expectedBody:   `This is a test response.`,
+			reqMethod:      http.MethodGet,
+			reqPath:        "/test",
+			assertions: func(test *testing.T, r *http.Request) {
+				assert.Equal(test, "/test", r.URL.Path)
+				assert.Equal(test, http.MethodGet, r.Method)
+			},
+		},
+		{
+			name:           "Empty string response with no assertions",
+			expectedStatus: http.StatusNoContent,
+			expectedCT:     "text/plain",
+			expectedBody:   ``,
+			reqMethod:      http.MethodGet,
+			reqPath:        "/test",
+			assertions:     nil,
+		},
+		{
+			name:           "String response with application/json content type and assertions",
+			expectedStatus: http.StatusOK,
+			expectedCT:     "application/json",
+			expectedBody:   `This is a test response.`,
+			reqMethod:      http.MethodGet,
+			reqPath:        "/test",
+			assertions: func(test *testing.T, r *http.Request) {
+				assert.Equal(test, "/test", r.URL.Path)
+				assert.Equal(test, http.MethodGet, r.Method)
+			},
+		},
 	}
 
-	handler := HttpHandler(assertions, expectedStatus, expectedContentType, expectedBody)
-	request := httptest.NewRequest(http.MethodGet, "/test", nil)
-	responseRecorder := httptest.NewRecorder()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			handler := HttpHandler(t, tc.expectedStatus, tc.expectedCT, tc.expectedBody, tc.assertions)
 
-	handler.ServeHTTP(responseRecorder, request)
+			req := httptest.NewRequest(tc.reqMethod, tc.reqPath, nil)
+			rr := httptest.NewRecorder()
 
-	response := responseRecorder.Result()
-	actualBody, _ := io.ReadAll(response.Body)
-	assert.Equal(t, expectedStatus, response.StatusCode)
-	assert.Equal(t, expectedContentType, response.Header.Get("Content-Type"))
-	body := string(actualBody)
-	assert.Equal(t, expectedBody, body)
+			handler.ServeHTTP(rr, req)
+
+			res := rr.Result()
+			defer res.Body.Close()
+
+			actualBody, _ := io.ReadAll(res.Body)
+
+			assert.Equal(t, tc.expectedStatus, res.StatusCode)
+			assert.Equal(t, tc.expectedCT, res.Header.Get("Content-Type"))
+			assert.Equal(t, tc.expectedBody, string(actualBody))
+		})
+	}
 }
 
 // TestHttpNoContentHandler tests that the function actually returns a No Content response.
 func TestHttpNoContentHandler(t *testing.T) {
-	assertions := []func(*testing.T, *http.Request){
-		func(t *testing.T, r *http.Request) {
-			assert.Equal(t, "/nocontent", r.URL.Path)
-		},
-		func(t *testing.T, r *http.Request) {
-			assert.Equal(t, http.MethodDelete, r.Method)
-		},
+	assertions := func(test *testing.T, r *http.Request) {
+		assert.Equal(t, "/nocontent", r.URL.Path)
+		assert.Equal(t, http.MethodDelete, r.Method)
 	}
 
 	handler := HttpNoContentHandler(t, assertions)
