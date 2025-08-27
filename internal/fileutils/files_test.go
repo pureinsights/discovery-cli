@@ -9,35 +9,45 @@ import (
 )
 
 // TestCreateTemporaryFile_Success tests when creating and writing to the temporary file was successful.
+// It tests what happens when either of the parameters is empty.
 func TestCreateTemporaryFile_Success(t *testing.T) {
-	dir := t.TempDir()
-	filename := "testfile-*"
-	content := "This is a test file"
+	tests := []struct {
+		name     string
+		filename string
+		content  string
+	}{
+		{
+			name:     "File with name and real content",
+			filename: "testfile-*",
+			content:  "This is a test file",
+		},
+		{
+			name:     "File with empty name and real content",
+			filename: "",
+			content:  "This is a test file",
+		},
+		{
+			name:     "File with name and empty content",
+			filename: "empty-*",
+			content:  "",
+		},
+	}
 
-	path, err := CreateTemporaryFile(dir, filename, content)
-	require.NoError(t, err)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			path, err := CreateTemporaryFile(dir, tc.filename, tc.content)
+			require.NoError(t, err)
 
-	require.FileExists(t, path)
+			require.FileExists(t, path)
 
-	require.True(t, filepath.Dir(path) == dir)
+			require.True(t, filepath.Dir(path) == dir)
 
-	data, err := os.ReadFile(path)
-	require.NoError(t, err)
-	require.Equal(t, content, string(data))
-}
-
-// TestCreateTemporaryFile_EmptyContent tests when creating an empty file.
-func TestCreateTemporaryFile_EmptyContent(t *testing.T) {
-	dir := t.TempDir()
-	filename := "empty-*"
-
-	path, err := CreateTemporaryFile(dir, filename, "")
-	require.NoError(t, err)
-	require.FileExists(t, path)
-
-	data, err := os.ReadFile(path)
-	require.NoError(t, err)
-	require.Empty(t, data)
+			data, err := os.ReadFile(path)
+			require.NoError(t, err)
+			require.Equal(t, tc.content, string(data))
+		})
+	}
 }
 
 // TestCreateTemporaryFile_InvalidDir tests when trying to create a file in an invalid directory.
