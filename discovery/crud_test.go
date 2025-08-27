@@ -226,11 +226,10 @@ func TestCRUD(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(testutils.HttpHandler(t,
-				tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
-					assert.Equal(t, tc.method, r.Method)
-					assert.Equal(t, tc.path, r.URL.Path)
-				}))
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, tc.path, r.URL.Path)
+			}))
 
 			defer srv.Close()
 
