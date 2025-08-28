@@ -302,7 +302,7 @@ func Test_filesClient_CRUD(t *testing.T) {
 			},
 		},
 		{
-			name:       "List returns a internal server errior",
+			name:       "List returns a internal server error",
 			method:     http.MethodGet,
 			path:       "/file",
 			statusCode: http.StatusInternalServerError,
