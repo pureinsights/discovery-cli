@@ -9,30 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestHttpHandler tests that the HttpHandler function actually sets the information and runs the assertions.
-// func TestHttpHandler(t *testing.T) {
-// 	expectedBody := `{"ok":true}`
-// 	expectedContentType := "application/json"
-// 	expectedStatus := http.StatusOK
-
-// 	assertions := func(test *testing.T, r *http.Request) {
-// 		assert.Equal(test, "/test", r.URL.Path)
-// 		assert.Equal(test, http.MethodGet, r.Method)
-// 	}
-
-// 	handler := HttpHandler(t, expectedStatus, expectedContentType, expectedBody, assertions)
-// 	request := httptest.NewRequest(http.MethodGet, "/test", nil)
-// 	responseRecorder := httptest.NewRecorder()
-
-// 	handler.ServeHTTP(responseRecorder, request)
-
-//		response := responseRecorder.Result()
-//		actualBody, _ := io.ReadAll(response.Body)
-//		assert.Equal(t, expectedStatus, response.StatusCode)
-//		assert.Equal(t, expectedContentType, response.Header.Get("Content-Type"))
-//		body := string(actualBody)
-//		assert.Equal(t, expectedBody, body)
-//	}
+// TestHttpHandler_Table tests the HttpHandler function using table-driven tests.
 func TestHttpHandler_Table(t *testing.T) {
 	tests := []struct {
 		name           string
