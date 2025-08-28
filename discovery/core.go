@@ -204,21 +204,25 @@ func (c core) Servers() serversClient {
 }
 
 func (c core) Credentials() credentialsClient {
-	return newCredentialsClient()
+	return newCredentialsClient(newClient(c.Url, c.ApiKey))
 }
 
 func (c core) Secrets() secretsClient {
-	return newSecretsClient()
+	return newSecretsClient(newClient(c.Url, c.ApiKey))
 }
 
 func (c core) Labels() labelsClient {
-	return newLabelsClient()
+	return newLabelsClient(newClient(c.Url, c.ApiKey))
 }
 
 func (c core) Files() filesClient {
-	return newFilesClient()
+	return newFilesClient(newClient(c.Url, c.ApiKey))
 }
 
 func (c core) Maintenance() maintenanceClient {
-	return newMaintenanceClient()
+	return newMaintenanceClient(newClient(c.Url, c.ApiKey))
+}
+
+func NewCore(url, apiKey string) core {
+	return core{Url: url, ApiKey: apiKey}
 }
