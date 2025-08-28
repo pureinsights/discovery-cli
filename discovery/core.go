@@ -194,3 +194,31 @@ func (mc maintenanceClient) Log(componentName string, level LogLevel, loggerName
 
 	return acknowledged, nil
 }
+
+type core struct {
+	Url, ApiKey string
+}
+
+func (c core) Servers() serversClient {
+	return newServersClient(newClient(c.Url, c.ApiKey))
+}
+
+func (c core) Credentials() credentialsClient {
+	return newCredentialsClient()
+}
+
+func (c core) Secrets() secretsClient {
+	return newSecretsClient()
+}
+
+func (c core) Labels() labelsClient {
+	return newLabelsClient()
+}
+
+func (c core) Files() filesClient {
+	return newFilesClient()
+}
+
+func (c core) Maintenance() maintenanceClient {
+	return newMaintenanceClient()
+}
