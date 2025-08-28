@@ -43,7 +43,6 @@ func newSecretsClient(core client) secretsClient {
 // CredentialsClient is the struct that performs the CRUD of credentials
 type credentialsClient struct {
 	crud
-	// searcher
 	cloner
 }
 
@@ -56,9 +55,6 @@ func newCredentialsClient(core client) credentialsClient {
 				client: client,
 			},
 		},
-		// searcher: searcher{
-		// 	client: client,
-		// },
 		cloner: cloner{
 			client: client,
 		},
@@ -68,7 +64,6 @@ func newCredentialsClient(core client) credentialsClient {
 // ServersClient is the struct that performs the CRUD of servers
 type serversClient struct {
 	crud
-	//	searcher
 	cloner
 }
 
@@ -81,9 +76,6 @@ func newServersClient(core client) serversClient {
 				client: client,
 			},
 		},
-		// searcher: searcher{
-		// 	client: client,
-		// },
 		cloner: cloner{
 			client: client,
 		},
