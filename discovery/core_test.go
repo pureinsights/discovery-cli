@@ -324,7 +324,7 @@ func Test_filesClient_CRUD(t *testing.T) {
 			testFunc: func(t *testing.T, fc filesClient) {
 				response, err := fc.Upload("testFile", "doesNotExist.txt")
 				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, "open doesNotExist.txt: The system cannot find the file specified.")
+				assert.Contains(t, err.Error(), "open doesNotExist.txt")
 			},
 		},
 		{
