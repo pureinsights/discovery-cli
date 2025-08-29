@@ -441,7 +441,7 @@ func Test_core_Constructors(t *testing.T) {
 		testFunc func(t *testing.T, c core)
 	}{
 		{
-			name: "newLabelsClient()",
+			name: "Labels()",
 			testFunc: func(t *testing.T, c core) {
 				lc := c.Labels()
 
@@ -450,7 +450,7 @@ func Test_core_Constructors(t *testing.T) {
 			},
 		},
 		{
-			name: "newSecretsClient()",
+			name: "Secrets()",
 			testFunc: func(t *testing.T, c core) {
 				sc := c.Secrets()
 
@@ -459,7 +459,7 @@ func Test_core_Constructors(t *testing.T) {
 			},
 		},
 		{
-			name: "newCredentialsClient()",
+			name: "Credentials()",
 			testFunc: func(t *testing.T, c core) {
 				cc := c.Credentials()
 
@@ -468,7 +468,7 @@ func Test_core_Constructors(t *testing.T) {
 			},
 		},
 		{
-			name: "newServersClient()",
+			name: "Servers()",
 			testFunc: func(t *testing.T, c core) {
 				sc := c.Servers()
 
@@ -477,7 +477,7 @@ func Test_core_Constructors(t *testing.T) {
 			},
 		},
 		{
-			name: "newFilesClient()",
+			name: "Files()",
 			testFunc: func(t *testing.T, c core) {
 				fc := c.Files()
 
@@ -486,12 +486,21 @@ func Test_core_Constructors(t *testing.T) {
 			},
 		},
 		{
-			name: "newMaintenanceClient()",
+			name: "Maintenance()",
 			testFunc: func(t *testing.T, c core) {
 				mc := c.Maintenance()
 
 				assert.Equal(t, c.ApiKey, mc.ApiKey)
 				assert.Equal(t, c.Url+"/maintenance", mc.client.client.BaseURL)
+			},
+		},
+		{
+			name: "BackupRestore()",
+			testFunc: func(t *testing.T, c core) {
+				br := c.BackupRestore()
+
+				assert.Equal(t, c.ApiKey, br.ApiKey)
+				assert.Equal(t, c.Url, br.client.client.BaseURL)
 			},
 		},
 	}
