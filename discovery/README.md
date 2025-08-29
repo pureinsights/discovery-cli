@@ -45,3 +45,31 @@ This struct allows for exporting and importing entities from Discovery's compone
 ### Error
 This struct is used as the Errors that the CLI returns. It has a Status, an integer, and a Body, a JSON object (gjson.Result). It has one method:
 - Error(): This method serves to fulfill Go's error interface. It returns a string with the error's information.
+
+## Core Client
+Discovery has a core client struct. Its fields are:
+- Url: The URL of Discovery's Core component. The URL should contain the URL up to the version. For example, http://localhost:8080/v2. 
+- ApiKey: The API key needed to authenticate to Discovery's Core.  
+
+The core client can create subclients that handle the Core's functions. These are the following:
+
+### SecretsClient
+The secretsClient manages secrets. It is a struct with an embedded CRUD struct. It has access to the execute(), Create(), Get(), GetAll(), Update(), and Delete() methods. Creating a secretsClient can be done with core.Secrets() or newSecretsClient(coreClient).
+
+### CredentialsClient
+The credentialsClient manages credentials. Its struct has embedded CRUD and Cloner structs. It has access to the Create(), Get(), GetAll(), Update(), Delete(), and Clone() methods. Creating a credentialsClient can be done with core.Credentials() or newCredentialsClient(coreClient).
+
+### ServersClient
+The serversClient manages servers. It is a struct with embedded CRUD and Cloner structs. It has access to the execute(), Create(), Get(), GetAll(), Update(), Delete(), and Clone(). Aditionally, it has a Ping() method to verify if the connection to the server was successful and the server is reachable. Creating a serversClient can be done with core.Servers() or newServersClient(coreClient).
+
+### FilesClient
+The filesClient manages Discovery's files. It has an embedded Client struct, so it can access the Client's execute() method. It has an Upload() method to send files to Discovery, Retrieve() to get a file's data in a byte array, List() to get the keys of all of the files stored in Discovery, and Delete() to remove a file. Creating a filesClient can be done with core.Files() or newServersClient(coreClient).
+
+## BackupRestore
+The backupRestore struct imports and exports entities. Its Export() method obtains the data of all of the entities, which can later be saved to a ZIP file. The Import() method restores the entities described in the sent file. If there are conflicts, Discovery can be set to ignore them, fail, or update them. Creating a backupRestore can be done with core.BackupRestore().
+
+### LabelsClient
+The labelsClient is a struct that manages labels. It has an embedded CRUD struct. It has access to the execute(), Create(), Get(), GetAll(), Update(), and Delete() methods. Creating a labelsClient can be done with core.Labels() or newLabelsClient(coreClient).
+
+### MaintenanceClient
+The maintenanceClient struct has an Client struct. It has access to the Client's execute() method. It has a Log() method that changes the log level of a component. It can also change the level of a specific logger inside a component. Creating a maintenanceClient can be done with core.Maintenance() or newMaintenanceClient(coreClient).

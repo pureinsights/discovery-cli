@@ -223,6 +223,12 @@ func (c core) Maintenance() maintenanceClient {
 	return newMaintenanceClient(newClient(c.Url, c.ApiKey))
 }
 
+func (c core) BackupRestore() backupRestore {
+	return backupRestore{
+		client: newClient(c.Url, c.ApiKey),
+	}
+}
+
 func NewCore(url, apiKey string) core {
 	return core{Url: url, ApiKey: apiKey}
 }
