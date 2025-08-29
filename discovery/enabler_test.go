@@ -40,7 +40,7 @@ func TestEnabler(t *testing.T) {
 			},
 		},
 		{
-			name:       "Enable returns true",
+			name:       "Disable returns true",
 			method:     http.MethodPatch,
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/disable",
 			statusCode: http.StatusOK,
