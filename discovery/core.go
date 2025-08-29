@@ -197,38 +197,39 @@ func (mc maintenanceClient) Log(componentName string, level LogLevel, loggerName
 
 type core struct {
 	Url, ApiKey string
+	client      client
 }
 
 func (c core) Servers() serversClient {
-	return newServersClient(newClient(c.Url, c.ApiKey))
+	return newServersClient(c.client)
 }
 
 func (c core) Credentials() credentialsClient {
-	return newCredentialsClient(newClient(c.Url, c.ApiKey))
+	return newCredentialsClient(c.client)
 }
 
 func (c core) Secrets() secretsClient {
-	return newSecretsClient(newClient(c.Url, c.ApiKey))
+	return newSecretsClient(c.client)
 }
 
 func (c core) Labels() labelsClient {
-	return newLabelsClient(newClient(c.Url, c.ApiKey))
+	return newLabelsClient(c.client)
 }
 
 func (c core) Files() filesClient {
-	return newFilesClient(newClient(c.Url, c.ApiKey))
+	return newFilesClient(c.client)
 }
 
 func (c core) Maintenance() maintenanceClient {
-	return newMaintenanceClient(newClient(c.Url, c.ApiKey))
+	return newMaintenanceClient(c.client)
 }
 
 func (c core) BackupRestore() backupRestore {
 	return backupRestore{
-		client: newClient(c.Url, c.ApiKey),
+		client: c.client,
 	}
 }
 
 func NewCore(url, apiKey string) core {
-	return core{Url: url, ApiKey: apiKey}
+	return core{Url: url, ApiKey: apiKey, client: newClient(url, apiKey)}
 }
