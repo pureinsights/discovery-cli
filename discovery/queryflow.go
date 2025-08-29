@@ -5,13 +5,17 @@ type queryFlowProcessorsClient struct {
 	cloner
 }
 
-// NewLabelsClient is the constructor of a labelsClient
-func newLabelsClient(core client) labelsClient {
-	return labelsClient{
-		crud{
+// newQueryFlowProcessorsClient
+func newQueryFlowProcessorsClient(queryflow client) queryFlowProcessorsClient {
+	client := newSubClient(queryflow, "/processor")
+	return queryFlowProcessorsClient{
+		crud: crud{
 			getter{
-				client: newSubClient(core, "/label"),
+				client: client,
 			},
+		},
+		cloner: cloner{
+			client: client,
 		},
 	}
 }
@@ -20,4 +24,21 @@ type endpointsClient struct {
 	crud
 	cloner
 	enabler
+}
+
+func newEndpointsClient(queryflow client) endpointsClient {
+	client := newSubClient(queryflow, "/endpoint")
+	return endpointsClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+		enabler: enabler{
+			client: client,
+		},
+	}
 }
