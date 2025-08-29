@@ -1,5 +1,11 @@
 package discovery
 
+import (
+	"strings"
+
+	"github.com/tidwall/gjson"
+)
+
 // QueryFlowProcessorsClient is a struct that performs the CRUD of processors.
 type queryFlowProcessorsClient struct {
 	crud
@@ -43,5 +49,44 @@ func newEndpointsClient(queryflow client) endpointsClient {
 		enabler: enabler{
 			client: client,
 		},
+	}
+}
+
+type queryFlow struct {
+	Url, ApiKey string
+	client      client
+}
+
+func (q queryFlow) Processors() queryFlowProcessorsClient {
+	return newQueryFlowProcessorsClient(q.client)
+}
+
+func (q queryFlow) Endpoints() endpointsClient {
+	return newEndpointsClient(q.client)
+}
+
+func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.Result, error) {
+	newUri := "/api/" + strings.TrimLeft(uri, "/")
+	response, err := execute(q.client, method, newUri, options...)
+	if err != nil {
+		return gjson.Result{}, nil
+	}
+
+	return response, nil
+}
+
+func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Result, error) {
+	newUri := "/debug/" + strings.TrimLeft(uri, "/")
+	response, err := execute(q.client, method, newUri, options...)
+	if err != nil {
+		return gjson.Result{}, nil
+	}
+
+	return response, nil
+}
+
+func (q queryFlow) BackupRestore() backupRestore {
+	return backupRestore{
+		client: q.client,
 	}
 }
