@@ -79,7 +79,7 @@ func TestConstructors(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			c := newClient("http://localhost:8080/v2/", "Api Key")
+			c := newClient("http://localhost:8080/v2", "Api Key")
 			tc.testFunc(t, c)
 		})
 	}
