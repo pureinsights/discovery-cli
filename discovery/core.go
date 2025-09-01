@@ -14,11 +14,11 @@ type labelsClient struct {
 }
 
 // NewLabelsClient is the constructor of a labelsClient
-func newLabelsClient(core client) labelsClient {
+func newLabelsClient(url, apiKey string) labelsClient {
 	return labelsClient{
 		crud{
 			getter{
-				client: newSubClient(core, "/label"),
+				client: newClient(url+"/label", apiKey),
 			},
 		},
 	}
@@ -30,11 +30,11 @@ type secretsClient struct {
 }
 
 // NewSecretsClient creates a new secretsClient
-func newSecretsClient(core client) secretsClient {
+func newSecretsClient(url, apiKey string) secretsClient {
 	return secretsClient{
 		crud{
 			getter{
-				client: newSubClient(core, "/secret"),
+				client: newClient(url+"/secret", apiKey),
 			},
 		},
 	}
@@ -47,8 +47,8 @@ type credentialsClient struct {
 }
 
 // NewCredentialsClient creates a new credentialsClient.
-func newCredentialsClient(core client) credentialsClient {
-	client := newSubClient(core, "/credential")
+func newCredentialsClient(url, apiKey string) credentialsClient {
+	client := newClient(url+"/credential", apiKey)
 	return credentialsClient{
 		crud: crud{
 			getter{
@@ -68,8 +68,8 @@ type serversClient struct {
 }
 
 // NewServersClient creates a new serversClient
-func newServersClient(core client) serversClient {
-	client := newSubClient(core, "/server")
+func newServersClient(url, apiKey string) serversClient {
+	client := newClient(url+"/server", apiKey)
 	return serversClient{
 		crud: crud{
 			getter{
@@ -99,8 +99,8 @@ type filesClient struct {
 }
 
 // NewFilesClient is the constructor of the filesClient struct
-func newFilesClient(core client) filesClient {
-	client := newSubClient(core, "/file")
+func newFilesClient(url, apiKey string) filesClient {
+	client := newClient(url+"/file", apiKey)
 	return filesClient{
 		client: client,
 	}
@@ -175,9 +175,9 @@ type maintenanceClient struct {
 }
 
 // newMaintenanceClient creates a maintenanceClient.
-func newMaintenanceClient(core client) maintenanceClient {
+func newMaintenanceClient(url, apiKey string) maintenanceClient {
 	return maintenanceClient{
-		client: newSubClient(core, "/maintenance"),
+		client: newClient(url+"/maintenance", apiKey),
 	}
 }
 
@@ -200,27 +200,27 @@ type core struct {
 }
 
 func (c core) Servers() serversClient {
-	return newServersClient(newClient(c.Url, c.ApiKey))
+	return newServersClient(c.Url, c.ApiKey)
 }
 
 func (c core) Credentials() credentialsClient {
-	return newCredentialsClient(newClient(c.Url, c.ApiKey))
+	return newCredentialsClient(c.Url, c.ApiKey)
 }
 
 func (c core) Secrets() secretsClient {
-	return newSecretsClient(newClient(c.Url, c.ApiKey))
+	return newSecretsClient(c.Url, c.ApiKey)
 }
 
 func (c core) Labels() labelsClient {
-	return newLabelsClient(newClient(c.Url, c.ApiKey))
+	return newLabelsClient(c.Url, c.ApiKey)
 }
 
 func (c core) Files() filesClient {
-	return newFilesClient(newClient(c.Url, c.ApiKey))
+	return newFilesClient(c.Url, c.ApiKey)
 }
 
 func (c core) Maintenance() maintenanceClient {
-	return newMaintenanceClient(newClient(c.Url, c.ApiKey))
+	return newMaintenanceClient(c.Url, c.ApiKey)
 }
 
 func (c core) BackupRestore() backupRestore {
