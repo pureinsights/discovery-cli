@@ -99,3 +99,8 @@ func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Re
 
 	return response, nil
 }
+
+// NewQueryFlow is the constructor for the QueryFlow struct.
+func NewQueryFlow(url, apiKey string) queryFlow {
+	return queryFlow{Url: url, ApiKey: apiKey}
+}
