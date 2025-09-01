@@ -8,7 +8,7 @@ import (
 
 // Test_newQueryFlowProcessorsClient test the QueryFlowProcessorsClient's constructor
 func Test_newQueryFlowProcessorsClient(t *testing.T) {
-	url := "http://localhost:8088/v2/"
+	url := "http://localhost:8088/v2"
 	apiKey := "Api Key"
 	qpc := newQueryFlowProcessorsClient(url, apiKey)
 
@@ -18,10 +18,10 @@ func Test_newQueryFlowProcessorsClient(t *testing.T) {
 
 // Test_newEndpointsClient tests the constructor of endpointsClients.
 func Test_newEndpointsClient(t *testing.T) {
-	url := "http://localhost:8088/v2/"
+	url := "http://localhost:8088/v2"
 	apiKey := "Api Key"
 	qec := newEndpointsClient(url, apiKey)
 
 	assert.Equal(t, apiKey, qec.crud.client.ApiKey)
-	assert.Equal(t, url+"/processor", qec.crud.client.client.BaseURL)
+	assert.Equal(t, url+"/endpoint", qec.crud.client.client.BaseURL)
 }
