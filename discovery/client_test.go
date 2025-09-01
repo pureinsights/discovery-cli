@@ -182,7 +182,7 @@ func Test_client_execute_HTTPErrorTypedError(t *testing.T) {
 	}
 }
 
-// TestExecute_RestyReturnsError tests when the Resty Execute function returns an error.
+// Test_client_execute_RestyReturnsError tests when the Resty Execute function returns an error.
 func Test_client_execute_RestyReturnsError(t *testing.T) {
 	srv := httptest.NewServer(http.NotFoundHandler())
 	base := srv.URL
@@ -193,6 +193,17 @@ func Test_client_execute_RestyReturnsError(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, res, "result should be nil on execute error")
 	assert.Contains(t, err.Error(), base+"/down")
+}
+
+// Test_client_execute_NoContent tests the client.execute() function when it receives a No Content Response.
+func Test_client_execute_NoContent(t *testing.T) {
+	srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
+	defer srv.Close()
+
+	c := newClient(srv.URL, "")
+	response, err := c.execute(http.MethodGet, "")
+	require.NoError(t, err)
+	assert.Len(t, response, 0)
 }
 
 // Test_client_execute_FunctionalOptionsFail tests when one of the functional options returns an error.
@@ -275,17 +286,6 @@ func Test_execute_ParsedResult(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "test-secret", response.Get("name").String())
 	assert.Equal(t, "user", response.Get("content.username").String())
-}
-
-// Test_client_execute_NoContent tests the client.execute() function when it receives a No Content Response.
-func Test_client_execute_NoContent(t *testing.T) {
-	srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
-	defer srv.Close()
-
-	c := newClient(srv.URL, "")
-	response, err := c.execute(http.MethodGet, "")
-	require.NoError(t, err)
-	assert.Len(t, response, 0)
 }
 
 // Test_execute_NoContent tests the execute() function when it receives a No Content Response.
