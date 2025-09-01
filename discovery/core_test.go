@@ -15,78 +15,62 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestConstructors tests all of the constructors of the subclient structs.
-func TestConstructors(t *testing.T) {
-	tests := []struct {
-		name     string
-		testFunc func(t *testing.T, c client)
-	}{
-		{
-			name: "newLabelsClient()",
-			testFunc: func(t *testing.T, c client) {
-				lc := newLabelsClient(c.client.BaseURL, c.ApiKey)
+// Test_newLabelsClient tests the constructor of newLabelsClient
+func Test_newLabelsClient(t *testing.T) {
+	c := newClient("http://localhost:8080/v2", "Api Key")
+	lc := newLabelsClient(c.client.BaseURL, c.ApiKey)
 
-				assert.Equal(t, c.ApiKey, lc.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/label", lc.client.client.BaseURL)
-			},
-		},
-		{
-			name: "newSecretsClient()",
-			testFunc: func(t *testing.T, c client) {
-				sc := newSecretsClient(c.client.BaseURL, c.ApiKey)
+	assert.Equal(t, c.ApiKey, lc.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/label", lc.client.client.BaseURL)
+}
 
-				assert.Equal(t, c.ApiKey, sc.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/secret", sc.client.client.BaseURL)
-			},
-		},
-		{
-			name: "newCredentialsClient()",
-			testFunc: func(t *testing.T, c client) {
-				cc := newCredentialsClient(c.client.BaseURL, c.ApiKey)
+// Test_newSecretsClient tests the constructor of newSecretsClient
+func Test_newSecretsClient(t *testing.T) {
+	c := newClient("http://localhost:8080/v2", "Api Key")
+	sc := newSecretsClient(c.client.BaseURL, c.ApiKey)
 
-				assert.Equal(t, c.ApiKey, cc.crud.client.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/credential", cc.crud.client.client.BaseURL)
-				assert.Equal(t, c.ApiKey, cc.cloner.client.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/credential", cc.cloner.client.client.BaseURL)
-			},
-		},
-		{
-			name: "newServersClient()",
-			testFunc: func(t *testing.T, c client) {
-				sc := newServersClient(c.client.BaseURL, c.ApiKey)
+	assert.Equal(t, c.ApiKey, sc.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/secret", sc.client.client.BaseURL)
+}
 
-				assert.Equal(t, c.ApiKey, sc.crud.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/server", sc.crud.client.client.BaseURL)
-				assert.Equal(t, c.ApiKey, sc.cloner.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/server", sc.cloner.client.client.BaseURL)
-			},
-		},
-		{
-			name: "newFilesClient()",
-			testFunc: func(t *testing.T, c client) {
-				fc := newFilesClient(c.client.BaseURL, c.ApiKey)
+// Test_newCredentialsClient tests the constructor of newCredentialsClient
+func Test_newCredentialsClient(t *testing.T) {
+	c := newClient("http://localhost:8080/v2", "Api Key")
+	cc := newCredentialsClient(c.client.BaseURL, c.ApiKey)
 
-				assert.Equal(t, c.ApiKey, fc.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/file", fc.client.client.BaseURL)
-			},
-		},
-		{
-			name: "newMaintenanceClient()",
-			testFunc: func(t *testing.T, c client) {
-				mc := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
+	assert.Equal(t, c.ApiKey, cc.crud.client.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/credential", cc.crud.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, cc.cloner.client.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/credential", cc.cloner.client.client.BaseURL)
+}
 
-				assert.Equal(t, c.ApiKey, mc.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/maintenance", mc.client.client.BaseURL)
-			},
-		},
-	}
+// Test_newServersClient tests the constructor of newServersClient
+func Test_newServersClient(t *testing.T) {
+	c := newClient("http://localhost:8080/v2", "Api Key")
+	sc := newServersClient(c.client.BaseURL, c.ApiKey)
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			c := newClient("http://localhost:8080/v2", "Api Key")
-			tc.testFunc(t, c)
-		})
-	}
+	assert.Equal(t, c.ApiKey, sc.crud.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/server", sc.crud.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, sc.cloner.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/server", sc.cloner.client.client.BaseURL)
+}
+
+// Test_newFilesClient tests the constructor of newFilesClient
+func Test_newFilesClient(t *testing.T) {
+	c := newClient("http://localhost:8080/v2", "Api Key")
+	fc := newFilesClient(c.client.BaseURL, c.ApiKey)
+
+	assert.Equal(t, c.ApiKey, fc.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/file", fc.client.client.BaseURL)
+}
+
+// Test_newMaintenanceClient tests the constructor of newMaintenanceClient
+func Test_newMaintenanceClient(t *testing.T) {
+	c := newClient("http://localhost:8080/v2", "Api Key")
+	mc := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
+
+	assert.Equal(t, c.ApiKey, mc.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/maintenance", mc.client.client.BaseURL)
 }
 
 // Test_serversClient_Ping tests the Ping method.
