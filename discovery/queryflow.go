@@ -54,20 +54,20 @@ func newEndpointsClient(url, apiKey string) endpointsClient {
 
 type queryFlow struct {
 	Url, ApiKey string
-	client      client
 }
 
 func (q queryFlow) Processors() queryFlowProcessorsClient {
-	return newQueryFlowProcessorsClient(q.client)
+	return newQueryFlowProcessorsClient(q.Url, q.ApiKey)
 }
 
 func (q queryFlow) Endpoints() endpointsClient {
-	return newEndpointsClient(q.client)
+	return newEndpointsClient(q.Url, q.ApiKey)
 }
 
 func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.Result, error) {
 	newUri := "/api/" + strings.TrimLeft(uri, "/")
-	response, err := execute(q.client, method, newUri, options...)
+	client := newClient(q.Url, q.ApiKey)
+	response, err := execute(client, method, newUri, options...)
 	if err != nil {
 		return gjson.Result{}, nil
 	}
@@ -77,7 +77,8 @@ func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.R
 
 func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Result, error) {
 	newUri := "/debug/" + strings.TrimLeft(uri, "/")
-	response, err := execute(q.client, method, newUri, options...)
+	client := newClient(q.Url, q.ApiKey)
+	response, err := execute(client, method, newUri, options...)
 	if err != nil {
 		return gjson.Result{}, nil
 	}
@@ -87,6 +88,6 @@ func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Re
 
 func (q queryFlow) BackupRestore() backupRestore {
 	return backupRestore{
-		client: q.client,
+		client: newClient(q.Url, q.ApiKey),
 	}
 }
