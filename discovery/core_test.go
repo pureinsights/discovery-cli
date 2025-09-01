@@ -24,7 +24,7 @@ func TestConstructors(t *testing.T) {
 		{
 			name: "newLabelsClient()",
 			testFunc: func(t *testing.T, c client) {
-				lc := newLabelsClient(c)
+				lc := newLabelsClient(c.client.BaseURL, c.ApiKey)
 
 				assert.Equal(t, c.ApiKey, lc.ApiKey)
 				assert.Equal(t, c.client.BaseURL+"/label", lc.client.client.BaseURL)
@@ -33,7 +33,7 @@ func TestConstructors(t *testing.T) {
 		{
 			name: "newSecretsClient()",
 			testFunc: func(t *testing.T, c client) {
-				sc := newSecretsClient(c)
+				sc := newSecretsClient(c.client.BaseURL, c.ApiKey)
 
 				assert.Equal(t, c.ApiKey, sc.ApiKey)
 				assert.Equal(t, c.client.BaseURL+"/secret", sc.client.client.BaseURL)
@@ -42,7 +42,7 @@ func TestConstructors(t *testing.T) {
 		{
 			name: "newCredentialsClient()",
 			testFunc: func(t *testing.T, c client) {
-				cc := newCredentialsClient(c)
+				cc := newCredentialsClient(c.client.BaseURL, c.ApiKey)
 
 				assert.Equal(t, c.ApiKey, cc.ApiKey)
 				assert.Equal(t, c.client.BaseURL+"/credential", cc.client.client.BaseURL)
@@ -51,7 +51,7 @@ func TestConstructors(t *testing.T) {
 		{
 			name: "newServersClient()",
 			testFunc: func(t *testing.T, c client) {
-				sc := newServersClient(c)
+				sc := newServersClient(c.client.BaseURL, c.ApiKey)
 
 				assert.Equal(t, c.ApiKey, sc.ApiKey)
 				assert.Equal(t, c.client.BaseURL+"/server", sc.client.client.BaseURL)
@@ -60,7 +60,7 @@ func TestConstructors(t *testing.T) {
 		{
 			name: "newFilesClient()",
 			testFunc: func(t *testing.T, c client) {
-				fc := newFilesClient(c)
+				fc := newFilesClient(c.client.BaseURL, c.ApiKey)
 
 				assert.Equal(t, c.ApiKey, fc.ApiKey)
 				assert.Equal(t, c.client.BaseURL+"/file", fc.client.client.BaseURL)
@@ -69,7 +69,7 @@ func TestConstructors(t *testing.T) {
 		{
 			name: "newMaintenanceClient()",
 			testFunc: func(t *testing.T, c client) {
-				mc := newMaintenanceClient(c)
+				mc := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
 
 				assert.Equal(t, c.ApiKey, mc.ApiKey)
 				assert.Equal(t, c.client.BaseURL+"/maintenance", mc.client.client.BaseURL)
@@ -151,8 +151,8 @@ func Test_serversClient_Ping(t *testing.T) {
 				}))
 			defer srv.Close()
 
-			coreClient := newClient(srv.URL, "")
-			serverClient := newServersClient(coreClient)
+			c := newClient(srv.URL, "")
+			serverClient := newServersClient(c.client.BaseURL, c.ApiKey)
 			tc.testFunc(t, serverClient)
 		})
 	}
@@ -361,8 +361,8 @@ func Test_filesClient_CRUD(t *testing.T) {
 			}))
 			defer srv.Close()
 
-			coreClient := newClient(srv.URL, "")
-			filesClient := newFilesClient(coreClient)
+			c := newClient(srv.URL, "")
+			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
 			tc.testFunc(t, filesClient)
 		})
 	}
@@ -428,8 +428,8 @@ func Test_maintenanceClient_Log(t *testing.T) {
 			}))
 			defer srv.Close()
 
-			coreClient := newClient(srv.URL, "")
-			maintenanceClient := newMaintenanceClient(coreClient)
+			c := newClient(srv.URL, "")
+			maintenanceClient := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
 			tc.testFunc(t, maintenanceClient)
 		})
 	}
