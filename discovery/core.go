@@ -195,40 +195,49 @@ func (mc maintenanceClient) Log(componentName string, level LogLevel, loggerName
 	return acknowledged, nil
 }
 
+// Core is the struct for the client that can execute every Core operation.
 type core struct {
 	Url, ApiKey string
 }
 
+// Servers creates a serversClient with the core's URL and API Key
 func (c core) Servers() serversClient {
 	return newServersClient(c.Url, c.ApiKey)
 }
 
+// Credentials creates a credentialsClient with the core's URL and API Key
 func (c core) Credentials() credentialsClient {
 	return newCredentialsClient(c.Url, c.ApiKey)
 }
 
+// Secrets creates a secretsClient with the core's URL and API Key
 func (c core) Secrets() secretsClient {
 	return newSecretsClient(c.Url, c.ApiKey)
 }
 
+// Labels creates a labelsClient with the core's URL and API Key
 func (c core) Labels() labelsClient {
 	return newLabelsClient(c.Url, c.ApiKey)
 }
 
+// Files creates a filesClient with the core's URL and API Key
 func (c core) Files() filesClient {
 	return newFilesClient(c.Url, c.ApiKey)
 }
 
+// Maintenance creates a maintenanceClient with the core's URL and API Key
 func (c core) Maintenance() maintenanceClient {
 	return newMaintenanceClient(c.Url, c.ApiKey)
 }
 
+// BackupRestore creates a backupRestore with the core's URL and API Key
 func (c core) BackupRestore() backupRestore {
 	return backupRestore{
 		client: newClient(c.Url, c.ApiKey),
 	}
 }
 
+// NewCore is the constructor for the core struct.
 func NewCore(url, apiKey string) core {
 	return core{Url: url, ApiKey: apiKey}
 }
