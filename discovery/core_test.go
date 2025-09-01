@@ -44,8 +44,10 @@ func TestConstructors(t *testing.T) {
 			testFunc: func(t *testing.T, c client) {
 				cc := newCredentialsClient(c.client.BaseURL, c.ApiKey)
 
-				assert.Equal(t, c.ApiKey, cc.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/credential", cc.client.client.BaseURL)
+				assert.Equal(t, c.ApiKey, cc.crud.client.ApiKey)
+				assert.Equal(t, c.client.BaseURL+"/credential", cc.crud.client.client.BaseURL)
+				assert.Equal(t, c.ApiKey, cc.cloner.client.ApiKey)
+				assert.Equal(t, c.client.BaseURL+"/credential", cc.cloner.client.client.BaseURL)
 			},
 		},
 		{
@@ -53,8 +55,10 @@ func TestConstructors(t *testing.T) {
 			testFunc: func(t *testing.T, c client) {
 				sc := newServersClient(c.client.BaseURL, c.ApiKey)
 
-				assert.Equal(t, c.ApiKey, sc.ApiKey)
-				assert.Equal(t, c.client.BaseURL+"/server", sc.client.client.BaseURL)
+				assert.Equal(t, c.ApiKey, sc.crud.ApiKey)
+				assert.Equal(t, c.client.BaseURL+"/server", sc.crud.client.client.BaseURL)
+				assert.Equal(t, c.ApiKey, sc.cloner.ApiKey)
+				assert.Equal(t, c.client.BaseURL+"/server", sc.cloner.client.client.BaseURL)
 			},
 		},
 		{
