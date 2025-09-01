@@ -11,7 +11,7 @@ type backupRestore struct {
 	client
 }
 
-// OnConflict is a type that is used to declare constants that represent that three conflict resolution options.
+// OnConflict is a type that is used to declare constants that represent the three conflict resolution options.
 type OnConflict string
 
 // The constants represent the options to ignore the new duplicated entities, fail if there are duplicated entities, and update the duplicated entities with the new values.
