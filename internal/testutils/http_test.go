@@ -110,11 +110,11 @@ func TestHttpHandler_Table(t *testing.T) {
 func TestHttpNoContentHandler(t *testing.T) {
 	assertions := func(test *testing.T, r *http.Request) {
 		assert.Equal(t, "/nocontent", r.URL.Path)
-		assert.Equal(t, http.MethodDelete, r.Method)
+		assert.Equal(t, http.MethodGet, r.Method)
 	}
 
 	handler := HttpNoContentHandler(t, assertions)
-	request := httptest.NewRequest(http.MethodDelete, "/nocontent", nil)
+	request := httptest.NewRequest(http.MethodGet, "/nocontent", nil)
 	responseRecorder := httptest.NewRecorder()
 
 	handler.ServeHTTP(responseRecorder, request)
