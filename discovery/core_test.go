@@ -422,3 +422,72 @@ func Test_maintenanceClient_Log(t *testing.T) {
 		})
 	}
 }
+
+// Test_core_Labels tests the core.Labels() function
+func Test_core_Labels(t *testing.T) {
+	c := NewCore("http://localhost:8080/v2", "Api Key")
+	lc := c.Labels()
+
+	assert.Equal(t, c.ApiKey, lc.ApiKey)
+	assert.Equal(t, c.Url+"/label", lc.client.client.BaseURL)
+}
+
+// Test_core_Secrets tests the core.Secrets() function
+func Test_core_Secrets(t *testing.T) {
+	c := NewCore("http://localhost:8080/v2", "Api Key")
+	sc := c.Secrets()
+
+	assert.Equal(t, c.ApiKey, sc.ApiKey)
+	assert.Equal(t, c.Url+"/secret", sc.client.client.BaseURL)
+}
+
+// Test_core_Credentials tests the core.Credentials() function
+func Test_core_Credentials(t *testing.T) {
+	c := NewCore("http://localhost:8080/v2", "Api Key")
+	cc := c.Credentials()
+
+	assert.Equal(t, c.ApiKey, cc.ApiKey)
+	assert.Equal(t, c.Url+"/credential", cc.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, cc.cloner.client.ApiKey)
+	assert.Equal(t, c.Url+"/credential", cc.cloner.client.client.BaseURL)
+}
+
+// Test_core_Servers tests the core.Servers() function
+func Test_core_Servers(t *testing.T) {
+	c := NewCore("http://localhost:8080/v2", "Api Key")
+	sc := c.Servers()
+
+	assert.Equal(t, c.ApiKey, sc.ApiKey)
+	assert.Equal(t, c.Url+"/server", sc.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, sc.cloner.ApiKey)
+	assert.Equal(t, c.Url+"/server", sc.cloner.client.client.BaseURL)
+}
+
+// Test_core_Files tests the core.Files() function
+func Test_core_Files(t *testing.T) {
+	c := NewCore("http://localhost:8080/v2", "Api Key")
+	fc := c.Files()
+
+	assert.Equal(t, c.ApiKey, fc.ApiKey)
+	assert.Equal(t, c.Url+"/file", fc.client.client.BaseURL)
+}
+
+// Test_core_Maintenance tests the core.Maintenance() function
+func Test_core_Maintenance(t *testing.T) {
+	c := NewCore("http://localhost:8080/v2", "Api Key")
+	mc := c.Maintenance()
+
+	assert.Equal(t, c.ApiKey, mc.ApiKey)
+	assert.Equal(t, c.Url+"/maintenance", mc.client.client.BaseURL)
+}
+
+// Test_NewCore_UrlAndAPIKey tests the function to create a new core client.
+// It verifies that the API Key and base URL correctly match.
+func Test_NewCore_UrlAndAPIKey(t *testing.T) {
+	url := "http://localhost:8080/v2"
+	apiKey := "secret-key"
+	c := NewCore(url, apiKey)
+
+	assert.Equal(t, apiKey, c.ApiKey, "ApiKey should be stored")
+	assert.Equal(t, url, c.Url, "BaseURL should match server URL")
+}
