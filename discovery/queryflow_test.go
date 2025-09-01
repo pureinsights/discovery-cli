@@ -29,3 +29,14 @@ func Test_newEndpointsClient(t *testing.T) {
 	assert.Equal(t, apiKey, qec.cloner.client.ApiKey)
 	assert.Equal(t, url+"/endpoint", qec.cloner.client.client.BaseURL)
 }
+
+// Test_core_Servers tests the core.Servers() function
+func Test_queryFlow_Servers(t *testing.T) {
+	c := NewCore("http://localhost:8080/v2", "Api Key")
+	sc := c.Servers()
+
+	assert.Equal(t, c.ApiKey, sc.ApiKey)
+	assert.Equal(t, c.Url+"/server", sc.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, sc.cloner.ApiKey)
+	assert.Equal(t, c.Url+"/server", sc.cloner.client.client.BaseURL)
+}

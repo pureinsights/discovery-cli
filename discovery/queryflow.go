@@ -52,18 +52,30 @@ func newEndpointsClient(url, apiKey string) endpointsClient {
 	}
 }
 
+// QueryFlow is the struct for the client that can carry out every QueryFlow operation.
 type queryFlow struct {
 	Url, ApiKey string
 }
 
+// Processors creates a queryFlowProcessorsClient with QueryFlow's URL and API Key
 func (q queryFlow) Processors() queryFlowProcessorsClient {
 	return newQueryFlowProcessorsClient(q.Url, q.ApiKey)
 }
 
+// Endpoints creates a endpointsClient with QueryFlow's URL and API Key
 func (q queryFlow) Endpoints() endpointsClient {
 	return newEndpointsClient(q.Url, q.ApiKey)
 }
 
+// BackupRestore creates a backupRestore with QueryFlow's URL and API Key
+func (q queryFlow) BackupRestore() backupRestore {
+	return backupRestore{
+		client: newClient(q.Url, q.ApiKey),
+	}
+}
+
+// Invoke is a function that calls the API version of an endpoint.
+// It returns the endpoint's response as a gjson.Result or an error if any occurred.
 func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.Result, error) {
 	newUri := "/api/" + strings.TrimLeft(uri, "/")
 	client := newClient(q.Url, q.ApiKey)
@@ -75,6 +87,8 @@ func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.R
 	return response, nil
 }
 
+// Debug is a function that calls the Debug version of an endpoint.
+// It returns the endpoint's response as a gjson.Result or an error if any occurred.
 func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Result, error) {
 	newUri := "/debug/" + strings.TrimLeft(uri, "/")
 	client := newClient(q.Url, q.ApiKey)
@@ -84,10 +98,4 @@ func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Re
 	}
 
 	return response, nil
-}
-
-func (q queryFlow) BackupRestore() backupRestore {
-	return backupRestore{
-		client: newClient(q.Url, q.ApiKey),
-	}
 }
