@@ -68,7 +68,7 @@ func newSubClient(c client, path string) client {
 // The path is added to the client's base URL.
 // The request is modified with the specified request options.
 // If set, the client's API key is set as the X-API-Key header.
-// This function returns the response as a byte array or an error it failed.
+// This function returns the response as a byte array or an if error it failed.
 func (c client) execute(method, path string, options ...RequestOption) ([]byte, error) {
 	request := c.client.R()
 
