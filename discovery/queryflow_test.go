@@ -6,20 +6,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestConstructors tests all of the constructors of the subclient structs.
+// Test_newQueryFlowProcessorsClient test the QueryFlowProcessorsClient's constructor
 func Test_newQueryFlowProcessorsClient(t *testing.T) {
-	c := newClient("http://localhost:8088/v2/", "Api Key")
-	qpc := newQueryFlowProcessorsClient(c)
+	url := "http://localhost:8088/v2/"
+	apiKey := "Api Key"
+	qpc := newQueryFlowProcessorsClient(url, apiKey)
 
-	assert.Equal(t, c.ApiKey, qpc.ApiKey)
-	assert.Equal(t, c.client.BaseURL+"/processor", qpc.client.client.BaseURL)
+	assert.Equal(t, apiKey, qpc.crud.client.ApiKey)
+	assert.Equal(t, url+"/processor", qpc.crud.client.client.BaseURL)
 }
 
-// Test_newEndpointsClient tests the Ping method.
+// Test_newEndpointsClient tests the constructor of endpointsClients.
 func Test_newEndpointsClient(t *testing.T) {
-	c := newClient("http://localhost:8088/v2/", "Api Key")
-	qec := newEndpointsClient(c)
+	url := "http://localhost:8088/v2/"
+	apiKey := "Api Key"
+	qec := newEndpointsClient(url, apiKey)
 
-	assert.Equal(t, c.ApiKey, qec.crud.ApiKey)
-	assert.Equal(t, c.client.BaseURL+"/endpoint", qec.crud.client.client.BaseURL)
+	assert.Equal(t, apiKey, qec.crud.client.ApiKey)
+	assert.Equal(t, url+"/processor", qec.crud.client.client.BaseURL)
 }

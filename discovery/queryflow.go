@@ -7,8 +7,8 @@ type queryFlowProcessorsClient struct {
 }
 
 // NewQueryFlowProcessorsClient is the constructor of a queryFlowProcessorsClient
-func newQueryFlowProcessorsClient(queryflow client) queryFlowProcessorsClient {
-	client := newSubClient(queryflow, "/processor")
+func newQueryFlowProcessorsClient(url, apiKey string) queryFlowProcessorsClient {
+	client := newClient(url+"/processor", apiKey)
 	return queryFlowProcessorsClient{
 		crud: crud{
 			getter{
@@ -29,8 +29,8 @@ type endpointsClient struct {
 }
 
 // NewEndpointsClient is the constructor of a newEndpointsClient
-func newEndpointsClient(queryflow client) endpointsClient {
-	client := newSubClient(queryflow, "/endpoint")
+func newEndpointsClient(url, apiKey string) endpointsClient {
+	client := newClient(url+"/endpoint", apiKey)
 	return endpointsClient{
 		crud: crud{
 			getter{
