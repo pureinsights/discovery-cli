@@ -65,7 +65,7 @@ The `serversClient` manages servers. It is a struct with embedded `CRUD` and `Cl
 ### FilesClient
 The `filesClient` manages Discovery's files. It has an embedded `Client` struct, so it can access the `Client`'s `execute()` method. It has an `Upload()` method to send files to Discovery, `Retrieve()` to get a file's data in a byte array, `List()` to get the keys of all of the files stored in Discovery, and `Delete()` to remove a file. Creating a `filesClient` can be done with `core.Files()` or `newServersClient(coreClient)`.
 
-## BackupRestore
+### BackupRestore
 The `backupRestore` struct imports and exports entities. Its `Export()` method obtains the data of all of the entities, which can later be saved to a ZIP file. The `Import()` method restores the entities described in the sent file. If there are conflicts, Discovery can be set to ignore them, fail, or update them. Creating a `backupRestore` can be done with `core.BackupRestore()`.
 
 ### LabelsClient
@@ -73,3 +73,22 @@ The `labelsClient` is a struct that manages labels. It has an embedded `CRUD` st
 
 ### MaintenanceClient
 The `maintenanceClient` struct has a `Client` struct. It has access to the `Client`'s `execute()` method. It has a `Log()` method that changes the log level of a component. It can also change the level of a specific logger inside a component. Creating a `maintenanceClient` can be done with `core.Maintenance()` or `newMaintenanceClient(coreClient)`.
+
+## QueryFlow Client
+Discovery has a QueryFlow client struct. Its fields are:
+- Url: The URL of Discovery's QueryFlow component. The URL should contain the URL up to the version. For example, `http://localhost:8088/v2`. 
+- ApiKey: The API key needed to authenticate to QueryFlow.  
+
+The QueryFlow client can create subclients with useful functions. These are the following:
+
+### QueryFlowProcessorsClient
+The `queryFlowProcessorsClient` manages QueryFlow's processors. It is a struct with embedded `CRUD` and `Cloner` structs. It has access to the `execute()`, `Create()`, `Get()`, `GetAll()`, `Update()`, `Delete()`, and `Clone()` methods. Creating a `queryFlowProcessorsClient` can be done with `queryFlow.Processors()` or `newQueryFlowProcessorsClient(URL, Api Key)`.
+
+### EndpointsClient
+The `endpointsClient` manages credentials. Its struct has embedded `CRUD`, `Cloner`, and `Enabler` structs. It has access to the `Create()`, `Get()`, `GetAll()`, `Update()`, `Delete()`, `Clone()`, `Enable`, and `Disable` methods. Creating a `endpointsClient` can be done with `queryFlow.endpointsClient()` or `newEndpointsClient(URL, Api Key)`.
+
+### BackupRestore
+The `backupRestore` struct imports and exports entities. Its `Export()` method obtains the data of all of the entities, which can later be saved to a ZIP file. The `Import()` method restores the entities described in the sent file. If there are conflicts, Discovery can be set to ignore them, fail, or update them. Creating a `backupRestore` can be done with `queryFlow.BackupRestore()`.
+
+### Invoke and Debug
+The QueryFlow client also has two important methods: `Invoke()` and `Debug()`. These are very similar to `client.execute()`, but are used to call QueryFlow's endpoints. The response can vary depending on the URI used on the request. `Invoke()` calls the endpoint with a `/api` root path to the URI, which adds makes QueryFlow return a normal response of the endpoint. On the other hand, `Debug()` calls the endpoint with a `/debug` root path, which makes QueryFlow respond with the entire trace of execution the state machine took. Each one of the states, their output, their errors and the overall flow followed by the state machine will be displayed.
