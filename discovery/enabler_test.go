@@ -13,8 +13,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestEnabler has table-driven tests to test the enabler methods.
-func TestEnabler(t *testing.T) {
+// Test_enabler_Enable has table-driven tests to test the enabler.Enable() method.
+func Test_enabler_Enable(t *testing.T) {
 	tests := []struct {
 		name       string
 		method     string
@@ -23,7 +23,7 @@ func TestEnabler(t *testing.T) {
 		response   string
 		testFunc   func(t *testing.T, e enabler)
 	}{
-		// Working cases
+		// Working case
 		{
 			name:       "Enable returns true",
 			method:     http.MethodPatch,
@@ -35,21 +35,6 @@ func TestEnabler(t *testing.T) {
 			testFunc: func(t *testing.T, e enabler) {
 				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
 				response, err := e.Enable(id)
-				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
-			},
-		},
-		{
-			name:       "Disable returns true",
-			method:     http.MethodPatch,
-			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/disable",
-			statusCode: http.StatusOK,
-			response: `{
-			"acknowledged": true
-			}`,
-			testFunc: func(t *testing.T, e enabler) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				response, err := e.Disable(id)
 				require.NoError(t, err)
 				assert.True(t, response.Get("acknowledged").Bool())
 			},
@@ -69,6 +54,51 @@ func TestEnabler(t *testing.T) {
 				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)))
 			},
 		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, tc.path, r.URL.Path)
+				}))
+			defer srv.Close()
+
+			e := enabler{client: newClient(srv.URL, "")}
+			tc.testFunc(t, e)
+		})
+	}
+}
+
+// Test_enabler_Disable has table-driven tests to test the enabler.Disable() method.
+func Test_enabler_Disable(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, e enabler)
+	}{
+		// Working case
+		{
+			name:       "Disable returns true",
+			method:     http.MethodPatch,
+			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/disable",
+			statusCode: http.StatusOK,
+			response: `{
+			"acknowledged": true
+			}`,
+			testFunc: func(t *testing.T, e enabler) {
+				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
+				response, err := e.Disable(id)
+				require.NoError(t, err)
+				assert.True(t, response.Get("acknowledged").Bool())
+			},
+		},
+
+		// Error case
 		{
 			name:       "Disable returns 404 Not Found",
 			method:     http.MethodPatch,
