@@ -206,7 +206,7 @@ func Test_backupRestore_Export(t *testing.T) {
 			}`),
 			testFunc: func(t *testing.T, b backupRestore) {
 				response, err := b.Export()
-				assert.Equal(t, []byte{}, response)
+				assert.Equal(t, []byte(nil), response)
 				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{
 				"status": 404,
 				"code": 1003,
