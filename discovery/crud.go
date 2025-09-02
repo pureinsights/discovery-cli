@@ -25,7 +25,7 @@ func (getter getter) Get(id uuid.UUID) (gjson.Result, error) {
 func (getter getter) GetAll() ([]gjson.Result, error) {
 	response, err := execute(getter.client, http.MethodGet, "")
 	if err != nil {
-		return []gjson.Result{}, err
+		return []gjson.Result(nil), err
 	}
 
 	elementNumber := response.Get("numberOfElements").Int()
@@ -37,7 +37,7 @@ func (getter getter) GetAll() ([]gjson.Result, error) {
 	for pageNumber < totalPages && elementNumber < totalSize {
 		response, err = execute(getter.client, http.MethodGet, "", WithQueryParameters(map[string][]string{"page": {strconv.FormatInt(pageNumber, 10)}}))
 		if err != nil {
-			return []gjson.Result{}, err
+			return []gjson.Result(nil), err
 		}
 
 		pageElements := response.Get("content").Array()
