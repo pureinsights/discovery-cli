@@ -79,12 +79,7 @@ func (q queryFlow) BackupRestore() backupRestore {
 func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.Result, error) {
 	newUri := "/api/" + strings.TrimLeft(uri, "/")
 	client := newClient(q.Url, q.ApiKey)
-	response, err := execute(client, method, newUri, options...)
-	if err != nil {
-		return gjson.Result{}, nil
-	}
-
-	return response, nil
+	return execute(client, method, newUri, options...)
 }
 
 // Debug is a function that calls the Debug version of an endpoint.
@@ -92,12 +87,7 @@ func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.R
 func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Result, error) {
 	newUri := "/debug/" + strings.TrimLeft(uri, "/")
 	client := newClient(q.Url, q.ApiKey)
-	response, err := execute(client, method, newUri, options...)
-	if err != nil {
-		return gjson.Result{}, nil
-	}
-
-	return response, nil
+	return execute(client, method, newUri, options...)
 }
 
 // NewQueryFlow is the constructor for the QueryFlow struct.

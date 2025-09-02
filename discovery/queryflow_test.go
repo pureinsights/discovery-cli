@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/testutils"
@@ -71,6 +72,7 @@ func Test_queryFlow_BackupRestore(t *testing.T) {
 	assert.Equal(t, q.Url, bc.client.client.BaseURL)
 }
 
+// Test_queryFlow_Invoke tests the queryFlow.Invoke() function with different endpoint responses.
 func Test_queryFlow_Invoke(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -78,13 +80,13 @@ func Test_queryFlow_Invoke(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
-		testFunc   func(t *testing.T, response string, err error)
+		testFunc   func(t *testing.T, response gjson.Result, err error)
 	}{
 		// Working case
 		{
 			name:       "Invoke returns a real response",
 			method:     http.MethodGet,
-			path:       "/api/blogs-search",
+			path:       "/blogs-search",
 			statusCode: http.StatusOK,
 			response: `[
 				{
@@ -94,18 +96,29 @@ func Test_queryFlow_Invoke(t *testing.T) {
 					"header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
 				}
 			]`,
-			testFunc: func(t *testing.T, response string, err error) {
-				json := gjson.Parse(response).Array()
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				json := response.Array()
 				require.NoError(t, err)
 				assert.Equal(t, "Graham Gillen", json[0].Get("author").String())
 			},
 		},
-
+		{
+			name:       "Invoke returns an empty array",
+			method:     http.MethodGet,
+			path:       "/blogs-search",
+			statusCode: http.StatusOK,
+			response:   `[]`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				json := response.Array()
+				require.NoError(t, err)
+				assert.Equal(t, 0, len(json))
+			},
+		},
 		// Error case
 		{
 			name:       "Invoking an endpoint returns an error",
 			method:     http.MethodGet,
-			path:       "/api/endpoint-false",
+			path:       "///endpoint-false",
 			statusCode: http.StatusNotFound,
 			response: `{
 				"status": 404,
@@ -115,8 +128,214 @@ func Test_queryFlow_Invoke(t *testing.T) {
 				],
 				"timestamp": "2025-09-01T22:54:37.580046500Z"
 			}`,
-			testFunc: func(t *testing.T, response string, err error) {
-				assert.Empty(t, response)
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, `{
+				"status": 404,
+				"code": 1001,
+				"messages": [
+					"The requested endpoint was not found or is inactive"
+				],
+				"timestamp": "2025-09-01T22:54:37.580046500Z"
+			}`))
+			},
+		},
+		{
+			name:       "Invoking an endpoint returns unprocessable entity",
+			method:     http.MethodGet,
+			path:       "/blogs-search",
+			statusCode: http.StatusUnprocessableEntity,
+			response: `{
+				"status": 422,
+				"code": 4001,
+				"messages": [
+					"Timed out after 30000 ms while waiting for a server that matches ReadPreferenceServerSelector{readPreference=primary}. Client view of cluster state is {type=REPLICA_SET, servers=[{address=cluster0-shard-00-00.dleud.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLException: Received fatal alert: internal_error}}, {address=cluster0-shard-00-01.dleud.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLException: Received fatal alert: internal_error}}, {address=cluster0-shard-00-02.dleud.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLException: Received fatal alert: internal_error}}]"
+				],
+				"timestamp": "2025-09-01T22:59:38.272579400Z"
+			}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusUnprocessableEntity, `{
+				"status": 422,
+				"code": 4001,
+				"messages": [
+					"Timed out after 30000 ms while waiting for a server that matches ReadPreferenceServerSelector{readPreference=primary}. Client view of cluster state is {type=REPLICA_SET, servers=[{address=cluster0-shard-00-00.dleud.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLException: Received fatal alert: internal_error}}, {address=cluster0-shard-00-01.dleud.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLException: Received fatal alert: internal_error}}, {address=cluster0-shard-00-02.dleud.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLException: Received fatal alert: internal_error}}]"
+				],
+				"timestamp": "2025-09-01T22:59:38.272579400Z"
+			}`))
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, "/api/"+strings.TrimLeft(tc.path, "/"), r.URL.Path)
+				}))
+			defer srv.Close()
+
+			q := NewQueryFlow(srv.URL, "")
+			response, err := q.Invoke(http.MethodGet, tc.path)
+			tc.testFunc(t, response, err)
+		})
+	}
+}
+
+// Test_queryFlow_Debug tests the queryFlow.Debug() function with different endpoint responses.
+func Test_queryFlow_Debug(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, response gjson.Result, err error)
+	}{
+		// Working case
+		{
+			name:       "Debug returns a real response",
+			method:     http.MethodGet,
+			path:       "/blogs-search",
+			statusCode: http.StatusOK,
+			response: `{
+			"duration": 31825,
+			"execution": [
+				{
+					"state": "searchState",
+					"result": [
+						{
+							"processor": "b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89",
+							"output": {
+								"openai": {
+									"embeddings": [
+										{
+											"embedding": [
+												0.026715148,
+												-0.061723955,
+												0.046651825,
+												-0.01745456
+											],
+											"index": 0
+										}
+									],
+									"model": "text-embedding-3-small",
+									"usage": {
+										"promptTokens": 8,
+										"totalTokens": 8
+									}
+								}
+							},
+							"duration": 10835
+						},
+						{
+							"processor": "a5ee116b-bd95-474e-9d50-db7be988b196",
+							"output": {
+								"mongo": [
+									{
+										"_id": "3016204f-1dba-435a-bbc3-7072aaa22770",
+										"content": "Mount Everest, known locally as Sagarmatha in Nepal and Qomolangma in Tibet, is Earth's highest mountain above sea level. It lies in the Mahalangur Himal sub-range of the Himalayas and marks part of the China�Nepal border at its summit. Its height was most recently measured in 2020 by Chinese and Nepali authorities as 8,848.86 m (29,031 ft 8+1/2 in). Mount Everest attracts many climbers, including highly experienced mountaineers. There are two main climbing routes, one approaching the summit from the southeast in Nepal (known as the standard route) and the other from the north in Tibet. While not posing substantial technical climbing challenges on the standard route, Everest presents dangers such as altitude sickness, weather, and wind, as well as hazards from avalanches and the Khumbu Icefall. As of May 2024, 340 people have died on Everest. Over 200 bodies remain on the mountain and have not been removed due to the dangerous conditions."
+									}
+								]
+							},
+							"duration": 1864
+						},
+						{
+							"processor": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+							"output": {
+								"script": "Act as an excellent question and answer system that ONLY answers information from the provided CONTEXT. \n\nObey the following rules:\n1. Accept the QUESTION in any language, but answer in english.\n2. Answer the QUESTION as accurately and exhaustively as possible.\n6. If a question cannot be answered with the provided CONTEXT, respond ONLY with: 'No answer found'.\n7. Do NOT mention that your answer comes from the CONTEXT.\n\nQUESTION: \"What is the height of mount everest\"\n\nCONTEXT: Mount Everest, known locally as Sagarmatha in Nepal and Qomolangma in Tibet, is Earth's highest mountain above sea level. It lies in the Mahalangur Himal sub-range of the Himalayas and marks part of the China�Nepal border at its summit. Its height was most recently measured in 2020 by Chinese and Nepali authorities as 8,848.86 m (29,031 ft 8+1/2 in). Mount Everest attracts many climbers, including highly experienced mountaineers. There are two main climbing routes, one approaching the summit from the southeast in Nepal (known as the standard route) and the other from the north in Tibet. While not posing substantial technical climbing challenges on the standard route, Everest presents dangers such as altitude sickness, weather, and wind, as well as hazards from avalanches and the Khumbu Icefall. As of May 2024, 340 people have died on Everest. Over 200 bodies remain on the mountain and have not been removed due to the dangerous conditions."
+							},
+							"duration": 14964
+						},
+						{
+							"processor": "8a399b1c-95fc-406c-a220-7d321aaa7b0e",
+							"output": {
+								"answer": {
+									"created": "2025-09-02T17:22:40Z",
+									"choices": [
+										{
+											"index": 0,
+											"message": {
+												"role": "assistant",
+												"content": "The height of Mount Everest was most recently measured in 2020 as 8,848.86 meters (29,031 feet 8½ inches)."
+											},
+											"finishReason": "stop"
+										}
+									],
+									"model": "gpt-4.1-2025-04-14",
+									"usage": {
+										"promptTokens": 322,
+										"completionTokens": 31,
+										"totalTokens": 353
+									}
+								}
+							},
+							"duration": 3663
+						}
+					]
+				},
+				{
+					"state": "responseState",
+					"result": {
+						"statusCode": 200,
+						"body": {
+							"answer": "The height of Mount Everest was most recently measured in 2020 as 8,848.86 meters (29,031 feet 8½ inches)."
+						}
+					}
+				}
+			]
+		}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				json := response.Get("execution").Array()
+				require.NoError(t, err)
+				assert.Equal(t, "The height of Mount Everest was most recently measured in 2020 as 8,848.86 meters (29,031 feet 8½ inches).", json[1].Get("result.body.answer").String())
+			},
+		},
+		{
+			name:       "Debug returns an empty array",
+			method:     http.MethodGet,
+			path:       "/blogs-search",
+			statusCode: http.StatusOK,
+			response: `{
+				"duration": 2147,
+				"execution": [
+					{
+						"state": "searchState",
+						"result": [
+							{
+								"processor": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+								"output": {
+									"mongo": []
+								},
+								"duration": 2132
+							}
+						]
+					}
+				]
+			}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				json := response.Get("execution").Array()
+				require.NoError(t, err)
+				assert.Equal(t, 0, len(json[0].Get("result.0.output.mongo").Array()))
+			},
+		},
+		// Error case
+		{
+			name:       "Debugging an endpoint returns an error",
+			method:     http.MethodGet,
+			path:       "///endpoint-false",
+			statusCode: http.StatusNotFound,
+			response: `{
+				"status": 404,
+				"code": 1001,
+				"messages": [
+					"The requested endpoint was not found or is inactive"
+				],
+				"timestamp": "2025-09-01T22:54:37.580046500Z"
+			}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				assert.Equal(t, gjson.Result{}, response)
 				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, `{
 				"status": 404,
 				"code": 1001,
@@ -134,13 +353,13 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			srv := httptest.NewServer(
 				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 					assert.Equal(t, tc.method, r.Method)
-					assert.Equal(t, tc.path, r.URL.Path)
+					assert.Equal(t, "/debug/"+strings.TrimLeft(tc.path, "/"), r.URL.Path)
 				}))
 			defer srv.Close()
 
-			c := newClient(srv.URL, "")
-			serverClient := newServersClient(c.client.BaseURL, c.ApiKey)
-			tc.testFunc(t, serverClient)
+			q := NewQueryFlow(srv.URL, "")
+			response, err := q.Debug(http.MethodGet, tc.path)
+			tc.testFunc(t, response, err)
 		})
 	}
 }
