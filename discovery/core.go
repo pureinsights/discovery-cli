@@ -110,12 +110,7 @@ func (fc filesClient) Upload(key, file string) (gjson.Result, error) {
 // Retrieve obtains a file's data and returns it as an array of bytes.
 // It receives the key that corresponds to the file.
 func (fc filesClient) Retrieve(key string) ([]byte, error) {
-	file, err := fc.execute(http.MethodGet, "/"+key)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return file, nil
+	return fc.execute(http.MethodGet, "/"+key)
 }
 
 // List displays an array of strings that contains every file key that is stored in Discovery.

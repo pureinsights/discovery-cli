@@ -146,8 +146,8 @@ func Test_serversClient_Ping(t *testing.T) {
 	}
 }
 
-// Test_filesClient_CRUD tests all of the file CRUD operations.
-func Test_filesClient_CRUD(t *testing.T) {
+// Test_filesClient_Upload tests the fileClient.Upload() function.
+func Test_filesClient_Upload(t *testing.T) {
 	tests := []struct {
 		name       string
 		method     string
@@ -156,7 +156,7 @@ func Test_filesClient_CRUD(t *testing.T) {
 		response   string
 		testFunc   func(t *testing.T, fc filesClient)
 	}{
-		// Working cases
+		// Working case
 		{
 			name:       "Upload returns acknowledged true",
 			method:     http.MethodPut,
@@ -176,6 +176,49 @@ func Test_filesClient_CRUD(t *testing.T) {
 				assert.True(t, response.Get("acknowledged").Bool())
 			},
 		},
+		// Error case
+		{
+			name:       "Upload uses a file that does not exist",
+			method:     http.MethodPut,
+			path:       "/file/testFile",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"acknowledged": true
+			}`,
+			testFunc: func(t *testing.T, fc filesClient) {
+				response, err := fc.Upload("testFile", "doesNotExist.txt")
+				assert.Equal(t, gjson.Result{}, response)
+				assert.Contains(t, err.Error(), "open doesNotExist.txt")
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, tc.path, r.URL.Path)
+			}))
+			defer srv.Close()
+
+			c := newClient(srv.URL, "")
+			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
+			tc.testFunc(t, filesClient)
+		})
+	}
+}
+
+// Test_filesClient_Retrieve tests the filesClient.Retrieve() function
+func Test_filesClient_Retrieve(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, fc filesClient)
+	}{
+		// Working case
 		{
 			name:       "Retrieve returns the file's data",
 			method:     http.MethodGet,
@@ -200,6 +243,47 @@ func Test_filesClient_CRUD(t *testing.T) {
 				assert.Empty(t, string(response))
 			},
 		},
+		// Error case
+		{
+			name:       "Retrieve returns 404 Not found",
+			method:     http.MethodGet,
+			path:       "/file/testFile",
+			statusCode: http.StatusNotFound,
+			response:   ``,
+			testFunc: func(t *testing.T, fc filesClient) {
+				response, err := fc.Retrieve("testFile")
+				assert.Equal(t, []byte(nil), response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, ``))
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, tc.path, r.URL.Path)
+			}))
+			defer srv.Close()
+
+			c := newClient(srv.URL, "")
+			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
+			tc.testFunc(t, filesClient)
+		})
+	}
+}
+
+// Test_filesClient_List tests the filesClient.List() function
+func Test_filesClient_List(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, fc filesClient)
+	}{
+		// Working case
 		{
 			name:       "List returns the list of files",
 			method:     http.MethodGet,
@@ -249,6 +333,59 @@ func Test_filesClient_CRUD(t *testing.T) {
 				assert.Len(t, response, 0)
 			},
 		},
+		// Error case
+		{
+			name:       "List returns a response that cannot be marshalled into an []string",
+			method:     http.MethodGet,
+			path:       "/file",
+			statusCode: http.StatusOK,
+			response:   `{"message"} : "This cannot be marshalled."`,
+			testFunc: func(t *testing.T, fc filesClient) {
+				response, err := fc.List()
+				assert.Equal(t, []string(nil), response)
+				assert.EqualError(t, err, "invalid character '}' after object key")
+			},
+		},
+		{
+			name:       "List returns a internal server error",
+			method:     http.MethodGet,
+			path:       "/file",
+			statusCode: http.StatusInternalServerError,
+			response:   ``,
+			testFunc: func(t *testing.T, fc filesClient) {
+				response, err := fc.List()
+				assert.Equal(t, []string(nil), response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, ``))
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, tc.path, r.URL.Path)
+			}))
+			defer srv.Close()
+
+			c := newClient(srv.URL, "")
+			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
+			tc.testFunc(t, filesClient)
+		})
+	}
+}
+
+// Test_filesClient_Delete tests de filesClient.Delete() function
+func Test_filesClient_Delete(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, fc filesClient)
+	}{
+		// Working case
 		{
 			name:       "Delete returns acknowledged true",
 			method:     http.MethodDelete,
@@ -277,57 +414,7 @@ func Test_filesClient_CRUD(t *testing.T) {
 				assert.False(t, response.Get("acknowledged").Bool())
 			},
 		},
-		// Error cases
-		{
-			name:       "List returns a response that cannot be marshalled into an []string",
-			method:     http.MethodGet,
-			path:       "/file",
-			statusCode: http.StatusOK,
-			response:   `{"message"} : "This cannot be marshalled."`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.List()
-				assert.Equal(t, []string(nil), response)
-				assert.EqualError(t, err, "invalid character '}' after object key")
-			},
-		},
-		{
-			name:       "List returns a internal server error",
-			method:     http.MethodGet,
-			path:       "/file",
-			statusCode: http.StatusInternalServerError,
-			response:   ``,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.List()
-				assert.Equal(t, []string(nil), response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, ``))
-			},
-		},
-		{
-			name:       "Upload uses a file that does not exist",
-			method:     http.MethodPut,
-			path:       "/file/testFile",
-			statusCode: http.StatusBadRequest,
-			response: `{
-			"acknowledged": true
-			}`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Upload("testFile", "doesNotExist.txt")
-				assert.Equal(t, gjson.Result{}, response)
-				assert.Contains(t, err.Error(), "open doesNotExist.txt")
-			},
-		},
-		{
-			name:       "Retrieve returns 404 Not found",
-			method:     http.MethodGet,
-			path:       "/file/testFile",
-			statusCode: http.StatusNotFound,
-			response:   ``,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Retrieve("testFile")
-				assert.Equal(t, []byte{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, ``))
-			},
-		},
+		// Error case
 		{
 			name:       "Delete returns internal server error",
 			method:     http.MethodDelete,
