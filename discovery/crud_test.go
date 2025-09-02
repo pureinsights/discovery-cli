@@ -145,6 +145,7 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			testFunc: func(t *testing.T, c crud) {
 				results, err := c.GetAll()
 				require.NoError(t, err)
+				assert.Equal(t, []gjson.Result{}, results)
 				assert.Len(t, results, 0)
 			},
 		},
@@ -158,7 +159,7 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			response:   `{"error":"unauthorized"}`,
 			testFunc: func(t *testing.T, c crud) {
 				response, err := c.GetAll()
-				assert.Equal(t, []gjson.Result{}, response)
+				assert.Equal(t, []gjson.Result(nil), response)
 				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusUnauthorized, []byte(`{"error":"unauthorized"}`)))
 			},
 		},
@@ -253,7 +254,7 @@ func Test_getter_GetAll_ErrorInSecondPage(t *testing.T) {
 	c := crud{getter{newClient(srv.URL, "")}}
 
 	response, err := c.GetAll()
-	assert.Equal(t, []gjson.Result{}, response)
+	assert.Equal(t, []gjson.Result(nil), response)
 	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, []byte(`{"error":"Internal Server Error"}`)))
 }
 
