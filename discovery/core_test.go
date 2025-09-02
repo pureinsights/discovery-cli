@@ -245,6 +245,7 @@ func Test_filesClient_CRUD(t *testing.T) {
 			testFunc: func(t *testing.T, fc filesClient) {
 				response, err := fc.List()
 				require.NoError(t, err)
+				assert.Equal(t, []string{}, response)
 				assert.Len(t, response, 0)
 			},
 		},
@@ -285,7 +286,7 @@ func Test_filesClient_CRUD(t *testing.T) {
 			response:   `{"message"} : "This cannot be marshalled."`,
 			testFunc: func(t *testing.T, fc filesClient) {
 				response, err := fc.List()
-				assert.Equal(t, []string{}, response)
+				assert.Equal(t, []string(nil), response)
 				assert.EqualError(t, err, "invalid character '}' after object key")
 			},
 		},
@@ -297,7 +298,7 @@ func Test_filesClient_CRUD(t *testing.T) {
 			response:   ``,
 			testFunc: func(t *testing.T, fc filesClient) {
 				response, err := fc.List()
-				assert.Equal(t, []string{}, response)
+				assert.Equal(t, []string(nil), response)
 				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, ``))
 			},
 		},
