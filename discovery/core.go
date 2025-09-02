@@ -85,12 +85,7 @@ func newServersClient(url, apiKey string) serversClient {
 // Ping calls the endpoint to verify the connection to a server.
 // It returns acknowledged: true if the connection was successful.
 func (sc serversClient) Ping(id uuid.UUID) (gjson.Result, error) {
-	pingServer, err := execute(sc.client, http.MethodGet, "/"+id.String()+"/ping")
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	return pingServer, nil
+	return execute(sc.client, http.MethodGet, "/"+id.String()+"/ping")
 }
 
 // FilesClient is the struct that performs the CRUD of files
@@ -109,23 +104,13 @@ func newFilesClient(url, apiKey string) filesClient {
 // Upload receives a key and file and sends it to Discovery.
 // It returns acknowledged: true if the upload was successful.
 func (fc filesClient) Upload(key, file string) (gjson.Result, error) {
-	response, err := execute(fc.client, http.MethodPut, "/"+key, WithFile(file))
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	return response, nil
+	return execute(fc.client, http.MethodPut, "/"+key, WithFile(file))
 }
 
 // Retrieve obtains a file's data and returns it as an array of bytes.
 // It receives the key that corresponds to the file.
 func (fc filesClient) Retrieve(key string) ([]byte, error) {
-	file, err := fc.execute(http.MethodGet, "/"+key)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return file, nil
+	return fc.execute(http.MethodGet, "/"+key)
 }
 
 // List displays an array of strings that contains every file key that is stored in Discovery.
@@ -133,12 +118,12 @@ func (fc filesClient) Retrieve(key string) ([]byte, error) {
 func (fc filesClient) List() ([]string, error) {
 	filesBytes, err := fc.execute(http.MethodGet, "")
 	if err != nil {
-		return []string{}, err
+		return []string(nil), err
 	}
 	if len(filesBytes) > 0 {
 		var files []string
 		if err := json.Unmarshal(filesBytes, &files); err != nil {
-			return []string{}, err
+			return []string(nil), err
 		}
 		return files, nil
 	} else {
@@ -149,12 +134,7 @@ func (fc filesClient) List() ([]string, error) {
 
 // Delete removes a file from Discovery based on the sent key.
 func (fc filesClient) Delete(key string) (gjson.Result, error) {
-	acknowledged, err := execute(fc.client, http.MethodDelete, "/"+key)
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	return acknowledged, nil
+	return execute(fc.client, http.MethodDelete, "/"+key)
 }
 
 // LogLevel is used as an enum to easily represent the logging levels.
@@ -187,12 +167,7 @@ func newMaintenanceClient(url, apiKey string) maintenanceClient {
 // The log endpoint often returns an acknowledged: true, even if the component does not exist.
 // If the request to change the log level failed, a specific log with details of what happens appear in the Discovery component's logs, not on the response to the request.
 func (mc maintenanceClient) Log(componentName string, level LogLevel, loggerName string) (gjson.Result, error) {
-	acknowledged, err := execute(mc.client, http.MethodPost, "/log", WithQueryParameters(map[string][]string{"componentName": {componentName}, "level": {string(level)}, "loggerName": {loggerName}}))
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	return acknowledged, nil
+	return execute(mc.client, http.MethodPost, "/log", WithQueryParameters(map[string][]string{"componentName": {componentName}, "level": {string(level)}, "loggerName": {loggerName}}))
 }
 
 // Core is the struct for the client that can execute every Core operation.
