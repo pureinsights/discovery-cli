@@ -13,8 +13,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestCloner has table-driven tests to test the cloner methods.
-func TestCloner(t *testing.T) {
+// Test_cloner_Clone has table-driven tests to test the cloner.Clone() method.
+func Test_cloner_Clone(t *testing.T) {
 	tests := []struct {
 		name       string
 		method     string
