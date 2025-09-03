@@ -37,6 +37,19 @@ func Test_summarizer_Summarize(t *testing.T) {
 				assert.Equal(t, 8, int(response.Get("DONE").Int()))
 			},
 		},
+		{
+			name:       "Summarizer returns no content",
+			method:     http.MethodGet,
+			path:       "/summary",
+			statusCode: http.StatusNoContent,
+			response:   ``,
+			testFunc: func(t *testing.T, s summarizer) {
+				response, err := s.Summarize()
+				require.NoError(t, err)
+				assert.Equal(t, gjson.Null, response.Type)
+				assert.Equal(t, "", response.Raw)
+			},
+		},
 
 		// Error case
 		{
