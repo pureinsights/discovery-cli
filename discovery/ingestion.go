@@ -2,7 +2,6 @@ package discovery
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
@@ -49,6 +48,10 @@ func newSeedRecordsClient(url, apiKey string, seedId uuid.UUID) seedRecordsClien
 	}
 }
 
+func (src seedRecordsClient) Get(id string) (gjson.Result, error) {
+	return execute(src.getter.client, http.MethodGet, "/"+id)
+}
+
 type seedExecutionsClient struct {
 	getter
 }
@@ -66,51 +69,32 @@ func (c seedExecutionsClient) Halt(executionId uuid.UUID) (gjson.Result, error) 
 }
 
 func (c seedExecutionsClient) Audit(executionId uuid.UUID) ([]gjson.Result, error) {
-	response, err := execute(c.client, http.MethodPost, "/"+executionId.String()+"/audit")
-	if err != nil {
-		return []gjson.Result(nil), err
+	auxClient := seedExecutionsClient{
+		getter: getter{
+			client: newSubClient(c.client, "/"+executionId.String()+"/audit"),
+		},
 	}
-
-	elementNumber := response.Get("numberOfElements").Int()
-	pageNumber := response.Get("pageNumber").Int()
-	totalPages := response.Get("totalPages").Int()
-	totalSize := response.Get("totalSize").Int()
-	elements := response.Get("content").Array()
-	pageNumber++
-	for pageNumber < totalPages && elementNumber < totalSize {
-		response, err = execute(c.client, http.MethodGet, "", WithQueryParameters(map[string][]string{"page": {strconv.FormatInt(pageNumber, 10)}}))
-		if err != nil {
-			return []gjson.Result(nil), err
-		}
-
-		pageElements := response.Get("content").Array()
-		elements = append(elements, pageElements...)
-
-		pageNumber++
-		pageElementNumber := response.Get("numberOfElements").Int()
-		elementNumber += pageElementNumber
-	}
-	return elements, nil
+	return auxClient.GetAll()
 }
 
 func (c seedExecutionsClient) Seed(executionId uuid.UUID) (gjson.Result, error) {
-	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/config/seed")
+	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/config/seed")
 }
 
 func (c seedExecutionsClient) Pipeline(executionId uuid.UUID, pipelineId uuid.UUID) (gjson.Result, error) {
-	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/config/pipeline/"+pipelineId.String())
+	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/config/pipeline/"+pipelineId.String())
 }
 
 func (c seedExecutionsClient) Processor(executionId uuid.UUID, processorId uuid.UUID) (gjson.Result, error) {
-	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/config/processor/"+processorId.String())
+	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/config/processor/"+processorId.String())
 }
 
 func (c seedExecutionsClient) Server(executionId uuid.UUID, serverId uuid.UUID) (gjson.Result, error) {
-	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/config/server/"+serverId.String())
+	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/config/server/"+serverId.String())
 }
 
 func (c seedExecutionsClient) Credential(executionId uuid.UUID, credentialId uuid.UUID) (gjson.Result, error) {
-	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/config/credential/"+credentialId.String())
+	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/config/credential/"+credentialId.String())
 }
 
 func (c seedExecutionsClient) Records(executionId uuid.UUID) seedExecutionRecordsClient {
