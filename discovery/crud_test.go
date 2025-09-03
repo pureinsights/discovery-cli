@@ -258,6 +258,113 @@ func Test_getter_GetAll_ErrorInSecondPage(t *testing.T) {
 	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, []byte(`{"error":"Internal Server Error"}`)))
 }
 
+// Test_getter_GetAll_ContentInSecondPage tests when there are two pages with content in them
+func Test_getter_GetAll_ContentInSecondPage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		w.Header().Set("Content-Type", "application/json")
+		if pageNumber > 0 {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"content": [
+				{
+					"type": "openai",
+					"name": "OpenAI Chat Processor",
+					"labels": [],
+					"active": true,
+					"id": "8a399b1c-95fc-406c-a220-7d321aaa7b0e",
+					"creationTimestamp": "2025-08-14T18:02:38Z",
+					"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				},
+				{
+					"type": "mongo",
+					"name": "MongoDB vector processor",
+					"labels": [],
+					"active": true,
+					"id": "a5ee116b-bd95-474e-9d50-db7be988b196",
+					"creationTimestamp": "2025-08-14T18:02:38Z",
+					"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				},
+				{
+					"type": "openai",
+					"name": "OpenAI embeddings processor",
+					"labels": [],
+					"active": true,
+					"id": "b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89",
+					"creationTimestamp": "2025-08-14T18:02:38Z",
+					"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 6,
+			"totalPages": 2,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 1
+			}`))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"content": [
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 6,
+			"totalPages": 2,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	c := crud{getter{newClient(srv.URL, "")}}
+
+	response, err := c.GetAll()
+	require.NoError(t, err)
+	assert.Len(t, response, 6)
+}
+
 // Test_getter_GetAll_NoContentInSecondPage tests what happens if one of the later pages returns No Content
 func Test_getter_GetAll_NoContentInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
