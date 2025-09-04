@@ -368,6 +368,6 @@ func Test_queryFlow_Debug(t *testing.T) {
 func Test_NewQueryFlow(t *testing.T) {
 	i := NewQueryFlow("http://localhost:8088/v2", "Api Key")
 
-	assert.Equal(t, "http://localhost:8088/v2", i.ApiKey)
-	assert.Equal(t, "Api Key", i.Url)
+	assert.Equal(t, "http://localhost:8088/v2", i.Url)
+	assert.Equal(t, "Api Key", i.ApiKey)
 }
