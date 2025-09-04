@@ -15,7 +15,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_newQueryFlowProcessorsClient test the queryFlowProcessorsClient's constructor
+// Test_newSeedExecutionsClient test the seedExecutionsClient's constructor
 func Test_newSeedExecutionsClient(t *testing.T) {
 	url := "http://localhost:8083/v2"
 	apiKey := "Api Key"
@@ -30,7 +30,7 @@ func Test_newSeedExecutionsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution", ingestionSeedExecutionsClient.getter.client.client.BaseURL)
 }
 
-// Test_newEndpointsClient tests the constructor of endpointsClients.
+// Test_newSeedRecordsClient tests the constructor of seedRecordsClient.
 func Test_newSeedRecordsClient(t *testing.T) {
 	url := "http://localhost:8083/v2"
 	apiKey := "Api Key"
@@ -47,6 +47,7 @@ func Test_newSeedRecordsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.summarizer.client.client.BaseURL)
 }
 
+// Test_newSeedExecutionRecordsClient tests the constructor of seedExecutionRecordsClient
 func Test_newSeedExecutionRecordsClient(t *testing.T) {
 	url := "http://localhost:8083/v2"
 	apiKey := "Api Key"
@@ -68,6 +69,7 @@ func Test_newSeedExecutionRecordsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution/"+executionId.String()+"/record", ingestionSeedExecutionRecordsClient.client.client.BaseURL)
 }
 
+// Test_newSeedExecutionJobsClient tests the constructor of seedExecutionJobsClient.
 func Test_newSeedExecutionJobsClient(t *testing.T) {
 	url := "http://localhost:8083/v2"
 	apiKey := "Api Key"
@@ -89,6 +91,7 @@ func Test_newSeedExecutionJobsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution/"+executionId.String()+"/job", ingestionSeedExecutionJobClient.client.client.BaseURL)
 }
 
+// Test_seedExecutionsClient_Seed tests the seedExecutionsClient.Seed() function
 func Test_seedExecutionsClient_Seed(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -165,6 +168,7 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 	}
 }
 
+// Test_seedExecutionsClient_Pipeline tests the seedExecutionsClient.Pipeline() function
 func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -247,6 +251,7 @@ func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 	}
 }
 
+// Test_seedExecutionsClient_Processor tests the seedExecutionsClient.Processor() function.
 func Test_seedExecutionsClient_Processor(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -276,13 +281,13 @@ func Test_seedExecutionsClient_Processor(t *testing.T) {
 			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/processor/aa0186f1-746f-4b20-b1b0-313bd79e78b8",
 			statusCode: http.StatusNotFound,
 			response: `{
-"status": 404,
-"code": 1003,
-"messages": [
-	"Processor not found: aa0186f1-746f-4b20-b1b0-313bd79e78b8"
-],
-"timestamp": "2025-09-03T17:44:01.557816Z"
-}`,
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Processor not found: aa0186f1-746f-4b20-b1b0-313bd79e78b8"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`,
 			testFunc: func(t *testing.T, response gjson.Result, err error) {
 				assert.Equal(t, gjson.Result{}, response)
 				require.Error(t, err)
@@ -329,6 +334,7 @@ func Test_seedExecutionsClient_Processor(t *testing.T) {
 	}
 }
 
+// Test_seedExecutionsClient_Server tests the seedExecutionsClient.Server() function.
 func Test_seedExecutionsClient_Server(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -411,6 +417,7 @@ func Test_seedExecutionsClient_Server(t *testing.T) {
 	}
 }
 
+// Test_seedExecutionsClient_Credential tests the seedExecutionsClient.Credential() function.
 func Test_seedExecutionsClient_Credential(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -493,6 +500,7 @@ func Test_seedExecutionsClient_Credential(t *testing.T) {
 	}
 }
 
+// Test_seedExecutionsClient_Halt tests the seedExecutionsClient.Halt() function.
 func Test_seedExecutionsClient_Halt(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -596,7 +604,7 @@ func Test_seedExecutionsClient_Halt(t *testing.T) {
 	}
 }
 
-// Test_newEndpointsClient tests the constructor of endpointsClients.
+// Test_seedExecutionsClient_Records tests the seedExecutionsClient.Records() function.
 func Test_seedExecutionsClient_Records(t *testing.T) {
 	url := "http://localhost:8083/v2"
 	apiKey := "Api Key"
@@ -619,6 +627,7 @@ func Test_seedExecutionsClient_Records(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution/"+executionId.String()+"/record", ingestionSeedExecutionRecordsClient.client.client.BaseURL)
 }
 
+// Test_seedExecutionsClient_Jobs tests the seedExecutionsClient.Jobs() function.
 func Test_seedExecutionsClient_Jobs(t *testing.T) {
 	url := "http://localhost:8083/v2"
 	apiKey := "Api Key"
@@ -641,7 +650,7 @@ func Test_seedExecutionsClient_Jobs(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution/"+executionId.String()+"/job", ingestionSeedExecutionJobClient.client.client.BaseURL)
 }
 
-// Test_seedExecutionsClient_Audit_HTTPResponseCases tests how the getter.GetAll() function behaves when receiving different HTTP responses and errors.
+// Test_seedExecutionsClient_Audit_HTTPResponseCases tests how the seedExecutionsClient.Audit() function behaves when receiving different HTTP responses and errors.
 // It does not test if reading all the pages works.
 func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 	tests := []struct {
@@ -650,147 +659,196 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
-		testFunc   func(t *testing.T, c crud)
+		testFunc   func(t *testing.T, response []gjson.Result, err error)
 	}{
 		// Working cases
 		{
-			name:       "GetAll returns array",
+			name:       "Audit returns array",
 			method:     http.MethodGet,
-			path:       "/",
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
 			statusCode: http.StatusOK,
 			response: `{
-  "content": [
-    {
-      "timestamp": "2025-09-03T19:58:09.495Z",
-      "status": "CREATED",
-      "stages": []
-    },
-    {
-      "timestamp": "2025-09-03T19:58:18.379Z",
-      "status": "RUNNING",
-      "stages": []
-    },
-    {
-      "timestamp": "2025-09-03T19:58:25.277Z",
-      "status": "RUNNING",
-      "stages": [
-        "BEFORE_HOOKS"
-      ]
-    },
-    {
-      "timestamp": "2025-09-03T20:02:33.461Z",
-      "status": "RUNNING",
-      "stages": [
-        "BEFORE_HOOKS",
-        "INGEST"
-      ]
-    },
-    {
-      "timestamp": "2025-09-03T20:02:48.877Z",
-      "status": "RUNNING",
-      "stages": [
-        "BEFORE_HOOKS",
-        "INGEST",
-        "RETRY"
-      ]
-    },
-    {
-      "timestamp": "2025-09-03T20:02:49.097Z",
-      "status": "RUNNING",
-      "stages": [
-        "BEFORE_HOOKS",
-        "INGEST",
-        "RETRY",
-        "AFTER_HOOKS"
-      ]
-    },
-    {
-      "timestamp": "2025-09-03T20:02:56.812Z",
-      "status": "DONE",
-      "stages": [
-        "BEFORE_HOOKS",
-        "INGEST",
-        "RETRY",
-        "AFTER_HOOKS"
-      ]
-    }
-  ],
-  "pageable": {
-    "page": 0,
-    "size": 25,
-    "sort": []
-  },
-  "totalSize": 7,
-  "totalPages": 1,
-  "empty": false,
-  "size": 25,
-  "offset": 0,
-  "numberOfElements": 7,
-  "pageNumber": 0
-}`,
-			testFunc: func(t *testing.T, c crud) {
-				results, err := c.GetAll()
+			"content": [
+				{
+				"timestamp": "2025-09-03T19:58:09.495Z",
+				"status": "CREATED",
+				"stages": []
+				},
+				{
+				"timestamp": "2025-09-03T19:58:18.379Z",
+				"status": "RUNNING",
+				"stages": []
+				},
+				{
+				"timestamp": "2025-09-03T19:58:25.277Z",
+				"status": "RUNNING",
+				"stages": [
+					"BEFORE_HOOKS"
+				]
+				},
+				{
+				"timestamp": "2025-09-03T20:02:33.461Z",
+				"status": "RUNNING",
+				"stages": [
+					"BEFORE_HOOKS",
+					"INGEST"
+				]
+				},
+				{
+				"timestamp": "2025-09-03T20:02:48.877Z",
+				"status": "RUNNING",
+				"stages": [
+					"BEFORE_HOOKS",
+					"INGEST",
+					"RETRY"
+				]
+				},
+				{
+				"timestamp": "2025-09-03T20:02:49.097Z",
+				"status": "RUNNING",
+				"stages": [
+					"BEFORE_HOOKS",
+					"INGEST",
+					"RETRY",
+					"AFTER_HOOKS"
+				]
+				},
+				{
+				"timestamp": "2025-09-03T20:02:56.812Z",
+				"status": "DONE",
+				"stages": [
+					"BEFORE_HOOKS",
+					"INGEST",
+					"RETRY",
+					"AFTER_HOOKS"
+				]
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 7,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 7,
+			"pageNumber": 0
+			}`,
+			testFunc: func(t *testing.T, response []gjson.Result, err error) {
 				require.NoError(t, err)
-				assert.Len(t, results, 7)
+				assert.Len(t, response, 7)
 			},
 		},
 		{
-			name:       "GetAll returns no content",
+			name:       "Audit returns no content",
 			method:     http.MethodGet,
-			path:       "/",
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
 			statusCode: http.StatusNoContent,
 			response:   `{"content": []}`,
-			testFunc: func(t *testing.T, c crud) {
-				results, err := c.GetAll()
+			testFunc: func(t *testing.T, response []gjson.Result, err error) {
 				require.NoError(t, err)
-				assert.Equal(t, []gjson.Result{}, results)
-				assert.Len(t, results, 0)
+				assert.Equal(t, []gjson.Result{}, response)
+				assert.Len(t, response, 0)
+			},
+		},
+		{
+			name:       "Audit has no content field",
+			method:     http.MethodGet,
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
+			statusCode: http.StatusNoContent,
+			response:   ``,
+			testFunc: func(t *testing.T, response []gjson.Result, err error) {
+				require.NoError(t, err)
+				assert.Len(t, response, 0)
 			},
 		},
 
 		// Error cases
 		{
-			name:       "GetAll returns a 401 Unauthorized",
+			name:       "Audit returns a 400 Bad request",
 			method:     http.MethodGet,
-			path:       "/",
-			statusCode: http.StatusUnauthorized,
-			response:   `{"error":"unauthorized"}`,
-			testFunc: func(t *testing.T, c crud) {
-				response, err := c.GetAll()
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [werf] due to: Invalid UUID string: werf"
+			],
+			"timestamp": "2025-09-03T22:09:32.940650300Z"
+			}`,
+			testFunc: func(t *testing.T, response []gjson.Result, err error) {
 				assert.Equal(t, []gjson.Result(nil), response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusUnauthorized, []byte(`{"error":"unauthorized"}`)))
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusBadRequest, []byte(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [werf] due to: Invalid UUID string: werf"
+			],
+			"timestamp": "2025-09-03T22:09:32.940650300Z"
+			}`)))
 			},
 		},
 		{
-			name:       "GetAll has no content field",
+			name:       "Audit returns a 404 Not found",
 			method:     http.MethodGet,
-			path:       "/",
-			statusCode: http.StatusNoContent,
-			response:   ``,
-			testFunc: func(t *testing.T, c crud) {
-				results, err := c.GetAll()
-				require.NoError(t, err)
-				assert.Len(t, results, 0)
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed execution not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-03T22:43:49.251888500Z"
+			}`,
+			testFunc: func(t *testing.T, response []gjson.Result, err error) {
+				assert.Equal(t, []gjson.Result(nil), response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed execution not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-03T22:43:49.251888500Z"
+			}`)))
 			},
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
-			}))
-
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, "/seed/2acd0a61-852c-4f38-af2b-9c84e152873e/execution/"+strings.TrimLeft(tc.path, "/"), r.URL.Path)
+				}))
 			defer srv.Close()
 
-			c := crud{getter{newClient(srv.URL, "")}}
-			tc.testFunc(t, c)
+			apiKey := "Api Key"
+			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+			if err != nil {
+				fmt.Println("UUID conversion failed: " + err.Error())
+				return
+			}
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+
+			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
+			if err != nil {
+				fmt.Println("UUID conversion failed: " + err.Error())
+				return
+			}
+
+			response, err := ingestionSeedExecutionsClient.Audit(executionId)
+			tc.testFunc(t, response, err)
 		})
 	}
 }
 
-// Test_seedExecutionsClient_Audit_ErrorInSecondPage tests when GetAll fails in a request while trying to get every content from every page.
+// Test_seedExecutionsClient_Audit_ErrorInSecondPage tests when seedExecutionsClient.Audit fails in a request while trying to get every content from every page.
 func Test_seedExecutionsClient_Audit_ErrorInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
@@ -839,14 +897,26 @@ func Test_seedExecutionsClient_Audit_ErrorInSecondPage(t *testing.T) {
 		}))
 	t.Cleanup(srv.Close)
 
-	c := crud{getter{newClient(srv.URL, "")}}
+	apiKey := "Api Key"
+	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+	if err != nil {
+		fmt.Println("UUID conversion failed: " + err.Error())
+		return
+	}
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
 
-	response, err := c.GetAll()
+	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
+	if err != nil {
+		fmt.Println("UUID conversion failed: " + err.Error())
+		return
+	}
+
+	response, err := ingestionSeedExecutionsClient.Audit(executionId)
 	assert.Equal(t, []gjson.Result(nil), response)
 	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, []byte(`{"error":"Internal Server Error"}`)))
 }
 
-// Test_seedExecutionsClient_Audit_NoContentInSecondPage tests what happens if one of the later pages returns No Content
+// Test_seedExecutionsClient_Audit_NoContentInSecondPage tests what happens in seedExecutionsClient.Audit() if one of the later pages returns No Content
 func Test_seedExecutionsClient_Audit_NoContentInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
@@ -894,9 +964,212 @@ func Test_seedExecutionsClient_Audit_NoContentInSecondPage(t *testing.T) {
 	}))
 	t.Cleanup(srv.Close)
 
-	c := crud{getter{newClient(srv.URL, "")}}
+	apiKey := "Api Key"
+	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+	if err != nil {
+		fmt.Println("UUID conversion failed: " + err.Error())
+		return
+	}
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
 
-	response, err := c.GetAll()
+	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
+	if err != nil {
+		fmt.Println("UUID conversion failed: " + err.Error())
+		return
+	}
+
+	response, err := ingestionSeedExecutionsClient.Audit(executionId)
 	require.NoError(t, err)
 	assert.Len(t, response, 3)
+}
+
+// Test_seedExecutionsClient_Audit_ContentInSecondPage tests if seedExecutionsClient.Audit() can successfully get content from all pages.
+func Test_seedExecutionsClient_Audit_ContentInSecondPage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		w.Header().Set("Content-Type", "application/json")
+		if pageNumber > 0 {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+		"content": [
+			{
+			"timestamp": "2025-09-03T19:58:09.495Z",
+			"status": "RUNNING",
+			"stages": ["BEFORE_HOOKS",
+						"AFTER_HOOKS"
+						]
+			},
+			{
+			"timestamp": "2025-09-03T19:58:18.379Z",
+			"status": "RUNNING",
+			"stages": ["BEFORE_HOOKS",
+						"AFTER_HOOKS".
+						"RETRY"
+						]
+			},
+			{
+			"timestamp": "2025-09-03T19:58:25.277Z",
+			"status": "DONE",
+			"stages": [
+				["BEFORE_HOOKS",
+						"AFTER_HOOKS".
+						"RETRY",
+						"DONE"
+						]
+			]
+			},
+		],
+		"pageable": {
+			"page": 0,
+			"size": 3,
+			"sort": []
+		},
+		"totalSize": 6,
+		"totalPages": 2,
+		"empty": false,
+		"size": 3,
+		"offset": 0,
+		"numberOfElements": 3,
+		"pageNumber": 0
+		}`))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+		"content": [
+			{
+			"timestamp": "2025-09-03T19:58:09.495Z",
+			"status": "CREATED",
+			"stages": []
+			},
+			{
+			"timestamp": "2025-09-03T19:58:18.379Z",
+			"status": "RUNNING",
+			"stages": []
+			},
+			{
+			"timestamp": "2025-09-03T19:58:25.277Z",
+			"status": "RUNNING",
+			"stages": [
+				"BEFORE_HOOKS"
+			]
+			},
+		],
+		"pageable": {
+			"page": 0,
+			"size": 3,
+			"sort": []
+		},
+		"totalSize": 6,
+		"totalPages": 2,
+		"empty": false,
+		"size": 3,
+		"offset": 0,
+		"numberOfElements": 3,
+		"pageNumber": 0
+		}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	apiKey := "Api Key"
+	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+	if err != nil {
+		fmt.Println("UUID conversion failed: " + err.Error())
+		return
+	}
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+
+	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
+	if err != nil {
+		fmt.Println("UUID conversion failed: " + err.Error())
+		return
+	}
+
+	response, err := ingestionSeedExecutionsClient.Audit(executionId)
+	require.NoError(t, err)
+	assert.Len(t, response, 6)
+}
+
+// Test_seedRecordsClient_Get tests the seedRecordsClient.Get() function.
+func Test_seedRecordsClient_Get(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, response gjson.Result, err error)
+	}{
+		// Working case
+		{
+			name:       "Get by ID returns object",
+			method:     http.MethodGet,
+			path:       "/seed/2acd0a61-852c-4f38-af2b-9c84e152873e/record/A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=",
+			statusCode: http.StatusOK,
+			response: ` {
+                          "id": {
+                                  "plain": "4e7c8a47efd829ef7f710d64da661786",
+                                  "hash": "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="
+                          },
+                          "creationTimestamp": "2025-09-03T21:02:54Z",
+                          "lastUpdatedTimestamp": "2025-09-03T21:02:54Z",
+                          "status": "SUCCESS"
+                  }`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				require.NoError(t, err)
+				assert.Equal(t, "4e7c8a47efd829ef7f710d64da661786", response.Get("id.plain").String())
+				assert.Equal(t, "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=", response.Get("id.hash").String())
+			},
+		},
+
+		// Error case
+		{
+			name:       "Get by ID returns 404 Not Found",
+			method:     http.MethodGet,
+			path:       "/seed/2acd0a61-852c-4f38-af2b-9c84e152873e/record/A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=",
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: SeedRecordId(seed=Seed(super=AbstractComponentConfigEntity(super=AbstractJsonConfigEntity(super=AbstractTypedConfigEntity(super=AbstractConfigEntity(super=AbstractUpdatableEntity(super=AbstractCoreEntity(id=2acd0a61-852c-4f38-af2b-9c84e152873e), creationTimestamp=2025-08-21T21:52:03Z, lastUpdatedTimestamp=2025-08-21T21:52:03Z), name=Search seed, description=null, active=true), type=staging), config={\"action\":\"scroll\",\"bucket\":\"blogs\"})), properties=null, labels=[], recordOptions=SeedRecordPolicy[timeoutPolicy=TimeoutPolicy[slice=PT1H], errorPolicy=FATAL, outboundPolicy=OutboundPolicy[idPolicy=IdPolicy[generator=null], batchPolicy=BatchPolicy[maxCount=25, flushAfter=PT1M]]], hooks=[], beforeHooksOptions=null, afterHooksOptions=null), recordId=[3, 113, -45, 12, 72, 2, 107, -82, 65, 21, -101, 26, 115, -44, -56, -100, 88, -84, -66, 90, 17, -108, -67, -52, -25, 72, -93, 9, 99])"
+			],
+			"timestamp": "2025-09-04T14:07:13.759984600Z"
+			}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: SeedRecordId(seed=Seed(super=AbstractComponentConfigEntity(super=AbstractJsonConfigEntity(super=AbstractTypedConfigEntity(super=AbstractConfigEntity(super=AbstractUpdatableEntity(super=AbstractCoreEntity(id=2acd0a61-852c-4f38-af2b-9c84e152873e), creationTimestamp=2025-08-21T21:52:03Z, lastUpdatedTimestamp=2025-08-21T21:52:03Z), name=Search seed, description=null, active=true), type=staging), config={\"action\":\"scroll\",\"bucket\":\"blogs\"})), properties=null, labels=[], recordOptions=SeedRecordPolicy[timeoutPolicy=TimeoutPolicy[slice=PT1H], errorPolicy=FATAL, outboundPolicy=OutboundPolicy[idPolicy=IdPolicy[generator=null], batchPolicy=BatchPolicy[maxCount=25, flushAfter=PT1M]]], hooks=[], beforeHooksOptions=null, afterHooksOptions=null), recordId=[3, 113, -45, 12, 72, 2, 107, -82, 65, 21, -101, 26, 115, -44, -56, -100, 88, -84, -66, 90, 17, -108, -67, -52, -25, 72, -93, 9, 99])"
+			],
+			"timestamp": "2025-09-04T14:07:13.759984600Z"
+			}`)))
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, tc.path, r.URL.Path)
+			}))
+
+			defer srv.Close()
+
+			apiKey := "Api Key"
+			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+			if err != nil {
+				fmt.Println("UUID conversion failed: " + err.Error())
+				return
+			}
+			ingestionSeedRecordsClient := newSeedRecordsClient(srv.URL, apiKey, seedId)
+
+			response, err := ingestionSeedRecordsClient.Get("A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=")
+			tc.testFunc(t, response, err)
+		})
+	}
 }
