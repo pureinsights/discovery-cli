@@ -24,7 +24,8 @@ func Test_newSeedExecutionsClient(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(url, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(url, apiKey)
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	assert.Equal(t, apiKey, ingestionSeedExecutionsClient.getter.client.ApiKey)
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution", ingestionSeedExecutionsClient.getter.client.client.BaseURL)
@@ -39,7 +40,8 @@ func Test_newSeedRecordsClient(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedRecordsClient := newSeedRecordsClient(url, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(url, apiKey)
+	ingestionSeedRecordsClient := newSeedRecordsClient(ingestionSeedsClient, seedId)
 
 	assert.Equal(t, apiKey, ingestionSeedRecordsClient.getter.client.ApiKey)
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.getter.client.client.BaseURL)
@@ -56,7 +58,8 @@ func Test_newSeedExecutionRecordsClient(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(url, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(url, apiKey)
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 	if err != nil {
@@ -78,7 +81,8 @@ func Test_newSeedExecutionJobsClient(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(url, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(url, apiKey)
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 	if err != nil {
@@ -155,7 +159,8 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 				fmt.Println("UUID conversion failed: " + err.Error())
 				return
 			}
-			ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 			if err != nil {
@@ -232,7 +237,8 @@ func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 				fmt.Println("UUID conversion failed: " + err.Error())
 				return
 			}
-			ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 			if err != nil {
@@ -315,7 +321,8 @@ func Test_seedExecutionsClient_Processor(t *testing.T) {
 				fmt.Println("UUID conversion failed: " + err.Error())
 				return
 			}
-			ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 			if err != nil {
@@ -398,7 +405,8 @@ func Test_seedExecutionsClient_Server(t *testing.T) {
 				fmt.Println("UUID conversion failed: " + err.Error())
 				return
 			}
-			ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 			if err != nil {
@@ -481,7 +489,8 @@ func Test_seedExecutionsClient_Credential(t *testing.T) {
 				fmt.Println("UUID conversion failed: " + err.Error())
 				return
 			}
-			ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 			if err != nil {
@@ -590,7 +599,8 @@ func Test_seedExecutionsClient_Halt(t *testing.T) {
 				fmt.Println("UUID conversion failed: " + err.Error())
 				return
 			}
-			ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 			if err != nil {
@@ -613,7 +623,8 @@ func Test_seedExecutionsClient_Records(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(url, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(url, apiKey)
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 	if err != nil {
@@ -636,7 +647,8 @@ func Test_seedExecutionsClient_Jobs(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(url, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(url, apiKey)
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 	if err != nil {
@@ -834,7 +846,8 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 				fmt.Println("UUID conversion failed: " + err.Error())
 				return
 			}
-			ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 			if err != nil {
@@ -903,7 +916,8 @@ func Test_seedExecutionsClient_Audit_ErrorInSecondPage(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 	if err != nil {
@@ -970,7 +984,8 @@ func Test_seedExecutionsClient_Audit_NoContentInSecondPage(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 	if err != nil {
@@ -1078,7 +1093,8 @@ func Test_seedExecutionsClient_Audit_ContentInSecondPage(t *testing.T) {
 		fmt.Println("UUID conversion failed: " + err.Error())
 		return
 	}
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(srv.URL, apiKey, seedId)
+	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 	if err != nil {
@@ -1166,7 +1182,8 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 				fmt.Println("UUID conversion failed: " + err.Error())
 				return
 			}
-			ingestionSeedRecordsClient := newSeedRecordsClient(srv.URL, apiKey, seedId)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedRecordsClient := newSeedRecordsClient(ingestionSeedsClient, seedId)
 
 			response, err := ingestionSeedRecordsClient.Get("A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=")
 			tc.testFunc(t, response, err)

@@ -26,7 +26,7 @@ type seedExecutionJobsClient struct {
 	summarizer
 }
 
-// NewSeedExecutionJobsClient is the constructor of seeedExecutionJobsClient.
+// NewSeedExecutionJobsClient is the constructor of seedExecutionJobsClient.
 func newSeedExecutionJobsClient(c seedExecutionsClient, executionId uuid.UUID) seedExecutionJobsClient {
 	return seedExecutionJobsClient{
 		summarizer: summarizer{
@@ -42,8 +42,8 @@ type seedRecordsClient struct {
 }
 
 // NewSeedRecordsClient is the constructor of seedRecordsClient
-func newSeedRecordsClient(url, apiKey string, seedId uuid.UUID) seedRecordsClient {
-	client := newClient(url+"/seed/"+seedId.String()+"/record", apiKey)
+func newSeedRecordsClient(sc seedsClient, seedId uuid.UUID) seedRecordsClient {
+	client := newSubClient(sc.client, "/"+seedId.String()+"/record")
 	return seedRecordsClient{
 		summarizer: summarizer{
 			client: client,
@@ -67,10 +67,10 @@ type seedExecutionsClient struct {
 }
 
 // NewSeedExecutionsClient is the constructor of seedExecutionClient.
-func newSeedExecutionsClient(url, apiKey string, seedId uuid.UUID) seedExecutionsClient {
+func newSeedExecutionsClient(sc seedsClient, seedId uuid.UUID) seedExecutionsClient {
 	return seedExecutionsClient{
 		getter: getter{
-			client: newClient(url+"/seed/"+seedId.String()+"/execution", apiKey),
+			client: newSubClient(sc.client, "/"+seedId.String()+"/execution"),
 		},
 	}
 }
@@ -124,4 +124,95 @@ func (c seedExecutionsClient) Records(executionId uuid.UUID) seedExecutionRecord
 // Jobs creates a seedExecutionJobsClient.
 func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClient {
 	return newSeedExecutionJobsClient(c, executionId)
+}
+
+// IngestionProcessorsClient is the struct that can create, read, update, delete, and clone processors.
+type ingestionProcessorsClient struct {
+	crud
+	cloner
+}
+
+// NnewIngestionProcessorsClient is the constructor of a ingestionProcessorsClient
+func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient {
+	client := newClient(url+"/processor", apiKey)
+	return ingestionProcessorsClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+	}
+}
+
+type pipelinesClient struct {
+	crud
+	cloner
+}
+
+// NewQueryFlowProcessorsClient is the constructor of a queryFlowProcessorsClient
+func newPipelinesClient(url, apiKey string) pipelinesClient {
+	client := newClient(url+"/pipeline", apiKey)
+	return pipelinesClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+	}
+}
+
+type seedsClient struct {
+	crud
+	cloner
+}
+
+func newSeedsClient(url, apiKey string) seedsClient {
+	client := newClient(url+"/seed", apiKey)
+	return seedsClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+	}
+}
+
+// LogLevel is used as an enum to easily represent the logging levels.
+type ScanType string
+
+// The constants represent the respective log level.
+const (
+	scanFull        ScanType = "FULL"
+	scanIncremental ScanType = "INCREMENETAL"
+)
+
+func (sc seedsClient) Start(id uuid.UUID, scan ScanType) (gjson.Result, error) {
+	return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+		"scanType": {string(scan)},
+	}))
+}
+
+func (sc seedsClient) Halt(id uuid.UUID) (gjson.Result, error) {
+	return execute(sc.client, http.MethodPost, "/"+id.String()+"/halt")
+}
+
+func (sc seedsClient) Reset(id uuid.UUID) (gjson.Result, error) {
+	return execute(sc.client, http.MethodPost, "/"+id.String()+"/reset")
+}
+
+func (sc seedsClient) Records(seedId uuid.UUID) seedRecordsClient {
+	return newSeedRecordsClient(sc, seedId)
+}
+
+func (sc seedsClient) Executions(seedId uuid.UUID) seedExecutionsClient {
+	return newSeedExecutionsClient(sc, seedId)
 }
