@@ -26,7 +26,7 @@ type seedExecutionJobsClient struct {
 	summarizer
 }
 
-// NewSeedExecutionJobsClient is the constructor of seeedExecutionJobsClient.
+// NewSeedExecutionJobsClient is the constructor of seedExecutionJobsClient.
 func newSeedExecutionJobsClient(c seedExecutionsClient, executionId uuid.UUID) seedExecutionJobsClient {
 	return seedExecutionJobsClient{
 		summarizer: summarizer{
