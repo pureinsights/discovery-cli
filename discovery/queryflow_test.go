@@ -63,7 +63,7 @@ func Test_queryFlow_Endpoints(t *testing.T) {
 	assert.Equal(t, q.Url+"/endpoint", qec.enabler.client.client.BaseURL)
 }
 
-// Test_queryFlow_BackupRestore tests the core.BackupRestore() function
+// Test_queryFlow_BackupRestore tests the queryFlow.BackupRestore() function
 func Test_queryFlow_BackupRestore(t *testing.T) {
 	q := NewQueryFlow("http://localhost:8088/v2", "Api Key")
 	bc := q.BackupRestore()
@@ -362,4 +362,12 @@ func Test_queryFlow_Debug(t *testing.T) {
 			tc.testFunc(t, response, err)
 		})
 	}
+}
+
+// Test_NewQueryFlow test the QueryFlow constructor.
+func Test_NewQueryFlow(t *testing.T) {
+	i := NewQueryFlow("http://localhost:8088/v2", "Api Key")
+
+	assert.Equal(t, "http://localhost:8088/v2", i.ApiKey)
+	assert.Equal(t, "Api Key", i.Url)
 }
