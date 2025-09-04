@@ -132,7 +132,7 @@ type ingestionProcessorsClient struct {
 	cloner
 }
 
-// NnewIngestionProcessorsClient is the constructor of a ingestionProcessorsClient
+// NewIngestionProcessorsClient is the constructor of a ingestionProcessorsClient
 func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient {
 	client := newClient(url+"/processor", apiKey)
 	return ingestionProcessorsClient{
@@ -147,12 +147,13 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 	}
 }
 
+// PipelinesClient is the struct that performs the CRUD and cloning of pipelines.
 type pipelinesClient struct {
 	crud
 	cloner
 }
 
-// NewQueryFlowProcessorsClient is the constructor of a queryFlowProcessorsClient
+// NewPipelinesClient is the constructor of a pipelinesClient
 func newPipelinesClient(url, apiKey string) pipelinesClient {
 	client := newClient(url+"/pipeline", apiKey)
 	return pipelinesClient{
@@ -167,11 +168,13 @@ func newPipelinesClient(url, apiKey string) pipelinesClient {
 	}
 }
 
+// SeedsClient is the struct that performs the CRUD and cloning of seeds.
 type seedsClient struct {
 	crud
 	cloner
 }
 
+// NewSeedsClient is the constructor of seedsClient.
 func newSeedsClient(url, apiKey string) seedsClient {
 	client := newClient(url+"/seed", apiKey)
 	return seedsClient{
@@ -186,33 +189,44 @@ func newSeedsClient(url, apiKey string) seedsClient {
 	}
 }
 
-// LogLevel is used as an enum to easily represent the logging levels.
+// ScanType is used as an enum to easily represent the scanTypes for seeds.
 type ScanType string
 
-// The constants represent the respective log level.
+// The constants represent the respective scan type.
 const (
 	scanFull        ScanType = "FULL"
 	scanIncremental ScanType = "INCREMENETAL"
 )
 
+// Start starts the execution of seed.
 func (sc seedsClient) Start(id uuid.UUID, scan ScanType) (gjson.Result, error) {
 	return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
 		"scanType": {string(scan)},
 	}))
 }
 
-func (sc seedsClient) Halt(id uuid.UUID) (gjson.Result, error) {
-	return execute(sc.client, http.MethodPost, "/"+id.String()+"/halt")
+// Halt stops all the executions of a seed.
+func (sc seedsClient) Halt(id uuid.UUID) ([]gjson.Result, error) {
+	haltings, err := execute(sc.client, http.MethodPost, "/"+id.String()+"/halt")
+	if err != nil {
+		return []gjson.Result(nil), err
+	}
+
+	return haltings.Array(), err
 }
 
+// Reset resets a seed.
+// If the seed has no active executions, then the seed's metadata is reset and its records deleted.
 func (sc seedsClient) Reset(id uuid.UUID) (gjson.Result, error) {
 	return execute(sc.client, http.MethodPost, "/"+id.String()+"/reset")
 }
 
+// Records creates a new seedRecordsClient.
 func (sc seedsClient) Records(seedId uuid.UUID) seedRecordsClient {
 	return newSeedRecordsClient(sc, seedId)
 }
 
+// Executions creates a new seedExecutionsClient.
 func (sc seedsClient) Executions(seedId uuid.UUID) seedExecutionsClient {
 	return newSeedExecutionsClient(sc, seedId)
 }

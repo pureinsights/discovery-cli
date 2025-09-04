@@ -95,6 +95,42 @@ func Test_newSeedExecutionJobsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution/"+executionId.String()+"/job", ingestionSeedExecutionJobClient.client.client.BaseURL)
 }
 
+// Test_newIngestionProcessorsClient tests the constructor of ingestionProcessorsClient.
+func Test_newIngestionProcessorsClient(t *testing.T) {
+	url := "http://localhost:8083/v2"
+	apiKey := "Api Key"
+	processorsClient := newIngestionProcessorsClient(url, apiKey)
+
+	assert.Equal(t, apiKey, processorsClient.crud.getter.client.ApiKey)
+	assert.Equal(t, url+"/processor", processorsClient.crud.getter.client.client.BaseURL)
+	assert.Equal(t, apiKey, processorsClient.cloner.client.ApiKey)
+	assert.Equal(t, url+"/processor", processorsClient.cloner.client.client.BaseURL)
+}
+
+// Test_newPipelinesClient tests the constructor of pipelinesClient.
+func Test_newPipelinesClient(t *testing.T) {
+	url := "http://localhost:8083/v2"
+	apiKey := "Api Key"
+	pipelineClient := newPipelinesClient(url, apiKey)
+
+	assert.Equal(t, apiKey, pipelineClient.crud.getter.client.ApiKey)
+	assert.Equal(t, url+"/pipeline", pipelineClient.crud.getter.client.client.BaseURL)
+	assert.Equal(t, apiKey, pipelineClient.cloner.client.ApiKey)
+	assert.Equal(t, url+"/pipeline", pipelineClient.cloner.client.client.BaseURL)
+}
+
+// Test_newSeedsClient tests the constructor of seedsClient.
+func Test_newSeedsClient(t *testing.T) {
+	url := "http://localhost:8083/v2"
+	apiKey := "Api Key"
+	seedClient := newSeedsClient(url, apiKey)
+
+	assert.Equal(t, apiKey, seedClient.crud.getter.client.ApiKey)
+	assert.Equal(t, url+"/seed", seedClient.crud.getter.client.client.BaseURL)
+	assert.Equal(t, apiKey, seedClient.cloner.client.ApiKey)
+	assert.Equal(t, url+"/seed", seedClient.cloner.client.client.BaseURL)
+}
+
 // Test_seedExecutionsClient_Seed tests the seedExecutionsClient.Seed() function
 func Test_seedExecutionsClient_Seed(t *testing.T) {
 	tests := []struct {
@@ -1189,4 +1225,317 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 			tc.testFunc(t, response, err)
 		})
 	}
+}
+
+// Test_seedsClient_Start tests the seedsClient.Start() function
+func Test_seedsClient_Start(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, response gjson.Result, err error)
+	}{
+		// Working case
+		{
+			name:       "Start works correctly",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode: http.StatusAccepted,
+			response:   `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				require.NoError(t, err)
+				assert.Equal(t, "a056c7fb-0ca1-45f6-97ea-ec849a0701fd", response.Get("id").String())
+				assert.Equal(t, "FULL", response.Get("scanType").String())
+			},
+		},
+		// Error cases
+		{
+			name:       "Start fails because the seed already has active executions.",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode: http.StatusConflict,
+			response: `{
+			"status": 409,
+			"code": 4001,
+			"messages": [
+				"The seed has 1 executions: 0c309dbb-0402-4710-8659-2c75f5d649b6"
+			],
+			"timestamp": "2025-09-04T20:17:00.116546400Z"
+			}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusConflict, `{
+			"status": 409,
+			"code": 4001,
+			"messages": [
+				"The seed has 1 executions: 0c309dbb-0402-4710-8659-2c75f5d649b6"
+			],
+			"timestamp": "2025-09-04T20:17:00.116546400Z"
+			}`))
+			},
+		},
+		{
+			name:       "start fails because the seed was not found.",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`))
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, "/seed"+tc.path, r.URL.Path)
+				}))
+			defer srv.Close()
+
+			apiKey := "Api Key"
+			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+			if err != nil {
+				fmt.Println("UUID conversion failed: " + err.Error())
+				return
+			}
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			response, err := ingestionSeedsClient.Start(seedId, scanFull)
+			tc.testFunc(t, response, err)
+		})
+	}
+}
+
+// Test_seedsClient_Halt tests the seedsClient.Halt() function
+func Test_seedsClient_Halt(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, response []gjson.Result, err error)
+	}{
+		// Working case
+		{
+			name:       "Halt works correctly",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e/halt",
+			statusCode: http.StatusMultiStatus,
+			response:   `[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}]`,
+			testFunc: func(t *testing.T, response []gjson.Result, err error) {
+				require.NoError(t, err)
+				assert.Equal(t, "a056c7fb-0ca1-45f6-97ea-ec849a0701fd", response[0].Get("id").String())
+				assert.Equal(t, int64(202), response[0].Get("status").Int())
+			},
+		},
+		{
+			name:       "Halt returns an empty array",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e/halt",
+			statusCode: http.StatusMultiStatus,
+			response:   `[]`,
+			testFunc: func(t *testing.T, response []gjson.Result, err error) {
+				require.NoError(t, err)
+				assert.Equal(t, 0, len(response))
+			},
+		},
+		// Error case
+		{
+			name:       "halt fails because the seed was not found.",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e/halt",
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`,
+			testFunc: func(t *testing.T, response []gjson.Result, err error) {
+				assert.Equal(t, []gjson.Result(nil), response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`))
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, "/seed"+tc.path, r.URL.Path)
+				}))
+			defer srv.Close()
+
+			apiKey := "Api Key"
+			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+			if err != nil {
+				fmt.Println("UUID conversion failed: " + err.Error())
+				return
+			}
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			response, err := ingestionSeedsClient.Halt(seedId)
+			tc.testFunc(t, response, err)
+		})
+	}
+}
+
+// Test_seedsClient_Reset tests the seedsClient.Reset() function
+func Test_seedsClient_Reset(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		statusCode int
+		response   string
+		testFunc   func(t *testing.T, response gjson.Result, err error)
+	}{
+		// Working case
+		{
+			name:       "Reset works correctly",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e/reset",
+			statusCode: http.StatusMultiStatus,
+			response:   `{"acknowledged":true}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				require.NoError(t, err)
+				assert.True(t, response.Get("acknowledged").Bool())
+			},
+		},
+		// Error case
+		{
+			name:       "Reset fails because the seed has active executions.",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e/reset",
+			statusCode: http.StatusConflict,
+			response: `{
+			"status": 409,
+			"code": 4001,
+			"messages": [
+				"Can not reset the seed '2acd0a61-852c-4f38-af2b-9c84e152873e' because it has active executions."
+			],
+			"timestamp": "2025-09-04T21:00:41.928010Z"
+			}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusConflict, `{
+			"status": 409,
+			"code": 4001,
+			"messages": [
+				"Can not reset the seed '2acd0a61-852c-4f38-af2b-9c84e152873e' because it has active executions."
+			],
+			"timestamp": "2025-09-04T21:00:41.928010Z"
+			}`))
+			},
+		},
+		{
+			name:       "Reset fails because the seed was not found.",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e/reset",
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`,
+			testFunc: func(t *testing.T, response gjson.Result, err error) {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`))
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, "/seed"+tc.path, r.URL.Path)
+				}))
+			defer srv.Close()
+
+			apiKey := "Api Key"
+			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+			if err != nil {
+				fmt.Println("UUID conversion failed: " + err.Error())
+				return
+			}
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			response, err := ingestionSeedsClient.Reset(seedId)
+			tc.testFunc(t, response, err)
+		})
+	}
+}
+
+// Test_seedsClient_Records tests the seedsClient.Records() function.
+func Test_seedsClient_Records(t *testing.T) {
+	url := "http://localhost:8083/v2"
+	apiKey := "Api Key"
+	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+	if err != nil {
+		fmt.Println("UUID conversion failed: " + err.Error())
+		return
+	}
+	ingestionSeedsClient := newSeedsClient(url, apiKey)
+	ingestionSeedRecordsClient := ingestionSeedsClient.Records(seedId)
+
+	assert.Equal(t, apiKey, ingestionSeedRecordsClient.getter.client.ApiKey)
+	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.getter.client.client.BaseURL)
+	assert.Equal(t, apiKey, ingestionSeedRecordsClient.summarizer.client.ApiKey)
+	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.summarizer.client.client.BaseURL)
+}
+
+// Test_newSeedsClient tests the seedClient.Executions() function
+func Test_seedsClient_Executions(t *testing.T) {
+	url := "http://localhost:8083/v2"
+	apiKey := "Api Key"
+	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+	if err != nil {
+		fmt.Println("UUID conversion failed: " + err.Error())
+		return
+	}
+	ingestionSeedsClient := newSeedsClient(url, apiKey)
+	ingestionSeedExecutionsClient := ingestionSeedsClient.Executions(seedId)
+
+	assert.Equal(t, apiKey, ingestionSeedExecutionsClient.getter.client.ApiKey)
+	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution", ingestionSeedExecutionsClient.getter.client.client.BaseURL)
 }
