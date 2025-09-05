@@ -51,6 +51,7 @@ Discovery has a core client struct. Its fields are:
 - Url: The URL of Discovery's Core component. The URL should contain the URL up to the version. For example, `http://localhost:8080/v2`. 
 - ApiKey: The API key needed to authenticate to Discovery's Core.  
 
+To create a Core client, the `NewCore(URL, API Key)` is used.
 The core client can create subclients that handle the Core's functions. These are the following:
 
 ### SecretsClient
@@ -79,6 +80,7 @@ Discovery has a QueryFlow client struct. Its fields are:
 - Url: The URL of Discovery's QueryFlow component. The URL should contain the URL up to the version. For example, `http://localhost:8088/v2`. 
 - ApiKey: The API key needed to authenticate to QueryFlow.  
 
+To create a QueryFlow client, the `NewQueryFlow(URL, API Key)` is used.
 The QueryFlow client can create subclients with useful functions. These are the following:
 
 ### QueryFlowProcessorsClient
@@ -92,3 +94,53 @@ The `backupRestore` struct imports and exports entities. Its `Export()` method o
 
 ### Invoke and Debug
 The QueryFlow client also has two important methods: `Invoke()` and `Debug()`. These are very similar to `client.execute()`, but are used to call QueryFlow's endpoints. The response can vary depending on the URI used on the request. `Invoke()` calls the endpoint with a `/api` root path to the URI, which adds makes QueryFlow return a normal response of the endpoint. On the other hand, `Debug()` calls the endpoint with a `/debug` root path, which makes QueryFlow respond with the entire trace of execution the state machine took. Each one of the states, their output, their errors and the overall flow followed by the state machine will be displayed.
+
+## Ingestion Client
+Discovery has an Ingestion client struct. Its fields are:
+- Url: The URL of Discovery's Ingestion component. The URL should contain the URL up to the version. For example, `http://localhost:8083/v2`. 
+- ApiKey: The API key needed to authenticate to Ingestion.  
+
+To create a Ingestion client, the `NewIngestion(URL, API Key)` is used.
+The Ingestion client can create subclients with useful functions. These are the following:
+
+### IngestionProcessorsClient
+The `ingestionProcessorsClient` manages Ingestion's processors. It is a struct with embedded `CRUD` and `Cloner` structs. It has access to the `execute()`, `Create()`, `Get()`, `GetAll()`, `Update()`, `Delete()`, and `Clone()` methods. Creating a `ingestionProcessorsClient` can be done with `ingestion.Processors()` or `newIngestionProcessorsClient(URL, API Key)`.
+
+### PipelinesClient
+The `pipelinesClient` manages Ingestion's pipelines. It is a struct with embedded `CRUD` and `Cloner` structs. It has access to the `execute()`, `Create()`, `Get()`, `GetAll()`, `Update()`, `Delete()`, and `Clone()` methods. Creating a `pipelinesClient` can be done with `ingestion.Pipelines()` or `newPipelinesClient(URL, API Key)`.
+
+### SeedsClient
+The `seedsClient` manages Ingestion's seeds. It is a struct with embedded `CRUD` and `Cloner` structs. It has access to the `execute()`, `Create()`, `Get()`, `GetAll()`, `Update()`, `Delete()`, and `Clone()` methods. Creating a `seedsClient` can be done with `ingestion.Seeds()` or `newSeedsClient(URL, API Key)`. 
+
+This struct has additional methods:
+- `Start(Seed ID)`: Starts the execution of a seed.
+- `Halt(Seed ID)`: Halts all of the executions of a seed.
+- `Reset(Seed ID)`: Resets the metadata of the seed and deletes its records. It only works if the seed does not have any active executions.
+- `Records(Seed ID)`: Creates a `seedRecordsClient`.
+- `Executions(Seed ID)`: Creates a `seedExecutionsClient`.
+
+### SeedExecutionsClient
+The `seedExecutionsClient` manages an execution of a seed. It has an embedded `Getter` struct, so it has access to the `Get()` and `GetAll()` functions. Creating a `seedExecutionsClient` can be done with `newSeedExecutionsClient(seedsClient, Seed ID)` or with `seedsClient.Executions()`.
+
+This struct has additional methods:
+- `Halt(Execution ID)`: Stops the execution of a seed's execution based on the execution ID.
+-  `Audit(Execution ID)`: Returns an array with the audited changes of the seed execution, or the stages it has completed up to the method's call.
+-  `Seed(Execution ID)`: Returns the configuration of the seed of the execution.
+-  `Pipeline(Execution ID, Pipeline ID)`: Returns the configuration of the pipeline the seed execution uses.
+-  `Processor(Execution ID, Processor ID)`: Returns the configuration of a processor the seed's pipeline uses, based on the processor's ID.
+-  `Server(Execution ID, Server ID)`: Returns the configuration of a server one of the processors in the pipeline uses.
+-  `Credential(Execution ID, Credential ID)`: Returns the configuration of the credential that is used by a server in the pipeline.
+-  `Records(Execution ID)`: Creates a `seedExecutionRecordsClient` with the execution ID.
+-  `Jobs(Execution ID)`: Creates a `seedExecutionJobsClient` with the execution ID.
+
+#### SeedExecutionRecordsClient
+The `seedExecutionRecordsClient` is the struct that can get the summary of records from a seed execution. It has an embedded `Summarizer` struct, so it has access to the `Summarize()` method. It can be created with `seedExecutionsClient.Records(Execution ID)` or `newSeedExecutionRecordsClient(seedExecutionsClient, Execution ID)`.
+
+#### SeedExecutionJobsClient
+The `seedExecutionJobsClient` is the struct that can get the summary of jobs from a seed execution. It has an embedded `Summarizer` struct, so it has access to the `Summarize()` method. It can be created with `seedExecutionsClient.Jobs(Execution ID)` or `newSeedExecutionJobsClient(seedExecutionsClient, Execution ID)`.
+
+### SeedRecordsClient
+The `seedRecordsClient` is the struct that can get the records and their summary from a seed. It has embedded `Getter` and `Summarizer` structs, so it has access to the `Get(Record ID)`, `GetAll()`, `Summarize()` method. The `Get()` method had to be overridden because records do not use a UUID as their ID, so this iteration receives a string. It can be created with `seedsClient.Records()` or `newSeedRecordsClient(seedsClient, Seed ID)`.
+
+### BackupRestore
+The `backupRestore` struct imports and exports entities. Its `Export()` method obtains the data of all of the entities, which can later be saved to a ZIP file. The `Import()` method restores the entities described in the sent file. If there are conflicts, Discovery can be set to ignore them, fail, or update them. Creating a `backupRestore` can be done with `ingestion.BackupRestore()`.
