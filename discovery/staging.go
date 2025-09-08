@@ -32,16 +32,20 @@ type contentClient struct {
 	client
 }
 
-func newContentClient(url, apiKey, bucketName string) bucketsClient {
-	return bucketsClient{
+func newContentClient(url, apiKey, bucketName string) contentClient {
+	return contentClient{
 		client: newClient(url+"/content/"+bucketName, apiKey),
 	}
 }
 
 func (c contentClient) Store(contentId, parentId string, content gjson.Result) (gjson.Result, error) {
-	return execute(c.client, http.MethodPost, "/"+contentId, WithQueryParameters(map[string][]string{
-		"parentId": {parentId},
-	}), WithJSONBody(content.Raw))
+	if parentId == "" {
+		return execute(c.client, http.MethodPost, "/"+contentId, WithJSONBody(content.Raw))
+	} else {
+		return execute(c.client, http.MethodPost, "/"+contentId, WithQueryParameters(map[string][]string{
+			"parentId": {parentId},
+		}), WithJSONBody(content.Raw))
+	}
 }
 
 func (c contentClient) Get(contentId string, options ...stagingGetContentOption) (gjson.Result, error) {
@@ -57,9 +61,14 @@ func (c contentClient) Delete(contentId string) (gjson.Result, error) {
 }
 
 func (c contentClient) DeleteMany(parentId string, filter gjson.Result) (gjson.Result, error) {
-	return execute(c.client, http.MethodDelete, "", WithQueryParameters(map[string][]string{
-		"parentId": {parentId},
-	}), WithJSONBody(filter.Raw))
+	if parentId == "" {
+		return execute(c.client, http.MethodDelete, "", WithJSONBody(filter.Raw))
+	} else {
+		return execute(c.client, http.MethodDelete, "", WithQueryParameters(map[string][]string{
+			"parentId": {parentId},
+		}), WithJSONBody(filter.Raw))
+	}
+
 }
 
 type bucketsClient struct {
