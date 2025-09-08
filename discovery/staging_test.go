@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -39,50 +40,65 @@ func Test_bucketsClient_Create(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
+		err        bool
 		testFunc   func(t *testing.T, response gjson.Result, err error)
 	}{
 		// Working case
 		{
 			name:       "Create works",
 			method:     http.MethodPost,
-			path:       "/",
+			path:       "/test-bucket",
 			statusCode: http.StatusCreated,
-			response:   `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
-			testFunc: func(t *testing.T, c crud) {
-				config := gjson.Parse(`{"name":"new-secret"}`)
-				response, err := c.Create(config)
-				require.NoError(t, err)
-				assert.Equal(t, "5f125024-1e5e-4591-9fee-365dc20eeeed", response.Get("id").String())
-			},
+			response:   `{"acknowledged": true}`,
+			err:        false,
 		},
 
 		// Error case
 		{
-			name:       "Create returns 403 Forbidden",
+			name:       "Create returns 409 Conflict",
 			method:     http.MethodPost,
-			path:       "/",
-			statusCode: http.StatusForbidden,
-			response:   `{"error":"forbidden"}`,
-			testFunc: func(t *testing.T, c crud) {
-				config := gjson.Parse(`{"name":"new-secret"}`)
-				response, err := c.Create(config)
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusForbidden, []byte(`{"error":"forbidden"}`)))
-			},
+			path:       "/test-bucket",
+			statusCode: http.StatusConflict,
+			response:   `{"acknowledged":false}`,
+			err:        true,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			config := `{
+			"indices": [
+				{
+					"name": "indexTest",
+					"fields": [{"author": "ASC"}],
+					"unique": false
+				}
+			],
+			"config": {}
+			}`
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
+				assert.Equal(t, "/bucket"+tc.path, r.URL.Path)
+				body, _ := io.ReadAll(r.Body)
+				json := gjson.Parse(string(body))
+				assert.Equal(t, "indexTest", json.Get("indices.0.name").String())
+				assert.Equal(t, "ASC", json.Get("indices.0.fields.0.author").String())
+				assert.False(t, json.Get("indices.0.unique").Bool())
 			}))
 
 			defer srv.Close()
 
-			c := crud{getter{newClient(srv.URL, "")}}
-			tc.testFunc(t, c)
+			bucketsClient := newBucketsClient(srv.URL, "")
+			jsonBody := gjson.Parse(config)
+
+			response, err := bucketsClient.Create("test-bucket", jsonBody)
+			if !(tc.err) {
+				require.NoError(t, err)
+				assert.True(t, response.Get("acknowledged").Bool())
+			} else {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+			}
 		})
 	}
 }
