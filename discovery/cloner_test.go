@@ -21,7 +21,7 @@ func Test_cloner_Clone(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
-		testFunc   func(t *testing.T, c cloner)
+		err        bool
 	}{
 		// Working case
 		{
@@ -39,13 +39,7 @@ func Test_cloner_Clone(t *testing.T) {
 			"lastUpdatedTimestamp": "2025-08-21T15:19:37.980898Z",
 			"secret": "mongo-secret"
 			}`,
-			testFunc: func(t *testing.T, c cloner) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				response, err := c.Clone(id, map[string][]string{"name": {"mongo2"}})
-				require.NoError(t, err)
-				assert.Equal(t, "mongo2", response.Get("name").String())
-				assert.Equal(t, "mongo-secret", response.Get("secret").String())
-			},
+			err: false,
 		},
 
 		// Error case
@@ -55,12 +49,7 @@ func Test_cloner_Clone(t *testing.T) {
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
 			statusCode: http.StatusNotFound,
 			response:   `{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
-			testFunc: func(t *testing.T, c cloner) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				response, err := c.Clone(id, map[string][]string{"name": {"mongo2"}})
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)))
-			},
+			err:        true,
 		},
 	}
 
@@ -73,7 +62,17 @@ func Test_cloner_Clone(t *testing.T) {
 			defer srv.Close()
 
 			c := cloner{client: newClient(srv.URL, "")}
-			tc.testFunc(t, c)
+			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
+			response, err := c.Clone(id, map[string][]string{"name": {"mongo2"}})
+
+			if !(tc.err) {
+				require.NoError(t, err)
+				assert.Equal(t, "mongo2", response.Get("name").String())
+				assert.Equal(t, "mongo-secret", response.Get("secret").String())
+			} else {
+				assert.Equal(t, gjson.Result{}, response)
+				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+			}
 		})
 	}
 }
