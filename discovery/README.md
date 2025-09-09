@@ -144,3 +144,30 @@ The `seedRecordsClient` is the struct that can get the records and their summary
 
 ### BackupRestore
 The `backupRestore` struct imports and exports entities. Its `Export()` method obtains the data of all of the entities, which can later be saved to a ZIP file. The `Import()` method restores the entities described in the sent file. If there are conflicts, Discovery can be set to ignore them, fail, or update them. Creating a `backupRestore` can be done with `ingestion.BackupRestore()`.
+
+## Staging Client
+Discovery has a Staging client struct. Its fields are:
+- Url: The URL of Discovery's Staging component. The URL should contain the URL up to the version. For example, `http://localhost:8081/v2`. 
+- ApiKey: The API key needed to authenticate to Staging.  
+
+To create a Staging client, the `NewStaging(URL, API Key)` is used.
+The Staging client can create subclients with useful functions. These are the following:
+
+### BucketsClient
+The `bucketsClient` manages Staging's buckets. It is a struct with an embedded `client` struct, so it has access to the `execute()`method. Creating a `bucketsClient` can be done with `staging.Buckets()` or `newBucketsClient(URL, API Key)`. There are additional methods available:
+- `Create(Bucket, Options)`: Creates a new bucket in the Staging Repository. It can receive an options JSON to add configurations and create indices.
+- `GetAll()`: Obtains the names of every bucket in the Staging Repository.
+- `Get(Bucket)`: Gets the information of the bucket.
+- `Delete(Bucket)`: Deletes the bucket.
+- `Purge(Bucket)`: Deletes all of the records in the bucket.
+- `CreateIndex(Bucket, Index Name, Configuration)`: Creates an index on the given bucket. The configuration it receives is an array of JSONs, each with the information of the fields that will be indexed.
+- `DeleteIndex(Bucket, Index)`: Removes the index on the bucket.
+
+### ContentClient
+The `ContentClient` manages a bucket's content. It is a struct with an embedded `client` struct, so it has access to the `execute()`method. Creating a `contentClient` can be done with `staging.Content(Bucket Name)` or `newContentClient(URL, API Key, Bucket Name)`. There are additional methods available:
+- `Store(Content ID, Parent ID, Content)`: Adds the received content JSON to a document with the given Content ID. The Parent ID can be used to establish hierarchical relationships between documents.
+- `Get(Content ID, Options)`: Obtains the information of the record with the given Content ID in the bucket. The options it can receive are the following functional options:
+  - `WithContentAction(Action)`: Adds the `action` query parameter to the request. Some examples of the values are `STORE` and `DELETE`. This will make the `Get()` function obtain the record with that action in its configuration.
+  - `WithIncludeProjections(Include Fields)`: This function receives an array of fields that need to be included in the result of the `GET` request.
+  - `WithExcludeProjections(Exclude Fields)`: This function receives an array of fields that need to be excluded from the result of the `GET` request.
+- `Delete(Content ID)`: Deletes the document with the given content ID in the bucket.
