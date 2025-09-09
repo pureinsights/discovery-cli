@@ -146,3 +146,23 @@ func (b bucketsClient) CreateIndex(bucket, index string, config []gjson.Result) 
 func (b bucketsClient) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return execute(b.client, http.MethodDelete, "/"+bucket+"/index/"+index)
 }
+
+// Staging is the struct for the client that can carry out every Staging operation.
+type staging struct {
+	Url, ApiKey string
+}
+
+// Buckets creates a new bucketsClient.
+func (s staging) Buckets() bucketsClient {
+	return newBucketsClient(s.Url, s.ApiKey)
+}
+
+// Content creates a new contentClient.
+func (s staging) Content(bucket string) contentClient {
+	return newContentClient(s.Url, s.ApiKey, bucket)
+}
+
+// NewStaging is the constructor for the staging struct.
+func NewStaging(url, apiKey string) staging {
+	return staging{Url: url, ApiKey: apiKey}
+}
