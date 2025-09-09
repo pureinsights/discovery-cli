@@ -8,36 +8,44 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// stagingGetContentOption is a type definition used for the functional options pattern.
+// It adds query parameters to the contentClient.Get().
 type stagingGetContentOption func(*map[string][]string)
 
+// WithContentAction adds the given action as query parameter to the Get function.
 func WithContentAction(action string) stagingGetContentOption {
 	return func(m *map[string][]string) {
 		(*m)["action"] = append((*m)["action"], action)
 	}
 }
 
+// WithIncludeProjections adds the query parameters to set the given fields as the ones the results will include.
 func WithIncludeProjections(include []string) stagingGetContentOption {
 	return func(m *map[string][]string) {
 		(*m)["include"] = append((*m)["include"], include...)
 	}
 }
 
+// WithExcludeProjections adds the query parameters to set the given fields as the ones the results will exclude.
 func WithExcludeProjections(exclude []string) stagingGetContentOption {
 	return func(m *map[string][]string) {
 		(*m)["exclude"] = append((*m)["exclude"], exclude...)
 	}
 }
 
+// ContentClient is a struct that manages the content inside the Staging Repository's buckets.
 type contentClient struct {
 	client
 }
 
+// NewContentClient is the constructor of the contentClient struct.
 func newContentClient(url, apiKey, bucketName string) contentClient {
 	return contentClient{
 		client: newClient(url+"/content/"+bucketName, apiKey),
 	}
 }
 
+// Store adds the given JSON content with the contentId parameter. The parentId parameter can be used to set hierarchical relationships between documents.
 func (c contentClient) Store(contentId, parentId string, content gjson.Result) (gjson.Result, error) {
 	if parentId == "" {
 		return execute(c.client, http.MethodPost, "/"+contentId, WithJSONBody(content.Raw))
@@ -48,6 +56,8 @@ func (c contentClient) Store(contentId, parentId string, content gjson.Result) (
 	}
 }
 
+// Get obtains the information of the record in the bucket with the given contentId.
+// It can receive functional options to add the action, include, and exclude query parameters.
 func (c contentClient) Get(contentId string, options ...stagingGetContentOption) (gjson.Result, error) {
 	queryParams := make(map[string][]string)
 	for _, opt := range options {
@@ -56,10 +66,12 @@ func (c contentClient) Get(contentId string, options ...stagingGetContentOption)
 	return execute(c.client, http.MethodGet, "/"+contentId, WithQueryParameters(queryParams))
 }
 
+// Delete deletes the document with the given contentId in the bucket.
 func (c contentClient) Delete(contentId string) (gjson.Result, error) {
 	return execute(c.client, http.MethodDelete, "/"+contentId)
 }
 
+// DeleteMany deletes the documents that match the given parentId or filters.
 func (c contentClient) DeleteMany(parentId string, filter gjson.Result) (gjson.Result, error) {
 	if parentId == "" {
 		return execute(c.client, http.MethodDelete, "", WithJSONBody(filter.Raw))
@@ -68,23 +80,26 @@ func (c contentClient) DeleteMany(parentId string, filter gjson.Result) (gjson.R
 			"parentId": {parentId},
 		}), WithJSONBody(filter.Raw))
 	}
-
 }
 
+// bucketsClient is the struct that manages buckets in the Staging Repository.
 type bucketsClient struct {
 	client
 }
 
+// NewBuckets is the constructor of the bucketsClient struct.
 func newBucketsClient(url, apiKey string) bucketsClient {
 	return bucketsClient{
 		client: newClient(url+"/bucket", apiKey),
 	}
 }
 
+// Create adds a new bucket with the given name and options, which can be used to create indices and set configurations.
 func (b bucketsClient) Create(bucket string, options gjson.Result) (gjson.Result, error) {
 	return execute(b.client, http.MethodPost, "/"+bucket, WithJSONBody(options.Raw))
 }
 
+// GetAll obtains a list with the names of every bucket.
 func (b bucketsClient) GetAll() ([]string, error) {
 	bucketsBytes, err := b.execute(http.MethodGet, "")
 	if err != nil {
@@ -101,18 +116,22 @@ func (b bucketsClient) GetAll() ([]string, error) {
 	}
 }
 
+// Get obtains the information of a bucket with the given name.
 func (b bucketsClient) Get(bucket string) (gjson.Result, error) {
 	return execute(b.client, http.MethodGet, "/"+bucket)
 }
 
+// Delete deletes the bucket with the given name.
 func (b bucketsClient) Delete(bucket string) (gjson.Result, error) {
 	return execute(b.client, http.MethodDelete, "/"+bucket)
 }
 
+// Purge deletes all of the records in the given bucket.
 func (b bucketsClient) Purge(bucket string) (gjson.Result, error) {
 	return execute(b.client, http.MethodDelete, "/"+bucket+"/purge")
 }
 
+// CreateIndex adds an index with the given name and configuration to a bucket.
 func (b bucketsClient) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	var parts []string
 	for _, r := range config {
@@ -123,6 +142,7 @@ func (b bucketsClient) CreateIndex(bucket, index string, config []gjson.Result) 
 	return execute(b.client, http.MethodPut, "/"+bucket+"/index/"+index, WithJSONBody(jsonArray))
 }
 
+// DeleteIndex removes the index of a bucket.
 func (b bucketsClient) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return execute(b.client, http.MethodDelete, "/"+bucket+"/index/"+index)
 }
