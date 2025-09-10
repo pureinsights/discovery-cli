@@ -22,7 +22,7 @@ func Test_getter_Get(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
-		err        bool
+		err        error
 	}{
 		// Working case
 		{
@@ -31,7 +31,7 @@ func Test_getter_Get(t *testing.T) {
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
 			statusCode: http.StatusOK,
 			response:   `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"test-secret"}`,
-			err:        false,
+			err:        nil,
 		},
 
 		// Error case
@@ -41,7 +41,7 @@ func Test_getter_Get(t *testing.T) {
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
 			statusCode: http.StatusNotFound,
 			response:   `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
-			err:        true,
+			err:        fmt.Errorf("status: %d, body: %s", http.StatusNotFound, `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`),
 		},
 	}
 
@@ -57,12 +57,12 @@ func Test_getter_Get(t *testing.T) {
 			c := crud{getter{newClient(srv.URL, "")}}
 			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
 			response, err := c.Get(id)
-			if !(tc.err) {
+			if tc.err == nil {
 				require.NoError(t, err)
 				assert.Equal(t, "test-secret", response.Get("name").String())
 			} else {
 				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
@@ -78,7 +78,7 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 		statusCode  int
 		response    string
 		expectedLen int
-		err         bool
+		err         error
 	}{
 		// Working cases
 		{
@@ -130,7 +130,7 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			"pageNumber": 0
 			}`,
 			expectedLen: 12,
-			err:         false,
+			err:         nil,
 		},
 		{
 			name:        "GetAll returns no content",
@@ -139,9 +139,8 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			statusCode:  http.StatusNoContent,
 			response:    `{"content": []}`,
 			expectedLen: 0,
-			err:         false,
+			err:         nil,
 		},
-
 		{
 			name:        "GetAll has no content field",
 			method:      http.MethodGet,
@@ -149,7 +148,7 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			statusCode:  http.StatusNoContent,
 			response:    ``,
 			expectedLen: 0,
-			err:         false,
+			err:         nil,
 		},
 
 		// Error cases
@@ -159,7 +158,7 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			path:       "/",
 			statusCode: http.StatusUnauthorized,
 			response:   `{"error":"unauthorized"}`,
-			err:        true,
+			err:        fmt.Errorf("status: %d, body: %s", http.StatusUnauthorized, `{"error":"unauthorized"}`),
 		},
 	}
 
@@ -174,12 +173,12 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 
 			c := crud{getter{newClient(srv.URL, "")}}
 			results, err := c.GetAll()
-			if !(tc.err) {
+			if tc.err == nil {
 				require.NoError(t, err)
 				assert.Len(t, results, tc.expectedLen)
 			} else {
 				assert.Equal(t, []gjson.Result(nil), results)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
@@ -431,7 +430,7 @@ func Test_crud_Create(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
-		err        bool
+		err        error
 	}{
 		// Working case
 		{
@@ -440,7 +439,7 @@ func Test_crud_Create(t *testing.T) {
 			path:       "/",
 			statusCode: http.StatusCreated,
 			response:   `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
-			err:        false,
+			err:        nil,
 		},
 
 		// Error case
@@ -450,7 +449,7 @@ func Test_crud_Create(t *testing.T) {
 			path:       "/",
 			statusCode: http.StatusForbidden,
 			response:   `{"error":"forbidden"}`,
-			err:        true,
+			err:        fmt.Errorf("status: %d, body: %s", http.StatusForbidden, `{"error":"forbidden"}`),
 		},
 	}
 
@@ -466,12 +465,12 @@ func Test_crud_Create(t *testing.T) {
 			c := crud{getter{newClient(srv.URL, "")}}
 			config := gjson.Parse(`{"name":"new-secret"}`)
 			response, err := c.Create(config)
-			if !(tc.err) {
+			if tc.err == nil {
 				require.NoError(t, err)
 				assert.Equal(t, "5f125024-1e5e-4591-9fee-365dc20eeeed", response.Get("id").String())
 			} else {
 				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
@@ -485,7 +484,7 @@ func Test_crud_Update(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
-		err        bool
+		err        error
 	}{
 		// Working case
 		{
@@ -494,7 +493,7 @@ func Test_crud_Update(t *testing.T) {
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
 			statusCode: http.StatusOK,
 			response:   `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
-			err:        false,
+			err:        nil,
 		},
 
 		// Error case
@@ -504,7 +503,7 @@ func Test_crud_Update(t *testing.T) {
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
 			statusCode: http.StatusInternalServerError,
 			response:   `{"error":"internal server error"}`,
-			err:        true,
+			err:        fmt.Errorf("status: %d, body: %s", http.StatusInternalServerError, `{"error":"internal server error"}`),
 		},
 	}
 
@@ -521,12 +520,12 @@ func Test_crud_Update(t *testing.T) {
 			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
 			config := gjson.Parse(`{"name":"updated-secret"}`)
 			response, err := c.Update(id, config)
-			if !(tc.err) {
+			if tc.err == nil {
 				require.NoError(t, err)
 				assert.Equal(t, "5f125024-1e5e-4591-9fee-365dc20eeeed", response.Get("id").String())
 			} else {
 				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
@@ -540,8 +539,7 @@ func Test_crud_Delete(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
-		err        bool
-		testFunc   func(t *testing.T, c crud)
+		err        error
 	}{
 		// Working case
 		{
@@ -550,7 +548,7 @@ func Test_crud_Delete(t *testing.T) {
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
 			statusCode: http.StatusOK,
 			response:   `{"acknowledged": true}`,
-			err:        false,
+			err:        nil,
 		},
 
 		// Error case
@@ -560,7 +558,7 @@ func Test_crud_Delete(t *testing.T) {
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
 			statusCode: http.StatusNotFound,
 			response:   `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
-			err:        true,
+			err:        fmt.Errorf("status: %d, body: %s", http.StatusNotFound, `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`),
 		},
 	}
 
@@ -576,12 +574,12 @@ func Test_crud_Delete(t *testing.T) {
 			c := crud{getter{newClient(srv.URL, "")}}
 			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
 			response, err := c.Delete(id)
-			if !(tc.err) {
+			if tc.err == nil {
 				require.NoError(t, err)
 				assert.True(t, response.Get("acknowledged").Bool())
 			} else {
 				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
