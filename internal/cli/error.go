@@ -1,6 +1,9 @@
 package cli
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type ExitCode int
 
@@ -24,6 +27,30 @@ const (
 	PanicErrorExitCode ExitCode = 2
 )
 
-func NewErrorWithCause(code int, cause error, message string, args ...any) Error
+func NewErrorWithCause(code ExitCode, cause error, message string, args ...any) Error {
+	return Error{
+		ExitCode: code,
+		Message:  fmt.Sprintf(message, args...),
+		Cause:    cause,
+	}
+}
 
-func NewError(code int, message string, args ...any) Error
+func NewError(code ExitCode, message string, args ...any) Error {
+	return Error{
+		ExitCode: code,
+		Message:  fmt.Sprintf(message, args...),
+		Cause:    nil,
+	}
+}
+
+func FromError(err error) Error {
+	var e Error
+	if errors.As(err, &e) {
+		return e
+	}
+	return Error{
+		ExitCode: ErrorExitCode,
+		Message:  "",
+		Cause:    err,
+	}
+}
