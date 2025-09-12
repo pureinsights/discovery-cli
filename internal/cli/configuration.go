@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
+// When the file could not be found, an error is logged to the error stream of the IOStreams parameter.
 func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStreams) error {
 	v.SetConfigName(baseName)
 	v.SetConfigType("toml")
@@ -21,11 +23,12 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 			)
 			return nil
 		}
-		return fmt.Errorf("failed loading %q from %q: %w", baseName, filepath.Clean(path), err)
+		return fmt.Errorf("could not read %q from %q: %w", baseName, filepath.Clean(path), err)
 	}
 	return nil
 }
 
+// InitializeConfig reads the config and credentials configuration files found in the given path and sets up the Viper instance with their values.
 func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error) {
 	vpr := viper.New()
 
