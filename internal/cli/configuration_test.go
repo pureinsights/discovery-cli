@@ -21,6 +21,7 @@ func Test_readConfigFile(t *testing.T) {
 		baseName       string
 		config         string
 		expectedConfig map[string]string
+		expectedBool   bool
 		err            error
 	}{
 		// Working cases
@@ -38,13 +39,15 @@ core_url="http://discovery.core.cn"
 				"default.core_url": "http://localhost:8080",
 				"cn.core_url":      "http://discovery.core.cn",
 			},
-			err: nil,
+			expectedBool: true,
+			err:          nil,
 		},
 		{
 			name:           "File does not exist",
 			baseName:       "fail",
 			config:         ``,
 			expectedConfig: map[string]string{},
+			expectedBool:   false,
 			err:            nil,
 		},
 		{
@@ -64,7 +67,8 @@ core_url="http://discovery.core.cn"
 				"default.core_key": "",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
-			err: errors.New("While parsing config: toml: invalid character at start of key: {"),
+			expectedBool: true,
+			err:          errors.New("While parsing config: toml: invalid character at start of key: {"),
 		},
 	}
 
@@ -89,7 +93,8 @@ core_url="http://discovery.core.cn"
 			}
 
 			viper := viper.New()
-			err = readConfigFile(tc.baseName, dir, viper, &ios)
+			exists, err := readConfigFile(tc.baseName, dir, viper, &ios)
+			assert.Equal(t, tc.expectedBool, exists)
 			if tc.err != nil {
 				assert.Contains(t, err.Error(), tc.err.Error())
 			} else {
@@ -123,22 +128,22 @@ func TestInitializeConfig(t *testing.T) {
 			name: "There are config and credentials files",
 			config: `
 [default]
-core_url="http://localhost:8080"
+core_url="http://localhost:3000"
 
 [cn]
 core_url="http://discovery.core.cn"	
 `,
 			credentials: `
 [default]
-core_key=""
+core_key="APIKey"
 
 [cn]
 core_key="discovery.key.core.cn"
 `,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:8080",
+				"default.core_url": "http://localhost:3000",
 				"cn.core_url":      "http://discovery.core.cn",
-				"default.core_key": "",
+				"default.core_key": "APIKey",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
 			err: nil,
@@ -147,14 +152,14 @@ core_key="discovery.key.core.cn"
 			name: "There is only a config file",
 			config: `
 [default]
-core_url="http://localhost:8080"
+core_url="http://localhost:8083"
 
 [cn]
 core_url="http://discovery.core.cn"	
 `,
 			credentials: ``,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:8080",
+				"default.core_url": "http://localhost:8083",
 				"cn.core_url":      "http://discovery.core.cn",
 				"default.core_key": "",
 			},
@@ -165,14 +170,14 @@ core_url="http://discovery.core.cn"
 			config: ``,
 			credentials: `
 [default]
-core_key=""
+core_key="APIKey"
 
 [cn]
 core_key="discovery.key.core.cn"
 `,
 			expectedConfig: map[string]string{
 				"default.core_url": "http://localhost:8080",
-				"default.core_key": "",
+				"default.core_key": "APIKey",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
 			err: nil,

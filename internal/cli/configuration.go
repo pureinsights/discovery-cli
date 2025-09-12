@@ -8,9 +8,16 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	DefaultCoreURL      string = "http://localhost:8080"
+	DefaultIngestionURL string = "http://localhost:8080"
+	DefaultQueryFlowURL string = "http://localhost:8088"
+	DefaultStagingURL   string = "http://localhost:8081"
+)
+
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
 // When the file could not be found, an error is logged to the error stream of the IOStreams parameter.
-func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStreams) error {
+func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStreams) (bool, error) {
 	v.SetConfigName(baseName)
 	v.SetConfigType("toml")
 	v.AddConfigPath(path)
@@ -21,11 +28,11 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 				"Configuration file %q not found under %q; using default values.\n",
 				baseName, filepath.Clean(path),
 			)
-			return nil
+			return false, nil
 		}
-		return fmt.Errorf("could not read %q from %q: %w", baseName, filepath.Clean(path), err)
+		return true, fmt.Errorf("could not read %q from %q: %w", baseName, filepath.Clean(path), err)
 	}
-	return nil
+	return true, nil
 }
 
 // InitializeConfig reads the config and credentials configuration files found in the given path and sets up the Viper instance with their values.
@@ -33,20 +40,27 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	vpr := viper.New()
 
 	vpr.SetDefault("profile", "default")
-	vpr.SetDefault("default.core_url", "http://localhost:8080")
-	vpr.SetDefault("default.ingestion_url", "http://localhost:8080")
-	vpr.SetDefault("default.queryflow_url", "http://localhost:8088")
-	vpr.SetDefault("default.staging_url", "http://localhost:8081")
-	vpr.SetDefault("default.core_key", "")
-	vpr.SetDefault("default.ingestion_key", "")
-	vpr.SetDefault("default.queryflow_key", "")
-	vpr.SetDefault("default.staging_key", "")
+	defaultProfile := "default"
 
-	if err := readConfigFile("config", path, vpr, &ios); err != nil {
+	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
 		return nil, err
+	} else {
+		if !exists {
+			vpr.SetDefault(fmt.Sprintf("%s.core_url", defaultProfile), DefaultCoreURL)
+			vpr.SetDefault(fmt.Sprintf("%s.ingestion_url", defaultProfile), DefaultIngestionURL)
+			vpr.SetDefault(fmt.Sprintf("%s.queryflow_url", defaultProfile), DefaultQueryFlowURL)
+			vpr.SetDefault(fmt.Sprintf("%s.staging_url", defaultProfile), DefaultStagingURL)
+		}
 	}
-	if err := readConfigFile("credentials", path, vpr, &ios); err != nil {
+	if exists, err := readConfigFile("credentials", path, vpr, &ios); err != nil {
 		return nil, err
+	} else {
+		if !exists {
+			vpr.SetDefault(fmt.Sprintf("%s.core_key", defaultProfile), "")
+			vpr.SetDefault(fmt.Sprintf("%s.ingestion_key", defaultProfile), "")
+			vpr.SetDefault(fmt.Sprintf("%s.queryflow_key", defaultProfile), "")
+			vpr.SetDefault(fmt.Sprintf("%s.staging_key", defaultProfile), "")
+		}
 	}
 
 	return vpr, nil
