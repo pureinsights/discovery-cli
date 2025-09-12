@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Test_readConfigFile tests the readConfigFile() auxiliary function.
 func Test_readConfigFile(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -115,6 +116,7 @@ core_url="http://discovery.core.cn"
 	}
 }
 
+// TestInitializeConfig tests the InitializeConfig() function
 func TestInitializeConfig(t *testing.T) {
 	tests := []struct {
 		name           string
