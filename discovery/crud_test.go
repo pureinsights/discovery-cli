@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -44,7 +43,7 @@ func Test_getter_Get(t *testing.T) {
 			statusCode:       http.StatusNotFound,
 			response:         `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
 			expectedResponse: gjson.Result{},
-			err:              fmt.Errorf("status: %d, body: %s", http.StatusNotFound, `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`),
+			err:              Error{Status: http.StatusNotFound, Body: gjson.Parse(`{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)},
 		},
 	}
 
@@ -60,12 +59,13 @@ func Test_getter_Get(t *testing.T) {
 			c := crud{getter{newClient(srv.URL, "")}}
 			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
 			response, err := c.Get(id)
-
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
 				assert.True(t, response.IsObject())
 			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
@@ -162,7 +162,7 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			path:       "/",
 			statusCode: http.StatusUnauthorized,
 			response:   `{"error":"unauthorized"}`,
-			err:        fmt.Errorf("status: %d, body: %s", http.StatusUnauthorized, `{"error":"unauthorized"}`),
+			err:        Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
 		},
 	}
 
@@ -182,6 +182,8 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 				assert.Len(t, results, tc.expectedLen)
 			} else {
 				assert.Equal(t, []gjson.Result(nil), results)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
@@ -251,7 +253,9 @@ func Test_getter_GetAll_ErrorInSecondPage(t *testing.T) {
 
 	response, err := c.GetAll()
 	assert.Equal(t, []gjson.Result(nil), response)
-	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, `{"error":"Internal Server Error"}`))
+	var errStruct Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, err, Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"Internal Server Error"}`)}.Error())
 }
 
 // Test_getter_GetAll_ContentInSecondPage tests when there are two pages with content in them
@@ -456,7 +460,7 @@ func Test_crud_Create(t *testing.T) {
 			statusCode:       http.StatusForbidden,
 			response:         `{"error":"forbidden"}`,
 			expectedResponse: gjson.Result{},
-			err:              fmt.Errorf("status: %d, body: %s", http.StatusForbidden, `{"error":"forbidden"}`),
+			err:              Error{Status: http.StatusForbidden, Body: gjson.Parse(`{"error":"forbidden"}`)},
 		},
 	}
 
@@ -477,6 +481,8 @@ func Test_crud_Create(t *testing.T) {
 				require.NoError(t, err)
 				assert.True(t, response.IsObject())
 			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
@@ -513,7 +519,7 @@ func Test_crud_Update(t *testing.T) {
 			statusCode:       http.StatusInternalServerError,
 			response:         `{"error":"internal server error"}`,
 			expectedResponse: gjson.Result{},
-			err:              fmt.Errorf("status: %d, body: %s", http.StatusInternalServerError, `{"error":"internal server error"}`),
+			err:              Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"internal server error"}`)},
 		},
 	}
 
@@ -535,6 +541,8 @@ func Test_crud_Update(t *testing.T) {
 				require.NoError(t, err)
 				assert.True(t, response.IsObject())
 			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
@@ -571,7 +579,7 @@ func Test_crud_Delete(t *testing.T) {
 			statusCode:       http.StatusNotFound,
 			response:         `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
 			expectedResponse: gjson.Result{},
-			err:              fmt.Errorf("status: %d, body: %s", http.StatusNotFound, `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`),
+			err:              Error{Status: http.StatusNotFound, Body: gjson.Parse(`{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)},
 		},
 	}
 
@@ -592,6 +600,8 @@ func Test_crud_Delete(t *testing.T) {
 				require.NoError(t, err)
 				assert.True(t, response.IsObject())
 			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
