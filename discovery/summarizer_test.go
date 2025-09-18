@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,12 +14,13 @@ import (
 // TestSummarizer has table-driven tests to test the summarizer.Summarize() method.
 func Test_summarizer_Summarize(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, s summarizer)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
@@ -31,38 +31,30 @@ func Test_summarizer_Summarize(t *testing.T) {
 			response: `{
 			"DONE": 8
 			}`,
-			testFunc: func(t *testing.T, s summarizer) {
-				response, err := s.Summarize()
-				require.NoError(t, err)
-				assert.Equal(t, 8, int(response.Get("DONE").Int()))
-			},
+			expectedResponse: gjson.Parse(`{
+			"DONE": 8
+			}`),
+			err: nil,
 		},
 		{
-			name:       "Summarizer returns no content",
-			method:     http.MethodGet,
-			path:       "/summary",
-			statusCode: http.StatusNoContent,
-			response:   ``,
-			testFunc: func(t *testing.T, s summarizer) {
-				response, err := s.Summarize()
-				require.NoError(t, err)
-				assert.Equal(t, gjson.Null, response.Type)
-				assert.Equal(t, "", response.Raw)
-			},
+			name:             "Summarizer returns no content",
+			method:           http.MethodGet,
+			path:             "/summary",
+			statusCode:       http.StatusNoContent,
+			response:         ``,
+			expectedResponse: gjson.Parse(``),
+			err:              nil,
 		},
 
 		// Error case
 		{
-			name:       "Summary fails",
-			method:     http.MethodGet,
-			path:       "/summary",
-			statusCode: http.StatusNotFound,
-			response:   `{"messages": ["Seed execution not found: 9ababe08-0b74-4672-bb7c-e7a8225d6d4"]}`,
-			testFunc: func(t *testing.T, s summarizer) {
-				response, err := s.Summarize()
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"messages": ["Seed execution not found: 9ababe08-0b74-4672-bb7c-e7a8225d6d4"]}`)))
-			},
+			name:             "Summary fails",
+			method:           http.MethodGet,
+			path:             "/summary",
+			statusCode:       http.StatusNotFound,
+			response:         `{"messages": ["Seed execution not found: 9ababe08-0b74-4672-bb7c-e7a8225d6d4"]}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusNotFound, Body: gjson.Parse(`{"messages": ["Seed execution not found: 9ababe08-0b74-4672-bb7c-e7a8225d6d4"]}`)},
 		},
 	}
 
@@ -76,7 +68,15 @@ func Test_summarizer_Summarize(t *testing.T) {
 			defer srv.Close()
 
 			s := summarizer{client: newClient(srv.URL, "")}
-			tc.testFunc(t, s)
+			response, err := s.Summarize()
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
