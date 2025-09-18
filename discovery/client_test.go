@@ -221,23 +221,41 @@ func Test_client_execute_FunctionalOptionsFail(t *testing.T) {
 	assert.Nil(t, res, "result should be nil on execute error")
 }
 
-// TestRequestOption_FunctionalOptions tests the WithQueryParameters() and WithJSONBody() options.
+// TestWithQueryParameters tests the WithQueryParameters() options.
 // It tests WithQueryParameters() with a single value and an array.
-func TestRequestOption_FunctionalOptions(t *testing.T) {
+func TestWithQueryParameters(t *testing.T) {
 	srv := httptest.NewServer(
 		testutils.HttpHandler(t,
 			http.StatusOK, "application/json", `{"ok":true}`,
 			func(t *testing.T, r *http.Request) {
 				assert.Equal(t, "Google", r.URL.Query().Get("q"))
 				assert.Equal(t, []string{"item1", "item2", "item3"}, r.URL.Query()["items"])
-				assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
-				body, _ := io.ReadAll(r.Body)
-				assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
 			}))
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
-	response, err := c.execute("POST", "", WithQueryParameters(map[string][]string{"q": {"Google"}, "items": {"item1", "item2", "item3"}}),
+	response, err := c.execute("POST", "", WithQueryParameters(map[string][]string{"q": {"Google"}, "items": {"item1", "item2", "item3"}}))
+	require.NoError(t, err)
+	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
+}
+
+// TestWithJSONBody tests the WithJSONBody() option.
+// It verifies that the sent body is a JSON and with the correct content.
+func TestWithJSONBody(t *testing.T) {
+	srv := httptest.NewServer(
+		testutils.HttpHandler(t,
+			http.StatusOK, "application/json", `{"ok":true}`,
+			func(t *testing.T, r *http.Request) {
+				assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+				body, _ := io.ReadAll(r.Body)
+				bodyJSON := gjson.Parse(string(body))
+				assert.Equal(t, "test-secret", bodyJSON.Get("name").String())
+				assert.True(t, bodyJSON.Get("active").Bool())
+			}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := c.execute("POST", "",
 		WithJSONBody(`{
 		"name": "test-secret",
 		"active": true
@@ -246,8 +264,8 @@ func TestRequestOption_FunctionalOptions(t *testing.T) {
 	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
 }
 
-// TestRequestOption_FileOption tests the WithFile() option.
-func TestRequestOption_FileOption(t *testing.T) {
+// TestWithFile tests the WithFile() option.
+func TestWithFile(t *testing.T) {
 	srv := httptest.NewServer(testutils.HttpHandler(t, http.StatusOK, "application/json", `{"ok":true}`,
 		func(t *testing.T, r *http.Request) {
 			assert.Contains(t, r.Header.Get("Content-Type"), "multipart/form-data")
