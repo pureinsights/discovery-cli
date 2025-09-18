@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,12 +15,13 @@ import (
 // Test_cloner_Clone has table-driven tests to test the cloner.Clone() method.
 func Test_cloner_Clone(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
@@ -39,17 +39,28 @@ func Test_cloner_Clone(t *testing.T) {
 			"lastUpdatedTimestamp": "2025-08-21T15:19:37.980898Z",
 			"secret": "mongo-secret"
 			}`,
-			err: false,
+			expectedResponse: gjson.Parse(`{
+			"type": "mongo",
+			"name": "mongo2",
+			"labels": [],
+			"active": true,
+			"id": "c77caced-b1d4-49de-b690-09bac3bc80a7",
+			"creationTimestamp": "2025-08-21T15:19:37.980898Z",
+			"lastUpdatedTimestamp": "2025-08-21T15:19:37.980898Z",
+			"secret": "mongo-secret"
+			}`),
+			err: nil,
 		},
 
 		// Error case
 		{
-			name:       "Clone returns 404 Not Found",
-			method:     http.MethodPost,
-			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
-			statusCode: http.StatusNotFound,
-			response:   `{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
-			err:        true,
+			name:             "Clone returns 404 Not Found",
+			method:           http.MethodPost,
+			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
+			statusCode:       http.StatusNotFound,
+			response:         `{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusNotFound, Body: gjson.Parse(`{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)},
 		},
 	}
 
@@ -64,14 +75,14 @@ func Test_cloner_Clone(t *testing.T) {
 			c := cloner{client: newClient(srv.URL, "")}
 			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
 			response, err := c.Clone(id, map[string][]string{"name": {"mongo2"}})
-
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.Equal(t, "mongo2", response.Get("name").String())
-				assert.Equal(t, "mongo-secret", response.Get("secret").String())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
