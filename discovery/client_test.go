@@ -28,6 +28,7 @@ func Test_newClient_BaseURLAndAPIKey(t *testing.T) {
 	assert.Equal(t, url, c.client.BaseURL, "BaseURL should match server URL")
 }
 
+// Test_newSubClient_BaseURLJoin tests if the newSubClient function correctly handles edge cases when joining a URL and a path.
 func Test_newSubClient_BaseURLJoin(t *testing.T) {
 	tests := []struct {
 		name string
@@ -181,7 +182,7 @@ func Test_client_execute_HTTPErrorTypedError(t *testing.T) {
 	}
 }
 
-// TestExecute_RestyReturnsError tests when the Resty Execute function returns an error.
+// Test_client_execute_RestyReturnsError tests when the Resty Execute function returns an error.
 func Test_client_execute_RestyReturnsError(t *testing.T) {
 	srv := httptest.NewServer(http.NotFoundHandler())
 	base := srv.URL
@@ -192,6 +193,17 @@ func Test_client_execute_RestyReturnsError(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, res, "result should be nil on execute error")
 	assert.Contains(t, err.Error(), base+"/down")
+}
+
+// Test_client_execute_NoContent tests the client.execute() function when it receives a No Content Response.
+func Test_client_execute_NoContent(t *testing.T) {
+	srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
+	defer srv.Close()
+
+	c := newClient(srv.URL, "")
+	response, err := c.execute(http.MethodGet, "")
+	require.NoError(t, err)
+	assert.Len(t, response, 0)
 }
 
 // Test_client_execute_FunctionalOptionsFail tests when one of the functional options returns an error.
@@ -209,20 +221,41 @@ func Test_client_execute_FunctionalOptionsFail(t *testing.T) {
 	assert.Nil(t, res, "result should be nil on execute error")
 }
 
-// TestRequestOption_FunctionalOptions tests the WithQueryParameters() and WithJSONBody() options.
+// TestWithQueryParameters tests the WithQueryParameters() options.
 // It tests WithQueryParameters() with a single value and an array.
-func TestRequestOption_FunctionalOptions(t *testing.T) {
+func TestWithQueryParameters(t *testing.T) {
 	srv := httptest.NewServer(
 		testutils.HttpHandler(t,
 			http.StatusOK, "application/json", `{"ok":true}`,
 			func(t *testing.T, r *http.Request) {
-				body, _ := io.ReadAll(r.Body)
-				assert.Equal(t, "test-secret", gjson.Parse(string(body)).Get("name").String())
+				assert.Equal(t, "Google", r.URL.Query().Get("q"))
+				assert.Equal(t, []string{"item1", "item2", "item3"}, r.URL.Query()["items"])
 			}))
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
-	response, err := c.execute("POST", "", WithQueryParameters(map[string][]string{"q": {"Google"}, "items": {"item1", "item2", "item3"}}),
+	response, err := c.execute("POST", "", WithQueryParameters(map[string][]string{"q": {"Google"}, "items": {"item1", "item2", "item3"}}))
+	require.NoError(t, err)
+	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
+}
+
+// TestWithJSONBody tests the WithJSONBody() option.
+// It verifies that the sent body is a JSON and with the correct content.
+func TestWithJSONBody(t *testing.T) {
+	srv := httptest.NewServer(
+		testutils.HttpHandler(t,
+			http.StatusOK, "application/json", `{"ok":true}`,
+			func(t *testing.T, r *http.Request) {
+				assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+				body, _ := io.ReadAll(r.Body)
+				bodyJSON := gjson.Parse(string(body))
+				assert.Equal(t, "test-secret", bodyJSON.Get("name").String())
+				assert.True(t, bodyJSON.Get("active").Bool())
+			}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := c.execute("POST", "",
 		WithJSONBody(`{
 		"name": "test-secret",
 		"active": true
@@ -231,8 +264,8 @@ func TestRequestOption_FunctionalOptions(t *testing.T) {
 	require.True(t, gjson.Parse(string(response)).Get("ok").Bool())
 }
 
-// TestRequestOption_FileOption tests the WithFile() option.
-func TestRequestOption_FileOption(t *testing.T) {
+// TestWithFile tests the WithFile() option.
+func TestWithFile(t *testing.T) {
 	srv := httptest.NewServer(testutils.HttpHandler(t, http.StatusOK, "application/json", `{"ok":true}`,
 		func(t *testing.T, r *http.Request) {
 			assert.Contains(t, r.Header.Get("Content-Type"), "multipart/form-data")
@@ -241,7 +274,7 @@ func TestRequestOption_FileOption(t *testing.T) {
 		}))
 	t.Cleanup(srv.Close)
 
-	tmpFile, err := fileutils.CreateTemporaryFile("", "testFile.txt", "This is a test file")
+	tmpFile, err := fileutils.CreateTemporaryFile(t.TempDir(), "testFile.txt", "This is a test file")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,40 +306,16 @@ func Test_execute_ParsedResult(t *testing.T) {
 	assert.Equal(t, "user", response.Get("content.username").String())
 }
 
-// Test_NoContent tests the execute() and client.execute() functions when they receive a No Content Response.
-func Test_NoContent(t *testing.T) {
-	tests := []struct {
-		name     string
-		testFunc func(t *testing.T, c client)
-	}{
-		{
-			name: "execute() returns no content",
-			testFunc: func(t *testing.T, c client) {
-				response, err := execute(c, http.MethodGet, "")
-				require.NoError(t, err)
-				assert.Equal(t, gjson.Null, response.Type)
-				assert.Equal(t, "", response.Raw)
-			},
-		},
-		{
-			name: "Client.execute() returns no content",
-			testFunc: func(t *testing.T, c client) {
-				response, err := c.execute(http.MethodGet, "")
-				require.NoError(t, err)
-				assert.Len(t, response, 0)
-			},
-		},
-	}
+// Test_execute_NoContent tests the execute() function when it receives a No Content Response.
+func Test_execute_NoContent(t *testing.T) {
+	srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
+	defer srv.Close()
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(testutils.HttpNoContentHandler(t, nil))
-			defer srv.Close()
-
-			c := newClient(srv.URL, "")
-			tc.testFunc(t, c)
-		})
-	}
+	c := newClient(srv.URL, "")
+	response, err := execute(c, http.MethodGet, "")
+	require.NoError(t, err)
+	assert.Equal(t, gjson.Null, response.Type)
+	assert.Equal(t, "", response.Raw)
 }
 
 // Test_execute_HTTPError tests the execute function when the response is an error.

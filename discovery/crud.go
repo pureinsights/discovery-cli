@@ -17,12 +17,7 @@ type getter struct {
 // Get executes a GET request to the client's endpoint to get a single entity.
 // It returns the JSON object it receives or an error if the request failed.
 func (getter getter) Get(id uuid.UUID) (gjson.Result, error) {
-	response, err := execute(getter.client, http.MethodGet, "/"+id.String())
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	return response, nil
+	return execute(getter.client, http.MethodGet, "/"+id.String())
 }
 
 // GetAll retrieves every entity. It iterates through every page to get all of the results.
@@ -30,7 +25,7 @@ func (getter getter) Get(id uuid.UUID) (gjson.Result, error) {
 func (getter getter) GetAll() ([]gjson.Result, error) {
 	response, err := execute(getter.client, http.MethodGet, "")
 	if err != nil {
-		return []gjson.Result{}, err
+		return []gjson.Result(nil), err
 	}
 
 	elementNumber := response.Get("numberOfElements").Int()
@@ -42,7 +37,7 @@ func (getter getter) GetAll() ([]gjson.Result, error) {
 	for pageNumber < totalPages && elementNumber < totalSize {
 		response, err = execute(getter.client, http.MethodGet, "", WithQueryParameters(map[string][]string{"page": {strconv.FormatInt(pageNumber, 10)}}))
 		if err != nil {
-			return []gjson.Result{}, err
+			return []gjson.Result(nil), err
 		}
 
 		pageElements := response.Get("content").Array()
@@ -63,32 +58,17 @@ type crud struct {
 // Create creates an entity.
 // It returns the body of the entity if it was created or an error if the request failed.
 func (crud crud) Create(config gjson.Result) (gjson.Result, error) {
-	response, err := execute(crud.client, http.MethodPost, "", WithJSONBody(config.Raw))
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	return response, nil
+	return execute(crud.client, http.MethodPost, "", WithJSONBody(config.Raw))
 }
 
 // Update updates an entity.
 // It returns the body of the entity if it was updated or an error if the request failed.
 func (crud crud) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
-	response, err := execute(crud.client, http.MethodPut, "/"+id.String(), WithJSONBody(config.Raw))
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	return response, nil
+	return execute(crud.client, http.MethodPut, "/"+id.String(), WithJSONBody(config.Raw))
 }
 
 // Delete deletes an entity.
 // It returns the the acknowledged message if it was deleted or an error if the request failed.
 func (crud crud) Delete(id uuid.UUID) (gjson.Result, error) {
-	response, err := execute(crud.client, http.MethodDelete, "/"+id.String())
-	if err != nil {
-		return gjson.Result{}, err
-	}
-
-	return response, nil
+	return execute(crud.client, http.MethodDelete, "/"+id.String())
 }
