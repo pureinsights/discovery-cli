@@ -94,25 +94,23 @@ func Test_newSeedExecutionJobsClient(t *testing.T) {
 // Test_seedExecutionsClient_Seed tests the seedExecutionsClient.Seed() function
 func Test_seedExecutionsClient_Seed(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response gjson.Result, err error)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Seed returns a real response",
-			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/seed",
-			statusCode: http.StatusOK,
-			response:   `{"id":"2acd0a61-852c-4f38-af2b-9c84e152873e","name":"Search seed","type":"staging","active":true,"config":{"action":"scroll","bucket":"blogs"},"labels":[],"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}},"creationTimestamp":"2025-08-21T21:52:03Z","lastUpdatedTimestamp":"2025-08-21T21:52:03Z"}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Equal(t, "Search seed", response.Get("name").String())
-				assert.Equal(t, "2acd0a61-852c-4f38-af2b-9c84e152873e", response.Get("id").String())
-			},
+			name:             "Seed returns a real response",
+			method:           http.MethodGet,
+			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/seed",
+			statusCode:       http.StatusOK,
+			response:         `{"id":"2acd0a61-852c-4f38-af2b-9c84e152873e","name":"Search seed","type":"staging","active":true,"config":{"action":"scroll","bucket":"blogs"},"labels":[],"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}},"creationTimestamp":"2025-08-21T21:52:03Z","lastUpdatedTimestamp":"2025-08-21T21:52:03Z"}`,
+			expectedResponse: gjson.Parse(`{"id":"2acd0a61-852c-4f38-af2b-9c84e152873e","name":"Search seed","type":"staging","active":true,"config":{"action":"scroll","bucket":"blogs"},"labels":[],"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}},"creationTimestamp":"2025-08-21T21:52:03Z","lastUpdatedTimestamp":"2025-08-21T21:52:03Z"}`),
+			err:              nil,
 		},
 		// Error case
 		{
@@ -121,22 +119,22 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/seed",
 			statusCode: http.StatusNotFound,
 			response: `{
-"status": 404,
-"code": 1003,
-"messages": [
-	"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
-],
-"timestamp": "2025-09-03T17:44:01.557816Z"
-}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				assert.Equal(t, gjson.Result{}, response)
-				require.Error(t, err)
-				errorStruct, ok := err.(Error)
-				if ok {
-					assert.Equal(t, http.StatusNotFound, errorStruct.Status)
-					assert.Equal(t, "Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed", errorStruct.Body.Get("messages.0").String())
-				}
-			},
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
 		},
 	}
 
@@ -163,7 +161,15 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 				return
 			}
 			response, err := ingestionSeedExecutionsClient.Seed(executionId)
-			tc.testFunc(t, response, err)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -171,25 +177,23 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 // Test_seedExecutionsClient_Pipeline tests the seedExecutionsClient.Pipeline() function
 func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response gjson.Result, err error)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Pipeline returns a real response",
-			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/pipeline/9a74bf3a-eb2a-4334-b803-c92bf1bc45fe",
-			statusCode: http.StatusOK,
-			response:   `{"id":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","name":"Search pipeline","active":true,"labels":[],"states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","active":true,"outputField":"header"},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"initialState":"ingestionState","recordPolicy":{"idPolicy":{},"errorPolicy":"FAIL","retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Equal(t, "Search pipeline", response.Get("name").String())
-				assert.Equal(t, "9a74bf3a-eb2a-4334-b803-c92bf1bc45fe", response.Get("id").String())
-			},
+			name:             "Pipeline returns a real response",
+			method:           http.MethodGet,
+			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/pipeline/9a74bf3a-eb2a-4334-b803-c92bf1bc45fe",
+			statusCode:       http.StatusOK,
+			response:         `{"id":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","name":"Search pipeline","active":true,"labels":[],"states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","active":true,"outputField":"header"},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"initialState":"ingestionState","recordPolicy":{"idPolicy":{},"errorPolicy":"FAIL","retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`,
+			expectedResponse: gjson.Parse(`{"id":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","name":"Search pipeline","active":true,"labels":[],"states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","active":true,"outputField":"header"},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"initialState":"ingestionState","recordPolicy":{"idPolicy":{},"errorPolicy":"FAIL","retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`),
+			err:              nil,
 		},
 		// Error case
 		{
@@ -198,22 +202,22 @@ func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/pipeline/9a74bf3a-eb2a-4334-b803-c92bf1bc45fe",
 			statusCode: http.StatusNotFound,
 			response: `{
-"status": 404,
-"code": 1003,
-"messages": [
-	"Pipeline not found: 9a74bf3a-eb2a-4334-b803-c92bf1bc45fe"
-],
-"timestamp": "2025-09-03T17:44:01.557816Z"
-}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				assert.Equal(t, gjson.Result{}, response)
-				require.Error(t, err)
-				errorStruct, ok := err.(Error)
-				if ok {
-					assert.Equal(t, http.StatusNotFound, errorStruct.Status)
-					assert.Equal(t, "Pipeline not found: 9a74bf3a-eb2a-4334-b803-c92bf1bc45fe", errorStruct.Body.Get("messages.0").String())
-				}
-			},
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Pipeline not found: 9a74bf3a-eb2a-4334-b803-c92bf1bc45fe"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Pipeline not found: 9a74bf3a-eb2a-4334-b803-c92bf1bc45fe"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
 		},
 	}
 
@@ -246,7 +250,15 @@ func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 				return
 			}
 			response, err := ingestionSeedExecutionsClient.Pipeline(executionId, pipelineId)
-			tc.testFunc(t, response, err)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -254,25 +266,23 @@ func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 // Test_seedExecutionsClient_Processor tests the seedExecutionsClient.Processor() function.
 func Test_seedExecutionsClient_Processor(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response gjson.Result, err error)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Processor returns a real response",
-			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/processor/aa0186f1-746f-4b20-b1b0-313bd79e78b8",
-			statusCode: http.StatusOK,
-			response:   `{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","name":"MongoDB store processor","type":"mongo","active":true,"config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"labels":[],"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Equal(t, "MongoDB store processor", response.Get("name").String())
-				assert.Equal(t, "aa0186f1-746f-4b20-b1b0-313bd79e78b8", response.Get("id").String())
-			},
+			name:             "Processor returns a real response",
+			method:           http.MethodGet,
+			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/processor/aa0186f1-746f-4b20-b1b0-313bd79e78b8",
+			statusCode:       http.StatusOK,
+			response:         `{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","name":"MongoDB store processor","type":"mongo","active":true,"config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"labels":[],"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`,
+			expectedResponse: gjson.Parse(`{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","name":"MongoDB store processor","type":"mongo","active":true,"config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"labels":[],"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`),
+			err:              nil,
 		},
 		// Error case
 		{
@@ -288,15 +298,15 @@ func Test_seedExecutionsClient_Processor(t *testing.T) {
 			],
 			"timestamp": "2025-09-03T17:44:01.557816Z"
 			}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				assert.Equal(t, gjson.Result{}, response)
-				require.Error(t, err)
-				errorStruct, ok := err.(Error)
-				if ok {
-					assert.Equal(t, http.StatusNotFound, errorStruct.Status)
-					assert.Equal(t, "Processor not found: aa0186f1-746f-4b20-b1b0-313bd79e78b8", errorStruct.Body.Get("messages.0").String())
-				}
-			},
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Processor not found: aa0186f1-746f-4b20-b1b0-313bd79e78b8"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
 		},
 	}
 
@@ -329,7 +339,15 @@ func Test_seedExecutionsClient_Processor(t *testing.T) {
 				return
 			}
 			response, err := ingestionSeedExecutionsClient.Processor(executionId, processorId)
-			tc.testFunc(t, response, err)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -337,25 +355,23 @@ func Test_seedExecutionsClient_Processor(t *testing.T) {
 // Test_seedExecutionsClient_Server tests the seedExecutionsClient.Server() function.
 func Test_seedExecutionsClient_Server(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response gjson.Result, err error)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Server returns a real response",
-			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/server/f6950327-3175-4a98-a570-658df852424a",
-			statusCode: http.StatusOK,
-			response:   `{"id":"f6950327-3175-4a98-a570-658df852424a","name":"MongoDB store server","type":"mongo","active":true,"config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"labels":[],"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Equal(t, "MongoDB store server", response.Get("name").String())
-				assert.Equal(t, "f6950327-3175-4a98-a570-658df852424a", response.Get("id").String())
-			},
+			name:             "Server returns a real response",
+			method:           http.MethodGet,
+			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/server/f6950327-3175-4a98-a570-658df852424a",
+			statusCode:       http.StatusOK,
+			response:         `{"id":"f6950327-3175-4a98-a570-658df852424a","name":"MongoDB store server","type":"mongo","active":true,"config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"labels":[],"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`,
+			expectedResponse: gjson.Parse(`{"id":"f6950327-3175-4a98-a570-658df852424a","name":"MongoDB store server","type":"mongo","active":true,"config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"labels":[],"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"},"creationTimestamp":"2025-08-21T21:52:02Z","lastUpdatedTimestamp":"2025-08-21T21:52:02Z"}`),
+			err:              nil,
 		},
 		// Error case
 		{
@@ -364,22 +380,22 @@ func Test_seedExecutionsClient_Server(t *testing.T) {
 			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/server/f6950327-3175-4a98-a570-658df852424a",
 			statusCode: http.StatusNotFound,
 			response: `{
-"status": 404,
-"code": 1003,
-"messages": [
-	"Server not found: f6950327-3175-4a98-a570-658df852424a"
-],
-"timestamp": "2025-09-03T17:44:01.557816Z"
-}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				assert.Equal(t, gjson.Result{}, response)
-				require.Error(t, err)
-				errorStruct, ok := err.(Error)
-				if ok {
-					assert.Equal(t, http.StatusNotFound, errorStruct.Status)
-					assert.Equal(t, "Server not found: f6950327-3175-4a98-a570-658df852424a", errorStruct.Body.Get("messages.0").String())
-				}
-			},
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Server not found: f6950327-3175-4a98-a570-658df852424a"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Server not found: f6950327-3175-4a98-a570-658df852424a"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
 		},
 	}
 
@@ -412,7 +428,15 @@ func Test_seedExecutionsClient_Server(t *testing.T) {
 				return
 			}
 			response, err := ingestionSeedExecutionsClient.Server(executionId, serverId)
-			tc.testFunc(t, response, err)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -420,25 +444,23 @@ func Test_seedExecutionsClient_Server(t *testing.T) {
 // Test_seedExecutionsClient_Credential tests the seedExecutionsClient.Credential() function.
 func Test_seedExecutionsClient_Credential(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response gjson.Result, err error)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Credential returns a real response",
-			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-			statusCode: http.StatusOK,
-			response:   `{"id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","name":"MongoDB credential","type":"mongo","active":true,"labels":[],"secret":"mongo-secret","creationTimestamp":"2025-08-14T18:02:11Z","lastUpdatedTimestamp":"2025-08-14T18:02:11Z"}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Equal(t, "MongoDB credential", response.Get("name").String())
-				assert.Equal(t, "9ababe08-0b74-4672-bb7c-e7a8227d6d4c", response.Get("id").String())
-			},
+			name:             "Credential returns a real response",
+			method:           http.MethodGet,
+			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+			statusCode:       http.StatusOK,
+			response:         `{"id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","name":"MongoDB credential","type":"mongo","active":true,"labels":[],"secret":"mongo-secret","creationTimestamp":"2025-08-14T18:02:11Z","lastUpdatedTimestamp":"2025-08-14T18:02:11Z"}`,
+			expectedResponse: gjson.Parse(`{"id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","name":"MongoDB credential","type":"mongo","active":true,"labels":[],"secret":"mongo-secret","creationTimestamp":"2025-08-14T18:02:11Z","lastUpdatedTimestamp":"2025-08-14T18:02:11Z"}`),
+			err:              nil,
 		},
 		// Error case
 		{
@@ -447,22 +469,22 @@ func Test_seedExecutionsClient_Credential(t *testing.T) {
 			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
 			statusCode: http.StatusNotFound,
 			response: `{
-"status": 404,
-"code": 1003,
-"messages": [
-	"Credential not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
-],
-"timestamp": "2025-09-03T17:44:01.557816Z"
-}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				assert.Equal(t, gjson.Result{}, response)
-				require.Error(t, err)
-				errorStruct, ok := err.(Error)
-				if ok {
-					assert.Equal(t, http.StatusNotFound, errorStruct.Status)
-					assert.Equal(t, "Credential not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4c", errorStruct.Body.Get("messages.0").String())
-				}
-			},
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Credential not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Credential not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
 		},
 	}
 
@@ -495,7 +517,15 @@ func Test_seedExecutionsClient_Credential(t *testing.T) {
 				return
 			}
 			response, err := ingestionSeedExecutionsClient.Credential(executionId, credentialId)
-			tc.testFunc(t, response, err)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -503,24 +533,23 @@ func Test_seedExecutionsClient_Credential(t *testing.T) {
 // Test_seedExecutionsClient_Halt tests the seedExecutionsClient.Halt() function.
 func Test_seedExecutionsClient_Halt(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response gjson.Result, err error)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Halt works correctly",
-			method:     http.MethodPost,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/halt",
-			statusCode: http.StatusOK,
-			response:   `{"acknowledged":true}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
-			},
+			name:             "Halt works correctly",
+			method:           http.MethodPost,
+			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/halt",
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged":true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
+			err:              nil,
 		},
 		// Error cases
 		{
@@ -536,17 +565,15 @@ func Test_seedExecutionsClient_Halt(t *testing.T) {
 			],
 			"timestamp": "2025-09-03T21:05:21.861757200Z"
 			}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusConflict, `{
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusConflict, Body: gjson.Parse(`{
 			"status": 409,
 			"code": 4001,
 			"messages": [
 				"Action HALT cannot be applied to seed execution cc89b714-d00a-4774-9c45-9497b5d9f8ef because of its current status: HALTING"
 			],
 			"timestamp": "2025-09-03T21:05:21.861757200Z"
-			}`))
-			},
+			}`)},
 		},
 		{
 			name:       "Halt fails because the execution was not found.",
@@ -561,17 +588,15 @@ func Test_seedExecutionsClient_Halt(t *testing.T) {
 			],
 			"timestamp": "2025-09-03T21:37:21.871825500Z"
 			}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, `{
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 			"status": 404,
 			"code": 1003,
 			"messages": [
 				"Seed execution not found: cc89b714-d00a-4774-9c45-9497b5d9f8e3"
 			],
 			"timestamp": "2025-09-03T21:37:21.871825500Z"
-			}`))
-			},
+			}`)},
 		},
 	}
 
@@ -599,7 +624,15 @@ func Test_seedExecutionsClient_Halt(t *testing.T) {
 			}
 
 			response, err := ingestionSeedExecutionsClient.Halt(executionId)
-			tc.testFunc(t, response, err)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -654,12 +687,13 @@ func Test_seedExecutionsClient_Jobs(t *testing.T) {
 // It does not test if reading all the pages works.
 func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response []gjson.Result, err error)
+		name        string
+		method      string
+		path        string
+		statusCode  int
+		response    string
+		expectedLen int
+		err         error
 	}{
 		// Working cases
 		{
@@ -737,33 +771,26 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 			"numberOfElements": 7,
 			"pageNumber": 0
 			}`,
-			testFunc: func(t *testing.T, response []gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Len(t, response, 7)
-			},
+			expectedLen: 7,
+			err:         nil,
 		},
 		{
-			name:       "Audit returns no content",
-			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
-			statusCode: http.StatusNoContent,
-			response:   `{"content": []}`,
-			testFunc: func(t *testing.T, response []gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Equal(t, []gjson.Result{}, response)
-				assert.Len(t, response, 0)
-			},
+			name:        "Audit returns no content",
+			method:      http.MethodGet,
+			path:        "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
+			statusCode:  http.StatusNoContent,
+			response:    `{"content": []}`,
+			expectedLen: 0,
+			err:         nil,
 		},
 		{
-			name:       "Audit has no content field",
-			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
-			statusCode: http.StatusNoContent,
-			response:   ``,
-			testFunc: func(t *testing.T, response []gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Len(t, response, 0)
-			},
+			name:        "Audit has no content field",
+			method:      http.MethodGet,
+			path:        "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/audit",
+			statusCode:  http.StatusNoContent,
+			response:    ``,
+			expectedLen: 0,
+			err:         nil,
 		},
 
 		// Error cases
@@ -780,17 +807,14 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 			],
 			"timestamp": "2025-09-03T22:09:32.940650300Z"
 			}`,
-			testFunc: func(t *testing.T, response []gjson.Result, err error) {
-				assert.Equal(t, []gjson.Result(nil), response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusBadRequest, []byte(`{
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
 			"status": 400,
 			"code": 3002,
 			"messages": [
 				"Failed to convert argument [executionId] for value [werf] due to: Invalid UUID string: werf"
 			],
 			"timestamp": "2025-09-03T22:09:32.940650300Z"
-			}`)))
-			},
+			}`)},
 		},
 		{
 			name:       "Audit returns a 404 Not found",
@@ -805,17 +829,14 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 			],
 			"timestamp": "2025-09-03T22:43:49.251888500Z"
 			}`,
-			testFunc: func(t *testing.T, response []gjson.Result, err error) {
-				assert.Equal(t, []gjson.Result(nil), response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 			"status": 404,
 			"code": 1003,
 			"messages": [
 				"Seed execution not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
 			],
 			"timestamp": "2025-09-03T22:43:49.251888500Z"
-			}`)))
-			},
+			}`)},
 		},
 	}
 
@@ -843,7 +864,15 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 			}
 
 			response, err := ingestionSeedExecutionsClient.Audit(executionId)
-			tc.testFunc(t, response, err)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.Equal(t, tc.expectedLen, len(response))
+			} else {
+				assert.Equal(t, []gjson.Result(nil), response)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -1094,12 +1123,13 @@ func Test_seedExecutionsClient_Audit_ContentInSecondPage(t *testing.T) {
 // Test_seedRecordsClient_Get tests the seedRecordsClient.Get() function.
 func Test_seedRecordsClient_Get(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response gjson.Result, err error)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
@@ -1107,20 +1137,25 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 			method:     http.MethodGet,
 			path:       "/seed/2acd0a61-852c-4f38-af2b-9c84e152873e/record/A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=",
 			statusCode: http.StatusOK,
-			response: ` {
-                          "id": {
-                                  "plain": "4e7c8a47efd829ef7f710d64da661786",
-                                  "hash": "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="
-                          },
-                          "creationTimestamp": "2025-09-03T21:02:54Z",
-                          "lastUpdatedTimestamp": "2025-09-03T21:02:54Z",
-                          "status": "SUCCESS"
-                  }`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				require.NoError(t, err)
-				assert.Equal(t, "4e7c8a47efd829ef7f710d64da661786", response.Get("id.plain").String())
-				assert.Equal(t, "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=", response.Get("id.hash").String())
-			},
+			response: `{
+				"id": {
+					"plain": "4e7c8a47efd829ef7f710d64da661786",
+					"hash": "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="
+				},
+				"creationTimestamp": "2025-09-03T21:02:54Z",
+				"lastUpdatedTimestamp": "2025-09-03T21:02:54Z",
+				"status": "SUCCESS"
+			}`,
+			expectedResponse: gjson.Parse(`{
+				"id": {
+					"plain": "4e7c8a47efd829ef7f710d64da661786",
+					"hash": "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="
+				},
+				"creationTimestamp": "2025-09-03T21:02:54Z",
+				"lastUpdatedTimestamp": "2025-09-03T21:02:54Z",
+				"status": "SUCCESS"
+			}`),
+			err: nil,
 		},
 
 		// Error case
@@ -1137,17 +1172,15 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 			],
 			"timestamp": "2025-09-04T14:07:13.759984600Z"
 			}`,
-			testFunc: func(t *testing.T, response gjson.Result, err error) {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 			"status": 404,
 			"code": 1003,
 			"messages": [
 				"Entity not found: SeedRecordId(seed=Seed(super=AbstractComponentConfigEntity(super=AbstractJsonConfigEntity(super=AbstractTypedConfigEntity(super=AbstractConfigEntity(super=AbstractUpdatableEntity(super=AbstractCoreEntity(id=2acd0a61-852c-4f38-af2b-9c84e152873e), creationTimestamp=2025-08-21T21:52:03Z, lastUpdatedTimestamp=2025-08-21T21:52:03Z), name=Search seed, description=null, active=true), type=staging), config={\"action\":\"scroll\",\"bucket\":\"blogs\"})), properties=null, labels=[], recordOptions=SeedRecordPolicy[timeoutPolicy=TimeoutPolicy[slice=PT1H], errorPolicy=FATAL, outboundPolicy=OutboundPolicy[idPolicy=IdPolicy[generator=null], batchPolicy=BatchPolicy[maxCount=25, flushAfter=PT1M]]], hooks=[], beforeHooksOptions=null, afterHooksOptions=null), recordId=[3, 113, -45, 12, 72, 2, 107, -82, 65, 21, -101, 26, 115, -44, -56, -100, 88, -84, -66, 90, 17, -108, -67, -52, -25, 72, -93, 9, 99])"
 			],
 			"timestamp": "2025-09-04T14:07:13.759984600Z"
-			}`)))
-			},
+			}`)},
 		},
 	}
 
@@ -1169,7 +1202,15 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 			ingestionSeedRecordsClient := newSeedRecordsClient(srv.URL, apiKey, seedId)
 
 			response, err := ingestionSeedRecordsClient.Get("A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=")
-			tc.testFunc(t, response, err)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
