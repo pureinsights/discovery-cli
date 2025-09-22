@@ -76,12 +76,13 @@ func Test_newMaintenanceClient(t *testing.T) {
 // Test_serversClient_Ping tests the Ping method.
 func Test_serversClient_Ping(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, sc serversClient)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
@@ -92,12 +93,10 @@ func Test_serversClient_Ping(t *testing.T) {
 			response: `{
 			"acknowledged": true
 			}`,
-			testFunc: func(t *testing.T, sc serversClient) {
-				id := uuid.MustParse("f6950327-3175-4a98-a570-658df852424a")
-				response, err := sc.Ping(id)
-				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
-			},
+			expectedResponse: gjson.Parse(`{
+			"acknowledged": true
+			}`),
+			err: nil,
 		},
 
 		// Error case
@@ -114,19 +113,15 @@ func Test_serversClient_Ping(t *testing.T) {
 					],
 					"timestamp": "2025-08-26T20:42:26.372708600Z"
 			}`,
-			testFunc: func(t *testing.T, sc serversClient) {
-				id := uuid.MustParse("f6950327-3175-4a98-a570-658df852424a")
-				response, err := sc.Ping(id)
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusBadGateway, `{
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadGateway, Body: gjson.Parse(`{
 					"status": 502,
 					"code": 8002,
 					"messages": [
 							"An error occurred while pinging the Mongo client."
 					],
 					"timestamp": "2025-08-26T20:42:26.372708600Z"
-			}`))
-			},
+			}`)},
 		},
 	}
 
@@ -141,7 +136,17 @@ func Test_serversClient_Ping(t *testing.T) {
 
 			c := newClient(srv.URL, "")
 			serverClient := newServersClient(c.client.BaseURL, c.ApiKey)
-			tc.testFunc(t, serverClient)
+			id := uuid.MustParse("f6950327-3175-4a98-a570-658df852424a")
+			response, err := serverClient.Ping(id)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -149,47 +154,42 @@ func Test_serversClient_Ping(t *testing.T) {
 // Test_filesClient_Upload tests the fileClient.Upload() function.
 func Test_filesClient_Upload(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, fc filesClient)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		fileName         string
+		err              error
 	}{
 		// Working case
 		{
 			name:       "Upload returns acknowledged true",
 			method:     http.MethodPut,
-			path:       "/file/testFile",
+			path:       "/file/testFile.txt",
 			statusCode: http.StatusOK,
 			response: `{
 			"acknowledged": true
 			}`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				tmpFile, err := fileutils.CreateTemporaryFile("", "testFile", "This is a test file")
-				if err != nil {
-					t.Fatalf("Failed to create file")
-				}
-				defer os.Remove(tmpFile)
-				response, err := fc.Upload("testFile", tmpFile)
-				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
-			},
+			expectedResponse: gjson.Parse(`{
+			"acknowledged": true
+			}`),
+			fileName: "testFile.txt",
+			err:      nil,
 		},
 		// Error case
 		{
 			name:       "Upload uses a file that does not exist",
 			method:     http.MethodPut,
-			path:       "/file/testFile",
+			path:       "/file/doesNotExist.txt",
 			statusCode: http.StatusBadRequest,
 			response: `{
 			"acknowledged": true
 			}`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Upload("testFile", "doesNotExist.txt")
-				assert.Equal(t, gjson.Result{}, response)
-				assert.Contains(t, err.Error(), "open doesNotExist.txt")
-			},
+			fileName:         "doesNotExist.txt",
+			expectedResponse: gjson.Result{},
+			err:              fmt.Errorf("open doesNotExist.txt"),
 		},
 	}
 
@@ -203,7 +203,22 @@ func Test_filesClient_Upload(t *testing.T) {
 
 			c := newClient(srv.URL, "")
 			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
-			tc.testFunc(t, filesClient)
+
+			if tc.err == nil {
+				tmpFile, err := fileutils.CreateTemporaryFile("", tc.fileName, "This is a test file")
+				if err != nil {
+					t.Fatalf("Failed to create file")
+				}
+				defer os.Remove(tmpFile)
+				response, err := filesClient.Upload(tc.fileName, tmpFile)
+				assert.Equal(t, tc.expectedResponse, response)
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				response, err := filesClient.Upload(tc.fileName, tc.fileName)
+				assert.Equal(t, tc.expectedResponse, response)
+				assert.Contains(t, err.Error(), tc.err.Error())
+			}
 		})
 	}
 }
@@ -216,45 +231,37 @@ func Test_filesClient_Retrieve(t *testing.T) {
 		path       string
 		statusCode int
 		response   string
-		testFunc   func(t *testing.T, fc filesClient)
+		fileName   string
+		err        error
 	}{
 		// Working case
 		{
 			name:       "Retrieve returns the file's data",
 			method:     http.MethodGet,
 			path:       "/file/testFile",
+			fileName:   "testFile",
 			statusCode: http.StatusOK,
 			response:   `This is a test file.`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Retrieve("testFile")
-				require.NoError(t, err)
-				assert.Equal(t, `This is a test file.`, string(response))
-			},
+			err:        nil,
 		},
 		{
 			name:       "Retrieve returns an empty file",
 			method:     http.MethodGet,
 			path:       "/file/empty",
+			fileName:   "empty",
 			statusCode: http.StatusOK,
 			response:   ``,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Retrieve("empty")
-				require.NoError(t, err)
-				assert.Empty(t, string(response))
-			},
+			err:        nil,
 		},
 		// Error case
 		{
 			name:       "Retrieve returns 404 Not found",
 			method:     http.MethodGet,
 			path:       "/file/testFile",
+			fileName:   "testFile",
 			statusCode: http.StatusNotFound,
 			response:   ``,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Retrieve("testFile")
-				assert.Equal(t, []byte(nil), response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, ``))
-			},
+			err:        Error{Status: http.StatusNotFound, Body: gjson.Result{}},
 		},
 	}
 
@@ -268,7 +275,15 @@ func Test_filesClient_Retrieve(t *testing.T) {
 
 			c := newClient(srv.URL, "")
 			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
-			tc.testFunc(t, filesClient)
+			response, err := filesClient.Retrieve(tc.fileName)
+			assert.Equal(t, tc.response, string(response))
+			if tc.err == nil {
+				require.NoError(t, err)
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -276,12 +291,13 @@ func Test_filesClient_Retrieve(t *testing.T) {
 // Test_filesClient_List tests the filesClient.List() function
 func Test_filesClient_List(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, fc filesClient)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse []string
+		err              error
 	}{
 		// Working case
 		{
@@ -314,49 +330,58 @@ func Test_filesClient_List(t *testing.T) {
 				"searchTemplate.json",
 				"searchTemplateAtlas.json"
 				]`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.List()
-				require.NoError(t, err)
-				assert.Len(t, response, 23)
+			expectedResponse: []string{
+				"Credential.ndjson",
+				"Server.ndjson",
+				"buildContextPrompt.js",
+				"buildSimplePrompt.js",
+				"constructPrompt.js",
+				"constructSuggestedPrompt.js",
+				"elastic-extraction.py",
+				"extractReference.groovy",
+				"extractReferenceAtlas.groovy",
+				"formatAnalysisResponse.js",
+				"formatAutocompleteResponse.js",
+				"formatChunksResponse.js",
+				"formatKeywordResponse.js",
+				"formatKeywordResponseAtlas.js",
+				"formatKeywordSearch.js",
+				"formatQuestionsResponse.js",
+				"formatSearchResponse.js",
+				"formatSearchResponseAtlas.js",
+				"formatSemanticResponse.js",
+				"formatSuggestionsResponse.js",
+				"keywordSearchTemplateAtlas.json",
+				"searchTemplate.json",
+				"searchTemplateAtlas.json",
 			},
 		},
 		{
-			name:       "List returns no content",
-			method:     http.MethodGet,
-			path:       "/file",
-			statusCode: http.StatusNoContent,
-			response:   ``,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.List()
-				require.NoError(t, err)
-				assert.Equal(t, []string{}, response)
-				assert.Len(t, response, 0)
-			},
+			name:             "List returns no content",
+			method:           http.MethodGet,
+			path:             "/file",
+			statusCode:       http.StatusNoContent,
+			response:         ``,
+			expectedResponse: []string{},
 		},
 		// Error case
 		{
-			name:       "List returns a response that cannot be marshalled into an []string",
-			method:     http.MethodGet,
-			path:       "/file",
-			statusCode: http.StatusOK,
-			response:   `{"message"} : "This cannot be marshalled."`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.List()
-				assert.Equal(t, []string(nil), response)
-				assert.EqualError(t, err, "invalid character '}' after object key")
-			},
+			name:             "List returns a response that cannot be marshalled into an []string",
+			method:           http.MethodGet,
+			path:             "/file",
+			statusCode:       http.StatusOK,
+			response:         `{"message"} : "This cannot be marshalled."`,
+			expectedResponse: []string(nil),
+			err:              fmt.Errorf("invalid character '}' after object key"),
 		},
 		{
-			name:       "List returns a internal server error",
-			method:     http.MethodGet,
-			path:       "/file",
-			statusCode: http.StatusInternalServerError,
-			response:   ``,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.List()
-				assert.Equal(t, []string(nil), response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, ``))
-			},
+			name:             "List returns a internal server error",
+			method:           http.MethodGet,
+			path:             "/file",
+			statusCode:       http.StatusInternalServerError,
+			response:         ``,
+			expectedResponse: []string(nil),
+			err:              Error{Status: http.StatusInternalServerError, Body: gjson.Result{}},
 		},
 	}
 
@@ -370,7 +395,13 @@ func Test_filesClient_List(t *testing.T) {
 
 			c := newClient(srv.URL, "")
 			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
-			tc.testFunc(t, filesClient)
+			response, err := filesClient.List()
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -378,12 +409,13 @@ func Test_filesClient_List(t *testing.T) {
 // Test_filesClient_Delete tests de filesClient.Delete() function
 func Test_filesClient_Delete(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, fc filesClient)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
@@ -394,11 +426,10 @@ func Test_filesClient_Delete(t *testing.T) {
 			response: `{
 			"acknowledged": true
 			}`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Delete("testFile")
-				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
-			},
+			expectedResponse: gjson.Parse(`{
+			"acknowledged": true
+			}`),
+			err: nil,
 		},
 		{
 			name:       "Delete returns acknowledged false",
@@ -408,24 +439,20 @@ func Test_filesClient_Delete(t *testing.T) {
 			response: `{
 			"acknowledged": false
 			}`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Delete("testFile")
-				require.NoError(t, err)
-				assert.False(t, response.Get("acknowledged").Bool())
-			},
+			expectedResponse: gjson.Parse(`{
+			"acknowledged": false
+			}`),
+			err: nil,
 		},
 		// Error case
 		{
-			name:       "Delete returns internal server error",
-			method:     http.MethodDelete,
-			path:       "/file/testFile",
-			statusCode: http.StatusInternalServerError,
-			response:   `{"error": "Internal Server Error"}`,
-			testFunc: func(t *testing.T, fc filesClient) {
-				response, err := fc.Delete("testFile")
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, `{"error": "Internal Server Error"}`))
-			},
+			name:             "Delete returns internal server error",
+			method:           http.MethodDelete,
+			path:             "/file/testFile",
+			statusCode:       http.StatusInternalServerError,
+			response:         `{"error": "Internal Server Error"}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error": "Internal Server Error"}`)},
 		},
 	}
 
@@ -439,7 +466,16 @@ func Test_filesClient_Delete(t *testing.T) {
 
 			c := newClient(srv.URL, "")
 			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
-			tc.testFunc(t, filesClient)
+			response, err := filesClient.Delete("testFile")
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -447,52 +483,58 @@ func Test_filesClient_Delete(t *testing.T) {
 // Test_maintenanceClient_Log tests the Log method
 func Test_maintenanceClient_Log(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, fc maintenanceClient)
+		name             string
+		method           string
+		path             string
+		componentName    string
+		logLevel         LogLevel
+		loggerName       string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Log returns acknowledged true",
-			method:     http.MethodPost,
-			path:       "/maintenance/log",
-			statusCode: http.StatusOK,
+			name:          "Log returns acknowledged true",
+			method:        http.MethodPost,
+			path:          "/maintenance/log",
+			componentName: "ingestion-api",
+			logLevel:      LevelInfo,
+			loggerName:    "api",
+			statusCode:    http.StatusOK,
 			response: `{
 			"acknowledged": true
 			}`,
-			testFunc: func(t *testing.T, mc maintenanceClient) {
-				response, err := mc.Log("ingestion-api", "INFO", "")
-				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
-			},
+			expectedResponse: gjson.Parse(`{
+			"acknowledged": true
+			}`),
+			err: nil,
 		},
 		// Error cases
 		{
-			name:       "Log uses a log level that does not exist",
-			method:     http.MethodPost,
-			path:       "/maintenance/log",
-			statusCode: http.StatusBadRequest,
-			response:   `{"status":400,"code":3002,"messages":["Failed to convert argument [level] for value [DOESNOTEXIST] due to: No enum constant org.slf4j.event.Level.DOESNOTEXIST"],"timestamp":"2025-08-27T23:51:45.872308300Z"}`,
-			testFunc: func(t *testing.T, mc maintenanceClient) {
-				response, err := mc.Log("ingestion-api", "DOESNOTEXIST", "")
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusBadRequest, `{"status":400,"code":3002,"messages":["Failed to convert argument [level] for value [DOESNOTEXIST] due to: No enum constant org.slf4j.event.Level.DOESNOTEXIST"],"timestamp":"2025-08-27T23:51:45.872308300Z"}`))
-			},
+			name:             "Log uses a log level that does not exist",
+			method:           http.MethodPost,
+			path:             "/maintenance/log",
+			componentName:    "ingestion-api",
+			logLevel:         "DOESNOTEXIST",
+			loggerName:       "",
+			statusCode:       http.StatusBadRequest,
+			response:         `{"status":400,"code":3002,"messages":["Failed to convert argument [level] for value [DOESNOTEXIST] due to: No enum constant org.slf4j.event.Level.DOESNOTEXIST"],"timestamp":"2025-08-27T23:51:45.872308300Z"}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{"status":400,"code":3002,"messages":["Failed to convert argument [level] for value [DOESNOTEXIST] due to: No enum constant org.slf4j.event.Level.DOESNOTEXIST"],"timestamp":"2025-08-27T23:51:45.872308300Z"}`)},
 		},
 		{
-			name:       "Log sends an empty component name",
-			method:     http.MethodPost,
-			path:       "/maintenance/log",
-			statusCode: http.StatusBadRequest,
-			response:   `{"status":400,"code":3002,"messages":["Required QueryValue [componentName] not specified"],"timestamp":"2025-08-28T00:03:31.103683200Z"}`,
-			testFunc: func(t *testing.T, mc maintenanceClient) {
-				response, err := mc.Log("", "INFO", "")
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusBadRequest, `{"status":400,"code":3002,"messages":["Required QueryValue [componentName] not specified"],"timestamp":"2025-08-28T00:03:31.103683200Z"}`))
-			},
+			name:             "Log sends an empty component name",
+			method:           http.MethodPost,
+			path:             "/maintenance/log",
+			componentName:    "",
+			logLevel:         LevelInfo,
+			loggerName:       "",
+			statusCode:       http.StatusBadRequest,
+			response:         `{"status":400,"code":3002,"messages":["Required QueryValue [componentName] not specified"],"timestamp":"2025-08-28T00:03:31.103683200Z"}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{"status":400,"code":3002,"messages":["Required QueryValue [componentName] not specified"],"timestamp":"2025-08-28T00:03:31.103683200Z"}`)},
 		},
 	}
 
@@ -506,7 +548,16 @@ func Test_maintenanceClient_Log(t *testing.T) {
 
 			c := newClient(srv.URL, "")
 			maintenanceClient := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
-			tc.testFunc(t, maintenanceClient)
+			response, err := maintenanceClient.Log(tc.componentName, tc.logLevel, tc.loggerName)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
