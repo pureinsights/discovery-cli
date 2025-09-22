@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -17,41 +16,34 @@ import (
 // Test_getter_Get tests the getter.Get() function
 func Test_getter_Get(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, c crud)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Get by ID returns object",
-			method:     http.MethodGet,
-			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
-			statusCode: http.StatusOK,
-			response:   `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"test-secret"}`,
-			testFunc: func(t *testing.T, c crud) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				response, err := c.Get(id)
-				require.NoError(t, err)
-				assert.Equal(t, "test-secret", response.Get("name").String())
-			},
+			name:             "Get by ID returns object",
+			method:           http.MethodGet,
+			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed",
+			statusCode:       http.StatusOK,
+			response:         `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"test-secret"}`,
+			expectedResponse: gjson.Parse(`{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"test-secret"}`),
+			err:              nil,
 		},
 
 		// Error case
 		{
-			name:       "Get by ID returns 404 Not Found",
-			method:     http.MethodGet,
-			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
-			statusCode: http.StatusNotFound,
-			response:   `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
-			testFunc: func(t *testing.T, c crud) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				response, err := c.Get(id)
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)))
-			},
+			name:             "Get by ID returns 404 Not Found",
+			method:           http.MethodGet,
+			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed",
+			statusCode:       http.StatusNotFound,
+			response:         `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusNotFound, Body: gjson.Parse(`{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)},
 		},
 	}
 
@@ -65,7 +57,17 @@ func Test_getter_Get(t *testing.T) {
 			defer srv.Close()
 
 			c := crud{getter{newClient(srv.URL, "")}}
-			tc.testFunc(t, c)
+			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
+			response, err := c.Get(id)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -74,12 +76,13 @@ func Test_getter_Get(t *testing.T) {
 // It does not test if reading all the pages works.
 func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, c crud)
+		name        string
+		method      string
+		path        string
+		statusCode  int
+		response    string
+		expectedLen int
+		err         error
 	}{
 		// Working cases
 		{
@@ -130,24 +133,26 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			"numberOfElements": 3,
 			"pageNumber": 0
 			}`,
-			testFunc: func(t *testing.T, c crud) {
-				results, err := c.GetAll()
-				require.NoError(t, err)
-				assert.Len(t, results, 12)
-			},
+			expectedLen: 12,
+			err:         nil,
 		},
 		{
-			name:       "GetAll returns no content",
-			method:     http.MethodGet,
-			path:       "/",
-			statusCode: http.StatusNoContent,
-			response:   `{"content": []}`,
-			testFunc: func(t *testing.T, c crud) {
-				results, err := c.GetAll()
-				require.NoError(t, err)
-				assert.Equal(t, []gjson.Result{}, results)
-				assert.Len(t, results, 0)
-			},
+			name:        "GetAll returns no content",
+			method:      http.MethodGet,
+			path:        "/",
+			statusCode:  http.StatusNoContent,
+			response:    `{"content": []}`,
+			expectedLen: 0,
+			err:         nil,
+		},
+		{
+			name:        "GetAll has no content field",
+			method:      http.MethodGet,
+			path:        "/",
+			statusCode:  http.StatusNoContent,
+			response:    ``,
+			expectedLen: 0,
+			err:         nil,
 		},
 
 		// Error cases
@@ -157,23 +162,7 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			path:       "/",
 			statusCode: http.StatusUnauthorized,
 			response:   `{"error":"unauthorized"}`,
-			testFunc: func(t *testing.T, c crud) {
-				response, err := c.GetAll()
-				assert.Equal(t, []gjson.Result(nil), response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusUnauthorized, []byte(`{"error":"unauthorized"}`)))
-			},
-		},
-		{
-			name:       "GetAll has no content field",
-			method:     http.MethodGet,
-			path:       "/",
-			statusCode: http.StatusNoContent,
-			response:   ``,
-			testFunc: func(t *testing.T, c crud) {
-				results, err := c.GetAll()
-				require.NoError(t, err)
-				assert.Len(t, results, 0)
-			},
+			err:        Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
 		},
 	}
 
@@ -187,7 +176,16 @@ func Test_getter_GetAll_HTTPResponseCases(t *testing.T) {
 			defer srv.Close()
 
 			c := crud{getter{newClient(srv.URL, "")}}
-			tc.testFunc(t, c)
+			results, err := c.GetAll()
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.Len(t, results, tc.expectedLen)
+			} else {
+				assert.Equal(t, []gjson.Result(nil), results)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -255,7 +253,9 @@ func Test_getter_GetAll_ErrorInSecondPage(t *testing.T) {
 
 	response, err := c.GetAll()
 	assert.Equal(t, []gjson.Result(nil), response)
-	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, []byte(`{"error":"Internal Server Error"}`)))
+	var errStruct Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, err, Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"Internal Server Error"}`)}.Error())
 }
 
 // Test_getter_GetAll_ContentInSecondPage tests when there are two pages with content in them
@@ -433,41 +433,34 @@ func Test_getter_GetAll_NoContentInSecondPage(t *testing.T) {
 // Test_crud_Create tests the crud.Create() function.
 func Test_crud_Create(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, c crud)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Create works",
-			method:     http.MethodPost,
-			path:       "/",
-			statusCode: http.StatusCreated,
-			response:   `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
-			testFunc: func(t *testing.T, c crud) {
-				config := gjson.Parse(`{"name":"new-secret"}`)
-				response, err := c.Create(config)
-				require.NoError(t, err)
-				assert.Equal(t, "5f125024-1e5e-4591-9fee-365dc20eeeed", response.Get("id").String())
-			},
+			name:             "Create works",
+			method:           http.MethodPost,
+			path:             "/",
+			statusCode:       http.StatusCreated,
+			response:         `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
+			expectedResponse: gjson.Parse(`{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`),
+			err:              nil,
 		},
 
 		// Error case
 		{
-			name:       "Create returns 403 Forbidden",
-			method:     http.MethodPost,
-			path:       "/",
-			statusCode: http.StatusForbidden,
-			response:   `{"error":"forbidden"}`,
-			testFunc: func(t *testing.T, c crud) {
-				config := gjson.Parse(`{"name":"new-secret"}`)
-				response, err := c.Create(config)
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusForbidden, []byte(`{"error":"forbidden"}`)))
-			},
+			name:             "Create returns 403 Forbidden",
+			method:           http.MethodPost,
+			path:             "/",
+			statusCode:       http.StatusForbidden,
+			response:         `{"error":"forbidden"}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusForbidden, Body: gjson.Parse(`{"error":"forbidden"}`)},
 		},
 	}
 
@@ -481,7 +474,17 @@ func Test_crud_Create(t *testing.T) {
 			defer srv.Close()
 
 			c := crud{getter{newClient(srv.URL, "")}}
-			tc.testFunc(t, c)
+			config := gjson.Parse(`{"name":"new-secret"}`)
+			response, err := c.Create(config)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -489,43 +492,34 @@ func Test_crud_Create(t *testing.T) {
 // Test_crud_Update tests the crud.Update() function.
 func Test_crud_Update(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, c crud)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Update works",
-			method:     http.MethodPut,
-			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
-			statusCode: http.StatusOK,
-			response:   `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
-			testFunc: func(t *testing.T, c crud) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				config := gjson.Parse(`{"name":"updated-secret"}`)
-				response, err := c.Update(id, config)
-				require.NoError(t, err)
-				assert.Equal(t, "5f125024-1e5e-4591-9fee-365dc20eeeed", response.Get("id").String())
-			},
+			name:             "Update works",
+			method:           http.MethodPut,
+			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed",
+			statusCode:       http.StatusOK,
+			response:         `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
+			expectedResponse: gjson.Parse(`{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`),
+			err:              nil,
 		},
 
 		// Error case
 		{
-			name:       "Update returns 500 Internal Server Error",
-			method:     http.MethodPut,
-			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
-			statusCode: http.StatusInternalServerError,
-			response:   `{"error":"internal server error"}`,
-			testFunc: func(t *testing.T, c crud) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				config := gjson.Parse(`{"name":"updated-secret"}`)
-				response, err := c.Update(id, config)
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, []byte(`{"error":"internal server error"}`)))
-			},
+			name:             "Update returns 500 Internal Server Error",
+			method:           http.MethodPut,
+			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed",
+			statusCode:       http.StatusInternalServerError,
+			response:         `{"error":"internal server error"}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"internal server error"}`)},
 		},
 	}
 
@@ -539,7 +533,18 @@ func Test_crud_Update(t *testing.T) {
 			defer srv.Close()
 
 			c := crud{getter{newClient(srv.URL, "")}}
-			tc.testFunc(t, c)
+			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
+			config := gjson.Parse(`{"name":"updated-secret"}`)
+			response, err := c.Update(id, config)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
@@ -547,41 +552,34 @@ func Test_crud_Update(t *testing.T) {
 // Test_crud_Delete tests the crud.Delete() function
 func Test_crud_Delete(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, c crud)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Delete works",
-			method:     http.MethodDelete,
-			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
-			statusCode: http.StatusOK,
-			response:   `{"acknowledged": true}`,
-			testFunc: func(t *testing.T, c crud) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				response, err := c.Delete(id)
-				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
-			},
+			name:             "Delete works",
+			method:           http.MethodDelete,
+			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed",
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged": true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged": true}`),
+			err:              nil,
 		},
 
 		// Error case
 		{
-			name:       "Delete returns 404 Not Found",
-			method:     http.MethodDelete,
-			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed",
-			statusCode: http.StatusNotFound,
-			response:   `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
-			testFunc: func(t *testing.T, c crud) {
-				id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-				response, err := c.Delete(id)
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)))
-			},
+			name:             "Delete returns 404 Not Found",
+			method:           http.MethodDelete,
+			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed",
+			statusCode:       http.StatusNotFound,
+			response:         `{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusNotFound, Body: gjson.Parse(`{"messages": ["Secret not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)},
 		},
 	}
 
@@ -595,7 +593,17 @@ func Test_crud_Delete(t *testing.T) {
 			defer srv.Close()
 
 			c := crud{getter{newClient(srv.URL, "")}}
-			tc.testFunc(t, c)
+			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
+			response, err := c.Delete(id)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
