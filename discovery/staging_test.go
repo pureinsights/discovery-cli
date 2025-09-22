@@ -13,6 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// Test_newBucketsClient tests the bucketsClient constructor
 func Test_newBucketsClient(t *testing.T) {
 	url := "http://localhost:8081/v2"
 	apiKey := "Api Key"
@@ -22,39 +23,25 @@ func Test_newBucketsClient(t *testing.T) {
 	assert.Equal(t, url+"/bucket", c.client.client.BaseURL)
 }
 
+// Test_bucketsClient_Create tests the bucketsClient.Create() function
 func Test_bucketsClient_Create(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		config           gjson.Result
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Create works",
+			name:       "Create works with full config",
 			method:     http.MethodPost,
 			path:       "/testBucket",
 			statusCode: http.StatusCreated,
-			response:   `{"acknowledged": true}`,
-			err:        false,
-		},
-
-		// Error case
-		{
-			name:       "Create returns 409 Conflict",
-			method:     http.MethodPost,
-			path:       "/testBucket",
-			statusCode: http.StatusConflict,
-			response:   `{"acknowledged":false}`,
-			err:        true,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			config := `{
+			config: gjson.Parse(`{
 			"indices": [
 				{
 					"name": "indexTest",
@@ -63,51 +50,123 @@ func Test_bucketsClient_Create(t *testing.T) {
 				}
 			],
 			"config": {}
-			}`
+			}`),
+			response:         `{"acknowledged": true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged": true}`),
+			err:              nil,
+		},
+		{
+			name:             "Create works with empty config",
+			method:           http.MethodPost,
+			path:             "/testBucket",
+			statusCode:       http.StatusCreated,
+			config:           gjson.Parse(``),
+			response:         `{"acknowledged": true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged": true}`),
+			err:              nil,
+		},
+
+		// Error case
+		{
+			name:       "Create returns 409 Conflict",
+			method:     http.MethodPost,
+			path:       "/testBucket",
+			statusCode: http.StatusConflict,
+			config: gjson.Parse(`{
+			"indices": [
+				{
+					"name": "indexTest",
+					"fields": [{"author": "ASC"}],
+					"unique": false
+				}
+			],
+			"config": {}
+			}`),
+			response:         `{"acknowledged":false}`,
+			expectedResponse: gjson.Result{},
+			err:              Error{Status: http.StatusConflict, Body: gjson.Parse(`{"acknowledged":false}`)},
+		},
+		{
+			name:       "Create returns 400 Bad Request",
+			method:     http.MethodPost,
+			path:       "/testBucket",
+			statusCode: http.StatusBadRequest,
+			config: gjson.Parse(`{
+			"indices": [
+				{
+					"fields": [{"author": "ASC"}],
+					"unique": false
+				}
+			]
+			}`),
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"options.indices[0].name: must not be blank"
+			],
+			"timestamp": "2025-09-22T16:40:06.261655900Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"options.indices[0].name: must not be blank"
+			],
+			"timestamp": "2025-09-22T16:40:06.261655900Z"
+			}`)},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, "/bucket"+tc.path, r.URL.Path)
 				body, _ := io.ReadAll(r.Body)
 				json := gjson.Parse(string(body))
-				assert.Equal(t, "indexTest", json.Get("indices.0.name").String())
-				assert.Equal(t, "ASC", json.Get("indices.0.fields.0.author").String())
-				assert.False(t, json.Get("indices.0.unique").Bool())
+				assert.Equal(t, tc.config, json)
 			}))
 
 			defer srv.Close()
 
 			bucketsClient := newBucketsClient(srv.URL, "")
-			jsonBody := gjson.Parse(config)
 
-			response, err := bucketsClient.Create("testBucket", jsonBody)
-			if !(tc.err) {
+			response, err := bucketsClient.Create("testBucket", tc.config)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_bucketsClient_Get tests the bucketsClient.Get() function.
 func Test_bucketsClient_Get(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Get works",
-			method:     http.MethodGet,
-			path:       "/testBucket",
-			statusCode: http.StatusOK,
-			response:   `{"name":"testBucket","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`,
-			err:        false,
+			name:             "Get works",
+			method:           http.MethodGet,
+			path:             "/testBucket",
+			statusCode:       http.StatusOK,
+			response:         `{"name":"testBucket","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`,
+			expectedResponse: gjson.Parse(`{"name":"testBucket","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`),
+			err:              nil,
 		},
 
 		// Error case
@@ -124,7 +183,15 @@ func Test_bucketsClient_Get(t *testing.T) {
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
-			err: true,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1002,
+			"messages": [
+				"The bucket 'testBucket' was not found."
+			],
+			"timestamp": "2025-09-08T23:05:32.202752400Z"
+			}`)},
 		},
 	}
 
@@ -140,28 +207,29 @@ func Test_bucketsClient_Get(t *testing.T) {
 			bucketsClient := newBucketsClient(srv.URL, "")
 
 			response, err := bucketsClient.Get("testBucket")
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.Equal(t, "testBucket", response.Get("name").String())
-				assert.Equal(t, int64(3), response.Get("documentCount.STORE").Int())
-				assert.Equal(t, "authorIndex", response.Get("indices.0.name").String())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_bucketsClient_GetAll tests the bucketsClient.GetAll() function.
 func Test_bucketsClient_GetAll(t *testing.T) {
 	tests := []struct {
-		name        string
-		method      string
-		path        string
-		statusCode  int
-		response    string
-		expectedLen int
-		err         bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse []string
+		err              error
 	}{
 		// Working case
 		{
@@ -174,26 +242,39 @@ func Test_bucketsClient_GetAll(t *testing.T) {
 			"blogsq",
 			"wikis"
 			]`,
-			expectedLen: 3,
-			err:         false,
+			expectedResponse: []string{
+				"blogs",
+				"blogsq",
+				"wikis",
+			},
+			err: nil,
 		}, {
-			name:        "GetAll returns no content",
-			method:      http.MethodGet,
-			path:        "",
-			statusCode:  http.StatusNoContent,
-			response:    ``,
-			expectedLen: 0,
-			err:         false,
+			name:             "GetAll returns no content",
+			method:           http.MethodGet,
+			path:             "",
+			statusCode:       http.StatusNoContent,
+			response:         ``,
+			expectedResponse: []string{},
+			err:              nil,
 		},
 		// Error case
 		{
-			name:        "GetAll returns an internal server error",
-			method:      http.MethodGet,
-			path:        "",
-			statusCode:  http.StatusInternalServerError,
-			response:    ``,
-			expectedLen: 0,
-			err:         true,
+			name:             "GetAll returns an internal server error",
+			method:           http.MethodGet,
+			path:             "",
+			statusCode:       http.StatusInternalServerError,
+			response:         ``,
+			expectedResponse: []string(nil),
+			err:              Error{Status: http.StatusInternalServerError, Body: gjson.Result{}},
+		},
+		{
+			name:             "GetAll returns a response that cannot be marshalled into an []string",
+			method:           http.MethodGet,
+			path:             "",
+			statusCode:       http.StatusOK,
+			response:         `{"message"} : "This cannot be marshalled."`,
+			expectedResponse: []string(nil),
+			err:              fmt.Errorf("invalid character '}' after object key"),
 		},
 	}
 
@@ -209,48 +290,36 @@ func Test_bucketsClient_GetAll(t *testing.T) {
 			bucketsClient := newBucketsClient(srv.URL, "")
 
 			response, err := bucketsClient.GetAll()
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.Equal(t, tc.expectedLen, len(response))
 			} else {
-				assert.Equal(t, []string(nil), response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
-func Test_bucketsClient_GetAll_InvalidJSONResponse(t *testing.T) {
-	srv := httptest.NewServer(
-		testutils.HttpHandler(t,
-			http.StatusOK, "application/json", `{"message"} : "This cannot be marshalled."`,
-			nil))
-	t.Cleanup(srv.Close)
-
-	bucketsClient := newBucketsClient(srv.URL, "")
-
-	response, err := bucketsClient.GetAll()
-	assert.Equal(t, []string(nil), response)
-	assert.EqualError(t, err, "invalid character '}' after object key")
-}
-
+// Test_bucketsClient_Delete tests the bucketsClient.Delete() function.
 func Test_bucketsClient_Delete(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Delete works",
-			method:     http.MethodDelete,
-			path:       "/testBucket",
-			statusCode: http.StatusOK,
-			response:   `{"acknowledged":true}`,
-			err:        false,
+			name:             "Delete works",
+			method:           http.MethodDelete,
+			path:             "/testBucket",
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged":true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
+			err:              nil,
 		},
 
 		// Error case
@@ -267,7 +336,15 @@ func Test_bucketsClient_Delete(t *testing.T) {
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
-			err: true,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1002,
+			"messages": [
+				"The bucket 'testBucket' was not found."
+			],
+			"timestamp": "2025-09-08T23:05:32.202752400Z"
+			}`)},
 		},
 	}
 
@@ -283,34 +360,39 @@ func Test_bucketsClient_Delete(t *testing.T) {
 			bucketsClient := newBucketsClient(srv.URL, "")
 
 			response, err := bucketsClient.Delete("testBucket")
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_bucketsClient_Purge tests the bucketsClient.Purge() function.
 func Test_bucketsClient_Purge(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Purge works",
-			method:     http.MethodDelete,
-			path:       "/testBucket/purge",
-			statusCode: http.StatusOK,
-			response:   `{"acknowledged":true}`,
-			err:        false,
+			name:             "Purge works",
+			method:           http.MethodDelete,
+			path:             "/testBucket/purge",
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged":true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
+			err:              nil,
 		},
 
 		// Error case
@@ -327,7 +409,15 @@ func Test_bucketsClient_Purge(t *testing.T) {
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
-			err: true,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1002,
+			"messages": [
+				"The bucket 'testBucket' was not found."
+			],
+			"timestamp": "2025-09-08T23:05:32.202752400Z"
+			}`)},
 		},
 	}
 
@@ -343,36 +433,41 @@ func Test_bucketsClient_Purge(t *testing.T) {
 			bucketsClient := newBucketsClient(srv.URL, "")
 
 			response, err := bucketsClient.Purge("testBucket")
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_bucketsClient_CreateIndex tests the bucketsClient.CreateIndex()
 func Test_bucketsClient_CreateIndex(t *testing.T) {
 	tests := []struct {
-		name        string
-		method      string
-		path        string
-		statusCode  int
-		response    string
-		err         bool
-		indexConfig []string
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		indexConfig      []string
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:        "Create Index works",
-			method:      http.MethodPut,
-			path:        "/testBucket/index/testIndex",
-			statusCode:  http.StatusOK,
-			response:    `{"acknowledged":true}`,
-			indexConfig: []string{`{"fieldName":"ASC"}`, `{"author":"DESC"}`},
-			err:         false,
+			name:             "Create Index works",
+			method:           http.MethodPut,
+			path:             "/testBucket/index/testIndex",
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged":true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
+			indexConfig:      []string{`{"fieldName":"ASC"}`, `{"author":"DESC"}`},
+			err:              nil,
 		},
 
 		// Error case
@@ -389,8 +484,16 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1002,
+			"messages": [
+				"The bucket 'testBucket' was not found."
+			],
+			"timestamp": "2025-09-08T23:05:32.202752400Z"
+			}`)},
 			indexConfig: []string{`{"fieldName":"ASC"}`, `{"author":"DESC"}`},
-			err:         true,
 		},
 		{
 			name:       "Create Index returns 400 Index already exists.",
@@ -405,8 +508,16 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 			],
 			"timestamp": "2025-09-08T23:51:00.869751600Z"
 			}`,
-			indexConfig: []string{`{"fieldName":"ASC"}`, `{"author":"DESC"}`},
-			err:         true,
+			indexConfig:      []string{`{"fieldName":"ASC"}`, `{"author":"DESC"}`},
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"An index with the same fields already exists"
+			],
+			"timestamp": "2025-09-08T23:51:00.869751600Z"
+			}`)},
 		},
 		{
 			name:       "Create Index returns 400 Invalid JSON",
@@ -421,8 +532,16 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T00:01:57.445509100Z"
 			}`,
-			indexConfig: []string{`{"fieldName":"ASC"}`, `"author":"DESC"}`},
-			err:         true,
+			indexConfig:      []string{`{"fieldName":"ASC"}`, `"author":"DESC"}`},
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3001,
+			"messages": [
+				"Invalid JSON: Cannot deserialize value of type "java.util.Map$Entry<java.lang.String,io.micronaut.data.model.Sort$Order$Direction>" from String value (token JsonToken.VALUE_STRING)\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 1, column: 22] (through reference chain: java.util.ArrayList[1])"
+			],
+			"timestamp": "2025-09-09T00:01:57.445509100Z"
+			}`)},
 		},
 	}
 
@@ -439,34 +558,39 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 
 			indices := []gjson.Result{gjson.Parse(tc.indexConfig[0]), gjson.Parse(tc.indexConfig[1])}
 			response, err := bucketsClient.CreateIndex("testBucket", "testIndex", indices)
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_bucketsClient_DeleteIndex tests the bucketsClient.DeleteIndex() function.
 func Test_bucketsClient_DeleteIndex(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Delete index works",
-			method:     http.MethodDelete,
-			path:       "/testBucket/index/testIndex",
-			statusCode: http.StatusOK,
-			response:   `{"acknowledged":true}`,
-			err:        false,
+			name:             "Delete index works",
+			method:           http.MethodDelete,
+			path:             "/testBucket/index/testIndex",
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged":true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
+			err:              nil,
 		},
 
 		// Error case
@@ -483,7 +607,15 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
-			err: true,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1002,
+			"messages": [
+				"The bucket 'testBucket' was not found."
+			],
+			"timestamp": "2025-09-08T23:05:32.202752400Z"
+			}`)},
 		},
 		{
 			name:       "Delete index returns 404 Index Not Found",
@@ -498,7 +630,15 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T00:07:39.219014900Z"
 			}`,
-			err: true,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"The index 'testIndex' was not found"
+			],
+			"timestamp": "2025-09-09T00:07:39.219014900Z"
+			}`)},
 		},
 	}
 
@@ -514,17 +654,20 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 			bucketsClient := newBucketsClient(srv.URL, "")
 
 			response, err := bucketsClient.DeleteIndex("testBucket", "testIndex")
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_newContentClient tests the contentClient constructor.
 func Test_newContentClient(t *testing.T) {
 	url := "http://localhost:8081/v2"
 	apiKey := "Api Key"
@@ -535,17 +678,19 @@ func Test_newContentClient(t *testing.T) {
 	assert.Equal(t, url+"/content/"+bucketName, c.client.client.BaseURL)
 }
 
+// Test_contentClient_Store tests the contentClient.Store() function.
 func Test_contentClient_Store(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		bucketName string
-		contentId  string
-		parentId   string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		bucketName       string
+		contentId        string
+		parentId         string
+		err              error
 	}{
 		// Working case
 		{
@@ -568,10 +713,25 @@ func Test_contentClient_Store(t *testing.T) {
 			},
 			"transaction": "68c03eef1816a507481717b7"
 			}`,
+			expectedResponse: gjson.Parse(`{
+			"id": "c28db957887e1aae75e7ab1dd0fd34e9",
+			"creationTimestamp": "2025-09-09T00:44:09Z",
+			"lastUpdatedTimestamp": "2025-09-09T14:51:27Z",
+			"parentId": "d758c733466967ea6f13b20bcbfcebb5",
+			"action": "STORE",
+			"checksum": "6b65188c0a7878ad4ba2d8f3e8109b7e",
+			"content": {
+				"reference": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+				"title": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights",
+				"description": "A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications.",
+				"author": "Matt Willsmore"
+			},
+			"transaction": "68c03eef1816a507481717b7"
+			}`),
 			bucketName: "testBucket",
 			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
 			parentId:   "d758c733466967ea6f13b20bcbfcebb5",
-			err:        false,
+			err:        nil,
 		},
 		{
 			name:       "Store works with no parent ID",
@@ -592,10 +752,24 @@ func Test_contentClient_Store(t *testing.T) {
 			},
 			"transaction": "68bf77c41816a507481717ac"
 			}`,
+			expectedResponse: gjson.Parse(`{
+			"id": "c28db957887e1aae75e7ab1dd0fd34e9",
+			"creationTimestamp": "2025-09-09T00:40:26Z",
+			"lastUpdatedTimestamp": "2025-09-09T00:41:40Z",
+			"action": "STORE",
+			"checksum": "6b65188c0a7878ad4ba2d8f3e8109b7e",
+			"content": {
+				"reference": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+				"title": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights",
+				"description": "A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications.",
+				"author": "Matt Willsmore"
+			},
+			"transaction": "68bf77c41816a507481717ac"
+			}`),
 			bucketName: "testBucket",
 			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
 			parentId:   "",
-			err:        false,
+			err:        nil,
 		},
 
 		// Error case
@@ -612,10 +786,18 @@ func Test_contentClient_Store(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T00:54:42.457812Z"
 			}`,
-			bucketName: "testBucket",
-			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
-			parentId:   "d758c733466967ea6f13b20bcbfcebb5",
-			err:        true,
+			bucketName:       "testBucket",
+			contentId:        "c28db957887e1aae75e7ab1dd0fd34e9",
+			parentId:         "d758c733466967ea6f13b20bcbfcebb5",
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3001,
+			"messages": [
+				"Invalid JSON: Unrecognized token 'test': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n at [Source: REDACTED ('StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION' disabled); line: 1, column: 5]"
+			],
+			"timestamp": "2025-09-09T00:54:42.457812Z"
+			}`)},
 		},
 		{
 			name:       "Store returns 400 Blank input values",
@@ -631,10 +813,19 @@ func Test_contentClient_Store(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T14:31:13.275303600Z"
 			}`,
-			bucketName: "   ",
-			contentId:  "   ",
-			parentId:   "   ",
-			err:        true,
+			bucketName:       "   ",
+			contentId:        "   ",
+			parentId:         "   ",
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"bucketName: must not be blank",
+				"contentId: must not be blank"
+			],
+			"timestamp": "2025-09-09T14:31:13.275303600Z"
+			}`)},
 		},
 		{
 			name:       "Store returns 413 Request Entity Too Large",
@@ -649,10 +840,18 @@ func Test_contentClient_Store(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T00:54:42.457812Z"
 			}`,
-			bucketName: "testBucket",
-			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
-			parentId:   "d758c733466967ea6f13b20bcbfcebb5",
-			err:        true,
+			bucketName:       "testBucket",
+			contentId:        "c28db957887e1aae75e7ab1dd0fd34e9",
+			parentId:         "d758c733466967ea6f13b20bcbfcebb5",
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusRequestEntityTooLarge, Body: gjson.Parse(`{
+			"status": 413,
+			"code": 3001,
+			"messages": [
+				"Request Entity is too large"
+			],
+			"timestamp": "2025-09-09T00:54:42.457812Z"
+			}`)},
 		},
 	}
 
@@ -674,27 +873,32 @@ func Test_contentClient_Store(t *testing.T) {
 			contentClient := newContentClient(srv.URL, "", tc.bucketName)
 
 			response, err := contentClient.Store(tc.contentId, tc.parentId, json)
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.Equal(t, "Matt Willsmore", response.Get("content.author").String())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_contentClient_Get tests the contentClient.Get() function.
 func Test_contentClient_Get(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		bucketName string
-		contentId  string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		bucketName       string
+		contentId        string
+		requestOptions   []RequestOption
+		err              error
 	}{
 		// Working case
 		{
@@ -717,9 +921,24 @@ func Test_contentClient_Get(t *testing.T) {
 			},
 			"transaction": "68c03eef1816a507481717b7"
 			}`,
+			expectedResponse: gjson.Parse(`{
+			"id": "c28db957887e1aae75e7ab1dd0fd34e9",
+			"creationTimestamp": "2025-09-09T00:44:09Z",
+			"lastUpdatedTimestamp": "2025-09-09T14:51:27Z",
+			"parentId": "d758c733466967ea6f13b20bcbfcebb5",
+			"action": "STORE",
+			"checksum": "6b65188c0a7878ad4ba2d8f3e8109b7e",
+			"content": {
+				"reference": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+				"title": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights",
+				"description": "A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications.",
+				"author": "Matt Willsmore"
+			},
+			"transaction": "68c03eef1816a507481717b7"
+			}`),
 			bucketName: "testBucket",
 			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
-			err:        false,
+			err:        nil,
 		},
 
 		// Error case
@@ -736,9 +955,17 @@ func Test_contentClient_Get(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T14:31:13.275303600Z"
 			}`,
-			bucketName: "   ",
-			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
-			err:        true,
+			bucketName:       "   ",
+			contentId:        "c28db957887e1aae75e7ab1dd0fd34e9",
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"bucketName: must not be blank"
+			],
+			"timestamp": "2025-09-09T14:31:13.275303600Z"
+			}`)},
 		},
 		{
 			name:       "Get returns 404 Not found",
@@ -753,9 +980,17 @@ func Test_contentClient_Get(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T15:47:26.883457300Z"
 			}`,
-			bucketName: "testBucket",
-			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
-			err:        true,
+			bucketName:       "testBucket",
+			contentId:        "c28db957887e1aae75e7ab1dd0fd34e9",
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Document with id 'c28db957887e1aae75e7ab1dd0fd34e9' on bucket 'testBucket' not found."
+			],
+			"timestamp": "2025-09-09T15:47:26.883457300Z"
+			}`)},
 		},
 	}
 
@@ -764,46 +999,51 @@ func Test_contentClient_Get(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, "/content/"+tc.bucketName+tc.path, r.URL.Path)
-				assert.Equal(t, "STORE", r.URL.Query().Get("action"))
+
 			}))
 
 			defer srv.Close()
 
 			contentClient := newContentClient(srv.URL, "", tc.bucketName)
 
-			response, err := contentClient.Get(tc.contentId, WithContentAction("STORE"))
-			if !(tc.err) {
+			response, err := contentClient.Get(tc.contentId)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.Equal(t, "Matt Willsmore", response.Get("content.author").String())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_contentClient_Delete tests the contentClient.Delete() function.
 func Test_contentClient_Delete(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		bucketName string
-		contentId  string
-		err        bool
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		bucketName       string
+		contentId        string
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Delete works",
-			method:     http.MethodDelete,
-			path:       "/c28db957887e1aae75e7ab1dd0fd34e9",
-			statusCode: http.StatusOK,
-			response:   `{"acknowledged":true}`,
-			bucketName: "testBucket",
-			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
-			err:        false,
+			name:             "Delete works",
+			method:           http.MethodDelete,
+			path:             "/c28db957887e1aae75e7ab1dd0fd34e9",
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged":true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
+			bucketName:       "testBucket",
+			contentId:        "c28db957887e1aae75e7ab1dd0fd34e9",
+			err:              nil,
 		},
 
 		// Error case
@@ -820,9 +1060,17 @@ func Test_contentClient_Delete(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T14:31:13.275303600Z"
 			}`,
-			bucketName: "testBucket",
-			contentId:  "  ",
-			err:        true,
+			expectedResponse: gjson.Result{},
+			bucketName:       "testBucket",
+			contentId:        "  ",
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"contentId: must not be blank"
+			],
+			"timestamp": "2025-09-09T14:31:13.275303600Z"
+			}`)},
 		},
 		{
 			name:       "Delete returns 404 Not found",
@@ -837,9 +1085,17 @@ func Test_contentClient_Delete(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T15:47:26.883457300Z"
 			}`,
-			bucketName: "testBucket",
-			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
-			err:        true,
+			expectedResponse: gjson.Result{},
+			bucketName:       "testBucket",
+			contentId:        "c28db957887e1aae75e7ab1dd0fd34e9",
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Document with id 'c28db957887e1aae75e7ab1dd0fd34e9' on bucket 'testBucket' not found."
+			],
+			"timestamp": "2025-09-09T15:47:26.883457300Z"
+			}`)},
 		},
 	}
 
@@ -855,46 +1111,52 @@ func Test_contentClient_Delete(t *testing.T) {
 			contentClient := newContentClient(srv.URL, "", tc.bucketName)
 
 			response, err := contentClient.Delete(tc.contentId)
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// Test_contentClient_DeleteMany tests the contentClient.DeleteMany() function.
 func Test_contentClient_DeleteMany(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		statusCode int
-		response   string
-		bucketName string
-		parentId   string
-		filters    string
-		err        bool
+		name             string
+		method           string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		bucketName       string
+		parentId         string
+		filters          string
+		err              error
 	}{
 		// Working case
 		{
-			name:       "Delete Many works with parentId and no filters",
-			method:     http.MethodDelete,
-			statusCode: http.StatusOK,
-			response:   `{"acknowledged":true}`,
-			bucketName: "testBucket",
-			parentId:   "d758c733466967ea6f13b20bcbfcebb5",
-			filters:    ``,
-			err:        false,
+			name:             "Delete Many works with parentId and no filters",
+			method:           http.MethodDelete,
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged":true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
+			bucketName:       "testBucket",
+			parentId:         "d758c733466967ea6f13b20bcbfcebb5",
+			filters:          ``,
+			err:              nil,
 		},
 		{
-			name:       "Delete Many works with no parentId and filters",
-			method:     http.MethodDelete,
-			statusCode: http.StatusOK,
-			response:   `{"acknowledged":true}`,
-			bucketName: "testBucket",
-			parentId:   "",
+			name:             "Delete Many works with no parentId and filters",
+			method:           http.MethodDelete,
+			statusCode:       http.StatusOK,
+			response:         `{"acknowledged":true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
+			bucketName:       "testBucket",
+			parentId:         "",
 			filters: `{
 			"equals": {
 				"field": "author",
@@ -902,7 +1164,7 @@ func Test_contentClient_DeleteMany(t *testing.T) {
 				"normalize": true
 			}
 			}`,
-			err: false,
+			err: nil,
 		},
 
 		// Error case
@@ -918,9 +1180,17 @@ func Test_contentClient_DeleteMany(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T14:31:13.275303600Z"
 			}`,
-			bucketName: "  ",
-			parentId:   "d758c733466967ea6f13b20bcbfcebb5",
-			err:        true,
+			bucketName:       "  ",
+			parentId:         "d758c733466967ea6f13b20bcbfcebb5",
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"bucketName: must not be blank"
+			],
+			"timestamp": "2025-09-09T14:31:13.275303600Z"
+			}`)},
 		},
 		{
 			name:       "Delete returns 404 Not found",
@@ -934,9 +1204,17 @@ func Test_contentClient_DeleteMany(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T16:35:57.753512900Z"
 			}`,
-			bucketName: "testBucket",
-			parentId:   "c28db957887e1aae75e7ab1dd0fd34e9",
-			err:        true,
+			bucketName:       "testBucket",
+			parentId:         "c28db957887e1aae75e7ab1dd0fd34e9",
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1002,
+			"messages": [
+				"The bucket 'testBucket' was not found."
+			],
+			"timestamp": "2025-09-09T16:35:57.753512900Z"
+			}`)},
 		},
 	}
 
@@ -955,17 +1233,21 @@ func Test_contentClient_DeleteMany(t *testing.T) {
 			contentClient := newContentClient(srv.URL, "", tc.bucketName)
 
 			response, err := contentClient.DeleteMany(tc.parentId, gjson.Parse(tc.filters))
-			if !(tc.err) {
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
 				require.NoError(t, err)
-				assert.True(t, response.Get("acknowledged").Bool())
+				assert.True(t, response.IsObject())
 			} else {
-				assert.Equal(t, gjson.Result{}, response)
-				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tc.statusCode, tc.response))
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
 }
 
+// TestWithContentAction tests the WithContentAction functional option.
+// It uses the Get function to call the option.
 func TestWithContentAction(t *testing.T) {
 	srv := httptest.NewServer(
 		testutils.HttpHandler(t,
@@ -980,6 +1262,8 @@ func TestWithContentAction(t *testing.T) {
 	contentClient.Get("c28db957887e1aae75e7ab1dd0fd34e9", WithContentAction("STORE"))
 }
 
+// TestWithIncludeProjections tests the WithIncludeProjections functional option.
+// It uses the Get function to call the option.
 func TestWithIncludeProjections(t *testing.T) {
 	srv := httptest.NewServer(
 		testutils.HttpHandler(t,
@@ -994,6 +1278,8 @@ func TestWithIncludeProjections(t *testing.T) {
 	contentClient.Get("c28db957887e1aae75e7ab1dd0fd34e9", WithIncludeProjections([]string{"author", "title", "description"}))
 }
 
+// TestWithExcludeProjections tests the WithExcludeProjections functional option.
+// It uses the Get function to call the option.
 func TestWithExcludeProjections(t *testing.T) {
 	srv := httptest.NewServer(
 		testutils.HttpHandler(t,
