@@ -1271,20 +1271,24 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 // Test_seedsClient_Start tests the seedsClient.Start() function
 func Test_seedsClient_Start(t *testing.T) {
 	tests := []struct {
-		name       string
-		method     string
-		path       string
-		statusCode int
-		response   string
-		testFunc   func(t *testing.T, response gjson.Result, err error)
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
+		testFunc         func(t *testing.T, response gjson.Result, err error)
 	}{
 		// Working case
 		{
-			name:       "Start works correctly",
-			method:     http.MethodPost,
-			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e",
-			statusCode: http.StatusAccepted,
-			response:   `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
+			name:             "Start works correctly",
+			method:           http.MethodPost,
+			path:             "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode:       http.StatusAccepted,
+			response:         `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
+			expectedResponse: gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`),
+			err:              nil,
 			testFunc: func(t *testing.T, response gjson.Result, err error) {
 				require.NoError(t, err)
 				assert.Equal(t, "a056c7fb-0ca1-45f6-97ea-ec849a0701fd", response.Get("id").String())
@@ -1305,6 +1309,15 @@ func Test_seedsClient_Start(t *testing.T) {
 			],
 			"timestamp": "2025-09-04T20:17:00.116546400Z"
 			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusConflict, Body: gjson.Parse(`{
+			"status": 409,
+			"code": 4001,
+			"messages": [
+				"The seed has 1 executions: 0c309dbb-0402-4710-8659-2c75f5d649b6"
+			],
+			"timestamp": "2025-09-04T20:17:00.116546400Z"
+			}`)},
 			testFunc: func(t *testing.T, response gjson.Result, err error) {
 				assert.Equal(t, gjson.Result{}, response)
 				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusConflict, `{
@@ -1330,6 +1343,15 @@ func Test_seedsClient_Start(t *testing.T) {
 			],
 			"timestamp": "2025-09-04T20:20:47.326270700Z"
 			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+			],
+			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`)},
 			testFunc: func(t *testing.T, response gjson.Result, err error) {
 				assert.Equal(t, gjson.Result{}, response)
 				assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, `{
@@ -1361,7 +1383,15 @@ func Test_seedsClient_Start(t *testing.T) {
 			}
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			response, err := ingestionSeedsClient.Start(seedId, scanFull)
-			tc.testFunc(t, response, err)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
 		})
 	}
 }
