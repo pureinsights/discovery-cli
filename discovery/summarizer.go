@@ -11,8 +11,7 @@ type summarizer struct {
 	client
 }
 
-// Summarize adds /summary to the client's base URL and executes the GET method.
-// This function works on clients that already have the seed id execution ids set in their URLs.
+// Summarize adds /summary to the client's base URL and executes the GET method to get a summary of the entity.
 func (s summarizer) Summarize() (gjson.Result, error) {
 	return execute(s.client, http.MethodGet, "/summary")
 }

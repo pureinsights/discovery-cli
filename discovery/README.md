@@ -97,7 +97,7 @@ The QueryFlow client also has two important methods: `Invoke()` and `Debug()`. T
 
 ## Ingestion Client
 Discovery has an Ingestion client struct. Its fields are:
-- Url: The URL of Discovery's Ingestion component. The URL should contain the URL up to the version. For example, `http://localhost:8083/v2`. 
+- Url: The URL of Discovery's Ingestion component. The URL should contain the URL up to the version. For example, `http://localhost:8080/v2`. 
 - ApiKey: The API key needed to authenticate to Ingestion.  
 
 To create a Ingestion client, the `NewIngestion(URL, API Key)` is used.
