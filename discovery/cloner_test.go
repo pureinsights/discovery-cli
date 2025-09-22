@@ -26,7 +26,7 @@ func Test_cloner_Clone(t *testing.T) {
 	}{
 		// Working cases
 		{
-			name:       "Clone returns object",
+			name:       "Clone with query parameters returns object",
 			method:     http.MethodPost,
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
 			statusCode: http.StatusOK,
@@ -54,7 +54,7 @@ func Test_cloner_Clone(t *testing.T) {
 			err:             nil,
 		},
 		{
-			name:       "Clone returns object",
+			name:       "Clone with no query parameters returns object",
 			method:     http.MethodPost,
 			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
 			statusCode: http.StatusOK,
@@ -84,17 +84,31 @@ func Test_cloner_Clone(t *testing.T) {
 
 		// Error cases
 		{
-			name:             "Clone returns 404 Not Found",
-			method:           http.MethodPost,
-			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
-			statusCode:       http.StatusNotFound,
-			response:         `{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`,
+			name:       "Clone with query parameters returns 409 Conflict",
+			method:     http.MethodPost,
+			path:       "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
+			statusCode: http.StatusConflict,
+			response: `{
+			"status": 409,
+			"code": 2001,
+			"messages": [
+				"Duplicate entry for field(s): name"
+			],
+			"timestamp": "2025-09-22T14:51:10.223790900Z"
+			}`,
 			expectedResponse: gjson.Result{},
 			queryParameters:  map[string][]string{"name": {"mongo2"}},
-			err:              Error{Status: http.StatusNotFound, Body: gjson.Parse(`{"messages": ["Entity not found: 5f125024-1e5e-4591-9fee-365dc20eeeed"]}`)},
+			err: Error{Status: http.StatusConflict, Body: gjson.Parse(`{
+			"status": 409,
+			"code": 2001,
+			"messages": [
+				"Duplicate entry for field(s): name"
+			],
+			"timestamp": "2025-09-22T14:51:10.223790900Z"
+			}`)},
 		},
 		{
-			name:             "Clone returns 404 Not Found",
+			name:             "Clone with no query parameters returns 404 Not Found",
 			method:           http.MethodPost,
 			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed/clone",
 			statusCode:       http.StatusNotFound,
