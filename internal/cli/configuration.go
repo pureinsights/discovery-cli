@@ -70,7 +70,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string) error {
 	ios := d.IOStreams()
 	v := d.Config()
 
-	propertyInput, err := ios.AskUser(fmt.Sprintf("%s [%s]", propertyName, v.Get(fmt.Sprintf("%s.%s", profile, property)).(string)))
+	propertyInput, err := ios.AskUser(fmt.Sprintf("%s [%s]", propertyName, v.GetString(fmt.Sprintf("%s.%s", profile, property))))
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string) error {
 	return nil
 }
 
-func (d discovery) SaveCoreConfigFromUser(profile, path string, standalone bool) error {
+func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
 
@@ -94,39 +94,20 @@ func (d discovery) SaveCoreConfigFromUser(profile, path string, standalone bool)
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	coreUrl, err := ios.AskUser(fmt.Sprintf("Core URL [%s]", v.Get(fmt.Sprintf("%s.core_url", profile)).(string)))
-	if err != nil {
-		return err
+	urlErr := d.askUserConfig(profile, "Core URL", "core_url")
+	if urlErr != nil {
+		return urlErr
 	}
 
-	switch coreUrl {
-	case "":
-
-	case " ":
-		v.Set(fmt.Sprintf("%s.core_url", profile), "")
-	default:
-		v.Set(fmt.Sprintf("%s.core_url", profile), coreUrl)
+	keyErr := d.askUserConfig(profile, "Core API Key", "core_key")
+	if keyErr != nil {
+		return keyErr
 	}
 
-	coreKey, err := ios.AskUser(fmt.Sprintf("Core API Key [%s]", v.Get(fmt.Sprintf("%s.core_key", profile)).(string)))
-	if err != nil {
-		return err
-	}
-
-	switch coreKey {
-	case "":
-
-	case " ":
-		v.Set(fmt.Sprintf("%s.core_url", profile), "")
-	default:
-		v.Set(fmt.Sprintf("%s.core_url", profile), coreKey)
-	}
-
-	err = v.WriteConfigAs(path)
-	return err
+	return v.WriteConfigAs(d.ConfigPath())
 }
 
-func (d discovery) SaveIngestionConfigFromUser(profile, path string, standalone bool) error {
+func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
 
@@ -134,39 +115,20 @@ func (d discovery) SaveIngestionConfigFromUser(profile, path string, standalone 
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	ingestionUrl, err := ios.AskUser(fmt.Sprintf("Ingestion URL [%s]", v.Get(fmt.Sprintf("%s.ingestion_url", profile)).(string)))
-	if err != nil {
-		return err
+	urlErr := d.askUserConfig(profile, "Ingestion URL", "ingestion_url")
+	if urlErr != nil {
+		return urlErr
 	}
 
-	switch ingestionUrl {
-	case "":
-
-	case " ":
-		v.Set(fmt.Sprintf("%s.ingestion_url", profile), "")
-	default:
-		v.Set(fmt.Sprintf("%s.ingestion_url", profile), ingestionUrl)
+	keyErr := d.askUserConfig(profile, "Ingestion API Key", "ingestion_key")
+	if keyErr != nil {
+		return keyErr
 	}
 
-	ingestionKey, err := ios.AskUser(fmt.Sprintf("Ingestion API Key [%s]", v.Get(fmt.Sprintf("%s.ingestion_key", profile)).(string)))
-	if err != nil {
-		return err
-	}
-
-	switch ingestionKey {
-	case "":
-
-	case " ":
-		v.Set(fmt.Sprintf("%s.ingestion_url", profile), "")
-	default:
-		v.Set(fmt.Sprintf("%s.ingestion_url", profile), ingestionKey)
-	}
-
-	err = v.WriteConfigAs(path)
-	return err
+	return v.WriteConfigAs(d.ConfigPath())
 }
 
-func (d discovery) SaveQueryFlowConfigFromUser(profile, path string, standalone bool) error {
+func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
 
@@ -174,39 +136,20 @@ func (d discovery) SaveQueryFlowConfigFromUser(profile, path string, standalone 
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	queryFlowUrl, err := ios.AskUser(fmt.Sprintf("QueryFlow URL [%s]", v.Get(fmt.Sprintf("%s.queryflow_url", profile)).(string)))
-	if err != nil {
-		return err
+	urlErr := d.askUserConfig(profile, "QueryFlow URL", "queryflow_url")
+	if urlErr != nil {
+		return urlErr
 	}
 
-	switch queryFlowUrl {
-	case "":
-
-	case " ":
-		v.Set(fmt.Sprintf("%s.queryflow_url", profile), "")
-	default:
-		v.Set(fmt.Sprintf("%s.queryflow_url", profile), queryFlowUrl)
+	keyErr := d.askUserConfig(profile, "QueryFlow API Key", "queryflow_key")
+	if keyErr != nil {
+		return keyErr
 	}
 
-	queryFlowKey, err := ios.AskUser(fmt.Sprintf("QueryFlow API Key [%s]", v.Get(fmt.Sprintf("%s.queryflow_key", profile)).(string)))
-	if err != nil {
-		return err
-	}
-
-	switch queryFlowKey {
-	case "":
-
-	case " ":
-		v.Set(fmt.Sprintf("%s.queryflow_url", profile), "")
-	default:
-		v.Set(fmt.Sprintf("%s.queryflow_url", profile), queryFlowKey)
-	}
-
-	err = v.WriteConfigAs(path)
-	return err
+	return v.WriteConfigAs(d.ConfigPath())
 }
 
-func (d discovery) SaveStagingConfigFromUser(profile, path string, standalone bool) error {
+func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
 
@@ -214,54 +157,35 @@ func (d discovery) SaveStagingConfigFromUser(profile, path string, standalone bo
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	stagingUrl, err := ios.AskUser(fmt.Sprintf("Staging URL [%s]", v.Get(fmt.Sprintf("%s.staging_url", profile)).(string)))
-	if err != nil {
-		return err
+	urlErr := d.askUserConfig(profile, "Staging URL", "staging_url")
+	if urlErr != nil {
+		return urlErr
 	}
 
-	switch stagingUrl {
-	case "":
-
-	case " ":
-		v.Set(fmt.Sprintf("%s.staging_url", profile), "")
-	default:
-		v.Set(fmt.Sprintf("%s.staging_url", profile), stagingUrl)
+	keyErr := d.askUserConfig(profile, "Staging API Key", "staging_key")
+	if keyErr != nil {
+		return keyErr
 	}
 
-	stagingKey, err := ios.AskUser(fmt.Sprintf("Staging API Key [%s]", v.Get(fmt.Sprintf("%s.staging_key", profile)).(string)))
-	if err != nil {
-		return err
-	}
-
-	switch stagingKey {
-	case "":
-
-	case " ":
-		v.Set(fmt.Sprintf("%s.staging_url", profile), "")
-	default:
-		v.Set(fmt.Sprintf("%s.staging_url", profile), stagingKey)
-	}
-
-	err = v.WriteConfigAs(path)
-	return err
+	return v.WriteConfigAs(d.ConfigPath())
 }
 
 // SaveConfigFromUser asks the user for the URLs and API Keys of the Discovery's components to save them in a profile.
 // It then writes the current configuration into the given file.
-func (d discovery) SaveConfigFromUser(profile string, path string) error {
+func (d discovery) SaveConfigFromUser(profile string) error {
 	fmt.Fprintf(d.IOStreams().Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 
-	err := d.SaveCoreConfigFromUser(profile, path, false)
+	err := d.SaveCoreConfigFromUser(profile, false)
 	if err != nil {
 		return err
 	}
-	err = d.SaveIngestionConfigFromUser(profile, path, false)
+	err = d.SaveIngestionConfigFromUser(profile, false)
 	if err != nil {
 		return err
 	}
-	err = d.SaveQueryFlowConfigFromUser(profile, path, false)
+	err = d.SaveQueryFlowConfigFromUser(profile, false)
 	if err != nil {
 		return err
 	}
-	return d.SaveStagingConfigFromUser(profile, path, false)
+	return d.SaveStagingConfigFromUser(profile, false)
 }
