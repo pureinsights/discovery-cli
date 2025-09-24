@@ -1,6 +1,9 @@
 name: Pull Request
 
 on:
+  push:
+    paths:
+      - '**/testdata/**'
   pull_request:
     types:
       - opened

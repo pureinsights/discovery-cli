@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/testutils"
@@ -16,7 +15,7 @@ import (
 
 // Test_backupRestore_Import has table-driven tests to test the Import method.
 func Test_backupRestore_Import(t *testing.T) {
-	fileName := filepath.Join("../testdata", "test-export.zip")
+	fileName := "testdata/test-export.zip"
 	bytes, err := os.ReadFile(fileName)
 	require.NoError(t, err)
 
@@ -127,7 +126,7 @@ func Test_backupRestore_Import(t *testing.T) {
 
 // Test_backupRestore_Export has table-driven tests to test the Export method.
 func Test_backupRestore_Export(t *testing.T) {
-	fileName := filepath.Join("../testdata", "test-export.zip")
+	fileName := "testdata/test-export.zip"
 	bytes, err := os.ReadFile(fileName)
 	require.NoError(t, err)
 
