@@ -66,6 +66,10 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	return vpr, nil
 }
 
+// AskUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
+// If the user inputs an empty string, the value is not changed.
+// If the user inputs a space, the value is set to an empty string.
+// If the user inputs a new value, the property is modified.
 func (d discovery) askUserConfig(profile, propertyName, property string) error {
 	ios := d.IOStreams()
 	v := d.Config()
@@ -86,6 +90,9 @@ func (d discovery) askUserConfig(profile, propertyName, property string) error {
 	return nil
 }
 
+// SaveCoreConfigFromUser asks the user for the values it wants to set for Discovery Core's configuration properties for the given profile.
+// It then writes the new configuration to the Discovery struct's Config Path.
+// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
@@ -107,6 +114,9 @@ func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error
 	return v.WriteConfigAs(d.ConfigPath())
 }
 
+// SaveIngestionConfigFromUser asks the user for the values it wants to set for Discovery Ingestion's configuration properties for the given profile.
+// It then writes the new configuration to the Discovery struct's Config Path.
+// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
@@ -128,6 +138,9 @@ func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) 
 	return v.WriteConfigAs(d.ConfigPath())
 }
 
+// SaveQueryFlowConfigFromUser asks the user for the values it wants to set for Discovery QueryFlow's configuration properties for the given profile.
+// It then writes the new configuration to the Discovery struct's Config Path.
+// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
@@ -149,6 +162,9 @@ func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) 
 	return v.WriteConfigAs(d.ConfigPath())
 }
 
+// SaveStagingConfigFromUser asks the user for the values it wants to set for Discovery Staging's configuration properties for the given profile.
+// It then writes the new configuration to the Discovery struct's Config Path.
+// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
