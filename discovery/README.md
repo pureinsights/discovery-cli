@@ -1,10 +1,7 @@
 # Pureinsights Discovery Platform: Command Line Interface
 
-## Common structs
-Thanks to the highly standardized API of the Discovery products, most of the endpoints for different entities are almost identical. In some cases, the difference is basically the base URL and some parameters. For some reason, common structs were created to expedite the development of the CLI. They implement methods that many of Discovery's components and entities need.
-
-### Client
-This struct contains a Resty client to do requests to Discovery's APIs. It also stores an API key for authentication. It has the following related methods:
+## Client
+This struct contains a Resty client to do requests to Discovery's APIs and also stores an API key for authentication. It has two methods to execute an HTTP request to Discovery's APIs, based on the URL configured in the client and the path parameter. One method returns a byte array and has the following related methods:
 - newClient(URL, API key): Creates a new client.
 - newSubClient(client, path): Creates a new subclient, which has the same URL as the client, but with the path at the end.
 - client.execute(method, path, Request Options): This method executes a request to Discovery's APIs, based on the URL configured in the client and the path parameter. This function returns the response's body as a byte array. The request options follow the [functional options pattern](https://www.sohamkamani.com/golang/options-pattern/). They are added to the request. The following options are available:
@@ -12,6 +9,9 @@ This struct contains a Resty client to do requests to Discovery's APIs. It also 
   - WithFile(path): This option adds a file to the request. It needs to be able to find the path with the received path.
   - WithJSONBody(body): This option sets the body as the received JSON body, which must be a valid JSON string. It also sets the Content Type to `application/json`.
 - execute(client, method, path, Request Options): This function is essentially the same as client.execute(), but returns a parsed response as a JSON Object, which in this case is a [gjson.Result](https://github.com/tidwall/gjson#result-type) type.
+
+## Common structs
+Thanks to the highly standardized API of the Discovery products, most of the endpoints for different entities are almost identical. In some cases, the difference is basically the base URL and some parameters. For some reason, common structs were created to expedite the development of the CLI. They implement methods that many of Discovery's components and entities need.
 
 ### Getter
 This struct performs all the GET operations. It receives a client field by composition, so it can access the API Key and Resty Client fields. The Resty client must have its URL pointing to the entity's endpoint. It has the following methods:
