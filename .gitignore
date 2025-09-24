@@ -9,6 +9,8 @@ go.work
 # Test binary and output of the go coverage tool
 *.test
 *.out
+**/manual-*
+/testFiles
 
 # IntelliJ
 .idea/
