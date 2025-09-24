@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -437,6 +438,7 @@ func Test_crud_Create(t *testing.T) {
 		method           string
 		path             string
 		statusCode       int
+		body             string
 		response         string
 		expectedResponse gjson.Result
 		err              error
@@ -447,6 +449,7 @@ func Test_crud_Create(t *testing.T) {
 			method:           http.MethodPost,
 			path:             "/",
 			statusCode:       http.StatusCreated,
+			body:             `{"name":"new-secret"}`,
 			response:         `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
 			expectedResponse: gjson.Parse(`{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`),
 			err:              nil,
@@ -458,6 +461,7 @@ func Test_crud_Create(t *testing.T) {
 			method:           http.MethodPost,
 			path:             "/",
 			statusCode:       http.StatusForbidden,
+			body:             `{"name":"new-secret"}`,
 			response:         `{"error":"forbidden"}`,
 			expectedResponse: gjson.Result{},
 			err:              Error{Status: http.StatusForbidden, Body: gjson.Parse(`{"error":"forbidden"}`)},
@@ -469,12 +473,14 @@ func Test_crud_Create(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, tc.path, r.URL.Path)
+				body, _ := io.ReadAll(r.Body)
+				assert.Equal(t, tc.body, string(body))
 			}))
 
 			defer srv.Close()
 
 			c := crud{getter{newClient(srv.URL, "")}}
-			config := gjson.Parse(`{"name":"new-secret"}`)
+			config := gjson.Parse(tc.body)
 			response, err := c.Create(config)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -496,6 +502,7 @@ func Test_crud_Update(t *testing.T) {
 		method           string
 		path             string
 		statusCode       int
+		body             string
 		response         string
 		expectedResponse gjson.Result
 		err              error
@@ -506,6 +513,7 @@ func Test_crud_Update(t *testing.T) {
 			method:           http.MethodPut,
 			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed",
 			statusCode:       http.StatusOK,
+			body:             `{"name":"updated-secret"}`,
 			response:         `{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`,
 			expectedResponse: gjson.Parse(`{"id":"5f125024-1e5e-4591-9fee-365dc20eeeed","name":"new-secret"}`),
 			err:              nil,
@@ -517,6 +525,7 @@ func Test_crud_Update(t *testing.T) {
 			method:           http.MethodPut,
 			path:             "/5f125024-1e5e-4591-9fee-365dc20eeeed",
 			statusCode:       http.StatusInternalServerError,
+			body:             `{"name":"updated-secret"}`,
 			response:         `{"error":"internal server error"}`,
 			expectedResponse: gjson.Result{},
 			err:              Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"internal server error"}`)},
@@ -528,13 +537,15 @@ func Test_crud_Update(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, tc.path, r.URL.Path)
+				body, _ := io.ReadAll(r.Body)
+				assert.Equal(t, tc.body, string(body))
 			}))
 
 			defer srv.Close()
 
 			c := crud{getter{newClient(srv.URL, "")}}
 			id := uuid.MustParse("5f125024-1e5e-4591-9fee-365dc20eeeed")
-			config := gjson.Parse(`{"name":"updated-secret"}`)
+			config := gjson.Parse(tc.body)
 			response, err := c.Update(id, config)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
