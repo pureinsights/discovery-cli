@@ -15,6 +15,12 @@ type IOStreams struct {
 	reader *bufio.Reader
 }
 
+// LineReader is used to set up the IOStream reader field.
+// This field is used to be able to use the same reader when reading an input string that has the configuration for all of the Discovery Components.
+// For example: "http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\nhttp://discovery.queryflow.cn\n\n\n\n".
+// The previous example changes the Core URL, Ingestion URL, and QueryFlow URL.
+// If a new reader was created every call of the AskUser() function, the buffered lines would be lost and the string will not be read completely.
+// This feature is mostly used to simplify the unit tests.
 func (ios *IOStreams) lineReader() *bufio.Reader {
 	if ios.reader == nil {
 		ios.reader = bufio.NewReader(ios.In)
@@ -22,6 +28,7 @@ func (ios *IOStreams) lineReader() *bufio.Reader {
 	return ios.reader
 }
 
+// AskUser asks the given question to the user and reads for their response.
 func (ios *IOStreams) AskUser(question string) (string, error) {
 	reader := ios.lineReader()
 

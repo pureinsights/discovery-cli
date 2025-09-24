@@ -74,7 +74,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string) error {
 	ios := d.IOStreams()
 	v := d.Config()
 
-	propertyInput, err := ios.AskUser(fmt.Sprintf("%s [%s]", propertyName, v.GetString(fmt.Sprintf("%s.%s", profile, property))))
+	propertyInput, err := ios.AskUser(fmt.Sprintf("%s [%s]: ", propertyName, v.GetString(fmt.Sprintf("%s.%s", profile, property))))
 	if err != nil {
 		return err
 	}

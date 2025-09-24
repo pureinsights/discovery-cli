@@ -278,7 +278,8 @@ type errReader struct{ err error }
 // Read fails on any reading operation.
 func (r errReader) Read(p []byte) (int, error) { return 0, r.err }
 
-func TestAskUserConfig(t *testing.T) {
+// Test_discovery_AskUserConfig tests the discovery.AskUser() function
+func Test_discovery_AskUserConfig(t *testing.T) {
 	const profile = "cn"
 	const prop = "core_url"
 	const propName = "Core URL"
@@ -377,8 +378,8 @@ func TestAskUserConfig(t *testing.T) {
 	}
 }
 
-// TestSaveConfigFromUser_AllConfigPresent tests the SaveConfigFromUser when there is a configuration for every possible URL and API Key
-func TestSaveConfigFromUser_AllConfigPresent(t *testing.T) {
+// Test_discovery_SaveConfigFromUser_AllConfigPresent tests the discovery.SaveConfigFromUser() when there is a configuration for every possible URL and API Key
+func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 	const profile = "cn"
 	config := map[string]string{
 		"cn.core_url":      "http://localhost:8080",
@@ -519,8 +520,8 @@ func TestSaveConfigFromUser_AllConfigPresent(t *testing.T) {
 	}
 }
 
-// TestSaveConfigFromUser_NotAllConfigPresent tests the SaveConfigFromUser function when there are some properties with no explicit values set.
-func TestSaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
+// Test_discovery_SaveConfigFromUser_NotAllConfigPresent tests the discovery.SaveConfigFromUser() function when there are some properties with no explicit values set.
+func Test_discovery_SaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 	const profile = "cn"
 	config := map[string]string{
 		"cn.core_url":      "http://localhost:8080",
@@ -564,7 +565,8 @@ func TestSaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 	assert.Nil(t, got.Get("cn.staging_key"))
 }
 
-func TestSaveCoreConfigFromUser(t *testing.T) {
+// Test_discovery_SaveCoreConfigFromUser tests the discovery.SaveCoreConfigFromUser() function.
+func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 	const profile = "cn"
 
 	dir := t.TempDir()
@@ -732,7 +734,8 @@ func TestSaveCoreConfigFromUser(t *testing.T) {
 	}
 }
 
-func TestSaveIngestionConfigFromUser(t *testing.T) {
+// Test_discovery_SaveIngestionConfigFromUser tests the discovery.SaveIngestionConfigFromUser() function.
+func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 	const profile = "cn"
 
 	dir := t.TempDir()
@@ -900,7 +903,8 @@ func TestSaveIngestionConfigFromUser(t *testing.T) {
 	}
 }
 
-func TestSaveQueryFlowConfigFromUser(t *testing.T) {
+// Test_discovery_SaveQueryFlowConfigFromUser tests discovery.SaveQueryFlowConfigFromUser() function.
+func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 	const profile = "cn"
 
 	dir := t.TempDir()
@@ -1068,7 +1072,8 @@ func TestSaveQueryFlowConfigFromUser(t *testing.T) {
 	}
 }
 
-func TestSaveStagingConfigFromUser(t *testing.T) {
+// Test_discovery_SaveStagingConfigFromUser tests the discovery.SaveStagingConfigFromUser() function.
+func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 	const profile = "cn"
 
 	dir := t.TempDir()
