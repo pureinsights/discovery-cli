@@ -1,9 +1,6 @@
 name: Pull Request
 
 on:
-  push:
-    paths:
-      - '**/testdata/**'
   pull_request:
     types:
       - opened
@@ -26,6 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Check base branch
+        if: github.event_name == 'pull_request'
         id: check-branch
         run: |
           prerelease=${{ startsWith(github.head_ref, 'hotfix/') || startsWith(github.head_ref, 'release/')}}
@@ -44,7 +42,7 @@ jobs:
               - '**.go'
               - 'go.mod'
               - '.github/workflows/pull-request.yml'
-
+              - '**/testdata/**'
 
   build:
     if: ${{ needs.validate.outputs.code-changes == 'true' }}
