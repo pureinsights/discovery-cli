@@ -272,8 +272,8 @@ core_key="discovery.key.core.cn"
 	}
 }
 
-// TestObfuscate tests the Obfuscate() function.
-func TestObfuscate(t *testing.T) {
+// Test_obfuscate tests the obfuscate() function.
+func Test_obfuscate(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -318,7 +318,7 @@ func TestObfuscate(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := Obfuscate(tc.input)
+			got := obfuscate(tc.input)
 			assert.Equal(t, tc.expected, got)
 		})
 	}
@@ -435,7 +435,7 @@ func Test_discovery_AskUserConfig(t *testing.T) {
 				require.Equal(t, tc.expectedResult, got, "property value mismatch")
 			}
 			if tc.sensitive {
-				require.Contains(t, out.String(), propName+" ["+Obfuscate(initial)+"]")
+				require.Contains(t, out.String(), propName+" ["+obfuscate(initial)+"]")
 			} else {
 				require.Contains(t, out.String(), propName+" ["+initial+"]")
 			}
