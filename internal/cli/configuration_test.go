@@ -1309,18 +1309,12 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 }
 
 func Test_discovery_printConfig(t *testing.T) {
-	const profile = "cn"
-	const prop = "core_url"
-	const propName = "Core URL"
-	const initial = "http://localhost:8080"
-
 	tests := []struct {
-		name           string
-		input          string
-		inReader       io.Reader
-		err            error
-		expectedResult string
-		sensitive      bool
+		name         string
+		propertyName string
+		property     string
+		sensitive    bool
+		err          error
 	}{
 		{
 			name:           "Keep value when user presses Enter",
