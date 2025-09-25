@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"math"
 	"path/filepath"
 
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
@@ -66,15 +67,49 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	return vpr, nil
 }
 
+// Obfuscate masks a string so that at least 60% of its runes
+// are replaced by '*' characters. Only the last runes are kept visible.
+// No parameters are accepted for visible count or mask rune.
+func Obfuscate(s string) string {
+	if s == "" {
+		return ""
+	}
+
+	r := []rune(s)
+	n := len(r)
+
+	minMask := int(math.Ceil(0.6 * float64(n)))
+
+	visible := n - minMask
+	if visible < 0 {
+		visible = 0
+	}
+
+	maskCount := n - visible
+
+	for i := 0; i < maskCount; i++ {
+		r[i] = '*'
+	}
+
+	return string(r)
+}
+
 // AskUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
 // If the user inputs an empty string, the value is not changed.
 // If the user inputs a space, the value is set to an empty string.
 // If the user inputs a new value, the property is modified.
-func (d discovery) askUserConfig(profile, propertyName, property string) error {
+func (d discovery) askUserConfig(profile, propertyName, property string, sensitive bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
 
-	propertyInput, err := ios.AskUser(fmt.Sprintf("%s [%s]: ", propertyName, v.GetString(fmt.Sprintf("%s.%s", profile, property))))
+	var value string
+	if !(sensitive) {
+		value = v.GetString(fmt.Sprintf("%s.%s", profile, property))
+	} else {
+		value = Obfuscate(v.GetString(fmt.Sprintf("%s.%s", profile, property)))
+	}
+
+	propertyInput, err := ios.AskUser(fmt.Sprintf("%s [%s]: ", propertyName, value))
 	if err != nil {
 		return err
 	}
@@ -101,12 +136,12 @@ func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	urlErr := d.askUserConfig(profile, "Core URL", "core_url")
+	urlErr := d.askUserConfig(profile, "Core URL", "core_url", false)
 	if urlErr != nil {
 		return urlErr
 	}
 
-	keyErr := d.askUserConfig(profile, "Core API Key", "core_key")
+	keyErr := d.askUserConfig(profile, "Core API Key", "core_key", true)
 	if keyErr != nil {
 		return keyErr
 	}
@@ -125,12 +160,12 @@ func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) 
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	urlErr := d.askUserConfig(profile, "Ingestion URL", "ingestion_url")
+	urlErr := d.askUserConfig(profile, "Ingestion URL", "ingestion_url", false)
 	if urlErr != nil {
 		return urlErr
 	}
 
-	keyErr := d.askUserConfig(profile, "Ingestion API Key", "ingestion_key")
+	keyErr := d.askUserConfig(profile, "Ingestion API Key", "ingestion_key", true)
 	if keyErr != nil {
 		return keyErr
 	}
@@ -149,12 +184,12 @@ func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) 
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	urlErr := d.askUserConfig(profile, "QueryFlow URL", "queryflow_url")
+	urlErr := d.askUserConfig(profile, "QueryFlow URL", "queryflow_url", false)
 	if urlErr != nil {
 		return urlErr
 	}
 
-	keyErr := d.askUserConfig(profile, "QueryFlow API Key", "queryflow_key")
+	keyErr := d.askUserConfig(profile, "QueryFlow API Key", "queryflow_key", true)
 	if keyErr != nil {
 		return keyErr
 	}
@@ -173,12 +208,12 @@ func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) er
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	urlErr := d.askUserConfig(profile, "Staging URL", "staging_url")
+	urlErr := d.askUserConfig(profile, "Staging URL", "staging_url", false)
 	if urlErr != nil {
 		return urlErr
 	}
 
-	keyErr := d.askUserConfig(profile, "Staging API Key", "staging_key")
+	keyErr := d.askUserConfig(profile, "Staging API Key", "staging_key", true)
 	if keyErr != nil {
 		return keyErr
 	}
