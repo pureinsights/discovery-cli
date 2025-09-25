@@ -290,29 +290,30 @@ func Test_obfuscate(t *testing.T) {
 			expected: "******GHIJ",
 		},
 		{
-			name:     "ascii len 5 (ceil(0.6*5)=3 masked, 2 visible)",
+			name:     "ascii len 5 (60% masked -> 3 masked, 2 visible)",
 			input:    "abcde",
 			expected: "***de",
 		},
 		{
-			name:     "ascii len 4 (ceil(0.6*4)=3 masked, 1 visible)",
+			name:     "ascii len 4 (60% masked -> 3 masked, 1 visible)",
 			input:    "abcd",
 			expected: "***d",
 		},
 		{
-			name:     "ascii len 3 (ceil(0.6*3)=2 masked, 1 visible)",
+			name:     "ascii len 3 (60% masked -> 2 masked, 1 visible)",
 			input:    "abc",
 			expected: "**c",
 		},
+
 		{
-			name:     "single rune",
-			input:    "x",
-			expected: "*",
-		},
-		{
-			name:     "two runes (ceil(0.6*2)=2 masked, 0 visible)",
+			name:     "two characters (60% masked -> 2 masked, 0 visible)",
 			input:    "xy",
 			expected: "**",
+		},
+		{
+			name:     "single character",
+			input:    "x",
+			expected: "*",
 		},
 	}
 
