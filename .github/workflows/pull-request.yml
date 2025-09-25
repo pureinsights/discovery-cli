@@ -23,7 +23,6 @@ jobs:
           fetch-depth: 0
 
       - name: Check base branch
-        if: github.event_name == 'pull_request'
         id: check-branch
         run: |
           prerelease=${{ startsWith(github.head_ref, 'hotfix/') || startsWith(github.head_ref, 'release/')}}
