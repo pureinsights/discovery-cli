@@ -465,7 +465,6 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		name       string
 		input      string
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -644,7 +643,6 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		config     map[string]string
 		standalone bool
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -813,7 +811,6 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		config     map[string]string
 		standalone bool
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -982,7 +979,6 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		config     map[string]string
 		standalone bool
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -1151,7 +1147,6 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		config     map[string]string
 		standalone bool
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
