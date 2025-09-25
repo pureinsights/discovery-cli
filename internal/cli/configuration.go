@@ -67,9 +67,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	return vpr, nil
 }
 
-// Obfuscate masks a string so that at least 60% of its runes
-// are replaced by '*' characters. Only the last runes are kept visible.
-// No parameters are accepted for visible count or mask rune.
+// Obfuscate modifies a string so that at least 60% of its characters are replaced by '*' characters.
 func Obfuscate(s string) string {
 	if s == "" {
 		return ""
