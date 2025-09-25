@@ -331,7 +331,7 @@ type errReader struct{ err error }
 func (r errReader) Read(p []byte) (int, error) { return 0, r.err }
 
 // Test_discovery_AskUserConfig tests the discovery.AskUser() function
-func Test_discovery_AskUserConfig(t *testing.T) {
+func Test_discovery_askUserConfig(t *testing.T) {
 	const profile = "cn"
 	const prop = "core_url"
 	const propName = "Core URL"
