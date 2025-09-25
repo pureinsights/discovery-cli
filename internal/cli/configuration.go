@@ -231,3 +231,33 @@ func (d discovery) SaveConfigFromUser(profile string) error {
 	}
 	return d.SaveStagingConfigFromUser(profile, false)
 }
+
+func (d discovery) PrintCoreConfigToUser(profile string, sensitive bool) error {
+	v := d.Config()
+	ios := d.IOStreams()
+	var err error
+	_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
+	if err != nil {
+		return err
+	}
+
+	url := v.Get(fmt.Sprintf("%s.%s", profile, "core_url"))
+	if url != nil {
+		_, err = fmt.Fprintf(ios.Out, "%q:%q\n", "Core URL", url.(string))
+		if err != nil {
+			return err
+		}
+	}
+
+	key := v.Get(fmt.Sprintf("%s.%s", profile, "core_key"))
+	if key != nil {
+		var value string
+		if !(sensitive) {
+			value = key.(string)
+		} else {
+			value = obfuscate(key.(string))
+		}
+		_, err = fmt.Fprintf(ios.Out, "%q:%q\n", "Core API Key", value)
+	}
+	return err
+}

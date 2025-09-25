@@ -12,7 +12,7 @@ type Discovery interface {
 	Config() *viper.Viper
 	ConfigPath() string
 	SaveConfigFromUser(ios iostreams.IOStreams, profile string, path string) error
-	PrintConfigToUser(profile string, sensitive bool)
+	PrintConfigToUser(profile string, sensitive bool) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
