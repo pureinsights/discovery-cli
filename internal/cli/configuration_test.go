@@ -272,6 +272,58 @@ core_key="discovery.key.core.cn"
 	}
 }
 
+// Test_obfuscate tests the obfuscate() function.
+func Test_obfuscate(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "ascii len 10 (60% masked -> 6 masked, 4 visible)",
+			input:    "ABCDEFGHIJ",
+			expected: "******GHIJ",
+		},
+		{
+			name:     "ascii len 5 (ceil(0.6*5)=3 masked, 2 visible)",
+			input:    "abcde",
+			expected: "***de",
+		},
+		{
+			name:     "ascii len 4 (ceil(0.6*4)=3 masked, 1 visible)",
+			input:    "abcd",
+			expected: "***d",
+		},
+		{
+			name:     "ascii len 3 (ceil(0.6*3)=2 masked, 1 visible)",
+			input:    "abc",
+			expected: "**c",
+		},
+		{
+			name:     "single rune",
+			input:    "x",
+			expected: "*",
+		},
+		{
+			name:     "two runes (ceil(0.6*2)=2 masked, 0 visible)",
+			input:    "xy",
+			expected: "**",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := obfuscate(tc.input)
+			assert.Equal(t, tc.expected, got)
+		})
+	}
+}
+
 // ErrReader is a struct that fails on any Read. It is used to mock when reading from an in IOStream fails.
 type errReader struct{ err error }
 
@@ -291,53 +343,62 @@ func Test_discovery_AskUserConfig(t *testing.T) {
 		inReader       io.Reader
 		err            error
 		expectedResult string
+		sensitive      bool
 	}{
 		{
 			name:           "Keep value when user presses Enter",
 			input:          "\n",
 			err:            nil,
 			expectedResult: initial,
+			sensitive:      false,
 		},
 		{
 			name:           "Set empty when user types single space",
 			input:          " \n",
 			err:            nil,
 			expectedResult: "",
+			sensitive:      false,
 		},
 		{
 			name:           "Set new value",
 			input:          "http://discovery.core.cn\n",
 			err:            nil,
 			expectedResult: "http://discovery.core.cn",
+			sensitive:      true,
 		},
 		{
 			name:           "Value without newline then EOF returns value, no error",
 			input:          "http://discovery.core.cn",
 			err:            nil,
 			expectedResult: "http://discovery.core.cn",
+			sensitive:      true,
 		},
 		{
 			name:           "Space without newline then EOF sets empty, no error",
 			input:          " ",
 			err:            nil,
 			expectedResult: "",
+			sensitive:      false,
 		},
 		{
 			name:           "Immediate EOF (empty reader) returns empty string, no error",
 			input:          "",
 			err:            nil,
 			expectedResult: initial,
+			sensitive:      false,
 		},
 		{
 			name:           "CRLF line endings handled",
 			input:          "http://discovery.core.cn\r\n",
 			err:            nil,
 			expectedResult: "http://discovery.core.cn",
+			sensitive:      true,
 		},
 		{
-			name:     "Reading from the In IOStream fails",
-			inReader: errReader{err: errors.New("read failed")},
-			err:      fmt.Errorf("read failed"),
+			name:      "Reading from the In IOStream fails",
+			inReader:  errReader{err: errors.New("read failed")},
+			err:       fmt.Errorf("read failed"),
+			sensitive: true,
 		},
 	}
 
@@ -363,7 +424,7 @@ func Test_discovery_AskUserConfig(t *testing.T) {
 
 			d := NewDiscovery(&ios, vpr, "")
 
-			err := d.askUserConfig(profile, propName, prop)
+			err := d.askUserConfig(profile, propName, prop, tc.sensitive)
 
 			if tc.err != nil {
 				require.Error(t, err)
@@ -373,7 +434,12 @@ func Test_discovery_AskUserConfig(t *testing.T) {
 				got := d.Config().GetString(profile + "." + prop)
 				require.Equal(t, tc.expectedResult, got, "property value mismatch")
 			}
-			require.Contains(t, out.String(), propName+" ["+initial+"]")
+			if tc.sensitive {
+				require.Contains(t, out.String(), propName+" ["+obfuscate(initial)+"]")
+			} else {
+				require.Contains(t, out.String(), propName+" ["+initial+"]")
+			}
+
 		})
 	}
 }

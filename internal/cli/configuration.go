@@ -68,7 +68,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 }
 
 // Obfuscate modifies a string so that at least 60% of its characters are replaced by '*' characters.
-func Obfuscate(s string) string {
+func obfuscate(s string) string {
 	if s == "" {
 		return ""
 	}
@@ -76,14 +76,7 @@ func Obfuscate(s string) string {
 	r := []rune(s)
 	n := len(r)
 
-	minMask := int(math.Ceil(0.6 * float64(n)))
-
-	visible := n - minMask
-	if visible < 0 {
-		visible = 0
-	}
-
-	maskCount := n - visible
+	maskCount := int(math.Ceil(0.6 * float64(n)))
 
 	for i := 0; i < maskCount; i++ {
 		r[i] = '*'
@@ -104,7 +97,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	if !(sensitive) {
 		value = v.GetString(fmt.Sprintf("%s.%s", profile, property))
 	} else {
-		value = Obfuscate(v.GetString(fmt.Sprintf("%s.%s", profile, property)))
+		value = obfuscate(v.GetString(fmt.Sprintf("%s.%s", profile, property)))
 	}
 
 	propertyInput, err := ios.AskUser(fmt.Sprintf("%s [%s]: ", propertyName, value))
