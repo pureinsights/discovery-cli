@@ -232,32 +232,107 @@ func (d discovery) SaveConfigFromUser(profile string) error {
 	return d.SaveStagingConfigFromUser(profile, false)
 }
 
-func (d discovery) PrintCoreConfigToUser(profile string, sensitive bool) error {
+func (d discovery) printConfig(profile, propertyName, property string, sensitive bool) error {
 	v := d.Config()
 	ios := d.IOStreams()
-	var err error
-	_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
-	if err != nil {
+
+	if v.IsSet(fmt.Sprintf("%s.%s", profile, property)) {
+		value := v.GetString(fmt.Sprintf("%s.%s", profile, property))
+		if sensitive {
+			value = obfuscate(value)
+		}
+		_, err := fmt.Fprintf(ios.Out, "%s: %q\n", propertyName, value)
 		return err
 	}
+	return nil
+}
 
-	url := v.Get(fmt.Sprintf("%s.%s", profile, "core_url"))
-	if url != nil {
-		_, err = fmt.Fprintf(ios.Out, "%q:%q\n", "Core URL", url.(string))
+func (d discovery) PrintCoreConfigToUser(profile string, sensitive, standalone bool) error {
+	ios := d.IOStreams()
+	var err error
+	if standalone {
+		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
 		if err != nil {
 			return err
 		}
 	}
 
-	key := v.Get(fmt.Sprintf("%s.%s", profile, "core_key"))
-	if key != nil {
-		var value string
-		if !(sensitive) {
-			value = key.(string)
-		} else {
-			value = obfuscate(key.(string))
-		}
-		_, err = fmt.Fprintf(ios.Out, "%q:%q\n", "Core API Key", value)
+	urlErr := d.printConfig(profile, "Core URL", "core_url", false)
+	if urlErr != nil {
+		return urlErr
 	}
-	return err
+
+	return d.printConfig(profile, "Core API Key", "core_key", sensitive)
+}
+
+func (d discovery) PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error {
+	ios := d.IOStreams()
+	var err error
+	if standalone {
+		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
+		if err != nil {
+			return err
+		}
+	}
+
+	urlErr := d.printConfig(profile, "Ingestion URL", "ingestion_url", false)
+	if urlErr != nil {
+		return urlErr
+	}
+
+	return d.printConfig(profile, "Ingestion API Key", "ingestion_key", sensitive)
+}
+
+func (d discovery) PrintQueryFlowConfigToUser(profile string, sensitive, standalone bool) error {
+	ios := d.IOStreams()
+	var err error
+	if standalone {
+		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
+		if err != nil {
+			return err
+		}
+	}
+
+	urlErr := d.printConfig(profile, "QueryFlow URL", "queryflow_url", false)
+	if urlErr != nil {
+		return urlErr
+	}
+
+	return d.printConfig(profile, "QueryFlow API Key", "queryflow_key", sensitive)
+}
+
+func (d discovery) PrintStagingConfigToUser(profile string, sensitive, standalone bool) error {
+	ios := d.IOStreams()
+	var err error
+	if standalone {
+		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
+		if err != nil {
+			return err
+		}
+	}
+
+	urlErr := d.printConfig(profile, "Staging URL", "staging_url", false)
+	if urlErr != nil {
+		return urlErr
+	}
+
+	return d.printConfig(profile, "Staging API Key", "staging_key", sensitive)
+}
+
+func (d discovery) printConfigToUser(profile string, sensitive bool) error {
+	fmt.Fprintf(d.IOStreams().Out, "Showing the configuration of profile %s:\n\n", profile)
+
+	err := d.PrintCoreConfigToUser(profile, sensitive, false)
+	if err != nil {
+		return err
+	}
+	err = d.PrintIngestionConfigToUser(profile, sensitive, false)
+	if err != nil {
+		return err
+	}
+	err = d.PrintQueryFlowConfigToUser(profile, sensitive, false)
+	if err != nil {
+		return err
+	}
+	return d.PrintStagingConfigToUser(profile, sensitive, false)
 }

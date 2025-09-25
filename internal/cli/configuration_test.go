@@ -1306,3 +1306,116 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		})
 	}
 }
+
+func Test_discovery_printConfig(t *testing.T) {
+	const profile = "cn"
+	const prop = "core_url"
+	const propName = "Core URL"
+	const initial = "http://localhost:8080"
+
+	tests := []struct {
+		name           string
+		input          string
+		inReader       io.Reader
+		err            error
+		expectedResult string
+		sensitive      bool
+	}{
+		{
+			name:           "Keep value when user presses Enter",
+			input:          "\n",
+			err:            nil,
+			expectedResult: initial,
+			sensitive:      false,
+		},
+		{
+			name:           "Set empty when user types single space",
+			input:          " \n",
+			err:            nil,
+			expectedResult: "",
+			sensitive:      false,
+		},
+		{
+			name:           "Set new value",
+			input:          "http://discovery.core.cn\n",
+			err:            nil,
+			expectedResult: "http://discovery.core.cn",
+			sensitive:      true,
+		},
+		{
+			name:           "Value without newline then EOF returns value, no error",
+			input:          "http://discovery.core.cn",
+			err:            nil,
+			expectedResult: "http://discovery.core.cn",
+			sensitive:      true,
+		},
+		{
+			name:           "Space without newline then EOF sets empty, no error",
+			input:          " ",
+			err:            nil,
+			expectedResult: "",
+			sensitive:      false,
+		},
+		{
+			name:           "Immediate EOF (empty reader) returns empty string, no error",
+			input:          "",
+			err:            nil,
+			expectedResult: initial,
+			sensitive:      false,
+		},
+		{
+			name:           "CRLF line endings handled",
+			input:          "http://discovery.core.cn\r\n",
+			err:            nil,
+			expectedResult: "http://discovery.core.cn",
+			sensitive:      true,
+		},
+		{
+			name:      "Reading from the In IOStream fails",
+			inReader:  errReader{err: errors.New("read failed")},
+			err:       fmt.Errorf("read failed"),
+			sensitive: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var in io.Reader
+			if tc.inReader != nil {
+				in = tc.inReader
+			} else {
+				in = strings.NewReader(tc.input)
+			}
+
+			var out bytes.Buffer
+
+			ios := iostreams.IOStreams{
+				In:  in,
+				Out: &out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			vpr.Set(fmt.Sprintf("%s.%s", profile, prop), initial)
+
+			d := NewDiscovery(&ios, vpr, "")
+
+			err := d.askUserConfig(profile, propName, prop, tc.sensitive)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				got := d.Config().GetString(profile + "." + prop)
+				require.Equal(t, tc.expectedResult, got, "property value mismatch")
+			}
+			if tc.sensitive {
+				require.Contains(t, out.String(), propName+" ["+obfuscate(initial)+"]")
+			} else {
+				require.Contains(t, out.String(), propName+" ["+initial+"]")
+			}
+
+		})
+	}
+}
