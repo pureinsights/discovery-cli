@@ -232,6 +232,9 @@ func (d discovery) SaveConfigFromUser(profile string) error {
 	return d.SaveStagingConfigFromUser(profile, false)
 }
 
+// PrintConfig is the auxiliary function to print a property's value to the user.
+// It prints the property with the given profile and name.
+// If the value of the property is sensitive, it is obfuscated.
 func (d discovery) printConfig(profile, propertyName, property string, sensitive bool) error {
 	v := d.Config()
 	ios := d.IOStreams()
@@ -247,11 +250,14 @@ func (d discovery) printConfig(profile, propertyName, property string, sensitive
 	return nil
 }
 
+// PrintCoreConfigToUser prints the Discovery Core's configuration properties for the given profile.
+// The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
+// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintCoreConfigToUser(profile string, sensitive, standalone bool) error {
 	ios := d.IOStreams()
 	var err error
 	if standalone {
-		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
+		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
 		if err != nil {
 			return err
 		}
@@ -265,11 +271,14 @@ func (d discovery) PrintCoreConfigToUser(profile string, sensitive, standalone b
 	return d.printConfig(profile, "Core API Key", "core_key", sensitive)
 }
 
+// PrintIngestionConfigToUser prints the Discovery Ingestion's configuration properties for the given profile.
+// The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
+// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error {
 	ios := d.IOStreams()
 	var err error
 	if standalone {
-		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
+		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
 		if err != nil {
 			return err
 		}
@@ -283,11 +292,14 @@ func (d discovery) PrintIngestionConfigToUser(profile string, sensitive, standal
 	return d.printConfig(profile, "Ingestion API Key", "ingestion_key", sensitive)
 }
 
+// PrintQueryFlowConfigToUser prints the Discovery QueryFlow's configuration properties for the given profile.
+// The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
+// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintQueryFlowConfigToUser(profile string, sensitive, standalone bool) error {
 	ios := d.IOStreams()
 	var err error
 	if standalone {
-		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
+		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
 		if err != nil {
 			return err
 		}
@@ -301,11 +313,14 @@ func (d discovery) PrintQueryFlowConfigToUser(profile string, sensitive, standal
 	return d.printConfig(profile, "QueryFlow API Key", "queryflow_key", sensitive)
 }
 
+// PrintStagingConfigToUser prints the Discovery Staging's configuration properties for the given profile.
+// The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
+// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintStagingConfigToUser(profile string, sensitive, standalone bool) error {
 	ios := d.IOStreams()
 	var err error
 	if standalone {
-		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %s:\n\n", profile)
+		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
 		if err != nil {
 			return err
 		}
@@ -319,10 +334,15 @@ func (d discovery) PrintStagingConfigToUser(profile string, sensitive, standalon
 	return d.printConfig(profile, "Staging API Key", "staging_key", sensitive)
 }
 
-func (d discovery) printConfigToUser(profile string, sensitive bool) error {
-	fmt.Fprintf(d.IOStreams().Out, "Showing the configuration of profile %s:\n\n", profile)
-
-	err := d.PrintCoreConfigToUser(profile, sensitive, false)
+// PrintConfigToUser prints the Discovery Components' configuration properties for the given profile.
+// The caller of the function can determine if the API Keys are sensitive so that they can be obfuscated.
+// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
+func (d discovery) PrintConfigToUser(profile string, sensitive bool) error {
+	_, err := fmt.Fprintf(d.IOStreams().Out, "Showing the configuration of profile %q:\n\n", profile)
+	if err != nil {
+		return err
+	}
+	err = d.PrintCoreConfigToUser(profile, sensitive, false)
 	if err != nil {
 		return err
 	}

@@ -465,7 +465,6 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		name       string
 		input      string
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -644,7 +643,6 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		config     map[string]string
 		standalone bool
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -813,7 +811,6 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		config     map[string]string
 		standalone bool
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -982,7 +979,6 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		config     map[string]string
 		standalone bool
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -1151,7 +1147,6 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		config     map[string]string
 		standalone bool
 		inReader   io.Reader
-		outWriter  io.Writer
 		writePath  string
 		err        error
 		expectKeys map[string]string
@@ -1308,109 +1303,878 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 	}
 }
 
+// ErrWriter is used to force an error when writing to the output stream.
+type errWriter struct{ err error }
+
+// Write completes the implementation of the io.Writer interface.
+func (w errWriter) Write(p []byte) (int, error) { return 0, w.err }
+
+// Test_discovery_printConfig tests the discovery.PrintConfig() function.
 func Test_discovery_printConfig(t *testing.T) {
 	tests := []struct {
-		name         string
-		propertyName string
-		property     string
-		sensitive    bool
-		err          error
+		name           string
+		profile        string
+		propertyName   string
+		property       string
+		sensitive      bool
+		config         map[string]string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
 	}{
 		{
-			name:           "Keep value when user presses Enter",
-			input:          "\n",
+			name:         "Print not sensitive value ",
+			profile:      "cn",
+			propertyName: "Core URL",
+			property:     "core_url",
+			sensitive:    false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
+			outWriter:      nil,
 			err:            nil,
-			expectedResult: initial,
-			sensitive:      false,
 		},
 		{
-			name:           "Set empty when user types single space",
-			input:          " \n",
+			name:         "Print sensitive value",
+			profile:      "cn",
+			propertyName: "Core API Key",
+			property:     "core_key",
+			sensitive:    true,
+			config: map[string]string{
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Core API Key", obfuscate("discovery.key.core.cn")),
+			outWriter:      nil,
 			err:            nil,
-			expectedResult: "",
-			sensitive:      false,
 		},
 		{
-			name:           "Set new value",
-			input:          "http://discovery.core.cn\n",
+			name:         "Do not print nil value",
+			profile:      "cn",
+			propertyName: "Core URL",
+			property:     "core_url",
+			sensitive:    false,
+			config: map[string]string{
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: "",
+			outWriter:      nil,
 			err:            nil,
-			expectedResult: "http://discovery.core.cn",
-			sensitive:      true,
 		},
 		{
-			name:           "Value without newline then EOF returns value, no error",
-			input:          "http://discovery.core.cn",
-			err:            nil,
-			expectedResult: "http://discovery.core.cn",
-			sensitive:      true,
-		},
-		{
-			name:           "Space without newline then EOF sets empty, no error",
-			input:          " ",
-			err:            nil,
-			expectedResult: "",
-			sensitive:      false,
-		},
-		{
-			name:           "Immediate EOF (empty reader) returns empty string, no error",
-			input:          "",
-			err:            nil,
-			expectedResult: initial,
-			sensitive:      false,
-		},
-		{
-			name:           "CRLF line endings handled",
-			input:          "http://discovery.core.cn\r\n",
-			err:            nil,
-			expectedResult: "http://discovery.core.cn",
-			sensitive:      true,
-		},
-		{
-			name:      "Reading from the In IOStream fails",
-			inReader:  errReader{err: errors.New("read failed")},
-			err:       fmt.Errorf("read failed"),
-			sensitive: true,
+			name:         "Printing fails",
+			profile:      "cn",
+			propertyName: "Core URL",
+			property:     "core_url",
+			sensitive:    false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			var in io.Reader
-			if tc.inReader != nil {
-				in = tc.inReader
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
 			} else {
-				in = strings.NewReader(tc.input)
+				out = buf
 			}
 
-			var out bytes.Buffer
-
 			ios := iostreams.IOStreams{
-				In:  in,
-				Out: &out,
+				In:  os.Stdin,
+				Out: out,
 				Err: os.Stderr,
 			}
 
 			vpr := viper.New()
-			vpr.Set(fmt.Sprintf("%s.%s", profile, prop), initial)
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
 
 			d := NewDiscovery(&ios, vpr, "")
 
-			err := d.askUserConfig(profile, propName, prop, tc.sensitive)
+			err := d.printConfig(tc.profile, tc.propertyName, tc.property, tc.sensitive)
 
 			if tc.err != nil {
 				require.Error(t, err)
 				require.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
-				got := d.Config().GetString(profile + "." + prop)
-				require.Equal(t, tc.expectedResult, got, "property value mismatch")
+				require.Equal(t, tc.expectedOutput, buf.String())
 			}
-			if tc.sensitive {
-				require.Contains(t, out.String(), propName+" ["+obfuscate(initial)+"]")
+		})
+	}
+}
+
+// FailOnNWriter is a struct that mocks the IOStreams.Out field.
+// It is used to force errors when writing to an output stream.
+type failOnNWriter struct {
+	Writer  io.Writer
+	N       int
+	counter int
+}
+
+// Write implements the io.Writer interface. This function fails on the N'th writing operation.
+func (f *failOnNWriter) Write(p []byte) (int, error) {
+	f.counter++
+	if f.counter == f.N {
+		return 0, fmt.Errorf("write failed")
+	}
+	return f.Writer.Write(p)
+}
+
+// Test_discovery_PrintCoreConfigToUser tests the discovery.PrintCoreToUser() function.
+func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
+	tests := []struct {
+		name           string
+		profile        string
+		sensitive      bool
+		standalone     bool
+		config         map[string]string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		{
+			name:       "Print not standalone and not sensitive values",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: true,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and nil value",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Printing fails for Standalone Instructions",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: true,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:       "Printing fails for Core URL",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:       "Printing fails for Core API Key",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
+			outWriter:      &failOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+			err:            errors.New("write failed"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
 			} else {
-				require.Contains(t, out.String(), propName+" ["+initial+"]")
+				out = buf
 			}
 
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			d := NewDiscovery(&ios, vpr, "")
+
+			err := d.PrintCoreConfigToUser(tc.profile, tc.sensitive, tc.standalone)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_PrintIngestionConfigToUser tests the discovery.PrintIngestionConfigToUser() function.
+func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
+	tests := []struct {
+		name           string
+		profile        string
+		sensitive      bool
+		standalone     bool
+		config         map[string]string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		{
+			name:       "Print not standalone and not sensitive values",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.ingestion_url": "http://localhost:8080",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", "discovery.key.ingestion.cn"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: false,
+			config: map[string]string{
+				"cn.ingestion_url": "http://localhost:8080",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: true,
+			config: map[string]string{
+				"cn.ingestion_url": "http://localhost:8080",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+			},
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and nil value",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.ingestion_url": "http://localhost:8080",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Ingestion URL", "http://localhost:8080"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Printing fails for Standalone Instructions",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: true,
+			config: map[string]string{
+				"cn.ingestion_url": "http://localhost:8080",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+			},
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:       "Printing fails for Ingestion URL",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.ingestion_url": "http://localhost:8080",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Ingestion URL", "http://localhost:8080"),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:       "Printing fails for Ingestion API Key",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.ingestion_url": "http://localhost:8080",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", "discovery.key.ingestion.cn"),
+			outWriter:      &failOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+			err:            errors.New("write failed"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			d := NewDiscovery(&ios, vpr, "")
+
+			err := d.PrintIngestionConfigToUser(tc.profile, tc.sensitive, tc.standalone)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_PrintQueryFlowConfigToUser tests the discovery.PrintQueryFlowConfigToUser() function.
+func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
+	tests := []struct {
+		name           string
+		profile        string
+		sensitive      bool
+		standalone     bool
+		config         map[string]string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		{
+			name:       "Print not standalone and not sensitive values",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.queryflow_url": "http://localhost:8080",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", "discovery.key.queryflow.cn"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: false,
+			config: map[string]string{
+				"cn.queryflow_url": "http://localhost:8080",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: true,
+			config: map[string]string{
+				"cn.queryflow_url": "http://localhost:8080",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+			},
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and nil value",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.queryflow_url": "http://localhost:8080",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "QueryFlow URL", "http://localhost:8080"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Printing fails for Standalone Instructions",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: true,
+			config: map[string]string{
+				"cn.queryflow_url": "http://localhost:8080",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+			},
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:       "Printing fails for QueryFlow URL",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.queryflow_url": "http://localhost:8080",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "QueryFlow URL", "http://localhost:8080"),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:       "Printing fails for QueryFlow API Key",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.queryflow_url": "http://localhost:8080",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", "discovery.key.queryflow.cn"),
+			outWriter:      &failOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+			err:            errors.New("write failed"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			d := NewDiscovery(&ios, vpr, "")
+
+			err := d.PrintQueryFlowConfigToUser(tc.profile, tc.sensitive, tc.standalone)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_PrintStagingConfigToUser tests the discovery.PrintStagingConfigToUser() function.
+func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
+	tests := []struct {
+		name           string
+		profile        string
+		sensitive      bool
+		standalone     bool
+		config         map[string]string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		{
+			name:       "Print not standalone and not sensitive values",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.staging_url": "http://localhost:8080",
+				"cn.staging_key": "discovery.key.queryflow.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Staging URL", "http://localhost:8080", "Staging API Key", "discovery.key.queryflow.cn"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: false,
+			config: map[string]string{
+				"cn.staging_url": "http://localhost:8080",
+				"cn.staging_key": "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: true,
+			config: map[string]string{
+				"cn.staging_url": "http://localhost:8080",
+				"cn.staging_key": "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and nil value",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.staging_url": "http://localhost:8080",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Staging URL", "http://localhost:8080"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Printing fails for Standalone Instructions",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: true,
+			config: map[string]string{
+				"cn.staging_url": "http://localhost:8080",
+				"cn.staging_key": "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:       "Printing fails for Staging URL",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.staging_url": "http://localhost:8080",
+				"cn.staging_key": "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Staging URL", "http://localhost:8080"),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:       "Printing fails for Staging API Key",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.staging_url": "http://localhost:8080",
+				"cn.staging_key": "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Staging URL", "http://localhost:8080", "Staging API Key", "discovery.key.staging.cn"),
+			outWriter:      &failOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+			err:            errors.New("write failed"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			d := NewDiscovery(&ios, vpr, "")
+
+			err := d.PrintStagingConfigToUser(tc.profile, tc.sensitive, tc.standalone)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_PrintConfigToUser tests the discovery.PrintConfigToUser() function.
+func Test_discovery_PrintConfigToUser(t *testing.T) {
+	tests := []struct {
+		name           string
+		profile        string
+		sensitive      bool
+		config         map[string]string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		{
+			name:      "Print all values not sensitive",
+			profile:   "cn",
+			sensitive: false,
+			config: map[string]string{
+				"cn.core_url":      "http://localhost:12010",
+				"cn.core_key":      "discovery.key.core.cn",
+				"cn.ingestion_url": "http://localhost:12020",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+				"cn.queryflow_url": "http://localhost:12030",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+				"cn.staging_url":   "http://localhost:12040",
+				"cn.staging_key":   "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:      "Print all values sensitive",
+			profile:   "cn",
+			sensitive: true,
+			config: map[string]string{
+				"cn.core_url":      "http://localhost:12010",
+				"cn.core_key":      "discovery.key.core.cn",
+				"cn.ingestion_url": "http://localhost:12020",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+				"cn.queryflow_url": "http://localhost:12030",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+				"cn.staging_url":   "http://localhost:12040",
+				"cn.staging_key":   "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", obfuscate("discovery.key.core.cn"), "Ingestion URL", "http://localhost:12020", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn"), "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn"), "Staging URL", "http://localhost:12040", "Staging API Key", obfuscate("discovery.key.staging.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:      "Print some values",
+			profile:   "cn",
+			sensitive: false,
+			config: map[string]string{
+				"cn.core_url":      "http://localhost:12010",
+				"cn.core_key":      "discovery.key.core.cn",
+				"cn.ingestion_url": "http://localhost:12020",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "QueryFlow API Key", "discovery.key.queryflow.cn"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:      "Print Fail on Printing Instructions",
+			profile:   "cn",
+			sensitive: false,
+			config: map[string]string{
+				"cn.core_url":      "http://localhost:12010",
+				"cn.core_key":      "discovery.key.core.cn",
+				"cn.ingestion_url": "http://localhost:12020",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+				"cn.queryflow_url": "http://localhost:12030",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+				"cn.staging_url":   "http://localhost:12040",
+				"cn.staging_key":   "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
+			outWriter:      errWriter{err: errors.New("write failed")},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:      "Print Fail on Printing Core Config",
+			profile:   "cn",
+			sensitive: false,
+			config: map[string]string{
+				"cn.core_url":      "http://localhost:12010",
+				"cn.core_key":      "discovery.key.core.cn",
+				"cn.ingestion_url": "http://localhost:12020",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+				"cn.queryflow_url": "http://localhost:12030",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+				"cn.staging_url":   "http://localhost:12040",
+				"cn.staging_key":   "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
+			outWriter:      &failOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:      "Print Fail on Printing Ingestion Config",
+			profile:   "cn",
+			sensitive: false,
+			config: map[string]string{
+				"cn.core_url":      "http://localhost:12010",
+				"cn.core_key":      "discovery.key.core.cn",
+				"cn.ingestion_url": "http://localhost:12020",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+				"cn.queryflow_url": "http://localhost:12030",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+				"cn.staging_url":   "http://localhost:12040",
+				"cn.staging_key":   "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
+			outWriter:      &failOnNWriter{Writer: &bytes.Buffer{}, N: 4},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:      "Print Fail on Printing QueryFlow Config",
+			profile:   "cn",
+			sensitive: false,
+			config: map[string]string{
+				"cn.core_url":      "http://localhost:12010",
+				"cn.core_key":      "discovery.key.core.cn",
+				"cn.ingestion_url": "http://localhost:12020",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+				"cn.queryflow_url": "http://localhost:12030",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+				"cn.staging_url":   "http://localhost:12040",
+				"cn.staging_key":   "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
+			outWriter:      &failOnNWriter{Writer: &bytes.Buffer{}, N: 6},
+			err:            errors.New("write failed"),
+		},
+		{
+			name:      "Print Fail on Printing Staging Config",
+			profile:   "cn",
+			sensitive: false,
+			config: map[string]string{
+				"cn.core_url":      "http://localhost:12010",
+				"cn.core_key":      "discovery.key.core.cn",
+				"cn.ingestion_url": "http://localhost:12020",
+				"cn.ingestion_key": "discovery.key.ingestion.cn",
+				"cn.queryflow_url": "http://localhost:12030",
+				"cn.queryflow_key": "discovery.key.queryflow.cn",
+				"cn.staging_url":   "http://localhost:12040",
+				"cn.staging_key":   "discovery.key.staging.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
+			outWriter:      &failOnNWriter{Writer: &bytes.Buffer{}, N: 8},
+			err:            errors.New("write failed"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			d := NewDiscovery(&ios, vpr, "")
+
+			err := d.PrintConfigToUser(tc.profile, tc.sensitive)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Contains(t, buf.String(), fmt.Sprintf("Showing the configuration of profile %q:\n\n", tc.profile))
+				require.Contains(t, buf.String(), tc.expectedOutput)
+			}
 		})
 	}
 }
