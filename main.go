@@ -1,5 +1,12 @@
 package main
 
+import (
+	"os"
+
+	"github.com/pureinsights/pdp-cli/cmd"
+)
+
 func main() {
-	// This funcion is empty bbecause it has not been implemented yet.
+	exitCode, _ := cmd.Run()
+	os.Exit(int(exitCode))
 }

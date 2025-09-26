@@ -8,10 +8,10 @@ import (
 // Discovery is the interface for the struct that represents Discovery.
 // This interface allows mocking Discovery in tests.
 type Discovery interface {
-	IOStreams() iostreams.IOStreams
+	IOStreams() *iostreams.IOStreams
 	Config() *viper.Viper
 	ConfigPath() string
-	SaveConfigFromUser(ios iostreams.IOStreams, profile string, path string) error
+	SaveConfigFromUser(profile string) error
 	PrintConfigToUser(profile string, sensitive bool) error
 }
 
