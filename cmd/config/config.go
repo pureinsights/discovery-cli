@@ -10,7 +10,11 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 		Use:   "config [subcommands]",
 		Short: "Save Discovery's configuration",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return d.SaveConfigFromUser(d.Config().GetString("profile"))
+			profile, err := cmd.Flags().GetString("profile")
+			if err != nil {
+				return err
+			}
+			return d.SaveConfigFromUser(profile)
 		},
 	}
 }
