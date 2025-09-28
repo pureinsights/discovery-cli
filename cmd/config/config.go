@@ -6,7 +6,7 @@ import (
 )
 
 func NewConfigCommand(d cli.Discovery) *cobra.Command {
-	return &cobra.Command{
+	config := &cobra.Command{
 		Use:   "config [subcommands]",
 		Short: "Save Discovery's configuration",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -17,4 +17,6 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 			return d.SaveConfigFromUser(profile)
 		},
 	}
+	config.AddCommand(NewGetCommand(d))
+	return config
 }
