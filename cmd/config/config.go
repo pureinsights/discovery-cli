@@ -17,6 +17,5 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 			return d.SaveConfigFromUser(profile)
 		},
 	}
-	config.AddCommand(NewGetCommand(d))
 	return config
 }
