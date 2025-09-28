@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/pureinsights/pdp-cli/cmd/config"
@@ -44,7 +43,6 @@ func Run() (cli.ExitCode, error) {
 		Err: os.Stderr,
 	}
 
-	fmt.Println("TEST: Config and credentials files exist")
 	viper, err := cli.InitializeConfig(ios, "testFiles/configuration")
 	if err != nil {
 		return cli.ErrorExitCode, cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not initialize configuration")
