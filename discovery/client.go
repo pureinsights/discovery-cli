@@ -115,6 +115,10 @@ func executeWithPagination(client client, method, path string, options ...Reques
 		return []gjson.Result(nil), err
 	}
 
+	if !(response.Get("content").Exists()) {
+		return []gjson.Result{}, nil
+	}
+
 	elementNumber := response.Get("numberOfElements").Int()
 	pageNumber := response.Get("pageNumber").Int()
 	totalPages := response.Get("totalPages").Int()
