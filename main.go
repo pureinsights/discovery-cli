@@ -1,3 +1,7 @@
 package main
 
-func main() {}
+import "github.com/pureinsights/pdp-cli/discovery"
+
+func main() {
+	discovery.Manual()
+}
