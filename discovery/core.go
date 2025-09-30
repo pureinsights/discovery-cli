@@ -129,10 +129,10 @@ func (fc filesClient) List() ([]string, error) {
 	} else {
 		return []string{}, nil
 	}
-
 }
 
 // Delete removes a file from Discovery based on the sent key.
+// It returns a JSON with the deletion acknowledgement or an error if any occured.
 func (fc filesClient) Delete(key string) (gjson.Result, error) {
 	return execute(fc.client, http.MethodDelete, "/"+key)
 }
