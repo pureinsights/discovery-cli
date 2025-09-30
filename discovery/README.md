@@ -48,7 +48,7 @@ This struct is used as the Errors that the CLI returns. It has a Status, an inte
 
 ## Core Client
 Discovery has a core client struct. Its fields are:
-- Url: The URL of Discovery's Core component. The URL should contain the URL up to the version. For example, `http://localhost:8080/v2`. 
+- Url: The URL of Discovery's Core component. The URL should contain the URL up to the version. For example, `http://localhost:12010/v2`. 
 - ApiKey: The API key needed to authenticate to Discovery's Core.  
 
 To create a Core client, the `NewCore(URL, API Key)` is used.
@@ -77,7 +77,7 @@ The `maintenanceClient` struct has a `Client` struct. It has access to the `Clie
 
 ## QueryFlow Client
 Discovery has a QueryFlow client struct. Its fields are:
-- Url: The URL of Discovery's QueryFlow component. The URL should contain the URL up to the version. For example, `http://localhost:8088/v2`. 
+- Url: The URL of Discovery's QueryFlow component. The URL should contain the URL up to the version. For example, `http://localhost:12040/v2`. 
 - ApiKey: The API key needed to authenticate to QueryFlow.  
 
 To create a QueryFlow client, the `NewQueryFlow(URL, API Key)` is used.
@@ -97,7 +97,7 @@ The QueryFlow client also has two important methods: `Invoke()` and `Debug()`. T
 
 ## Ingestion Client
 Discovery has an Ingestion client struct. Its fields are:
-- Url: The URL of Discovery's Ingestion component. The URL should contain the URL up to the version. For example, `http://localhost:8080/v2`. 
+- Url: The URL of Discovery's Ingestion component. The URL should contain the URL up to the version. For example, `http://localhost:12030/v2`. 
 - ApiKey: The API key needed to authenticate to Ingestion.  
 
 To create a Ingestion client, the `NewIngestion(URL, API Key)` is used.
@@ -147,7 +147,7 @@ The `backupRestore` struct imports and exports entities. Its `Export()` method o
 
 ## Staging Client
 Discovery has a Staging client struct. Its fields are:
-- Url: The URL of Discovery's Staging component. The URL should contain the URL up to the version. For example, `http://localhost:8081/v2`. 
+- Url: The URL of Discovery's Staging component. The URL should contain the URL up to the version. For example, `http://localhost:12020/v2`. 
 - ApiKey: The API key needed to authenticate to Staging.  
 
 To create a Staging client, the `NewStaging(URL, API Key)` is used.

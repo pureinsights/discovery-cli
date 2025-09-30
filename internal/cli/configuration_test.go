@@ -33,13 +33,13 @@ func Test_readConfigFile(t *testing.T) {
 			baseName: "config",
 			config: `
 [default]
-core_url="http://localhost:8080"
+core_url="http://localhost:12010"
 
 [cn]
 core_url="http://discovery.core.cn"	
 `,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:8080",
+				"default.core_url": "http://localhost:12010",
 				"cn.core_url":      "http://discovery.core.cn",
 			},
 			expectedBool: true,
@@ -177,7 +177,7 @@ core_key="APIKey"
 core_key="discovery.key.core.cn"
 `,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:8080",
+				"default.core_url": "http://localhost:12010",
 				"default.core_key": "APIKey",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
@@ -188,7 +188,7 @@ core_key="discovery.key.core.cn"
 			config:      ``,
 			credentials: ``,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:8080",
+				"default.core_url": "http://localhost:12010",
 				"default.core_key": "",
 			},
 			err: nil,
@@ -198,7 +198,7 @@ core_key="discovery.key.core.cn"
 			config: `
 {
   "default": {
-    "core_url": "http://localhost:8080"
+    "core_url": "http://localhost:12010"
   },
   "cn": {
     "core_url": "http://discovery.core.cn"
@@ -207,7 +207,7 @@ core_key="discovery.key.core.cn"
 `,
 			credentials: ``,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:8080",
+				"default.core_url": "http://localhost:12010",
 				"cn.core_url":      "http://discovery.core.cn",
 				"default.core_key": "",
 			},
@@ -227,7 +227,7 @@ core_key="discovery.key.core.cn"
 }
 `,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:8080",
+				"default.core_url": "http://localhost:12010",
 				"default.core_key": "",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
