@@ -116,6 +116,11 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	return nil
 }
 
+func (d discovery) saveConfig(error) {
+
+	profileSettings := d.Config().AllSettings()
+}
+
 // SaveCoreConfigFromUser asks the user for the values it wants to set for Discovery Core's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
 // The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
