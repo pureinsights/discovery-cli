@@ -39,8 +39,8 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error) {
 	vpr := viper.New()
 
-	vpr.SetDefault("profile", "default")
 	defaultProfile := "default"
+	vpr.SetDefault("profile", defaultProfile)
 
 	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
 		return nil, err
