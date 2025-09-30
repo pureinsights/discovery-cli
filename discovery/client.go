@@ -109,6 +109,8 @@ func execute(client client, method, path string, options ...RequestOption) (gjso
 	return resultJson, nil
 }
 
+// ExecuteWithPagination obtains all of the content when the endpoint returns its results in pages.
+// It requests the data in every page and returns an array with all of the JSON results.
 func executeWithPagination(client client, method, path string, options ...RequestOption) ([]gjson.Result, error) {
 	response, err := execute(client, method, path, options...)
 	if err != nil {
@@ -128,7 +130,7 @@ func executeWithPagination(client client, method, path string, options ...Reques
 	var requestOptions []RequestOption
 	for pageNumber < totalPages && elementNumber < totalSize {
 		requestOptions = append(options, WithQueryParameters(map[string][]string{"page": {strconv.FormatInt(pageNumber, 10)}}))
-		response, err = execute(client, method, "", requestOptions...)
+		response, err = execute(client, method, path, requestOptions...)
 		if err != nil {
 			return []gjson.Result(nil), err
 		}

@@ -351,6 +351,7 @@ func Test_execute_RestyReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), base+"/down")
 }
 
+// Test_executeWithPagination_HTTPResponseCases tests how the executeWithPagination() function behaves with various HTTP responses.
 func Test_executeWithPagination_HTTPResponseCases(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -467,11 +468,12 @@ func Test_executeWithPagination_HTTPResponseCases(t *testing.T) {
 	}
 }
 
-// Test_getter_executeWithPagination_ErrorInSecondPage tests when executeWithPagination fails in a request while trying to get every content from every page.
+// Test_executeWithPagination_ErrorInSecondPage tests when executeWithPagination fails in a request while trying to get every content from every page.
 func Test_executeWithPagination_ErrorInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, http.MethodGet, r.Method)
+			assert.Equal(t, "/getall", r.URL.Path)
 			pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
 			w.Header().Set("Content-Type", "application/json")
 			if pageNumber > 0 {
@@ -527,13 +529,14 @@ func Test_executeWithPagination_ErrorInSecondPage(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
-	response, err := executeWithPagination(c, http.MethodGet, "")
+	response, err := executeWithPagination(c, http.MethodGet, "/getall")
 	assert.Equal(t, []gjson.Result(nil), response)
 	var errStruct Error
 	require.ErrorAs(t, err, &errStruct)
 	assert.EqualError(t, err, Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"Internal Server Error"}`)}.Error())
 }
 
+// Test_executeWithPagination_RestyReturnsError tests what happens when the Resty client fails to execute the request.
 func Test_executeWithPagination_RestyReturnsError(t *testing.T) {
 	srv := httptest.NewServer(http.NotFoundHandler())
 	base := srv.URL
@@ -546,7 +549,8 @@ func Test_executeWithPagination_RestyReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), base+"/down")
 }
 
-// Test_getter_executeWithPagination_ContentInSecondPage tests when there are two pages with content in them
+// Test_executeWithPagination_ContentInSecondPage tests that the executeWithPagination() function
+// can successfully get all content when there are two pages with content in them
 func Test_executeWithPagination_ContentInSecondPage(t *testing.T) {
 	body := `{
 	"equals": {
@@ -560,6 +564,7 @@ func Test_executeWithPagination_ContentInSecondPage(t *testing.T) {
 		requestBody, _ := io.ReadAll(r.Body)
 		assert.Equal(t, gjson.Parse(body), gjson.Parse(string(requestBody)))
 		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+		assert.Equal(t, "/getall", r.URL.Path)
 		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
 		w.Header().Set("Content-Type", "application/json")
 		if pageNumber > 0 {
@@ -657,15 +662,16 @@ func Test_executeWithPagination_ContentInSecondPage(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
-	response, err := executeWithPagination(c, http.MethodPost, "", WithJSONBody(body))
+	response, err := executeWithPagination(c, http.MethodPost, "/getall", WithJSONBody(body))
 	require.NoError(t, err)
 	assert.Len(t, response, 6)
 }
 
-// Test_getter_executeWithPagination_NoContentInSecondPage tests what happens if one of the later pages returns No Content
+// Test_executeWithPagination_NoContentInSecondPage tests what happens if one of the later pages returns No Content
 func Test_executeWithPagination_NoContentInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
+		assert.Equal(t, "/getall", r.URL.Path)
 		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
 		w.Header().Set("Content-Type", "application/json")
 		if pageNumber > 0 {
@@ -721,7 +727,7 @@ func Test_executeWithPagination_NoContentInSecondPage(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
-	response, err := executeWithPagination(c, http.MethodGet, "")
+	response, err := executeWithPagination(c, http.MethodGet, "/getall")
 	require.NoError(t, err)
 	assert.Len(t, response, 3)
 }
