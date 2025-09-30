@@ -41,7 +41,7 @@ jobs:
               - '**.go'
               - 'go.mod'
               - '.github/workflows/pull-request.yml'
-
+              - '**/testdata/**'
 
   build:
     if: ${{ needs.validate.outputs.code-changes == 'true' }}
