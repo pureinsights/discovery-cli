@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	DefaultCoreURL      string = "http://localhost:8080"
-	DefaultIngestionURL string = "http://localhost:8080"
-	DefaultQueryFlowURL string = "http://localhost:8088"
-	DefaultStagingURL   string = "http://localhost:8081"
+	DefaultCoreURL      string = "http://localhost:12010"
+	DefaultStagingURL   string = "http://localhost:12020"
+	DefaultIngestionURL string = "http://localhost:12030"
+	DefaultQueryFlowURL string = "http://localhost:12040"
 )
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
