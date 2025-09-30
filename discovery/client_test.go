@@ -111,6 +111,7 @@ func Test_client_execute_SendsAPIKeyReturnsBody(t *testing.T) {
 	srv := httptest.NewServer(testutils.HttpHandler(t, http.StatusOK, "application/json", `{"ok":true}`,
 		func(t *testing.T, r *http.Request) {
 			assert.Equal(t, "/seed", r.URL.Path)
+			assert.Equal(t, apiKey, r.Header.Get("X-API-Key"))
 		}))
 	t.Cleanup(srv.Close)
 
@@ -350,7 +351,7 @@ func Test_execute_RestyReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), base+"/down")
 }
 
-func Test_client_executeWithPagination_HTTPResponseCases(t *testing.T) {
+func Test_executeWithPagination_HTTPResponseCases(t *testing.T) {
 	tests := []struct {
 		name        string
 		method      string
@@ -467,7 +468,7 @@ func Test_client_executeWithPagination_HTTPResponseCases(t *testing.T) {
 }
 
 // Test_getter_executeWithPagination_ErrorInSecondPage tests when executeWithPagination fails in a request while trying to get every content from every page.
-func Test_client_executeWithPagination_ErrorInSecondPage(t *testing.T) {
+func Test_executeWithPagination_ErrorInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, http.MethodGet, r.Method)
@@ -533,8 +534,20 @@ func Test_client_executeWithPagination_ErrorInSecondPage(t *testing.T) {
 	assert.EqualError(t, err, Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"Internal Server Error"}`)}.Error())
 }
 
+func Test_executeWithPagination_RestyReturnsError(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	base := srv.URL
+	srv.Close()
+
+	c := newClient(base, "")
+	response, err := executeWithPagination(c, http.MethodGet, "/down")
+	require.Error(t, err)
+	assert.Equal(t, response, []gjson.Result(nil))
+	assert.Contains(t, err.Error(), base+"/down")
+}
+
 // Test_getter_executeWithPagination_ContentInSecondPage tests when there are two pages with content in them
-func Test_client_executeWithPagination_ContentInSecondPage(t *testing.T) {
+func Test_executeWithPagination_ContentInSecondPage(t *testing.T) {
 	body := `{
 	"equals": {
 		"field": "type",
@@ -546,6 +559,7 @@ func Test_client_executeWithPagination_ContentInSecondPage(t *testing.T) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		requestBody, _ := io.ReadAll(r.Body)
 		assert.Equal(t, gjson.Parse(body), gjson.Parse(string(requestBody)))
+		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
 		w.Header().Set("Content-Type", "application/json")
 		if pageNumber > 0 {
@@ -649,7 +663,7 @@ func Test_client_executeWithPagination_ContentInSecondPage(t *testing.T) {
 }
 
 // Test_getter_executeWithPagination_NoContentInSecondPage tests what happens if one of the later pages returns No Content
-func Test_client_executeWithPagination_NoContentInSecondPage(t *testing.T) {
+func Test_executeWithPagination_NoContentInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
