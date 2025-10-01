@@ -38,7 +38,7 @@ It has the following methods:
 | --- | --- | --- | --- | --- | --- | 
 | Create | POST | `{URL}/{UUID}` | `application/json` | `application/json` | Receives a UUID to get the entity referenced by it. It returns the result as a gjson.Result object. |
 | Update | PUT | `{URL}/{UUID}`  | `application/json` | `application/json` | Receives a UUID and the configuration JSON to update an entity in Discovery. It returns the result as a gjson.Result object |
-| Delete | DELETE | `{URL}/{UUID}`  | | `application/json` | Deletes the entity identified by the received UUID.
+| Delete | DELETE | `{URL}/{UUID}`  | | `application/json` | Deletes the entity identified by the received UUID. |
 
 ### Cloner
 This struct is used to clone entities. It adds the `/clone` path to its client's URL to duplicate entities.
