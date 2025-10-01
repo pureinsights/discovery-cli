@@ -85,3 +85,83 @@ It has the following method:
 | --- | --- | --- | --- | --- | --- | --- | 
 | Export | GET | `{URL}/export` |  |  | `application/octet-stream` | Calls the `/export` endpoint. It returns the result of the endpoint in bytes, which should be written to a ZIP file so that it can be restored later. |
 | Import | POST | `{URL}/import` | `multipart/form-data` | `onConflict`: `UPDATE`, `IGNORE`, `FAIL` | `application/json` | Calls the `/import` endpoint. It receives the given file to restore the entities contained within. |
+
+## Core Client
+Discovery has a core client struct. Its fields are:
+- Url: The URL of Discovery's Core component. The URL should contain the URL up to the version. For example, `http://localhost:12010/v2`. 
+- ApiKey: The API key needed to authenticate to Discovery's Core.  
+
+The Core client can create subclients that handle the Core's functions. These are the following:
+
+### SecretsClient
+This struct manages secrets. 
+
+It inherits from:
+* [CRUD](#crud)
+
+Creating a `secretsClient` can be done with `core.Secrets()` or `newSecretsClient(URL, API Key)`.
+
+### CredentialsClient
+This struct manages credentials. 
+
+It inherits from:
+* [CRUD](#crud)
+* [Cloner](#cloner)
+
+Creating a `credentialsClient` can be done with `core.Credentials()` or `newCredentialsClient(URL, API Key)`.
+
+### ServersClient
+This struct manages servers. 
+
+It inherits from:
+* [CRUD](#crud)
+* [Cloner](#cloner)
+
+It has the following additional method:
+| Name | Method | Path | Response | Description |
+| --- | --- | --- | --- | --- | 
+| Ping | GET | `{URL}/{UUID}/ping` | `application/json` | This function verifies if the connection to the server was successful and the server is reachable. |
+
+Creating a `serversClient` can be done with `core.Servers()` or `newServersClient(URL, API Key)`.
+
+### FilesClient
+This struct manages Discovery's files. 
+
+It inherits from:
+* [Client](#client)
+
+It has the following additional methods:
+| Name | Method | Path | Request Body | Response | Description |
+| --- | --- | --- | --- | --- | --- | 
+| Upload | PUT | `{URL}/file/{Key}` | `multipart/form-data` | `application/json` | Sends a file to Discovery. |
+| Retrieve | GET | `{URL}/file/{Key}`  |  | `application/octet-stream` | Returns file's data inside a byte array. |
+| List | GET | `{URL}/file`  |  | `application/json` | Returns an array with all of the file keys in Discovery. |
+| Delete | DELETE | `{URL}/file/{Key}`  | | `application/json` | Removes the file. |
+
+Creating a `filesClient` can be done with `core.Files()` or `newServersClient(URL, API Key)`.
+
+## BackupRestore
+This struct imports and exports the Core's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
+
+Creating a `backupRestore` can be done with `core.BackupRestore()`.
+
+### LabelsClient
+This struct manages labels. 
+
+It inherits from:
+* [CRUD](#crud)
+
+Creating a `labelsClient` can be done with `core.Labels()` or `newLabelsClient(URL, API Key)`.
+
+### MaintenanceClient
+The `maintenanceClient` struct carries out the Core's maintenance operations.
+
+It inherits from:
+* [Client](#client)
+
+It has the following method:
+| Name | Method | Path | Query Parameters | Response | Description |
+| --- | --- | --- | --- | --- | --- 
+| Log | POST | `{URL}/maintenance/log` | • `componentName`<br>• `level`: `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`<br>• loggerName | `application/json` | This function changes the log level of a component. It can also change the level of a specific logger inside a component. |
+ 
+ Creating a `maintenanceClient` can be done with `core.Maintenance()` or `newMaintenanceClient(URL, API Key)`.
