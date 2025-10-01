@@ -154,7 +154,7 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 		},
 		// Error case
 		{
-			name:       "Seed config returns not found",
+			name:       "Seed config returns seed not found",
 			method:     http.MethodGet,
 			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/seed",
 			statusCode: http.StatusNotFound,
@@ -174,6 +174,52 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
 			],
 			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
+		},
+		{
+			name:       "Seed config returns execution not found",
+			method:     http.MethodGet,
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/seed",
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
+			],
+			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
+		},
+		{
+			name:       "Seed config returns bad request",
+			method:     http.MethodGet,
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/seed",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [notseed] due to: Invalid UUID string: notseed"
+			],
+			"timestamp": "2025-10-01T19:21:49.817539200Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [notseed] due to: Invalid UUID string: notseed"
+			],
+			"timestamp": "2025-10-01T19:21:49.817539200Z"
 			}`)},
 		},
 	}
@@ -258,6 +304,29 @@ func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 				"Pipeline not found: 9a74bf3a-eb2a-4334-b803-c92bf1bc45fe"
 			],
 			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
+		},
+		{
+			name:       "pipeline config returns bad request",
+			method:     http.MethodGet,
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/pipeline/9a74bf3a-eb2a-4334-b803-c92bf1bc45fe",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [-] due to: Invalid UUID string: -"
+			],
+			"timestamp": "2025-10-01T19:26:07.794214300Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [-] due to: Invalid UUID string: -"
+			],
+			"timestamp": "2025-10-01T19:26:07.794214300Z"
 			}`)},
 		},
 	}
@@ -350,6 +419,29 @@ func Test_seedExecutionsClient_Processor(t *testing.T) {
 			"timestamp": "2025-09-03T17:44:01.557816Z"
 			}`)},
 		},
+		{
+			name:       "processor config returns bad request",
+			method:     http.MethodGet,
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/processor/aa0186f1-746f-4b20-b1b0-313bd79e78b8",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [-] due to: Invalid UUID string: -"
+			],
+			"timestamp": "2025-10-01T19:26:07.794214300Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [-] due to: Invalid UUID string: -"
+			],
+			"timestamp": "2025-10-01T19:26:07.794214300Z"
+			}`)},
+		},
 	}
 
 	for _, tc := range tests {
@@ -440,6 +532,29 @@ func Test_seedExecutionsClient_Server(t *testing.T) {
 			"timestamp": "2025-09-03T17:44:01.557816Z"
 			}`)},
 		},
+		{
+			name:       "server config returns bad request",
+			method:     http.MethodGet,
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/server/f6950327-3175-4a98-a570-658df852424a",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [-] due to: Invalid UUID string: -"
+			],
+			"timestamp": "2025-10-01T19:26:07.794214300Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [-] due to: Invalid UUID string: -"
+			],
+			"timestamp": "2025-10-01T19:26:07.794214300Z"
+			}`)},
+		},
 	}
 
 	for _, tc := range tests {
@@ -528,6 +643,29 @@ func Test_seedExecutionsClient_Credential(t *testing.T) {
 				"Credential not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
 			],
 			"timestamp": "2025-09-03T17:44:01.557816Z"
+			}`)},
+		},
+		{
+			name:       "credential config returns bad request",
+			method:     http.MethodGet,
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [-] due to: Invalid UUID string: -"
+			],
+			"timestamp": "2025-10-01T19:26:07.794214300Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [executionId] for value [-] due to: Invalid UUID string: -"
+			],
+			"timestamp": "2025-10-01T19:26:07.794214300Z"
 			}`)},
 		},
 	}
@@ -851,7 +989,7 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 			"status": 400,
 			"code": 3002,
 			"messages": [
-				"Failed to convert argument [executionId] for value [werf] due to: Invalid UUID string: werf"
+				"Failed to convert argument [executionId] for value [nouuid] due to: Invalid UUID string: nouuid"
 			],
 			"timestamp": "2025-09-03T22:09:32.940650300Z"
 			}`,
@@ -859,7 +997,7 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 			"status": 400,
 			"code": 3002,
 			"messages": [
-				"Failed to convert argument [executionId] for value [werf] due to: Invalid UUID string: werf"
+				"Failed to convert argument [executionId] for value [nouuid] due to: Invalid UUID string: nouuid"
 			],
 			"timestamp": "2025-09-03T22:09:32.940650300Z"
 			}`)},
@@ -1232,6 +1370,29 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 				"Entity not found: SeedRecordId(seed=Seed(super=AbstractComponentConfigEntity(super=AbstractJsonConfigEntity(super=AbstractTypedConfigEntity(super=AbstractConfigEntity(super=AbstractUpdatableEntity(super=AbstractCoreEntity(id=2acd0a61-852c-4f38-af2b-9c84e152873e), creationTimestamp=2025-08-21T21:52:03Z, lastUpdatedTimestamp=2025-08-21T21:52:03Z), name=Search seed, description=null, active=true), type=staging), config={\"action\":\"scroll\",\"bucket\":\"blogs\"})), properties=null, labels=[], recordOptions=SeedRecordPolicy[timeoutPolicy=TimeoutPolicy[slice=PT1H], errorPolicy=FATAL, outboundPolicy=OutboundPolicy[idPolicy=IdPolicy[generator=null], batchPolicy=BatchPolicy[maxCount=25, flushAfter=PT1M]]], hooks=[], beforeHooksOptions=null, afterHooksOptions=null), recordId=[3, 113, -45, 12, 72, 2, 107, -82, 65, 21, -101, 26, 115, -44, -56, -100, 88, -84, -66, 90, 17, -108, -67, -52, -25, 72, -93, 9, 99])"
 			],
 			"timestamp": "2025-09-04T14:07:13.759984600Z"
+			}`)},
+		},
+		{
+			name:       "Get by ID returns 400 Not Found",
+			method:     http.MethodGet,
+			path:       "/seed/2acd0a61-852c-4f38-af2b-9c84e152873e/record/A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [seedId] for value [notaseed] due to: Invalid UUID string: notaseed"
+			],
+			"timestamp": "2025-10-01T19:43:37.753734900Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [seedId] for value [notaseed] due to: Invalid UUID string: notaseed"
+			],
+			"timestamp": "2025-10-01T19:43:37.753734900Z"
 			}`)},
 		},
 	}
