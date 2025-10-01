@@ -14,7 +14,7 @@ import (
 
 // Test_newQueryFlowProcessorsClient test the queryFlowProcessorsClient's constructor
 func Test_newQueryFlowProcessorsClient(t *testing.T) {
-	url := "http://localhost:8088/v2"
+	url := "http://localhost:12040/v2"
 	apiKey := "Api Key"
 	qpc := newQueryFlowProcessorsClient(url, apiKey)
 
@@ -26,7 +26,7 @@ func Test_newQueryFlowProcessorsClient(t *testing.T) {
 
 // Test_newEndpointsClient tests the constructor of endpointsClients.
 func Test_newEndpointsClient(t *testing.T) {
-	url := "http://localhost:8088/v2"
+	url := "http://localhost:12040/v2"
 	apiKey := "Api Key"
 	qec := newEndpointsClient(url, apiKey)
 
@@ -40,7 +40,7 @@ func Test_newEndpointsClient(t *testing.T) {
 
 // Test_queryFlow_Processors tests the queryFlow.Processors() function
 func Test_queryFlow_Processors(t *testing.T) {
-	q := NewQueryFlow("http://localhost:8080/v2", "Api Key")
+	q := NewQueryFlow("http://localhost:12040/v2", "Api Key")
 	qpc := q.Processors()
 
 	assert.Equal(t, q.ApiKey, qpc.crud.client.ApiKey)
@@ -51,7 +51,7 @@ func Test_queryFlow_Processors(t *testing.T) {
 
 // Test_queryFlow_Endpoints tests the queryFlow.Endpoints() function
 func Test_queryFlow_Endpoints(t *testing.T) {
-	q := NewQueryFlow("http://localhost:8080/v2", "Api Key")
+	q := NewQueryFlow("http://localhost:12040/v2", "Api Key")
 	qec := q.Endpoints()
 
 	assert.Equal(t, q.ApiKey, qec.crud.client.ApiKey)
@@ -64,7 +64,7 @@ func Test_queryFlow_Endpoints(t *testing.T) {
 
 // Test_queryFlow_BackupRestore tests the queryFlow.BackupRestore() function
 func Test_queryFlow_BackupRestore(t *testing.T) {
-	q := NewQueryFlow("http://localhost:8088/v2", "Api Key")
+	q := NewQueryFlow("http://localhost:12040/v2", "Api Key")
 	bc := q.BackupRestore()
 
 	assert.Equal(t, q.ApiKey, bc.ApiKey)
@@ -474,8 +474,8 @@ func Test_queryFlow_Debug(t *testing.T) {
 
 // Test_NewQueryFlow test the QueryFlow constructor.
 func Test_NewQueryFlow(t *testing.T) {
-	i := NewQueryFlow("http://localhost:8088/v2", "Api Key")
+	i := NewQueryFlow("http://localhost:12040/v2", "Api Key")
 
-	assert.Equal(t, "http://localhost:8088/v2", i.Url)
+	assert.Equal(t, "http://localhost:12040/v2", i.Url)
 	assert.Equal(t, "Api Key", i.ApiKey)
 }

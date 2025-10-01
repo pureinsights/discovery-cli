@@ -27,8 +27,8 @@ func (backup backupRestore) Export() ([]byte, error) {
 	return backup.execute(http.MethodGet, "/export")
 }
 
-// Import reads a file containing the entities to be imported, and then calls the endpoint to do so.
-// It sets the conflict resolution strategy and returns the status of the imported entities.
+// Import reads the given file containing the entities to be imported, and then calls the endpoint to do so.
+// It sets the conflict resolution strategy to the one sent as a parameter and returns the status of the imported entities.
 func (restore backupRestore) Import(onConflict OnConflict, file string) (gjson.Result, error) {
 	return execute(restore.client, http.MethodPost, "/import", WithFile(file), WithQueryParameters(map[string][]string{"onConflict": {string(onConflict)}}))
 }
