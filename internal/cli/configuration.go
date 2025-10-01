@@ -121,7 +121,6 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 // SaveConfig separates de API Keys from Discovery's Viper configuration and writes the config and credentials into their own files.
 func (d discovery) saveConfig() error {
 	v := d.Config()
-
 	apiKeys := []string{"core_key", "ingestion_key", "queryflow_key", "staging_key"}
 
 	config := viper.New()
