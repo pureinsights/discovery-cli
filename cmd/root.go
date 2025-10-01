@@ -40,11 +40,16 @@ func Run() (cli.ExitCode, error) {
 		Err: os.Stderr,
 	}
 
-	viper, err := cli.InitializeConfig(ios, "testFiles/configuration")
+	configPath, err := cli.SetDiscoveryDir()
+	if err != nil {
+		return cli.ErrorExitCode, cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not set up Discovery's directory in User's home directory")
+	}
+
+	viper, err := cli.InitializeConfig(ios, configPath)
 	if err != nil {
 		return cli.ErrorExitCode, cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not initialize configuration")
 	}
-	d := cli.NewDiscovery(&ios, viper, "testFiles/configtest.toml")
+	d := cli.NewDiscovery(&ios, viper, configPath)
 	root := newRootCommand(d)
 	err = root.Execute()
 	if err != nil {

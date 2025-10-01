@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"math"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -146,6 +147,21 @@ func (d discovery) saveConfig() error {
 	}
 
 	return credentials.WriteConfigAs(filepath.Join(d.ConfigPath(), "credentials.toml"))
+}
+
+func SetDiscoveryDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	configPath := filepath.Join(home, ".discovery")
+
+	if err := os.MkdirAll(configPath, 0o700); err != nil {
+		return "", err
+	}
+
+	return configPath, nil
 }
 
 // SaveCoreConfigFromUser asks the user for the values it wants to set for Discovery Core's configuration properties for the given profile.
