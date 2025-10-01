@@ -140,7 +140,7 @@ It has the following additional methods:
 
 Creating a `filesClient` can be done with `core.Files()` or `newServersClient(URL, API Key)`.
 
-## BackupRestore
+### BackupRestore
 This struct imports and exports the Core's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
 
 Creating a `backupRestore` can be done with `core.BackupRestore()`.
