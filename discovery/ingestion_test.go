@@ -17,7 +17,7 @@ import (
 
 // Test_newSeedExecutionsClient test the seedExecutionsClient's constructor
 func Test_newSeedExecutionsClient(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	if err != nil {
@@ -33,7 +33,7 @@ func Test_newSeedExecutionsClient(t *testing.T) {
 
 // Test_newSeedRecordsClient tests the constructor of seedRecordsClient.
 func Test_newSeedRecordsClient(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	if err != nil {
@@ -51,7 +51,7 @@ func Test_newSeedRecordsClient(t *testing.T) {
 
 // Test_newSeedExecutionRecordsClient tests the constructor of seedExecutionRecordsClient
 func Test_newSeedExecutionRecordsClient(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	if err != nil {
@@ -74,7 +74,7 @@ func Test_newSeedExecutionRecordsClient(t *testing.T) {
 
 // Test_newSeedExecutionJobsClient tests the constructor of seedExecutionJobsClient.
 func Test_newSeedExecutionJobsClient(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	if err != nil {
@@ -97,7 +97,7 @@ func Test_newSeedExecutionJobsClient(t *testing.T) {
 
 // Test_newIngestionProcessorsClient tests the constructor of ingestionProcessorsClient.
 func Test_newIngestionProcessorsClient(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	processorsClient := newIngestionProcessorsClient(url, apiKey)
 
@@ -109,7 +109,7 @@ func Test_newIngestionProcessorsClient(t *testing.T) {
 
 // Test_newPipelinesClient tests the constructor of pipelinesClient.
 func Test_newPipelinesClient(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	pipelineClient := newPipelinesClient(url, apiKey)
 
@@ -121,7 +121,7 @@ func Test_newPipelinesClient(t *testing.T) {
 
 // Test_newSeedsClient tests the constructor of seedsClient.
 func Test_newSeedsClient(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedClient := newSeedsClient(url, apiKey)
 
@@ -823,7 +823,7 @@ func Test_seedExecutionsClient_Halt(t *testing.T) {
 
 // Test_seedExecutionsClient_Records tests the seedExecutionsClient.Records() function.
 func Test_seedExecutionsClient_Records(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	if err != nil {
@@ -847,7 +847,7 @@ func Test_seedExecutionsClient_Records(t *testing.T) {
 
 // Test_seedExecutionsClient_Jobs tests the seedExecutionsClient.Jobs() function.
 func Test_seedExecutionsClient_Jobs(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	if err != nil {
@@ -1450,6 +1450,15 @@ func Test_seedsClient_Start(t *testing.T) {
 			expectedResponse: gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`),
 			err:              nil,
 		},
+		{
+			name:             "Start works correctly with OK",
+			method:           http.MethodPost,
+			path:             "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode:       http.StatusOK,
+			response:         `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
+			expectedResponse: gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`),
+			err:              nil,
+		},
 		// Error cases
 		{
 			name:       "Start fails because the seed already has active executions.",
@@ -1495,6 +1504,29 @@ func Test_seedsClient_Start(t *testing.T) {
 				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
 			],
 			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`)},
+		},
+		{
+			name:       "start fails because of bad request",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [id] for value [notuuid] due to: Invalid UUID string: notuuid"
+			],
+			"timestamp": "2025-10-01T20:01:34.588816100Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [id] for value [notuuid] due to: Invalid UUID string: notuuid"
+			],
+			"timestamp": "2025-10-01T20:01:34.588816100Z"
 			}`)},
 		},
 	}
@@ -1559,6 +1591,15 @@ func Test_seedsClient_Halt(t *testing.T) {
 			expectedResponse: []gjson.Result{},
 			err:              nil,
 		},
+		{
+			name:             "Halt returns an empty array with OK",
+			method:           http.MethodPost,
+			path:             "/2acd0a61-852c-4f38-af2b-9c84e152873e/halt",
+			statusCode:       http.StatusOK,
+			response:         `[]`,
+			expectedResponse: []gjson.Result{},
+			err:              nil,
+		},
 		// Error case
 		{
 			name:       "halt fails because the seed was not found.",
@@ -1581,6 +1622,29 @@ func Test_seedsClient_Halt(t *testing.T) {
 				"Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
 			],
 			"timestamp": "2025-09-04T20:20:47.326270700Z"
+			}`)},
+		},
+		{
+			name:       "halt fails because of bad request",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e/halt",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [id] for value [notuuid] due to: Invalid UUID string: notuuid"
+			],
+			"timestamp": "2025-10-01T20:01:34.588816100Z"
+			}`,
+			expectedResponse: []gjson.Result(nil),
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [id] for value [notuuid] due to: Invalid UUID string: notuuid"
+			],
+			"timestamp": "2025-10-01T20:01:34.588816100Z"
 			}`)},
 		},
 	}
@@ -1682,6 +1746,29 @@ func Test_seedsClient_Reset(t *testing.T) {
 			"timestamp": "2025-09-04T20:20:47.326270700Z"
 			}`)},
 		},
+		{
+			name:       "reset fails because of bad request",
+			method:     http.MethodPost,
+			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e/reset",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [id] for value [notuuid] due to: Invalid UUID string: notuuid"
+			],
+			"timestamp": "2025-10-01T20:01:34.588816100Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [id] for value [notuuid] due to: Invalid UUID string: notuuid"
+			],
+			"timestamp": "2025-10-01T20:01:34.588816100Z"
+			}`)},
+		},
 	}
 
 	for _, tc := range tests {
@@ -1716,7 +1803,7 @@ func Test_seedsClient_Reset(t *testing.T) {
 
 // Test_seedsClient_Records tests the seedsClient.Records() function.
 func Test_seedsClient_Records(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	if err != nil {
@@ -1734,7 +1821,7 @@ func Test_seedsClient_Records(t *testing.T) {
 
 // Test_newSeedsClient tests the seedClient.Executions() function
 func Test_seedsClient_Executions(t *testing.T) {
-	url := "http://localhost:8083/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	if err != nil {
