@@ -129,10 +129,10 @@ func (fc filesClient) List() ([]string, error) {
 	} else {
 		return []string{}, nil
 	}
-
 }
 
 // Delete removes a file from Discovery based on the sent key.
+// It returns a JSON with the deletion acknowledgement or an error if any occured.
 func (fc filesClient) Delete(key string) (gjson.Result, error) {
 	return execute(fc.client, http.MethodDelete, "/"+key)
 }
@@ -169,6 +169,7 @@ func newMaintenanceClient(url, apiKey string) maintenanceClient {
 func (mc maintenanceClient) Log(componentName string, level LogLevel, loggerName string) (gjson.Result, error) {
 	return execute(mc.client, http.MethodPost, "/log", WithQueryParameters(map[string][]string{"componentName": {componentName}, "level": {string(level)}, "loggerName": {loggerName}}))
 }
+
 
 // Core is the struct for the client that can execute every Core operation.
 type core struct {
