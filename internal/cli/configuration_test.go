@@ -446,6 +446,188 @@ func Test_discovery_askUserConfig(t *testing.T) {
 }
 
 // Test_discovery_SaveConfigFromUser_AllConfigPresent tests the discovery.SaveConfigFromUser() when there is a configuration for every possible URL and API Key
+func Test_discovery_saveConfig(t *testing.T) {
+	tests := []struct {
+		name                string
+		config              map[string]string
+		writePath           string
+		expectedConfig      map[string]string
+		expectedCredentials map[string]string
+		err                 error
+	}{
+		// Working cases
+		{
+			name:      "Every value exists",
+			writePath: t.TempDir(),
+			config: map[string]string{
+				"profile":          "cn",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
+				"cn.core_key":      "core321",
+				"cn.ingestion_key": "ingestion432",
+				"cn.queryflow_key": "queryflow123",
+				"cn.staging_key":   "staging235",
+			},
+			expectedConfig: map[string]string{
+				"profile":          "cn",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
+			},
+			expectedCredentials: map[string]string{
+				"cn.core_key":      "core321",
+				"cn.ingestion_key": "ingestion432",
+				"cn.queryflow_key": "queryflow123",
+				"cn.staging_key":   "staging235",
+			},
+			err: nil,
+		},
+		{
+			name:      "No keys exist",
+			writePath: t.TempDir(),
+			config: map[string]string{
+				"profile":          "cn",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
+			},
+			expectedConfig: map[string]string{
+				"profile":          "cn",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
+			},
+			expectedCredentials: map[string]string{},
+			err:                 nil,
+		},
+		{
+			name:      "Only keys exist",
+			writePath: t.TempDir(),
+			config: map[string]string{
+				"cn.core_key":      "core321",
+				"cn.ingestion_key": "ingestion432",
+				"cn.queryflow_key": "queryflow123",
+				"cn.staging_key":   "staging235",
+			},
+			expectedConfig: map[string]string{},
+			expectedCredentials: map[string]string{
+				"cn.core_key":      "core321",
+				"cn.ingestion_key": "ingestion432",
+				"cn.queryflow_key": "queryflow123",
+				"cn.staging_key":   "staging235",
+			},
+			err: nil,
+		},
+		{
+			name:      "There are keys with multiple periods in their viper keys",
+			writePath: t.TempDir(),
+			config: map[string]string{
+				"profile":                "cn",
+				"cn.core_url":            "http://localhost:12010",
+				"cn.ingestion_url":       "http://localhost:12030",
+				"cn.queryflow_url":       "http://localhost:12040",
+				"cn.staging_url":         "http://localhost:12020",
+				"cn.core_key":            "core321",
+				"cn.cn.ingestion_key":    "ingestion432",
+				"cn.cn.cn.queryflow_key": "queryflow123",
+				"cn.cn.cn.staging_key":   "staging235",
+			},
+			expectedConfig: map[string]string{
+				"profile":          "cn",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
+			},
+			expectedCredentials: map[string]string{
+				"cn.core_key":            "core321",
+				"cn.cn.ingestion_key":    "ingestion432",
+				"cn.cn.cn.queryflow_key": "queryflow123",
+				"cn.cn.cn.staging_key":   "staging235",
+			},
+			err: nil,
+		},
+
+		// Error cases
+		{
+			name:      "Writing to config.toml fails",
+			writePath: "doesnotexist",
+			config: map[string]string{
+				"profile":          "cn",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
+				"cn.core_key":      "core321",
+				"cn.ingestion_key": "ingestion432",
+				"cn.queryflow_key": "queryflow123",
+				"cn.staging_key":   "staging235",
+			},
+			expectedConfig: map[string]string{
+				"profile":          "cn",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
+			},
+			expectedCredentials: map[string]string{
+				"cn.core_key":      "core321",
+				"cn.ingestion_key": "ingestion432",
+				"cn.queryflow_key": "queryflow123",
+				"cn.staging_key":   "staging235",
+			},
+			err: fmt.Errorf("cannot find the path specified"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: os.Stdout,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, vpr, tc.writePath)
+
+			err := d.saveConfig()
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tc.err.Error())
+				return
+			} else {
+				require.NoError(t, err)
+				configVpr := viper.New()
+				configVpr.SetConfigFile(filepath.Join(tc.writePath, "config.toml"))
+				require.NoError(t, configVpr.ReadInConfig())
+
+				for k, expected := range tc.expectedConfig {
+					require.Equal(t, expected, configVpr.GetString(k))
+				}
+
+				credentialsVpr := viper.New()
+				credentialsVpr.SetConfigFile(filepath.Join(tc.writePath, "credentials.toml"))
+				require.NoError(t, credentialsVpr.ReadInConfig())
+
+				for k, expected := range tc.expectedCredentials {
+					require.Equal(t, expected, credentialsVpr.GetString(k))
+				}
+			}
+		})
+	}
+}
+
+// Test_discovery_SaveConfigFromUser_AllConfigPresent tests the discovery.SaveConfigFromUser() when there is a configuration for every possible URL and API Key
 func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 	const profile = "cn"
 	config := map[string]string{
@@ -459,8 +641,6 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		"cn.staging_key":   "staging235",
 	}
 
-	dir := t.TempDir()
-
 	tests := []struct {
 		name       string
 		input      string
@@ -472,7 +652,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		{
 			name:      "Keep every existing value",
 			input:     strings.Repeat("\n", 8),
-			writePath: filepath.Join(dir, "test1.toml"),
+			writePath: t.TempDir(),
 			expectKeys: map[string]string{
 				"core_url":      config["cn.core_url"],
 				"core_key":      config["cn.core_key"],
@@ -483,7 +663,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		{
 			name:      "Set Core URL and Staging URL to empty, keep the rest",
 			input:     " \n" + strings.Repeat("\n", 5) + " \n\n",
-			writePath: filepath.Join(dir, "test2.toml"),
+			writePath: t.TempDir(),
 			expectKeys: map[string]string{
 				"core_url":      "",
 				"core_key":      config["cn.core_key"],
@@ -494,7 +674,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		{
 			name:      "Set Core URL to new value, keep the rest",
 			input:     "http://discovery.core.cn\n" + strings.Repeat("\n", 7),
-			writePath: filepath.Join(dir, "test3.toml"),
+			writePath: t.TempDir(),
 			expectKeys: map[string]string{
 				"core_url":      "http://discovery.core.cn",
 				"core_key":      config["cn.core_key"],
@@ -504,7 +684,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		{
 			name:      "The user writes an End Of File while inputting the values",
 			input:     "http://discovery.core.cn\ncore123",
-			writePath: filepath.Join(dir, "test5.toml"),
+			writePath: t.TempDir(),
 			expectKeys: map[string]string{
 				"core_url": "http://discovery.core.cn",
 				"core_key": "core123",
@@ -513,31 +693,31 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		{
 			name:      "Reading from the Core Config In IOStream fails",
 			inReader:  errReader{err: errors.New("read failed")},
-			writePath: filepath.Join(dir, "test7.toml"),
+			writePath: t.TempDir(),
 			err:       fmt.Errorf("read failed"),
 		},
 		{
 			name:      "Reading from the Ingestion Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\n"), errReader{err: errors.New("read failed")}),
-			writePath: filepath.Join(dir, "test7.toml"),
+			writePath: t.TempDir(),
 			err:       fmt.Errorf("read failed"),
 		},
 		{
 			name:      "Reading from the QueryFlow Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\n"), errReader{err: errors.New("read failed")}),
-			writePath: filepath.Join(dir, "test7.toml"),
+			writePath: t.TempDir(),
 			err:       fmt.Errorf("read failed"),
 		},
 		{
 			name:      "Reading from the Staging Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\nhttp://discovery.queryflow.cn\n\n"), errReader{err: errors.New("read failed")}),
-			writePath: filepath.Join(dir, "test7.toml"),
+			writePath: t.TempDir(),
 			err:       fmt.Errorf("read failed"),
 		},
 		{
 			name:      "Invalid write location",
 			input:     strings.Repeat("\n", 8),
-			writePath: filepath.Join(dir, "nonexistent", "config.toml"),
+			writePath: "doesnotexist",
 			err:       fmt.Errorf("cannot find the path specified"),
 		},
 	}
@@ -573,13 +753,12 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 				return
 			} else {
 				require.NoError(t, err)
-				got := viper.New()
-				got.SetConfigFile(tc.writePath)
-				require.NoError(t, got.ReadInConfig())
+				vpr, err := InitializeConfig(ios, tc.writePath)
+				require.NoError(t, err)
 
-				for k, want := range tc.expectKeys {
-					gotVal := got.GetString(profile + "." + k)
-					require.Equalf(t, want, gotVal, "key %q mismatch", k)
+				for k, expected := range tc.expectKeys {
+					gotVal := vpr.GetString(profile + "." + k)
+					require.Equal(t, expected, gotVal)
 				}
 			}
 		})
@@ -612,14 +791,12 @@ func Test_discovery_SaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 		vpr.Set(k, v)
 	}
 
-	path := filepath.Join(dir, "config.toml")
-	d := NewDiscovery(&ios, vpr, path)
+	d := NewDiscovery(&ios, vpr, dir)
 
 	err := d.SaveConfigFromUser(profile)
 	require.NoError(t, err)
-	got := viper.New()
-	got.SetConfigFile(path)
-	require.NoError(t, got.ReadInConfig())
+	got, err := InitializeConfig(ios, dir)
+	require.NoError(t, err)
 
 	assert.Equal(t, "http://localhost:8080", got.Get("cn.core_url"))
 	assert.Equal(t, "core123", got.Get("cn.core_key"))
@@ -635,8 +812,6 @@ func Test_discovery_SaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 	const profile = "cn"
 
-	dir := t.TempDir()
-
 	tests := []struct {
 		name       string
 		input      string
@@ -650,7 +825,7 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		{
 			name:       "Keep every existing value",
 			input:      "\n\n",
-			writePath:  filepath.Join(dir, "test1.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.core_url": "http://localhost:8080",
@@ -664,7 +839,7 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		{
 			name:       "Set Core URL to empty, keep Core Key",
 			input:      " \n",
-			writePath:  filepath.Join(dir, "test2.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.core_url": "http://localhost:8080",
@@ -678,7 +853,7 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		{
 			name:       "Set Core URL to new value, keep Core Key",
 			input:      "http://discovery.core.cn\n\n",
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			standalone: false,
 			config: map[string]string{
 				"cn.core_url": "http://localhost:8080",
@@ -692,7 +867,7 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		{
 			name:       "The user writes an End Of File while inputting the values",
 			input:      "http://discovery.core.cn\ncore123",
-			writePath:  filepath.Join(dir, "test5.toml"),
+			writePath:  t.TempDir(),
 			standalone: false,
 			config: map[string]string{
 				"cn.core_url": "http://localhost:8080",
@@ -707,7 +882,7 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 			name:       "Core Key is nil, keep Core Key",
 			input:      "http://discovery.core.cn\n\n",
 			standalone: true,
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			config: map[string]string{
 				"cn.core_url": "http://localhost:8080",
 			},
@@ -719,7 +894,7 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		{
 			name:       "Core Key is nil, change Core Key",
 			input:      "http://discovery.core.cn\ncore123\n",
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.core_url": "http://localhost:8080",
@@ -733,21 +908,21 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 			name:       "Reading from the In IOStream fails in Core URL",
 			inReader:   errReader{err: errors.New("read failed")},
 			standalone: true,
-			writePath:  filepath.Join(dir, "test7.toml"),
+			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Core Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), errReader{err: errors.New("read failed")}),
 			standalone: true,
-			writePath:  filepath.Join(dir, "test9.toml"),
+			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
-			writePath:  filepath.Join(dir, "nonexistent", "config.toml"),
+			writePath:  "doesnotexist",
 			err:        fmt.Errorf("cannot find the path specified"),
 		},
 	}
@@ -786,13 +961,12 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 				return
 			} else {
 				require.NoError(t, err)
-				got := viper.New()
-				got.SetConfigFile(tc.writePath)
-				require.NoError(t, got.ReadInConfig())
+				vpr, err := InitializeConfig(ios, tc.writePath)
+				require.NoError(t, err)
 
-				for k, want := range tc.expectKeys {
-					gotVal := got.GetString(profile + "." + k)
-					require.Equalf(t, want, gotVal, "key %q mismatch", k)
+				for k, expected := range tc.expectKeys {
+					gotVal := vpr.GetString(profile + "." + k)
+					require.Equal(t, expected, gotVal)
 				}
 			}
 		})
@@ -802,8 +976,6 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 // Test_discovery_SaveIngestionConfigFromUser tests the discovery.SaveIngestionConfigFromUser() function.
 func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 	const profile = "cn"
-
-	dir := t.TempDir()
 
 	tests := []struct {
 		name       string
@@ -818,7 +990,7 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		{
 			name:       "Keep every existing value",
 			input:      "\n\n",
-			writePath:  filepath.Join(dir, "test1.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.ingestion_url": "http://localhost:8080",
@@ -832,7 +1004,7 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		{
 			name:       "Set Ingestion URL to empty, keep Ingestion Key",
 			input:      " \n",
-			writePath:  filepath.Join(dir, "test2.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.ingestion_url": "http://localhost:8080",
@@ -846,7 +1018,7 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		{
 			name:       "Set Ingestion URL to new value, keep Ingestion Key",
 			input:      "http://discovery.ingestion.cn\n\n",
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			standalone: false,
 			config: map[string]string{
 				"cn.ingestion_url": "http://localhost:8080",
@@ -860,7 +1032,7 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		{
 			name:       "The user writes an End Of File while inputting the values",
 			input:      "http://discovery.ingestion.cn\ningestion123",
-			writePath:  filepath.Join(dir, "test5.toml"),
+			writePath:  t.TempDir(),
 			standalone: false,
 			config: map[string]string{
 				"cn.ingestion_url": "http://localhost:8080",
@@ -875,7 +1047,7 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 			name:       "Ingestion Key is nil, keep Ingestion Key",
 			input:      "http://discovery.ingestion.cn\n\n",
 			standalone: true,
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			config: map[string]string{
 				"cn.ingestion_url": "http://localhost:8080",
 			},
@@ -887,7 +1059,7 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		{
 			name:       "Ingestion Key is nil, change Ingestion Key",
 			input:      "http://discovery.ingestion.cn\ningestion123\n",
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.ingestion_url": "http://localhost:8080",
@@ -901,21 +1073,21 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 			name:       "Reading from the In IOStream fails in Ingestion URL",
 			inReader:   errReader{err: errors.New("read failed")},
 			standalone: true,
-			writePath:  filepath.Join(dir, "test7.toml"),
+			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Ingestion Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.ingestion.cn\n"), errReader{err: errors.New("read failed")}),
 			standalone: true,
-			writePath:  filepath.Join(dir, "test9.toml"),
+			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
-			writePath:  filepath.Join(dir, "nonexistent", "config.toml"),
+			writePath:  "doesnotexist",
 			err:        fmt.Errorf("cannot find the path specified"),
 		},
 	}
@@ -954,13 +1126,12 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 				return
 			} else {
 				require.NoError(t, err)
-				got := viper.New()
-				got.SetConfigFile(tc.writePath)
-				require.NoError(t, got.ReadInConfig())
+				vpr, err := InitializeConfig(ios, tc.writePath)
+				require.NoError(t, err)
 
-				for k, want := range tc.expectKeys {
-					gotVal := got.GetString(profile + "." + k)
-					require.Equalf(t, want, gotVal, "key %q mismatch", k)
+				for k, expected := range tc.expectKeys {
+					gotVal := vpr.GetString(profile + "." + k)
+					require.Equal(t, expected, gotVal)
 				}
 			}
 		})
@@ -970,8 +1141,6 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 // Test_discovery_SaveQueryFlowConfigFromUser tests discovery.SaveQueryFlowConfigFromUser() function.
 func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 	const profile = "cn"
-
-	dir := t.TempDir()
 
 	tests := []struct {
 		name       string
@@ -986,7 +1155,7 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		{
 			name:       "Keep every existing value",
 			input:      "\n\n",
-			writePath:  filepath.Join(dir, "test1.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.queryflow_url": "http://localhost:8080",
@@ -1000,7 +1169,7 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		{
 			name:       "Set QueryFlow URL to empty, keep QueryFlow Key",
 			input:      " \n",
-			writePath:  filepath.Join(dir, "test2.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.queryflow_url": "http://localhost:8080",
@@ -1014,7 +1183,7 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		{
 			name:       "Set QueryFlow URL to new value, keep QueryFlow Key",
 			input:      "http://discovery.queryflow.cn\n\n",
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			standalone: false,
 			config: map[string]string{
 				"cn.queryflow_url": "http://localhost:8080",
@@ -1028,7 +1197,7 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		{
 			name:       "The user writes an End Of File while inputting the values",
 			input:      "http://discovery.queryflow.cn\nqueryflow123",
-			writePath:  filepath.Join(dir, "test5.toml"),
+			writePath:  t.TempDir(),
 			standalone: false,
 			config: map[string]string{
 				"cn.queryflow_url": "http://localhost:8080",
@@ -1043,7 +1212,7 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 			name:       "QueryFlow Key is nil, keep QueryFlow Key",
 			input:      "http://discovery.queryflow.cn\n\n",
 			standalone: true,
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			config: map[string]string{
 				"cn.queryflow_url": "http://localhost:8080",
 			},
@@ -1055,7 +1224,7 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		{
 			name:       "QueryFlow Key is nil, change QueryFlow Key",
 			input:      "http://discovery.queryflow.cn\nqueryflow123\n",
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.queryflow_url": "http://localhost:8080",
@@ -1069,21 +1238,21 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 			name:       "Reading from the In IOStream fails in QueryFlow URL",
 			inReader:   errReader{err: errors.New("read failed")},
 			standalone: true,
-			writePath:  filepath.Join(dir, "test7.toml"),
+			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in QueryFlow Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.queryflow.cn\n"), errReader{err: errors.New("read failed")}),
 			standalone: true,
-			writePath:  filepath.Join(dir, "test9.toml"),
+			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
-			writePath:  filepath.Join(dir, "nonexistent", "config.toml"),
+			writePath:  "doesnotexist",
 			err:        fmt.Errorf("cannot find the path specified"),
 		},
 	}
@@ -1122,13 +1291,12 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 				return
 			} else {
 				require.NoError(t, err)
-				got := viper.New()
-				got.SetConfigFile(tc.writePath)
-				require.NoError(t, got.ReadInConfig())
+				vpr, err := InitializeConfig(ios, tc.writePath)
+				require.NoError(t, err)
 
-				for k, want := range tc.expectKeys {
-					gotVal := got.GetString(profile + "." + k)
-					require.Equalf(t, want, gotVal, "key %q mismatch", k)
+				for k, expected := range tc.expectKeys {
+					gotVal := vpr.GetString(profile + "." + k)
+					require.Equal(t, expected, gotVal)
 				}
 			}
 		})
@@ -1138,8 +1306,6 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 // Test_discovery_SaveStagingConfigFromUser tests the discovery.SaveStagingConfigFromUser() function.
 func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 	const profile = "cn"
-
-	dir := t.TempDir()
 
 	tests := []struct {
 		name       string
@@ -1154,7 +1320,7 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		{
 			name:       "Keep every existing value",
 			input:      "\n\n",
-			writePath:  filepath.Join(dir, "test1.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.staging_url": "http://localhost:8080",
@@ -1168,7 +1334,7 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		{
 			name:       "Set Staging URL to empty, keep Staging Key",
 			input:      " \n",
-			writePath:  filepath.Join(dir, "test2.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.staging_url": "http://localhost:8080",
@@ -1182,7 +1348,7 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		{
 			name:       "Set Staging URL to new value, keep Staging Key",
 			input:      "http://discovery.staging.cn\n\n",
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			standalone: false,
 			config: map[string]string{
 				"cn.staging_url": "http://localhost:8080",
@@ -1196,7 +1362,7 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		{
 			name:       "The user writes an End Of File while inputting the values",
 			input:      "http://discovery.staging.cn\nstaging123",
-			writePath:  filepath.Join(dir, "test5.toml"),
+			writePath:  t.TempDir(),
 			standalone: false,
 			config: map[string]string{
 				"cn.staging_url": "http://localhost:8080",
@@ -1211,7 +1377,7 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 			name:       "Staging Key is nil, keep Staging Key",
 			input:      "http://discovery.staging.cn\n\n",
 			standalone: true,
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			config: map[string]string{
 				"cn.staging_url": "http://localhost:8080",
 			},
@@ -1223,7 +1389,7 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		{
 			name:       "Staging Key is nil, change Staging Key",
 			input:      "http://discovery.staging.cn\nstaging123\n",
-			writePath:  filepath.Join(dir, "test3.toml"),
+			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
 				"cn.staging_url": "http://localhost:8080",
@@ -1237,21 +1403,21 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 			name:       "Reading from the In IOStream fails in Staging URL",
 			inReader:   errReader{err: errors.New("read failed")},
 			standalone: true,
-			writePath:  filepath.Join(dir, "test7.toml"),
+			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Staging Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.staging.cn\n"), errReader{err: errors.New("read failed")}),
 			standalone: true,
-			writePath:  filepath.Join(dir, "test9.toml"),
+			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
-			writePath:  filepath.Join(dir, "nonexistent", "config.toml"),
+			writePath:  "doesnotexist",
 			err:        fmt.Errorf("cannot find the path specified"),
 		},
 	}
@@ -1290,13 +1456,12 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 				return
 			} else {
 				require.NoError(t, err)
-				got := viper.New()
-				got.SetConfigFile(tc.writePath)
-				require.NoError(t, got.ReadInConfig())
+				vpr, err := InitializeConfig(ios, tc.writePath)
+				require.NoError(t, err)
 
-				for k, want := range tc.expectKeys {
-					gotVal := got.GetString(profile + "." + k)
-					require.Equalf(t, want, gotVal, "key %q mismatch", k)
+				for k, expected := range tc.expectKeys {
+					gotVal := vpr.GetString(profile + "." + k)
+					require.Equal(t, expected, gotVal)
 				}
 			}
 		})
