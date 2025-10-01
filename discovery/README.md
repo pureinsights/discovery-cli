@@ -212,4 +212,4 @@ Creating a `endpointsClient` can be done with `queryFlow.endpointsClient()` or `
 ##### BackupRestore
 This struct imports and exports QueryFlow's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
 
-Creating a `backupRestore` can be done with `core.BackupRestore()`.
+Creating a `backupRestore` can be done with `queryflow.BackupRestore()`.
