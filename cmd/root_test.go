@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Test_newRootCommand tests the newRootCommand() function.
 func Test_newRootCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
@@ -42,6 +43,7 @@ func Test_newRootCommand(t *testing.T) {
 	assert.Equal(t, "cn", vpr.GetString("profile"))
 }
 
+// TestRun_SetDiscoveryDirFails tests the Run function when the SetDiscoveryDir() function fails.
 func TestRun_SetDiscoveryDirFails(t *testing.T) {
 	tmp := t.TempDir()
 
@@ -61,6 +63,7 @@ func TestRun_SetDiscoveryDirFails(t *testing.T) {
 	}
 }
 
+// TestRun_InitializeConfigFails tests the Run function when the InitializeConfig() function fails.
 func TestRun_InitializeConfigFails(t *testing.T) {
 	tmp := t.TempDir()
 
@@ -91,6 +94,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	}
 }
 
+// TestRun_Success tests when the Run function works
 func TestRun_Success(t *testing.T) {
 	tmp := t.TempDir()
 
