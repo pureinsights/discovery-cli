@@ -130,6 +130,16 @@ It has the following additional method:
 
 Creating a `serversClient` can be done with `core.Servers()` or `newServersClient(URL, API Key)`.
 
+
+
+##### LabelsClient
+This struct manages labels. 
+
+It inherits from:
+* [CRUD](#crud)
+
+Creating a `labelsClient` can be done with `core.Labels()` or `newLabelsClient(URL, API Key)`.
+
 ##### FilesClient
 This struct manages Discovery's files. 
 
@@ -139,25 +149,12 @@ It inherits from:
 It has the following additional methods:
 | Name | Method | Path | Request Body | Response | Description |
 | --- | --- | --- | --- | --- | --- | 
-| Upload | PUT | `{URL}/file/{Key}` | `multipart/form-data` | `application/json` | Sends a file to Discovery. |
-| Retrieve | GET | `{URL}/file/{Key}`  |  | `application/octet-stream` | Returns file's data inside a byte array. |
+| Upload | PUT | `{URL}/file/{KEY}` | `multipart/form-data` | `application/json` | Sends a file to Discovery. |
+| Retrieve | GET | `{URL}/file/{KEY}`  |  | `application/octet-stream` | Returns file's data inside a byte array. |
 | List | GET | `{URL}/file`  |  | `application/json` | Returns an array with all of the file keys in Discovery. |
-| Delete | DELETE | `{URL}/file/{Key}`  | | `application/json` | Removes the file. |
+| Delete | DELETE | `{URL}/file/{KEY}`  | | `application/json` | Removes the file. |
 
 Creating a `filesClient` can be done with `core.Files()` or `newServersClient(URL, API Key)`.
-
-##### BackupRestore
-This struct imports and exports the Core's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
-
-Creating a `backupRestore` can be done with `core.BackupRestore()`.
-
-##### LabelsClient
-This struct manages labels. 
-
-It inherits from:
-* [CRUD](#crud)
-
-Creating a `labelsClient` can be done with `core.Labels()` or `newLabelsClient(URL, API Key)`.
 
 ##### MaintenanceClient
 The `maintenanceClient` struct carries out the Core's maintenance operations.
@@ -171,3 +168,8 @@ It has the following method:
 | Log | POST | `{URL}/maintenance/log` | • `componentName`<br>• `level`: `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`<br>• loggerName | `application/json` | This function changes the log level of a component. It can also change the level of a specific logger inside a component. |
  
  Creating a `maintenanceClient` can be done with `core.Maintenance()` or `newMaintenanceClient(URL, API Key)`.
+
+##### BackupRestore
+This struct imports and exports the Core's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
+
+Creating a `backupRestore` can be done with `core.BackupRestore()`.
