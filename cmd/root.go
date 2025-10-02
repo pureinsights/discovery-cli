@@ -6,7 +6,6 @@ import (
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func newRootCommand(d cli.Discovery) *cobra.Command {
@@ -28,8 +27,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 		"configuration profile to use",
 	)
 
-	_ = viper.BindPFlag("profile", discovery.PersistentFlags().Lookup("profile"))
-
+	d.Config().BindPFlag("profile", discovery.PersistentFlags().Lookup("profile"))
 	return discovery
 }
 

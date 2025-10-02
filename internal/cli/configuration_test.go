@@ -627,6 +627,61 @@ func Test_discovery_saveConfig(t *testing.T) {
 	}
 }
 
+// TestSetDiscoveryDir_MkDirAllFails tests the SetDiscoveryDir() function when the ~/.discovery directory could not be made
+func TestSetDiscoveryDir_MkDirAllFails(t *testing.T) {
+	tmp := t.TempDir()
+
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+
+	target := filepath.Join(tmp, ".discovery")
+
+	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o600))
+
+	_, err := SetDiscoveryDir()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "The system cannot find the path specified.")
+}
+
+// TestSetDiscoveryDir_osUserHomeDirFails tests the SetDiscoveryDir() function when the environment variables are not defined.
+func TestSetDiscoveryDir_osUserHomeDirFails(t *testing.T) {
+
+	t.Setenv("HOME", "")
+	t.Setenv("USERPROFILE", "")
+
+	_, err := SetDiscoveryDir()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "is not defined")
+}
+
+// TestSetDiscoveryDir_Success tests the SetDiscoveryDir() function when the ~/.discovery directory could be created successfully
+func TestSetDiscoveryDir_DiscoveryDirCreated(t *testing.T) {
+	tmp := t.TempDir()
+
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+
+	configPath, err := SetDiscoveryDir()
+	require.NoError(t, err)
+	assert.Equal(t, filepath.Join(tmp, ".discovery"), configPath)
+}
+
+// TestSetDiscoveryDir_Success tests the SetDiscoveryDir() function when the ~/.discovery directory already exists
+func TestSetDiscoveryDir_DiscoveryDirExists(t *testing.T) {
+	tmp := t.TempDir()
+
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+
+	target := filepath.Join(tmp, ".discovery")
+
+	require.NoError(t, os.Mkdir(target, 0o600))
+
+	configPath, err := SetDiscoveryDir()
+	require.NoError(t, err)
+	assert.Equal(t, target, configPath)
+}
+
 // Test_discovery_SaveConfigFromUser_AllConfigPresent tests the discovery.SaveConfigFromUser() when there is a configuration for every possible URL and API Key
 func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 	const profile = "cn"

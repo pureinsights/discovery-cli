@@ -148,6 +148,7 @@ func (d discovery) saveConfig() error {
 	return credentials.WriteConfigAs(filepath.Join(d.ConfigPath(), "credentials.toml"))
 }
 
+// SetDiscoveryDir creates the Discovery directory if it does not exist and returns its path if an error did not occur.
 func SetDiscoveryDir() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
