@@ -1,16 +1,15 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/pureinsights/pdp-cli/cmd/config"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
+// NewRootCommand creates and sets up the root command of the Discovery CLI
 func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery := &cobra.Command{
 		Use:   "discovery [subcommand]",
@@ -30,13 +29,14 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 		"configuration profile to use",
 	)
 
-	_ = viper.BindPFlag("profile", discovery.PersistentFlags().Lookup("profile"))
+	d.Config().BindPFlag("profile", discovery.PersistentFlags().Lookup("profile"))
 
 	discovery.AddCommand(config.NewConfigCommand(d))
 
 	return discovery
 }
 
+// Run executes the root command
 func Run() (cli.ExitCode, error) {
 	ios := iostreams.IOStreams{
 		In:  os.Stdin,
@@ -44,12 +44,16 @@ func Run() (cli.ExitCode, error) {
 		Err: os.Stderr,
 	}
 
-	fmt.Println("TEST: Config and credentials files exist")
-	viper, err := cli.InitializeConfig(ios, "testFiles/configuration")
+	configPath, err := cli.SetDiscoveryDir()
+	if err != nil {
+		return cli.ErrorExitCode, cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not set up Discovery's directory in User's home directory")
+	}
+
+	viper, err := cli.InitializeConfig(ios, configPath)
 	if err != nil {
 		return cli.ErrorExitCode, cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not initialize configuration")
 	}
-	d := cli.NewDiscovery(&ios, viper, "testFiles/configtest.toml")
+	d := cli.NewDiscovery(&ios, viper, configPath)
 	root := newRootCommand(d)
 	err = root.Execute()
 	if err != nil {
