@@ -3,7 +3,6 @@ package iostreams
 import (
 	"bytes"
 	"errors"
-	"flag"
 	"io"
 	"strings"
 	"testing"
@@ -11,8 +10,6 @@ import (
 	"github.com/pureinsights/pdp-cli/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
-
-var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Test_lineReader_InitializesWhenNil tests the lineReader() function when there is no reader yet.
 func Test_lineReader_InitializesWhenNil(t *testing.T) {

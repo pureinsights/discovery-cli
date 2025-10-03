@@ -44,6 +44,16 @@ func Test_newRootCommand(t *testing.T) {
 	// Change flag value to check Viper binding
 	discoveryCmd.PersistentFlags().Set("profile", "cn")
 	assert.Equal(t, "cn", vpr.GetString("profile"))
+
+	var commandNames []string
+	for _, c := range discoveryCmd.Commands() {
+		commandNames = append(commandNames, c.Name())
+	}
+
+	expectedCommands := []string{"config"}
+	for _, c := range expectedCommands {
+		require.Contains(t, commandNames, c)
+	}
 }
 
 // TestRun_SetDiscoveryDirFails tests the Run function when the SetDiscoveryDir() function fails.

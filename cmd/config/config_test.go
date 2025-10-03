@@ -186,6 +186,10 @@ func Test_NewConfigCommand(t *testing.T) {
 
 			configCmd := NewConfigCommand(d)
 
+			configCmd.SetIn(ios.In)
+			configCmd.SetOut(ios.Out)
+			configCmd.SetErr(ios.Err)
+
 			configCmd.PersistentFlags().StringP(
 				"profile",
 				"p",
