@@ -445,7 +445,7 @@ func Test_discovery_askUserConfig(t *testing.T) {
 	}
 }
 
-// Test_discovery_SaveConfigFromUser_AllConfigPresent tests the discovery.SaveConfigFromUser() when there is a configuration for every possible URL and API Key
+// Test_discovery_saveConfig tests the discovery.saveConfig() function.
 func Test_discovery_saveConfig(t *testing.T) {
 	tests := []struct {
 		name                string
