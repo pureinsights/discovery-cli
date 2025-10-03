@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,7 +18,7 @@ import (
 
 // Test_newLabelsClient tests the constructor of newLabelsClient
 func Test_newLabelsClient(t *testing.T) {
-	c := newClient("http://localhost:8080/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	lc := newLabelsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, lc.ApiKey)
@@ -26,7 +27,7 @@ func Test_newLabelsClient(t *testing.T) {
 
 // Test_newSecretsClient tests the constructor of newSecretsClient
 func Test_newSecretsClient(t *testing.T) {
-	c := newClient("http://localhost:8080/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	sc := newSecretsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, sc.ApiKey)
@@ -35,7 +36,7 @@ func Test_newSecretsClient(t *testing.T) {
 
 // Test_newCredentialsClient tests the constructor of newCredentialsClient
 func Test_newCredentialsClient(t *testing.T) {
-	c := newClient("http://localhost:8080/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	cc := newCredentialsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, cc.crud.client.ApiKey)
@@ -46,7 +47,7 @@ func Test_newCredentialsClient(t *testing.T) {
 
 // Test_newServersClient tests the constructor of newServersClient
 func Test_newServersClient(t *testing.T) {
-	c := newClient("http://localhost:8080/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	sc := newServersClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, sc.crud.ApiKey)
@@ -57,7 +58,7 @@ func Test_newServersClient(t *testing.T) {
 
 // Test_newFilesClient tests the constructor of newFilesClient
 func Test_newFilesClient(t *testing.T) {
-	c := newClient("http://localhost:8080/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	fc := newFilesClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, fc.ApiKey)
@@ -66,7 +67,7 @@ func Test_newFilesClient(t *testing.T) {
 
 // Test_newMaintenanceClient tests the constructor of newMaintenanceClient
 func Test_newMaintenanceClient(t *testing.T) {
-	c := newClient("http://localhost:8080/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	mc := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, mc.ApiKey)
@@ -101,7 +102,7 @@ func Test_serversClient_Ping(t *testing.T) {
 
 		// Error case
 		{
-			name:       "Ping returns an error",
+			name:       "Ping returns a 502 error",
 			method:     http.MethodGet,
 			path:       "/server/f6950327-3175-4a98-a570-658df852424a/ping",
 			statusCode: http.StatusBadGateway,
@@ -123,6 +124,75 @@ func Test_serversClient_Ping(t *testing.T) {
 					"timestamp": "2025-08-26T20:42:26.372708600Z"
 			}`)},
 		},
+		{
+			name:       "Ping returns a 400 error",
+			method:     http.MethodGet,
+			path:       "/server/f6950327-3175-4a98-a570-658df852424a/ping",
+			statusCode: http.StatusBadRequest,
+			response: `{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+					"Failed to convert argument [id] for value [notuuid] due to: Invalid UUID string: notuuid"
+			],
+			"timestamp": "2025-09-30T15:35:00.121829500Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+					"Failed to convert argument [id] for value [notuuid] due to: Invalid UUID string: notuuid"
+			],
+			"timestamp": "2025-09-30T15:35:00.121829500Z"
+			}`)},
+		},
+		{
+			name:       "Ping returns a 422 error",
+			method:     http.MethodGet,
+			path:       "/server/f6950327-3175-4a98-a570-658df852424a/ping",
+			statusCode: http.StatusUnprocessableEntity,
+			response: `{
+			"status": 422,
+			"code": 4001,
+			"messages": [
+					"Client of type openai cannot be validated"
+			],
+			"timestamp": "2025-09-30T15:35:00.121829500Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusUnprocessableEntity, Body: gjson.Parse(`{
+			"status": 422,
+			"code": 4001,
+			"messages": [
+					"Client of type openai cannot be validated"
+			],
+			"timestamp": "2025-09-30T15:35:00.121829500Z"
+			}`)},
+		},
+		{
+			name:       "Ping returns a 404 error",
+			method:     http.MethodGet,
+			path:       "/server/f6950327-3175-4a98-a570-658df852424a/ping",
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: f6950327-3175-4a98-a570-658df852424a"
+			],
+			"timestamp": "2025-09-30T15:38:42.885125200Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: f6950327-3175-4a98-a570-658df852424a"
+			],
+			"timestamp": "2025-09-30T15:38:42.885125200Z"
+			}`)},
+		},
 	}
 
 	for _, tc := range tests {
@@ -134,8 +204,7 @@ func Test_serversClient_Ping(t *testing.T) {
 				}))
 			defer srv.Close()
 
-			c := newClient(srv.URL, "")
-			serverClient := newServersClient(c.client.BaseURL, c.ApiKey)
+			serverClient := newServersClient(srv.URL, "")
 			id := uuid.MustParse("f6950327-3175-4a98-a570-658df852424a")
 			response, err := serverClient.Ping(id)
 			assert.Equal(t, tc.expectedResponse, response)
@@ -153,6 +222,7 @@ func Test_serversClient_Ping(t *testing.T) {
 
 // Test_filesClient_Upload tests the fileClient.Upload() function.
 func Test_filesClient_Upload(t *testing.T) {
+	fileContent := "This is a test file"
 	tests := []struct {
 		name             string
 		method           string
@@ -198,17 +268,16 @@ func Test_filesClient_Upload(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, tc.path, r.URL.Path)
+				body, _ := io.ReadAll(r.Body)
+				assert.Contains(t, string(body), fileContent)
 			}))
 			defer srv.Close()
 
-			c := newClient(srv.URL, "")
-			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
+			filesClient := newFilesClient(srv.URL, "")
 
 			if tc.err == nil {
-				tmpFile, err := fileutils.CreateTemporaryFile("", tc.fileName, "This is a test file")
-				if err != nil {
-					t.Fatalf("Failed to create file")
-				}
+				tmpFile, err := fileutils.CreateTemporaryFile(t.TempDir(), tc.fileName, fileContent)
+				require.NoError(t, err)
 				defer os.Remove(tmpFile)
 				response, err := filesClient.Upload(tc.fileName, tmpFile)
 				assert.Equal(t, tc.expectedResponse, response)
@@ -267,14 +336,13 @@ func Test_filesClient_Retrieve(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/octet-stream", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, tc.path, r.URL.Path)
 			}))
 			defer srv.Close()
 
-			c := newClient(srv.URL, "")
-			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
+			filesClient := newFilesClient(srv.URL, "")
 			response, err := filesClient.Retrieve(tc.fileName)
 			assert.Equal(t, tc.response, string(response))
 			if tc.err == nil {
@@ -366,7 +434,7 @@ func Test_filesClient_List(t *testing.T) {
 		},
 		// Error case
 		{
-			name:             "List returns a response that cannot be marshalled into an []string",
+			name:             "List returns a response that cannot be marshalled into a []string",
 			method:           http.MethodGet,
 			path:             "/file",
 			statusCode:       http.StatusOK,
@@ -393,8 +461,7 @@ func Test_filesClient_List(t *testing.T) {
 			}))
 			defer srv.Close()
 
-			c := newClient(srv.URL, "")
-			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
+			filesClient := newFilesClient(srv.URL, "")
 			response, err := filesClient.List()
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -464,8 +531,7 @@ func Test_filesClient_Delete(t *testing.T) {
 			}))
 			defer srv.Close()
 
-			c := newClient(srv.URL, "")
-			filesClient := newFilesClient(c.client.BaseURL, c.ApiKey)
+			filesClient := newFilesClient(srv.URL, "")
 			response, err := filesClient.Delete("testFile")
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -536,6 +602,32 @@ func Test_maintenanceClient_Log(t *testing.T) {
 			expectedResponse: gjson.Result{},
 			err:              Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{"status":400,"code":3002,"messages":["Required QueryValue [componentName] not specified"],"timestamp":"2025-08-28T00:03:31.103683200Z"}`)},
 		},
+		{
+			name:          "Log returns 422 error because the maintenance service is disabled.",
+			method:        http.MethodPost,
+			path:          "/maintenance/log",
+			componentName: "",
+			logLevel:      LevelInfo,
+			loggerName:    "",
+			statusCode:    http.StatusUnprocessableEntity,
+			response: `{
+			"status": 422,
+			"code": 4001,
+			"messages": [
+				"The maintenance service is disabled per application configuration"
+			],
+			"timestamp": "2025-09-30T15:57:00.226830700Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusUnprocessableEntity, Body: gjson.Parse(`{
+			"status": 422,
+			"code": 4001,
+			"messages": [
+				"The maintenance service is disabled per application configuration"
+			],
+			"timestamp": "2025-09-30T15:57:00.226830700Z"
+			}`)},
+		},
 	}
 
 	for _, tc := range tests {
@@ -543,11 +635,13 @@ func Test_maintenanceClient_Log(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, tc.path, r.URL.Path)
+				assert.Equal(t, tc.componentName, r.URL.Query().Get("componentName"))
+				assert.Equal(t, string(tc.logLevel), r.URL.Query().Get("level"))
+				assert.Equal(t, tc.loggerName, r.URL.Query().Get("loggerName"))
 			}))
 			defer srv.Close()
 
-			c := newClient(srv.URL, "")
-			maintenanceClient := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
+			maintenanceClient := newMaintenanceClient(srv.URL, "")
 			response, err := maintenanceClient.Log(tc.componentName, tc.logLevel, tc.loggerName)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -564,7 +658,7 @@ func Test_maintenanceClient_Log(t *testing.T) {
 
 // Test_core_Labels tests the core.Labels() function
 func Test_core_Labels(t *testing.T) {
-	c := NewCore("http://localhost:8080/v2", "Api Key")
+	c := NewCore("http://localhost:12010/v2", "Api Key")
 	lc := c.Labels()
 
 	assert.Equal(t, c.ApiKey, lc.ApiKey)
@@ -573,7 +667,7 @@ func Test_core_Labels(t *testing.T) {
 
 // Test_core_Secrets tests the core.Secrets() function
 func Test_core_Secrets(t *testing.T) {
-	c := NewCore("http://localhost:8080/v2", "Api Key")
+	c := NewCore("http://localhost:12010/v2", "Api Key")
 	sc := c.Secrets()
 
 	assert.Equal(t, c.ApiKey, sc.ApiKey)
@@ -582,7 +676,7 @@ func Test_core_Secrets(t *testing.T) {
 
 // Test_core_Credentials tests the core.Credentials() function
 func Test_core_Credentials(t *testing.T) {
-	c := NewCore("http://localhost:8080/v2", "Api Key")
+	c := NewCore("http://localhost:12010/v2", "Api Key")
 	cc := c.Credentials()
 
 	assert.Equal(t, c.ApiKey, cc.ApiKey)
@@ -593,7 +687,7 @@ func Test_core_Credentials(t *testing.T) {
 
 // Test_core_Servers tests the core.Servers() function
 func Test_core_Servers(t *testing.T) {
-	c := NewCore("http://localhost:8080/v2", "Api Key")
+	c := NewCore("http://localhost:12010/v2", "Api Key")
 	sc := c.Servers()
 
 	assert.Equal(t, c.ApiKey, sc.ApiKey)
@@ -604,7 +698,7 @@ func Test_core_Servers(t *testing.T) {
 
 // Test_core_Files tests the core.Files() function
 func Test_core_Files(t *testing.T) {
-	c := NewCore("http://localhost:8080/v2", "Api Key")
+	c := NewCore("http://localhost:12010/v2", "Api Key")
 	fc := c.Files()
 
 	assert.Equal(t, c.ApiKey, fc.ApiKey)
@@ -613,7 +707,7 @@ func Test_core_Files(t *testing.T) {
 
 // Test_core_Maintenance tests the core.Maintenance() function
 func Test_core_Maintenance(t *testing.T) {
-	c := NewCore("http://localhost:8080/v2", "Api Key")
+	c := NewCore("http://localhost:12010/v2", "Api Key")
 	mc := c.Maintenance()
 
 	assert.Equal(t, c.ApiKey, mc.ApiKey)
@@ -622,7 +716,7 @@ func Test_core_Maintenance(t *testing.T) {
 
 // Test_core_BackupRestore tests the core.BackupRestore() function
 func Test_core_BackupRestore(t *testing.T) {
-	c := NewCore("http://localhost:8080/v2", "Api Key")
+	c := NewCore("http://localhost:12010/v2", "Api Key")
 	bc := c.BackupRestore()
 
 	assert.Equal(t, c.ApiKey, bc.ApiKey)
@@ -632,7 +726,7 @@ func Test_core_BackupRestore(t *testing.T) {
 // Test_NewCore_UrlAndAPIKey tests the function to create a new core client.
 // It verifies that the API Key and base URL correctly match.
 func Test_NewCore_UrlAndAPIKey(t *testing.T) {
-	url := "http://localhost:8080/v2"
+	url := "http://localhost:12010/v2"
 	apiKey := "secret-key"
 	c := NewCore(url, apiKey)
 

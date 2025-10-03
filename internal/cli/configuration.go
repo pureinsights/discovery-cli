@@ -3,17 +3,20 @@ package cli
 import (
 	"fmt"
 	"math"
+	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/viper"
 )
 
 const (
-	DefaultCoreURL      string = "http://localhost:8080"
-	DefaultIngestionURL string = "http://localhost:8080"
-	DefaultQueryFlowURL string = "http://localhost:8088"
-	DefaultStagingURL   string = "http://localhost:8081"
+	DefaultCoreURL      string = "http://localhost:12010"
+	DefaultStagingURL   string = "http://localhost:12020"
+	DefaultIngestionURL string = "http://localhost:12030"
+	DefaultQueryFlowURL string = "http://localhost:12040"
 )
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
@@ -40,8 +43,8 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error) {
 	vpr := viper.New()
 
-	vpr.SetDefault("profile", "default")
 	defaultProfile := "default"
+	vpr.SetDefault("profile", defaultProfile)
 
 	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
 		return nil, err
@@ -116,12 +119,56 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	return nil
 }
 
+// SaveConfig separates de API Keys from Discovery's Viper configuration and writes the config and credentials into their own files.
+func (d discovery) saveConfig() error {
+	v := d.Config()
+	apiKeys := []string{"core_key", "ingestion_key", "queryflow_key", "staging_key"}
+
+	config := viper.New()
+	credentials := viper.New()
+
+	for _, setting := range v.AllKeys() {
+		if setting != "profile" {
+			parts := strings.Split(setting, ".")
+			if slices.Contains(apiKeys, parts[len(parts)-1]) {
+				credentials.Set(setting, v.Get(setting))
+			} else {
+				config.Set(setting, v.Get(setting))
+			}
+		} else {
+			config.Set("profile", v.Get("profile"))
+		}
+	}
+
+	err := config.WriteConfigAs(filepath.Join(d.ConfigPath(), "config.toml"))
+	if err != nil {
+		return err
+	}
+
+	return credentials.WriteConfigAs(filepath.Join(d.ConfigPath(), "credentials.toml"))
+}
+
+// SetDiscoveryDir creates the Discovery directory if it does not exist and returns its path if an error did not occur.
+func SetDiscoveryDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	configPath := filepath.Join(home, ".discovery")
+
+	if err := os.MkdirAll(configPath, 0o700); err != nil {
+		return "", err
+	}
+
+	return configPath, nil
+}
+
 // SaveCoreConfigFromUser asks the user for the values it wants to set for Discovery Core's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
 // The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
-	v := d.Config()
 
 	if standalone {
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
@@ -137,7 +184,7 @@ func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error
 		return keyErr
 	}
 
-	return v.WriteConfigAs(d.ConfigPath())
+	return d.saveConfig()
 }
 
 // SaveIngestionConfigFromUser asks the user for the values it wants to set for Discovery Ingestion's configuration properties for the given profile.
@@ -145,7 +192,6 @@ func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error
 // The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
-	v := d.Config()
 
 	if standalone {
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
@@ -161,7 +207,7 @@ func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) 
 		return keyErr
 	}
 
-	return v.WriteConfigAs(d.ConfigPath())
+	return d.saveConfig()
 }
 
 // SaveQueryFlowConfigFromUser asks the user for the values it wants to set for Discovery QueryFlow's configuration properties for the given profile.
@@ -169,7 +215,6 @@ func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) 
 // The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
-	v := d.Config()
 
 	if standalone {
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
@@ -185,7 +230,7 @@ func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) 
 		return keyErr
 	}
 
-	return v.WriteConfigAs(d.ConfigPath())
+	return d.saveConfig()
 }
 
 // SaveStagingConfigFromUser asks the user for the values it wants to set for Discovery Staging's configuration properties for the given profile.
@@ -193,7 +238,6 @@ func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) 
 // The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) error {
 	ios := d.IOStreams()
-	v := d.Config()
 
 	if standalone {
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
@@ -209,7 +253,7 @@ func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) er
 		return keyErr
 	}
 
-	return v.WriteConfigAs(d.ConfigPath())
+	return d.saveConfig()
 }
 
 // SaveConfigFromUser asks the user for the URLs and API Keys of the Discovery's components to save them in a profile.

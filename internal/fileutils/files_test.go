@@ -1,12 +1,15 @@
 package fileutils
 
 import (
+	"flag"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+var Update = flag.Bool("update", false, "rewrite golden files")
 
 // TestCreateTemporaryFile_Success tests when creating and writing to the temporary file was successful.
 // It tests what happens when either of the parameters is empty.

@@ -47,7 +47,7 @@ type client struct {
 
 // NewClient returns an instance of a [client] struct.
 // The url parameter is the url to which the request is sent.
-// For example, http://localhost:8080
+// For example, http://localhost:12010
 func newClient(url, apiKey string) client {
 	restyClient := resty.New()
 	restyClient.SetBaseURL(url)
@@ -55,7 +55,7 @@ func newClient(url, apiKey string) client {
 }
 
 // NewSubClient returns an instance of a [client] struct whose base URL is the parent client’s base URL with an added path.
-// For example, http://localhost:8080/seed
+// For example, http://localhost:12010/seed
 func newSubClient(c client, path string) client {
 	newUrl := strings.TrimRight(c.client.BaseURL, "/") + "/" + strings.TrimLeft(path, "/")
 	subClient := resty.New()

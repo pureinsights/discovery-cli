@@ -10,7 +10,7 @@ This section contains guidelines and best practices to contribute to the project
 Cobra provides a feature to generate automatically help and usage messages for commands.
 Which allows users to use the flag `--help` to show the generated message and get the command documentation.
 
-However, we as developers have the responsibility to provide the information and documentation for each to command to cobra.
+However, we as developers have the responsibility to provide the information and documentation for each command to cobra.
 We can leverage the fields provided by the `cobra.Command` struct as follows:
 
 ```go
