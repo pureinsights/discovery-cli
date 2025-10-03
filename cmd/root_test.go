@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"flag"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Test_newRootCommand tests the newRootCommand() function.
 func Test_newRootCommand(t *testing.T) {

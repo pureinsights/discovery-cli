@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -16,6 +17,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var Update= flag.Bool("update", false, "rewrite golden files")
 
 // Test_readConfigFile tests the readConfigFile() auxiliary function.
 func Test_readConfigFile(t *testing.T) {
