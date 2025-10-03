@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/pureinsights/pdp-cli/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,18 +32,6 @@ func Test_lineReader_CachesSameInstance(t *testing.T) {
 
 	require.Same(t, r1, r2, "lineReader must return the same cached instance")
 }
-
-// ErrWriter is used to force an error when writing to the output stream.
-type errWriter struct{ err error }
-
-// Write completes the implementation of the io.Writer interface.
-func (w errWriter) Write(p []byte) (int, error) { return 0, w.err }
-
-// ErrReader is used to force an error when reading from the input stream.
-type errReader struct{ err error }
-
-// Read completes the implementation of the io.Reader interface.
-func (r errReader) Read(p []byte) (int, error) { return 0, r.err }
 
 // TestAskUser tests the AskUser() function.
 func TestAskUser(t *testing.T) {
@@ -89,13 +78,13 @@ func TestAskUser(t *testing.T) {
 		{
 			name:     "Write prompt returns ios.out error",
 			in:       strings.NewReader("willfail\n"),
-			out:      errWriter{err: errors.New("write failed")},
+			out:      testutils.ErrWriter{Err: errors.New("write failed")},
 			question: "Core URL [http://localhost:8080]",
 			err:      errors.New("write failed"),
 		},
 		{
 			name:     "Read error (not End Of File)",
-			in:       errReader{err: errors.New("read failed")},
+			in:       testutils.ErrReader{Err: errors.New("read failed")},
 			out:      &bytes.Buffer{},
 			question: "Core URL []",
 			err:      errors.New("read failed"),
