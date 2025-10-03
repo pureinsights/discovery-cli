@@ -12,6 +12,7 @@ import (
 
 	"github.com/pureinsights/pdp-cli/internal/fileutils"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/pdp-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1468,12 +1469,6 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 	}
 }
 
-// ErrWriter is used to force an error when writing to the output stream.
-type errWriter struct{ err error }
-
-// Write completes the implementation of the io.Writer interface.
-func (w errWriter) Write(p []byte) (int, error) { return 0, w.err }
-
 // Test_discovery_printConfig tests the discovery.PrintConfig() function.
 func Test_discovery_printConfig(t *testing.T) {
 	tests := []struct {
@@ -1536,7 +1531,7 @@ func Test_discovery_printConfig(t *testing.T) {
 				"cn.core_url": "http://localhost:8080",
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 	}
@@ -1667,7 +1662,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 				"cn.core_key": "discovery.key.core.cn",
 			},
 			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
@@ -1680,7 +1675,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 				"cn.core_key": "discovery.key.core.cn",
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
@@ -1807,7 +1802,7 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 				"cn.ingestion_key": "discovery.key.ingestion.cn",
 			},
 			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
@@ -1820,7 +1815,7 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 				"cn.ingestion_key": "discovery.key.ingestion.cn",
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Ingestion URL", "http://localhost:8080"),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
@@ -1947,7 +1942,7 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 				"cn.queryflow_key": "discovery.key.queryflow.cn",
 			},
 			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
@@ -1960,7 +1955,7 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 				"cn.queryflow_key": "discovery.key.queryflow.cn",
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "QueryFlow URL", "http://localhost:8080"),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
@@ -2087,7 +2082,7 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 				"cn.staging_key": "discovery.key.staging.cn",
 			},
 			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
@@ -2100,7 +2095,7 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 				"cn.staging_key": "discovery.key.staging.cn",
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Staging URL", "http://localhost:8080"),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
@@ -2230,7 +2225,7 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 				"cn.staging_key":   "discovery.key.staging.cn",
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
-			outWriter:      errWriter{err: errors.New("write failed")},
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            errors.New("write failed"),
 		},
 		{
