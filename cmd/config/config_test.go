@@ -15,7 +15,7 @@ import (
 )
 
 // Test_NewConfigCommand tests the NewConfigCommand() function.
-func Test_NewConfigCommand(t *testing.T) {
+func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 	tests := []struct {
 		name                string
 		config              map[string]string
@@ -41,8 +41,8 @@ func Test_NewConfigCommand(t *testing.T) {
 				"cn.queryflow_key": "queryflow123",
 				"cn.staging_key":   "staging235",
 			},
-			outGolden: "newConfigCommand_Out_All",
-			errGolden: "newConfigCommand_Err_All",
+			outGolden: "NewConfigCommand_Out_All",
+			errGolden: "NewConfigCommand_Err_All",
 			expectedConfig: map[string]string{
 				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
@@ -68,8 +68,8 @@ func Test_NewConfigCommand(t *testing.T) {
 				"cn.queryflow_url": "http://localhost:12040",
 				"cn.staging_url":   "http://localhost:12020",
 			},
-			outGolden: "newConfigCommand_Out_NoKeys",
-			errGolden: "newConfigCommand_Err_NoKeys",
+			outGolden: "NewConfigCommand_Out_NoKeys",
+			errGolden: "NewConfigCommand_Err_NoKeys",
 			expectedConfig: map[string]string{
 				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
@@ -89,8 +89,8 @@ func Test_NewConfigCommand(t *testing.T) {
 				"cn.queryflow_key": "queryflow123",
 				"cn.staging_key":   "staging235",
 			},
-			outGolden:      "newConfigCommand_Out_OnlyKeys",
-			errGolden:      "newConfigCommand_Err_OnlyKeys",
+			outGolden:      "NewConfigCommand_Out_OnlyKeys",
+			errGolden:      "NewConfigCommand_Err_OnlyKeys",
 			expectedConfig: map[string]string{},
 			expectedCredentials: map[string]string{
 				"cn.core_key":      "core321",
@@ -114,8 +114,8 @@ func Test_NewConfigCommand(t *testing.T) {
 				"cn.cn.cn.queryflow_key": "queryflow123",
 				"cn.cn.cn.staging_key":   "staging235",
 			},
-			outGolden: "newConfigCommand_Out_MultiplePeriods",
-			errGolden: "newConfigCommand_Err_MultiplePeriods",
+			outGolden: "NewConfigCommand_Out_MultiplePeriods",
+			errGolden: "NewConfigCommand_Err_MultiplePeriods",
 			expectedConfig: map[string]string{
 				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
@@ -147,8 +147,8 @@ func Test_NewConfigCommand(t *testing.T) {
 				"cn.queryflow_key": "queryflow123",
 				"cn.staging_key":   "staging235",
 			},
-			outGolden: "newConfigCommand_Out_ConfigError",
-			errGolden: "newConfigCommand_Err_ConfigError",
+			outGolden: "NewConfigCommand_Out_ConfigError",
+			errGolden: "NewConfigCommand_Err_ConfigError",
 			expectedConfig: map[string]string{
 				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
@@ -211,4 +211,49 @@ func Test_NewConfigCommand(t *testing.T) {
 			testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
 		})
 	}
+}
+
+func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
+	in := strings.NewReader(strings.Repeat("\n", 8))
+	out := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	config := map[string]string{
+		"profile":          "cn",
+		"cn.core_url":      "http://localhost:12010",
+		"cn.ingestion_url": "http://localhost:12030",
+		"cn.queryflow_url": "http://localhost:12040",
+		"cn.staging_url":   "http://localhost:12020",
+		"cn.core_key":      "core321",
+		"cn.ingestion_key": "ingestion432",
+		"cn.queryflow_key": "queryflow123",
+		"cn.staging_key":   "staging235",
+	}
+
+	vpr := viper.New()
+	for k, v := range config {
+		vpr.Set(k, v)
+	}
+
+	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
+
+	configCmd := NewConfigCommand(d)
+
+	configCmd.SetIn(ios.In)
+	configCmd.SetOut(ios.Out)
+	configCmd.SetErr(ios.Err)
+
+	configCmd.SetArgs([]string{"discovery config"})
+
+	err := configCmd.Execute()
+	require.Error(t, err)
+	assert.Equal(t, "flag accessed but not defined: profile", err.Error())
+
+	testutils.CompareBytes(t, "NewConfigCommand_Out_NoProfile", out.Bytes())
+	testutils.CompareBytes(t, "NewConfigCommand_Err_NoProfile", errBuf.Bytes())
 }
