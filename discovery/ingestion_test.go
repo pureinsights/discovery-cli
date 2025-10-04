@@ -1437,10 +1437,7 @@ func Test_seedsClient_Start(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			response, err := ingestionSeedsClient.Start(seedId, scanFull)
 			assert.Equal(t, tc.expectedResponse, response)
@@ -1555,10 +1552,7 @@ func Test_seedsClient_Halt(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			response, err := ingestionSeedsClient.Halt(seedId)
 			assert.Equal(t, tc.expectedResponse, response)
@@ -1677,10 +1671,7 @@ func Test_seedsClient_Reset(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			response, err := ingestionSeedsClient.Reset(seedId)
 			assert.Equal(t, tc.expectedResponse, response)
@@ -1701,10 +1692,7 @@ func Test_seedsClient_Records(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedRecordsClient := ingestionSeedsClient.Records(seedId)
 
@@ -1719,10 +1707,7 @@ func Test_seedsClient_Executions(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedExecutionsClient := ingestionSeedsClient.Executions(seedId)
 
