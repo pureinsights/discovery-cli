@@ -20,10 +20,7 @@ func Test_newSeedExecutionsClient(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
@@ -36,10 +33,7 @@ func Test_newSeedRecordsClient(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedRecordsClient := newSeedRecordsClient(ingestionSeedsClient, seedId)
 
@@ -54,18 +48,12 @@ func Test_newSeedExecutionRecordsClient(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedExecutionRecordsClient := newSeedExecutionRecordsClient(ingestionSeedExecutionsClient, executionId)
 
 	assert.Equal(t, apiKey, ingestionSeedExecutionRecordsClient.client.ApiKey)
@@ -77,18 +65,12 @@ func Test_newSeedExecutionJobsClient(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedExecutionJobClient := newSeedExecutionJobsClient(ingestionSeedExecutionsClient, executionId)
 
 	assert.Equal(t, apiKey, ingestionSeedExecutionJobClient.client.ApiKey)
@@ -235,18 +217,12 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			response, err := ingestionSeedExecutionsClient.Seed(executionId)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -342,24 +318,15 @@ func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 
 			pipelineId, err := uuid.Parse("9a74bf3a-eb2a-4334-b803-c92bf1bc45fe")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			response, err := ingestionSeedExecutionsClient.Pipeline(executionId, pipelineId)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -455,24 +422,15 @@ func Test_seedExecutionsClient_Processor(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 
 			processorId, err := uuid.Parse("aa0186f1-746f-4b20-b1b0-313bd79e78b8")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			response, err := ingestionSeedExecutionsClient.Processor(executionId, processorId)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -568,24 +526,15 @@ func Test_seedExecutionsClient_Server(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 
 			serverId, err := uuid.Parse("f6950327-3175-4a98-a570-658df852424a")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			response, err := ingestionSeedExecutionsClient.Server(executionId, serverId)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -681,24 +630,15 @@ func Test_seedExecutionsClient_Credential(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 
 			credentialId, err := uuid.Parse("9ababe08-0b74-4672-bb7c-e7a8227d6d4c")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			response, err := ingestionSeedExecutionsClient.Credential(executionId, credentialId)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
@@ -794,18 +734,12 @@ func Test_seedExecutionsClient_Halt(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 
 			response, err := ingestionSeedExecutionsClient.Halt(executionId)
 			assert.Equal(t, tc.expectedResponse, response)
@@ -826,18 +760,12 @@ func Test_seedExecutionsClient_Records(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 
 	ingestionSeedExecutionRecordsClient := ingestionSeedExecutionsClient.Records(executionId)
 
@@ -850,18 +778,12 @@ func Test_seedExecutionsClient_Jobs(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 
 	ingestionSeedExecutionJobClient := ingestionSeedExecutionsClient.Jobs(executionId)
 
@@ -1037,18 +959,12 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 
 			response, err := ingestionSeedExecutionsClient.Audit(executionId)
 			if tc.err == nil {
@@ -1115,18 +1031,12 @@ func Test_seedExecutionsClient_Audit_ErrorInSecondPage(t *testing.T) {
 
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 
 	response, err := ingestionSeedExecutionsClient.Audit(executionId)
 	assert.Equal(t, []gjson.Result(nil), response)
@@ -1183,18 +1093,12 @@ func Test_seedExecutionsClient_Audit_NoContentInSecondPage(t *testing.T) {
 
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 
 	response, err := ingestionSeedExecutionsClient.Audit(executionId)
 	require.NoError(t, err)
@@ -1292,18 +1196,12 @@ func Test_seedExecutionsClient_Audit_ContentInSecondPage(t *testing.T) {
 
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
 
 	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 
 	response, err := ingestionSeedExecutionsClient.Audit(executionId)
 	require.NoError(t, err)
@@ -1408,10 +1306,7 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			ingestionSeedRecordsClient := newSeedRecordsClient(ingestionSeedsClient, seedId)
 
@@ -1542,10 +1437,7 @@ func Test_seedsClient_Start(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			response, err := ingestionSeedsClient.Start(seedId, scanFull)
 			assert.Equal(t, tc.expectedResponse, response)
@@ -1660,10 +1552,7 @@ func Test_seedsClient_Halt(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			response, err := ingestionSeedsClient.Halt(seedId)
 			assert.Equal(t, tc.expectedResponse, response)
@@ -1782,10 +1671,7 @@ func Test_seedsClient_Reset(t *testing.T) {
 
 			apiKey := "Api Key"
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-			if err != nil {
-				fmt.Println("UUID conversion failed: " + err.Error())
-				return
-			}
+			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
 			response, err := ingestionSeedsClient.Reset(seedId)
 			assert.Equal(t, tc.expectedResponse, response)
@@ -1806,10 +1692,7 @@ func Test_seedsClient_Records(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedRecordsClient := ingestionSeedsClient.Records(seedId)
 
@@ -1824,10 +1707,7 @@ func Test_seedsClient_Executions(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	if err != nil {
-		fmt.Println("UUID conversion failed: " + err.Error())
-		return
-	}
+	require.NoError(t, err)
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedExecutionsClient := ingestionSeedsClient.Executions(seedId)
 
