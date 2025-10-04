@@ -3,7 +3,6 @@ package testutils
 import (
 	"bytes"
 	"flag"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,6 +12,7 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
+// Path creates the testdata directory when update is true.
 func Path(t *testing.T, name string) string {
 	t.Helper()
 	p := filepath.Join("testdata", name+".golden")
@@ -26,19 +26,18 @@ func Path(t *testing.T, name string) string {
 func Write(t *testing.T, name string, got []byte) {
 	t.Helper()
 	require.True(t, *Update)
-	fmt.Println("Write")
 	require.NoError(t, os.WriteFile(Path(t, name), got, 0o644))
 }
 
 // Read reads the golden file contents.
 func Read(t *testing.T, name string) []byte {
 	t.Helper()
-	fmt.Println("Read")
 	b, err := os.ReadFile(Path(t, name))
 	require.NoError(t, err)
 	return b
 }
 
+// CompareBytes reads the golden file and verifies that its contents and the current response are the same.
 func CompareBytes(t *testing.T, name string, got []byte) {
 	t.Helper()
 	if *Update {
