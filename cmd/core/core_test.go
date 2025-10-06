@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"flag"
 	"strings"
 	"testing"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
+
+var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Test_NewCoreCommand tests the NewCoreCommand() function
 func Test_NewCoreCommand(t *testing.T) {
