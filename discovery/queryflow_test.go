@@ -80,6 +80,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 		statusCode       int
 		response         string
 		expectedResponse gjson.Result
+		expectedPath     string
 		err              error
 	}{
 		// Working case
@@ -109,7 +110,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 		{
 			name:             "Invoke returns an empty array",
 			method:           http.MethodGet,
-			path:             "/blogs-search",
+			path:             "blogs-search",
 			statusCode:       http.StatusOK,
 			response:         `[]`,
 			expectedResponse: gjson.Parse(`[]`),

@@ -77,7 +77,7 @@ func (q queryFlow) BackupRestore() backupRestore {
 // Invoke is a function that calls the API version of an endpoint.
 // It returns the endpoint's response as a gjson.Result or an error if any occurred.
 func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.Result, error) {
-	newUri := "/api/" + strings.TrimLeft(uri, "/")
+	newUri := "/api/" + strings.TrimPrefix(uri, "/")
 	client := newClient(q.Url, q.ApiKey)
 	return execute(client, method, newUri, options...)
 }
@@ -85,7 +85,7 @@ func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.R
 // Debug is a function that calls the Debug version of an endpoint.
 // It returns the endpoint's response as a gjson.Result or an error if any occurred.
 func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Result, error) {
-	newUri := "/debug/" + strings.TrimLeft(uri, "/")
+	newUri := "/debug/" + strings.TrimPrefix(uri, "/")
 	client := newClient(q.Url, q.ApiKey)
 	return execute(client, method, newUri, options...)
 }
