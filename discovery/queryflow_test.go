@@ -28,4 +28,6 @@ func Test_newEndpointsClient(t *testing.T) {
 	assert.Equal(t, url+"/endpoint", qec.crud.client.client.BaseURL)
 	assert.Equal(t, apiKey, qec.cloner.client.ApiKey)
 	assert.Equal(t, url+"/endpoint", qec.cloner.client.client.BaseURL)
+	assert.Equal(t, apiKey, qec.enabler.client.ApiKey)
+	assert.Equal(t, url+"/endpoint", qec.enabler.client.client.BaseURL)
 }
