@@ -3,7 +3,6 @@ package discovery
 import (
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/testutils"
@@ -85,10 +84,11 @@ func Test_queryFlow_Invoke(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:       "Invoke returns a real response",
-			method:     http.MethodGet,
-			path:       "/blogs-search",
-			statusCode: http.StatusOK,
+			name:         "Invoke returns a real response",
+			method:       http.MethodGet,
+			path:         "/blogs-search",
+			expectedPath: "/api/blogs-search",
+			statusCode:   http.StatusOK,
 			response: `[
 				{
 					"_id": "5625c64483bef0d48e9ad91aca9b2f94",
@@ -111,6 +111,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			name:             "Invoke returns an empty array",
 			method:           http.MethodGet,
 			path:             "blogs-search",
+			expectedPath:     "/api/blogs-search",
 			statusCode:       http.StatusOK,
 			response:         `[]`,
 			expectedResponse: gjson.Parse(`[]`),
@@ -119,10 +120,11 @@ func Test_queryFlow_Invoke(t *testing.T) {
 
 		// Error case
 		{
-			name:       "Invoking an endpoint returns an error",
-			method:     http.MethodGet,
-			path:       "///endpoint-false",
-			statusCode: http.StatusNotFound,
+			name:         "Invoking an endpoint returns an error",
+			method:       http.MethodGet,
+			path:         "///endpoint-false",
+			expectedPath: "/api///endpoint-false",
+			statusCode:   http.StatusNotFound,
 			response: `{
 				"status": 404,
 				"code": 1001,
@@ -142,10 +144,11 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			}`)},
 		},
 		{
-			name:       "Invoking an endpoint returns unprocessable entity",
-			method:     http.MethodGet,
-			path:       "/blogs-search",
-			statusCode: http.StatusUnprocessableEntity,
+			name:         "Invoking an endpoint returns unprocessable entity",
+			method:       http.MethodGet,
+			path:         "/blogs-search",
+			expectedPath: "/api/blogs-search",
+			statusCode:   http.StatusUnprocessableEntity,
 			response: `{
 				"status": 422,
 				"code": 4001,
@@ -171,7 +174,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			srv := httptest.NewServer(
 				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 					assert.Equal(t, tc.method, r.Method)
-					assert.Equal(t, "/api/"+strings.TrimLeft(tc.path, "/"), r.URL.Path)
+					assert.Equal(t, tc.expectedPath, r.URL.Path)
 				}))
 			defer srv.Close()
 
@@ -195,6 +198,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 		name             string
 		method           string
 		path             string
+		expectedPath     string
 		statusCode       int
 		response         string
 		expectedResponse gjson.Result
@@ -202,10 +206,11 @@ func Test_queryFlow_Debug(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:       "Debug returns a real response",
-			method:     http.MethodGet,
-			path:       "/blogs-search",
-			statusCode: http.StatusOK,
+			name:         "Debug returns a real response",
+			method:       http.MethodGet,
+			path:         "/blogs-search",
+			expectedPath: "/debug/blogs-search",
+			statusCode:   http.StatusOK,
 			response: `{
 			"duration": 31825,
 			"execution": [
@@ -383,10 +388,11 @@ func Test_queryFlow_Debug(t *testing.T) {
 			err: nil,
 		},
 		{
-			name:       "Debug returns an empty array",
-			method:     http.MethodGet,
-			path:       "/blogs-search",
-			statusCode: http.StatusOK,
+			name:         "Debug returns an empty array",
+			method:       http.MethodGet,
+			path:         "/blogs-search",
+			expectedPath: "/debug/blogs-search",
+			statusCode:   http.StatusOK,
 			response: `{
 				"duration": 2147,
 				"execution": [
@@ -425,10 +431,11 @@ func Test_queryFlow_Debug(t *testing.T) {
 		},
 		// Error case
 		{
-			name:       "Debugging an endpoint returns an error",
-			method:     http.MethodGet,
-			path:       "///endpoint-false",
-			statusCode: http.StatusNotFound,
+			name:         "Debugging an endpoint returns an error",
+			method:       http.MethodGet,
+			path:         "///endpoint-false",
+			expectedPath: "/debug///endpoint-false",
+			statusCode:   http.StatusNotFound,
 			response: `{
 				"status": 404,
 				"code": 1001,
@@ -454,7 +461,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 			srv := httptest.NewServer(
 				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 					assert.Equal(t, tc.method, r.Method)
-					assert.Equal(t, "/debug/"+strings.TrimLeft(tc.path, "/"), r.URL.Path)
+					assert.Equal(t, tc.expectedPath, r.URL.Path)
 				}))
 			defer srv.Close()
 
