@@ -44,6 +44,8 @@ func CompareBytes(t *testing.T, name string, got []byte) {
 		Write(t, name, got)
 	} else {
 		expected := Read(t, name)
-		require.True(t, bytes.Equal(got, expected))
+		normalizedExpected := bytes.ReplaceAll(expected, []byte("\r\n"), []byte("\n"))
+		normalizedGot := bytes.ReplaceAll(got, []byte("\r\n"), []byte("\n"))
+		require.Equal(t, normalizedExpected, normalizedGot)
 	}
 }

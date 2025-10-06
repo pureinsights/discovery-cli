@@ -157,6 +157,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 	}
 }
 
+// Test_NewConfigCommand_NoProfileFlag tests the config command when there is no profile flag defined.
 func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader(strings.Repeat("\n", 8))
 	out := &bytes.Buffer{}
