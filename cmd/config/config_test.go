@@ -17,14 +17,12 @@ import (
 // Test_NewConfigCommand tests the NewConfigCommand() function.
 func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 	tests := []struct {
-		name                string
-		config              map[string]string
-		writePath           string
-		outGolden           string
-		errGolden           string
-		expectedConfig      map[string]string
-		expectedCredentials map[string]string
-		err                 error
+		name      string
+		config    map[string]string
+		writePath string
+		outGolden string
+		errGolden string
+		err       error
 	}{
 		// Working cases
 		{
@@ -43,20 +41,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_All",
 			errGolden: "NewConfigCommand_Err_All",
-			expectedConfig: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010",
-				"cn.ingestion_url": "http://localhost:12030",
-				"cn.queryflow_url": "http://localhost:12040",
-				"cn.staging_url":   "http://localhost:12020",
-			},
-			expectedCredentials: map[string]string{
-				"cn.core_key":      "core321",
-				"cn.ingestion_key": "ingestion432",
-				"cn.queryflow_key": "queryflow123",
-				"cn.staging_key":   "staging235",
-			},
-			err: nil,
+			err:       nil,
 		},
 		{
 			name:      "No keys exist",
@@ -70,15 +55,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_NoKeys",
 			errGolden: "NewConfigCommand_Err_NoKeys",
-			expectedConfig: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010",
-				"cn.ingestion_url": "http://localhost:12030",
-				"cn.queryflow_url": "http://localhost:12040",
-				"cn.staging_url":   "http://localhost:12020",
-			},
-			expectedCredentials: map[string]string{},
-			err:                 nil,
+			err:       nil,
 		},
 		{
 			name:      "Only keys exist",
@@ -89,16 +66,9 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 				"cn.queryflow_key": "queryflow123",
 				"cn.staging_key":   "staging235",
 			},
-			outGolden:      "NewConfigCommand_Out_OnlyKeys",
-			errGolden:      "NewConfigCommand_Err_OnlyKeys",
-			expectedConfig: map[string]string{},
-			expectedCredentials: map[string]string{
-				"cn.core_key":      "core321",
-				"cn.ingestion_key": "ingestion432",
-				"cn.queryflow_key": "queryflow123",
-				"cn.staging_key":   "staging235",
-			},
-			err: nil,
+			outGolden: "NewConfigCommand_Out_OnlyKeys",
+			errGolden: "NewConfigCommand_Err_OnlyKeys",
+			err:       nil,
 		},
 		{
 			name:      "There are keys with multiple periods in their viper keys",
@@ -116,20 +86,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_MultiplePeriods",
 			errGolden: "NewConfigCommand_Err_MultiplePeriods",
-			expectedConfig: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010",
-				"cn.ingestion_url": "http://localhost:12030",
-				"cn.queryflow_url": "http://localhost:12040",
-				"cn.staging_url":   "http://localhost:12020",
-			},
-			expectedCredentials: map[string]string{
-				"cn.core_key":            "core321",
-				"cn.cn.ingestion_key":    "ingestion432",
-				"cn.cn.cn.queryflow_key": "queryflow123",
-				"cn.cn.cn.staging_key":   "staging235",
-			},
-			err: nil,
+			err:       nil,
 		},
 
 		// Error cases
@@ -149,20 +106,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_ConfigError",
 			errGolden: "NewConfigCommand_Err_ConfigError",
-			expectedConfig: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010",
-				"cn.ingestion_url": "http://localhost:12030",
-				"cn.queryflow_url": "http://localhost:12040",
-				"cn.staging_url":   "http://localhost:12020",
-			},
-			expectedCredentials: map[string]string{
-				"cn.core_key":      "core321",
-				"cn.ingestion_key": "ingestion432",
-				"cn.queryflow_key": "queryflow123",
-				"cn.staging_key":   "staging235",
-			},
-			err: fmt.Errorf("cannot find the path specified"),
+			err:       fmt.Errorf("cannot find the path specified"),
 		},
 	}
 
@@ -213,6 +157,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 	}
 }
 
+// Test_NewConfigCommand_NoProfileFlag tests the config command when there is no profile flag defined.
 func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader(strings.Repeat("\n", 8))
 	out := &bytes.Buffer{}
