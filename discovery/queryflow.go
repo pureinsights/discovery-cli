@@ -83,7 +83,7 @@ func (q queryFlow) Invoke(method, uri string, options ...RequestOption) (gjson.R
 }
 
 // Debug is a function that calls the Debug version of an endpoint.
-// It returns the endpoint's response as a gjson.Result or an error if any occurred.
+// It returns the endpoint's response as a gjson.Result or an error if one occurred.
 func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Result, error) {
 	newUri := "/debug/" + strings.TrimPrefix(uri, "/")
 	client := newClient(q.Url, q.ApiKey)

@@ -312,7 +312,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 	}
 }
 
-// Test_NewQueryFlow test the QueryFlow constructor.
+// Test_NewQueryFlow tests the QueryFlow constructor.
 func Test_NewQueryFlow(t *testing.T) {
 	i := NewQueryFlow("http://localhost:8088/v2", "Api Key")
 
