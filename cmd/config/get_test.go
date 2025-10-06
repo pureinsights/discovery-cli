@@ -218,6 +218,8 @@ func Test_NewGetCommand(t *testing.T) {
 		profile        string
 		sensitive      bool
 		config         map[string]string
+		outGolden      string
+		errGolden      string
 		expectedOutput string
 		outWriter      io.Writer
 		err            error
