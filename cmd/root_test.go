@@ -94,6 +94,24 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	}
 }
 
+// TestRun_ExecuteFails tests when the execution of the CLI results in an error
+func TestRun_ExecuteFails(t *testing.T) {
+	tmp := t.TempDir()
+
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+
+	os.Args = []string{"discovery", "--profiles=cn"}
+	exitCode, err := Run()
+	require.Error(t, err)
+	assert.Equal(t, cli.ErrorExitCode, exitCode)
+	cliError, ok := err.(cli.Error)
+	if ok {
+		assert.Equal(t, cliError.Message, "")
+		assert.EqualError(t, cliError.Cause, "unknown flag: --profiles")
+	}
+}
+
 // TestRun_Success tests when the Run function works
 func TestRun_Success(t *testing.T) {
 	tmp := t.TempDir()
