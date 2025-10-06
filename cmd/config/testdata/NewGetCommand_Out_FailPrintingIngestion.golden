@@ -1,7 +1,7 @@
 Showing the configuration of profile "cn":
 
 Core URL: "http://localhost:12010"
-Core API Key: "*************.core.cn"
+Core API Key: "discovery.key.core.cn"
 Usage:
   get [flags]
 

@@ -141,7 +141,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 				"configuration profile to use",
 			)
 
-			configCmd.SetArgs([]string{"discovery config", "--profile=cn"})
+			configCmd.SetArgs([]string{"--profile=cn"})
 
 			err := configCmd.Execute()
 			if tc.err != nil {
@@ -153,6 +153,16 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 
 			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
 			testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
+
+			var commandNames []string
+			for _, c := range configCmd.Commands() {
+				commandNames = append(commandNames, c.Name())
+			}
+
+			expectedCommands := []string{"get"}
+			for _, c := range expectedCommands {
+				require.Contains(t, commandNames, c)
+			}
 		})
 	}
 }
@@ -193,7 +203,7 @@ func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
 	configCmd.SetOut(ios.Out)
 	configCmd.SetErr(ios.Err)
 
-	configCmd.SetArgs([]string{"discovery config"})
+	configCmd.SetArgs([]string{})
 
 	err := configCmd.Execute()
 	require.Error(t, err)

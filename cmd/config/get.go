@@ -5,20 +5,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// getCommandExecute is an auxiliary function was defined to be able to test the Get Command's RunE field.
+func getCommandExecute(cmd *cobra.Command, d cli.Discovery) error {
+	profile, err := cmd.Flags().GetString("profile")
+	if err != nil {
+		return err
+	}
+	sensitive, err := cmd.Flags().GetBool("sensitive")
+	if err != nil {
+		return err
+	}
+	return d.PrintConfigToUser(profile, sensitive)
+}
+
+// NewGetCommand creates the config get command.
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "Print Discovery's configuration",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			profile, err := cmd.Flags().GetString("profile")
-			if err != nil {
-				return err
-			}
-			sensitive, err := cmd.Flags().GetBool("sensitive")
-			if err != nil {
-				return err
-			}
-			return d.PrintConfigToUser(profile, sensitive)
+			return getCommandExecute(cmd, d)
 		},
 	}
 	get.Flags().BoolP("sensitive", "s", true, "--sensitive=true")
