@@ -45,7 +45,7 @@ Flags:
 Examples:
 
 ```bash
-# Ask the user for the configuration of profile "cn"
+# Ask the user for the configuration of profile "cn".
 discovery -p cn config
 Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
 
@@ -133,6 +133,39 @@ Staging API Key: "discovery.key.staging.cn"
 ```
 
 #### Core
+`core` is the main command used to interact with Discovery's Core. 
+
+Usage: `discovery core [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery core
+The main command to interact with Discovery's Core
+
+Usage:
+  discovery core [command]
+
+Available Commands:
+  config      Save Discovery Core's configuration
+
+Flags:
+  -h, --help   help for core
+
+Global Flags:
+  -p, --profile string   configuration profile to use (default "default")
+
+Use "discovery core [command] --help" for more information about a command.
+```
+
 ##### Config
 `config` is the command used to interact with Discovery Core's configuration for a profile. This command by itself asks the user to save Discovery Core's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
 
