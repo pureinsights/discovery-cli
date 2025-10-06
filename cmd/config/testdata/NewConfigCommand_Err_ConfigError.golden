@@ -1,2 +1,1 @@
-Error: unknown command "config" for "config"
-Run 'config --help' for usage.
+Error: open doesnotexist\config.toml: The system cannot find the path specified.

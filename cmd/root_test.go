@@ -32,7 +32,7 @@ func Test_newRootCommand(t *testing.T) {
 	vpr := viper.New()
 	vpr.SetDefault("profile", "default")
 	d := cli.NewDiscovery(&ios, vpr, dir)
-	discoveryCmd := NewRootCommand(d)
+	discoveryCmd := newRootCommand(d)
 
 	assert.Equal(t, in, discoveryCmd.InOrStdin())
 	assert.Equal(t, out, discoveryCmd.OutOrStdout())

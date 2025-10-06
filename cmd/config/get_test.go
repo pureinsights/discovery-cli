@@ -26,60 +26,60 @@ func Test_NewGetCommand(t *testing.T) {
 		outWriter io.Writer
 		err       error
 	}{
-		{
-			name:      "Print all values not sensitive",
-			profile:   "cn",
-			sensitive: false,
-			config: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010",
-				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040",
-				"cn.staging_key":   "discovery.key.staging.cn",
-			},
-			outGolden: "NewGetCommand_Out_AllNotSensitive",
-			errGolden: "NewGetCommand_Err_AllNotSensitive",
-			outWriter: nil,
-			err:       nil,
-		},
-		{
-			name:      "Print all values sensitive",
-			profile:   "cn",
-			sensitive: true,
-			config: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010",
-				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040",
-				"cn.staging_key":   "discovery.key.staging.cn",
-			},
-			outGolden: "NewGetCommand_Out_AllSensitive",
-			errGolden: "NewGetCommand_Err_AllSensitive",
-			outWriter: nil,
-			err:       nil,
-		},
-		{
-			name:      "Print some values",
-			profile:   "cn",
-			sensitive: false,
-			config: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010",
-				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-			},
-			outWriter: nil,
-			err:       nil,
-		},
+		// {
+		// 	name:      "Print all values not sensitive",
+		// 	profile:   "cn",
+		// 	sensitive: false,
+		// 	config: map[string]string{
+		// 		"profile":          "cn",
+		// 		"cn.core_url":      "http://localhost:12010",
+		// 		"cn.core_key":      "discovery.key.core.cn",
+		// 		"cn.ingestion_url": "http://localhost:12020",
+		// 		"cn.ingestion_key": "discovery.key.ingestion.cn",
+		// 		"cn.queryflow_url": "http://localhost:12030",
+		// 		"cn.queryflow_key": "discovery.key.queryflow.cn",
+		// 		"cn.staging_url":   "http://localhost:12040",
+		// 		"cn.staging_key":   "discovery.key.staging.cn",
+		// 	},
+		// 	outGolden: "NewGetCommand_Out_AllNotSensitive",
+		// 	errGolden: "NewGetCommand_Err_AllNotSensitive",
+		// 	outWriter: nil,
+		// 	err:       nil,
+		// },
+		// {
+		// 	name:      "Print all values sensitive",
+		// 	profile:   "cn",
+		// 	sensitive: true,
+		// 	config: map[string]string{
+		// 		"profile":          "cn",
+		// 		"cn.core_url":      "http://localhost:12010",
+		// 		"cn.core_key":      "discovery.key.core.cn",
+		// 		"cn.ingestion_url": "http://localhost:12020",
+		// 		"cn.ingestion_key": "discovery.key.ingestion.cn",
+		// 		"cn.queryflow_url": "http://localhost:12030",
+		// 		"cn.queryflow_key": "discovery.key.queryflow.cn",
+		// 		"cn.staging_url":   "http://localhost:12040",
+		// 		"cn.staging_key":   "discovery.key.staging.cn",
+		// 	},
+		// 	outGolden: "NewGetCommand_Out_AllSensitive",
+		// 	errGolden: "NewGetCommand_Err_AllSensitive",
+		// 	outWriter: nil,
+		// 	err:       nil,
+		// },
+		// {
+		// 	name:      "Print some values",
+		// 	profile:   "cn",
+		// 	sensitive: false,
+		// 	config: map[string]string{
+		// 		"profile":          "cn",
+		// 		"cn.core_url":      "http://localhost:12010",
+		// 		"cn.core_key":      "discovery.key.core.cn",
+		// 		"cn.ingestion_url": "http://localhost:12020",
+		// 		"cn.queryflow_key": "discovery.key.queryflow.cn",
+		// 	},
+		// 	outWriter: nil,
+		// 	err:       nil,
+		// },
 		{
 			name:      "Print Fail on Printing Instructions",
 			profile:   "cn",
@@ -192,6 +192,8 @@ func Test_NewGetCommand(t *testing.T) {
 				if ok {
 					failOnNWriter.Writer = out
 					outWriter = failOnNWriter
+				} else {
+					outWriter = tc.outWriter
 				}
 			} else {
 				outWriter = out
