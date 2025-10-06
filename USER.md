@@ -21,7 +21,7 @@ Flags:
 (Optional, bool) Prints the usage of the command.
 
 `-p, --profile`::
-(Optional, bool) Set the configuration profile that will execute the command.
+(Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
 
@@ -40,12 +40,12 @@ Flags:
 (Optional, bool) Prints the usage of the command.
 
 `-p, --profile`::
-(Optional, bool) Set the configuration profile that will execute the command.
+(Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
 
 ```bash
-# Ask the user for the configuration of profile "cn"
+# Ask the user for the configuration of profile "cn".
 discovery -p cn config
 Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
 
@@ -60,13 +60,13 @@ Staging API Key [***************taging.cn]:
 ```
 
 ```bash
-# Config works without setting the profile.
+# Config works without setting the profile. The rest of the command's output is omitted.
 discovery config
 Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
 ```
 
 ```bash
-# The profile flag can be set after the command.
+# The profile flag can be set after the command. The rest of the command's output is omitted.
 discovery config --profile cn
 Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
 ```
@@ -81,7 +81,7 @@ Flags:
 (Optional, bool) Prints the usage of the command.
 
 `-p, --profile`::
-(Optional, bool) Set the configuration profile that will execute the command.
+(Optional, string) Set the configuration profile that will execute the command.
 
 
 `-s, --sensitive`::
