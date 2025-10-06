@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewCoreCommand creates the core command.
 func NewCoreCommand(d cli.Discovery) *cobra.Command {
 	core := &cobra.Command{
 		Use:   "core [subcommand] [flags]",
