@@ -141,7 +141,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 				"configuration profile to use",
 			)
 
-			configCmd.SetArgs([]string{"discovery config", "--profile=cn"})
+			configCmd.SetArgs([]string{"config", "--profile=cn"})
 
 			err := configCmd.Execute()
 			if tc.err != nil {

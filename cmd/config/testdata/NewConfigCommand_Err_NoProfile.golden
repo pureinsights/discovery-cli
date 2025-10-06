@@ -1,1 +1,2 @@
-Error: flag accessed but not defined: profile
+Error: unknown command "config" for "config"
+Run 'config --help' for usage.
