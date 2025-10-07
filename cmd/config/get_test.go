@@ -71,7 +71,7 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 		},
 		{
 			name:      "Print some values",
-			profile:   "cn",
+			profile:   "default",
 			sensitive: false,
 			config: map[string]string{
 				"profile":               "default",
