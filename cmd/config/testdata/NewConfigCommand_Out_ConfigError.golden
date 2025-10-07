@@ -5,5 +5,5 @@ Core URL [http://localhost:12010]: Core API Key [*****21]: Usage:
 
 Flags:
   -h, --help             help for config
-  -p, --profile string   configuration profile to use (default "cn")
+  -p, --profile string   configuration profile to use
 
