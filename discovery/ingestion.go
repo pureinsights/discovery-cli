@@ -37,7 +37,6 @@ func newSeedExecutionJobsClient(c seedExecutionsClient, executionId uuid.UUID) s
 
 // SeedRecordsClient is the struct that can get records and the summary of records from a seed.
 type seedRecordsClient struct {
-	getter
 	summarizer
 }
 
@@ -48,16 +47,13 @@ func newSeedRecordsClient(url, apiKey string, seedId uuid.UUID) seedRecordsClien
 		summarizer: summarizer{
 			client: client,
 		},
-		getter: getter{
-			client: client,
-		},
 	}
 }
 
 // Get obtains a record based on the seed and record IDs.
 // Since record IDs are not UUIDs, a new function was needed.
 func (src seedRecordsClient) Get(id string) (gjson.Result, error) {
-	return execute(src.getter.client, http.MethodGet, "/"+id)
+	return execute(src.client, http.MethodGet, "/"+id)
 }
 
 // SeedExecutionClient can carry out every operation regarding seed executions.
