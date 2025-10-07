@@ -20,5 +20,6 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 		},
 	}
 
+	config.AddCommand(NewGetCommand(d))
 	return config
 }

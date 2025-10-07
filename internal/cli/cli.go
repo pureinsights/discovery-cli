@@ -16,6 +16,7 @@ type Discovery interface {
 	SaveIngestionConfigFromUser(profile string, standalone bool) error
 	PrintConfigToUser(profile string, sensitive bool) error
 	PrintCoreConfigToUser(profile string, sensitive, standalone bool) error
+	PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
