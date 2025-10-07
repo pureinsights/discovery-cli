@@ -153,6 +153,16 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 
 			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
 			testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
+
+			var commandNames []string
+			for _, c := range configCmd.Commands() {
+				commandNames = append(commandNames, c.Name())
+			}
+
+			expectedCommands := []string{"get"}
+			for _, c := range expectedCommands {
+				require.Contains(t, commandNames, c)
+			}
 		})
 	}
 }
