@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -80,6 +81,8 @@ func Test_queryFlow_Invoke(t *testing.T) {
 		path             string
 		statusCode       int
 		response         string
+		body             string
+		queryParams      map[string][]string
 		expectedResponse gjson.Result
 		expectedPath     string
 		err              error
@@ -91,6 +94,9 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			path:         "/blogs-search",
 			expectedPath: "/api/blogs-search",
 			statusCode:   http.StatusOK,
+			queryParams: map[string][]string{
+				"q": {"Google"},
+			},
 			response: `[
 				{
 					"_id": "5625c64483bef0d48e9ad91aca9b2f94",
@@ -118,6 +124,68 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			response:         `[]`,
 			expectedResponse: gjson.Parse(`[]`),
 			err:              nil,
+		},
+		{
+			name:         "Invoke has a JSON Body",
+			method:       http.MethodPost,
+			path:         "/blogs-search",
+			expectedPath: "/api/blogs-search",
+			statusCode:   http.StatusCreated,
+			body: `{
+				"_id": "5625c64483bef0d48e9ad91aca9b2f94",
+				"link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+				"author": "Graham Gillen",
+				"header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+			}`,
+			response:         `{"acknowledged": true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged": true}`),
+			err:              nil,
+		},
+		{
+			name:         "Invoke sends query parameters",
+			method:       http.MethodDelete,
+			path:         "/blogs-search",
+			expectedPath: "/api/blogs-search",
+			statusCode:   http.StatusOK,
+			queryParams: map[string][]string{
+				"author": {"Graham Gillen"},
+			},
+			response:         `{"acknowledged": true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged": true}`),
+			err:              nil,
+		},
+		{
+			name:         "Invoke sends a body and query parameters",
+			method:       http.MethodPut,
+			path:         "/blogs-search",
+			expectedPath: "/api/blogs-search",
+			statusCode:   http.StatusMultiStatus,
+			queryParams: map[string][]string{
+				"author": {"Graham Gillen"},
+			},
+			body: `{
+				"_id": "5625c64483bef0d48e9ad91aca9b2f94",
+				"link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+				"author": "Graham Gillen",
+				"header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+			}`,
+			response: `[
+				{
+					"5625c64483bef0d48e9ad91aca9b2f94": 204,
+					"04f8787b-c352-4c0c-aee4-6b537d873007": 204,
+					"c26dc995-2ecf-4f6f-b78e-93a79e3c07a8": 204,
+					"fb627ac3-e3c7-4452-aac3-3349c6492d60": 204
+				}
+			]`,
+			expectedResponse: gjson.Parse(`[
+				{
+					"5625c64483bef0d48e9ad91aca9b2f94": 204,
+					"04f8787b-c352-4c0c-aee4-6b537d873007": 204,
+					"c26dc995-2ecf-4f6f-b78e-93a79e3c07a8": 204,
+					"fb627ac3-e3c7-4452-aac3-3349c6492d60": 204
+				}
+			]`),
+			err: nil,
 		},
 
 		// Error case
@@ -177,11 +245,30 @@ func Test_queryFlow_Invoke(t *testing.T) {
 				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 					assert.Equal(t, tc.method, r.Method)
 					assert.Equal(t, tc.expectedPath, r.URL.Path)
+					if tc.body != "" {
+						body, _ := io.ReadAll(r.Body)
+						assert.Equal(t, tc.body, string(body))
+					}
+
+					if tc.queryParams != nil {
+						for k, v := range tc.queryParams {
+							assert.Equal(t, v, r.URL.Query()[k])
+						}
+					}
 				}))
 			defer srv.Close()
 
 			q := NewQueryFlow(srv.URL, "")
-			response, err := q.Invoke(http.MethodGet, tc.path)
+
+			requestOptions := []RequestOption{}
+			if tc.body != "" {
+				requestOptions = append(requestOptions, WithJSONBody(tc.body))
+			}
+
+			if tc.queryParams != nil {
+				requestOptions = append(requestOptions, WithQueryParameters(tc.queryParams))
+			}
+			response, err := q.Invoke(tc.method, tc.path, requestOptions...)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
@@ -205,6 +292,8 @@ func Test_queryFlow_Debug(t *testing.T) {
 		expectedPath     string
 		statusCode       int
 		response         string
+		body             string
+		queryParams      map[string][]string
 		expectedResponse gjson.Result
 		err              error
 	}{
@@ -261,6 +350,55 @@ func Test_queryFlow_Debug(t *testing.T) {
 			}`),
 			err: nil,
 		},
+		{
+			name:         "Debug has a JSON Body",
+			method:       http.MethodPost,
+			path:         "/blogs-search",
+			expectedPath: "/debug/blogs-search",
+			statusCode:   http.StatusCreated,
+			body: `{
+				"_id": "5625c64483bef0d48e9ad91aca9b2f94",
+				"link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+				"author": "Graham Gillen",
+				"header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+			}`,
+			response:         string(realResponse),
+			expectedResponse: gjson.ParseBytes(realResponse),
+			err:              nil,
+		},
+		{
+			name:         "Debug sends query parameters",
+			method:       http.MethodDelete,
+			path:         "/blogs-search",
+			expectedPath: "/debug/blogs-search",
+			statusCode:   http.StatusOK,
+			queryParams: map[string][]string{
+				"author": {"Graham Gillen"},
+			},
+			response:         `{"acknowledged": true}`,
+			expectedResponse: gjson.Parse(`{"acknowledged": true}`),
+			err:              nil,
+		},
+		{
+			name:         "Debug sends a body and query parameters",
+			method:       http.MethodPut,
+			path:         "/blogs-search",
+			expectedPath: "/debug/blogs-search",
+			statusCode:   http.StatusMultiStatus,
+			queryParams: map[string][]string{
+				"author": {"Graham Gillen"},
+			},
+			body: `{
+				"_id": "5625c64483bef0d48e9ad91aca9b2f94",
+				"link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+				"author": "Graham Gillen",
+				"header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+			}`,
+			response:         string(realResponse),
+			expectedResponse: gjson.ParseBytes(realResponse),
+			err:              nil,
+		},
+
 		// Error case
 		{
 			name:         "Debugging an endpoint returns an error",
@@ -294,11 +432,29 @@ func Test_queryFlow_Debug(t *testing.T) {
 				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 					assert.Equal(t, tc.method, r.Method)
 					assert.Equal(t, tc.expectedPath, r.URL.Path)
+					if tc.body != "" {
+						body, _ := io.ReadAll(r.Body)
+						assert.Equal(t, tc.body, string(body))
+					}
+
+					if tc.queryParams != nil {
+						for k, v := range tc.queryParams {
+							assert.Equal(t, v, r.URL.Query()[k])
+						}
+					}
 				}))
 			defer srv.Close()
 
 			q := NewQueryFlow(srv.URL, "")
-			response, err := q.Debug(http.MethodGet, tc.path)
+			requestOptions := []RequestOption{}
+			if tc.body != "" {
+				requestOptions = append(requestOptions, WithJSONBody(tc.body))
+			}
+
+			if tc.queryParams != nil {
+				requestOptions = append(requestOptions, WithQueryParameters(tc.queryParams))
+			}
+			response, err := q.Debug(tc.method, tc.path, requestOptions...)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
