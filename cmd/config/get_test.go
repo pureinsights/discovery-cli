@@ -34,7 +34,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
 				"cn.ingestion_url": "http://localhost:12020",
@@ -54,7 +53,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: true,
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
 				"cn.ingestion_url": "http://localhost:12020",
@@ -74,7 +72,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "default",
 			sensitive: false,
 			config: map[string]string{
-				"profile":               "default",
 				"default.core_url":      "http://localhost:12010",
 				"default.core_key":      "discovery.key.core.cn",
 				"default.ingestion_url": "http://localhost:12020",
@@ -90,7 +87,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
 				"cn.ingestion_url": "http://localhost:12020",
@@ -110,7 +106,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
 				"cn.ingestion_url": "http://localhost:12020",
@@ -130,7 +125,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
 				"cn.ingestion_url": "http://localhost:12020",
@@ -150,7 +144,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
 				"cn.ingestion_url": "http://localhost:12020",
@@ -170,7 +163,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
 				"cn.ingestion_url": "http://localhost:12020",
@@ -258,7 +250,6 @@ func Test_getCommandExecute_NoProfileFlag(t *testing.T) {
 	}
 
 	config := map[string]string{
-		"profile":          "cn",
 		"cn.core_url":      "http://localhost:12010",
 		"cn.ingestion_url": "http://localhost:12030",
 		"cn.queryflow_url": "http://localhost:12040",
@@ -304,7 +295,6 @@ func Test_getCommandExecute_NoSensitiveFlag(t *testing.T) {
 	}
 
 	config := map[string]string{
-		"profile":          "cn",
 		"cn.core_url":      "http://localhost:12010",
 		"cn.ingestion_url": "http://localhost:12030",
 		"cn.queryflow_url": "http://localhost:12040",

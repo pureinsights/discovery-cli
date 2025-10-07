@@ -9,6 +9,6 @@ Usage:
 
 Flags:
   -h, --help             help for get
-  -p, --profile string   configuration profile to use (default "cn")
+  -p, --profile string   configuration profile to use
   -s, --sensitive        --sensitive=true (default true)
 
