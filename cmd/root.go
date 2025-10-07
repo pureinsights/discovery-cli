@@ -6,6 +6,7 @@ import (
 	"github.com/pureinsights/pdp-cli/cmd/config"
 	"github.com/pureinsights/pdp-cli/cmd/core"
 	"github.com/pureinsights/pdp-cli/cmd/ingestion"
+	"github.com/pureinsights/pdp-cli/cmd/queryflow"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/cobra"
@@ -36,6 +37,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery.AddCommand(config.NewConfigCommand(d))
 	discovery.AddCommand(core.NewCoreCommand(d))
 	discovery.AddCommand(ingestion.NewIngestionCommand(d))
+	discovery.AddCommand(queryflow.NewQueryFlowCommand(d))
 
 	return discovery
 }
