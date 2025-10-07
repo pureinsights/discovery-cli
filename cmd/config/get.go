@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
@@ -17,7 +15,7 @@ func getCommandExecute(cmd *cobra.Command, d cli.Discovery) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(sensitive)
+
 	return d.PrintConfigToUser(profile, sensitive)
 }
 
