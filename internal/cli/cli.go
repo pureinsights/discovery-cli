@@ -13,6 +13,7 @@ type Discovery interface {
 	ConfigPath() string
 	SaveConfigFromUser(profile string) error
 	SaveCoreConfigFromUser(profile string, standalone bool) error
+	SaveIngestionConfigFromUser(profile string, standalone bool) error
 	PrintConfigToUser(profile string, sensitive bool) error
 	PrintCoreConfigToUser(profile string, sensitive, standalone bool) error
 }

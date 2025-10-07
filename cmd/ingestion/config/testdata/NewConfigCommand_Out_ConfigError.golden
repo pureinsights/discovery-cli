@@ -1,0 +1,9 @@
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+Ingestion URL [http://localhost:12030]: Ingestion API Key [********n432]: Usage:
+  config [subcommands] [flags]
+
+Flags:
+  -h, --help             help for config
+  -p, --profile string   configuration profile to use (default "cn")
+
