@@ -112,7 +112,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	case "":
 
 	case " ":
-		v.Set(fmt.Sprintf("%s.%s", profile, property), "")
+		v.Set(fmt.Sprintf("%s.%s", profile, property), nil)
 	default:
 		v.Set(fmt.Sprintf("%s.%s", profile, property), propertyInput)
 	}
@@ -135,8 +135,6 @@ func (d discovery) saveConfig() error {
 			} else {
 				config.Set(setting, v.Get(setting))
 			}
-		} else {
-			config.Set("profile", v.Get("profile"))
 		}
 	}
 
@@ -184,7 +182,16 @@ func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error
 		return keyErr
 	}
 
-	return d.saveConfig()
+	saveErr := d.saveConfig()
+	if saveErr != nil {
+		return saveErr
+	}
+
+	if standalone {
+		fmt.Fprint(ios.Out, "Core configuration saved successfully")
+	}
+
+	return nil
 }
 
 // SaveIngestionConfigFromUser asks the user for the values it wants to set for Discovery Ingestion's configuration properties for the given profile.
@@ -207,7 +214,16 @@ func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) 
 		return keyErr
 	}
 
-	return d.saveConfig()
+	saveErr := d.saveConfig()
+	if saveErr != nil {
+		return saveErr
+	}
+
+	if standalone {
+		fmt.Fprint(ios.Out, "Ingestion configuration saved successfully")
+	}
+
+	return nil
 }
 
 // SaveQueryFlowConfigFromUser asks the user for the values it wants to set for Discovery QueryFlow's configuration properties for the given profile.
@@ -230,7 +246,16 @@ func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) 
 		return keyErr
 	}
 
-	return d.saveConfig()
+	saveErr := d.saveConfig()
+	if saveErr != nil {
+		return saveErr
+	}
+
+	if standalone {
+		fmt.Fprint(ios.Out, "QueryFlow configuration saved successfully")
+	}
+
+	return nil
 }
 
 // SaveStagingConfigFromUser asks the user for the values it wants to set for Discovery Staging's configuration properties for the given profile.
@@ -253,7 +278,16 @@ func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) er
 		return keyErr
 	}
 
-	return d.saveConfig()
+	saveErr := d.saveConfig()
+	if saveErr != nil {
+		return saveErr
+	}
+
+	if standalone {
+		fmt.Fprint(ios.Out, "Staging configuration saved successfully")
+	}
+
+	return nil
 }
 
 // SaveConfigFromUser asks the user for the URLs and API Keys of the Discovery's components to save them in a profile.
@@ -273,7 +307,14 @@ func (d discovery) SaveConfigFromUser(profile string) error {
 	if err != nil {
 		return err
 	}
-	return d.SaveStagingConfigFromUser(profile, false)
+	err = d.SaveStagingConfigFromUser(profile, false)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprint(d.IOStreams().Out, "Configuration saved successfully")
+
+	return nil
 }
 
 // PrintConfig is the auxiliary function to print a property's value to the user.
