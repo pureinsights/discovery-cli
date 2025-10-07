@@ -79,12 +79,7 @@ func (c seedExecutionsClient) Halt(executionId uuid.UUID) (gjson.Result, error) 
 
 // Audit gets the audited changes from a seed execution. It returns an array with the stages the execution has completed.
 func (c seedExecutionsClient) Audit(executionId uuid.UUID) ([]gjson.Result, error) {
-	auxClient := seedExecutionsClient{
-		getter: getter{
-			client: newSubClient(c.client, "/"+executionId.String()+"/audit"),
-		},
-	}
-	return auxClient.GetAll()
+	return executeWithPagination(c.client, http.MethodGet, "/"+executionId.String()+"/audit")
 }
 
 // Seed gets the seed configuration of the seed execution.

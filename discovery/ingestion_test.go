@@ -35,8 +35,6 @@ func Test_newSeedRecordsClient(t *testing.T) {
 	require.NoError(t, err)
 	ingestionSeedRecordsClient := newSeedRecordsClient(url, apiKey, seedId)
 
-	assert.Equal(t, apiKey, ingestionSeedRecordsClient.getter.client.ApiKey)
-	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.getter.client.client.BaseURL)
 	assert.Equal(t, apiKey, ingestionSeedRecordsClient.summarizer.client.ApiKey)
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.summarizer.client.client.BaseURL)
 }
