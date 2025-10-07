@@ -12,6 +12,7 @@ import (
 
 	"github.com/pureinsights/pdp-cli/internal/fileutils"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/pdp-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -325,12 +326,6 @@ func Test_obfuscate(t *testing.T) {
 	}
 }
 
-// ErrReader is a struct that fails on any Read. It is used to mock when reading from an in IOStream fails.
-type errReader struct{ err error }
-
-// Read fails on any reading operation.
-func (r errReader) Read(p []byte) (int, error) { return 0, r.err }
-
 // Test_discovery_AskUserConfig tests the discovery.AskUser() function
 func Test_discovery_askUserConfig(t *testing.T) {
 	const profile = "cn"
@@ -397,7 +392,7 @@ func Test_discovery_askUserConfig(t *testing.T) {
 		},
 		{
 			name:      "Reading from the In IOStream fails",
-			inReader:  errReader{err: errors.New("read failed")},
+			inReader:  testutils.ErrReader{Err: errors.New("read failed")},
 			err:       fmt.Errorf("read failed"),
 			sensitive: true,
 		},
@@ -692,25 +687,25 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 		},
 		{
 			name:      "Reading from the Core Config In IOStream fails",
-			inReader:  errReader{err: errors.New("read failed")},
+			inReader:  testutils.ErrReader{Err: errors.New("read failed")},
 			writePath: t.TempDir(),
 			err:       fmt.Errorf("read failed"),
 		},
 		{
 			name:      "Reading from the Ingestion Config In IOStream fails",
-			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\n"), errReader{err: errors.New("read failed")}),
+			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
 			err:       fmt.Errorf("read failed"),
 		},
 		{
 			name:      "Reading from the QueryFlow Config In IOStream fails",
-			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\n"), errReader{err: errors.New("read failed")}),
+			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
 			err:       fmt.Errorf("read failed"),
 		},
 		{
 			name:      "Reading from the Staging Config In IOStream fails",
-			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\nhttp://discovery.queryflow.cn\n\n"), errReader{err: errors.New("read failed")}),
+			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\nhttp://discovery.queryflow.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
 			err:       fmt.Errorf("read failed"),
 		},
@@ -759,6 +754,11 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
+				}
+
+				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
+				if err == nil {
+					assert.Contains(t, out.String(), "Configuration saved successfully", profile)
 				}
 			}
 		})
@@ -906,14 +906,14 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		},
 		{
 			name:       "Reading from the In IOStream fails in Core URL",
-			inReader:   errReader{err: errors.New("read failed")},
+			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Core Key",
-			inReader:   io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), errReader{err: errors.New("read failed")}),
+			inReader:   io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
@@ -954,6 +954,9 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 			err := d.SaveCoreConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
+				if err == nil {
+					assert.Contains(t, out.String(), "configuration saved successfully", profile)
+				}
 			}
 			if tc.err != nil {
 				require.Error(t, err)
@@ -1071,14 +1074,14 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		},
 		{
 			name:       "Reading from the In IOStream fails in Ingestion URL",
-			inReader:   errReader{err: errors.New("read failed")},
+			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Ingestion Key",
-			inReader:   io.MultiReader(strings.NewReader("http://discovery.ingestion.cn\n"), errReader{err: errors.New("read failed")}),
+			inReader:   io.MultiReader(strings.NewReader("http://discovery.ingestion.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
@@ -1119,6 +1122,9 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 			err := d.SaveIngestionConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
+				if err == nil {
+					assert.Contains(t, out.String(), "configuration saved successfully", profile)
+				}
 			}
 			if tc.err != nil {
 				require.Error(t, err)
@@ -1236,14 +1242,14 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		},
 		{
 			name:       "Reading from the In IOStream fails in QueryFlow URL",
-			inReader:   errReader{err: errors.New("read failed")},
+			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in QueryFlow Key",
-			inReader:   io.MultiReader(strings.NewReader("http://discovery.queryflow.cn\n"), errReader{err: errors.New("read failed")}),
+			inReader:   io.MultiReader(strings.NewReader("http://discovery.queryflow.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
@@ -1284,6 +1290,9 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 			err := d.SaveQueryFlowConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
+				if err == nil {
+					assert.Contains(t, out.String(), "configuration saved successfully", profile)
+				}
 			}
 			if tc.err != nil {
 				require.Error(t, err)
@@ -1401,14 +1410,14 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		},
 		{
 			name:       "Reading from the In IOStream fails in Staging URL",
-			inReader:   errReader{err: errors.New("read failed")},
+			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Staging Key",
-			inReader:   io.MultiReader(strings.NewReader("http://discovery.staging.cn\n"), errReader{err: errors.New("read failed")}),
+			inReader:   io.MultiReader(strings.NewReader("http://discovery.staging.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
 			err:        fmt.Errorf("read failed"),
@@ -1449,6 +1458,9 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 			err := d.SaveStagingConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
+				if err == nil {
+					assert.Contains(t, out.String(), "configuration saved successfully", profile)
+				}
 			}
 			if tc.err != nil {
 				require.Error(t, err)
