@@ -455,7 +455,6 @@ func Test_discovery_saveConfig(t *testing.T) {
 			name:      "Every value exists",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -466,7 +465,6 @@ func Test_discovery_saveConfig(t *testing.T) {
 				"cn.staging_key":   "staging235",
 			},
 			expectedConfig: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -484,14 +482,12 @@ func Test_discovery_saveConfig(t *testing.T) {
 			name:      "No keys exist",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
 				"cn.staging_url":   "http://localhost:12020",
 			},
 			expectedConfig: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -522,7 +518,6 @@ func Test_discovery_saveConfig(t *testing.T) {
 			name:      "There are keys with multiple periods in their viper keys",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":                "cn",
 				"cn.core_url":            "http://localhost:12010",
 				"cn.ingestion_url":       "http://localhost:12030",
 				"cn.queryflow_url":       "http://localhost:12040",
@@ -533,7 +528,6 @@ func Test_discovery_saveConfig(t *testing.T) {
 				"cn.cn.cn.staging_key":   "staging235",
 			},
 			expectedConfig: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -553,7 +547,6 @@ func Test_discovery_saveConfig(t *testing.T) {
 			name:      "Writing to config.toml fails",
 			writePath: "doesnotexist",
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -564,7 +557,6 @@ func Test_discovery_saveConfig(t *testing.T) {
 				"cn.staging_key":   "staging235",
 			},
 			expectedConfig: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -801,7 +793,7 @@ func Test_discovery_SaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 	assert.Equal(t, "http://localhost:8080", got.Get("cn.core_url"))
 	assert.Equal(t, "core123", got.Get("cn.core_key"))
 	assert.Equal(t, "http://localhost:8080", got.Get("cn.ingestion_url"))
-	assert.Equal(t, "", got.Get("cn.ingestion_key"))
+	assert.Nil(t, got.Get("cn.ingestion_key"))
 	assert.Nil(t, got.Get("cn.queryflow_url"))
 	assert.Equal(t, "queryflow123", got.Get("cn.queryflow_key"))
 	assert.Equal(t, "staging.cn.aws.com", got.Get("cn.staging_url"))
@@ -970,6 +962,9 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
+					if expected == "" {
+						require.False(t, vpr.IsSet(profile+"."+k))
+					}
 				}
 			}
 		})
@@ -1138,6 +1133,9 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
+					if expected == "" {
+						require.False(t, vpr.IsSet(profile+"."+k))
+					}
 				}
 			}
 		})
@@ -1306,6 +1304,9 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
+					if expected == "" {
+						require.False(t, vpr.IsSet(profile+"."+k))
+					}
 				}
 			}
 		})
@@ -1474,6 +1475,9 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
+					if expected == "" {
+						require.False(t, vpr.IsSet(profile+"."+k))
+					}
 				}
 			}
 		})
