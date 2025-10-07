@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/tidwall/gjson"
@@ -106,4 +107,40 @@ func execute(client client, method, path string, options ...RequestOption) (gjso
 	}
 	resultJson := gjson.ParseBytes(response)
 	return resultJson, nil
+}
+
+// ExecuteWithPagination obtains all of the content when the endpoint returns its results in pages.
+// It requests the data in every page and returns an array with all of the JSON results.
+func executeWithPagination(client client, method, path string, options ...RequestOption) ([]gjson.Result, error) {
+	response, err := execute(client, method, path, options...)
+	if err != nil {
+		return []gjson.Result(nil), err
+	}
+
+	if !(response.Get("content").Exists()) {
+		return []gjson.Result{}, nil
+	}
+
+	elementNumber := response.Get("numberOfElements").Int()
+	pageNumber := response.Get("pageNumber").Int()
+	totalPages := response.Get("totalPages").Int()
+	totalSize := response.Get("totalSize").Int()
+	elements := response.Get("content").Array()
+	pageNumber++
+	var requestOptions []RequestOption
+	for pageNumber < totalPages && elementNumber < totalSize {
+		requestOptions = append(options, WithQueryParameters(map[string][]string{"page": {strconv.FormatInt(pageNumber, 10)}}))
+		response, err = execute(client, method, path, requestOptions...)
+		if err != nil {
+			return []gjson.Result(nil), err
+		}
+
+		pageElements := response.Get("content").Array()
+		elements = append(elements, pageElements...)
+
+		pageNumber++
+		pageElementNumber := response.Get("numberOfElements").Int()
+		elementNumber += pageElementNumber
+	}
+	return elements, nil
 }
