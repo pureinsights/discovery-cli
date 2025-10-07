@@ -15,6 +15,7 @@ type Discovery interface {
 	SaveCoreConfigFromUser(profile string, standalone bool) error
 	SaveIngestionConfigFromUser(profile string, standalone bool) error
 	SaveQueryFlowConfigFromUser(profile string, standalone bool) error
+	SaveStagingConfigFromUser(profile string, standalone bool) error
 	PrintConfigToUser(profile string, sensitive bool) error
 	PrintCoreConfigToUser(profile string, sensitive, standalone bool) error
 	PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error
