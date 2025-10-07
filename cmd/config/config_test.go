@@ -29,7 +29,6 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			name:      "Every value exists",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -47,7 +46,6 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			name:      "No keys exist",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -74,7 +72,6 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			name:      "There are keys with multiple periods in their viper keys",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":                "cn",
 				"cn.core_url":            "http://localhost:12010",
 				"cn.ingestion_url":       "http://localhost:12030",
 				"cn.queryflow_url":       "http://localhost:12040",
@@ -94,7 +91,6 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			name:      "Writing to config.toml fails",
 			writePath: "doesnotexist",
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -179,7 +175,6 @@ func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
 	}
 
 	config := map[string]string{
-		"profile":          "cn",
 		"cn.core_url":      "http://localhost:12010",
 		"cn.ingestion_url": "http://localhost:12030",
 		"cn.queryflow_url": "http://localhost:12040",
