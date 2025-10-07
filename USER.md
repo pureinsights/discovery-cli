@@ -194,3 +194,46 @@ Core API Key [*************.core.cn]:
 discovery core config
 Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
 ```
+
+###### Get
+`get` is the command used to obtain Discovery Core's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery core config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery core config get -p cn
+Showing the configuration of profile "cn":
+
+Core URL: "https://discovery.core.cn"
+Core API Key: "*************.core.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery core config get -p cn -s=true
+Showing the configuration of profile "default":
+
+Core URL: "http://localhost:12010"
+Core API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery core config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+Core URL: "https://discovery.core.cn"
+Core API Key: "discovery.key.core.cn"
+```
