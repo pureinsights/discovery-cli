@@ -95,9 +95,7 @@ core_url="http://discovery.core.cn"
 			exists, err := readConfigFile(tc.baseName, dir, viper, &ios)
 			assert.Equal(t, tc.expectedBool, exists)
 			if tc.err != nil {
-				var errStruct Error
-				require.ErrorAs(t, err, &errStruct)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				if tc.config != "" {
@@ -212,7 +210,7 @@ core_key="discovery.key.core.cn"
 				"cn.core_url":      "http://discovery.core.cn",
 				"default.core_key": "",
 			},
-			err: errors.New("While parsing config: toml: invalid character at start of key: {"),
+			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read config file"),
 		},
 		{
 			name:   "Reading the credentials file fails",
@@ -232,7 +230,7 @@ core_key="discovery.key.core.cn"
 				"default.core_key": "",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
-			err: errors.New("While parsing config: toml: invalid character at start of key: {"),
+			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read credentials file"),
 		},
 	}
 
@@ -259,7 +257,7 @@ core_key="discovery.key.core.cn"
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				for k, v := range tc.expectedConfig {
