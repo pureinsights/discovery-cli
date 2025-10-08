@@ -173,3 +173,46 @@ It has the following method:
 This struct imports and exports the Core's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
 
 Creating a `backupRestore` can be done with `core.BackupRestore()`.
+
+### QueryFlow Client
+Discovery has a QueryFlow client struct. 
+
+Its fields are:
+| Field | Description |
+| --- | --- |
+| Url   | The URL of Discovery's QueryFlow component. The URL should contain the URL up to the version. For example, `http://localhost:12040/v2`. |
+| ApiKey | The API key to authenticate each request to Discovery's QueryFlow. |
+
+It has the following methods:
+| Name | Method | Path | Request Body | Response | Description |
+| --- | --- | --- | --- | --- | --- | 
+| Invoke | `{method}` | `{URL}/api/{URI}` | `{Functional Options}` | `application/json` | Calls the endpoint with a `/api` root path added to the URI, which makes QueryFlow return a normal response of the endpoint. It can receive the [Client's](#client) functional options to modify the request. |
+| Debug | `{method}` | `{URL}/{UUID}` | `{Functional Options}` | `application/json` | Calls the endpoint with a `/debug` root path, which makes QueryFlow respond with the entire trace of execution the state machine took. Each one of the states, their output, their errors and the overall flow followed by the state machine will be displayed. It can receive the [Client's](#client) functional options to modify the request. |
+
+These are very similar to `client.execute()`, but are used to call QueryFlow's endpoints. The response can vary depending on the URI used on the request.
+
+#### Sub-Clients
+
+##### QueryFlowProcessorsClient
+This struct manages QueryFlow's processors. 
+
+It inherits from:
+* [CRUD](#crud)
+* [Cloner](#cloner)
+
+Creating a `queryFlowProcessorsClient` can be done with `queryFlow.Processors()` or `newQueryFlowProcessorsClient(URL, API Key)`.
+
+##### EndpointsClient
+This struct manages QueryFlow's endpoints. 
+
+It inherits from:
+* [CRUD](#crud)
+* [Cloner](#cloner)
+* [Enabler](#enabler)
+
+Creating a `endpointsClient` can be done with `queryFlow.endpointsClient()` or `newEndpointsClient(URL, API Key)`.
+
+##### BackupRestore
+This struct imports and exports QueryFlow's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
+
+Creating a `backupRestore` can be done with `queryflow.BackupRestore()`.
