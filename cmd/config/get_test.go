@@ -226,8 +226,9 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 
 			err := getCmd.Execute()
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 			}
