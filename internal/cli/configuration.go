@@ -309,16 +309,20 @@ func (d discovery) PrintCoreConfigToUser(profile string, sensitive, standalone b
 	if standalone {
 		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
 		if err != nil {
-			return err
+			return NewErrorWithCause(ErrorExitCode, err, "Could not print the header")
 		}
 	}
 
-	urlErr := d.printConfig(profile, "Core URL", "core_url", false)
-	if urlErr != nil {
-		return urlErr
+	err = d.printConfig(profile, "Core URL", "core_url", false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print the Core's URL")
 	}
 
-	return d.printConfig(profile, "Core API Key", "core_key", sensitive)
+	err = d.printConfig(profile, "Core API Key", "core_key", sensitive)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print the Core's API key")
+	}
+	return nil
 }
 
 // PrintIngestionConfigToUser prints the Discovery Ingestion's configuration properties for the given profile.
@@ -330,16 +334,20 @@ func (d discovery) PrintIngestionConfigToUser(profile string, sensitive, standal
 	if standalone {
 		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
 		if err != nil {
-			return err
+			return NewErrorWithCause(ErrorExitCode, err, "Could not print the header")
 		}
 	}
 
-	urlErr := d.printConfig(profile, "Ingestion URL", "ingestion_url", false)
-	if urlErr != nil {
-		return urlErr
+	err = d.printConfig(profile, "Ingestion URL", "ingestion_url", false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print Ingestion's URL")
 	}
 
-	return d.printConfig(profile, "Ingestion API Key", "ingestion_key", sensitive)
+	err = d.printConfig(profile, "Ingestion API Key", "ingestion_key", sensitive)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print Ingestion's API key")
+	}
+	return nil
 }
 
 // PrintQueryFlowConfigToUser prints the Discovery QueryFlow's configuration properties for the given profile.
@@ -351,16 +359,20 @@ func (d discovery) PrintQueryFlowConfigToUser(profile string, sensitive, standal
 	if standalone {
 		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
 		if err != nil {
-			return err
+			return NewErrorWithCause(ErrorExitCode, err, "Could not print the header")
 		}
 	}
 
-	urlErr := d.printConfig(profile, "QueryFlow URL", "queryflow_url", false)
-	if urlErr != nil {
-		return urlErr
+	err = d.printConfig(profile, "QueryFlow URL", "queryflow_url", false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print QueryFlow's URL")
 	}
 
-	return d.printConfig(profile, "QueryFlow API Key", "queryflow_key", sensitive)
+	err = d.printConfig(profile, "QueryFlow API Key", "queryflow_key", sensitive)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print QueryFlow's API key")
+	}
+	return nil
 }
 
 // PrintStagingConfigToUser prints the Discovery Staging's configuration properties for the given profile.
@@ -372,16 +384,21 @@ func (d discovery) PrintStagingConfigToUser(profile string, sensitive, standalon
 	if standalone {
 		_, err = fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
 		if err != nil {
-			return err
+			return NewErrorWithCause(ErrorExitCode, err, "Could not print the header")
 		}
 	}
 
-	urlErr := d.printConfig(profile, "Staging URL", "staging_url", false)
-	if urlErr != nil {
-		return urlErr
+	err = d.printConfig(profile, "Staging URL", "staging_url", false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print Staging's URL")
 	}
 
-	return d.printConfig(profile, "Staging API Key", "staging_key", sensitive)
+	err = d.printConfig(profile, "Staging API Key", "staging_key", sensitive)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print Staging's API key")
+	}
+	return nil
+
 }
 
 // PrintConfigToUser prints the Discovery Components' configuration properties for the given profile.
