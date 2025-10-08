@@ -33,7 +33,7 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 			)
 			return false, nil
 		}
-		return true, fmt.Errorf("could not read %q from %q: %w", baseName, filepath.Clean(path), err)
+		return true, err
 	}
 	return true, nil
 }
@@ -46,7 +46,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	vpr.SetDefault("profile", defaultProfile)
 
 	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
-		return nil, err
+		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read config file")
 	} else {
 		if !exists {
 			vpr.SetDefault(fmt.Sprintf("%s.core_url", defaultProfile), DefaultCoreURL)
@@ -56,7 +56,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 		}
 	}
 	if exists, err := readConfigFile("credentials", path, vpr, &ios); err != nil {
-		return nil, err
+		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read credentials file")
 	} else {
 		if !exists {
 			vpr.SetDefault(fmt.Sprintf("%s.core_key", defaultProfile), "")
@@ -155,23 +155,19 @@ func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	urlErr := d.askUserConfig(profile, "Core URL", "core_url", false)
-	if urlErr != nil {
-		return urlErr
+	err := d.askUserConfig(profile, "Core URL", "core_url", false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get the Core's URL")
 	}
 
-	keyErr := d.askUserConfig(profile, "Core API Key", "core_key", true)
-	if keyErr != nil {
-		return keyErr
+	err = d.askUserConfig(profile, "Core API Key", "core_key", true)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get the Core's API key")
 	}
 
-	saveErr := d.saveConfig()
-	if saveErr != nil {
-		return saveErr
-	}
-
-	if standalone {
-		fmt.Fprint(ios.Out, "Core configuration saved successfully")
+	err = d.saveConfig()
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to save the Core's configuration")
 	}
 
 	return nil
@@ -187,23 +183,19 @@ func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) 
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	urlErr := d.askUserConfig(profile, "Ingestion URL", "ingestion_url", false)
-	if urlErr != nil {
-		return urlErr
+	err := d.askUserConfig(profile, "Ingestion URL", "ingestion_url", false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get Ingestion's URL")
 	}
 
-	keyErr := d.askUserConfig(profile, "Ingestion API Key", "ingestion_key", true)
-	if keyErr != nil {
-		return keyErr
+	err = d.askUserConfig(profile, "Ingestion API Key", "ingestion_key", true)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get Ingestion's API key")
 	}
 
-	saveErr := d.saveConfig()
-	if saveErr != nil {
-		return saveErr
-	}
-
-	if standalone {
-		fmt.Fprint(ios.Out, "Ingestion configuration saved successfully")
+	err = d.saveConfig()
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to save Ingestion's configuration")
 	}
 
 	return nil
@@ -219,23 +211,19 @@ func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) 
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	urlErr := d.askUserConfig(profile, "QueryFlow URL", "queryflow_url", false)
-	if urlErr != nil {
-		return urlErr
+	err := d.askUserConfig(profile, "QueryFlow URL", "queryflow_url", false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get QueryFlow's URL")
 	}
 
-	keyErr := d.askUserConfig(profile, "QueryFlow API Key", "queryflow_key", true)
-	if keyErr != nil {
-		return keyErr
+	err = d.askUserConfig(profile, "QueryFlow API Key", "queryflow_key", true)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get QueryFlow's API key")
 	}
 
-	saveErr := d.saveConfig()
-	if saveErr != nil {
-		return saveErr
-	}
-
-	if standalone {
-		fmt.Fprint(ios.Out, "QueryFlow configuration saved successfully")
+	err = d.saveConfig()
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to save QueryFlow's configuration")
 	}
 
 	return nil
@@ -251,23 +239,19 @@ func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) er
 		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
 	}
 
-	urlErr := d.askUserConfig(profile, "Staging URL", "staging_url", false)
-	if urlErr != nil {
-		return urlErr
+	err := d.askUserConfig(profile, "Staging URL", "staging_url", false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get Staging's URL")
 	}
 
-	keyErr := d.askUserConfig(profile, "Staging API Key", "staging_key", true)
-	if keyErr != nil {
-		return keyErr
+	err = d.askUserConfig(profile, "Staging API Key", "staging_key", true)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get Staging's API key")
 	}
 
-	saveErr := d.saveConfig()
-	if saveErr != nil {
-		return saveErr
-	}
-
-	if standalone {
-		fmt.Fprint(ios.Out, "Staging configuration saved successfully")
+	err = d.saveConfig()
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to save Staging's configuration")
 	}
 
 	return nil
@@ -294,8 +278,6 @@ func (d discovery) SaveConfigFromUser(profile string) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Fprint(d.IOStreams().Out, "Configuration saved successfully")
 
 	return nil
 }
