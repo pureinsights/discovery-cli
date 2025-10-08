@@ -274,12 +274,7 @@ func (d discovery) SaveConfigFromUser(profile string) error {
 	if err != nil {
 		return err
 	}
-	err = d.SaveStagingConfigFromUser(profile, false)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d.SaveStagingConfigFromUser(profile, false)
 }
 
 // PrintConfig is the auxiliary function to print a property's value to the user.
