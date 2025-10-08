@@ -78,8 +78,7 @@ core_url="http://discovery.core.cn"
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			dir, err := os.MkdirTemp("", "temp-")
-			require.NoError(t, err)
+			dir := t.TempDir()
 			if tc.baseName != "fail" {
 				_, err := fileutils.CreateTemporaryFile(dir, tc.baseName+".toml", tc.config)
 				require.NoError(t, err)
