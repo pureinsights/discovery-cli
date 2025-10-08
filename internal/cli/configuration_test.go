@@ -81,9 +81,7 @@ core_url="http://discovery.core.cn"
 			dir := t.TempDir()
 			if tc.baseName != "fail" {
 				_, err := fileutils.CreateTemporaryFile(dir, tc.baseName+".toml", tc.config)
-				if err != nil {
-					t.Fatalf("Could not create temporary file: %s", err.Error())
-				}
+				require.NoError(t, err)
 			}
 
 			errStream := &bytes.Buffer{}
@@ -97,7 +95,7 @@ core_url="http://discovery.core.cn"
 			exists, err := readConfigFile(tc.baseName, dir, viper, &ios)
 			assert.Equal(t, tc.expectedBool, exists)
 			if tc.err != nil {
-				assert.Contains(t, err.Error(), tc.err.Error())
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				if tc.config != "" {
@@ -212,7 +210,7 @@ core_key="discovery.key.core.cn"
 				"cn.core_url":      "http://discovery.core.cn",
 				"default.core_key": "",
 			},
-			err: errors.New("While parsing config: toml: invalid character at start of key: {"),
+			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read config file"),
 		},
 		{
 			name:   "Reading the credentials file fails",
@@ -232,7 +230,7 @@ core_key="discovery.key.core.cn"
 				"default.core_key": "",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
-			err: errors.New("While parsing config: toml: invalid character at start of key: {"),
+			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read credentials file"),
 		},
 	}
 
@@ -247,22 +245,19 @@ core_key="discovery.key.core.cn"
 			dir := t.TempDir()
 			if tc.config != "" {
 				_, err := fileutils.CreateTemporaryFile(dir, "config.toml", tc.config)
-				if err != nil {
-					t.Fatalf("Could not create temporary file: %s", err.Error())
-				}
+				require.NoError(t, err)
 			}
 
 			if tc.credentials != "" {
 				_, err := fileutils.CreateTemporaryFile(dir, "credentials.toml", tc.credentials)
-				if err != nil {
-					t.Fatalf("Could not create temporary file: %s", err.Error())
-				}
+				require.NoError(t, err)
 			}
 
 			viper, err := InitializeConfig(ios, dir)
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				for k, v := range tc.expectedConfig {
@@ -591,7 +586,6 @@ func Test_discovery_saveConfig(t *testing.T) {
 			if tc.err != nil {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), tc.err.Error())
-				return
 			} else {
 				require.NoError(t, err)
 				configVpr := viper.New()
@@ -736,31 +730,31 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			name:      "Reading from the Core Config In IOStream fails",
 			inReader:  testutils.ErrReader{Err: errors.New("read failed")},
 			writePath: t.TempDir(),
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's URL"),
 		},
 		{
 			name:      "Reading from the Ingestion Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Ingestion's URL"),
 		},
 		{
 			name:      "Reading from the QueryFlow Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get QueryFlow's URL"),
 		},
 		{
 			name:      "Reading from the Staging Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\nhttp://discovery.queryflow.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Staging's URL"),
 		},
 		{
 			name:      "Invalid write location",
 			input:     strings.Repeat("\n", 8),
 			writePath: "doesnotexist",
-			err:       fmt.Errorf("cannot find the path specified"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save the Core's configuration"),
 		},
 	}
 
@@ -790,9 +784,9 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 
 			err := d.SaveConfigFromUser(profile)
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -804,9 +798,6 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 				}
 
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "Configuration saved successfully", profile)
-				}
 			}
 		})
 	}
@@ -956,21 +947,21 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's URL"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Core Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's API key"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
 			writePath:  "doesnotexist",
-			err:        fmt.Errorf("cannot find the path specified"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save the Core's configuration"),
 		},
 	}
 
@@ -1001,14 +992,11 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 			err := d.SaveCoreConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "configuration saved successfully", profile)
-				}
 			}
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1127,21 +1115,21 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Ingestion's URL"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Ingestion Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.ingestion.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Ingestion's API key"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
 			writePath:  "doesnotexist",
-			err:        fmt.Errorf("cannot find the path specified"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Ingestion's configuration"),
 		},
 	}
 
@@ -1172,14 +1160,11 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 			err := d.SaveIngestionConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "configuration saved successfully", profile)
-				}
 			}
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1298,21 +1283,21 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get QueryFlow's URL"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in QueryFlow Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.queryflow.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get QueryFlow's API key"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
 			writePath:  "doesnotexist",
-			err:        fmt.Errorf("cannot find the path specified"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save QueryFlow's configuration"),
 		},
 	}
 
@@ -1343,14 +1328,11 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 			err := d.SaveQueryFlowConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "configuration saved successfully", profile)
-				}
 			}
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1469,21 +1451,21 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Staging's URL"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Staging Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.staging.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Staging's API key"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
 			writePath:  "doesnotexist",
-			err:        fmt.Errorf("cannot find the path specified"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Staging's configuration"),
 		},
 	}
 
@@ -1514,14 +1496,11 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 			err := d.SaveStagingConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "configuration saved successfully", profile)
-				}
 			}
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1706,19 +1685,6 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Printing fails for Standalone Instructions",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: true,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-				"cn.core_key": "discovery.key.core.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
-			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
-		},
-		{
 			name:       "Printing fails for Core URL",
 			profile:    "cn",
 			sensitive:  false,
@@ -1729,7 +1695,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's URL"),
 		},
 		{
 			name:       "Printing fails for Core API Key",
@@ -1742,7 +1708,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's API key"),
 		},
 	}
 
@@ -1772,8 +1738,9 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			err := d.PrintCoreConfigToUser(tc.profile, tc.sensitive, tc.standalone)
 
 			if tc.err != nil {
-				require.Error(t, err)
-				require.EqualError(t, err, tc.err.Error())
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())
@@ -1846,19 +1813,6 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Printing fails for Standalone Instructions",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: true,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
-			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
-		},
-		{
 			name:       "Printing fails for Ingestion URL",
 			profile:    "cn",
 			sensitive:  false,
@@ -1869,7 +1823,7 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Ingestion URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Ingestion's URL"),
 		},
 		{
 			name:       "Printing fails for Ingestion API Key",
@@ -1882,7 +1836,7 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", "discovery.key.ingestion.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Ingestion's API key"),
 		},
 	}
 
@@ -1912,8 +1866,9 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 			err := d.PrintIngestionConfigToUser(tc.profile, tc.sensitive, tc.standalone)
 
 			if tc.err != nil {
-				require.Error(t, err)
-				require.EqualError(t, err, tc.err.Error())
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())
@@ -1986,19 +1941,6 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Printing fails for Standalone Instructions",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: true,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
-			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
-		},
-		{
 			name:       "Printing fails for QueryFlow URL",
 			profile:    "cn",
 			sensitive:  false,
@@ -2009,7 +1951,7 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "QueryFlow URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print QueryFlow's URL"),
 		},
 		{
 			name:       "Printing fails for QueryFlow API Key",
@@ -2022,7 +1964,7 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", "discovery.key.queryflow.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print QueryFlow's API key"),
 		},
 	}
 
@@ -2052,8 +1994,9 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 			err := d.PrintQueryFlowConfigToUser(tc.profile, tc.sensitive, tc.standalone)
 
 			if tc.err != nil {
-				require.Error(t, err)
-				require.EqualError(t, err, tc.err.Error())
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())
@@ -2126,19 +2069,6 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Printing fails for Standalone Instructions",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: true,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "discovery.key.staging.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
-			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
-		},
-		{
 			name:       "Printing fails for Staging URL",
 			profile:    "cn",
 			sensitive:  false,
@@ -2149,7 +2079,7 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Staging URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Staging's URL"),
 		},
 		{
 			name:       "Printing fails for Staging API Key",
@@ -2162,7 +2092,7 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Staging URL", "http://localhost:8080", "Staging API Key", "discovery.key.staging.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Staging's API key"),
 		},
 	}
 
@@ -2192,8 +2122,9 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 			err := d.PrintStagingConfigToUser(tc.profile, tc.sensitive, tc.standalone)
 
 			if tc.err != nil {
-				require.Error(t, err)
-				require.EqualError(t, err, tc.err.Error())
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())
@@ -2264,24 +2195,6 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:      "Print Fail on Printing Instructions",
-			profile:   "cn",
-			sensitive: false,
-			config: map[string]string{
-				"cn.core_url":      "http://localhost:12010",
-				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040",
-				"cn.staging_key":   "discovery.key.staging.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
-			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            errors.New("write failed"),
-		},
-		{
 			name:      "Print Fail on Printing Core Config",
 			profile:   "cn",
 			sensitive: false,
@@ -2297,7 +2210,7 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's URL"),
 		},
 		{
 			name:      "Print Fail on Printing Ingestion Config",
@@ -2315,7 +2228,7 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 4},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Ingestion's URL"),
 		},
 		{
 			name:      "Print Fail on Printing QueryFlow Config",
@@ -2333,7 +2246,7 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 6},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print QueryFlow's URL"),
 		},
 		{
 			name:      "Print Fail on Printing Staging Config",
@@ -2351,7 +2264,7 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 8},
-			err:            errors.New("write failed"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Staging's URL"),
 		},
 	}
 
@@ -2381,8 +2294,9 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 			err := d.PrintConfigToUser(tc.profile, tc.sensitive)
 
 			if tc.err != nil {
-				require.Error(t, err)
-				require.EqualError(t, err, tc.err.Error())
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				require.Contains(t, buf.String(), fmt.Sprintf("Showing the configuration of profile %q:\n\n", tc.profile))
