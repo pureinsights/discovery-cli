@@ -33,7 +33,7 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 			)
 			return false, nil
 		}
-		return true, fmt.Errorf("could not read %q from %q: %w", baseName, filepath.Clean(path), err)
+		return true, NewErrorWithCause(ErrorExitCode, err, "could not read %q from %q", baseName, filepath.Clean(path))
 	}
 	return true, nil
 }

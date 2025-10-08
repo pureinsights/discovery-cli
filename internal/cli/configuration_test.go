@@ -72,7 +72,7 @@ core_url="http://discovery.core.cn"
 				"cn.core_key":      "discovery.key.core.cn",
 			},
 			expectedBool: true,
-			err:          errors.New("While parsing config: toml: invalid character at start of key: {"),
+			err:          errors.New("could not read \"config\" from"),
 		},
 	}
 
@@ -81,9 +81,7 @@ core_url="http://discovery.core.cn"
 			dir := t.TempDir()
 			if tc.baseName != "fail" {
 				_, err := fileutils.CreateTemporaryFile(dir, tc.baseName+".toml", tc.config)
-				if err != nil {
-					t.Fatalf("Could not create temporary file: %s", err.Error())
-				}
+				require.NoError(t, err)
 			}
 
 			errStream := &bytes.Buffer{}
@@ -97,6 +95,8 @@ core_url="http://discovery.core.cn"
 			exists, err := readConfigFile(tc.baseName, dir, viper, &ios)
 			assert.Equal(t, tc.expectedBool, exists)
 			if tc.err != nil {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
 				assert.Contains(t, err.Error(), tc.err.Error())
 			} else {
 				require.NoError(t, err)
@@ -247,21 +247,18 @@ core_key="discovery.key.core.cn"
 			dir := t.TempDir()
 			if tc.config != "" {
 				_, err := fileutils.CreateTemporaryFile(dir, "config.toml", tc.config)
-				if err != nil {
-					t.Fatalf("Could not create temporary file: %s", err.Error())
-				}
+				require.NoError(t, err)
 			}
 
 			if tc.credentials != "" {
 				_, err := fileutils.CreateTemporaryFile(dir, "credentials.toml", tc.credentials)
-				if err != nil {
-					t.Fatalf("Could not create temporary file: %s", err.Error())
-				}
+				require.NoError(t, err)
 			}
 
 			viper, err := InitializeConfig(ios, dir)
 			if tc.err != nil {
-				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
 				assert.Contains(t, err.Error(), tc.err.Error())
 			} else {
 				require.NoError(t, err)
