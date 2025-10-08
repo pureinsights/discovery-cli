@@ -390,7 +390,7 @@ func Test_discovery_askUserConfig(t *testing.T) {
 		{
 			name:      "Reading from the In IOStream fails",
 			inReader:  testutils.ErrReader{Err: errors.New("read failed")},
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the user's input"),
 			sensitive: true,
 		},
 	}
@@ -420,8 +420,9 @@ func Test_discovery_askUserConfig(t *testing.T) {
 			err := d.askUserConfig(profile, propName, prop, tc.sensitive)
 
 			if tc.err != nil {
-				require.Error(t, err)
-				require.EqualError(t, err, tc.err.Error())
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.Contains(t, err.Error(), tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				got := d.Config().GetString(profile + "." + prop)

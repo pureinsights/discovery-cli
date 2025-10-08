@@ -104,7 +104,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 
 	propertyInput, err := ios.AskUser(fmt.Sprintf("%s [%s]: ", propertyName, value))
 	if err != nil {
-		return err
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get the user's input")
 	}
 
 	switch propertyInput {
@@ -139,7 +139,7 @@ func (d discovery) saveConfig() error {
 
 	err := config.WriteConfigAs(filepath.Join(d.ConfigPath(), "config.toml"))
 	if err != nil {
-		return err
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to write the configuration")
 	}
 
 	return credentials.WriteConfigAs(filepath.Join(d.ConfigPath(), "credentials.toml"))
@@ -157,21 +157,17 @@ func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error
 
 	urlErr := d.askUserConfig(profile, "Core URL", "core_url", false)
 	if urlErr != nil {
-		return urlErr
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to get the Core's URL")
 	}
 
 	keyErr := d.askUserConfig(profile, "Core API Key", "core_key", true)
 	if keyErr != nil {
-		return keyErr
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to get the Core's API Key")
 	}
 
 	saveErr := d.saveConfig()
 	if saveErr != nil {
-		return saveErr
-	}
-
-	if standalone {
-		fmt.Fprint(ios.Out, "Core configuration saved successfully")
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to save the Core's configuration")
 	}
 
 	return nil
@@ -189,21 +185,17 @@ func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) 
 
 	urlErr := d.askUserConfig(profile, "Ingestion URL", "ingestion_url", false)
 	if urlErr != nil {
-		return urlErr
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to get Ingestion's URL")
 	}
 
 	keyErr := d.askUserConfig(profile, "Ingestion API Key", "ingestion_key", true)
 	if keyErr != nil {
-		return keyErr
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to get Ingestion's API key")
 	}
 
 	saveErr := d.saveConfig()
 	if saveErr != nil {
-		return saveErr
-	}
-
-	if standalone {
-		fmt.Fprint(ios.Out, "Ingestion configuration saved successfully")
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to save Ingestion's configuration")
 	}
 
 	return nil
@@ -221,21 +213,17 @@ func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) 
 
 	urlErr := d.askUserConfig(profile, "QueryFlow URL", "queryflow_url", false)
 	if urlErr != nil {
-		return urlErr
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to get QueryFlow's URL")
 	}
 
 	keyErr := d.askUserConfig(profile, "QueryFlow API Key", "queryflow_key", true)
 	if keyErr != nil {
-		return keyErr
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to get QueryFlow's API key")
 	}
 
 	saveErr := d.saveConfig()
 	if saveErr != nil {
-		return saveErr
-	}
-
-	if standalone {
-		fmt.Fprint(ios.Out, "QueryFlow configuration saved successfully")
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to save QueryFlow's configuration")
 	}
 
 	return nil
@@ -253,21 +241,17 @@ func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) er
 
 	urlErr := d.askUserConfig(profile, "Staging URL", "staging_url", false)
 	if urlErr != nil {
-		return urlErr
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to get Staging's URL")
 	}
 
 	keyErr := d.askUserConfig(profile, "Staging API Key", "staging_key", true)
 	if keyErr != nil {
-		return keyErr
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to get Staging's API key")
 	}
 
 	saveErr := d.saveConfig()
 	if saveErr != nil {
-		return saveErr
-	}
-
-	if standalone {
-		fmt.Fprint(ios.Out, "Staging configuration saved successfully")
+		return NewErrorWithCause(ErrorExitCode, urlErr, "Failed to save Staging's configuration")
 	}
 
 	return nil
@@ -294,8 +278,6 @@ func (d discovery) SaveConfigFromUser(profile string) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Fprint(d.IOStreams().Out, "Configuration saved successfully")
 
 	return nil
 }
