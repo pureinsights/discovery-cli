@@ -30,7 +30,7 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 			)
 			return false, nil
 		}
-		return true, fmt.Errorf("could not read %q from %q: %w", baseName, filepath.Clean(path), err)
+		return true, err
 	}
 	return true, nil
 }
@@ -43,7 +43,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	vpr.SetDefault("profile", defaultProfile)
 
 	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
-		return nil, err
+		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read config file")
 	} else {
 		if !exists {
 			vpr.SetDefault(fmt.Sprintf("%s.core_url", defaultProfile), DefaultCoreURL)
@@ -53,7 +53,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 		}
 	}
 	if exists, err := readConfigFile("credentials", path, vpr, &ios); err != nil {
-		return nil, err
+		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read credentials file")
 	} else {
 		if !exists {
 			vpr.SetDefault(fmt.Sprintf("%s.core_key", defaultProfile), "")
