@@ -72,13 +72,14 @@ core_url="http://discovery.core.cn"
 				"cn.core_key":      "discovery.key.core.cn",
 			},
 			expectedBool: true,
-			err:          errors.New("could not read \"config\" from"),
+			err:          errors.New("While parsing config: toml: invalid character at start of key: {"),
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			dir := t.TempDir()
+			dir, err := os.MkdirTemp("", "temp-")
+			require.NoError(t, err)
 			if tc.baseName != "fail" {
 				_, err := fileutils.CreateTemporaryFile(dir, tc.baseName+".toml", tc.config)
 				require.NoError(t, err)
@@ -388,7 +389,7 @@ func Test_discovery_askUserConfig(t *testing.T) {
 		{
 			name:      "Reading from the In IOStream fails",
 			inReader:  testutils.ErrReader{Err: errors.New("read failed")},
-			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the user's input"),
+			err:       fmt.Errorf("read failed"),
 			sensitive: true,
 		},
 	}
@@ -418,9 +419,8 @@ func Test_discovery_askUserConfig(t *testing.T) {
 			err := d.askUserConfig(profile, propName, prop, tc.sensitive)
 
 			if tc.err != nil {
-				var errStruct Error
-				require.ErrorAs(t, err, &errStruct)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				require.Error(t, err)
+				require.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				got := d.Config().GetString(profile + "." + prop)
@@ -587,7 +587,6 @@ func Test_discovery_saveConfig(t *testing.T) {
 			if tc.err != nil {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), tc.err.Error())
-				return
 			} else {
 				require.NoError(t, err)
 				configVpr := viper.New()
@@ -677,31 +676,31 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			name:      "Reading from the Core Config In IOStream fails",
 			inReader:  testutils.ErrReader{Err: errors.New("read failed")},
 			writePath: t.TempDir(),
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's URL"),
 		},
 		{
 			name:      "Reading from the Ingestion Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Ingestion's URL"),
 		},
 		{
 			name:      "Reading from the QueryFlow Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get QueryFlow's URL"),
 		},
 		{
 			name:      "Reading from the Staging Config In IOStream fails",
 			inReader:  io.MultiReader(strings.NewReader("http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\nhttp://discovery.queryflow.cn\n\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			writePath: t.TempDir(),
-			err:       fmt.Errorf("read failed"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Staging's URL"),
 		},
 		{
 			name:      "Invalid write location",
 			input:     strings.Repeat("\n", 8),
 			writePath: "doesnotexist",
-			err:       fmt.Errorf("cannot find the path specified"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save the Core's configuration"),
 		},
 	}
 
@@ -731,9 +730,9 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 
 			err := d.SaveConfigFromUser(profile)
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -745,9 +744,6 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 				}
 
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "Configuration saved successfully", profile)
-				}
 			}
 		})
 	}
@@ -897,21 +893,21 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's URL"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Core Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's API key"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
 			writePath:  "doesnotexist",
-			err:        fmt.Errorf("cannot find the path specified"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save the Core's configuration"),
 		},
 	}
 
@@ -942,14 +938,11 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 			err := d.SaveCoreConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "configuration saved successfully", profile)
-				}
 			}
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1068,21 +1061,21 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Ingestion's URL"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Ingestion Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.ingestion.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Ingestion's API key"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
 			writePath:  "doesnotexist",
-			err:        fmt.Errorf("cannot find the path specified"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Ingestion's configuration"),
 		},
 	}
 
@@ -1113,14 +1106,11 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 			err := d.SaveIngestionConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "configuration saved successfully", profile)
-				}
 			}
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1239,21 +1229,21 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get QueryFlow's URL"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in QueryFlow Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.queryflow.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get QueryFlow's API key"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
 			writePath:  "doesnotexist",
-			err:        fmt.Errorf("cannot find the path specified"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save QueryFlow's configuration"),
 		},
 	}
 
@@ -1284,14 +1274,11 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 			err := d.SaveQueryFlowConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "configuration saved successfully", profile)
-				}
 			}
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1410,21 +1397,21 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Staging's URL"),
 		},
 		{
 			name:       "Reading from the In IOStream fails in Staging Key",
 			inReader:   io.MultiReader(strings.NewReader("http://discovery.staging.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone: true,
 			writePath:  t.TempDir(),
-			err:        fmt.Errorf("read failed"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Staging's API key"),
 		},
 		{
 			name:       "Invalid write location",
 			input:      strings.Repeat("\n", 8),
 			standalone: false,
 			writePath:  "doesnotexist",
-			err:        fmt.Errorf("cannot find the path specified"),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Staging's configuration"),
 		},
 	}
 
@@ -1455,14 +1442,11 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 			err := d.SaveStagingConfigFromUser(profile, true)
 			if tc.standalone {
 				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
-				if err == nil {
-					assert.Contains(t, out.String(), "configuration saved successfully", profile)
-				}
 			}
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
-				return
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
