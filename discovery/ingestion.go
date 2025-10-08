@@ -37,7 +37,6 @@ func newSeedExecutionJobsClient(c seedExecutionsClient, executionId uuid.UUID) s
 
 // SeedRecordsClient is the struct that can get records and the summary of records from a seed.
 type seedRecordsClient struct {
-	getter
 	summarizer
 }
 
@@ -48,16 +47,13 @@ func newSeedRecordsClient(sc seedsClient, seedId uuid.UUID) seedRecordsClient {
 		summarizer: summarizer{
 			client: client,
 		},
-		getter: getter{
-			client: client,
-		},
 	}
 }
 
 // Get obtains a record based on the seed and record IDs.
 // Since record IDs are not UUIDs, a new function was needed.
 func (src seedRecordsClient) Get(id string) (gjson.Result, error) {
-	return execute(src.getter.client, http.MethodGet, "/"+id)
+	return execute(src.client, http.MethodGet, "/"+id)
 }
 
 // SeedExecutionClient can carry out every operation regarding seed executions.
@@ -83,12 +79,7 @@ func (c seedExecutionsClient) Halt(executionId uuid.UUID) (gjson.Result, error) 
 
 // Audit gets the audited changes from a seed execution. It returns an array with the stages the execution has completed.
 func (c seedExecutionsClient) Audit(executionId uuid.UUID) ([]gjson.Result, error) {
-	auxClient := seedExecutionsClient{
-		getter: getter{
-			client: newSubClient(c.client, "/"+executionId.String()+"/audit"),
-		},
-	}
-	return auxClient.GetAll()
+	return executeWithPagination(c.client, http.MethodGet, "/"+executionId.String()+"/audit")
 }
 
 // Seed gets the seed configuration of the seed execution.

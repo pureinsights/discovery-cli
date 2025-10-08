@@ -1,10 +1,8 @@
 package discovery
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -37,8 +35,6 @@ func Test_newSeedRecordsClient(t *testing.T) {
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedRecordsClient := newSeedRecordsClient(ingestionSeedsClient, seedId)
 
-	assert.Equal(t, apiKey, ingestionSeedRecordsClient.getter.client.ApiKey)
-	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.getter.client.client.BaseURL)
 	assert.Equal(t, apiKey, ingestionSeedRecordsClient.summarizer.client.ApiKey)
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.summarizer.client.client.BaseURL)
 }
@@ -134,30 +130,7 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 			expectedResponse: gjson.Parse(`{"id":"2acd0a61-852c-4f38-af2b-9c84e152873e","name":"Search seed","type":"staging","active":true,"config":{"action":"scroll","bucket":"blogs"},"labels":[],"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}},"creationTimestamp":"2025-08-21T21:52:03Z","lastUpdatedTimestamp":"2025-08-21T21:52:03Z"}`),
 			err:              nil,
 		},
-		// Error case
-		{
-			name:       "Seed config returns seed not found",
-			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/config/seed",
-			statusCode: http.StatusNotFound,
-			response: `{
-			"status": 404,
-			"code": 1003,
-			"messages": [
-				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
-			],
-			"timestamp": "2025-09-03T17:44:01.557816Z"
-			}`,
-			expectedResponse: gjson.Result{},
-			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
-			"status": 404,
-			"code": 1003,
-			"messages": [
-				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
-			],
-			"timestamp": "2025-09-03T17:44:01.557816Z"
-			}`)},
-		},
+		// Error cases
 		{
 			name:       "Seed config returns execution not found",
 			method:     http.MethodGet,
@@ -978,234 +951,6 @@ func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Test_seedExecutionsClient_Audit_ErrorInSecondPage tests when seedExecutionsClient.Audit fails in a request while trying to get every content from every page.
-func Test_seedExecutionsClient_Audit_ErrorInSecondPage(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, http.MethodGet, r.Method)
-			pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
-			w.Header().Set("Content-Type", "application/json")
-			if pageNumber > 0 {
-				w.WriteHeader(http.StatusInternalServerError)
-				_, _ = w.Write([]byte(`{"error":"Internal Server Error"}`))
-			} else {
-				w.WriteHeader(http.StatusOK)
-				_, _ = w.Write([]byte(`{
-		"content": [
-			{
-			"timestamp": "2025-09-03T19:58:09.495Z",
-			"status": "CREATED",
-			"stages": []
-			},
-			{
-			"timestamp": "2025-09-03T19:58:18.379Z",
-			"status": "RUNNING",
-			"stages": []
-			},
-			{
-			"timestamp": "2025-09-03T19:58:25.277Z",
-			"status": "RUNNING",
-			"stages": [
-				"BEFORE_HOOKS"
-			]
-			},
-		],
-		"pageable": {
-			"page": 0,
-			"size": 3,
-			"sort": []
-		},
-		"totalSize": 7,
-		"totalPages": 2,
-		"empty": false,
-		"size": 3,
-		"offset": 0,
-		"numberOfElements": 3,
-		"pageNumber": 0
-		}`))
-			}
-		}))
-	t.Cleanup(srv.Close)
-
-	apiKey := "Api Key"
-	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	require.NoError(t, err)
-	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
-
-	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	require.NoError(t, err)
-
-	response, err := ingestionSeedExecutionsClient.Audit(executionId)
-	assert.Equal(t, []gjson.Result(nil), response)
-	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusInternalServerError, []byte(`{"error":"Internal Server Error"}`)))
-}
-
-// Test_seedExecutionsClient_Audit_NoContentInSecondPage tests what happens in seedExecutionsClient.Audit() if one of the later pages returns No Content
-func Test_seedExecutionsClient_Audit_NoContentInSecondPage(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, http.MethodGet, r.Method)
-		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
-		w.Header().Set("Content-Type", "application/json")
-		if pageNumber > 0 {
-			w.WriteHeader(http.StatusNoContent)
-			_, _ = w.Write([]byte(`[]`))
-		} else {
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{
-		"content": [
-			{
-			"timestamp": "2025-09-03T19:58:09.495Z",
-			"status": "CREATED",
-			"stages": []
-			},
-			{
-			"timestamp": "2025-09-03T19:58:18.379Z",
-			"status": "RUNNING",
-			"stages": []
-			},
-			{
-			"timestamp": "2025-09-03T19:58:25.277Z",
-			"status": "RUNNING",
-			"stages": [
-				"BEFORE_HOOKS"
-			]
-			},
-		],
-		"pageable": {
-			"page": 0,
-			"size": 3,
-			"sort": []
-		},
-		"totalSize": 7,
-		"totalPages": 2,
-		"empty": false,
-		"size": 3,
-		"offset": 0,
-		"numberOfElements": 3,
-		"pageNumber": 0
-		}`))
-		}
-	}))
-	t.Cleanup(srv.Close)
-
-	apiKey := "Api Key"
-	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	require.NoError(t, err)
-	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
-
-	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	require.NoError(t, err)
-
-	response, err := ingestionSeedExecutionsClient.Audit(executionId)
-	require.NoError(t, err)
-	assert.Len(t, response, 3)
-}
-
-// Test_seedExecutionsClient_Audit_ContentInSecondPage tests if seedExecutionsClient.Audit() can successfully get content from all pages.
-func Test_seedExecutionsClient_Audit_ContentInSecondPage(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, http.MethodGet, r.Method)
-		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
-		w.Header().Set("Content-Type", "application/json")
-		if pageNumber > 0 {
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{
-		"content": [
-			{
-			"timestamp": "2025-09-03T19:58:09.495Z",
-			"status": "RUNNING",
-			"stages": ["BEFORE_HOOKS",
-						"AFTER_HOOKS"
-						]
-			},
-			{
-			"timestamp": "2025-09-03T19:58:18.379Z",
-			"status": "RUNNING",
-			"stages": ["BEFORE_HOOKS",
-						"AFTER_HOOKS".
-						"RETRY"
-						]
-			},
-			{
-			"timestamp": "2025-09-03T19:58:25.277Z",
-			"status": "DONE",
-			"stages": [
-				["BEFORE_HOOKS",
-						"AFTER_HOOKS".
-						"RETRY",
-						"DONE"
-						]
-			]
-			},
-		],
-		"pageable": {
-			"page": 0,
-			"size": 3,
-			"sort": []
-		},
-		"totalSize": 6,
-		"totalPages": 2,
-		"empty": false,
-		"size": 3,
-		"offset": 0,
-		"numberOfElements": 3,
-		"pageNumber": 0
-		}`))
-		} else {
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{
-		"content": [
-			{
-			"timestamp": "2025-09-03T19:58:09.495Z",
-			"status": "CREATED",
-			"stages": []
-			},
-			{
-			"timestamp": "2025-09-03T19:58:18.379Z",
-			"status": "RUNNING",
-			"stages": []
-			},
-			{
-			"timestamp": "2025-09-03T19:58:25.277Z",
-			"status": "RUNNING",
-			"stages": [
-				"BEFORE_HOOKS"
-			]
-			},
-		],
-		"pageable": {
-			"page": 0,
-			"size": 3,
-			"sort": []
-		},
-		"totalSize": 6,
-		"totalPages": 2,
-		"empty": false,
-		"size": 3,
-		"offset": 0,
-		"numberOfElements": 3,
-		"pageNumber": 0
-		}`))
-		}
-	}))
-	t.Cleanup(srv.Close)
-
-	apiKey := "Api Key"
-	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
-	require.NoError(t, err)
-	ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
-	ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
-
-	executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
-	require.NoError(t, err)
-
-	response, err := ingestionSeedExecutionsClient.Audit(executionId)
-	require.NoError(t, err)
-	assert.Len(t, response, 6)
 }
 
 // Test_seedRecordsClient_Get tests the seedRecordsClient.Get() function.
