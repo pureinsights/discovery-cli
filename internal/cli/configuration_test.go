@@ -785,10 +785,13 @@ func Test_discovery_SaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 	assert.Equal(t, "core123", got.Get("cn.core_key"))
 	assert.Equal(t, "http://localhost:8080", got.Get("cn.ingestion_url"))
 	assert.Nil(t, got.Get("cn.ingestion_key"))
+	assert.False(t, got.IsSet("cn.ingestion_key"))
 	assert.Nil(t, got.Get("cn.queryflow_url"))
+	assert.False(t, got.IsSet("cn.queryflow_url"))
 	assert.Equal(t, "queryflow123", got.Get("cn.queryflow_key"))
 	assert.Equal(t, "staging.cn.aws.com", got.Get("cn.staging_url"))
 	assert.Nil(t, got.Get("cn.staging_key"))
+	assert.False(t, got.IsSet("cn.staging_key"))
 }
 
 // Test_discovery_SaveCoreConfigFromUser tests the discovery.SaveCoreConfigFromUser() function.
