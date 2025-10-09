@@ -122,19 +122,21 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 func (d discovery) saveConfig() error {
 	v := d.Config()
 	apiKeys := []string{"core_key", "ingestion_key", "queryflow_key", "staging_key"}
+	temporaryProperties := []string{"profile"}
 
 	config := viper.New()
 	credentials := viper.New()
 
 	for _, setting := range v.AllKeys() {
-		if setting != "profile" {
-			parts := strings.Split(setting, ".")
-			if slices.Contains(apiKeys, parts[len(parts)-1]) {
-				credentials.Set(setting, v.Get(setting))
-			} else {
-				config.Set(setting, v.Get(setting))
-			}
+		switch {
+		case slices.Contains(temporaryProperties, setting):
+
+		case slices.Contains(apiKeys, strings.Split(setting, ".")[len(strings.Split(setting, "."))-1]):
+			credentials.Set(setting, v.Get(setting))
+		default:
+			config.Set(setting, v.Get(setting))
 		}
+
 	}
 
 	err := config.WriteConfigAs(filepath.Join(d.ConfigPath(), "config.toml"))
