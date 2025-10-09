@@ -13,7 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_newSeedExecutionsClient test the seedExecutionsClient's constructor
+// Test_newSeedExecutionsClient test the constructor of seedExecutionsClient
 func Test_newSeedExecutionsClient(t *testing.T) {
 	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
