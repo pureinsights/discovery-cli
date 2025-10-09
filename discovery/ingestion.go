@@ -62,7 +62,7 @@ type seedExecutionsClient struct {
 	getter
 }
 
-// NewSeedExecutionsClient is the constructor of seedExecutionClient.
+// NewSeedExecutionsClient is the constructor of a seedExecutionClient.
 func newSeedExecutionsClient(sc seedsClient, seedId uuid.UUID) seedExecutionsClient {
 	return seedExecutionsClient{
 		getter: getter{
