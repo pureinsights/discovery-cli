@@ -208,7 +208,7 @@ core_key="discovery.key.core.cn"
 				"cn.core_url":      "http://discovery.core.cn",
 				"default.core_key": "",
 			},
-			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read config file"),
+			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file"),
 		},
 		{
 			name:   "Reading the credentials file fails",
@@ -228,7 +228,7 @@ core_key="discovery.key.core.cn"
 				"default.core_key": "",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
-			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read credentials file"),
+			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the credentials file"),
 		},
 	}
 
