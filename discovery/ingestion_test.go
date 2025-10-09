@@ -1441,8 +1441,6 @@ func Test_seedsClient_Records(t *testing.T) {
 	ingestionSeedsClient := newSeedsClient(url, apiKey)
 	ingestionSeedRecordsClient := ingestionSeedsClient.Records(seedId)
 
-	assert.Equal(t, apiKey, ingestionSeedRecordsClient.getter.client.ApiKey)
-	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.getter.client.client.BaseURL)
 	assert.Equal(t, apiKey, ingestionSeedRecordsClient.summarizer.client.ApiKey)
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.summarizer.client.client.BaseURL)
 }
