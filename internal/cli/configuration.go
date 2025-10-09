@@ -46,7 +46,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	vpr.SetDefault("profile", defaultProfile)
 
 	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
-		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read config file")
+		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read the configuration file")
 	} else {
 		if !exists {
 			vpr.SetDefault(fmt.Sprintf("%s.core_url", defaultProfile), DefaultCoreURL)
@@ -56,7 +56,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 		}
 	}
 	if exists, err := readConfigFile("credentials", path, vpr, &ios); err != nil {
-		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read credentials file")
+		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read the credentials file")
 	} else {
 		if !exists {
 			vpr.SetDefault(fmt.Sprintf("%s.core_key", defaultProfile), "")
