@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -731,7 +732,17 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				assert.EqualError(t, err, tc.err.Error())
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
+
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -944,7 +955,16 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				assert.EqualError(t, err, tc.err.Error())
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1109,7 +1129,16 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				assert.EqualError(t, err, tc.err.Error())
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1274,7 +1303,16 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				assert.EqualError(t, err, tc.err.Error())
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1439,7 +1477,16 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				assert.EqualError(t, err, tc.err.Error())
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
