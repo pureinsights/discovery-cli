@@ -111,7 +111,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	case "":
 
 	case " ":
-		v.Set(fmt.Sprintf("%s.%s", profile, property), nil)
+		v.Set(fmt.Sprintf("%s.%s", profile, property), "")
 	default:
 		v.Set(fmt.Sprintf("%s.%s", profile, property), propertyInput)
 	}

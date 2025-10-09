@@ -784,8 +784,8 @@ func Test_discovery_SaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 	assert.Equal(t, "http://localhost:8080", got.Get("cn.core_url"))
 	assert.Equal(t, "core123", got.Get("cn.core_key"))
 	assert.Equal(t, "http://localhost:8080", got.Get("cn.ingestion_url"))
-	assert.Nil(t, got.Get("cn.ingestion_key"))
-	assert.False(t, got.IsSet("cn.ingestion_key"))
+	assert.Equal(t, "", got.Get("cn.ingestion_key"))
+	assert.True(t, got.IsSet("cn.ingestion_key"))
 	assert.Nil(t, got.Get("cn.queryflow_url"))
 	assert.False(t, got.IsSet("cn.queryflow_url"))
 	assert.Equal(t, "queryflow123", got.Get("cn.queryflow_key"))
@@ -953,9 +953,6 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
-					if expected == "" {
-						require.False(t, vpr.IsSet(profile+"."+k))
-					}
 				}
 			}
 		})
@@ -1121,9 +1118,6 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
-					if expected == "" {
-						require.False(t, vpr.IsSet(profile+"."+k))
-					}
 				}
 			}
 		})
@@ -1289,9 +1283,6 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
-					if expected == "" {
-						require.False(t, vpr.IsSet(profile+"."+k))
-					}
 				}
 			}
 		})
@@ -1457,9 +1448,6 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
-					if expected == "" {
-						require.False(t, vpr.IsSet(profile+"."+k))
-					}
 				}
 			}
 		})
