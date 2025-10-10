@@ -1597,7 +1597,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 		err            error
 	}{
 		{
-			name:       "Print not standalone and not sensitive values",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1610,45 +1610,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Print not standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: false,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-				"cn.core_key": "discovery.key.core.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: true,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-				"cn.core_key": "discovery.key.core.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print not standalone and nil value",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Printing fails for Core URL",
+			name:       "printURLAndAPIKey returns error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1659,19 +1621,6 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's URL"),
-		},
-		{
-			name:       "Printing fails for Core API Key",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-				"cn.core_key": "discovery.key.core.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
-			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's API key"),
 		},
 	}
 
@@ -1725,7 +1674,7 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 		err            error
 	}{
 		{
-			name:       "Print not standalone and not sensitive values",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1738,45 +1687,7 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Print not standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: false,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: true,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print not standalone and nil value",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n", "Ingestion URL", "http://localhost:8080"),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Printing fails for Ingestion URL",
+			name:       "printURLAndAPIKey returns error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1787,19 +1698,6 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Ingestion URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Ingestion's URL"),
-		},
-		{
-			name:       "Printing fails for Ingestion API Key",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", "discovery.key.ingestion.cn"),
-			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Ingestion's API key"),
 		},
 	}
 
@@ -1853,7 +1751,7 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 		err            error
 	}{
 		{
-			name:       "Print not standalone and not sensitive values",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1866,45 +1764,7 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Print not standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: false,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: true,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print not standalone and nil value",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n", "QueryFlow URL", "http://localhost:8080"),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Printing fails for QueryFlow URL",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1915,19 +1775,6 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 			expectedOutput: fmt.Sprintf("%s: %q\n", "QueryFlow URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print QueryFlow's URL"),
-		},
-		{
-			name:       "Printing fails for QueryFlow API Key",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", "discovery.key.queryflow.cn"),
-			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print QueryFlow's API key"),
 		},
 	}
 
@@ -1981,7 +1828,7 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 		err            error
 	}{
 		{
-			name:       "Print not standalone and not sensitive values",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1994,45 +1841,7 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Print not standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: false,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "discovery.key.staging.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: true,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "discovery.key.staging.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print not standalone and nil value",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n", "Staging URL", "http://localhost:8080"),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Printing fails for Staging URL",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -2043,19 +1852,6 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Staging URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Staging's URL"),
-		},
-		{
-			name:       "Printing fails for Staging API Key",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "discovery.key.staging.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Staging URL", "http://localhost:8080", "Staging API Key", "discovery.key.staging.cn"),
-			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Staging's API key"),
 		},
 	}
 
