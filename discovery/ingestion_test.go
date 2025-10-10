@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -1072,32 +1073,49 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 // Test_seedsClient_Start tests the seedsClient.Start() function
 func Test_seedsClient_Start(t *testing.T) {
 	tests := []struct {
-		name             string
-		method           string
-		path             string
-		statusCode       int
-		response         string
-		expectedResponse gjson.Result
-		err              error
+		name                string
+		method              string
+		path                string
+		statusCode          int
+		response            string
+		scan                ScanType
+		expectedResponse    gjson.Result
+		executionProperties gjson.Result
+		err                 error
 	}{
 		// Working case
 		{
-			name:             "Start works correctly",
-			method:           http.MethodPost,
-			path:             "/2acd0a61-852c-4f38-af2b-9c84e152873e",
-			statusCode:       http.StatusAccepted,
-			response:         `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
-			expectedResponse: gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`),
-			err:              nil,
+			name:                "Start works correctly without executionProperties",
+			method:              http.MethodPost,
+			path:                "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode:          http.StatusAccepted,
+			response:            `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
+			scan:                ScanFull,
+			expectedResponse:    gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`),
+			executionProperties: gjson.Result{},
+			err:                 nil,
 		},
 		{
-			name:             "Start works correctly with OK",
-			method:           http.MethodPost,
-			path:             "/2acd0a61-852c-4f38-af2b-9c84e152873e",
-			statusCode:       http.StatusOK,
-			response:         `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
-			expectedResponse: gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`),
-			err:              nil,
+			name:                "Start works correctly with executionProperties",
+			method:              http.MethodPost,
+			path:                "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode:          http.StatusAccepted,
+			scan:                ScanIncremental,
+			response:            `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`,
+			expectedResponse:    gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`),
+			executionProperties: gjson.Parse(`{"stagingBucket":"testBucket"}`),
+			err:                 nil,
+		},
+		{
+			name:                "Start works correctly with OK",
+			method:              http.MethodPost,
+			path:                "/2acd0a61-852c-4f38-af2b-9c84e152873e",
+			statusCode:          http.StatusOK,
+			scan:                ScanFull,
+			response:            `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
+			expectedResponse:    gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`),
+			executionProperties: gjson.Result{},
+			err:                 nil,
 		},
 		// Error cases
 		{
@@ -1105,6 +1123,7 @@ func Test_seedsClient_Start(t *testing.T) {
 			method:     http.MethodPost,
 			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e",
 			statusCode: http.StatusConflict,
+			scan:       ScanFull,
 			response: `{
 			"status": 409,
 			"code": 4001,
@@ -1113,7 +1132,8 @@ func Test_seedsClient_Start(t *testing.T) {
 			],
 			"timestamp": "2025-09-04T20:17:00.116546400Z"
 			}`,
-			expectedResponse: gjson.Result{},
+			expectedResponse:    gjson.Result{},
+			executionProperties: gjson.Result{},
 			err: Error{Status: http.StatusConflict, Body: gjson.Parse(`{
 			"status": 409,
 			"code": 4001,
@@ -1128,6 +1148,7 @@ func Test_seedsClient_Start(t *testing.T) {
 			method:     http.MethodPost,
 			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e",
 			statusCode: http.StatusNotFound,
+			scan:       ScanFull,
 			response: `{
 			"status": 404,
 			"code": 1003,
@@ -1136,7 +1157,8 @@ func Test_seedsClient_Start(t *testing.T) {
 			],
 			"timestamp": "2025-09-04T20:20:47.326270700Z"
 			}`,
-			expectedResponse: gjson.Result{},
+			expectedResponse:    gjson.Result{},
+			executionProperties: gjson.Result{},
 			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 			"status": 404,
 			"code": 1003,
@@ -1151,6 +1173,7 @@ func Test_seedsClient_Start(t *testing.T) {
 			method:     http.MethodPost,
 			path:       "/2acd0a61-852c-4f38-af2b-9c84e152873e",
 			statusCode: http.StatusBadRequest,
+			scan:       ScanFull,
 			response: `{
 			"status": 400,
 			"code": 3002,
@@ -1177,6 +1200,11 @@ func Test_seedsClient_Start(t *testing.T) {
 				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 					assert.Equal(t, tc.method, r.Method)
 					assert.Equal(t, "/seed"+tc.path, r.URL.Path)
+					if tc.executionProperties.Exists() {
+						body, _ := io.ReadAll(r.Body)
+						assert.Equal(t, tc.executionProperties.Raw, string(body))
+					}
+					assert.Equal(t, string(tc.scan), r.URL.Query().Get("scanType"))
 				}))
 			defer srv.Close()
 
@@ -1184,7 +1212,7 @@ func Test_seedsClient_Start(t *testing.T) {
 			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 			require.NoError(t, err)
 			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
-			response, err := ingestionSeedsClient.Start(seedId, scanFull)
+			response, err := ingestionSeedsClient.Start(seedId, tc.scan, tc.executionProperties)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
