@@ -676,7 +676,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			name:      "Reading from the Core Config In IOStream fails",
 			inReader:  testutils.ErrReader{Err: errors.New("read failed")},
 			writePath: t.TempDir(),
-			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's URL"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Core's URL"),
 		},
 		{
 			name:      "Reading from the Ingestion Config In IOStream fails",
@@ -700,7 +700,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			name:      "Invalid write location",
 			input:     strings.Repeat("\n", 8),
 			writePath: "doesnotexist",
-			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save the Core's configuration"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Core's configuration"),
 		},
 	}
 
@@ -919,7 +919,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			inReader:      testutils.ErrReader{Err: errors.New("read failed")},
 			standalone:    true,
 			writePath:     t.TempDir(),
-			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's URL"),
+			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Core's URL"),
 			component:     "core",
 			componentName: "Core",
 		},
@@ -928,7 +928,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			inReader:      io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone:    true,
 			writePath:     t.TempDir(),
-			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's API key"),
+			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Core's API key"),
 			component:     "core",
 			componentName: "Core",
 		},
@@ -937,7 +937,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			input:         strings.Repeat("\n", 8),
 			standalone:    false,
 			writePath:     "doesnotexist",
-			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save the Core's configuration"),
+			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Core's configuration"),
 			component:     "core",
 			componentName: "Core",
 		},
@@ -1434,6 +1434,157 @@ func Test_discovery_printConfig(t *testing.T) {
 }
 
 // Test_discovery_PrintCoreConfigToUser tests the discovery.PrintCoreToUser() function.
+func Test_discovery_printURLAndAPIKey(t *testing.T) {
+	tests := []struct {
+		name           string
+		profile        string
+		sensitive      bool
+		standalone     bool
+		config         map[string]string
+		component      string
+		componentName  string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		{
+			name:       "Print not standalone and not sensitive values",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			component:      "core",
+			componentName:  "Core",
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			component:      "core",
+			componentName:  "Core",
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print standalone and sensitive value",
+			profile:    "cn",
+			sensitive:  true,
+			standalone: true,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			component:      "core",
+			componentName:  "Core",
+			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Print not standalone and nil value",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+			},
+			component:      "core",
+			componentName:  "Core",
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "Printing fails for URL",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			component:      "core",
+			componentName:  "Core",
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's URL"),
+		},
+		{
+			name:       "Printing fails for API Key",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			component:      "core",
+			componentName:  "Core",
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
+			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's API key"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			d := NewDiscovery(&ios, vpr, "")
+
+			err := d.printURLAndAPIKey(tc.profile, tc.component, tc.componentName, tc.standalone, tc.sensitive)
+
+			if tc.err != nil {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_PrintCoreConfigToUser tests the discovery.PrintCoreToUser() function.
 func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -1507,7 +1658,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's URL"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's URL"),
 		},
 		{
 			name:       "Printing fails for Core API Key",
@@ -1520,7 +1671,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's API key"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's API key"),
 		},
 	}
 
@@ -2022,7 +2173,7 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's URL"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's URL"),
 		},
 		{
 			name:      "Print Fail on Printing Ingestion Config",

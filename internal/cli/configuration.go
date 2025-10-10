@@ -17,6 +17,7 @@ const (
 	DefaultIngestionURL string = "http://localhost:12030"
 	DefaultQueryFlowURL string = "http://localhost:12040"
 	SaveHeader          string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
+	PrintHeader         string = "Showing the configuration of profile %q:\n\n"
 )
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
@@ -240,100 +241,59 @@ func (d discovery) printConfig(profile, propertyName, property string, sensitive
 	return nil
 }
 
+// PrintURLAndAPIKey prints the URL and API key of a Discovery component to the Out IOStream.
+func (d discovery) printURLAndAPIKey(profile, component, componentName string, standalone, sensitive bool) error {
+	ios := d.IOStreams()
+	var err error
+	if standalone {
+		fmt.Fprintf(ios.Out, PrintHeader, profile)
+	}
+
+	err = d.printConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print %s's URL", componentName)
+	}
+
+	err = d.printConfig(profile, fmt.Sprintf("%s API Key", componentName), fmt.Sprintf("%s_key", component), sensitive)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print %s's API key", componentName)
+	}
+	return nil
+}
+
 // PrintCoreConfigToUser prints the Discovery Core's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintCoreConfigToUser(profile string, sensitive, standalone bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
-	}
-
-	err = d.printConfig(profile, "Core URL", "core_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print the Core's URL")
-	}
-
-	err = d.printConfig(profile, "Core API Key", "core_key", sensitive)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print the Core's API key")
-	}
-	return nil
+	return d.printURLAndAPIKey(profile, "core", "Core", standalone, sensitive)
 }
 
 // PrintIngestionConfigToUser prints the Discovery Ingestion's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
-	}
-
-	err = d.printConfig(profile, "Ingestion URL", "ingestion_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print Ingestion's URL")
-	}
-
-	err = d.printConfig(profile, "Ingestion API Key", "ingestion_key", sensitive)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print Ingestion's API key")
-	}
-	return nil
+	return d.printURLAndAPIKey(profile, "ingestion", "Ingestion", standalone, sensitive)
 }
 
 // PrintQueryFlowConfigToUser prints the Discovery QueryFlow's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintQueryFlowConfigToUser(profile string, sensitive, standalone bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
-	}
-
-	err = d.printConfig(profile, "QueryFlow URL", "queryflow_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print QueryFlow's URL")
-	}
-
-	err = d.printConfig(profile, "QueryFlow API Key", "queryflow_key", sensitive)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print QueryFlow's API key")
-	}
-	return nil
+	return d.printURLAndAPIKey(profile, "queryflow", "QueryFlow", standalone, sensitive)
 }
 
 // PrintStagingConfigToUser prints the Discovery Staging's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintStagingConfigToUser(profile string, sensitive, standalone bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
-	}
-
-	err = d.printConfig(profile, "Staging URL", "staging_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print Staging's URL")
-	}
-
-	err = d.printConfig(profile, "Staging API Key", "staging_key", sensitive)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print Staging's API key")
-	}
-	return nil
-
+	return d.printURLAndAPIKey(profile, "staging", "Staging", standalone, sensitive)
 }
 
 // PrintConfigToUser prints the Discovery Components' configuration properties for the given profile.
 // The caller of the function can determine if the API Keys are sensitive so that they can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintConfigToUser(profile string, sensitive bool) error {
-	fmt.Fprintf(d.IOStreams().Out, "Showing the configuration of profile %q:\n\n", profile)
+	fmt.Fprintf(d.IOStreams().Out, PrintHeader, profile)
 
 	err := d.PrintCoreConfigToUser(profile, sensitive, false)
 	if err != nil {
