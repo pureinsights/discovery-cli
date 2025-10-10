@@ -586,7 +586,7 @@ func Test_discovery_saveConfig(t *testing.T) {
 			err := d.saveConfig()
 			if tc.err != nil {
 				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				assert.True(t, errors.Is(err, fs.ErrNotExist))
 			} else {
 				require.NoError(t, err)
 				configVpr := viper.New()
