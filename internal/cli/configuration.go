@@ -17,6 +17,8 @@ const (
 	DefaultStagingURL   string = "http://localhost:12020"
 	DefaultIngestionURL string = "http://localhost:12030"
 	DefaultQueryFlowURL string = "http://localhost:12040"
+	SaveHeader          string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
+	PrintHeader         string = "Showing the configuration of profile %q:\n\n"
 )
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
@@ -47,7 +49,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	vpr.SetDefault("profile", defaultProfile)
 
 	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
-		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read config file")
+		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read the configuration file")
 	} else {
 		if !exists {
 			vpr.SetDefault(fmt.Sprintf("%s.core_url", defaultProfile), DefaultCoreURL)
@@ -57,7 +59,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 		}
 	}
 	if exists, err := readConfigFile("credentials", path, vpr, &ios); err != nil {
-		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read credentials file")
+		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read the credentials file")
 	} else {
 		if !exists {
 			vpr.SetDefault(fmt.Sprintf("%s.core_key", defaultProfile), "")
@@ -112,7 +114,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	case "":
 
 	case " ":
-		v.Set(fmt.Sprintf("%s.%s", profile, property), nil)
+		v.Set(fmt.Sprintf("%s.%s", profile, property), "")
 	default:
 		v.Set(fmt.Sprintf("%s.%s", profile, property), propertyInput)
 	}
@@ -123,19 +125,21 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 func (d discovery) saveConfig() error {
 	v := d.Config()
 	apiKeys := []string{"core_key", "ingestion_key", "queryflow_key", "staging_key"}
+	temporaryProperties := []string{"profile"}
 
 	config := viper.New()
 	credentials := viper.New()
 
 	for _, setting := range v.AllKeys() {
-		if setting != "profile" {
-			parts := strings.Split(setting, ".")
-			if slices.Contains(apiKeys, parts[len(parts)-1]) {
-				credentials.Set(setting, v.Get(setting))
-			} else {
-				config.Set(setting, v.Get(setting))
-			}
+		switch {
+		case slices.Contains(temporaryProperties, setting):
+
+		case slices.Contains(apiKeys, strings.Split(setting, ".")[len(strings.Split(setting, "."))-1]):
+			credentials.Set(setting, v.Get(setting))
+		default:
+			config.Set(setting, v.Get(setting))
 		}
+
 	}
 
 	err := config.WriteConfigAs(filepath.Join(d.ConfigPath(), "config.toml"))
@@ -162,122 +166,64 @@ func SetDiscoveryDir() (string, error) {
 	return configPath, nil
 }
 
-// SaveCoreConfigFromUser asks the user for the values it wants to set for Discovery Core's configuration properties for the given profile.
-// It then writes the new configuration to the Discovery struct's Config Path.
-// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
-func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error {
+// SaveUrlAndAPIKey asks the user for the URL and API key of a Discovery component and saves them.
+func (d discovery) saveUrlAndAPIKey(profile, component, componentName string, standalone bool) error {
 	ios := d.IOStreams()
 
 	if standalone {
-		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
+		fmt.Fprintf(ios.Out, SaveHeader, profile)
 	}
 
-	err := d.askUserConfig(profile, "Core URL", "core_url", false)
+	err := d.askUserConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to get the Core's URL")
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get %s's URL", componentName)
 	}
 
-	err = d.askUserConfig(profile, "Core API Key", "core_key", true)
+	err = d.askUserConfig(profile, fmt.Sprintf("%s API key", componentName), fmt.Sprintf("%s_key", component), false)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to get the Core's API key")
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to get %s's API key", componentName)
 	}
 
 	err = d.saveConfig()
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to save the Core's configuration")
+		return NewErrorWithCause(ErrorExitCode, err, "Failed to save %s's configuration", componentName)
 	}
 
 	return nil
+}
+
+// SaveCoreConfigFromUser asks the user for the values it wants to set for Discovery Core's configuration properties for the given profile.
+// It then writes the new configuration to the Discovery struct's Config Path.
+// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
+func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error {
+	return d.saveUrlAndAPIKey(profile, "core", "Core", standalone)
 }
 
 // SaveIngestionConfigFromUser asks the user for the values it wants to set for Discovery Ingestion's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
 // The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) error {
-	ios := d.IOStreams()
-
-	if standalone {
-		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
-	}
-
-	err := d.askUserConfig(profile, "Ingestion URL", "ingestion_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to get Ingestion's URL")
-	}
-
-	err = d.askUserConfig(profile, "Ingestion API Key", "ingestion_key", true)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to get Ingestion's API key")
-	}
-
-	err = d.saveConfig()
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to save Ingestion's configuration")
-	}
-
-	return nil
+	return d.saveUrlAndAPIKey(profile, "ingestion", "Ingestion", standalone)
 }
 
 // SaveQueryFlowConfigFromUser asks the user for the values it wants to set for Discovery QueryFlow's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
 // The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) error {
-	ios := d.IOStreams()
-
-	if standalone {
-		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
-	}
-
-	err := d.askUserConfig(profile, "QueryFlow URL", "queryflow_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to get QueryFlow's URL")
-	}
-
-	err = d.askUserConfig(profile, "QueryFlow API Key", "queryflow_key", true)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to get QueryFlow's API key")
-	}
-
-	err = d.saveConfig()
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to save QueryFlow's configuration")
-	}
-
-	return nil
+	return d.saveUrlAndAPIKey(profile, "queryflow", "QueryFlow", standalone)
 }
 
 // SaveStagingConfigFromUser asks the user for the values it wants to set for Discovery Staging's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
 // The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
 func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) error {
-	ios := d.IOStreams()
-
-	if standalone {
-		fmt.Fprintf(ios.Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
-	}
-
-	err := d.askUserConfig(profile, "Staging URL", "staging_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to get Staging's URL")
-	}
-
-	err = d.askUserConfig(profile, "Staging API Key", "staging_key", true)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to get Staging's API key")
-	}
-
-	err = d.saveConfig()
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Failed to save Staging's configuration")
-	}
-
-	return nil
+	return d.saveUrlAndAPIKey(profile, "staging", "Staging", standalone)
 }
 
 // SaveConfigFromUser asks the user for the URLs and API Keys of the Discovery's components to save them in a profile.
 // It then writes the current configuration into the given file.
 func (d discovery) SaveConfigFromUser(profile string) error {
-	fmt.Fprintf(d.IOStreams().Out, "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile)
+	fmt.Fprintf(d.IOStreams().Out, SaveHeader, profile)
 
 	err := d.SaveCoreConfigFromUser(profile, false)
 	if err != nil {
@@ -312,100 +258,59 @@ func (d discovery) printConfig(profile, propertyName, property string, sensitive
 	return nil
 }
 
+// PrintURLAndAPIKey prints the URL and API key of a Discovery component to the Out IOStream.
+func (d discovery) printURLAndAPIKey(profile, component, componentName string, standalone, sensitive bool) error {
+	ios := d.IOStreams()
+	var err error
+	if standalone {
+		fmt.Fprintf(ios.Out, PrintHeader, profile)
+	}
+
+	err = d.printConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print %s's URL", componentName)
+	}
+
+	err = d.printConfig(profile, fmt.Sprintf("%s API Key", componentName), fmt.Sprintf("%s_key", component), sensitive)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not print %s's API key", componentName)
+	}
+	return nil
+}
+
 // PrintCoreConfigToUser prints the Discovery Core's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintCoreConfigToUser(profile string, sensitive, standalone bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
-	}
-
-	err = d.printConfig(profile, "Core URL", "core_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print the Core's URL")
-	}
-
-	err = d.printConfig(profile, "Core API Key", "core_key", sensitive)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print the Core's API key")
-	}
-	return nil
+	return d.printURLAndAPIKey(profile, "core", "Core", standalone, sensitive)
 }
 
 // PrintIngestionConfigToUser prints the Discovery Ingestion's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
-	}
-
-	err = d.printConfig(profile, "Ingestion URL", "ingestion_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print Ingestion's URL")
-	}
-
-	err = d.printConfig(profile, "Ingestion API Key", "ingestion_key", sensitive)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print Ingestion's API key")
-	}
-	return nil
+	return d.printURLAndAPIKey(profile, "ingestion", "Ingestion", standalone, sensitive)
 }
 
 // PrintQueryFlowConfigToUser prints the Discovery QueryFlow's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintQueryFlowConfigToUser(profile string, sensitive, standalone bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
-	}
-
-	err = d.printConfig(profile, "QueryFlow URL", "queryflow_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print QueryFlow's URL")
-	}
-
-	err = d.printConfig(profile, "QueryFlow API Key", "queryflow_key", sensitive)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print QueryFlow's API key")
-	}
-	return nil
+	return d.printURLAndAPIKey(profile, "queryflow", "QueryFlow", standalone, sensitive)
 }
 
 // PrintStagingConfigToUser prints the Discovery Staging's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintStagingConfigToUser(profile string, sensitive, standalone bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, "Showing the configuration of profile %q:\n\n", profile)
-	}
-
-	err = d.printConfig(profile, "Staging URL", "staging_url", false)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print Staging's URL")
-	}
-
-	err = d.printConfig(profile, "Staging API Key", "staging_key", sensitive)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not print Staging's API key")
-	}
-	return nil
-
+	return d.printURLAndAPIKey(profile, "staging", "Staging", standalone, sensitive)
 }
 
 // PrintConfigToUser prints the Discovery Components' configuration properties for the given profile.
 // The caller of the function can determine if the API Keys are sensitive so that they can be obfuscated.
 // The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintConfigToUser(profile string, sensitive bool) error {
-	fmt.Fprintf(d.IOStreams().Out, "Showing the configuration of profile %q:\n\n", profile)
+	fmt.Fprintf(d.IOStreams().Out, PrintHeader, profile)
 
 	err := d.PrintCoreConfigToUser(profile, sensitive, false)
 	if err != nil {

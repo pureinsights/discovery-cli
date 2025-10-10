@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -210,7 +211,7 @@ core_key="discovery.key.core.cn"
 				"cn.core_url":      "http://discovery.core.cn",
 				"default.core_key": "",
 			},
-			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read config file"),
+			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file"),
 		},
 		{
 			name:   "Reading the credentials file fails",
@@ -230,7 +231,7 @@ core_key="discovery.key.core.cn"
 				"default.core_key": "",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
-			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read credentials file"),
+			err: NewErrorWithCause(ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the credentials file"),
 		},
 	}
 
@@ -585,7 +586,7 @@ func Test_discovery_saveConfig(t *testing.T) {
 			err := d.saveConfig()
 			if tc.err != nil {
 				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				assert.True(t, errors.Is(err, fs.ErrNotExist))
 			} else {
 				require.NoError(t, err)
 				configVpr := viper.New()
@@ -730,7 +731,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			name:      "Reading from the Core Config In IOStream fails",
 			inReader:  testutils.ErrReader{Err: errors.New("read failed")},
 			writePath: t.TempDir(),
-			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's URL"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Core's URL"),
 		},
 		{
 			name:      "Reading from the Ingestion Config In IOStream fails",
@@ -754,7 +755,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			name:      "Invalid write location",
 			input:     strings.Repeat("\n", 8),
 			writePath: "doesnotexist",
-			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save the Core's configuration"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Core's configuration"),
 		},
 	}
 
@@ -786,7 +787,17 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				assert.EqualError(t, err, tc.err.Error())
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
+
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -839,11 +850,207 @@ func Test_discovery_SaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 	assert.Equal(t, "http://localhost:8080", got.Get("cn.core_url"))
 	assert.Equal(t, "core123", got.Get("cn.core_key"))
 	assert.Equal(t, "http://localhost:8080", got.Get("cn.ingestion_url"))
-	assert.Nil(t, got.Get("cn.ingestion_key"))
+	assert.Equal(t, "", got.Get("cn.ingestion_key"))
+	assert.True(t, got.IsSet("cn.ingestion_key"))
 	assert.Nil(t, got.Get("cn.queryflow_url"))
+	assert.False(t, got.IsSet("cn.queryflow_url"))
 	assert.Equal(t, "queryflow123", got.Get("cn.queryflow_key"))
 	assert.Equal(t, "staging.cn.aws.com", got.Get("cn.staging_url"))
 	assert.Nil(t, got.Get("cn.staging_key"))
+	assert.False(t, got.IsSet("cn.staging_key"))
+}
+
+func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
+	const profile = "cn"
+
+	tests := []struct {
+		name          string
+		input         string
+		config        map[string]string
+		standalone    bool
+		inReader      io.Reader
+		writePath     string
+		component     string
+		componentName string
+		err           error
+		expectKeys    map[string]string
+	}{
+		{
+			name:       "Keep every existing value",
+			input:      "\n\n",
+			writePath:  t.TempDir(),
+			standalone: true,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "core321",
+			},
+			expectKeys: map[string]string{
+				"core_url": "http://localhost:8080",
+				"core_key": "core321",
+			},
+			component:     "core",
+			componentName: "Core",
+		},
+		{
+			name:       "Set Core URL to empty, keep Core Key",
+			input:      " \n",
+			writePath:  t.TempDir(),
+			standalone: true,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "core321",
+			},
+			expectKeys: map[string]string{
+				"core_url": "",
+				"core_key": "core321",
+			},
+			component:     "core",
+			componentName: "Core",
+		},
+		{
+			name:       "Set Core URL to new value, keep Core Key",
+			input:      "http://discovery.core.cn\n\n",
+			writePath:  t.TempDir(),
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "core321",
+			},
+			expectKeys: map[string]string{
+				"core_url": "http://discovery.core.cn",
+				"core_key": "core321",
+			},
+			component:     "core",
+			componentName: "Core",
+		},
+		{
+			name:       "The user writes an End Of File while inputting the values",
+			input:      "http://discovery.core.cn\ncore123",
+			writePath:  t.TempDir(),
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "core321",
+			},
+			expectKeys: map[string]string{
+				"core_url": "http://discovery.core.cn",
+				"core_key": "core123",
+			},
+			component:     "core",
+			componentName: "Core",
+		},
+		{
+			name:       "Core Key is nil, keep Core Key",
+			input:      "http://discovery.core.cn\n\n",
+			standalone: true,
+			writePath:  t.TempDir(),
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+			},
+			expectKeys: map[string]string{
+				"core_url": "http://discovery.core.cn",
+				"core_key": "",
+			},
+			component:     "core",
+			componentName: "Core",
+		},
+		{
+			name:       "Core Key is nil, change Core Key",
+			input:      "http://discovery.core.cn\ncore123\n",
+			writePath:  t.TempDir(),
+			standalone: true,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+			},
+			expectKeys: map[string]string{
+				"core_url": "http://discovery.core.cn",
+				"core_key": "core123",
+			},
+			component:     "core",
+			componentName: "Core",
+		},
+		{
+			name:          "Reading from the In IOStream fails in Core URL",
+			inReader:      testutils.ErrReader{Err: errors.New("read failed")},
+			standalone:    true,
+			writePath:     t.TempDir(),
+			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Core's URL"),
+			component:     "core",
+			componentName: "Core",
+		},
+		{
+			name:          "Reading from the In IOStream fails in Core Key",
+			inReader:      io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
+			standalone:    true,
+			writePath:     t.TempDir(),
+			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Core's API key"),
+			component:     "core",
+			componentName: "Core",
+		},
+		{
+			name:          "Invalid write location",
+			input:         strings.Repeat("\n", 8),
+			standalone:    false,
+			writePath:     "doesnotexist",
+			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Core's configuration"),
+			component:     "core",
+			componentName: "Core",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var in io.Reader
+			if tc.inReader != nil {
+				in = tc.inReader
+			} else {
+				in = strings.NewReader(tc.input)
+			}
+
+			out := &bytes.Buffer{}
+
+			ios := iostreams.IOStreams{
+				In:  in,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			d := NewDiscovery(&ios, vpr, tc.writePath)
+
+			err := d.saveUrlAndAPIKey(profile, tc.component, tc.componentName, tc.standalone)
+			if tc.standalone {
+				assert.Contains(t, out.String(), fmt.Sprintf("Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n", profile))
+			}
+			if tc.err != nil {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
+			} else {
+				require.NoError(t, err)
+				vpr, err := InitializeConfig(ios, tc.writePath)
+				require.NoError(t, err)
+
+				for k, expected := range tc.expectKeys {
+					gotVal := vpr.GetString(profile + "." + k)
+					require.Equal(t, expected, gotVal)
+				}
+			}
+		})
+	}
 }
 
 // Test_discovery_SaveCoreConfigFromUser tests the discovery.SaveCoreConfigFromUser() function.
@@ -861,107 +1068,25 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 		expectKeys map[string]string
 	}{
 		{
-			name:       "Keep every existing value",
+			name:       "saveURLAndAPIKey returns no error",
 			input:      "\n\n",
 			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
+				"cn.core_url": "http://localhost:12010",
 				"cn.core_key": "core321",
 			},
 			expectKeys: map[string]string{
-				"core_url": "http://localhost:8080",
+				"core_url": "http://localhost:12010",
 				"core_key": "core321",
 			},
 		},
 		{
-			name:       "Set Core URL to empty, keep Core Key",
-			input:      " \n",
-			writePath:  t.TempDir(),
-			standalone: true,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-				"cn.core_key": "core321",
-			},
-			expectKeys: map[string]string{
-				"core_url": "",
-				"core_key": "core321",
-			},
-		},
-		{
-			name:       "Set Core URL to new value, keep Core Key",
-			input:      "http://discovery.core.cn\n\n",
-			writePath:  t.TempDir(),
-			standalone: false,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-				"cn.core_key": "core321",
-			},
-			expectKeys: map[string]string{
-				"core_url": "http://discovery.core.cn",
-				"core_key": "core321",
-			},
-		},
-		{
-			name:       "The user writes an End Of File while inputting the values",
-			input:      "http://discovery.core.cn\ncore123",
-			writePath:  t.TempDir(),
-			standalone: false,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-				"cn.core_key": "core321",
-			},
-			expectKeys: map[string]string{
-				"core_url": "http://discovery.core.cn",
-				"core_key": "core123",
-			},
-		},
-		{
-			name:       "Core Key is nil, keep Core Key",
-			input:      "http://discovery.core.cn\n\n",
-			standalone: true,
-			writePath:  t.TempDir(),
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-			},
-			expectKeys: map[string]string{
-				"core_url": "http://discovery.core.cn",
-				"core_key": "",
-			},
-		},
-		{
-			name:       "Core Key is nil, change Core Key",
-			input:      "http://discovery.core.cn\ncore123\n",
-			writePath:  t.TempDir(),
-			standalone: true,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-			},
-			expectKeys: map[string]string{
-				"core_url": "http://discovery.core.cn",
-				"core_key": "core123",
-			},
-		},
-		{
-			name:       "Reading from the In IOStream fails in Core URL",
+			name:       "saveURLAndAPIKey returns an error",
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
-			standalone: true,
-			writePath:  t.TempDir(),
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's URL"),
-		},
-		{
-			name:       "Reading from the In IOStream fails in Core Key",
-			inReader:   io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
-			standalone: true,
-			writePath:  t.TempDir(),
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get the Core's API key"),
-		},
-		{
-			name:       "Invalid write location",
-			input:      strings.Repeat("\n", 8),
 			standalone: false,
-			writePath:  "doesnotexist",
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save the Core's configuration"),
+			writePath:  t.TempDir(),
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Core's URL"),
 		},
 	}
 
@@ -1005,9 +1130,6 @@ func Test_discovery_SaveCoreConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
-					if expected == "" {
-						require.False(t, vpr.IsSet(profile+"."+k))
-					}
 				}
 			}
 		})
@@ -1029,107 +1151,25 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 		expectKeys map[string]string
 	}{
 		{
-			name:       "Keep every existing value",
+			name:       "saveURLAndAPIKey returns no error",
 			input:      "\n\n",
 			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
+				"cn.ingestion_url": "http://localhost:12030",
 				"cn.ingestion_key": "ingestion321",
 			},
 			expectKeys: map[string]string{
-				"ingestion_url": "http://localhost:8080",
+				"ingestion_url": "http://localhost:12030",
 				"ingestion_key": "ingestion321",
 			},
 		},
 		{
-			name:       "Set Ingestion URL to empty, keep Ingestion Key",
-			input:      " \n",
-			writePath:  t.TempDir(),
-			standalone: true,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "ingestion321",
-			},
-			expectKeys: map[string]string{
-				"ingestion_url": "",
-				"ingestion_key": "ingestion321",
-			},
-		},
-		{
-			name:       "Set Ingestion URL to new value, keep Ingestion Key",
-			input:      "http://discovery.ingestion.cn\n\n",
-			writePath:  t.TempDir(),
-			standalone: false,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "ingestion321",
-			},
-			expectKeys: map[string]string{
-				"ingestion_url": "http://discovery.ingestion.cn",
-				"ingestion_key": "ingestion321",
-			},
-		},
-		{
-			name:       "The user writes an End Of File while inputting the values",
-			input:      "http://discovery.ingestion.cn\ningestion123",
-			writePath:  t.TempDir(),
-			standalone: false,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "ingestion321",
-			},
-			expectKeys: map[string]string{
-				"ingestion_url": "http://discovery.ingestion.cn",
-				"ingestion_key": "ingestion123",
-			},
-		},
-		{
-			name:       "Ingestion Key is nil, keep Ingestion Key",
-			input:      "http://discovery.ingestion.cn\n\n",
-			standalone: true,
-			writePath:  t.TempDir(),
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-			},
-			expectKeys: map[string]string{
-				"ingestion_url": "http://discovery.ingestion.cn",
-				"ingestion_key": "",
-			},
-		},
-		{
-			name:       "Ingestion Key is nil, change Ingestion Key",
-			input:      "http://discovery.ingestion.cn\ningestion123\n",
-			writePath:  t.TempDir(),
-			standalone: true,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-			},
-			expectKeys: map[string]string{
-				"ingestion_url": "http://discovery.ingestion.cn",
-				"ingestion_key": "ingestion123",
-			},
-		},
-		{
-			name:       "Reading from the In IOStream fails in Ingestion URL",
+			name:       "saveURLAndAPIKey returns an error",
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
-			standalone: true,
+			standalone: false,
 			writePath:  t.TempDir(),
 			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Ingestion's URL"),
-		},
-		{
-			name:       "Reading from the In IOStream fails in Ingestion Key",
-			inReader:   io.MultiReader(strings.NewReader("http://discovery.ingestion.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
-			standalone: true,
-			writePath:  t.TempDir(),
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Ingestion's API key"),
-		},
-		{
-			name:       "Invalid write location",
-			input:      strings.Repeat("\n", 8),
-			standalone: false,
-			writePath:  "doesnotexist",
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Ingestion's configuration"),
 		},
 	}
 
@@ -1173,9 +1213,6 @@ func Test_discovery_SaveIngestionConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
-					if expected == "" {
-						require.False(t, vpr.IsSet(profile+"."+k))
-					}
 				}
 			}
 		})
@@ -1197,107 +1234,25 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 		expectKeys map[string]string
 	}{
 		{
-			name:       "Keep every existing value",
+			name:       "saveURLAndAPIKey returns no error",
 			input:      "\n\n",
 			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
+				"cn.queryflow_url": "http://localhost:12040",
 				"cn.queryflow_key": "queryflow321",
 			},
 			expectKeys: map[string]string{
-				"queryflow_url": "http://localhost:8080",
+				"queryflow_url": "http://localhost:12040",
 				"queryflow_key": "queryflow321",
 			},
 		},
 		{
-			name:       "Set QueryFlow URL to empty, keep QueryFlow Key",
-			input:      " \n",
-			writePath:  t.TempDir(),
-			standalone: true,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "queryflow321",
-			},
-			expectKeys: map[string]string{
-				"queryflow_url": "",
-				"queryflow_key": "queryflow321",
-			},
-		},
-		{
-			name:       "Set QueryFlow URL to new value, keep QueryFlow Key",
-			input:      "http://discovery.queryflow.cn\n\n",
-			writePath:  t.TempDir(),
-			standalone: false,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "queryflow321",
-			},
-			expectKeys: map[string]string{
-				"queryflow_url": "http://discovery.queryflow.cn",
-				"queryflow_key": "queryflow321",
-			},
-		},
-		{
-			name:       "The user writes an End Of File while inputting the values",
-			input:      "http://discovery.queryflow.cn\nqueryflow123",
-			writePath:  t.TempDir(),
-			standalone: false,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "queryflow321",
-			},
-			expectKeys: map[string]string{
-				"queryflow_url": "http://discovery.queryflow.cn",
-				"queryflow_key": "queryflow123",
-			},
-		},
-		{
-			name:       "QueryFlow Key is nil, keep QueryFlow Key",
-			input:      "http://discovery.queryflow.cn\n\n",
-			standalone: true,
-			writePath:  t.TempDir(),
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-			},
-			expectKeys: map[string]string{
-				"queryflow_url": "http://discovery.queryflow.cn",
-				"queryflow_key": "",
-			},
-		},
-		{
-			name:       "QueryFlow Key is nil, change QueryFlow Key",
-			input:      "http://discovery.queryflow.cn\nqueryflow123\n",
-			writePath:  t.TempDir(),
-			standalone: true,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-			},
-			expectKeys: map[string]string{
-				"queryflow_url": "http://discovery.queryflow.cn",
-				"queryflow_key": "queryflow123",
-			},
-		},
-		{
-			name:       "Reading from the In IOStream fails in QueryFlow URL",
+			name:       "saveURLAndAPIKey returns an error",
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
-			standalone: true,
+			standalone: false,
 			writePath:  t.TempDir(),
 			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get QueryFlow's URL"),
-		},
-		{
-			name:       "Reading from the In IOStream fails in QueryFlow Key",
-			inReader:   io.MultiReader(strings.NewReader("http://discovery.queryflow.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
-			standalone: true,
-			writePath:  t.TempDir(),
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get QueryFlow's API key"),
-		},
-		{
-			name:       "Invalid write location",
-			input:      strings.Repeat("\n", 8),
-			standalone: false,
-			writePath:  "doesnotexist",
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save QueryFlow's configuration"),
 		},
 	}
 
@@ -1341,9 +1296,6 @@ func Test_discovery_SaveQueryFlowConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
-					if expected == "" {
-						require.False(t, vpr.IsSet(profile+"."+k))
-					}
 				}
 			}
 		})
@@ -1365,107 +1317,25 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 		expectKeys map[string]string
 	}{
 		{
-			name:       "Keep every existing value",
+			name:       "saveURLAndAPIKey returns no error",
 			input:      "\n\n",
 			writePath:  t.TempDir(),
 			standalone: true,
 			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
+				"cn.staging_url": "http://localhost:12020",
 				"cn.staging_key": "staging321",
 			},
 			expectKeys: map[string]string{
-				"staging_url": "http://localhost:8080",
+				"staging_url": "http://localhost:12020",
 				"staging_key": "staging321",
 			},
 		},
 		{
-			name:       "Set Staging URL to empty, keep Staging Key",
-			input:      " \n",
-			writePath:  t.TempDir(),
-			standalone: true,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "staging321",
-			},
-			expectKeys: map[string]string{
-				"staging_url": "",
-				"staging_key": "staging321",
-			},
-		},
-		{
-			name:       "Set Staging URL to new value, keep Staging Key",
-			input:      "http://discovery.staging.cn\n\n",
-			writePath:  t.TempDir(),
-			standalone: false,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "staging321",
-			},
-			expectKeys: map[string]string{
-				"staging_url": "http://discovery.staging.cn",
-				"staging_key": "staging321",
-			},
-		},
-		{
-			name:       "The user writes an End Of File while inputting the values",
-			input:      "http://discovery.staging.cn\nstaging123",
-			writePath:  t.TempDir(),
-			standalone: false,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "staging321",
-			},
-			expectKeys: map[string]string{
-				"staging_url": "http://discovery.staging.cn",
-				"staging_key": "staging123",
-			},
-		},
-		{
-			name:       "Staging Key is nil, keep Staging Key",
-			input:      "http://discovery.staging.cn\n\n",
-			standalone: true,
-			writePath:  t.TempDir(),
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-			},
-			expectKeys: map[string]string{
-				"staging_url": "http://discovery.staging.cn",
-				"staging_key": "",
-			},
-		},
-		{
-			name:       "Staging Key is nil, change Staging Key",
-			input:      "http://discovery.staging.cn\nstaging123\n",
-			writePath:  t.TempDir(),
-			standalone: true,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-			},
-			expectKeys: map[string]string{
-				"staging_url": "http://discovery.staging.cn",
-				"staging_key": "staging123",
-			},
-		},
-		{
-			name:       "Reading from the In IOStream fails in Staging URL",
+			name:       "saveURLAndAPIKey returns an error",
 			inReader:   testutils.ErrReader{Err: errors.New("read failed")},
-			standalone: true,
+			standalone: false,
 			writePath:  t.TempDir(),
 			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Staging's URL"),
-		},
-		{
-			name:       "Reading from the In IOStream fails in Staging Key",
-			inReader:   io.MultiReader(strings.NewReader("http://discovery.staging.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
-			standalone: true,
-			writePath:  t.TempDir(),
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("read failed"), "Failed to get Staging's API key"),
-		},
-		{
-			name:       "Invalid write location",
-			input:      strings.Repeat("\n", 8),
-			standalone: false,
-			writePath:  "doesnotexist",
-			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Staging's configuration"),
 		},
 	}
 
@@ -1509,9 +1379,6 @@ func Test_discovery_SaveStagingConfigFromUser(t *testing.T) {
 				for k, expected := range tc.expectKeys {
 					gotVal := vpr.GetString(profile + "." + k)
 					require.Equal(t, expected, gotVal)
-					if expected == "" {
-						require.False(t, vpr.IsSet(profile+"."+k))
-					}
 				}
 			}
 		})
@@ -1622,13 +1489,15 @@ func Test_discovery_printConfig(t *testing.T) {
 }
 
 // Test_discovery_PrintCoreConfigToUser tests the discovery.PrintCoreToUser() function.
-func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
+func Test_discovery_printURLAndAPIKey(t *testing.T) {
 	tests := []struct {
 		name           string
 		profile        string
 		sensitive      bool
 		standalone     bool
 		config         map[string]string
+		component      string
+		componentName  string
 		expectedOutput string
 		outWriter      io.Writer
 		err            error
@@ -1642,6 +1511,8 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 				"cn.core_url": "http://localhost:8080",
 				"cn.core_key": "discovery.key.core.cn",
 			},
+			component:      "core",
+			componentName:  "Core",
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
 			outWriter:      nil,
 			err:            nil,
@@ -1655,6 +1526,8 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 				"cn.core_url": "http://localhost:8080",
 				"cn.core_key": "discovery.key.core.cn",
 			},
+			component:      "core",
+			componentName:  "Core",
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
 			outWriter:      nil,
 			err:            nil,
@@ -1668,6 +1541,8 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 				"cn.core_url": "http://localhost:8080",
 				"cn.core_key": "discovery.key.core.cn",
 			},
+			component:      "core",
+			componentName:  "Core",
 			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Core URL", "http://localhost:8080", "Core API Key", obfuscate("discovery.key.core.cn")),
 			outWriter:      nil,
 			err:            nil,
@@ -1680,12 +1555,117 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			config: map[string]string{
 				"cn.core_url": "http://localhost:8080",
 			},
+			component:      "core",
+			componentName:  "Core",
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
 			outWriter:      nil,
 			err:            nil,
 		},
 		{
-			name:       "Printing fails for Core URL",
+			name:       "Printing fails for URL",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			component:      "core",
+			componentName:  "Core",
+			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's URL"),
+		},
+		{
+			name:       "Printing fails for API Key",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			component:      "core",
+			componentName:  "Core",
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
+			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's API key"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			for k, v := range tc.config {
+				vpr.Set(k, v)
+			}
+
+			d := NewDiscovery(&ios, vpr, "")
+
+			err := d.printURLAndAPIKey(tc.profile, tc.component, tc.componentName, tc.standalone, tc.sensitive)
+
+			if tc.err != nil {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				if cliError, ok := err.(*Error); ok {
+					cause := cliError.Cause
+					if !errors.Is(cause, fs.ErrNotExist) {
+						assert.EqualError(t, err, tc.err.Error())
+					} else {
+						tcError, _ := err.(*Error)
+						assert.Equal(t, tcError.Message, cliError.Message)
+						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
+					}
+				}
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_PrintCoreConfigToUser tests the discovery.PrintCoreToUser() function.
+func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
+	tests := []struct {
+		name           string
+		profile        string
+		sensitive      bool
+		standalone     bool
+		config         map[string]string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		{
+			name:       "printURLAndAPIKey returns no error",
+			profile:    "cn",
+			sensitive:  false,
+			standalone: false,
+			config: map[string]string{
+				"cn.core_url": "http://localhost:8080",
+				"cn.core_key": "discovery.key.core.cn",
+			},
+			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
+			outWriter:      nil,
+			err:            nil,
+		},
+		{
+			name:       "printURLAndAPIKey returns error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1695,20 +1675,7 @@ func Test_discovery_PrintCoreConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Core URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's URL"),
-		},
-		{
-			name:       "Printing fails for Core API Key",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.core_url": "http://localhost:8080",
-				"cn.core_key": "discovery.key.core.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Core URL", "http://localhost:8080", "Core API Key", "discovery.key.core.cn"),
-			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's API key"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's URL"),
 		},
 	}
 
@@ -1762,7 +1729,7 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 		err            error
 	}{
 		{
-			name:       "Print not standalone and not sensitive values",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1775,45 +1742,7 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Print not standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: false,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: true,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", obfuscate("discovery.key.ingestion.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print not standalone and nil value",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n", "Ingestion URL", "http://localhost:8080"),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Printing fails for Ingestion URL",
+			name:       "printURLAndAPIKey returns error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1824,19 +1753,6 @@ func Test_discovery_PrintIngestionConfigToUser(t *testing.T) {
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Ingestion URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Ingestion's URL"),
-		},
-		{
-			name:       "Printing fails for Ingestion API Key",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.ingestion_url": "http://localhost:8080",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Ingestion URL", "http://localhost:8080", "Ingestion API Key", "discovery.key.ingestion.cn"),
-			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Ingestion's API key"),
 		},
 	}
 
@@ -1890,7 +1806,7 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 		err            error
 	}{
 		{
-			name:       "Print not standalone and not sensitive values",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1903,45 +1819,7 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Print not standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: false,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: true,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", obfuscate("discovery.key.queryflow.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print not standalone and nil value",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n", "QueryFlow URL", "http://localhost:8080"),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Printing fails for QueryFlow URL",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -1952,19 +1830,6 @@ func Test_discovery_PrintQueryFlowConfigToUser(t *testing.T) {
 			expectedOutput: fmt.Sprintf("%s: %q\n", "QueryFlow URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print QueryFlow's URL"),
-		},
-		{
-			name:       "Printing fails for QueryFlow API Key",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.queryflow_url": "http://localhost:8080",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "QueryFlow URL", "http://localhost:8080", "QueryFlow API Key", "discovery.key.queryflow.cn"),
-			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print QueryFlow's API key"),
 		},
 	}
 
@@ -2018,7 +1883,7 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 		err            error
 	}{
 		{
-			name:       "Print not standalone and not sensitive values",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -2031,45 +1896,7 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:       "Print not standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: false,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "discovery.key.staging.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print standalone and sensitive value",
-			profile:    "cn",
-			sensitive:  true,
-			standalone: true,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "discovery.key.staging.cn",
-			},
-			expectedOutput: fmt.Sprintf("Showing the configuration of profile %q:\n\n%s: %q\n%s: %q\n", "cn", "Staging URL", "http://localhost:8080", "Staging API Key", obfuscate("discovery.key.staging.cn")),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Print not standalone and nil value",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n", "Staging URL", "http://localhost:8080"),
-			outWriter:      nil,
-			err:            nil,
-		},
-		{
-			name:       "Printing fails for Staging URL",
+			name:       "printURLAndAPIKey returns no error",
 			profile:    "cn",
 			sensitive:  false,
 			standalone: false,
@@ -2080,19 +1907,6 @@ func Test_discovery_PrintStagingConfigToUser(t *testing.T) {
 			expectedOutput: fmt.Sprintf("%s: %q\n", "Staging URL", "http://localhost:8080"),
 			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
 			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Staging's URL"),
-		},
-		{
-			name:       "Printing fails for Staging API Key",
-			profile:    "cn",
-			sensitive:  false,
-			standalone: false,
-			config: map[string]string{
-				"cn.staging_url": "http://localhost:8080",
-				"cn.staging_key": "discovery.key.staging.cn",
-			},
-			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n", "Staging URL", "http://localhost:8080", "Staging API Key", "discovery.key.staging.cn"),
-			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Staging's API key"),
 		},
 	}
 
@@ -2210,7 +2024,7 @@ func Test_discovery_PrintConfigToUser(t *testing.T) {
 			},
 			expectedOutput: fmt.Sprintf("%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n%s: %q\n", "Core URL", "http://localhost:12010", "Core API Key", "discovery.key.core.cn", "Ingestion URL", "http://localhost:12020", "Ingestion API Key", "discovery.key.ingestion.cn", "QueryFlow URL", "http://localhost:12030", "QueryFlow API Key", "discovery.key.queryflow.cn", "Staging URL", "http://localhost:12040", "Staging API Key", "discovery.key.staging.cn"),
 			outWriter:      &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print the Core's URL"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("write failed"), "Could not print Core's URL"),
 		},
 		{
 			name:      "Print Fail on Printing Ingestion Config",

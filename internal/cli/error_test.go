@@ -21,14 +21,14 @@ func TestError_Error(t *testing.T) {
 			code:     ErrorExitCode,
 			message:  "Unable to connect to Discovery",
 			cause:    errors.New(`Get "http://127.0.0.1:49190/down": dial tcp 127.0.0.1:49190: connectex: No connection could be made because the target machine actively refused it.`),
-			expected: "Message: Unable to connect to Discovery\nCause: Get \"http://127.0.0.1:49190/down\": dial tcp 127.0.0.1:49190: connectex: No connection could be made because the target machine actively refused it.",
+			expected: "Unable to connect to Discovery\nGet \"http://127.0.0.1:49190/down\": dial tcp 127.0.0.1:49190: connectex: No connection could be made because the target machine actively refused it.",
 		},
 		{
 			name:     "Error string with cause",
 			code:     ErrorExitCode,
 			message:  "An unknown error occurred.",
 			cause:    nil,
-			expected: "Message: An unknown error occurred.",
+			expected: "An unknown error occurred.",
 		},
 	}
 
@@ -158,7 +158,7 @@ func TestFromError(t *testing.T) {
 		expectedCause string
 	}{
 		{
-			name: "Input is already Error (value)",
+			name: "Input is already Error",
 			input: Error{
 				ExitCode: ErrorExitCode,
 				Message:  "An error occurred",
@@ -169,7 +169,7 @@ func TestFromError(t *testing.T) {
 			expectedCause: "Unable to connect to Discovery",
 		},
 		{
-			name:          "input is generic error",
+			name:          "Input is a generic error",
 			input:         errors.New("JSON unmarshal failed"),
 			expectedCode:  ErrorExitCode,
 			expectedMsg:   "",
