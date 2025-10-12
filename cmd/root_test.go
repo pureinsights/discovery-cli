@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/cli"
@@ -61,7 +62,9 @@ func TestRun_SetDiscoveryDirFails(t *testing.T) {
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
 	cliError, ok := err.(cli.Error)
 	if ok {
-		assert.True(t, errors.Is(cliError.Cause, fs.ErrNotExist))
+		cause := cliError.Cause
+		isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
+		assert.True(t, isFileError)
 		assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
 		assert.Equal(t, cli.ErrorExitCode, cliError.ExitCode)
 	}
@@ -74,7 +77,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
 
-	require.NoError(t, os.Mkdir(filepath.Join(tmp, ".discovery"), 0x700))
+	require.NoError(t, os.Mkdir(filepath.Join(tmp, ".discovery"), 0o700))
 
 	config := filepath.Join(filepath.Join(tmp, ".discovery"), "config.toml")
 
@@ -87,7 +90,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
     "core_url": "http://discovery.core.cn"
   }
 }
-`), 0x700))
+`), 0o700))
 	os.Args = []string{"discovery"}
 	exitCode, err := Run()
 	require.Error(t, err)

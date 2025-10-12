@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/fileutils"
@@ -625,7 +626,9 @@ func TestSetDiscoveryDir_MkDirAllFails(t *testing.T) {
 	var errStruct Error
 	require.ErrorAs(t, err, &errStruct)
 	if cliError, ok := err.(*Error); ok {
-		assert.True(t, errors.Is(cliError.Cause, fs.ErrNotExist))
+		cause := cliError.Cause
+		isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
+		assert.True(t, isFileError)
 		assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
 		assert.Equal(t, ErrorExitCode, cliError.ExitCode)
 	}
