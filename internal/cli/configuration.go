@@ -154,13 +154,13 @@ func (d discovery) saveConfig() error {
 func SetDiscoveryDir() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return "", err
+		return "", NewErrorWithCause(ErrorExitCode, err, "Could not access the user's Home directory")
 	}
 
 	configPath := filepath.Join(home, ".discovery")
 
 	if err := os.MkdirAll(configPath, 0o700); err != nil {
-		return "", err
+		return "", NewErrorWithCause(ErrorExitCode, err, "Could not create the /.discovery directory")
 	}
 
 	return configPath, nil

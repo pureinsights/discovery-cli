@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,7 +61,9 @@ func TestRun_SetDiscoveryDirFails(t *testing.T) {
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
 	cliError, ok := err.(cli.Error)
 	if ok {
-		assert.Equal(t, cliError.Message, "Could not set up Discovery's directory in User's home directory")
+		assert.True(t, errors.Is(cliError.Cause, fs.ErrNotExist))
+		assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
+		assert.Equal(t, cli.ErrorExitCode, cliError.ExitCode)
 	}
 }
 
@@ -83,14 +87,15 @@ func TestRun_InitializeConfigFails(t *testing.T) {
     "core_url": "http://discovery.core.cn"
   }
 }
-`), 0o600))
+`), 0x700))
 	os.Args = []string{"discovery"}
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
 	cliError, ok := err.(cli.Error)
 	if ok {
-		assert.Equal(t, cliError.Message, "Could not initialize configuration")
+		errorStruct := cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file")
+		assert.EqualError(t, cliError, errorStruct.Error())
 	}
 }
 

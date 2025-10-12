@@ -622,7 +622,13 @@ func TestSetDiscoveryDir_MkDirAllFails(t *testing.T) {
 
 	_, err := SetDiscoveryDir()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "The system cannot find the path specified.")
+	var errStruct Error
+	require.ErrorAs(t, err, &errStruct)
+	if cliError, ok := err.(*Error); ok {
+		assert.True(t, errors.Is(cliError.Cause, fs.ErrNotExist))
+		assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
+		assert.Equal(t, ErrorExitCode, cliError.ExitCode)
+	}
 }
 
 // TestSetDiscoveryDir_osUserHomeDirFails tests the SetDiscoveryDir() function when the environment variables are not defined.
