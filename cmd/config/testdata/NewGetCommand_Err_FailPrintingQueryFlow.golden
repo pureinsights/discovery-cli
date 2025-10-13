@@ -1,2 +1,2 @@
-Error: Message: Could not print QueryFlow's URL
-Cause: write failed
+Error: Could not print QueryFlow's URL
+write failed

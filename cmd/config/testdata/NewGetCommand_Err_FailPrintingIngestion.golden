@@ -1,2 +1,2 @@
-Error: Message: Could not print Ingestion's URL
-Cause: write failed
+Error: Could not print Ingestion's URL
+write failed

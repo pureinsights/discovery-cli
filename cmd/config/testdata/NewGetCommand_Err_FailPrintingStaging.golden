@@ -1,2 +1,2 @@
-Error: Message: Could not print Staging's URL
-Cause: write failed
+Error: Could not print Staging's URL
+write failed
