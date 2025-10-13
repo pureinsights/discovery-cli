@@ -1,0 +1,17 @@
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+QueryFlow URL [http://localhost:12040]: QueryFlow API Key [********w123]: Usage:
+  config [subcommands] [flags]
+  config [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  get         Print Discovery Queryflow's configuration
+  help        Help about any command
+
+Flags:
+  -h, --help             help for config
+  -p, --profile string   configuration profile to use (default "cn")
+
+Use "config [command] --help" for more information about a command.
+

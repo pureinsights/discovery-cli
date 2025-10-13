@@ -1,0 +1,19 @@
+package staging
+
+import (
+	"github.com/pureinsights/pdp-cli/cmd/staging/config"
+	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/spf13/cobra"
+)
+
+// NewStagingCommand creates the staging command.
+func NewStagingCommand(d cli.Discovery) *cobra.Command {
+	staging := &cobra.Command{
+		Use:   "staging [subcommand] [flags]",
+		Short: "The main command to interact with Discovery's Staging",
+	}
+
+	staging.AddCommand(config.NewConfigCommand(d))
+
+	return staging
+}

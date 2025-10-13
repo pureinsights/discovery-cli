@@ -13,8 +13,14 @@ type Discovery interface {
 	ConfigPath() string
 	SaveConfigFromUser(profile string) error
 	SaveCoreConfigFromUser(profile string, standalone bool) error
+	SaveIngestionConfigFromUser(profile string, standalone bool) error
+	SaveQueryFlowConfigFromUser(profile string, standalone bool) error
+	SaveStagingConfigFromUser(profile string, standalone bool) error
 	PrintConfigToUser(profile string, sensitive bool) error
 	PrintCoreConfigToUser(profile string, sensitive, standalone bool) error
+	PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error
+	PrintQueryFlowConfigToUser(profile string, sensitive, standalone bool) error
+	PrintStagingConfigToUser(profile string, sensitive, standalone bool) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
