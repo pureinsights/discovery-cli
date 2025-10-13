@@ -83,26 +83,6 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			err:       nil,
 		},
 		{
-			name:      "Print Fail on Printing Instructions",
-			profile:   "cn",
-			sensitive: false,
-			config: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010",
-				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020",
-				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030",
-				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040",
-				"cn.staging_key":   "discovery.key.staging.cn",
-			},
-			outGolden: "NewGetCommand_Out_FailPrintingInstructions",
-			errGolden: "NewGetCommand_Err_FailPrintingInstructions",
-			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
-			err:       errors.New("write failed"),
-		},
-		{
 			name:      "Print Fail on Printing Core Config",
 			profile:   "cn",
 			sensitive: false,
@@ -120,7 +100,7 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			outGolden: "NewGetCommand_Out_FailPrintingCore",
 			errGolden: "NewGetCommand_Err_FailPrintingCore",
 			outWriter: &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:       errors.New("write failed"),
+			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print Core's URL"),
 		},
 	}
 
@@ -171,8 +151,9 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 
 			err := getCmd.Execute()
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 			}
