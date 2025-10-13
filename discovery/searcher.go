@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/tidwall/gjson"
@@ -15,4 +16,28 @@ type searcher struct {
 // Each object has a score that grades how well it matches the given filters.
 func (s searcher) Search(filter gjson.Result) ([]gjson.Result, error) {
 	return executeWithPagination(s.client, http.MethodPost, "/search", WithJSONBody(filter.Raw))
+}
+
+// SearchByName creates the filter to search an entity by the given name and calls the searcher.Search() function.
+// It returns the first result if any or an error if it was not found or the search failed.
+func (s searcher) SearchByName(name string) (gjson.Result, error) {
+	byNameFilter := gjson.Parse(fmt.Sprintf(`{
+		"equals": {
+			"field": "name",
+			"value": "%s"
+		}
+	}`, name))
+
+	results, err := s.Search(byNameFilter)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	if len(results) == 0 {
+		return gjson.Result{}, Error{
+			Status: http.StatusNotFound,
+		}
+	}
+
+	return results[0], nil
 }
