@@ -35,7 +35,14 @@ func (s searcher) SearchByName(name string) (gjson.Result, error) {
 
 	if len(results) == 0 {
 		return gjson.Result{}, Error{
-			Status: http.StatusNotFound,
+			Status: http.StatusNotFound, Body: gjson.Parse(fmt.Sprintf(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name %q does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`, name)),
 		}
 	}
 

@@ -270,7 +270,15 @@ func Test_searcher_SearchByName(t *testing.T) {
 			path:       "/search",
 			statusCode: http.StatusNoContent,
 			response:   `{"content": []}`,
-			err:        Error{Status: http.StatusNotFound},
+			nameFilter: "MongoDB Atlas Server",
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`)},
 		},
 		{
 			name:       "executeWithPagination has no content field",
@@ -278,7 +286,15 @@ func Test_searcher_SearchByName(t *testing.T) {
 			path:       "/search",
 			statusCode: http.StatusNoContent,
 			response:   ``,
-			err:        Error{Status: http.StatusNotFound},
+			nameFilter: "MongoDB Atlas Server",
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`)},
 		},
 
 		{
