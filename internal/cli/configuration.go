@@ -45,6 +45,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 
 	defaultProfile := "default"
 	vpr.SetDefault("profile", defaultProfile)
+	vpr.SetDefault("output", "json")
 
 	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
 		return nil, err

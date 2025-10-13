@@ -75,3 +75,21 @@ func JsonArrayPrinter(pretty bool) Printer {
 		return nil
 	}
 }
+
+func GetObjectPrinter(name string) Printer {
+	switch name {
+	case "json":
+		return JsonObjectPrinter(false)
+	default:
+		return nil
+	}
+}
+
+func GetArrayPrinter(name string) Printer {
+	switch name {
+	case "json":
+		return JsonArrayPrinter(false)
+	default:
+		return nil
+	}
+}
