@@ -8,6 +8,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// Printer is the type that prints gjson.Result objects to the Out IOStream using different formats.
 type Printer func(iostreams.IOStreams, ...gjson.Result) error
 
 // PrintJsonObject prints the given JSON object to the Out IOStream.
