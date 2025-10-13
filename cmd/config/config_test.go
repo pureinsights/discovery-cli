@@ -2,7 +2,7 @@ package config
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"strings"
 	"testing"
 
@@ -29,7 +29,6 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			name:      "Every value exists",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -47,7 +46,6 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			name:      "No keys exist",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -74,7 +72,6 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			name:      "There are keys with multiple periods in their viper keys",
 			writePath: t.TempDir(),
 			config: map[string]string{
-				"profile":                "cn",
 				"cn.core_url":            "http://localhost:12010",
 				"cn.ingestion_url":       "http://localhost:12030",
 				"cn.queryflow_url":       "http://localhost:12040",
@@ -94,7 +91,6 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			name:      "Writing to config.toml fails",
 			writePath: "doesnotexist",
 			config: map[string]string{
-				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
@@ -106,7 +102,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_ConfigError",
 			errGolden: "NewConfigCommand_Err_ConfigError",
-			err:       fmt.Errorf("cannot find the path specified"),
+			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Core's configuration"),
 		},
 	}
 
@@ -145,8 +141,9 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 
 			err := configCmd.Execute()
 			if tc.err != nil {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.err.Error())
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 			}
@@ -179,7 +176,6 @@ func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
 	}
 
 	config := map[string]string{
-		"profile":          "cn",
 		"cn.core_url":      "http://localhost:12010",
 		"cn.ingestion_url": "http://localhost:12030",
 		"cn.queryflow_url": "http://localhost:12040",
