@@ -19,9 +19,9 @@ type Error struct {
 // This is done to comply with the error interface.
 func (e Error) Error() string {
 	if e.Cause != nil {
-		return fmt.Sprintf("Message: %s\nCause: %s", e.Message, e.Cause.Error())
+		return fmt.Sprintf("%s\n%s", e.Message, e.Cause.Error())
 	} else {
-		return fmt.Sprintf("Message: %s", e.Message)
+		return e.Message
 	}
 }
 
@@ -29,7 +29,7 @@ func (e Error) Error() string {
 const (
 	SuccessExitCode    ExitCode = 0 // This code is used when the CLI finished the command successfully.
 	ErrorExitCode      ExitCode = 1 // This code is used when the CLI failed due to a normal error.
-	PanicErrorExitCode ExitCode = 2 // This code is used when the LCI failed because it panicked somewhere in the code.
+	PanicErrorExitCode ExitCode = 2 // This code is used when the CLI failed because it panicked somewhere in the code.
 )
 
 // NewErrorWithCause creates an Error with a cause. It receives the exit code, cause, message, and any arguments that can be added to the message in a formatted string.
