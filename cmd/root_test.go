@@ -3,9 +3,12 @@ package cmd
 import (
 	"bytes"
 	"flag"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/cli"
@@ -72,7 +75,11 @@ func TestRun_SetDiscoveryDirFails(t *testing.T) {
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
 	cliError, ok := err.(cli.Error)
 	if ok {
-		assert.Equal(t, cliError.Message, "Could not set up Discovery's directory in User's home directory")
+		cause := cliError.Cause
+		isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
+		assert.True(t, isFileError)
+		assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
+		assert.Equal(t, cli.ErrorExitCode, cliError.ExitCode)
 	}
 }
 
@@ -83,7 +90,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
 
-	require.NoError(t, os.Mkdir(filepath.Join(tmp, ".discovery"), 0x700))
+	require.NoError(t, os.Mkdir(filepath.Join(tmp, ".discovery"), 0o700))
 
 	config := filepath.Join(filepath.Join(tmp, ".discovery"), "config.toml")
 
@@ -96,14 +103,15 @@ func TestRun_InitializeConfigFails(t *testing.T) {
     "core_url": "http://discovery.core.cn"
   }
 }
-`), 0o600))
+`), 0o700))
 	os.Args = []string{"discovery"}
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
 	cliError, ok := err.(cli.Error)
 	if ok {
-		assert.Equal(t, cliError.Message, "Could not initialize configuration")
+		errorStruct := cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file")
+		assert.EqualError(t, cliError, errorStruct.Error())
 	}
 }
 

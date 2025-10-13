@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/go-resty/resty/v2"
@@ -104,6 +105,7 @@ func Test_client_execute_SendsAPIKeyReturnsBody(t *testing.T) {
 	srv := httptest.NewServer(testutils.HttpHandler(t, http.StatusOK, "application/json", `{"ok":true}`,
 		func(t *testing.T, r *http.Request) {
 			assert.Equal(t, "/seed", r.URL.Path)
+			assert.Equal(t, apiKey, r.Header.Get("X-API-Key"))
 		}))
 	t.Cleanup(srv.Close)
 
@@ -339,4 +341,385 @@ func Test_execute_RestyReturnsError(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, response, gjson.Result{})
 	assert.Contains(t, err.Error(), base+"/down")
+}
+
+// Test_executeWithPagination_HTTPResponseCases tests how the executeWithPagination() function behaves with various HTTP responses.
+func Test_executeWithPagination_HTTPResponseCases(t *testing.T) {
+	tests := []struct {
+		name        string
+		method      string
+		path        string
+		statusCode  int
+		response    string
+		expectedLen int
+		err         error
+	}{
+		// Working cases
+		{
+			name:       "executeWithPagination returns array",
+			method:     http.MethodGet,
+			path:       "/",
+			statusCode: http.StatusOK,
+			response: `{
+			"content": [
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 12,
+			"totalPages": 4,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`,
+			expectedLen: 12,
+			err:         nil,
+		},
+		{
+			name:        "executeWithPagination returns no content",
+			method:      http.MethodGet,
+			path:        "/",
+			statusCode:  http.StatusNoContent,
+			response:    `{"content": []}`,
+			expectedLen: 0,
+			err:         nil,
+		},
+		{
+			name:        "executeWithPagination has no content field",
+			method:      http.MethodGet,
+			path:        "/",
+			statusCode:  http.StatusNoContent,
+			response:    ``,
+			expectedLen: 0,
+			err:         nil,
+		},
+
+		// Error cases
+		{
+			name:       "executeWithPagination returns a 401 Unauthorized",
+			method:     http.MethodGet,
+			path:       "/",
+			statusCode: http.StatusUnauthorized,
+			response:   `{"error":"unauthorized"}`,
+			err:        Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, tc.path, r.URL.Path)
+			}))
+
+			defer srv.Close()
+
+			c := newClient(srv.URL, "")
+			results, err := executeWithPagination(c, tc.method, "")
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.Len(t, results, tc.expectedLen)
+			} else {
+				assert.Equal(t, []gjson.Result(nil), results)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
+		})
+	}
+}
+
+// Test_executeWithPagination_ErrorInSecondPage tests when executeWithPagination fails in a request while trying to get every content from every page.
+func Test_executeWithPagination_ErrorInSecondPage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, http.MethodGet, r.Method)
+			assert.Equal(t, "/getall", r.URL.Path)
+			pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+			w.Header().Set("Content-Type", "application/json")
+			if pageNumber > 0 {
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(`{"error":"Internal Server Error"}`))
+			} else {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{
+			"content": [
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 12,
+			"totalPages": 4,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`))
+			}
+		}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := executeWithPagination(c, http.MethodGet, "/getall")
+	assert.Equal(t, []gjson.Result(nil), response)
+	var errStruct Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, err, Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"Internal Server Error"}`)}.Error())
+}
+
+// Test_executeWithPagination_RestyReturnsError tests what happens when the Resty client fails to execute the request.
+func Test_executeWithPagination_RestyReturnsError(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	base := srv.URL
+	srv.Close()
+
+	c := newClient(base, "")
+	response, err := executeWithPagination(c, http.MethodGet, "/down")
+	require.Error(t, err)
+	assert.Equal(t, response, []gjson.Result(nil))
+	assert.Contains(t, err.Error(), base+"/down")
+}
+
+// Test_executeWithPagination_ContentInSecondPage tests that the executeWithPagination() function
+// can successfully get all content when there are two pages with content in them
+func Test_executeWithPagination_ContentInSecondPage(t *testing.T) {
+	body := `{
+	"equals": {
+		"field": "type",
+		"value": "mongo",
+		"normalize": true
+	}
+	}`
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		requestBody, _ := io.ReadAll(r.Body)
+		assert.Equal(t, gjson.Parse(body), gjson.Parse(string(requestBody)))
+		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+		assert.Equal(t, "/getall", r.URL.Path)
+		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		w.Header().Set("Content-Type", "application/json")
+		if pageNumber > 0 {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"content": [
+				{
+					"type": "openai",
+					"name": "OpenAI Chat Processor",
+					"labels": [],
+					"active": true,
+					"id": "8a399b1c-95fc-406c-a220-7d321aaa7b0e",
+					"creationTimestamp": "2025-08-14T18:02:38Z",
+					"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				},
+				{
+					"type": "mongo",
+					"name": "MongoDB vector processor",
+					"labels": [],
+					"active": true,
+					"id": "a5ee116b-bd95-474e-9d50-db7be988b196",
+					"creationTimestamp": "2025-08-14T18:02:38Z",
+					"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				},
+				{
+					"type": "openai",
+					"name": "OpenAI embeddings processor",
+					"labels": [],
+					"active": true,
+					"id": "b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89",
+					"creationTimestamp": "2025-08-14T18:02:38Z",
+					"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 6,
+			"totalPages": 2,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 1
+			}`))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"content": [
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 6,
+			"totalPages": 2,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := executeWithPagination(c, http.MethodPost, "/getall", WithJSONBody(body))
+	require.NoError(t, err)
+	assert.Len(t, response, 6)
+}
+
+// Test_executeWithPagination_NoContentInSecondPage tests what happens if one of the later pages returns No Content
+func Test_executeWithPagination_NoContentInSecondPage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		assert.Equal(t, "/getall", r.URL.Path)
+		pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		w.Header().Set("Content-Type", "application/json")
+		if pageNumber > 0 {
+			w.WriteHeader(http.StatusNoContent)
+			_, _ = w.Write([]byte(`[]`))
+		} else {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"content": [
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 3,
+				"sort": []
+			},
+			"totalSize": 6,
+			"totalPages": 2,
+			"empty": false,
+			"size": 3,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := executeWithPagination(c, http.MethodGet, "/getall")
+	require.NoError(t, err)
+	assert.Len(t, response, 3)
 }
