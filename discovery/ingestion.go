@@ -37,7 +37,6 @@ func newSeedExecutionJobsClient(c seedExecutionsClient, executionId uuid.UUID) s
 
 // SeedRecordsClient is the struct that can get records and the summary of records from a seed.
 type seedRecordsClient struct {
-	getter
 	summarizer
 }
 
@@ -48,16 +47,13 @@ func newSeedRecordsClient(sc seedsClient, seedId uuid.UUID) seedRecordsClient {
 		summarizer: summarizer{
 			client: client,
 		},
-		getter: getter{
-			client: client,
-		},
 	}
 }
 
 // Get obtains a record based on the seed and record IDs.
 // Since record IDs are not UUIDs, a new function was needed.
 func (src seedRecordsClient) Get(id string) (gjson.Result, error) {
-	return execute(src.getter.client, http.MethodGet, "/"+id)
+	return execute(src.client, http.MethodGet, "/"+id)
 }
 
 // SeedExecutionClient can carry out every operation regarding seed executions.
@@ -66,7 +62,7 @@ type seedExecutionsClient struct {
 	getter
 }
 
-// NewSeedExecutionsClient is the constructor of seedExecutionClient.
+// NewSeedExecutionsClient is the constructor of a seedExecutionClient.
 func newSeedExecutionsClient(sc seedsClient, seedId uuid.UUID) seedExecutionsClient {
 	return seedExecutionsClient{
 		getter: getter{
@@ -83,12 +79,7 @@ func (c seedExecutionsClient) Halt(executionId uuid.UUID) (gjson.Result, error) 
 
 // Audit gets the audited changes from a seed execution. It returns an array with the stages the execution has completed.
 func (c seedExecutionsClient) Audit(executionId uuid.UUID) ([]gjson.Result, error) {
-	auxClient := seedExecutionsClient{
-		getter: getter{
-			client: newSubClient(c.client, "/"+executionId.String()+"/audit"),
-		},
-	}
-	return auxClient.GetAll()
+	return executeWithPagination(c.client, http.MethodGet, "/"+executionId.String()+"/audit")
 }
 
 // Seed gets the seed configuration of the seed execution.
@@ -126,7 +117,7 @@ func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClien
 	return newSeedExecutionJobsClient(c, executionId)
 }
 
-// IngestionProcessorsClient is the struct that can create, read, update, delete, and clone processors.
+// IngestionProcessorsClient is the struct that performs the CRUD and cloning of processors.
 type ingestionProcessorsClient struct {
 	crud
 	cloner
@@ -194,15 +185,22 @@ type ScanType string
 
 // The constants represent the respective scan type.
 const (
-	scanFull        ScanType = "FULL"
-	scanIncremental ScanType = "INCREMENETAL"
+	ScanFull        ScanType = "FULL"
+	ScanIncremental ScanType = "INCREMENETAL"
 )
 
 // Start starts the execution of seed.
-func (sc seedsClient) Start(id uuid.UUID, scan ScanType) (gjson.Result, error) {
-	return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
-		"scanType": {string(scan)},
-	}))
+func (sc seedsClient) Start(id uuid.UUID, scan ScanType, executionProperties gjson.Result) (gjson.Result, error) {
+	if !executionProperties.Exists() {
+		return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+			"scanType": {string(scan)},
+		}))
+	} else {
+		return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+			"scanType": {string(scan)},
+		}), WithJSONBody(executionProperties.Raw))
+	}
+
 }
 
 // Halt stops all the executions of a seed.

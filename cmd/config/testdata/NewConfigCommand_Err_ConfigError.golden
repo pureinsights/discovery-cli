@@ -1,2 +1,2 @@
-Error: Message: Failed to save the Core's configuration
-Cause: open doesnotexist\config.toml: The system cannot find the path specified.
+Error: Failed to save Core's configuration
+open doesnotexist\config.toml: The system cannot find the path specified.
