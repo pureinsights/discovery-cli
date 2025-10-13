@@ -94,7 +94,8 @@ It inherits from:
 
 It has the following method:
 | Name | Method | Path | Request Body | Response | Description |
-| Import | POST | `{URL}/search` | `application/json` | `application/json` | Returns an array with the entities that match the given filters. |
+| Search | POST | `{URL}/search` | `application/json` | `application/json` | Returns an array with the entities that match the given filters. |
+| SearchByName | POST | `{URL}/search` | `application/json` | `application/json` | Returns the JSON object with the best match to the given name or an error if any occured or the entity was not found. |
 
 ## Discovery Clients
 ### Core Client
