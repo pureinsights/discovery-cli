@@ -14,9 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// PrintJsonObject prints the given JSON object to the Out IOStream.
-// If the pretty boolean is true, it prints the object with spacing and indentation
-// If not, it prints it in a compact format.
+// Test_printJsonObject tests the printJsonObject() function
 func Test_printJsonObject(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -109,9 +107,7 @@ func Test_printJsonObject(t *testing.T) {
 	}
 }
 
-// PrintJsonArray prints the given JSON array to the Out IOStream.
-// If the pretty boolean is true, it prints the objects in the array with spacing and indentation and adds brackets at each end.
-// If not, it prints the objects in a compact format.
+// Test_printArrayObject tests the printArrayObject() function.
 func Test_printArrayObject(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -271,7 +267,7 @@ func Test_printArrayObject(t *testing.T) {
 	}
 }
 
-// JsonObjectPrinter receives the pretty boolean and returns the function that prints the JSON object with that boolean as a parameter.
+// TestJsonObjectPrinter tests the JsonObjectPrinter() function.
 func TestJsonObjectPrinter(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -348,7 +344,7 @@ func TestJsonObjectPrinter(t *testing.T) {
 	}
 }
 
-// // JsonArrayPrinter receives the pretty boolean and returns the function that prints the JSON array with that boolean as a parameter.
+// TestJsonArrayPrinter tests the JsonArrayPrinter() function
 func TestJsonArrayPrinter(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -438,7 +434,7 @@ func TestJsonArrayPrinter(t *testing.T) {
 	}
 }
 
-// // GetObjectPrinter chooses the most appropiate printer depending on the given printer name.
+// TestGetObjectPrinter tests the GetObjectPrinter() function.
 func TestGetObjectPrinter(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -492,7 +488,7 @@ func TestGetObjectPrinter(t *testing.T) {
 	}
 }
 
-// GetArrayPrinter chooses the most appropiate printer depending on the given printer name.
+// TestGetArrayPrinter tests the GetArrayPrinter() function.
 func TestGetArrayPrinter(t *testing.T) {
 	tests := []struct {
 		name            string
