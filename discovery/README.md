@@ -93,8 +93,10 @@ It inherits from:
 * [Client](#client)
 
 It has the following method:
+
 | Name | Method | Path | Request Body | Response | Description |
-| Import | POST | `{URL}/search` | `application/json` | `application/json` | Returns an array with the entities that match the given filters. |
+| --- | --- | --- | --- | --- | --- |
+| Search | POST | `{URL}/search` | `application/json` | `application/json` | Returns an array with the entities that match the given filters. |
 
 ## Discovery Clients
 ### Core Client
