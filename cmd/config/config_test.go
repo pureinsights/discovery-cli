@@ -149,9 +149,8 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 					assert.EqualError(t, err, tc.err.Error())
 					testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
 				} else {
-					actualError, _ := tc.err.(cli.Error)
-					assert.Equal(t, cliError.ExitCode, actualError.ExitCode)
-					assert.Equal(t, cliError.Message, actualError.Message)
+					assert.Equal(t, errStruct.ExitCode, errStruct.ExitCode)
+					assert.Equal(t, errStruct.Message, errStruct.Message)
 				}
 			} else {
 				require.NoError(t, err)
