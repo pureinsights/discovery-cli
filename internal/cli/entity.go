@@ -1,11 +1,13 @@
 package cli
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 )
@@ -95,7 +97,7 @@ func (d discovery) searchEntity(client searcher, id string) (gjson.Result, error
 func (d discovery) SearchEntity(client searcher, id string, printer Printer) error {
 	result, err := d.searchEntity(client, id)
 	if err != nil {
-		return err
+		return NewErrorWithCause(ErrorExitCode, err, "Could not search for entity with id %q", id)
 	}
 
 	if printer == nil {
@@ -111,7 +113,7 @@ func (d discovery) SearchEntity(client searcher, id string, printer Printer) err
 func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer Printer) error {
 	results, err := client.Search(filter)
 	if err != nil {
-		return err
+		return NewErrorWithCause(ErrorExitCode, err, "Could not search for the entities")
 	}
 
 	if printer == nil {
@@ -125,8 +127,8 @@ func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer 
 }
 
 func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
-	labelFilters := map[string]string{}
-	typeFilters := map[string]string{}
+	labelFilters := []string{}
+	typeFilters := []string{}
 
 	for _, filter := range filters {
 		parts := strings.Split(filter, "=")
@@ -141,11 +143,50 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 				value = keyValue[1]
 			}
 
+			labelFilters = append(labelFilters, fmt.Sprintf(EqualsFilter, "labels.key", key))
+			if value != "" {
+				labelFilters = append(labelFilters, fmt.Sprintf(EqualsFilter, "labels.value", value))
+			}
 		case "type":
-
+			typeFilters = append(typeFilters, fmt.Sprintf(EqualsFilter, "type", parts[1]))
 		default:
 			return gjson.Result{}, NewError(ErrorExitCode, "Filter %q does not exist", filterType)
 		}
-
 	}
+
+	labelFilterString := "{}"
+	var err error
+	if len(labelFilters) > 1 {
+		labelFilterString, err = sjson.SetRaw(labelFilterString, "and", "["+strings.Join(labelFilters, ",")+"]")
+		if err != nil {
+			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create label filters")
+		}
+	} else if len(labelFilters) == 1 {
+		labelFilterString = labelFilters[0]
+	}
+
+	typeFilterString := "{}"
+	if len(typeFilters) > 1 {
+		typeFilterString, err = sjson.SetRaw(typeFilterString, "and", "["+strings.Join(typeFilters, ",")+"]")
+		if err != nil {
+			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create type filters")
+		}
+	} else if len(typeFilters) == 1 {
+		typeFilterString = typeFilters[0]
+	}
+
+	filterString := "{}"
+	switch {
+	case len(labelFilters) > 0 && len(typeFilters) > 0:
+		filterString, err = sjson.SetRaw(filterString, "and", fmt.Sprintf("[%s,%s]", labelFilterString, typeFilterString))
+		if err != nil {
+			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not combine label and type filters")
+		}
+	case len(labelFilters) > 0:
+		filterString = labelFilterString
+	default:
+		filterString = typeFilterString
+	}
+
+	return gjson.Parse(filterString), nil
 }
