@@ -179,7 +179,7 @@ func Test_client_execute_HTTPErrorTypedError(t *testing.T) {
 			assert.Nil(t, res, "result should be nil on response error")
 			require.Error(t, err, "expected an error")
 
-			assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tt.status, tt.expectBody))
+			assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s\n", tt.status, tt.expectBody))
 		})
 	}
 }
@@ -329,7 +329,7 @@ func Test_execute_HTTPError(t *testing.T) {
 	c := newClient(srv.URL, "")
 	response, err := execute(c, "GET", "")
 	assert.Equal(t, response, gjson.Result{})
-	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"message":"missing"}`)))
+	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s\n", http.StatusNotFound, []byte(`{"message":"missing"}`)))
 }
 
 // Test_execute_RestyReturnsError tests the execute function when Resty returns an error.
