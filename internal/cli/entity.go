@@ -2,11 +2,21 @@ package cli
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
+)
+
+const (
+	EqualsFilter = `{
+	"equals": {
+		"field": "%s",
+		"value": "%s"
+		}
+	}`
 )
 
 // Getter defines the Get and GetAll methods.
@@ -114,4 +124,28 @@ func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer 
 	return err
 }
 
-func BuildEntitiesFilter(filters []string) (gjson.Result, error)
+func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
+	labelFilters := map[string]string{}
+	typeFilters := map[string]string{}
+
+	for _, filter := range filters {
+		parts := strings.Split(filter, "=")
+		filterType := parts[0]
+
+		switch filterType {
+		case "label":
+			keyValue := strings.Split(parts[1], ":")
+			key := keyValue[0]
+			var value string
+			if len(keyValue) > 1 {
+				value = keyValue[1]
+			}
+
+		case "type":
+
+		default:
+			return gjson.Result{}, NewError(ErrorExitCode, "Filter %q does not exist", filterType)
+		}
+
+	}
+}
