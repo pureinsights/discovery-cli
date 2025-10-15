@@ -301,10 +301,15 @@ It can be created with `seedExecutionsClient.Jobs(Execution ID)` or `newSeedExec
 The `seedRecordsClient` is the struct that can get the records and their summary from a seed.
 
 It inherits from:
-* [Getter](#getter)
 * [Summarizer](#summarizer)
 
-The `Get()` method had to be overridden because records do not use a UUID as their ID, so this iteration receives a string. It can be created with `seedsClient.Records()` or `newSeedRecordsClient(seedsClient, Seed ID)`.
+It has the following methods:
+| Name | Method | Path | Response | Description |
+| --- | --- | --- | --- | --- |
+| Get | GET | `{URL}/seed/{UUID}/record/{RECORDID}` | `application/json` | Returns the seed record with the given id. |
+| GetAll | GET | `{URL}/seed/{UUID}/record` | `application/json` | Returns an array with all of the seed's records. |
+
+It can be created with `seedsClient.Records()` or `newSeedRecordsClient(seedsClient, Seed ID)`.
 
 ##### BackupRestore
 This struct imports and exports Ingestion's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
