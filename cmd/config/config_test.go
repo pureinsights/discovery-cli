@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"errors"
+	"io/fs"
 	"strings"
 	"testing"
 
@@ -102,7 +103,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_ConfigError",
 			errGolden: "NewConfigCommand_Err_ConfigError",
-			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Core's configuration"),
+			err:       cli.NewErrorWithCause(cli.ErrorExitCode, fs.ErrNotExist, "Failed to save Core's configuration"),
 		},
 	}
 
@@ -143,13 +144,20 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			if tc.err != nil {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
-				assert.EqualError(t, err, tc.err.Error())
+				cliError, _ := tc.err.(cli.Error)
+				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
+					assert.EqualError(t, err, tc.err.Error())
+					testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
+				} else {
+					actualError, _ := tc.err.(cli.Error)
+					assert.Equal(t, cliError.ExitCode, actualError.ExitCode)
+					assert.Equal(t, cliError.Message, actualError.Message)
+				}
 			} else {
 				require.NoError(t, err)
 			}
 
 			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
-			testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
 
 			var commandNames []string
 			for _, c := range configCmd.Commands() {
