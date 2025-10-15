@@ -92,14 +92,8 @@ func Test_newSubClient_BaseURLJoin(t *testing.T) {
 			parent := newClient(tc.base, "apiKey")
 			got := newSubClient(parent, tc.path)
 
-			if got.ApiKey != parent.ApiKey {
-				t.Fatalf("API Key not inherited: got %q want %q", got.ApiKey, parent.ApiKey)
-			}
-
-			if got.client.BaseURL != tc.want {
-				t.Fatalf("Base URL is different:\n  base=%q path=%q\n  got =%q\n  want=%q",
-					tc.base, tc.path, got.client.BaseURL, tc.want)
-			}
+			assert.Equalf(t, parent.ApiKey, got.ApiKey, "API Key not inherited")
+			assert.Equalf(t, tc.want, got.client.BaseURL, "Base URL is different:\n")
 		})
 	}
 }
@@ -283,9 +277,7 @@ func TestWithFile(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	tmpFile, err := fileutils.CreateTemporaryFile(t.TempDir(), "testFile.txt", "This is a test file")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	defer os.Remove(tmpFile)
 

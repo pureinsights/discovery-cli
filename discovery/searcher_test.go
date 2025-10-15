@@ -12,7 +12,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_searcher_Search_HTTPResponseCases tests how the executeWithPagination() function behaves with various HTTP responses.
+// Test_searcher_Search_HTTPResponseCases tests how the searcher.Search() function behaves with various HTTP responses.
 func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 	body := gjson.Parse(`{
 	"equals": {
@@ -32,7 +32,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 	}{
 		// Working cases
 		{
-			name:       "executeWithPagination returns array",
+			name:       "Search returns array",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusOK,
@@ -95,7 +95,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 			err:         nil,
 		},
 		{
-			name:        "executeWithPagination returns no content",
+			name:        "Search returns no content",
 			method:      http.MethodPost,
 			path:        "/search",
 			statusCode:  http.StatusNoContent,
@@ -104,7 +104,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 			err:         nil,
 		},
 		{
-			name:        "executeWithPagination has no content field",
+			name:        "Search has no content field",
 			method:      http.MethodPost,
 			path:        "/search",
 			statusCode:  http.StatusNoContent,
@@ -115,7 +115,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 
 		// Error cases
 		{
-			name:       "executeWithPagination returns a 401 Unauthorized",
+			name:       "Search returns a 401 Unauthorized",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusUnauthorized,

@@ -87,7 +87,7 @@ It has the following method:
 | Import | POST | `{URL}/import` | `multipart/form-data` | `onConflict`: `UPDATE`, `IGNORE`, `FAIL` | `application/json` | Calls the `/import` endpoint. It receives the given file to restore the entities contained within. |
 
 ### Searcher
-This struct allows for exporting and importing entities from Discovery's components.
+This struct has methods to search for entities in Discovery's components.
 
 It inherits from:
 * [Client](#client)
