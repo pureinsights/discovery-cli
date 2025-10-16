@@ -41,7 +41,6 @@ func Test_newRootCommand(t *testing.T) {
 	assert.Equal(t, out, discoveryCmd.OutOrStdout())
 	assert.Equal(t, errBuf, discoveryCmd.ErrOrStderr())
 
-	discoveryCmd.PersistentFlags().Lookup("profile")
 	assert.Equal(t, "default", discoveryCmd.PersistentFlags().Lookup("profile").DefValue)
 
 	// Change flag value to check Viper binding
@@ -73,14 +72,13 @@ func TestRun_SetDiscoveryDirFails(t *testing.T) {
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	cliError, ok := err.(cli.Error)
-	if ok {
-		cause := cliError.Cause
-		isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
-		assert.True(t, isFileError)
-		assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
-		assert.Equal(t, cli.ErrorExitCode, cliError.ExitCode)
-	}
+	var cliError *cli.Error
+	require.ErrorAs(t, err, &cliError)
+	cause := cliError.Cause
+	isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
+	assert.True(t, isFileError)
+	assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
+	assert.Equal(t, cli.ErrorExitCode, cliError.ExitCode)
 }
 
 // TestRun_InitializeConfigFails tests the Run function when the InitializeConfig() function fails.
@@ -108,11 +106,10 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	cliError, ok := err.(cli.Error)
-	if ok {
-		errorStruct := cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file")
-		assert.EqualError(t, cliError, errorStruct.Error())
-	}
+	var cliError *cli.Error
+	require.ErrorAs(t, err, &cliError)
+	errorStruct := cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file")
+	assert.EqualError(t, cliError, errorStruct.Error())
 }
 
 // TestRun_ExecuteFails tests when the execution of the CLI results in an error
@@ -126,11 +123,10 @@ func TestRun_ExecuteFails(t *testing.T) {
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	cliError, ok := err.(cli.Error)
-	if ok {
-		assert.Equal(t, cliError.Message, "")
-		assert.EqualError(t, cliError.Cause, "unknown flag: --profiles")
-	}
+	var cliError *cli.Error
+	require.ErrorAs(t, err, &cliError)
+	assert.Equal(t, cliError.Message, "")
+	assert.EqualError(t, cliError.Cause, "unknown flag: --profiles")
 }
 
 // TestRun_Success tests when the Run function works
