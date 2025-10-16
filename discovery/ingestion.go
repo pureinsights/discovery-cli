@@ -41,8 +41,8 @@ type seedRecordsClient struct {
 }
 
 // NewSeedRecordsClient is the constructor of seedRecordsClient
-func newSeedRecordsClient(url, apiKey string, seedId uuid.UUID) seedRecordsClient {
-	client := newClient(url+"/seed/"+seedId.String()+"/record", apiKey)
+func newSeedRecordsClient(sc seedsClient, seedId uuid.UUID) seedRecordsClient {
+	client := newSubClient(sc.client, "/"+seedId.String()+"/record")
 	return seedRecordsClient{
 		summarizer: summarizer{
 			client: client,
@@ -62,11 +62,11 @@ type seedExecutionsClient struct {
 	getter
 }
 
-// NewSeedExecutionsClient is the constructor of seedExecutionClient.
-func newSeedExecutionsClient(url, apiKey string, seedId uuid.UUID) seedExecutionsClient {
+// NewSeedExecutionsClient is the constructor of a seedExecutionClient.
+func newSeedExecutionsClient(sc seedsClient, seedId uuid.UUID) seedExecutionsClient {
 	return seedExecutionsClient{
 		getter: getter{
-			client: newClient(url+"/seed/"+seedId.String()+"/execution", apiKey),
+			client: newSubClient(sc.client, "/"+seedId.String()+"/execution"),
 		},
 	}
 }
@@ -115,4 +115,115 @@ func (c seedExecutionsClient) Records(executionId uuid.UUID) seedExecutionRecord
 // Jobs creates a seedExecutionJobsClient.
 func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClient {
 	return newSeedExecutionJobsClient(c, executionId)
+}
+
+// IngestionProcessorsClient is the struct performs the CRUD and cloning of processors.
+type ingestionProcessorsClient struct {
+	crud
+	cloner
+}
+
+// NewIngestionProcessorsClient is the constructor of a ingestionProcessorsClient
+func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient {
+	client := newClient(url+"/processor", apiKey)
+	return ingestionProcessorsClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+	}
+}
+
+// PipelinesClient is the struct that performs the CRUD and cloning of pipelines.
+type pipelinesClient struct {
+	crud
+	cloner
+}
+
+// NewPipelinesClient is the constructor of a pipelinesClient
+func newPipelinesClient(url, apiKey string) pipelinesClient {
+	client := newClient(url+"/pipeline", apiKey)
+	return pipelinesClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+	}
+}
+
+// SeedsClient is the struct that performs the CRUD and cloning of seeds.
+type seedsClient struct {
+	crud
+	cloner
+}
+
+// NewSeedsClient is the constructor of seedsClient.
+func newSeedsClient(url, apiKey string) seedsClient {
+	client := newClient(url+"/seed", apiKey)
+	return seedsClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+	}
+}
+
+// ScanType is used as an enum to easily represent the scanTypes for seeds.
+type ScanType string
+
+// The constants represent the respective scan type.
+const (
+	ScanFull        ScanType = "FULL"
+	ScanIncremental ScanType = "INCREMENETAL"
+)
+
+// Start starts the execution of seed.
+func (sc seedsClient) Start(id uuid.UUID, scan ScanType, executionProperties gjson.Result) (gjson.Result, error) {
+	if !executionProperties.Exists() {
+		return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+			"scanType": {string(scan)},
+		}))
+	} else {
+		return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+			"scanType": {string(scan)},
+		}), WithJSONBody(executionProperties.Raw))
+	}
+}
+
+// Halt stops all the executions of a seed.
+func (sc seedsClient) Halt(id uuid.UUID) ([]gjson.Result, error) {
+	haltings, err := execute(sc.client, http.MethodPost, "/"+id.String()+"/halt")
+	if err != nil {
+		return []gjson.Result(nil), err
+	}
+
+	return haltings.Array(), err
+}
+
+// Reset resets a seed.
+// If the seed has no active executions, then the seed's metadata is reset and its records deleted.
+func (sc seedsClient) Reset(id uuid.UUID) (gjson.Result, error) {
+	return execute(sc.client, http.MethodPost, "/"+id.String()+"/reset")
+}
+
+// Records creates a new seedRecordsClient.
+func (sc seedsClient) Records(seedId uuid.UUID) seedRecordsClient {
+	return newSeedRecordsClient(sc, seedId)
+}
+
+// Executions creates a new seedExecutionsClient.
+func (sc seedsClient) Executions(seedId uuid.UUID) seedExecutionsClient {
+	return newSeedExecutionsClient(sc, seedId)
 }
