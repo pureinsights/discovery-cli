@@ -130,6 +130,8 @@ func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer 
 	return err
 }
 
+// BuildEntitiesFilter builds a filter based on the arguments sent to the get command.
+// The filters are combined through the "and" operator.
 func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 	labelFilters := []string{}
 	typeFilters := []string{}

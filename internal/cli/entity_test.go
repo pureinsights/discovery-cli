@@ -254,22 +254,280 @@ func Test_discovery_GetEntities(t *testing.T) {
 func TestBuildEntitiesFilter(t *testing.T) {
 	tests := []struct {
 		name           string
-		client         getter
-		printer        Printer
-		expectedOutput string
-		outWriter      io.Writer
+		filters        []string
+		expectedFilter string
 		err            error
-	}{}
+	}{
+		// Working cases
+		{
+			name:    "1 label key/value",
+			filters: []string{"label=A:B"},
+			expectedFilter: `{
+  "and": [
+    {
+      "equals": {
+        "field": "labels.key",
+        "value": "A"
+      }
+    },
+    {
+      "equals": {
+        "field": "labels.value",
+        "value": "B"
+      }
+    }
+  ]
+}
+`,
+			err: nil,
+		},
+		{
+			name:    "1 label only key",
+			filters: []string{"label=A"},
+			expectedFilter: `{
+  "equals": {
+    "field": "labels.key",
+    "value": "A"
+  }
+}
+`,
+			err: nil,
+		},
+		{
+			name:    "1 type",
+			filters: []string{"type=mongo"},
+			expectedFilter: `{
+  "equals": {
+    "field": "type",
+    "value": "mongo"
+  }
+}
+`,
+			err: nil,
+		},
+		{
+
+			name:    "1 label key/value and 1 type",
+			filters: []string{"label=A:B", "type=mongo"},
+			expectedFilter: `{
+  "and": [
+    {
+      "and": [
+        {
+          "equals": {
+            "field": "labels.key",
+            "value": "A"
+          }
+        },
+        {
+          "equals": {
+            "field": "labels.value",
+            "value": "B"
+          }
+        }
+      ]
+    },
+    {
+      "equals": {
+        "field": "type",
+        "value": "mongo"
+      }
+    }
+  ]
+}
+`,
+			err: nil,
+		},
+		{
+
+			name:    "2 label key/value, only key, and 1 type",
+			filters: []string{"label=A:B", "type=mongo", "label=C"},
+			expectedFilter: `{
+  "and": [
+    {
+      "and": [
+        {
+          "equals": {
+            "field": "labels.key",
+            "value": "A"
+          }
+        },
+        {
+          "equals": {
+            "field": "labels.value",
+            "value": "B"
+          }
+        },
+        {
+          "equals": {
+            "field": "labels.key",
+            "value": "C"
+          }
+        }
+      ]
+    },
+    {
+      "equals": {
+        "field": "type",
+        "value": "mongo"
+      }
+    }
+  ]
+}
+`,
+			err: nil,
+		},
+		{
+
+			name:    "1 label only key, and 2 type",
+			filters: []string{"label=A", "type=mongo", "type=openai"},
+			expectedFilter: `{
+  "and": [
+    {
+      "equals": {
+        "field": "labels.key",
+        "value": "A"
+      }
+    },
+    {
+      "and": [
+        {
+          "equals": {
+            "field": "type",
+            "value": "mongo"
+          }
+        },
+        {
+          "equals": {
+            "field": "type",
+            "value": "openai"
+          }
+        }
+      ]
+    }
+  ]
+}
+`,
+			err: nil,
+		},
+		{
+
+			name:    "2 label key/value, only key, and 2 type",
+			filters: []string{"label=A:B", "type=mongo", "label=C", "type=openai"},
+			expectedFilter: `{
+  "and": [
+    {
+      "and": [
+        {
+          "equals": {
+            "field": "labels.key",
+            "value": "A"
+          }
+        },
+        {
+          "equals": {
+            "field": "labels.value",
+            "value": "B"
+          }
+        },
+        {
+          "equals": {
+            "field": "labels.key",
+            "value": "C"
+          }
+        }
+      ]
+    },
+    {
+      "and": [
+        {
+          "equals": {
+            "field": "type",
+            "value": "mongo"
+          }
+        },
+        {
+          "equals": {
+            "field": "type",
+            "value": "openai"
+          }
+        }
+      ]
+    }
+  ]
+}
+`,
+			err: nil,
+		},
+		{
+
+			name:    "2 label key/value, and 2 type",
+			filters: []string{"label=A:B", "type=mongo", "label=C:D", "type=openai"},
+			expectedFilter: `{
+  "and": [
+    {
+      "and": [
+        {
+          "equals": {
+            "field": "labels.key",
+            "value": "A"
+          }
+        },
+        {
+          "equals": {
+            "field": "labels.value",
+            "value": "B"
+          }
+        },
+        {
+          "equals": {
+            "field": "labels.key",
+            "value": "C"
+          }
+        },
+        {
+          "equals": {
+            "field": "labels.value",
+            "value": "D"
+          }
+        }
+      ]
+    },
+    {
+      "and": [
+        {
+          "equals": {
+            "field": "type",
+            "value": "mongo"
+          }
+        },
+        {
+          "equals": {
+            "field": "type",
+            "value": "openai"
+          }
+        }
+      ]
+    }
+  ]
+}
+`,
+			err: nil,
+		},
+
+		// Error case
+		{
+
+			name:           "Filter that does not exist",
+			filters:        []string{"name=mongo"},
+			expectedFilter: ``,
+			err:            NewError(ErrorExitCode, "Filter \"name\" does not exist"),
+		},
+	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-			var out io.Writer
-			if tc.outWriter != nil {
-				out = tc.outWriter
-			} else {
-				out = buf
-			}
+			out := &bytes.Buffer{}
 
 			ios := iostreams.IOStreams{
 				In:  os.Stdin,
@@ -277,17 +535,20 @@ func TestBuildEntitiesFilter(t *testing.T) {
 				Err: os.Stderr,
 			}
 
-			d := NewDiscovery(&ios, viper.New(), "")
-			err := d.GetEntities(tc.client, tc.printer)
+			filter, err := BuildEntitiesFilter(tc.filters)
 
 			if tc.err != nil {
+				assert.Equal(t, gjson.Result{}, filter)
 				require.Error(t, err)
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tc.expectedOutput, buf.String())
+				printer := JsonObjectPrinter(true)
+				err = printer(ios, filter)
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedFilter, out.String())
 			}
 		})
 	}
