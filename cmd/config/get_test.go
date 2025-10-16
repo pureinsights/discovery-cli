@@ -259,7 +259,9 @@ func Test_getCommandExecute_NoProfileFlag(t *testing.T) {
 
 	err := getCmd.Execute()
 	require.Error(t, err)
-	assert.Equal(t, "flag accessed but not defined: profile", err.Error())
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
 	testutils.CompareBytes(t, "getCommandExecute_Out_NoProfile", out.Bytes())
 	testutils.CompareBytes(t, "getCommandExecute_Err_NoProfile", errBuf.Bytes())
@@ -317,7 +319,9 @@ func Test_getCommandExecute_NoSensitiveFlag(t *testing.T) {
 
 	err := getCmd.Execute()
 	require.Error(t, err)
-	assert.Equal(t, "flag accessed but not defined: sensitive", err.Error())
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: sensitive"), "Could not get the sensitive flag").Error())
 
 	testutils.CompareBytes(t, "getCommandExecute_Out_NoSensitive", out.Bytes())
 	testutils.CompareBytes(t, "getCommandExecute_Err_NoSensitive", errBuf.Bytes())
