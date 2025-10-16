@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_NewCoreCommand tests the NewCoreCommand() function
+// Test_NewLabelCommand tests the NewLabelCommand() function
 func Test_NewLabelCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
