@@ -397,7 +397,7 @@ func TestJsonArrayPrinter(t *testing.T) {
 			pretty:        false,
 			array:         gjson.Parse(`[{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"}]`).Array(),
 			expectedPrint: ``,
-			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
+			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON array"),
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
 		},
 	}

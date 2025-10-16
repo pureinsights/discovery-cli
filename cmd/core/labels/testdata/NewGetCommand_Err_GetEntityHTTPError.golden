@@ -1,0 +1,10 @@
+Error: Could not get entity with id "3d51beef-8b90-40aa-84b5-033241dc6239"
+status: 404, body: {
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6239"
+			],
+			"timestamp": "2025-10-16T17:46:45.386963700Z"
+			}
+

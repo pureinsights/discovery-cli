@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"bytes"
-	"flag"
 	"errors"
+	"flag"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -97,7 +97,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	require.NoError(t, os.WriteFile(config, []byte(`
 {
   "default": {
-    "core_url": "http://localhost:12010"
+    "core_url": "http://localhost:12010/v2"
   },
   "cn": {
     "core_url": "http://discovery.core.cn"

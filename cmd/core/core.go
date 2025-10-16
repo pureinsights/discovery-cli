@@ -2,6 +2,8 @@ package core
 
 import (
 	"github.com/pureinsights/pdp-cli/cmd/core/config"
+	"github.com/pureinsights/pdp-cli/cmd/core/labels"
+	"github.com/pureinsights/pdp-cli/cmd/core/secrets"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
@@ -14,6 +16,8 @@ func NewCoreCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	core.AddCommand(config.NewConfigCommand(d))
+	core.AddCommand(labels.NewLabelCommand(d))
+	core.AddCommand(secrets.NewSecretCommand(d))
 
 	return core
 }

@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	DefaultCoreURL      string = "http://localhost:12010"
-	DefaultStagingURL   string = "http://localhost:12020"
-	DefaultIngestionURL string = "http://localhost:12030"
-	DefaultQueryFlowURL string = "http://localhost:12040"
+	DefaultCoreURL      string = "http://localhost:12010/v2"
+	DefaultStagingURL   string = "http://localhost:12020/v2"
+	DefaultIngestionURL string = "http://localhost:12030/v2"
+	DefaultQueryFlowURL string = "http://localhost:12040/v2"
 	SaveHeader          string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
 	PrintHeader         string = "Showing the configuration of profile %q:\n\n"
 )

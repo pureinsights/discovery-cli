@@ -1,1 +1,3 @@
-Error: open doesnotexist\config.toml: The system cannot find the path specified.
+Error: Failed to save Staging's configuration
+open doesnotexist\config.toml: The system cannot find the path specified.
+

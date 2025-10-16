@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/google/uuid"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/viper"
 )
@@ -21,6 +22,8 @@ type Discovery interface {
 	PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error
 	PrintQueryFlowConfigToUser(profile string, sensitive, standalone bool) error
 	PrintStagingConfigToUser(profile string, sensitive, standalone bool) error
+	GetEntity(client getter, id uuid.UUID, printer Printer) error
+	GetEntities(client getter, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.

@@ -82,7 +82,7 @@ func JsonArrayPrinter(pretty bool) Printer {
 	return func(ios iostreams.IOStreams, objects ...gjson.Result) error {
 		err := printArrayObject(ios, pretty, objects...)
 		if err != nil {
-			return NewErrorWithCause(ErrorExitCode, err, "Could not print JSON Array")
+			return NewErrorWithCause(ErrorExitCode, err, "Could not print JSON array")
 		}
 		return nil
 	}

@@ -1,10 +1,10 @@
 Showing the configuration of profile "cn":
 
-Core URL: "http://localhost:12010"
+Core URL: "http://localhost:12010/v2"
 Core API Key: "discovery.key.core.cn"
-Ingestion URL: "http://localhost:12020"
+Ingestion URL: "http://localhost:12020/v2"
 Ingestion API Key: "discovery.key.ingestion.cn"
-QueryFlow URL: "http://localhost:12030"
+QueryFlow URL: "http://localhost:12030/v2"
 QueryFlow API Key: "discovery.key.queryflow.cn"
 Usage:
   get [flags]
