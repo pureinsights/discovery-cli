@@ -307,3 +307,73 @@ Flags:
 Global Flags:
   -p, --profile string   configuration profile to use (default "default")
 ```
+
+##### Secret
+`secret` is the command used to manage secrets in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery core secret [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get the command's help
+discovery core label -h
+The command to interact with Discovery Core's labels.
+```
+
+###### Get
+`get` is the command used to obtain Discovery Core's labels. The user can send a UUID to get a specific label. If no UUID is given, then the command retrieves every label. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
+
+Usage: `discovery core label get [flags] <uuid>`
+
+Arguments:
+`uuid`::
+(Optional, String) The UUID of the label that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Get a label by id
+discovery core label get
+{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"A","lastUpdatedTimestamp":"2025-08-27T19:22:47Z","value":"B"}
+```
+
+```bash
+# Get all labels using the configuration in profile "cn"
+discovery core label get -p cn
+{"creationTimestamp":"2025-10-15T20:28:39Z","id":"5467ab23-7827-4fae-aa78-dfd4800549ee","key":"D","lastUpdatedTimestamp":"2025-10-15T20:28:39Z","value":"F"}
+{"creationTimestamp":"2025-10-15T20:25:29Z","id":"7d0cb8c9-6555-4592-9b6c-1f4ed7fca9f4","key":"D","lastUpdatedTimestamp":"2025-10-15T20:25:29Z","value":"D"}
+{"creationTimestamp":"2025-09-29T17:00:47Z","id":"a77fed6a-021e-440b-bb32-91e22ea31598","key":"A","lastUpdatedTimestamp":"2025-09-29T17:00:47Z","value":"A"}
+{"creationTimestamp":"2025-09-29T19:45:51Z","id":"b667b650-9ddf-490a-bc89-276987c4076f","key":"B","lastUpdatedTimestamp":"2025-09-29T19:45:51Z","value":"B"}
+{"creationTimestamp":"2025-10-15T20:25:29Z","id":"bf0e20b7-24de-448d-b7c8-e4721f51e3dc","key":"E","lastUpdatedTimestamp":"2025-10-15T20:25:29Z","value":"F"}
+{"creationTimestamp":"2025-10-15T20:26:27Z","id":"e113751a-b063-40f5-9a8b-f7cd82094cc7","key":"E","lastUpdatedTimestamp":"2025-10-15T20:26:27Z","value":"G"}
+{"creationTimestamp":"2025-10-15T20:26:27Z","id":"f37907e3-1f7a-481c-88f4-bc263eff2613","key":"H","lastUpdatedTimestamp":"2025-10-15T20:26:27Z","value":"F"}
+{"creationTimestamp":"2025-09-29T19:45:52Z","id":"f5e01fb8-1503-4401-ba56-039548259739","key":"C","lastUpdatedTimestamp":"2025-09-29T19:45:52Z","value":"C"}
+```
+
+```bash
+# Try to get label by name
+discovery core label get label1
+Error: Could not convert given id "label1" to UUID. This command does not support filters or referencing an entity by name
+invalid UUID length: 6
+Usage:
+  discovery core label get [flags]
+
+Flags:
+  -h, --help        help for get
+
+Global Flags:
+  -p, --profile string   configuration profile to use (default "default")
+```
