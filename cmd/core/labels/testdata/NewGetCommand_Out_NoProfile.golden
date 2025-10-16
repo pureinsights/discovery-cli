@@ -2,6 +2,5 @@ Usage:
   get [flags]
 
 Flags:
-  -h, --help        help for get
-  -s, --sensitive   --sensitive=true (default true)
+  -h, --help   help for get
 

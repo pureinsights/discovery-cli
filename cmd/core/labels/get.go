@@ -12,8 +12,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	missingConfig := "The Discovery Core %s is missing for profile %q.\nTo set the %s for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"
 	get := &cobra.Command{
 		Use:   "get",
-		Short: "Print Discovery Core's configuration",
-		Long:  "get is the command used to obtain Discovery Core's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.",
+		Short: "The command that obtains labels from Discovery Core.",
+		Long:  "get is the command used to obtain Discovery Core's labels. The user can send a UUID to get a specific label. If no UUID is given, then the command retrieves every label. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -45,6 +45,5 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 	}
-	get.Flags().BoolP("sensitive", "s", true, "--sensitive=true")
 	return get
 }

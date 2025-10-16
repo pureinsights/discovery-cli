@@ -290,6 +290,7 @@ func TestNewGetCommand(t *testing.T) {
 	}
 }
 
+// TestNewGetCommand_NoProfileFlag tests the NewGetCommand when the profile flag was not defined.
 func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader("")
 	out := &bytes.Buffer{}
