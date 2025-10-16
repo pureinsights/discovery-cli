@@ -86,6 +86,17 @@ It has the following method:
 | Export | GET | `{URL}/export` |  |  | `application/octet-stream` | Calls the `/export` endpoint. It returns the result of the endpoint in bytes, which should be written to a ZIP file so that it can be restored later. |
 | Import | POST | `{URL}/import` | `multipart/form-data` | `onConflict`: `UPDATE`, `IGNORE`, `FAIL` | `application/json` | Calls the `/import` endpoint. It receives the given file to restore the entities contained within. |
 
+### Searcher
+This struct allows for exporting and importing entities from Discovery's components.
+
+It inherits from:
+* [Client](#client)
+
+It has the following method:
+| Name | Method | Path | Request Body | Response | Description |
+| --- | --- | --- | --- | --- | --- |
+| Search | POST | `{URL}/search` | `application/json` | `application/json` | Returns an array with the entities that match the given filters. |
+| SearchByName | POST | `{URL}/search` | `application/json` | `application/json` | Returns the JSON object with the best match to the given name or an error if any occured or the entity was not found. |
 
 ## Discovery Clients
 ### Core Client
