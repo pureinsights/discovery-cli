@@ -59,7 +59,7 @@ func TestRun_SetDiscoveryDirFails(t *testing.T) {
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	var cliError cli.Error
+	var cliError *cli.Error
 	require.ErrorAs(t, err, &cliError)
 	cause := cliError.Cause
 	isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
@@ -93,7 +93,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	var cliError cli.Error
+	var cliError *cli.Error
 	require.ErrorAs(t, err, &cliError)
 	errorStruct := cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file")
 	assert.EqualError(t, cliError, errorStruct.Error())
@@ -110,7 +110,7 @@ func TestRun_ExecuteFails(t *testing.T) {
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	var cliError cli.Error
+	var cliError *cli.Error
 	require.ErrorAs(t, err, &cliError)
 	assert.Equal(t, cliError.Message, "")
 	assert.EqualError(t, cliError.Cause, "unknown flag: --profiles")
