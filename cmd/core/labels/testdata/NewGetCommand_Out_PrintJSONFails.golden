@@ -1,0 +1,8 @@
+Usage:
+  get [flags]
+
+Flags:
+  -h, --help             help for get
+  -p, --profile string   configuration profile to use (default "default")
+  -s, --sensitive        --sensitive=true (default true)
+

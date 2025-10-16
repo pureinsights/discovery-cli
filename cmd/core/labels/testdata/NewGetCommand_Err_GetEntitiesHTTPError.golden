@@ -1,0 +1,3 @@
+Error: Could not get all entities
+status: 401, body: {"error": "unauthorized"}
+

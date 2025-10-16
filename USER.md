@@ -53,7 +53,7 @@ Core URL [http://discovery.core.cn]: https://discovery.core.cn
 Core API Key [*************.core.cn]: 
 Ingestion URL [http://discovery.ingestion.cn]:      
 Ingestion API Key [****************gestion.cn]: ingestion123
-QueryFlow URL [http://discovery.queryflow.cn]: http://localhost:12040 
+QueryFlow URL [http://discovery.queryflow.cn]: http://localhost:12040/v2 
 QueryFlow API Key [****************eryflow.cn]: queryflow213
 Staging URL [http://discovery.staging.cn]: 
 Staging API Key [***************taging.cn]: 
@@ -96,7 +96,7 @@ Core URL: "https://discovery.core.cn"
 Core API Key: "*************.core.cn"
 Ingestion URL: "http://discovery.ingestion.cn"
 Ingestion API Key: "********n123"
-QueryFlow URL: "http://localhost:12040"
+QueryFlow URL: "http://localhost:12040/v2"
 QueryFlow API Key: "********w213"
 Staging URL: "http://discovery.staging.cn"
 Staging API Key: "***************taging.cn"
@@ -107,13 +107,13 @@ Staging API Key: "***************taging.cn"
 discovery config get -p cn -s=true
 Showing the configuration of profile "default":
 
-Core URL: "http://localhost:12010"
+Core URL: "http://localhost:12010/v2"
 Core API Key: ""
-Ingestion URL: "http://localhost:12030"
+Ingestion URL: "http://localhost:12030/v2"
 Ingestion API Key: ""
-QueryFlow URL: "http://localhost:12040"
+QueryFlow URL: "http://localhost:12040/v2"
 QueryFlow API Key: ""
-Staging URL: "http://localhost:12020"
+Staging URL: "http://localhost:12020/v2"
 Staging API Key: ""
 ```
 
@@ -126,7 +126,7 @@ Core URL: "https://discovery.core.cn"
 Core API Key: "discovery.key.core.cn"
 Ingestion URL: "http://discovery.ingestion.cn"
 Ingestion API Key: "ingestion123"
-QueryFlow URL: "http://localhost:12040"
+QueryFlow URL: "http://localhost:12040/v2"
 QueryFlow API Key: "queryflow213"
 Staging URL: "http://discovery.staging.cn"
 Staging API Key: "discovery.key.staging.cn"
@@ -225,7 +225,7 @@ Core API Key: "*************.core.cn"
 discovery core config get -p cn -s=true
 Showing the configuration of profile "default":
 
-Core URL: "http://localhost:12010"
+Core URL: "http://localhost:12010/v2"
 Core API Key: ""
 ```
 

@@ -1,4 +1,4 @@
 Showing the configuration of profile "cn":
 
-Ingestion URL: "http://localhost:12020"
+Ingestion URL: "http://localhost:12020/v2"
 Ingestion API Key: "discovery.key.ingestion.cn"

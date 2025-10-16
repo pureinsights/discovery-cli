@@ -1,4 +1,4 @@
 Showing the configuration of profile "cn":
 
-Staging URL: "http://localhost:12040"
+Staging URL: "http://localhost:12040/v2"
 Staging API Key: "discovery.key.staging.cn"

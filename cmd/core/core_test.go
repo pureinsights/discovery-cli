@@ -47,7 +47,7 @@ func Test_NewCoreCommand(t *testing.T) {
 		commandNames = append(commandNames, c.Name())
 	}
 
-	expectedCommands := []string{"config"}
+	expectedCommands := []string{"config", "label"}
 	for _, c := range expectedCommands {
 		require.Contains(t, commandNames, c)
 	}
