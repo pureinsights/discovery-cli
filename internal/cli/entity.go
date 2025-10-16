@@ -61,12 +61,14 @@ func (d discovery) GetEntities(client getter, printer Printer) error {
 	return err
 }
 
+// Searcher is the interface that implements searching methods.
 type searcher interface {
 	getter
 	Search(gjson.Result) ([]gjson.Result, error)
 	SearchByName(name string) (gjson.Result, error)
 }
 
+// SearchEntity tries to search an entity by name, and if it fails, it tries to get the entity by its id.
 func (d discovery) searchEntity(client searcher, id string) (gjson.Result, error) {
 	result, err := client.SearchByName(id)
 	if err != nil {
@@ -94,6 +96,7 @@ func (d discovery) searchEntity(client searcher, id string) (gjson.Result, error
 	return result, nil
 }
 
+// SearchEntity searches for the entity and prints it into the Out IOStream.
 func (d discovery) SearchEntity(client searcher, id string, printer Printer) error {
 	result, err := d.searchEntity(client, id)
 	if err != nil {
@@ -110,6 +113,7 @@ func (d discovery) SearchEntity(client searcher, id string, printer Printer) err
 	return err
 }
 
+// SearchEntities searches for entities and prints the results into the Out IOStream.
 func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer Printer) error {
 	results, err := client.Search(filter)
 	if err != nil {
