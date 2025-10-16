@@ -104,7 +104,7 @@ Staging API Key: "***************taging.cn"
 
 ```bash
 # Print the configuration of the "default" profile.
-discovery config get -p cn -s=true
+discovery config get -s=true
 Showing the configuration of profile "default":
 
 Core URL: "http://localhost:12010"
