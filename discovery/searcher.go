@@ -1,0 +1,50 @@
+package discovery
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/tidwall/gjson"
+)
+
+// Searcher is a struct that adds the path to a request to search for entities with filters.
+type searcher struct {
+	client
+}
+
+// Search iterates through every page of the results and returns an array with only the JSON objects.
+// Each object has a score that grades how well it matches the given filters.
+func (s searcher) Search(filter gjson.Result) ([]gjson.Result, error) {
+	return executeWithPagination(s.client, http.MethodPost, "/search", WithJSONBody(filter.Raw))
+}
+
+// SearchByName creates the filter to search an entity by the given name and calls the searcher.Search() function.
+// It returns the first result if any or an error if it was not found or the search failed.
+func (s searcher) SearchByName(name string) (gjson.Result, error) {
+	byNameFilter := gjson.Parse(fmt.Sprintf(`{
+		"equals": {
+			"field": "name",
+			"value": "%s"
+		}
+	}`, name))
+
+	results, err := s.Search(byNameFilter)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	if len(results) == 0 {
+		return gjson.Result{}, Error{
+			Status: http.StatusNotFound, Body: gjson.Parse(fmt.Sprintf(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name %q does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`, name)),
+		}
+	}
+
+	return results[0], nil
+}
