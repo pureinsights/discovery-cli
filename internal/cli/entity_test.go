@@ -251,6 +251,70 @@ func Test_discovery_GetEntities(t *testing.T) {
 	}
 }
 
+type WorkingSearcher struct {
+	mock.Mock
+}
+
+func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
+	return gjson.Parse(`[
+                  {
+					"source": {
+						"type": "mongo",
+						"name": "MongoDB Atlas server clone",
+						"labels": [],
+						"active": true,
+						"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+						"creationTimestamp": "2025-09-29T15:50:17Z",
+						"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+					},
+					"highlight": {},
+					"score": 0.20970252
+                  },
+                  {
+					"source": {
+						"type": "mongo",
+						"name": "MongoDB Atlas server clone 1",
+						"labels": [],
+						"active": true,
+						"id": "8f14c11c-bb66-49d3-aa2a-dedff4608c17",
+						"creationTimestamp": "2025-09-29T15:50:19Z",
+						"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
+					},
+					"highlight": {},
+					"score": 0.20970252
+                  },
+                  {
+					"source": {
+						"type": "mongo",
+						"name": "MongoDB Atlas server clone 3",
+						"labels": [],
+						"active": true,
+						"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
+						"creationTimestamp": "2025-09-29T15:50:20Z",
+						"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
+					},
+					"highlight": {},
+					"score": 0.20970252
+                  }
+          ]`).Array(), nil
+}
+
+func (g *WorkingSearcher) SearchByName() (gjson.Result, error) {
+	return gjson.Parse(` {
+		"source": {
+			"type": "mongo",
+			"name": "MongoDB Atlas server clone",
+			"labels": [],
+			"active": true,
+			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+			"creationTimestamp": "2025-09-29T15:50:17Z",
+			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+		},
+		"highlight": {},
+		"score": 0.20970252
+	}`), nil
+}
+
 func TestBuildEntitiesFilter(t *testing.T) {
 	tests := []struct {
 		name           string
