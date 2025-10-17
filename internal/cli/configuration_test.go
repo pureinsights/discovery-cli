@@ -901,7 +901,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			componentName: "Core",
 		},
 		{
-			name:       "Set Core URL to empty, keep Core Key",
+			name:       "Set URL to empty, keep Key",
 			input:      " \n",
 			writePath:  t.TempDir(),
 			standalone: true,
@@ -917,7 +917,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			componentName: "Core",
 		},
 		{
-			name:       "Set Core URL to new value, keep Core Key",
+			name:       "Set URL to new value, keep Key",
 			input:      "http://discovery.core.cn\n\n",
 			writePath:  t.TempDir(),
 			standalone: false,
@@ -949,7 +949,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			componentName: "Core",
 		},
 		{
-			name:       "Core Key is nil, keep Core Key",
+			name:       "Key is nil, keep Key",
 			input:      "http://discovery.core.cn\n\n",
 			standalone: true,
 			writePath:  t.TempDir(),
@@ -964,7 +964,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			componentName: "Core",
 		},
 		{
-			name:       "Core Key is nil, change Core Key",
+			name:       "Key is nil, change Key",
 			input:      "http://discovery.core.cn\ncore123\n",
 			writePath:  t.TempDir(),
 			standalone: true,
@@ -979,7 +979,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			componentName: "Core",
 		},
 		{
-			name:          "Reading from the In IOStream fails in Core URL",
+			name:          "Reading from the In IOStream fails to get URL",
 			inReader:      testutils.ErrReader{Err: errors.New("read failed")},
 			standalone:    true,
 			writePath:     t.TempDir(),
@@ -988,7 +988,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			componentName: "Core",
 		},
 		{
-			name:          "Reading from the In IOStream fails in Core Key",
+			name:          "Reading from the In IOStream fails to get Key",
 			inReader:      io.MultiReader(strings.NewReader("http://discovery.core.cn\n"), testutils.ErrReader{Err: errors.New("read failed")}),
 			standalone:    true,
 			writePath:     t.TempDir(),
