@@ -277,9 +277,7 @@ func TestWithFile(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	tmpFile, err := fileutils.CreateTemporaryFile(t.TempDir(), "testFile.txt", "This is a test file")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	defer os.Remove(tmpFile)
 
