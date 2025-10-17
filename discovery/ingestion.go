@@ -56,6 +56,11 @@ func (src seedRecordsClient) Get(id string) (gjson.Result, error) {
 	return execute(src.client, http.MethodGet, "/"+id)
 }
 
+// GetAll obtains every record in the seed.
+func (src seedRecordsClient) GetAll() ([]gjson.Result, error) {
+	return executeWithPagination(src.client, http.MethodGet, "")
+}
+
 // SeedExecutionClient can carry out every operation regarding seed executions.
 // With its Getter embedded struct, it can obtain seed executions.
 type seedExecutionsClient struct {
@@ -226,4 +231,36 @@ func (sc seedsClient) Records(seedId uuid.UUID) seedRecordsClient {
 // Executions creates a new seedExecutionsClient.
 func (sc seedsClient) Executions(seedId uuid.UUID) seedExecutionsClient {
 	return newSeedExecutionsClient(sc, seedId)
+}
+
+// Ingestion is the struct that is used to interact with the Ingestion Component
+type ingestion struct {
+	Url, ApiKey string
+}
+
+// Procesors is used to create an ingestionProcessorsClient
+func (i ingestion) Processors() ingestionProcessorsClient {
+	return newIngestionProcessorsClient(i.Url, i.ApiKey)
+}
+
+// Pipelines is used to create a pipelinesClient
+func (i ingestion) Pipelines() pipelinesClient {
+	return newPipelinesClient(i.Url, i.ApiKey)
+}
+
+// Seeds is used to create a seedsClient
+func (i ingestion) Seeds() seedsClient {
+	return newSeedsClient(i.Url, i.ApiKey)
+}
+
+// BackupRestore creates a backUpRestore struct.
+func (i ingestion) BackupRestore() backupRestore {
+	return backupRestore{
+		client: newClient(i.Url, i.ApiKey),
+	}
+}
+
+// NewIngestion is the constructor of the ingestion struct.
+func NewIngestion(url, apiKey string) ingestion {
+	return ingestion{Url: url, ApiKey: apiKey}
 }
