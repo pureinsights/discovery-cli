@@ -44,6 +44,7 @@ func newSecretsClient(url, apiKey string) secretsClient {
 type credentialsClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewCredentialsClient creates a new credentialsClient.
@@ -56,6 +57,9 @@ func newCredentialsClient(url, apiKey string) credentialsClient {
 			},
 		},
 		cloner: cloner{
+			client: client,
+		},
+		searcher: searcher{
 			client: client,
 		},
 	}
@@ -169,7 +173,6 @@ func newMaintenanceClient(url, apiKey string) maintenanceClient {
 func (mc maintenanceClient) Log(componentName string, level LogLevel, loggerName string) (gjson.Result, error) {
 	return execute(mc.client, http.MethodPost, "/log", WithQueryParameters(map[string][]string{"componentName": {componentName}, "level": {string(level)}, "loggerName": {loggerName}}))
 }
-
 
 // Core is the struct for the client that can execute every Core operation.
 type core struct {

@@ -9,6 +9,7 @@ import (
 // NewGetCommand creates the credential get command
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	missingConfig := "The Discovery Core %s is missing for profile %q.\nTo set the %s for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"
+	var filters []string
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains credentials from Discovery Core.",
@@ -33,6 +34,15 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				printer := cli.GetObjectPrinter(vpr.GetString("output"))
 				err = d.SearchEntity(coreClient.Credentials(), args[0], printer)
 				return err
+			} else if len(filters) > 0 {
+				printer := cli.GetArrayPrinter(vpr.GetString("output"))
+				filter, err := cli.BuildEntitiesFilter(filters)
+				if err != nil {
+					return err
+				}
+
+				err = d.SearchEntities(coreClient.Credentials(), filter, printer)
+				return err
 			} else {
 				printer := cli.GetArrayPrinter(vpr.GetString("output"))
 				err = d.GetEntities(coreClient.Credentials(), printer)
@@ -41,5 +51,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 	}
+
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, "Apply filters in the format \"filter=key:value\"")
 	return get
 }
