@@ -73,13 +73,18 @@ func (c contentClient) Delete(contentId string) (gjson.Result, error) {
 
 // DeleteMany deletes the documents that match the given parentId or filters.
 func (c contentClient) DeleteMany(parentId string, filter gjson.Result) (gjson.Result, error) {
-	if parentId == "" {
-		return execute(c.client, http.MethodDelete, "", WithJSONBody(filter.Raw))
-	} else {
-		return execute(c.client, http.MethodDelete, "", WithQueryParameters(map[string][]string{
+	options := []RequestOption{}
+	if parentId != "" {
+		options = append(options, WithQueryParameters(map[string][]string{
 			"parentId": {parentId},
-		}), WithJSONBody(filter.Raw))
+		}))
 	}
+
+	if filter.Exists() {
+		options = append(options, WithJSONBody(filter.Raw))
+	}
+
+	return execute(c.client, http.MethodDelete, "", options...)
 }
 
 // bucketsClient is the struct that manages buckets in the Staging Repository.
