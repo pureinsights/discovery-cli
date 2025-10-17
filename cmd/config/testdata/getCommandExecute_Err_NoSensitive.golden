@@ -1,1 +1,3 @@
-Error: flag accessed but not defined: sensitive
+Error: Could not get the sensitive flag
+flag accessed but not defined: sensitive
+
