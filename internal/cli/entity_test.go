@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -251,10 +252,13 @@ func Test_discovery_GetEntities(t *testing.T) {
 	}
 }
 
+// WorkingSearcher mocks the discovery.Searcher struct.
+// This struct is used to test when the search functions work.
 type WorkingSearcher struct {
 	mock.Mock
 }
 
+// Search returns an array of results as it if correctly found matches.
 func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 	return gjson.Parse(`[
                   {
@@ -299,8 +303,9 @@ func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
           ]`).Array(), nil
 }
 
-func (g *WorkingSearcher) SearchByName() (gjson.Result, error) {
-	return gjson.Parse(` {
+// SearchByName returns an object as if it found correctly the entity.
+func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
+	return gjson.Parse(`{
 		"source": {
 			"type": "mongo",
 			"name": "MongoDB Atlas server clone",
@@ -310,11 +315,538 @@ func (g *WorkingSearcher) SearchByName() (gjson.Result, error) {
 			"creationTimestamp": "2025-09-29T15:50:17Z",
 			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
 		},
-		"highlight": {},
-		"score": 0.20970252
+		"highlight": {
+			"name": [
+				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
+			]
+		},
+		"score": 0.50769836
 	}`), nil
 }
 
+// Get returns a JSON object as if the searcher found the entity by its ID.
+func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB Atlas server clone",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
+	}`), nil
+}
+
+// GetAll returns
+func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
+	return gjson.Parse(`[]`).Array(), nil
+}
+
+// FailingSearcher mocks the discovery.Searcher struct when its functions return errors.
+type FailingSearcher struct {
+	mock.Mock
+}
+
+// Search implements the searcher interface
+func (s *FailingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body:   gjson.Result{},
+	}
+}
+
+// SearchByName returns 404 so that the searchEntity function enters the err != nil code branch
+func (s *FailingSearcher) SearchByName(name string) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusBadRequest,
+		Body: gjson.Parse(`{
+	"status": 400,
+	"code": 3002,
+	"messages": [
+		"Invalid JSON: Unexpected end-of-input:"
+	],
+	"timestamp": "2025-10-17T17:43:52.817308100Z"
+	}`),
+	}
+}
+
+// Get returns an error so mock when the user searches for an entity that does not exist.
+func (s *FailingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Server not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+			],
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`),
+	}
+}
+
+// GetAll implements the searcher interface
+func (s *FailingSearcher) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// FailingSearcherWorkingGetter mocks the discovery.searcher struct when the search by name fails, but the get does succeed
+type FailingSearcherWorkingGetter struct {
+	mock.Mock
+}
+
+// Search implements the searcher interface
+func (s *FailingSearcherWorkingGetter) Search(gjson.Result) ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body:   gjson.Result{},
+	}
+}
+
+// SearchByName returns 404 not found to make the test go through the err != nil code branch
+func (s *FailingSearcherWorkingGetter) SearchByName(name string) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body: gjson.Parse(fmt.Sprintf(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name %q does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`, name)),
+	}
+}
+
+// Get returns a JSON object to mock that the SearchByName failed, but the Get succeeded.
+func (s *FailingSearcherWorkingGetter) Get(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB Atlas server clone",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
+	}`), nil
+}
+
+// GetAll implements the searcher interface.
+func (s *FailingSearcherWorkingGetter) GetAll() ([]gjson.Result, error) {
+	return gjson.Parse(`[]`).Array(), nil
+}
+
+// FailingSearcherFailingGetter mocks the discovery.searcher struct when both the searchByName and Get function fails
+type FailingSearcherFailingGetter struct {
+	mock.Mock
+}
+
+// Search returns an error
+func (s *FailingSearcherFailingGetter) Search(gjson.Result) ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// SearchByName returns a 404 Not Found error to make the test go through the err != nil branch
+func (s *FailingSearcherFailingGetter) SearchByName(name string) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body: gjson.Parse(fmt.Sprintf(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name %q does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`, name)),
+	}
+}
+
+// Get Returns error to mock that it also failed to find the entity.
+func (s *FailingSearcherFailingGetter) Get(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Server not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+			],
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`),
+	}
+}
+
+// GetAll implements the searcher interface.
+func (s *FailingSearcherFailingGetter) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// SearcherReturnsOtherError is a struct that mocks discovery.searcher when the search functions do not return a discovery.Error
+type SearcherReturnsOtherError struct {
+	mock.Mock
+}
+
+// Search implements the searcher interface
+func (s *SearcherReturnsOtherError) Search(gjson.Result) ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body:   gjson.Parse(``),
+	}
+}
+
+// SearchByName does not return a discovery.Error
+func (s *SearcherReturnsOtherError) SearchByName(name string) (gjson.Result, error) {
+	return gjson.Result{}, errors.New("not discovery error")
+}
+
+// Get implements the searcher interface.
+func (s *SearcherReturnsOtherError) Get(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body:   gjson.Parse(``),
+	}
+}
+
+// GetAll implements the searcher interface
+func (s *SearcherReturnsOtherError) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(``)}
+}
+
+// Test_searchEntity tests the discovery.searchEntity() function.
+func Test_searchEntity(t *testing.T) {
+	tests := []struct {
+		name      string
+		client    searcher
+		id        string
+		expected  gjson.Result
+		outWriter io.Writer
+		err       error
+	}{
+		{
+			name:   "Search by name works for name",
+			client: new(WorkingSearcher),
+			id:     "MongoDB Atlas server",
+			expected: gjson.Parse(`{
+		"source": {
+			"type": "mongo",
+			"name": "MongoDB Atlas server clone",
+			"labels": [],
+			"active": true,
+			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+			"creationTimestamp": "2025-09-29T15:50:17Z",
+			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+		},
+		"highlight": {
+			"name": [
+				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
+			]
+		},
+		"score": 0.50769836
+	}`),
+			err: nil,
+		},
+		{
+			name:   "Search by name fails for name, but get works for Id",
+			client: new(FailingSearcherWorkingGetter),
+			id:     "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+			expected: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB Atlas server clone",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
+	}`),
+			err: nil,
+		},
+
+		// Error cases
+		{
+			name:     "Search by name fails with error Bad Request",
+			client:   new(FailingSearcher),
+			id:       "MongoDB Atlas Server",
+			expected: gjson.Result{},
+			err: discoveryPackage.Error{
+				Status: http.StatusBadRequest,
+				Body: gjson.Parse(`{
+	"status": 400,
+	"code": 3002,
+	"messages": [
+		"Invalid JSON: Unexpected end-of-input:"
+	],
+	"timestamp": "2025-10-17T17:43:52.817308100Z"
+	}`),
+			},
+		},
+		{
+			name:     "Search by name fails with error Not Found, and Get fails with 404 Not found",
+			client:   new(FailingSearcherFailingGetter),
+			id:       "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+			expected: gjson.Result{},
+			err: discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Server not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+			],
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`),
+			},
+		},
+		{
+			name:     "Search by name fails with error 404 Not Found and id is not a UUID",
+			client:   new(FailingSearcherWorkingGetter),
+			id:       "MongoDB Atlas Server",
+			expected: gjson.Result{},
+			err: discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`),
+			},
+		},
+		{
+			name:     "Search returns an error different from discovery.Error",
+			client:   new(SearcherReturnsOtherError),
+			id:       "MongoDB Atlas Server",
+			expected: gjson.Result{},
+			err:      errors.New("not discovery error"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			result, err := d.searchEntity(tc.client, tc.id)
+			assert.Equal(t, tc.expected, result)
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+// Test_searchEntity tests the discovery.SearchEntity() function.
+func Test_discovery_SearchEntity(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         searcher
+		id             string
+		expectedOutput string
+		printer        Printer
+		outWriter      io.Writer
+		err            error
+	}{
+		{
+			name:           "SearchEntity correctly prints an object with the sent printer",
+			client:         new(WorkingSearcher),
+			id:             "MongoDB Atlas Server",
+			printer:        JsonObjectPrinter(true),
+			expectedOutput: "{\n  \"highlight\": {\n    \"name\": [\n      \"\\u003cem\\u003eMongoDB\\u003c/em\\u003e \\u003cem\\u003eAtlas\\u003c/em\\u003e \\u003cem\\u003eserver\\u003c/em\\u003e clone\"\n    ]\n  },\n  \"score\": 0.50769836,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"name\": \"MongoDB Atlas server clone\",\n    \"type\": \"mongo\"\n  }\n}\n",
+			err:            nil,
+		},
+		{
+			name:           "SearchEntity correctly prints an object with JSON ugly printer",
+			client:         new(FailingSearcherWorkingGetter),
+			id:             "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+			printer:        nil,
+			expectedOutput: "{\"active\":true,\"config\":{\"connection\":{\"connectTimeout\":\"1m\",\"readTimeout\":\"30s\"},\"credentialId\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"servers\":[\"mongodb+srv://cluster0.dleud.mongodb.net/\"]},\"creationTimestamp\":\"2025-09-29T15:50:17Z\",\"id\":\"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:17Z\",\"name\":\"MongoDB Atlas server clone\",\"type\":\"mongo\"}\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name:           "Search returns 404 Not Found",
+			client:         new(FailingSearcherWorkingGetter),
+			id:             "MongoDB Atlas Server",
+			printer:        nil,
+			expectedOutput: "",
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`),
+			}, "Could not search for entity with id \"MongoDB Atlas Server\""),
+		},
+		{
+			name:           "Printing fails",
+			client:         new(WorkingSearcher),
+			id:             "MongoDB Atlas Server",
+			expectedOutput: "",
+			printer:        nil,
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.SearchEntity(tc.client, tc.id, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_searchEntity tests the discovery.SearchEntities() function.
+func Test_discovery_SearchEntities(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         searcher
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "SearchEntities correctly prints an array with the sent printer",
+			client:         new(WorkingSearcher),
+			printer:        JsonArrayPrinter(true),
+			expectedOutput: "[\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"name\": \"MongoDB Atlas server clone\",\n    \"type\": \"mongo\"\n  }\n}\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:19Z\",\n    \"id\": \"8f14c11c-bb66-49d3-aa2a-dedff4608c17\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:19Z\",\n    \"name\": \"MongoDB Atlas server clone 1\",\n    \"type\": \"mongo\"\n  }\n}\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:20Z\",\n    \"id\": \"3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:20Z\",\n    \"name\": \"MongoDB Atlas server clone 3\",\n    \"type\": \"mongo\"\n  }\n}\n]\n",
+			err:            nil,
+		},
+		{
+			name:           "SearchEntities correctly prints an array with JSON ugly printer",
+			client:         new(WorkingSearcher),
+			printer:        nil,
+			expectedOutput: "{\"highlight\":{},\"score\":0.20970252,\"source\":{\"active\":true,\"creationTimestamp\":\"2025-09-29T15:50:17Z\",\"id\":\"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:17Z\",\"name\":\"MongoDB Atlas server clone\",\"type\":\"mongo\"}}\n{\"highlight\":{},\"score\":0.20970252,\"source\":{\"active\":true,\"creationTimestamp\":\"2025-09-29T15:50:19Z\",\"id\":\"8f14c11c-bb66-49d3-aa2a-dedff4608c17\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:19Z\",\"name\":\"MongoDB Atlas server clone 1\",\"type\":\"mongo\"}}\n{\"highlight\":{},\"score\":0.20970252,\"source\":{\"active\":true,\"creationTimestamp\":\"2025-09-29T15:50:20Z\",\"id\":\"3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:20Z\",\"name\":\"MongoDB Atlas server clone 3\",\"type\":\"mongo\"}}\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name:           "SearchAll returns 401 Unauthorized",
+			client:         new(FailingSearcherFailingGetter),
+			printer:        nil,
+			expectedOutput: "",
+			err:            NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not search for the entities"),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(WorkingSearcher),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON array"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.SearchEntities(tc.client, gjson.Result{}, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_searchEntity tests the BuildEntitiesFilter() function.
 func TestBuildEntitiesFilter(t *testing.T) {
 	tests := []struct {
 		name           string
