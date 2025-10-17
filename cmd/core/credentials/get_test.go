@@ -35,28 +35,74 @@ func TestNewGetCommand(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:       "Get by ID returns an object",
-			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
+			name:       "Search by ID returns an object",
+			args:       []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
+			url:        true,
+			apiKey:     "apiKey123",
+			outGolden:  "NewGetCommand_Out_SearchByIdReturnsObject",
+			errGolden:  "NewGetCommand_Err_SearchByIdReturnsObject",
+			method:     http.MethodGet,
+			path:       "/credential/3b32e410-2F33-412d-9fb8-17970131921c",
+			statusCode: http.StatusOK,
+			response: `{
+				"type": "mongo",
+				"name": "label test 1 clone 10",
+				"labels": [
+					{
+					"key": "A",
+					"value": "A"
+					}
+				],
+				"active": true,
+				"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+				"creationTimestamp": "2025-10-17T22:37:57Z",
+				"lastUpdatedTimestamp": "2025-10-17T22:37:57Z",
+				"secret": "mongo-secret"
+			}`,
+			err: nil,
+		},
+		{
+			name:       "Search by name returns an object",
+			args:       []string{"label test clone 10"},
+			url:        true,
+			apiKey:     "apiKey123",
+			outGolden:  "NewGetCommand_Out_SearchByNameReturnsObject",
+			errGolden:  "NewGetCommand_Err_SearchByNameReturnsObject",
+			method:     http.MethodGet,
+			path:       "/credential/search",
+			statusCode: http.StatusOK,
+			response: `{
+			name:       "Search by ID returns an object",
+			args:       []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
 			url:        true,
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_GetByIdReturnsObject",
 			errGolden:  "NewGetCommand_Err_GetByIdReturnsObject",
 			method:     http.MethodGet,
-			path:       "/credential/81ca1ac6-3058-4ecd-a292-e439827a675a",
+			path:       "/credential/3b32e410-2F33-412d-9fb8-17970131921c",
 			statusCode: http.StatusOK,
 			response: `{
-				"name": "openai-credential",
-				"labels": [],
+				"type": "mongo",
+				"name": "label test 1 clone 10",
+				"labels": [
+					{
+					"key": "A",
+					"value": "A"
+					}
+				],
 				"active": true,
-				"id": "81ca1ac6-3058-4ecd-a292-e439827a675a",
-				"creationTimestamp": "2025-08-26T21:56:50Z",
-				"lastUpdatedTimestamp": "2025-08-26T21:56:50Z"
+				"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+				"creationTimestamp": "2025-10-17T22:37:57Z",
+				"lastUpdatedTimestamp": "2025-10-17T22:37:57Z",
+				"secret": "mongo-secret"
 			}`,
+			err: nil,
+		},`,
 			err: nil,
 		},
 		{
 			name:       "Get with no args returns an array",
-			args:       []string{},
+			args:       []string{"--filter", "type=mongo"},
 			outGolden:  "NewGetCommand_Out_GetAllReturnsArray",
 			errGolden:  "NewGetCommand_Err_GetAllReturnsArray",
 			url:        true,
@@ -67,20 +113,22 @@ func TestNewGetCommand(t *testing.T) {
 			response: `{
 			"content": [
                   {
-                          "name": "openai-credential",
-                          "labels": [],
-                          "active": true,
-                          "id": "81ca1ac6-3058-4ecd-a292-e439827a675a",
-                          "creationTimestamp": "2025-08-26T21:56:50Z",
-                          "lastUpdatedTimestamp": "2025-08-26T21:56:50Z"
+					"name": "mongo-credential-2",
+					"type": "mongo",
+					"labels": [],
+					"active": true,
+					"id": "3b32e410-2F33-412d-9fb8-17970131921c",
+					"creationTimestamp": "2025-08-26T21:56:50Z",
+					"lastUpdatedTimestamp": "2025-08-26T21:56:50Z"
                   },
                   {
-                          "name": "mongo-credential",
-                          "labels": [],
-                          "active": true,
-                          "id": "cfa0ef51-1fd9-47e2-8fdb-262ac9712781",
-                          "creationTimestamp": "2025-08-14T18:01:59Z",
-                          "lastUpdatedTimestamp": "2025-08-14T18:01:59Z"
+					"name": "mongo-credential",
+					"type": "mongo",
+					"labels": [],
+					"active": true,
+					"id": "cfa0ef51-1fd9-47e2-8fdb-262ac9712781",
+					"creationTimestamp": "2025-08-14T18:01:59Z",
+					"lastUpdatedTimestamp": "2025-08-14T18:01:59Z"
                   }
           ],
 			"pageable": {
@@ -108,7 +156,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        false,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/credential/81ca1ac6-3058-4ecd-a292-e439827a675a",
+			path:       "/credential/3b32e410-2F33-412d-9fb8-17970131921c",
 			statusCode: http.StatusOK,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
@@ -134,20 +182,20 @@ func TestNewGetCommand(t *testing.T) {
 			outGolden:  "NewGetCommand_Out_NotUUID",
 			errGolden:  "NewGetCommand_Err_NotUUID",
 			method:     http.MethodGet,
-			path:       "/credential/81ca1ac6-3058-4ecd-a292-e439827a675a",
+			path:       "/credential/3b32e410-2F33-412d-9fb8-17970131921c",
 			statusCode: http.StatusOK,
 			response:   ``,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not convert given id \"test\" to UUID. This command does not support filters or referencing an entity by name."),
 		},
 		{
 			name:       "Printing JSON object fails",
-			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
+			args:       []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
 			outGolden:  "NewGetCommand_Out_PrintJSONFails",
 			errGolden:  "NewGetCommand_Err_PrintJSONFails",
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/credential/81ca1ac6-3058-4ecd-a292-e439827a675a",
+			path:       "/credential/3b32e410-2F33-412d-9fb8-17970131921c",
 			statusCode: http.StatusOK,
 			response:   `{"messages": {{}`,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '{' looking for beginning of object key string"), "Could not print JSON object"),
@@ -184,19 +232,19 @@ func TestNewGetCommand(t *testing.T) {
 		},
 		{
 			name:       "GetEntity returns HTTP error",
-			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
+			args:       []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
 			outGolden:  "NewGetCommand_Out_GetEntityHTTPError",
 			errGolden:  "NewGetCommand_Err_GetEntityHTTPError",
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/credential/81ca1ac6-3058-4ecd-a292-e439827a675a",
+			path:       "/credential/3b32e410-2F33-412d-9fb8-17970131921c",
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
 			"code": 1003,
 			"messages": [
-				"Entity not found: 81ca1ac6-3058-4ecd-a292-e439827a675a"
+				"Entity not found: 3b32e410-2F33-412d-9fb8-17970131921c"
 			],
 			"timestamp": "2025-10-16T17:46:45.386963700Z"
 			}`,
@@ -204,10 +252,10 @@ func TestNewGetCommand(t *testing.T) {
 			"status": 404,
 			"code": 1003,
 			"messages": [
-				"Entity not found: 81ca1ac6-3058-4ecd-a292-e439827a675a"
+				"Entity not found: 3b32e410-2F33-412d-9fb8-17970131921c"
 			],
 			"timestamp": "2025-10-16T17:46:45.386963700Z"
-			}`)}, "Could not get entity with id \"81ca1ac6-3058-4ecd-a292-e439827a675a\""),
+			}`)}, "Could not get entity with id \"3b32e410-2F33-412d-9fb8-17970131921c\""),
 		},
 		{
 			name:       "GetEntities returns HTTP error",
