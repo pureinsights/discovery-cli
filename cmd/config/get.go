@@ -9,11 +9,11 @@ import (
 func getCommandExecute(cmd *cobra.Command, d cli.Discovery) error {
 	profile, err := cmd.Flags().GetString("profile")
 	if err != nil {
-		return err
+		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
 	}
 	sensitive, err := cmd.Flags().GetBool("sensitive")
 	if err != nil {
-		return err
+		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the sensitive flag")
 	}
 
 	return d.PrintConfigToUser(profile, sensitive)
