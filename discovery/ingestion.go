@@ -56,6 +56,11 @@ func (src seedRecordsClient) Get(id string) (gjson.Result, error) {
 	return execute(src.client, http.MethodGet, "/"+id)
 }
 
+// GetAll obtains every record in the seed.
+func (src seedRecordsClient) GetAll() ([]gjson.Result, error) {
+	return executeWithPagination(src.client, http.MethodGet, "")
+}
+
 // SeedExecutionClient can carry out every operation regarding seed executions.
 // With its Getter embedded struct, it can obtain seed executions.
 type seedExecutionsClient struct {
@@ -117,7 +122,7 @@ func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClien
 	return newSeedExecutionJobsClient(c, executionId)
 }
 
-// IngestionProcessorsClient is the struct that can create, read, update, delete, and clone processors.
+// IngestionProcessorsClient is the struct performs the CRUD and cloning of processors.
 type ingestionProcessorsClient struct {
 	crud
 	cloner
@@ -185,15 +190,21 @@ type ScanType string
 
 // The constants represent the respective scan type.
 const (
-	scanFull        ScanType = "FULL"
-	scanIncremental ScanType = "INCREMENETAL"
+	ScanFull        ScanType = "FULL"
+	ScanIncremental ScanType = "INCREMENETAL"
 )
 
 // Start starts the execution of seed.
-func (sc seedsClient) Start(id uuid.UUID, scan ScanType) (gjson.Result, error) {
-	return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
-		"scanType": {string(scan)},
-	}))
+func (sc seedsClient) Start(id uuid.UUID, scan ScanType, executionProperties gjson.Result) (gjson.Result, error) {
+	if !executionProperties.Exists() {
+		return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+			"scanType": {string(scan)},
+		}))
+	} else {
+		return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+			"scanType": {string(scan)},
+		}), WithJSONBody(executionProperties.Raw))
+	}
 }
 
 // Halt stops all the executions of a seed.
