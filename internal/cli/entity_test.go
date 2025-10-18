@@ -20,10 +20,12 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// WorkingGetter mocks the discovery.Getter struct to always answer a working result
 type WorkingGetter struct {
 	mock.Mock
 }
 
+// Get returns a working processor as if the request worked successfully.
 func (g *WorkingGetter) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
@@ -36,6 +38,7 @@ func (g *WorkingGetter) Get(id uuid.UUID) (gjson.Result, error) {
 	}`), nil
 }
 
+// GetAll returns a list of processors
 func (g *WorkingGetter) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{
@@ -68,10 +71,12 @@ func (g *WorkingGetter) GetAll() ([]gjson.Result, error) {
 	]`).Array(), nil
 }
 
+// FailingGetter mocks the discovery.Getter struct to always return an HTTP error.
 type FailingGetter struct {
 	mock.Mock
 }
 
+// Get returns a 404 Not Found
 func (g *FailingGetter) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -86,6 +91,7 @@ func (g *FailingGetter) Get(id uuid.UUID) (gjson.Result, error) {
 	}
 }
 
+// GetAll returns 401 unauthorized
 func (g *FailingGetter) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
