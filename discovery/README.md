@@ -86,6 +86,17 @@ It has the following method:
 | Export | GET | `{URL}/export` |  |  | `application/octet-stream` | Calls the `/export` endpoint. It returns the result of the endpoint in bytes, which should be written to a ZIP file so that it can be restored later. |
 | Import | POST | `{URL}/import` | `multipart/form-data` | `onConflict`: `UPDATE`, `IGNORE`, `FAIL` | `application/json` | Calls the `/import` endpoint. It receives the given file to restore the entities contained within. |
 
+### Searcher
+This struct has methods to search for entities in Discovery's components.
+
+It inherits from:
+* [Client](#client)
+
+It has the following method:
+
+| Name | Method | Path | Request Body | Response | Description |
+| --- | --- | --- | --- | --- | --- |
+| Search | POST | `{URL}/search` | `application/json` | `application/json` | Returns an array with the entities that match the given filters. |
 
 ## Discovery Clients
 ### Core Client
@@ -301,64 +312,17 @@ It can be created with `seedExecutionsClient.Jobs(Execution ID)` or `newSeedExec
 The `seedRecordsClient` is the struct that can get the records and their summary from a seed.
 
 It inherits from:
-* [Getter](#getter)
 * [Summarizer](#summarizer)
 
-The `Get()` method had to be overridden because records do not use a UUID as their ID, so this iteration receives a string. It can be created with `seedsClient.Records()` or `newSeedRecordsClient(seedsClient, Seed ID)`.
+It has the following methods:
+| Name | Method | Path | Response | Description |
+| --- | --- | --- | --- | --- |
+| Get | GET | `{URL}/seed/{UUID}/record/{RECORDID}` | `application/json` | Returns the seed record with the given id. |
+| GetAll | GET | `{URL}/seed/{UUID}/record` | `application/json` | Returns an array with all of the seed's records. |
+
+It can be created with `seedsClient.Records()` or `newSeedRecordsClient(seedsClient, Seed ID)`.
 
 ##### BackupRestore
 This struct imports and exports Ingestion's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
 
 Creating a `backupRestore` can be done with `ingestion.BackupRestore()`.
-
-### Staging Client
-Discovery has a Staging client struct. 
-
-Its fields are:
-| Field | Description |
-| --- | --- |
-| Url   | The URL of Discovery's Staging component. The URL should contain the URL up to the version. For example, `http://localhost:12020/v2`. |
-| ApiKey | The API key to authenticate each request to Discovery's Staging. |
-
-#### Sub-Clients
-
-##### BucketsClient
-This struct manages Staging's buckets. 
-
-It inherits from:
-* [Client](#client)
-
-It has the following methods:
-| Name | Method | Path | Request Body | Response | Description |
-| --- | --- | --- | --- | --- | --- | 
-| Create | POST | `{URL}/bucket/{bucketName}` | `application/json` | `application/json` | Creates a new bucket in the Staging Repository. It can receive an options JSON to add configurations and create indices. |
-| GetAll | GET | `{URL}/bucket` |  | `application/json` | Obtains the names of every bucket in the Staging Repository. |
-| Get | GET | `{URL}/bucket/{bucketName}` |  | `application/json` | Gets the information of the bucket. |
-| Delete | DELETE | `{URL}/bucket/{bucketName}` | | `application/json` | Deletes the bucket. |
-| Purge | DELETE | `{URL}/bucket/{bucketName}/purge` | | `application/json` | Deletes all of the records in the bucket. |
-| CreateIndex | PUT | `{URL}/bucket/{bucketName}/index/{indexName}` | `application/json` | `application/json` | Creates an index on the given bucket. The configuration it receives is an array of JSONs, each with the information of the fields that will be indexed. |
-| DeleteIndex | DELETE | `{URL}/bucket/{bucketName}/index/{indexName}` |  | `application/json` | Removes the index on the bucket. |
-
-Creating a `bucketsClient` can be done with `staging.Buckets()` or `newBucketsClient(URL, API Key)`.
-
-##### ContentClient
-This struct manages a bucket's content. 
-
-It inherits from:
-* [Client](#client)
-
-It has the following methods:
-| Name | Method | Path | Request Body | Query Parameters | Response | Description |
-| --- | --- | --- | --- | --- | --- | --- | 
-| Store | POST | `{URL}/content/{bucketName}/{contentId}` | `application/json` | • `parentId` |`application/json` | Adds the received content JSON to a document with the given Content ID. The Parent ID can be used to establish hierarchical relationships between documents. |
-| Get | GET | `{URL}/content/{bucketName}/{contentId}` || • `action`: `STORE`, `DELETE`<br>• `include`<br>• `exclude` | `application/json` | Obtains the information of the record with the given Content ID in the bucket. It can receive functional options described later in the docuumentation. |
-| Delete | DELETE | `{URL}/content/{bucketName}/{contentId}` |  |  |`application/json` | Deletes the document with the given content ID in the bucket. |
-
-The functional options for the `Get` method are the following:
-| Option | Description |
-| --- | --- |
-| WithContentAction | Adds the `action` query parameter to the request. Some examples of the values are `STORE` and `DELETE`. This will make the `Get()` function obtain the record with that action in its configuration. |
-| WithIncludeProjections | This function receives an array of fields that need to be included in the result of the `GET` request. |
-| WithExcludeProjections | This function receives an array of fields that need to be excluded from the result of the `GET` request. |
-
-Creating a `contentClient` can be done with `staging.Content(Bucket Name)` or `newContentClient(URL, API Key, Bucket Name)`.
