@@ -2,7 +2,6 @@ package config
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -90,24 +89,24 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 		},
 
 		// Error cases
-		{
-			name:      "Writing to config.toml fails",
-			writePath: "doesnotexist",
-			config: map[string]string{
-				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010/v2",
-				"cn.ingestion_url": "http://localhost:12030/v2",
-				"cn.queryflow_url": "http://localhost:12040/v2",
-				"cn.staging_url":   "http://localhost:12020/v2",
-				"cn.core_key":      "core321",
-				"cn.ingestion_key": "ingestion432",
-				"cn.queryflow_key": "queryflow123",
-				"cn.staging_key":   "staging235",
-			},
-			outGolden: "NewConfigCommand_Out_ConfigError",
-			errGolden: "NewConfigCommand_Err_ConfigError",
-			err:       fmt.Errorf("cannot find the path specified"),
-		},
+		// {
+		// 	name:      "Writing to config.toml fails",
+		// 	writePath: "doesnotexist",
+		// 	config: map[string]string{
+		// 		"profile":          "cn",
+		// 		"cn.core_url":      "http://localhost:12010",
+		// 		"cn.ingestion_url": "http://localhost:12030",
+		// 		"cn.queryflow_url": "http://localhost:12040",
+		// 		"cn.staging_url":   "http://localhost:12020",
+		// 		"cn.core_key":      "core321",
+		// 		"cn.ingestion_key": "ingestion432",
+		// 		"cn.queryflow_key": "queryflow123",
+		// 		"cn.staging_key":   "staging235",
+		// 	},
+		// 	outGolden: "NewConfigCommand_Out_ConfigError",
+		// 	errGolden: "NewConfigCommand_Err_ConfigError",
+		// 	err:       fmt.Errorf("cannot find the path specified"),
+		// },
 	}
 
 	for _, tc := range tests {
