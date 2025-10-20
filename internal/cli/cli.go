@@ -54,10 +54,12 @@ func NewDiscovery(io *iostreams.IOStreams, config *viper.Viper, configPath strin
 	}
 }
 
+// ConfigPath returns the address that contains Discovery's configuration.
 func (d discovery) ConfigPath() string {
 	return d.configPath
 }
 
+// CommandConfig is a struct that contains fields necessary to check the credentials.
 type commandConfig struct {
 	profile       string
 	output        string
@@ -66,6 +68,7 @@ type commandConfig struct {
 	componentName string
 }
 
+// GetCommandConfig is the constructor of the commandConfig struct
 func GetCommandConfig(profile, output, componentName, url, apiKey string) commandConfig {
 	return commandConfig{
 		profile:       profile,
@@ -76,6 +79,8 @@ func GetCommandConfig(profile, output, componentName, url, apiKey string) comman
 	}
 }
 
+// CheckCredentials verifies that both the URL and API Key are set for the given profile and component in the configuration.
+// If not, it returns an error
 func checkCredentials(d Discovery, profile, componentName, urlProperty, apiProperty string) error {
 	missingConfig := "The Discovery %s %s is missing for profile %q.\nTo set the %s for the Discovery %s API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery %s config --profile {profile}"
 
