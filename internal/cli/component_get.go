@@ -4,8 +4,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetCommand(args []string, d Discovery, client getter, profile, output, componentName, urlProperty, apiProperty string) error {
-	err := checkCredentials(d, profile, componentName, urlProperty, apiProperty)
+func GetCommand(args []string, d Discovery, client getter, config commandConfig) error {
+	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
 	if err != nil {
 		return err
 	}
@@ -15,11 +15,11 @@ func GetCommand(args []string, d Discovery, client getter, profile, output, comp
 		if err != nil {
 			return NewErrorWithCause(ErrorExitCode, err, "Could not convert given id %q to UUID. This command does not support filters or referencing an entity by name.", args[0])
 		}
-		printer := GetObjectPrinter(output)
+		printer := GetObjectPrinter(config.output)
 		err = d.GetEntity(client, id, printer)
 		return err
 	} else {
-		printer := GetArrayPrinter(output)
+		printer := GetArrayPrinter(config.output)
 		err = d.GetEntities(client, printer)
 		return err
 	}

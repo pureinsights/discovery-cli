@@ -17,10 +17,11 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return cli.GetCommand(args, d, coreClient.Labels(), profile, vpr.GetString("output"), "Core", "core_url", "core_key")
+			return cli.GetCommand(args, d, coreClient.Labels(), cli.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url", "core_key"))
 		},
 	}
 	return get

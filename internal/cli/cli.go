@@ -58,6 +58,24 @@ func (d discovery) ConfigPath() string {
 	return d.configPath
 }
 
+type commandConfig struct {
+	profile       string
+	output        string
+	url           string
+	apiKey        string
+	componentName string
+}
+
+func GetCommandConfig(profile, output, componentName, url, apiKey string) commandConfig {
+	return commandConfig{
+		profile:       profile,
+		output:        output,
+		url:           url,
+		apiKey:        apiKey,
+		componentName: componentName,
+	}
+}
+
 func checkCredentials(d Discovery, profile, componentName, urlProperty, apiProperty string) error {
 	missingConfig := "The Discovery %s %s is missing for profile %q.\nTo set the %s for the Discovery %s API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery %s config --profile {profile}"
 
