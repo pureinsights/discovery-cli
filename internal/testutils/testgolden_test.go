@@ -81,6 +81,7 @@ func TestRead_SucceedsWhenFileExists(t *testing.T) {
 	require.Equal(t, []byte("this is a test\n"), got)
 }
 
+// TestRead_ReturnsNilWhenUpdateTrue tests the Read function when the update flag is true
 func TestRead_ReturnsNilWhenUpdateTrue(t *testing.T) {
 	changeDirectoryHelper(t)
 
