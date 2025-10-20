@@ -23,6 +23,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
 			return cli.GetCommand(args, d, coreClient.Labels(), cli.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url", "core_key"))
 		},
+		Args: cobra.MaximumNArgs(1),
 	}
 	return get
 }
