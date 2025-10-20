@@ -26,7 +26,6 @@ type Discovery interface {
 	PrintStagingConfigToUser(profile string, sensitive, standalone bool) error
 	GetEntity(client getter, id uuid.UUID, printer Printer) error
 	GetEntities(client getter, printer Printer) error
-	GetCommand(args []string, client getter, profile, output, componentName, urlProperty, apiProperty string) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
@@ -59,7 +58,7 @@ func (d discovery) ConfigPath() string {
 	return d.configPath
 }
 
-func (d discovery) checkCredentials(profile, componentName, urlProperty, apiProperty string) error {
+func checkCredentials(d Discovery, profile, componentName, urlProperty, apiProperty string) error {
 	missingConfig := "The Discovery %s %s is missing for profile %q.\nTo set the %s for the Discovery %s API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery %s config --profile {profile}"
 
 	vpr := d.Config()

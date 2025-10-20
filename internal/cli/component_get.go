@@ -4,8 +4,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func (d discovery) GetCommand(args []string, client getter, profile, output, componentName, urlProperty, apiProperty string) error {
-	err := d.checkCredentials(profile, componentName, urlProperty, apiProperty)
+func GetCommand(args []string, d Discovery, client getter, profile, output, componentName, urlProperty, apiProperty string) error {
+	err := checkCredentials(d, profile, componentName, urlProperty, apiProperty)
 	if err != nil {
 		return err
 	}
