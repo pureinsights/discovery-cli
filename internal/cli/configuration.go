@@ -12,9 +12,13 @@ import (
 )
 
 const (
-	DefaultCoreURL      string = "http://localhost:12010"
-	DefaultStagingURL   string = "http://localhost:12020"
+	// The default URL for Discovery Core
+	DefaultCoreURL string = "http://localhost:12010"
+	// The default URL for Discovery Staging
+	DefaultStagingURL string = "http://localhost:12020"
+	// The default URL for Discovery Ingestion
 	DefaultIngestionURL string = "http://localhost:12030"
+	// The default URL for Discovery QueryFlow
 	DefaultQueryFlowURL string = "http://localhost:12040"
 	SaveHeader          string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
 )
