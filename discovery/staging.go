@@ -33,7 +33,7 @@ func WithExcludeProjections(exclude []string) stagingGetContentOption {
 	}
 }
 
-// ContentClient is a struct that manages the content inside the Staging Repository's buckets.
+// ContentClient is the struct that manages the content inside the Staging Repository's buckets.
 type contentClient struct {
 	client
 }
