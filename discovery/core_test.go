@@ -43,6 +43,8 @@ func Test_newCredentialsClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/credential", cc.crud.client.client.BaseURL)
 	assert.Equal(t, c.ApiKey, cc.cloner.client.ApiKey)
 	assert.Equal(t, c.client.BaseURL+"/credential", cc.cloner.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, cc.searcher.client.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/credential", cc.searcher.client.client.BaseURL)
 }
 
 // Test_newServersClient tests the constructor of newServersClient
@@ -54,6 +56,8 @@ func Test_newServersClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/server", sc.crud.client.client.BaseURL)
 	assert.Equal(t, c.ApiKey, sc.cloner.ApiKey)
 	assert.Equal(t, c.client.BaseURL+"/server", sc.cloner.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, sc.searcher.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/server", sc.searcher.client.client.BaseURL)
 }
 
 // Test_newFilesClient tests the constructor of newFilesClient
@@ -692,10 +696,12 @@ func Test_core_Servers(t *testing.T) {
 	c := NewCore("http://localhost:12010/v2/v2", "Api Key")
 	sc := c.Servers()
 
-	assert.Equal(t, c.ApiKey, sc.ApiKey)
-	assert.Equal(t, c.Url+"/server", sc.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, sc.crud.ApiKey)
+	assert.Equal(t, c.Url+"/server", sc.crud.client.client.BaseURL)
 	assert.Equal(t, c.ApiKey, sc.cloner.ApiKey)
 	assert.Equal(t, c.Url+"/server", sc.cloner.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, sc.searcher.ApiKey)
+	assert.Equal(t, c.Url+"/server", sc.searcher.client.client.BaseURL)
 }
 
 // Test_core_Files tests the core.Files() function
