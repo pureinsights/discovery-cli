@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// NewGetCommand creates the label get command
+// NewGetCommand tests the NewGetCommand function
 func TestNewGetCommand(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -321,7 +321,7 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 
 	err := getCmd.Execute()
 	require.Error(t, err)
-	assert.Equal(t, "flag accessed but not defined: profile", err.Error())
+	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
 	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", out.Bytes())
 	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", errBuf.Bytes())
