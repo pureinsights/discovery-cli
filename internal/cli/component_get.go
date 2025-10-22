@@ -25,3 +25,29 @@ func GetCommand(args []string, d Discovery, client getter, config commandConfig)
 		return err
 	}
 }
+
+func SearchCommand(args []string, d Discovery, client searcher, config commandConfig, filters *[]string) error {
+	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
+	if err != nil {
+		return err
+	}
+
+	if len(args) > 0 {
+		printer := GetObjectPrinter(config.output)
+		err = d.SearchEntity(client, args[0], printer)
+		return err
+	} else if len(*filters) > 0 {
+		printer := GetArrayPrinter(config.output)
+		filter, err := BuildEntitiesFilter(*filters)
+		if err != nil {
+			return err
+		}
+
+		err = d.SearchEntities(client, filter, printer)
+		return err
+	} else {
+		printer := GetArrayPrinter(config.output)
+		err = d.GetEntities(client, printer)
+		return err
+	}
+}

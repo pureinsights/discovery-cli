@@ -355,7 +355,31 @@ func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 
 // GetAll returns
 func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
-	return gjson.Parse(`[]`).Array(), nil
+	return gjson.Parse(`[
+		{
+		"type": "mongo",
+		"name": "label test 1 clone 10",
+		"labels": [
+			{
+			"key": "A",
+			"value": "A"
+			}
+		],
+		"active": true,
+		"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+		"creationTimestamp": "2025-10-17T22:37:57Z",
+		"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+		},
+		{
+		"type": "openai",
+		"name": "OpenAI credential clone clone",
+		"labels": [],
+		"active": true,
+		"id": "5c09589e-b643-41aa-a766-3b7fc3660473",
+		"creationTimestamp": "2025-10-17T22:38:12Z",
+		"lastUpdatedTimestamp": "2025-10-17T22:38:12Z"
+		},
+	]`).Array(), nil
 }
 
 // FailingSearcher mocks the discovery.Searcher struct when its functions return errors.

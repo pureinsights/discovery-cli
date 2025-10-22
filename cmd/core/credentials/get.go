@@ -29,25 +29,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			}
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			if len(args) > 0 {
-
-				printer := cli.GetObjectPrinter(vpr.GetString("output"))
-				err = d.SearchEntity(coreClient.Credentials(), args[0], printer)
-				return err
-			} else if len(filters) > 0 {
-				printer := cli.GetArrayPrinter(vpr.GetString("output"))
-				filter, err := cli.BuildEntitiesFilter(filters)
-				if err != nil {
-					return err
-				}
-
-				err = d.SearchEntities(coreClient.Credentials(), filter, printer)
-				return err
-			} else {
-				printer := cli.GetArrayPrinter(vpr.GetString("output"))
-				err = d.GetEntities(coreClient.Credentials(), printer)
-				return err
-			}
+			return cli.SearchCommand(args, d, coreClient.Credentials(), cli.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url", "core_key"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
 	}
