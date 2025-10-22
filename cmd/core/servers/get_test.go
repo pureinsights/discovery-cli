@@ -36,7 +36,7 @@ func TestNewGetCommand(t *testing.T) {
 		// Working case
 		{
 			name:       "Search by name returns an array of which the first object is returned",
-			args:       []string{"label test clone 10"},
+			args:       []string{"MongoDB Atlas Server Clone 2"},
 			url:        true,
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_SearchByNameReturnsObject",
@@ -48,48 +48,40 @@ func TestNewGetCommand(t *testing.T) {
 			"content": [
 				{
 				"source": {
-					"type": "mongo",
-					"name": "label test 1 clone 10",
-					"labels": [
+				"type": "mongo",
+				"name": "MongoDB Atlas server clone 2",
+				"labels": [
 					{
 						"key": "A",
 						"value": "A"
 					}
-					],
-					"active": true,
-					"id": "3b32e410-2f33-412d-9fb8-17970131921c",
-					"creationTimestamp": "2025-10-17T22:37:57Z",
-					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				],
+				"active": true,
+				"id": "21029da3-041c-43b5-a67e-870251f2f6a6",
+				"creationTimestamp": "2025-09-29T15:50:19Z",
+				"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
 				},
-				"highlight": {
-					"name": [
-					"<em>label</em> <em>test</em> 1 <em>clone</em> <em>10</em>"
-					]
-				},
-				"score": 1.4854797
-				},
-				{
+				"highlight": {},
+				"score": 0.30723327
+			},
+			{
 				"source": {
-					"type": "mongo",
-					"name": "label test 1 clone",
-					"labels": [
+				"type": "mongo",
+				"name": "MongoDB Atlas server clone 4",
+				"labels": [
 					{
 						"key": "A",
 						"value": "A"
 					}
-					],
-					"active": true,
-					"id": "4957145b-6192-4862-a5da-e97853974e9f",
-					"creationTimestamp": "2025-10-17T22:37:53Z",
-					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				],
+				"active": true,
+				"id": "a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f",
+				"creationTimestamp": "2025-09-29T15:50:21Z",
+				"lastUpdatedTimestamp": "2025-09-29T15:50:21Z"
 				},
-				"highlight": {
-					"name": [
-					"<em>label</em> <em>test</em> 1 <em>clone</em>"
-					]
-				},
-				"score": 0.3980717
-				}
+				"highlight": {},
+				"score": 0.30723327
+			}
 			],
 			"pageable": {
 				"page": 0,
@@ -118,41 +110,45 @@ func TestNewGetCommand(t *testing.T) {
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
-				{
+			{
 				"type": "mongo",
-				"name": "label test 1 clone 10",
-				"labels": [
-					{
-					"key": "A",
-					"value": "A"
-					}
-				],
-				"active": true,
-				"id": "3b32e410-2f33-412d-9fb8-17970131921c",
-				"creationTimestamp": "2025-10-17T22:37:57Z",
-				"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
-				},
-				{
-				"type": "openai",
-				"name": "OpenAI server clone clone",
+				"name": "MongoDB Atlas server clone 6",
 				"labels": [],
 				"active": true,
-				"id": "5c09589e-b643-41aa-a766-3b7fc3660473",
-				"creationTimestamp": "2025-10-17T22:38:12Z",
-				"lastUpdatedTimestamp": "2025-10-17T22:38:12Z"
-				},
+				"id": "226e8a0b-5016-4ebe-9963-1461edd39d0a",
+				"creationTimestamp": "2025-09-29T15:50:22Z",
+				"lastUpdatedTimestamp": "2025-09-29T15:50:22Z"
+			},
+			{
+				"type": "mongo",
+				"name": "MongoDB Atlas server clone 9",
+				"labels": [],
+				"active": true,
+				"id": "2b839453-ddad-4ced-8e13-2c7860af60a7",
+				"creationTimestamp": "2025-09-29T15:50:26Z",
+				"lastUpdatedTimestamp": "2025-09-29T15:50:26Z"
+			},
+			{
+				"type": "mongo",
+				"name": "MongoDB Atlas server clone 3",
+				"labels": [],
+				"active": true,
+				"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
+				"creationTimestamp": "2025-09-29T15:50:20Z",
+				"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
+            }
 			],
 			"pageable": {
 				"page": 0,
 				"size": 25,
 				"sort": []
 			},
-			"totalSize": 2,
+			"totalSize": 3,
 			"totalPages": 1,
 			"empty": false,
 			"size": 25,
 			"offset": 0,
-			"numberOfElements": 2,
+			"numberOfElements": 3,
 			"pageNumber": 0
 			}`,
 			err: nil,
@@ -169,54 +165,57 @@ func TestNewGetCommand(t *testing.T) {
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
-				{
+			{
 				"source": {
 					"type": "mongo",
-					"name": "label test 1",
-					"labels": [
-					{
-						"key": "A",
-						"value": "A"
-					}
-					],
+					"name": "MongoDB Atlas server clone",
+					"labels": [],
 					"active": true,
-					"id": "8c243a1d-9384-421d-8f99-4ef28d4e0ab0",
-					"creationTimestamp": "2025-10-17T15:33:58Z",
-					"lastUpdatedTimestamp": "2025-10-17T15:33:58Z"
+					"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+					"creationTimestamp": "2025-09-29T15:50:17Z",
+					"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
 				},
 				"highlight": {},
-				"score": 0.15534057
-				},
-				{
+				"score": 0.20970252
+			},
+			{
 				"source": {
 					"type": "mongo",
-					"name": "label test 1 clone",
-					"labels": [
-					{
-						"key": "A",
-						"value": "A"
-					}
-					],
+					"name": "MongoDB Atlas server clone 1",
+					"labels": [],
 					"active": true,
-					"id": "4957145b-6192-4862-a5da-e97853974e9f",
-					"creationTimestamp": "2025-10-17T22:37:53Z",
-					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+					"id": "8f14c11c-bb66-49d3-aa2a-dedff4608c17",
+					"creationTimestamp": "2025-09-29T15:50:19Z",
+					"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
 				},
 				"highlight": {},
-				"score": 0.15534057
-				}
+				"score": 0.20970252
+			},
+            {
+				"source": {
+					"type": "mongo",
+					"name": "MongoDB Atlas server clone 3",
+					"labels": [],
+					"active": true,
+					"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
+					"creationTimestamp": "2025-09-29T15:50:20Z",
+					"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
+				},
+				"highlight": {},
+				"score": 0.20970252
+			}
 			],
 			"pageable": {
 				"page": 0,
 				"size": 25,
 				"sort": []
 			},
-			"totalSize": 13,
+			"totalSize": 3,
 			"totalPages": 1,
 			"empty": false,
 			"size": 25,
 			"offset": 0,
-			"numberOfElements": 13,
+			"numberOfElements": 3,
 			"pageNumber": 0
 			}`,
 			err: nil,
