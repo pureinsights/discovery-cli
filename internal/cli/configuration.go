@@ -26,6 +26,7 @@ const (
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
 // When the file could not be found, an error is logged to the error stream of the IOStreams parameter.
+// If the configuration file exists, the functions returns true and false if it does not.
 func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStreams) (bool, error) {
 	v.SetConfigName(baseName)
 	v.SetConfigType("toml")
