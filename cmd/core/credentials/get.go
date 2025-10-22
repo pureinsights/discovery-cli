@@ -13,7 +13,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains credentials from Discovery Core.",
-		Long:  "",
+		Long:  "get is the command used to obtain Discovery Core's credentials. The user can send a name or UUID to get a specific credential. If no argument is given, then the command retrieves every credential. The command also supports filters with the flag --filter followed by the filter in the format filter=key:value.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -34,6 +34,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, "Apply filters in the format \"filter=key:value\"")
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:
+- Label: The format is label={key}[:{value}], where the value is optional.
+- Type: The format is type={type}.`)
 	return get
 }

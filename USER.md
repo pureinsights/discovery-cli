@@ -371,3 +371,71 @@ Flags:
 Global Flags:
   -p, --profile string   configuration profile to use (default "default")
 ```
+
+##### Credential
+`credential` is the command used to manage credentials in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery core credential [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get the command's help
+discovery core credential -h
+The command to interact with Discovery Core's secrets.
+```
+
+###### Get
+`get` is the command used to obtain Discovery Core's credentials. The user can send a name or UUID to get a specific credential. If no argument is given, then the command retrieves every credential. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery core credential get [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the credential that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+```bash
+# Get a credential by id
+discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","secret":"mongo-secret","type":"mongo"}
+
+```
+
+```bash
+# Get credential by name
+{"highlight":{"name":["\u003cem\u003elabel\u003c/em\u003e \u003cem\u003etest\u003c/em\u003e \u003cem\u003e1\u003c/em\u003e \u003cem\u003eclone\u003c/em\u003e \u003cem\u003e10\u003c/em\u003e"]},"score":1.63641,"source":{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","type":"mongo"}}
+```
+
+```bash
+# Get credentials using filters
+./discovery core credential get --filter label=A:A --filter type=mongo
+{"highlight":{},"score":0.22338435,"source":{"active":true,"creationTimestamp":"2025-10-17T15:33:58Z","id":"8c243a1d-9384-421d-8f99-4ef28d4e0ab0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T15:33:58Z","name":"label test 1","type":"mongo"}}
+```
+
+```bash
+# Get all credentials using the configuration in profile "cn"
+discovery core credential get -p cn
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"label test 2","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:56Z","id":"46cb4fff-28be-4901-b059-1dd618e74ee4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:56Z","name":"label test 1 clone 9","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"label test 1 clone","type":"mongo"}
+```
