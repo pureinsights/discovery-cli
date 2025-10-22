@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// GetCommand is the function that the executes the get operation for the commands that do not work with names or filters.
+// GetCommand is the function that executes the get operation for the commands that do not work with names or filters.
 func GetCommand(args []string, d Discovery, client getter, config commandConfig) error {
 	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
 	if err != nil {
@@ -26,6 +26,7 @@ func GetCommand(args []string, d Discovery, client getter, config commandConfig)
 	}
 }
 
+// SearchCommand is the function that the get command executes when it also allows for searching by name and with filters.
 func SearchCommand(args []string, d Discovery, client searcher, config commandConfig, filters *[]string) error {
 	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
 	if err != nil {
