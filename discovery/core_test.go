@@ -43,6 +43,8 @@ func Test_newCredentialsClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/credential", cc.crud.client.client.BaseURL)
 	assert.Equal(t, c.ApiKey, cc.cloner.client.ApiKey)
 	assert.Equal(t, c.client.BaseURL+"/credential", cc.cloner.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, cc.searcher.client.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/credential", cc.searcher.client.client.BaseURL)
 }
 
 // Test_newServersClient tests the constructor of newServersClient
