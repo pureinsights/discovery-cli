@@ -97,7 +97,7 @@ func obfuscate(s string) string {
 // AskUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
 // If the user inputs an empty string, the value is not changed.
 // If the user inputs a space, the value is set to an empty string.
-// If the user inputs a new value, the property is modified.
+// If the user inputs a new value, the property is updated.
 func (d discovery) askUserConfig(profile, propertyName, property string, sensitive bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
