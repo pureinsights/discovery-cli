@@ -428,7 +428,7 @@ discovery core credential get "label test 1 clone 10"
 
 ```bash
 # Get credentials using filters
-./discovery core credential get --filter label=A:A --filter type=mongo
+discovery core credential get --filter label=A:A --filter type=mongo
 {"highlight":{},"score":0.22338435,"source":{"active":true,"creationTimestamp":"2025-10-17T15:33:58Z","id":"8c243a1d-9384-421d-8f99-4ef28d4e0ab0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T15:33:58Z","name":"label test 1","type":"mongo"}}
 ```
 
@@ -497,7 +497,7 @@ discovery core server get "MongoDB Atlas server clone 2"
 
 ```bash
 # Get servers using filters
-./discovery core server get --filter label=A:A -f type=mongo
+discovery core server get --filter label=A:A -f type=mongo
 {"highlight":{},"score":0.82416904,"source":{"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server clone 2","type":"mongo"}}
 {"highlight":{},"score":0.82416904,"source":{"active":true,"creationTimestamp":"2025-09-29T15:50:21Z","id":"a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:21Z","name":"MongoDB Atlas server clone 4","type":"mongo"}}
 ```
