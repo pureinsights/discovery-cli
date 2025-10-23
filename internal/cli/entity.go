@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	// EqualsFilter contains the JSON string for the Equals DSL filter.
 	EqualsFilter = `{
 	"equals": {
 		"field": "%s",
@@ -130,38 +131,55 @@ func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer 
 	return err
 }
 
+// ParseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery
+func parseFilter(filter string, labelFilters *[]string, typeFilters *[]string) error {
+
+	filterType, keyValue, found := strings.Cut(filter, "=")
+	if !found {
+		return NewError(ErrorExitCode, "Filter %q does not follow the format {type}={key}[:{value}]", filter)
+	}
+
+	switch filterType {
+	case "label":
+		key, value, found := strings.Cut(keyValue, ":")
+		if key == "" {
+			return NewError(ErrorExitCode, "The label's key in the filter %q cannot be empty", filter)
+		}
+		*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.key", key))
+		if found {
+			if value == "" {
+				return NewError(ErrorExitCode, "The label's value in the filter %q cannot be empty if ':' is included", filter)
+			}
+			*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.value", value))
+		}
+	case "type":
+		if keyValue == "" {
+			return NewError(ErrorExitCode, "The type in the filter %q cannot be empty", filter)
+		}
+
+		*typeFilters = append(*typeFilters, fmt.Sprintf(EqualsFilter, "type", keyValue))
+	default:
+		return NewError(ErrorExitCode, "Filter type %q does not exist", filterType)
+	}
+
+	return nil
+}
+
 // BuildEntitiesFilter builds a filter based on the arguments sent to the get command.
 // The filters are combined through the "and" operator.
 func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 	labelFilters := []string{}
 	typeFilters := []string{}
 
+	var err error
 	for _, filter := range filters {
-		parts := strings.Split(filter, "=")
-		filterType := parts[0]
-
-		switch filterType {
-		case "label":
-			keyValue := strings.Split(parts[1], ":")
-			key := keyValue[0]
-			var value string
-			if len(keyValue) > 1 {
-				value = keyValue[1]
-			}
-
-			labelFilters = append(labelFilters, fmt.Sprintf(EqualsFilter, "labels.key", key))
-			if value != "" {
-				labelFilters = append(labelFilters, fmt.Sprintf(EqualsFilter, "labels.value", value))
-			}
-		case "type":
-			typeFilters = append(typeFilters, fmt.Sprintf(EqualsFilter, "type", parts[1]))
-		default:
-			return gjson.Result{}, NewError(ErrorExitCode, "Filter %q does not exist", filterType)
+		err := parseFilter(filter, &labelFilters, &typeFilters)
+		if err != nil {
+			return gjson.Result{}, err
 		}
 	}
 
 	labelFilterString := "{}"
-	var err error
 	if len(labelFilters) > 1 {
 		labelFilterString, err = sjson.SetRaw(labelFilterString, "and", "["+strings.Join(labelFilters, ",")+"]")
 		if err != nil {

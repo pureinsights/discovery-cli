@@ -711,7 +711,7 @@ func Test_searchEntity(t *testing.T) {
 	}
 }
 
-// Test_searchEntity tests the discovery.SearchEntity() function.
+// Test_discovery_SearchEntity tests the discovery.SearchEntity() function.
 func Test_discovery_SearchEntity(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -801,7 +801,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 	}
 }
 
-// Test_searchEntity tests the discovery.SearchEntities() function.
+// Test_discovery_SearchEntities tests the discovery.SearchEntities() function.
 func Test_discovery_SearchEntities(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -876,7 +876,96 @@ func Test_discovery_SearchEntities(t *testing.T) {
 	}
 }
 
-// Test_searchEntity tests the BuildEntitiesFilter() function.
+// Test_parseFilter tests the parseFilter() function.
+func Test_parseFilter(t *testing.T) {
+	tests := []struct {
+		name                 string
+		filters              []string
+		expectedLabelFilters []string
+		expectedTypeFilters  []string
+		err                  error
+	}{
+		{
+			name:    "Send label with key and value, label with only key, and type filter",
+			filters: []string{"label=A:C", "label=B", "type=mongo"},
+			expectedLabelFilters: []string{`{
+	"equals": {
+		"field": "labels.key",
+		"value": "A"
+		}
+	}`, `{
+	"equals": {
+		"field": "labels.value",
+		"value": "C"
+		}
+	}`, `{
+	"equals": {
+		"field": "labels.key",
+		"value": "B"
+		}
+	}`},
+			expectedTypeFilters: []string{`{
+	"equals": {
+		"field": "type",
+		"value": "mongo"
+		}
+	}`,
+			},
+			err: nil,
+		},
+		{
+			name:    "Send unknown filter",
+			filters: []string{"name=mongo"},
+			err:     NewError(ErrorExitCode, "Filter type \"name\" does not exist"),
+		},
+		{
+			name:    "Send filter with no =",
+			filters: []string{"label"},
+			err:     NewError(ErrorExitCode, "Filter \"label\" does not follow the format {type}={key}[:{value}]"),
+		},
+		{
+			name:    "Send label filter with empty key",
+			filters: []string{"label="},
+			err:     NewError(ErrorExitCode, "The label's key in the filter \"label=\" cannot be empty"),
+		},
+		{
+			name:    "Send label filter with empty value",
+			filters: []string{"label=key:"},
+			err:     NewError(ErrorExitCode, "The label's value in the filter \"label=key:\" cannot be empty if ':' is included"),
+		},
+		{
+			name:    "Send type filter with empty type",
+			filters: []string{"type="},
+			err:     NewError(ErrorExitCode, "The type in the filter \"type=\" cannot be empty"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			labelFilters := []string{}
+			typeFilters := []string{}
+
+			for _, filter := range tc.filters {
+				err := parseFilter(filter, &labelFilters, &typeFilters)
+
+				if tc.err != nil {
+					require.Error(t, err)
+					var errStruct Error
+					require.ErrorAs(t, err, &errStruct)
+					assert.EqualError(t, err, tc.err.Error())
+				} else {
+					require.NoError(t, err)
+				}
+			}
+			if tc.err == nil {
+				assert.Equal(t, tc.expectedLabelFilters, labelFilters)
+				assert.Equal(t, tc.expectedTypeFilters, typeFilters)
+			}
+		})
+	}
+}
+
+// TestBuildEntitiesFilter tests the BuildEntitiesFilter() function.
 func TestBuildEntitiesFilter(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -1147,7 +1236,7 @@ func TestBuildEntitiesFilter(t *testing.T) {
 			name:           "Filter that does not exist",
 			filters:        []string{"name=mongo"},
 			expectedFilter: ``,
-			err:            NewError(ErrorExitCode, "Filter \"name\" does not exist"),
+			err:            NewError(ErrorExitCode, "Filter type \"name\" does not exist"),
 		},
 	}
 
