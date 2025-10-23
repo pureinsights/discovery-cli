@@ -863,7 +863,7 @@ func Test_parseFilters(t *testing.T) {
 	}{
 		{
 			name:    "Send label with key and value, label with only key, and type filter",
-			filters: []string{"label=A:C", "label=B", "type=mongo", "label"},
+			filters: []string{"label=A:C", "label=B", "type=mongo"},
 			expectedLabelFilters: []string{`{
 	"equals": {
 		"field": "labels.key",
@@ -892,7 +892,27 @@ func Test_parseFilters(t *testing.T) {
 		{
 			name:    "Send unknown filter",
 			filters: []string{"name=mongo"},
-			err:     NewError(ErrorExitCode, "Filter \"name\" does not exist"),
+			err:     NewError(ErrorExitCode, "Filter type \"name\" does not exist"),
+		},
+		{
+			name:    "Send filter with no =",
+			filters: []string{"label"},
+			err:     NewError(ErrorExitCode, "Filter \"label\" does not follow the format {type}={key}[:{value}]"),
+		},
+		{
+			name:    "Send label filter with empty key",
+			filters: []string{"label="},
+			err:     NewError(ErrorExitCode, "The label's key in the filter \"label=\" cannot be empty"),
+		},
+		{
+			name:    "Send label filter with empty value",
+			filters: []string{"label=key:"},
+			err:     NewError(ErrorExitCode, "The label's value in the filter \"label=key:\" cannot be empty if ':' is included"),
+		},
+		{
+			name:    "Send type filter with empty type",
+			filters: []string{"type="},
+			err:     NewError(ErrorExitCode, "The type in the filter \"type=\" cannot be empty"),
 		},
 	}
 
@@ -910,8 +930,6 @@ func Test_parseFilters(t *testing.T) {
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
-				fmt.Println(labelFilters)
-				fmt.Println(typeFilters)
 				assert.Equal(t, tc.expectedLabelFilters, labelFilters)
 				assert.Equal(t, tc.expectedTypeFilters, typeFilters)
 			}
@@ -1190,7 +1208,7 @@ func TestBuildEntitiesFilter(t *testing.T) {
 			name:           "Filter that does not exist",
 			filters:        []string{"name=mongo"},
 			expectedFilter: ``,
-			err:            NewError(ErrorExitCode, "Filter \"name\" does not exist"),
+			err:            NewError(ErrorExitCode, "Filter type \"name\" does not exist"),
 		},
 	}
 
