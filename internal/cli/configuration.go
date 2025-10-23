@@ -20,7 +20,8 @@ const (
 	DefaultIngestionURL string = "http://localhost:12030"
 	// The default URL for Discovery QueryFlow
 	DefaultQueryFlowURL string = "http://localhost:12040"
-	SaveHeader          string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
+	// SaveHeader contains the instructions header printed when saving a configuration.
+	SaveHeader string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
 )
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
