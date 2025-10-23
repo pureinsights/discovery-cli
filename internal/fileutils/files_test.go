@@ -18,17 +18,12 @@ func TestCreateTemporaryFile_Success(t *testing.T) {
 	}{
 		{
 			name:     "File with name and real content",
-			filename: "testfile-*",
-			content:  "This is a test file",
-		},
-		{
-			name:     "File with empty name and real content",
-			filename: "",
+			filename: "testfile.txt",
 			content:  "This is a test file",
 		},
 		{
 			name:     "File with name and empty content",
-			filename: "empty-*",
+			filename: "empty.txt",
 			content:  "",
 		},
 	}
@@ -53,9 +48,18 @@ func TestCreateTemporaryFile_Success(t *testing.T) {
 // TestCreateTemporaryFile_InvalidDir tests when trying to create a file in an invalid directory.
 func TestCreateTemporaryFile_InvalidDir(t *testing.T) {
 	invalidDir := filepath.Join(os.TempDir(), "does-not-exist")
-	filename := "fail-*"
+	filename := "fail.txt"
 
-	path, err := CreateTemporaryFile(invalidDir, filename, "irrelevant")
+	path, err := CreateTemporaryFile(invalidDir, filename, "test")
 	require.Error(t, err)
 	require.Empty(t, path)
+}
+
+func TestCreateTemporaryFile_EmptyFile(t *testing.T) {
+	invalidDir := os.TempDir()
+	filename := ""
+
+	path, err := CreateTemporaryFile(invalidDir, filename, "test")
+	require.Error(t, err)
+	require.NoFileExists(t, path)
 }

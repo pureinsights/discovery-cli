@@ -21,7 +21,7 @@ import (
 // Test_newClient_BaseURLAndAPIKey tests the function to create a new client.
 // It verifies that the API Key and base URL correctly match.
 func Test_newClient_BaseURLAndAPIKey(t *testing.T) {
-	url := "http://localhost:8080"
+	url := "http://localhost:12010"
 	apiKey := "secret-key"
 	c := newClient(url, apiKey)
 
