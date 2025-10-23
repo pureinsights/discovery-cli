@@ -1660,7 +1660,7 @@ func Test_ingestion_Seeds(t *testing.T) {
 
 // Test_ingestion_BackupRestore tests the ingestion.BackupRestore() function
 func Test_ingestion_BackupRestore(t *testing.T) {
-	i := NewIngestion("http://localhost:8088/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030/v2", "Api Key")
 	bc := i.BackupRestore()
 
 	assert.Equal(t, i.ApiKey, bc.ApiKey)
