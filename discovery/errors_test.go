@@ -37,7 +37,7 @@ func TestError_ErrorString_StringBody(t *testing.T) {
 			body := gjson.Parse(tc.json)
 			e := Error{Status: tc.status, Body: body}
 
-			assert.EqualError(t, e, fmt.Sprintf("status: %d, body: %s", tc.status, body.String()))
+			assert.EqualError(t, e, fmt.Sprintf("status: %d, body: %s\n", tc.status, body.String()))
 		})
 	}
 }

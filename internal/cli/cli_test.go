@@ -37,7 +37,7 @@ func Test_discovery_Config(t *testing.T) {
 	assert.Equal(t, vpr, discovery.Config())
 }
 
-// Test_discovery_Config tests the discovery.Config() function
+// Test_discovery_ConfigPath tests the discovery.ConfigPath() function
 func Test_discovery_ConfigPath(t *testing.T) {
 	io := iostreams.IOStreams{
 		In:  strings.NewReader("Test Reader"),
