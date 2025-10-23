@@ -1497,7 +1497,7 @@ func Test_discovery_printConfig(t *testing.T) {
 	}
 }
 
-// Test_discovery_PrintCoreConfigToUser tests the discovery.PrintCoreToUser() function.
+// Test_discovery_printURLAndAPIKey tests the discovery.printURLAndAPIKey() function.
 func Test_discovery_printURLAndAPIKey(t *testing.T) {
 	tests := []struct {
 		name           string
