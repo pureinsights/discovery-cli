@@ -18,7 +18,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
-				return err
+				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
 			}
 
 			vpr := d.Config()
