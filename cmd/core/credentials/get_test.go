@@ -49,7 +49,7 @@ func TestNewGetCommand(t *testing.T) {
 				{
 				"source": {
 					"type": "mongo",
-					"name": "label test 1 clone 10",
+					"name": "label test clone 10",
 					"labels": [
 					{
 						"key": "A",
@@ -63,7 +63,7 @@ func TestNewGetCommand(t *testing.T) {
 				},
 				"highlight": {
 					"name": [
-					"<em>label</em> <em>test</em> 1 <em>clone</em> <em>10</em>"
+					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
 					]
 				},
 				"score": 1.4854797
@@ -367,13 +367,13 @@ func TestNewGetCommand(t *testing.T) {
 			path:       "/credential/search",
 			statusCode: http.StatusOK,
 			response: `{
-			"content": [{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","credentials":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":"mongo},       
-			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","credentials":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}],
+			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","credentials":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"test","type":mongo"}},       
+			{{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","credentials":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}],
 			"pageable": {
 				"page": 0,
 				"size": 3,
 				"sort": []
-			},
+			}},
 			"totalSize": 2,
 			"totalPages": 4,
 			"empty": false,
@@ -382,7 +382,7 @@ func TestNewGetCommand(t *testing.T) {
 			"numberOfElements": 2,
 			"pageNumber": 0
 			}`,
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '\\n' in string literal"), "Could not print JSON object"),
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character 'm' looking for beginning of value"), "Could not print JSON object"),
 		},
 		{
 			name:       "Printing JSON array fails",
@@ -395,9 +395,9 @@ func TestNewGetCommand(t *testing.T) {
 			path:       "/credential",
 			statusCode: http.StatusOK,
 			response: `{
-			"content": [{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","credentials":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"},     
-			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","credentials":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":"mongo",       
-			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","credentials":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}
+			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","credentials":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}},     
+			{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","credentials":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":mongo}},       
+			{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","credentials":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}}
 			],
 			"pageable": {
 				"page": 0,
@@ -412,7 +412,7 @@ func TestNewGetCommand(t *testing.T) {
 			"numberOfElements": 3,
 			"pageNumber": 0
 			}`,
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '{' looking for beginning of object key string"), "Could not print JSON array"),
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character 'm' looking for beginning of value"), "Could not print JSON array"),
 		},
 	}
 

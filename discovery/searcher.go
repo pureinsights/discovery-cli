@@ -12,10 +12,28 @@ type searcher struct {
 	client
 }
 
+const (
+	NotFoundError string = `{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name %q does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`
+)
+
 // Search iterates through every page of the results and returns an array with only the JSON objects.
 // Each object has a score that grades how well it matches the given filters.
 func (s searcher) Search(filter gjson.Result) ([]gjson.Result, error) {
-	return executeWithPagination(s.client, http.MethodPost, "/search", WithJSONBody(filter.Raw))
+	results, err := executeWithPagination(s.client, http.MethodPost, "/search", WithJSONBody(filter.Raw))
+	if err != nil {
+		return []gjson.Result(nil), err
+	}
+	for index, entity := range results {
+		results[index] = entity.Get("source")
+	}
+	return results, nil
 }
 
 // SearchByName creates the filter to search an entity by the given name and calls the searcher.Search() function.
@@ -35,14 +53,11 @@ func (s searcher) SearchByName(name string) (gjson.Result, error) {
 
 	if len(results) == 0 {
 		return gjson.Result{}, Error{
-			Status: http.StatusNotFound, Body: gjson.Parse(fmt.Sprintf(`{
-	"status": 404,
-	"code": 1003,
-	"messages": [
-		"Entity not found: entity with name %q does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
-}`, name)),
+			Status: http.StatusNotFound, Body: gjson.Parse(fmt.Sprintf(NotFoundError, name)),
+		}
+	} else if firstResultName := results[0].Get("name").String(); firstResultName != name {
+		return gjson.Result{}, Error{
+			Status: http.StatusNotFound, Body: gjson.Parse(fmt.Sprintf(NotFoundError, name)),
 		}
 	}
 
