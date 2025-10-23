@@ -853,7 +853,7 @@ func Test_discovery_SearchEntities(t *testing.T) {
 }
 
 // Test_parseFilters tests the parseFilters() function.
-func Test_parseFilters(t *testing.T) {
+func Test_parseFilter(t *testing.T) {
 	tests := []struct {
 		name                 string
 		filters              []string
@@ -921,15 +921,19 @@ func Test_parseFilters(t *testing.T) {
 			labelFilters := []string{}
 			typeFilters := []string{}
 
-			err := parseFilters(tc.filters, &labelFilters, &typeFilters)
+			for _, filter := range tc.filters {
+				err := parseFilter(filter, &labelFilters, &typeFilters)
 
-			if tc.err != nil {
-				require.Error(t, err)
-				var errStruct Error
-				require.ErrorAs(t, err, &errStruct)
-				assert.EqualError(t, err, tc.err.Error())
-			} else {
-				require.NoError(t, err)
+				if tc.err != nil {
+					require.Error(t, err)
+					var errStruct Error
+					require.ErrorAs(t, err, &errStruct)
+					assert.EqualError(t, err, tc.err.Error())
+				} else {
+					require.NoError(t, err)
+				}
+			}
+			if tc.err == nil {
 				assert.Equal(t, tc.expectedLabelFilters, labelFilters)
 				assert.Equal(t, tc.expectedTypeFilters, typeFilters)
 			}
