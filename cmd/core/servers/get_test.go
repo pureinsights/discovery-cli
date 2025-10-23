@@ -353,7 +353,7 @@ func TestNewGetCommand(t *testing.T) {
 			path:       "/server/search",
 			statusCode: http.StatusBadRequest,
 			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "Filter \"gte\" does not exist"),
+			err:        cli.NewError(cli.ErrorExitCode, "Filter type \"gte\" does not exist"),
 		},
 		{
 			name:       "Printing JSON object fails",
@@ -508,7 +508,7 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 
 	err := getCmd.Execute()
 	require.Error(t, err)
-	assert.Equal(t, "flag accessed but not defined: profile", err.Error())
+	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
 	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", out.Bytes())
 	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", errBuf.Bytes())
