@@ -178,28 +178,20 @@ func Test_searcher_SearchByName(t *testing.T) {
 			statusCode: http.StatusOK,
 			nameFilter: "MongoDB Atlas Server",
 			result: gjson.Parse(`{
-				"source": {
 					"type": "mongo",
-					"name": "MongoDB Atlas server clone",
+					"name": "MongoDB Atlas Server",
 					"labels": [],
 					"active": true,
 					"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
 					"creationTimestamp": "2025-09-29T15:50:17Z",
 					"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-				},
-				"highlight": {
-					"name": [
-						"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-					]
-				},
-				"score": 0.321809,
 				}`),
 			response: `{
 			"content": [
 				{
 				"source": {
 					"type": "mongo",
-					"name": "MongoDB Atlas server clone",
+					"name": "MongoDB Atlas Server",
 					"labels": [],
 					"active": true,
 					"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
@@ -208,7 +200,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 				},
 				"highlight": {
 					"name": [
-						"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
+						"<em>MongoDB</em> <em>Atlas</em> <em>Server</em>"
 					]
 				},
 				"score": 0.321809,
@@ -296,7 +288,87 @@ func Test_searcher_SearchByName(t *testing.T) {
 	"timestamp": "2025-09-30T15:38:42.885125200Z"
 }`)},
 		},
-
+		{
+			name:       "The first result does not have the same name",
+			method:     http.MethodPost,
+			path:       "/search",
+			statusCode: http.StatusOK,
+			nameFilter: "MongoDB Atlas Server",
+			response: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "MongoDB Atlas server clone",
+					"labels": [],
+					"active": true,
+					"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+					"creationTimestamp": "2025-09-29T15:50:17Z",
+					"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+				},
+				"highlight": {
+					"name": [
+						"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
+					]
+				},
+				"score": 0.321809,
+				},
+				{
+				"source": {
+					"type": "mongo",
+					"name": "MongoDB Atlas server clone 1",
+					"labels": [],
+					"active": true,
+					"id": "8f14c11c-bb66-49d3-aa2a-dedff4608c17",
+					"creationTimestamp": "2025-09-29T15:50:19Z",
+					"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
+				},
+				"highlight": {
+					"name": [
+						"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone 1"
+					]
+				},
+				"score": 0.29428056,
+				},
+				{
+				"source": {
+					"type": "openai",
+					"name": "OpenAI server",
+					"labels": [],
+					"active": true,
+					"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
+					"creationTimestamp": "2025-09-29T15:50:20Z",
+					"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
+				},
+				"highlight": {
+					"name": [
+                        "OpenAI <em>Server</em>"
+                ]},
+				"score": 0.013445788
+				},
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 3,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"pageNumber": 0,
+			"numberOfElements": 3
+			}`,
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
+	],
+	"timestamp": "2025-09-30T15:38:42.885125200Z"
+}`)},
+		},
 		{
 			name:       "executeWithPagination returns a 401 Unauthorized",
 			method:     http.MethodPost,
