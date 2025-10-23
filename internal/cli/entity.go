@@ -133,7 +133,6 @@ func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer 
 
 // ParseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery
 func parseFilter(filter string, labelFilters *[]string, typeFilters *[]string) error {
-
 	filterType, keyValue, found := strings.Cut(filter, "=")
 	if !found {
 		return NewError(ErrorExitCode, "Filter %q does not follow the format {type}={key}[:{value}]", filter)
