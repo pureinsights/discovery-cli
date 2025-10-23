@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	// EqualsFilter contains the JSON string for the Equals DSL filter.
 	EqualsFilter = `{
 	"equals": {
 		"field": "%s",

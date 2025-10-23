@@ -354,7 +354,7 @@ func TestNewGetCommand(t *testing.T) {
 			path:       "/credential/search",
 			statusCode: http.StatusBadRequest,
 			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "Filter \"gte\" does not exist"),
+			err:        cli.NewError(cli.ErrorExitCode, "Filter type \"gte\" does not exist"),
 		},
 		{
 			name:       "Printing JSON object fails",

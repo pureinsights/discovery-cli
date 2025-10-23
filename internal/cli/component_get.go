@@ -7,6 +7,7 @@ import (
 const (
 	// LongGetNoNames is the message used in the Long field of the Get commands that do not support getting by name or using filters.
 	LongGetNoNames string = "get is the command used to obtain Discovery %[2]s's %[1]ss. The user can send a UUID to get a specific %[1]s. If no UUID is given, then the command retrieves every %[1]s. The optional argument must be a UUID. This command does not support filters or referencing an entity by name."
+	LongGetSearch  string = "get is the command used to obtain Discovery %[2]s's %[1]ss. The user can send a name or UUID to get a specific %[1]s. If no argument is given, then the command retrieves every %[1]s. The command also supports filters with the flag --filter followed by the filter in the format filter=key:value."
 )
 
 // GetCommand is the function that executes the get operation for the get commands that do not work with names or filters.

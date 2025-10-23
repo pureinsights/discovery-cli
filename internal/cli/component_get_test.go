@@ -298,7 +298,7 @@ func TestSearchCommand(t *testing.T) {
 			url:     "http://localhost:12010/v2",
 			apiKey:  "apiKey123",
 			client:  new(WorkingSearcher),
-			err:     NewError(ErrorExitCode, "Filter \"gte\" does not exist"),
+			err:     NewError(ErrorExitCode, "Filter type \"gte\" does not exist"),
 		},
 		{
 			name:          "Printing JSON fails",
