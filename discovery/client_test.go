@@ -21,7 +21,7 @@ import (
 // Test_newClient_BaseURLAndAPIKey tests the function to create a new client.
 // It verifies that the API Key and base URL correctly match.
 func Test_newClient_BaseURLAndAPIKey(t *testing.T) {
-	url := "http://localhost:8080"
+	url := "http://localhost:12010"
 	apiKey := "secret-key"
 	c := newClient(url, apiKey)
 
@@ -92,14 +92,8 @@ func Test_newSubClient_BaseURLJoin(t *testing.T) {
 			parent := newClient(tc.base, "apiKey")
 			got := newSubClient(parent, tc.path)
 
-			if got.ApiKey != parent.ApiKey {
-				t.Fatalf("API Key not inherited: got %q want %q", got.ApiKey, parent.ApiKey)
-			}
-
-			if got.client.BaseURL != tc.want {
-				t.Fatalf("Base URL is different:\n  base=%q path=%q\n  got =%q\n  want=%q",
-					tc.base, tc.path, got.client.BaseURL, tc.want)
-			}
+			assert.Equalf(t, parent.ApiKey, got.ApiKey, "API Key not inherited")
+			assert.Equalf(t, tc.want, got.client.BaseURL, "Base URL is different:\n")
 		})
 	}
 }
@@ -185,7 +179,7 @@ func Test_client_execute_HTTPErrorTypedError(t *testing.T) {
 			assert.Nil(t, res, "result should be nil on response error")
 			require.Error(t, err, "expected an error")
 
-			assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", tt.status, tt.expectBody))
+			assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s\n", tt.status, tt.expectBody))
 		})
 	}
 }
@@ -283,9 +277,7 @@ func TestWithFile(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	tmpFile, err := fileutils.CreateTemporaryFile(t.TempDir(), "testFile.txt", "This is a test file")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	defer os.Remove(tmpFile)
 
@@ -335,7 +327,7 @@ func Test_execute_HTTPError(t *testing.T) {
 	c := newClient(srv.URL, "")
 	response, err := execute(c, "GET", "")
 	assert.Equal(t, response, gjson.Result{})
-	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s", http.StatusNotFound, []byte(`{"message":"missing"}`)))
+	assert.EqualError(t, err, fmt.Sprintf("status: %d, body: %s\n", http.StatusNotFound, []byte(`{"message":"missing"}`)))
 }
 
 // Test_execute_RestyReturnsError tests the execute function when Resty returns an error.
