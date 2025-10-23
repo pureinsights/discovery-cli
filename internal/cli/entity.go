@@ -145,17 +145,18 @@ func parseFilters(filters []string, labelFilters *[]string, typeFilters *[]strin
 				return NewError(ErrorExitCode, "The label's key in the filter %q cannot be empty", filter)
 			}
 			*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.key", key))
-			if value != "" && found {
+			if found {
+				if value == "" {
+					return NewError(ErrorExitCode, "The label's value in the filter %q cannot be empty if ':' is included", filter)
+				}
 				*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.value", value))
-			} else if found {
-				return NewError(ErrorExitCode, "The label's value in the filter %q cannot be empty if ':' is included", filter)
 			}
 		case "type":
-			if keyValue != "" {
-				*typeFilters = append(*typeFilters, fmt.Sprintf(EqualsFilter, "type", keyValue))
-			} else {
+			if keyValue == "" {
 				return NewError(ErrorExitCode, "The type in the filter %q cannot be empty", filter)
 			}
+
+			*typeFilters = append(*typeFilters, fmt.Sprintf(EqualsFilter, "type", keyValue))
 		default:
 			return NewError(ErrorExitCode, "Filter type %q does not exist", filterType)
 		}
