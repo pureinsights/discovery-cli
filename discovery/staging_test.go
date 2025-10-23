@@ -550,6 +550,13 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, "/bucket"+tc.path, r.URL.Path)
+				if tc.err == nil {
+					body, _ := io.ReadAll(r.Body)
+					jsonArray := gjson.ParseBytes(body).Array()
+					for _, index := range jsonArray {
+						assert.Contains(t, tc.indexConfig, index.Raw)
+					}
+				}
 			}))
 
 			defer srv.Close()
@@ -857,19 +864,25 @@ func Test_contentClient_Store(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, "/content/"+tc.bucketName+tc.path, r.URL.Path)
-			}))
-
-			defer srv.Close()
-
-			json := gjson.Parse(`{
+			jsonString := `{
 				"reference": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
 				"title": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights",
 				"description": "A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications.",
 				"author": "Matt Willsmore"
-			}`)
+			}`
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, "/content/"+tc.bucketName+tc.path, r.URL.Path)
+				body, _ := io.ReadAll(r.Body)
+				assert.Equal(t, jsonString, string(body))
+				if tc.parentId != "" {
+					assert.Equal(t, tc.parentId, r.URL.Query().Get("parentId"))
+				}
+			}))
+
+			defer srv.Close()
+
+			json := gjson.Parse(jsonString)
 			contentClient := newContentClient(srv.URL, "", tc.bucketName)
 
 			response, err := contentClient.Store(tc.contentId, tc.parentId, json)
@@ -897,7 +910,7 @@ func Test_contentClient_Get(t *testing.T) {
 		expectedResponse gjson.Result
 		bucketName       string
 		contentId        string
-		requestOptions   []RequestOption
+		getOptions       []stagingGetContentOption
 		err              error
 	}{
 		// Working case
@@ -939,6 +952,7 @@ func Test_contentClient_Get(t *testing.T) {
 			bucketName: "testBucket",
 			contentId:  "c28db957887e1aae75e7ab1dd0fd34e9",
 			err:        nil,
+			getOptions: []stagingGetContentOption{WithContentAction("STORE"), WithIncludeProjections([]string{"author", "header"}), WithExcludeProjections([]string{"author", "link"})},
 		},
 
 		// Error case
@@ -966,6 +980,7 @@ func Test_contentClient_Get(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T14:31:13.275303600Z"
 			}`)},
+			getOptions: []stagingGetContentOption(nil),
 		},
 		{
 			name:       "Get returns 404 Not found",
@@ -991,6 +1006,7 @@ func Test_contentClient_Get(t *testing.T) {
 			],
 			"timestamp": "2025-09-09T15:47:26.883457300Z"
 			}`)},
+			getOptions: []stagingGetContentOption(nil),
 		},
 	}
 
@@ -999,14 +1015,20 @@ func Test_contentClient_Get(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, "/content/"+tc.bucketName+tc.path, r.URL.Path)
-
+				queryParams := make(map[string][]string)
+				for _, opt := range tc.getOptions {
+					opt(&queryParams)
+				}
+				for k, v := range queryParams {
+					assert.Equal(t, v, r.URL.Query()[k])
+				}
 			}))
 
 			defer srv.Close()
 
 			contentClient := newContentClient(srv.URL, "", tc.bucketName)
 
-			response, err := contentClient.Get(tc.contentId)
+			response, err := contentClient.Get(tc.contentId, tc.getOptions...)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
@@ -1223,6 +1245,10 @@ func Test_contentClient_DeleteMany(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, "/content/"+tc.bucketName, r.URL.Path)
+				if tc.filters != "" {
+					body, _ := io.ReadAll(r.Body)
+					assert.Equal(t, tc.filters, string(body))
+				}
 				if tc.parentId != "" {
 					assert.Equal(t, tc.parentId, r.URL.Query().Get("parentId"))
 				}
