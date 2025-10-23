@@ -13,7 +13,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains secrets from Discovery Core.",
-		Long:  fmt.Sprintf(cli.LongGetNoNames, "secret"),
+		Long:  fmt.Sprintf(cli.LongGetNoNames, "secret", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
