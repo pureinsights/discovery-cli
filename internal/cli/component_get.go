@@ -4,6 +4,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	LongGetNoNames string = "get is the command used to obtain Discovery Core's %[1]ss. The user can send a UUID to get a specific %[1]s. If no UUID is given, then the command retrieves every %[1]s. The optional argument must be a UUID. This command does not support filters or referencing an entity by name."
+)
+
 // GetCommand is the function that executes the get operation for the get commands that do not work with names or filters.
 func GetCommand(args []string, d Discovery, client getter, config commandConfig) error {
 	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
