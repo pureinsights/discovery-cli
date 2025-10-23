@@ -17,7 +17,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestGetCommand tests command
+// TestGetCommand tests the GetCommand() function.
 func TestGetCommand(t *testing.T) {
 	tests := []struct {
 		name           string

@@ -333,7 +333,7 @@ Discovery has a Staging client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url   | The URL of Discovery's Staging component. The URL should contain the URL up to the version. For example, `http://localhost:12020/v2/v2`. |
+| Url   | The URL of Discovery's Staging component. The URL should contain the URL up to the version. For example, `http://localhost:12020/v2`. |
 | ApiKey | The API key to authenticate each request to Discovery's Staging. |
 
 #### Sub-Clients
