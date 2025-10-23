@@ -130,12 +130,7 @@ func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer 
 	return err
 }
 
-// BuildEntitiesFilter builds a filter based on the arguments sent to the get command.
-// The filters are combined through the "and" operator.
-func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
-	labelFilters := []string{}
-	typeFilters := []string{}
-
+func parseFilters(filters []string, labelFilters *[]string, typeFilters *[]string) error {
 	for _, filter := range filters {
 		parts := strings.Split(filter, "=")
 		filterType := parts[0]
@@ -149,19 +144,32 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 				value = keyValue[1]
 			}
 
-			labelFilters = append(labelFilters, fmt.Sprintf(EqualsFilter, "labels.key", key))
+			*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.key", key))
 			if value != "" {
-				labelFilters = append(labelFilters, fmt.Sprintf(EqualsFilter, "labels.value", value))
+				*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.value", value))
 			}
 		case "type":
-			typeFilters = append(typeFilters, fmt.Sprintf(EqualsFilter, "type", parts[1]))
+			*typeFilters = append(*typeFilters, fmt.Sprintf(EqualsFilter, "type", parts[1]))
 		default:
-			return gjson.Result{}, NewError(ErrorExitCode, "Filter %q does not exist", filterType)
+			return NewError(ErrorExitCode, "Filter %q does not exist", filterType)
 		}
 	}
 
+	return nil
+}
+
+// BuildEntitiesFilter builds a filter based on the arguments sent to the get command.
+// The filters are combined through the "and" operator.
+func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
+	labelFilters := []string{}
+	typeFilters := []string{}
+
+	err := parseFilters(filters, &labelFilters, &typeFilters)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
 	labelFilterString := "{}"
-	var err error
 	if len(labelFilters) > 1 {
 		labelFilterString, err = sjson.SetRaw(labelFilterString, "and", "["+strings.Join(labelFilters, ",")+"]")
 		if err != nil {
