@@ -852,7 +852,7 @@ func Test_discovery_SearchEntities(t *testing.T) {
 	}
 }
 
-// Test_parseFilters tests the parseFilters() function.
+// Test_parseFilter tests the parseFilter() function.
 func Test_parseFilter(t *testing.T) {
 	tests := []struct {
 		name                 string
