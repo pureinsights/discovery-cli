@@ -130,6 +130,7 @@ func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer 
 	return err
 }
 
+// ParseFilters converts the filters in the format type=key:value to the JSON DSL Filter in Discovery
 func parseFilters(filters []string, labelFilters *[]string, typeFilters *[]string) error {
 	for _, filter := range filters {
 		parts := strings.Split(filter, "=")

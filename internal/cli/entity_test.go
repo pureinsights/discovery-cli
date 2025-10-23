@@ -687,7 +687,7 @@ func Test_searchEntity(t *testing.T) {
 	}
 }
 
-// Test_searchEntity tests the discovery.SearchEntity() function.
+// Test_discovery_SearchEntity tests the discovery.SearchEntity() function.
 func Test_discovery_SearchEntity(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -777,7 +777,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 	}
 }
 
-// Test_searchEntity tests the discovery.SearchEntities() function.
+// Test_discovery_SearchEntities tests the discovery.SearchEntities() function.
 func Test_discovery_SearchEntities(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -852,7 +852,74 @@ func Test_discovery_SearchEntities(t *testing.T) {
 	}
 }
 
-// Test_searchEntity tests the BuildEntitiesFilter() function.
+// Test_parseFilters tests the parseFilters() function.
+func Test_parseFilters(t *testing.T) {
+	tests := []struct {
+		name                 string
+		filters              []string
+		expectedLabelFilters []string
+		expectedTypeFilters  []string
+		err                  error
+	}{
+		{
+			name:    "Send label with key and value, label with only key, and type filter",
+			filters: []string{"label=A:C", "label=B", "type=mongo", "label"},
+			expectedLabelFilters: []string{`{
+	"equals": {
+		"field": "labels.key",
+		"value": "A"
+		}
+	}`, `{
+	"equals": {
+		"field": "labels.value",
+		"value": "C"
+		}
+	}`, `{
+	"equals": {
+		"field": "labels.key",
+		"value": "B"
+		}
+	}`},
+			expectedTypeFilters: []string{`{
+	"equals": {
+		"field": "type",
+		"value": "mongo"
+		}
+	}`,
+			},
+			err: nil,
+		},
+		{
+			name:    "Send unknown filter",
+			filters: []string{"name=mongo"},
+			err:     NewError(ErrorExitCode, "Filter \"name\" does not exist"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			labelFilters := []string{}
+			typeFilters := []string{}
+
+			err := parseFilters(tc.filters, &labelFilters, &typeFilters)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				fmt.Println(labelFilters)
+				fmt.Println(typeFilters)
+				assert.Equal(t, tc.expectedLabelFilters, labelFilters)
+				assert.Equal(t, tc.expectedTypeFilters, typeFilters)
+			}
+		})
+	}
+}
+
+// TestBuildEntitiesFilter tests the BuildEntitiesFilter() function.
 func TestBuildEntitiesFilter(t *testing.T) {
 	tests := []struct {
 		name           string
