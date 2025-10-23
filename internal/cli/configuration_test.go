@@ -178,7 +178,7 @@ core_key="APIKey"
 core_key="discovery.key.core.cn"
 `,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:12010",
+				"default.core_url": "http://localhost:12010/v2",
 				"default.core_key": "APIKey",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
@@ -189,7 +189,7 @@ core_key="discovery.key.core.cn"
 			config:      ``,
 			credentials: ``,
 			expectedConfig: map[string]string{
-				"default.core_url": "http://localhost:12010",
+				"default.core_url": "http://localhost:12010/v2",
 				"default.core_key": "",
 			},
 			err: nil,
