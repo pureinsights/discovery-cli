@@ -51,11 +51,7 @@ func (s searcher) SearchByName(name string) (gjson.Result, error) {
 		return gjson.Result{}, err
 	}
 
-	if len(results) == 0 {
-		return gjson.Result{}, Error{
-			Status: http.StatusNotFound, Body: gjson.Parse(fmt.Sprintf(NotFoundError, name)),
-		}
-	} else if firstResultName := results[0].Get("name").String(); firstResultName != name {
+	if len(results) == 0 || results[0].Get("name").String() != name {
 		return gjson.Result{}, Error{
 			Status: http.StatusNotFound, Body: gjson.Parse(fmt.Sprintf(NotFoundError, name)),
 		}
