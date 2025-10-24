@@ -1627,7 +1627,7 @@ func Test_seedsClient_Executions(t *testing.T) {
 
 // Test_ingestion_Processors tests the ingestion.Processors() function
 func Test_ingestion_Processors(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 	ipc := i.Processors()
 
 	assert.Equal(t, i.ApiKey, ipc.crud.client.ApiKey)
@@ -1638,7 +1638,7 @@ func Test_ingestion_Processors(t *testing.T) {
 
 // Test_ingestion_Pipelines tests the ingestion.Pipelines() function
 func Test_ingestion_Pipelines(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 	ipc := i.Pipelines()
 
 	assert.Equal(t, i.ApiKey, ipc.crud.client.ApiKey)
@@ -1649,7 +1649,7 @@ func Test_ingestion_Pipelines(t *testing.T) {
 
 // Test_ingestion_Seeds test the ingestion.Seeds() function.
 func Test_ingestion_Seeds(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 	ipc := i.Seeds()
 
 	assert.Equal(t, i.ApiKey, ipc.crud.client.ApiKey)
@@ -1660,7 +1660,7 @@ func Test_ingestion_Seeds(t *testing.T) {
 
 // Test_ingestion_BackupRestore tests the ingestion.BackupRestore() function
 func Test_ingestion_BackupRestore(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 	bc := i.BackupRestore()
 
 	assert.Equal(t, i.ApiKey, bc.ApiKey)
@@ -1669,7 +1669,7 @@ func Test_ingestion_BackupRestore(t *testing.T) {
 
 // Test_NewIngestion tests the ingestion constructor
 func Test_NewIngestion(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 
 	assert.Equal(t, "http://localhost:12030/v2/v2", i.Url)
 	assert.Equal(t, "Api Key", i.ApiKey)
