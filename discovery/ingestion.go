@@ -261,6 +261,7 @@ func (i ingestion) BackupRestore() backupRestore {
 }
 
 // NewIngestion is the constructor of the ingestion struct.
+// It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewIngestion(url, apiKey string) ingestion {
-	return ingestion{Url: url, ApiKey: apiKey}
+	return ingestion{Url: url + "/v2", ApiKey: apiKey}
 }
