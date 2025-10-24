@@ -308,6 +308,43 @@ Global Flags:
   -p, --profile string   configuration profile to use (default "default")
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Core's labels. The user must send a UUID to delete a specific label. If no UUID is given, then an error is returned. This command does not support referencing an entity by name.
+
+Usage: `discovery core label delete [flags] <uuid>`
+
+Arguments:
+`uuid`::
+(Optional, String) The UUID of the label that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a label by id
+discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Try to delete label by name
+discovery core label delete label1
+Error: Could not convert given id "label1" to UUID. This command does not support filters or referencing an entity by name
+invalid UUID length: 6
+Usage:
+  discovery core label delete [flags]
+
+Flags:
+  -h, --help        help for delete
+
+Global Flags:
+  -p, --profile string   configuration profile to use (default "default")
+```
+
 ##### Secret
 `secret` is the command used to manage secrets in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
