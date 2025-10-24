@@ -13,16 +13,23 @@ import (
 )
 
 const (
-	DefaultCoreURL      string = "http://localhost:12010"
-	DefaultStagingURL   string = "http://localhost:12020"
+	// The default URL for Discovery Core
+	DefaultCoreURL string = "http://localhost:12010"
+	// The default URL for Discovery Staging
+	DefaultStagingURL string = "http://localhost:12020"
+	// The default URL for Discovery Ingestion
 	DefaultIngestionURL string = "http://localhost:12030"
+	// The default URL for Discovery QueryFlow
 	DefaultQueryFlowURL string = "http://localhost:12040"
-	SaveHeader          string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
-	PrintHeader         string = "Showing the configuration of profile %q:\n\n"
+	// SaveHeader contains the instructions header printed when saving a configuration.
+	SaveHeader string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
+	// PrintHeader contains the header displayed when printing a configuration.
+	PrintHeader string = "Showing the configuration of profile %q:\n\n"
 )
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
 // When the file could not be found, an error is logged to the error stream of the IOStreams parameter.
+// If the configuration file exists, the functions returns true and false if it does not.
 func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStreams) (bool, error) {
 	v.SetConfigName(baseName)
 	v.SetConfigType("toml")
@@ -93,7 +100,7 @@ func obfuscate(s string) string {
 // AskUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
 // If the user inputs an empty string, the value is not changed.
 // If the user inputs a space, the value is set to an empty string.
-// If the user inputs a new value, the property is modified.
+// If the user inputs a new value, the property is updated.
 func (d discovery) askUserConfig(profile, propertyName, property string, sensitive bool) error {
 	ios := d.IOStreams()
 	v := d.Config()
@@ -139,7 +146,6 @@ func (d discovery) saveConfig() error {
 		default:
 			config.Set(setting, v.Get(setting))
 		}
-
 	}
 
 	err := config.WriteConfigAs(filepath.Join(d.ConfigPath(), "config.toml"))
@@ -159,7 +165,7 @@ func SetDiscoveryDir() (string, error) {
 
 	configPath := filepath.Join(home, ".discovery")
 
-	if err := os.MkdirAll(configPath, 0o700); err != nil {
+	if err := os.MkdirAll(configPath, 0o644); err != nil {
 		return "", NewErrorWithCause(ErrorExitCode, err, "Could not create the /.discovery directory")
 	}
 

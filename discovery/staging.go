@@ -33,7 +33,7 @@ func WithExcludeProjections(exclude []string) stagingGetContentOption {
 	}
 }
 
-// ContentClient is a struct that manages the content inside the Staging Repository's buckets.
+// ContentClient is the struct that manages the content inside the Staging Repository's buckets.
 type contentClient struct {
 	client
 }
@@ -168,6 +168,7 @@ func (s staging) Content(bucket string) contentClient {
 }
 
 // NewStaging is the constructor for the staging struct.
+// It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewStaging(url, apiKey string) staging {
-	return staging{Url: url, ApiKey: apiKey}
+	return staging{Url: url + "/v2", ApiKey: apiKey}
 }

@@ -42,7 +42,7 @@ func Test_newEndpointsClient(t *testing.T) {
 
 // Test_queryFlow_Processors tests the queryFlow.Processors() function
 func Test_queryFlow_Processors(t *testing.T) {
-	q := NewQueryFlow("http://localhost:12040/v2", "Api Key")
+	q := NewQueryFlow("http://localhost:12040", "Api Key")
 	qpc := q.Processors()
 
 	assert.Equal(t, q.ApiKey, qpc.crud.client.ApiKey)
@@ -53,7 +53,7 @@ func Test_queryFlow_Processors(t *testing.T) {
 
 // Test_queryFlow_Endpoints tests the queryFlow.Endpoints() function
 func Test_queryFlow_Endpoints(t *testing.T) {
-	q := NewQueryFlow("http://localhost:12040/v2", "Api Key")
+	q := NewQueryFlow("http://localhost:12040", "Api Key")
 	qec := q.Endpoints()
 
 	assert.Equal(t, q.ApiKey, qec.crud.client.ApiKey)
@@ -66,7 +66,7 @@ func Test_queryFlow_Endpoints(t *testing.T) {
 
 // Test_queryFlow_BackupRestore tests the queryFlow.BackupRestore() function
 func Test_queryFlow_BackupRestore(t *testing.T) {
-	q := NewQueryFlow("http://localhost:12040/v2", "Api Key")
+	q := NewQueryFlow("http://localhost:12040", "Api Key")
 	bc := q.BackupRestore()
 
 	assert.Equal(t, q.ApiKey, bc.ApiKey)
@@ -92,7 +92,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			name:         "Invoke returns a real response",
 			method:       http.MethodGet,
 			path:         "/blogs-search",
-			expectedPath: "/api/blogs-search",
+			expectedPath: "/v2/api/blogs-search",
 			statusCode:   http.StatusOK,
 			queryParams: map[string][]string{
 				"q": {"Google"},
@@ -119,7 +119,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			name:             "Invoke returns an empty array",
 			method:           http.MethodGet,
 			path:             "blogs-search",
-			expectedPath:     "/api/blogs-search",
+			expectedPath:     "/v2/api/blogs-search",
 			statusCode:       http.StatusOK,
 			response:         `[]`,
 			expectedResponse: gjson.Parse(`[]`),
@@ -129,7 +129,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			name:         "Invoke has a JSON Body",
 			method:       http.MethodPost,
 			path:         "/blogs-search",
-			expectedPath: "/api/blogs-search",
+			expectedPath: "/v2/api/blogs-search",
 			statusCode:   http.StatusCreated,
 			body: `{
 				"_id": "5625c64483bef0d48e9ad91aca9b2f94",
@@ -145,7 +145,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			name:         "Invoke sends query parameters",
 			method:       http.MethodDelete,
 			path:         "/blogs-search",
-			expectedPath: "/api/blogs-search",
+			expectedPath: "/v2/api/blogs-search",
 			statusCode:   http.StatusOK,
 			queryParams: map[string][]string{
 				"author": {"Graham Gillen"},
@@ -158,7 +158,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			name:         "Invoke sends a body and query parameters",
 			method:       http.MethodPut,
 			path:         "/blogs-search",
-			expectedPath: "/api/blogs-search",
+			expectedPath: "/v2/api/blogs-search",
 			statusCode:   http.StatusMultiStatus,
 			queryParams: map[string][]string{
 				"author": {"Graham Gillen"},
@@ -193,7 +193,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			name:         "Invoking an endpoint returns an error",
 			method:       http.MethodGet,
 			path:         "///endpoint-false",
-			expectedPath: "/api///endpoint-false",
+			expectedPath: "/v2/api///endpoint-false",
 			statusCode:   http.StatusNotFound,
 			response: `{
 				"status": 404,
@@ -217,7 +217,7 @@ func Test_queryFlow_Invoke(t *testing.T) {
 			name:         "Invoking an endpoint returns unprocessable entity",
 			method:       http.MethodGet,
 			path:         "/blogs-search",
-			expectedPath: "/api/blogs-search",
+			expectedPath: "/v2/api/blogs-search",
 			statusCode:   http.StatusUnprocessableEntity,
 			response: `{
 				"status": 422,
@@ -302,7 +302,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 			name:             "Debug returns a real response",
 			method:           http.MethodGet,
 			path:             "/blogs-search",
-			expectedPath:     "/debug/blogs-search",
+			expectedPath:     "/v2/debug/blogs-search",
 			statusCode:       http.StatusOK,
 			response:         string(realResponse),
 			expectedResponse: gjson.ParseBytes(realResponse),
@@ -312,7 +312,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 			name:         "Debug returns an empty array",
 			method:       http.MethodGet,
 			path:         "/blogs-search",
-			expectedPath: "/debug/blogs-search",
+			expectedPath: "/v2/debug/blogs-search",
 			statusCode:   http.StatusOK,
 			response: `{
 				"duration": 2147,
@@ -354,7 +354,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 			name:         "Debug has a JSON Body",
 			method:       http.MethodPost,
 			path:         "/blogs-search",
-			expectedPath: "/debug/blogs-search",
+			expectedPath: "/v2/debug/blogs-search",
 			statusCode:   http.StatusCreated,
 			body: `{
 				"_id": "5625c64483bef0d48e9ad91aca9b2f94",
@@ -370,7 +370,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 			name:         "Debug sends query parameters",
 			method:       http.MethodDelete,
 			path:         "/blogs-search",
-			expectedPath: "/debug/blogs-search",
+			expectedPath: "/v2/debug/blogs-search",
 			statusCode:   http.StatusOK,
 			queryParams: map[string][]string{
 				"author": {"Graham Gillen"},
@@ -383,7 +383,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 			name:         "Debug sends a body and query parameters",
 			method:       http.MethodPut,
 			path:         "/blogs-search",
-			expectedPath: "/debug/blogs-search",
+			expectedPath: "/v2/debug/blogs-search",
 			statusCode:   http.StatusMultiStatus,
 			queryParams: map[string][]string{
 				"author": {"Graham Gillen"},
@@ -404,7 +404,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 			name:         "Debugging an endpoint returns an error",
 			method:       http.MethodGet,
 			path:         "///endpoint-false",
-			expectedPath: "/debug///endpoint-false",
+			expectedPath: "/v2/debug///endpoint-false",
 			statusCode:   http.StatusNotFound,
 			response: `{
 				"status": 404,
@@ -470,7 +470,7 @@ func Test_queryFlow_Debug(t *testing.T) {
 
 // Test_NewQueryFlow tests the QueryFlow constructor.
 func Test_NewQueryFlow(t *testing.T) {
-	i := NewQueryFlow("http://localhost:12040/v2", "Api Key")
+	i := NewQueryFlow("http://localhost:12040", "Api Key")
 
 	assert.Equal(t, "http://localhost:12040/v2", i.Url)
 	assert.Equal(t, "Api Key", i.ApiKey)
