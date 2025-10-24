@@ -11,8 +11,8 @@ import (
 // NewDeleteCommand creates the label delete command
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "get",
-		Short: "The command that obtains labels from Discovery Core.",
+		Use:   "delete",
+		Short: "The command that deletes labels from Discovery Core.",
 		Long:  fmt.Sprintf(cli.LongDeleteNoNames, "label", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
@@ -23,9 +23,9 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return cli.DeleteCommand(args, d, coreClient.Labels(), cli.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url", "core_key"))
+			return cli.DeleteCommand(args[0], d, coreClient.Labels(), cli.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url", "core_key"))
 		},
-		Args: cobra.MaximumNArgs(1),
+		Args: cobra.ExactArgs(1),
 	}
 	return get
 }

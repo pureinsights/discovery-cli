@@ -29,6 +29,8 @@ type Discovery interface {
 	GetEntities(client getter, printer Printer) error
 	SearchEntity(client searcher, id string, printer Printer) error
 	SearchEntities(client searcher, filter gjson.Result, printer Printer) error
+	DeleteEntity(client deleter, id uuid.UUID, printer Printer) error
+	SearchDeleteEntity(client searchDeleter, name string, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
