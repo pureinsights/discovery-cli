@@ -13,7 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_searcher_Search_HTTPResponseCases tests how the executeWithPagination() function behaves with various HTTP responses.
+// Test_searcher_Search_HTTPResponseCases tests the searcher.Search() function.
 func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 	body := gjson.Parse(`{
 	"equals": {
@@ -33,7 +33,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 	}{
 		// Working cases
 		{
-			name:       "executeWithPagination returns array",
+			name:       "Search returns array",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusOK,
@@ -96,7 +96,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 			err:         nil,
 		},
 		{
-			name:        "executeWithPagination returns no content",
+			name:        "Search returns no content",
 			method:      http.MethodPost,
 			path:        "/search",
 			statusCode:  http.StatusNoContent,
@@ -105,7 +105,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 			err:         nil,
 		},
 		{
-			name:        "executeWithPagination has no content field",
+			name:        "Search has no content field",
 			method:      http.MethodPost,
 			path:        "/search",
 			statusCode:  http.StatusNoContent,
@@ -116,7 +116,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 
 		// Error cases
 		{
-			name:       "executeWithPagination returns a 401 Unauthorized",
+			name:       "Search returns a 401 Unauthorized",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusUnauthorized,
@@ -152,7 +152,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 	}
 }
 
-// Test_searcher_Search_HTTPResponseCases tests how the executeWithPagination() function behaves with various HTTP responses.
+// Test_searcher_SearchByName tests searcher.SearchByName().
 func Test_searcher_SearchByName(t *testing.T) {
 	filterString := `{
 		"equals": {
@@ -172,7 +172,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 	}{
 		// Working cases
 		{
-			name:       "executeWithPagination returns array",
+			name:       "Search By Name returns a result with matching name",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusOK,
@@ -257,7 +257,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 
 		// Error cases
 		{
-			name:       "executeWithPagination returns no content",
+			name:       "SearchByName returns no content",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusNoContent,
@@ -268,12 +268,11 @@ func Test_searcher_SearchByName(t *testing.T) {
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`)},
 		},
 		{
-			name:       "executeWithPagination has no content field",
+			name:       "SearchByName results have no content field",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusNoContent,
@@ -284,8 +283,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`)},
 		},
 		{
@@ -365,12 +363,11 @@ func Test_searcher_SearchByName(t *testing.T) {
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`)},
 		},
 		{
-			name:       "executeWithPagination returns a 401 Unauthorized",
+			name:       "SearchByName returns a 401 Unauthorized",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusUnauthorized,

@@ -18,8 +18,7 @@ const (
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name %q does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`
 )
 
