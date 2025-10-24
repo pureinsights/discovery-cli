@@ -42,7 +42,20 @@ func TestNewDeleteCommand(t *testing.T) {
 			outGolden:  "NewDeleteCommand_Out_DeleteByIdReturnsObject",
 			errGolden:  "NewDeleteCommand_Err_DeleteByIdReturnsObject",
 			method:     http.MethodDelete,
-			path:       "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239",
+			statusCode: http.StatusOK,
+			response: `{
+				"acknowledged": true
+			}`,
+			err: nil,
+		},
+		{
+			name:       "Delete by name returns an acknowledged true",
+			args:       []string{""},
+			url:        true,
+			apiKey:     "apiKey123",
+			outGolden:  "NewDeleteCommand_Out_DeleteByIdReturnsObject",
+			errGolden:  "NewDeleteCommand_Err_DeleteByIdReturnsObject",
+			method:     http.MethodDelete,
 			statusCode: http.StatusOK,
 			response: `{
 				"acknowledged": true
@@ -59,7 +72,6 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:        false,
 			apiKey:     "apiKey123",
 			method:     http.MethodDelete,
-			path:       "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239",
 			statusCode: http.StatusOK,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
@@ -72,7 +84,6 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "",
 			method:     http.MethodDelete,
-			path:       "/v2/credential",
 			statusCode: http.StatusNotFound,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
@@ -85,7 +96,6 @@ func TestNewDeleteCommand(t *testing.T) {
 			outGolden:  "NewDeleteCommand_Out_NotUUID",
 			errGolden:  "NewDeleteCommand_Err_NotUUID",
 			method:     http.MethodDelete,
-			path:       "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239",
 			statusCode: http.StatusOK,
 			response:   ``,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not convert given id \"test\" to UUID. This command does not support referencing an entity by name."),
@@ -98,7 +108,6 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodDelete,
-			path:       "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239",
 			statusCode: http.StatusOK,
 			response:   `{"messages": {{}`,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '{' looking for beginning of object key string"), "Could not print JSON object"),
@@ -111,7 +120,6 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodDelete,
-			path:       "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239",
 			statusCode: http.StatusBadRequest,
 			response: `{
 			"status": 400,
