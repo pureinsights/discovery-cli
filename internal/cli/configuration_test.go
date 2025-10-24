@@ -619,7 +619,7 @@ func TestSetDiscoveryDir_MkDirAllFails(t *testing.T) {
 
 	target := filepath.Join(tmp, ".discovery")
 
-	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o600))
+	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o644))
 
 	_, err := SetDiscoveryDir()
 	require.Error(t, err)
@@ -645,7 +645,7 @@ func TestSetDiscoveryDir_osUserHomeDirFails(t *testing.T) {
 	assert.Contains(t, err.Error(), "is not defined")
 }
 
-// TestSetDiscoveryDir_Success tests the SetDiscoveryDir() function when the ~/.discovery directory could be created successfully
+// TestSetDiscoveryDir_DiscoveryDirCreated tests the SetDiscoveryDir() function when the ~/.discovery directory could be created successfully
 func TestSetDiscoveryDir_DiscoveryDirCreated(t *testing.T) {
 	tmp := t.TempDir()
 
@@ -657,7 +657,7 @@ func TestSetDiscoveryDir_DiscoveryDirCreated(t *testing.T) {
 	assert.Equal(t, filepath.Join(tmp, ".discovery"), configPath)
 }
 
-// TestSetDiscoveryDir_Success tests the SetDiscoveryDir() function when the ~/.discovery directory already exists
+// TestSetDiscoveryDir_DiscoveryDirExists tests the SetDiscoveryDir() function when the ~/.discovery directory already exists
 func TestSetDiscoveryDir_DiscoveryDirExists(t *testing.T) {
 	tmp := t.TempDir()
 
@@ -666,7 +666,7 @@ func TestSetDiscoveryDir_DiscoveryDirExists(t *testing.T) {
 
 	target := filepath.Join(tmp, ".discovery")
 
-	require.NoError(t, os.Mkdir(target, 0o600))
+	require.NoError(t, os.Mkdir(target, 0o644))
 
 	configPath, err := SetDiscoveryDir()
 	require.NoError(t, err)

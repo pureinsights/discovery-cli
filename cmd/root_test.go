@@ -54,7 +54,7 @@ func TestRun_SetDiscoveryDirFails(t *testing.T) {
 
 	target := filepath.Join(tmp, ".discovery")
 
-	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o600))
+	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o644))
 	os.Args = []string{"discovery"}
 	exitCode, err := Run()
 	require.Error(t, err)
@@ -75,7 +75,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
 
-	require.NoError(t, os.Mkdir(filepath.Join(tmp, ".discovery"), 0o700))
+	require.NoError(t, os.Mkdir(filepath.Join(tmp, ".discovery"), 0o644))
 
 	config := filepath.Join(filepath.Join(tmp, ".discovery"), "config.toml")
 
@@ -88,7 +88,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
     "core_url": "http://discovery.core.cn"
   }
 }
-`), 0o700))
+`), 0o644))
 	os.Args = []string{"discovery"}
 	exitCode, err := Run()
 	require.Error(t, err)
