@@ -88,7 +88,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
     "core_url": "http://discovery.core.cn"
   }
 }
-`), 0o644))
+`), 0o744))
 	os.Args = []string{"discovery"}
 	exitCode, err := Run()
 	require.Error(t, err)
