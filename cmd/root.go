@@ -37,7 +37,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	return discovery
 }
 
-// Run executes the root command
+// Run executes the Root command
 func Run() (cli.ExitCode, error) {
 	ios := iostreams.IOStreams{
 		In:  os.Stdin,
