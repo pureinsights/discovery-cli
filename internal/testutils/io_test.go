@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"bytes"
 	"errors"
 	"testing"
 
@@ -74,6 +75,47 @@ func TestErrReader_Read(t *testing.T) {
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+// TestFailOnNWriter tests that the FailOnWriter.Write() function fails at the desired N.
+func TestFailOnNWriter(t *testing.T) {
+	tests := []struct {
+		name      string
+		N         int
+		expectedN int
+	}{
+		{
+			name:      "fails on first write when N=1",
+			N:         1,
+			expectedN: 1,
+		},
+		{
+			name:      "fails on second write when N=2",
+			N:         2,
+			expectedN: 2,
+		},
+		{
+			name:      "fails on third write when N=3",
+			N:         3,
+			expectedN: 3,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := &FailOnNWriter{Writer: &bytes.Buffer{}, N: tc.N}
+
+			for i := 1; i <= tc.expectedN; i++ {
+				_, err := w.Write([]byte("x"))
+
+				if i == tc.expectedN {
+					require.Error(t, err, "expected error on write %d", i)
+				} else {
+					require.NoError(t, err, "did not expect error on write %d", i)
+				}
 			}
 		})
 	}

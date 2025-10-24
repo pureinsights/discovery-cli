@@ -10,8 +10,9 @@ import (
 type Discovery interface {
 	IOStreams() iostreams.IOStreams
 	Config() *viper.Viper
-	SaveConfigFromUser(ios iostreams.IOStreams, profile string, path string) error
 	ConfigPath() string
+	SaveConfigFromUser(ios iostreams.IOStreams, profile string, path string) error
+	PrintConfigToUser(profile string, sensitive bool) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
