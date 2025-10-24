@@ -491,7 +491,6 @@ Flags:
 # Get a credential by id
 discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
 {"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","secret":"mongo-secret","type":"mongo"}
-
 ```
 
 ```bash
@@ -513,6 +512,54 @@ discovery core credential get -p cn
 {"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"label test 2","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-10-17T22:37:56Z","id":"46cb4fff-28be-4901-b059-1dd618e74ee4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:56Z","name":"label test 1 clone 9","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"label test 1 clone","type":"mongo"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Core's credentials. The user must send a name or UUID to get a specific credential.
+
+Usage: `discovery core credential delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the credential that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a credential by id
+discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Delete a credential by name
+discovery core credential delete secret1
+{"acknowledged":true}
+```
+
+```bash
+# Try to delete a credential that does not exist by name
+discovery core credential delete secret1
+Error: Could not search for entity with name "secret1"
+status: 404, body: {
+        "status": 404,
+        "code": 1003,
+        "messages": [
+                "Entity not found: entity with name "secret1"
+        ]
+}
+```
+
+```bash
+# Try to delete a credential that does not exist by id
+discovery core credential delete 62127af9-0da9-4bca-86d6-40354ba196d1
+Error: Could not search for entity with name "62127af9-0da9-4bca-86d6-40354ba196d1"
+status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 62127af9-0da9-4bca-86d6-40354ba196d1"],"timestamp":"2025-10-24T23:14:35.867583300Z"}
 ```
 
 ##### Server
