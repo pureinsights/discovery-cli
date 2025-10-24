@@ -10,16 +10,19 @@ import (
 type Discovery interface {
 	IOStreams() iostreams.IOStreams
 	Config() *viper.Viper
+	SaveConfigFromUser(ios iostreams.IOStreams, profile string, path string) error
+	ConfigPath() string
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
 type discovery struct {
-	config    *viper.Viper
-	iostreams iostreams.IOStreams
+	config     *viper.Viper
+	configPath string
+	iostreams  *iostreams.IOStreams
 }
 
 // IOStreams is a getter method to obtain the CLI's IO streams.
-func (d discovery) IOStreams() iostreams.IOStreams {
+func (d discovery) IOStreams() *iostreams.IOStreams {
 	return d.iostreams
 }
 
@@ -29,9 +32,15 @@ func (d discovery) Config() *viper.Viper {
 }
 
 // NewDiscovery is a constructor of the discovery struct.
-func NewDiscovery(io iostreams.IOStreams, config *viper.Viper) discovery {
+func NewDiscovery(io *iostreams.IOStreams, config *viper.Viper, configPath string) discovery {
 	return discovery{
-		config:    config,
-		iostreams: io,
+		config:     config,
+		iostreams:  io,
+		configPath: configPath,
 	}
+}
+
+// ConfigPath returns the address that contains Discovery's configuration.
+func (d discovery) ConfigPath() string {
+	return d.configPath
 }

@@ -170,7 +170,6 @@ func (mc maintenanceClient) Log(componentName string, level LogLevel, loggerName
 	return execute(mc.client, http.MethodPost, "/log", WithQueryParameters(map[string][]string{"componentName": {componentName}, "level": {string(level)}, "loggerName": {loggerName}}))
 }
 
-
 // Core is the struct for the client that can execute every Core operation.
 type core struct {
 	Url, ApiKey string
@@ -214,6 +213,7 @@ func (c core) BackupRestore() backupRestore {
 }
 
 // NewCore is the constructor for the core struct.
+// It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewCore(url, apiKey string) core {
-	return core{Url: url, ApiKey: apiKey}
+	return core{Url: url + "/v2", ApiKey: apiKey}
 }
