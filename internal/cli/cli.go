@@ -10,8 +10,8 @@ import (
 type Discovery interface {
 	IOStreams() iostreams.IOStreams
 	Config() *viper.Viper
-	ConfigPath() string
 	SaveConfigFromUser(ios iostreams.IOStreams, profile string, path string) error
+	ConfigPath() string
 	PrintConfigToUser(profile string, sensitive bool) error
 }
 

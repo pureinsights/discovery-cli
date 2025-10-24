@@ -19,7 +19,7 @@ const (
 	// The default URL for Discovery Ingestion
 	DefaultIngestionURL string = "http://localhost:12030/v2"
 	// The default URL for Discovery QueryFlow
-	DefaultQueryFlowURL string = "http://localhost:12040/v2"
+	DefaultQueryFlowURL string = "http://localhost:12040"
 	// SaveHeader contains the instructions header printed when saving a configuration.
 	SaveHeader string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
 	// PrintHeader contains the header displayed when printing a configuration.
