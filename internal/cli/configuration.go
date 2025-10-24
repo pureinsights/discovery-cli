@@ -13,11 +13,11 @@ import (
 
 const (
 	// The default URL for Discovery Core
-	DefaultCoreURL string = "http://localhost:12010/v2"
+	DefaultCoreURL string = "http://localhost:12010"
 	// The default URL for Discovery Staging
-	DefaultStagingURL string = "http://localhost:12020/v2"
+	DefaultStagingURL string = "http://localhost:12020"
 	// The default URL for Discovery Ingestion
-	DefaultIngestionURL string = "http://localhost:12030/v2"
+	DefaultIngestionURL string = "http://localhost:12030"
 	// The default URL for Discovery QueryFlow
 	DefaultQueryFlowURL string = "http://localhost:12040"
 	// SaveHeader contains the instructions header printed when saving a configuration.
@@ -145,7 +145,6 @@ func (d discovery) saveConfig() error {
 		default:
 			config.Set(setting, v.Get(setting))
 		}
-
 	}
 
 	err := config.WriteConfigAs(filepath.Join(d.ConfigPath(), "config.toml"))
