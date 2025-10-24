@@ -22,12 +22,12 @@ import (
 // Test_readConfigFile tests the readConfigFile() auxiliary function.
 func Test_readConfigFile(t *testing.T) {
 	tests := []struct {
-		name           string
-		baseName       string
-		config         string
-		expectedConfig map[string]string
-		expectedBool   bool
-		err            error
+		name                   string
+		baseName               string
+		config                 string
+		expectedConfig         map[string]string
+		expectedFileExistsBool bool
+		err                    error
 	}{
 		// Working cases
 		{
@@ -44,16 +44,16 @@ core_url="http://discovery.core.cn"
 				"default.core_url": "http://localhost:12010",
 				"cn.core_url":      "http://discovery.core.cn",
 			},
-			expectedBool: true,
-			err:          nil,
+			expectedFileExistsBool: true,
+			err:                    nil,
 		},
 		{
-			name:           "File does not exist",
-			baseName:       "fail",
-			config:         ``,
-			expectedConfig: map[string]string{},
-			expectedBool:   false,
-			err:            nil,
+			name:                   "File does not exist",
+			baseName:               "fail",
+			config:                 ``,
+			expectedConfig:         map[string]string{},
+			expectedFileExistsBool: false,
+			err:                    nil,
 		},
 		{
 			name:     "Cannot Merge configuration",
@@ -72,8 +72,8 @@ core_url="http://discovery.core.cn"
 				"default.core_key": "",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
-			expectedBool: true,
-			err:          errors.New("While parsing config: toml: invalid character at start of key: {"),
+			expectedFileExistsBool: true,
+			err:                    errors.New("While parsing config: toml: invalid character at start of key: {"),
 		},
 	}
 
@@ -94,7 +94,7 @@ core_url="http://discovery.core.cn"
 
 			viper := viper.New()
 			exists, err := readConfigFile(tc.baseName, dir, viper, &ios)
-			assert.Equal(t, tc.expectedBool, exists)
+			assert.Equal(t, tc.expectedFileExistsBool, exists)
 			if tc.err != nil {
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
@@ -1433,7 +1433,7 @@ func Test_discovery_printConfig(t *testing.T) {
 	}
 }
 
-// Test_discovery_PrintCoreConfigToUser tests the discovery.PrintCoreToUser() function.
+// Test_discovery_printURLAndAPIKey tests the discovery.printURLAndAPIKey() function.
 func Test_discovery_printURLAndAPIKey(t *testing.T) {
 	tests := []struct {
 		name           string
