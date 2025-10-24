@@ -24,3 +24,15 @@ func DeleteCommand(id string, d Discovery, client deleter, config commandConfig)
 	err = d.DeleteEntity(client, deleteId, printer)
 	return err
 }
+
+// SearchDeleteCommand is the function that executes the delete operation for the delete commands that can also work with names.
+func SearchDeleteCommand(id string, d Discovery, client searchDeleter, config commandConfig) error {
+	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
+	if err != nil {
+		return err
+	}
+
+	printer := GetObjectPrinter(config.output)
+	err = d.SearchDeleteEntity(client, id, printer)
+	return err
+}
