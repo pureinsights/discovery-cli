@@ -42,7 +42,7 @@ func TestNewGetCommand(t *testing.T) {
 			outGolden:  "NewGetCommand_Out_SearchByNameReturnsObject",
 			errGolden:  "NewGetCommand_Err_SearchByNameReturnsObject",
 			method:     http.MethodPost,
-			path:       "/server/search",
+			path:       "/v2/server/search",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
@@ -106,7 +106,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/server",
+			path:       "/v2/server",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
@@ -161,7 +161,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodPost,
-			path:       "/server/search",
+			path:       "/v2/server/search",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
@@ -230,7 +230,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        false,
 			apiKey:     "apiKey123",
 			method:     http.MethodPost,
-			path:       "/server/search",
+			path:       "/v2/server/search",
 			statusCode: http.StatusOK,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
@@ -243,7 +243,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "",
 			method:     http.MethodPost,
-			path:       "/server",
+			path:       "/v2/server",
 			statusCode: http.StatusNotFound,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
@@ -256,7 +256,7 @@ func TestNewGetCommand(t *testing.T) {
 			outGolden:  "NewGetCommand_Out_NameDoesNotExist",
 			errGolden:  "NewGetCommand_Err_NameDoesNotExist",
 			method:     http.MethodPost,
-			path:       "/server/search",
+			path:       "/v2/server/search",
 			statusCode: http.StatusNoContent,
 			response:   ``,
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
@@ -280,7 +280,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodPost,
-			path:       "/server/search",
+			path:       "/v2/server/search",
 			statusCode: http.StatusInternalServerError,
 			response: `{
 			"status": 500,
@@ -307,7 +307,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/server",
+			path:       "/v2/server",
 			statusCode: http.StatusUnauthorized,
 			response:   `{"error": "unauthorized"}`,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error": "unauthorized"}`)}, "Could not get all entities"),
@@ -320,7 +320,7 @@ func TestNewGetCommand(t *testing.T) {
 			outGolden:  "NewGetCommand_Out_SearchHTTPError",
 			errGolden:  "NewGetCommand_Err_SearchHTTPError",
 			method:     http.MethodPost,
-			path:       "/server/search",
+			path:       "/v2/server/search",
 			statusCode: http.StatusUnauthorized,
 			response: `{
 	"status": 401,
@@ -350,7 +350,7 @@ func TestNewGetCommand(t *testing.T) {
 			outGolden:  "NewGetCommand_Out_FilterDoesNotExist",
 			errGolden:  "NewGetCommand_Err_FilterDoesNotExist",
 			method:     http.MethodPost,
-			path:       "/server/search",
+			path:       "/v2/server/search",
 			statusCode: http.StatusBadRequest,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "Filter type \"gte\" does not exist"),
@@ -363,7 +363,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodPost,
-			path:       "/server/search",
+			path:       "/v2/server/search",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","credentials":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"test","type":mongo"}},       
@@ -391,7 +391,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/server",
+			path:       "/v2/server",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","credentials":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}},     
