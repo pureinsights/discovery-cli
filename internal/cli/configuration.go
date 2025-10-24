@@ -143,7 +143,6 @@ func (d discovery) saveConfig() error {
 		default:
 			config.Set(setting, v.Get(setting))
 		}
-
 	}
 
 	err := config.WriteConfigAs(filepath.Join(d.ConfigPath(), "config.toml"))
