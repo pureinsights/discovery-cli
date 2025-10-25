@@ -631,3 +631,50 @@ discovery core server get -p cn
 {"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server clone 2","type":"mongo"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Core's servers. The user must send a name or UUID to get a specific server.
+
+Usage: `discovery core server delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the server that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a server by id
+discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Delete a server by name
+discovery core server delete secret1
+{"acknowledged":true}
+```
+
+```bash
+# Try to delete a server that does not exist by name
+discovery core server delete server1
+Error: Could not search for entity with name "server1"
+status: 404, body: {
+        "status": 404,
+        "code": 1003,
+        "messages": [
+                "Entity not found: entity with name "server1"
+        ]
+}
+```
+
+```bash
+# Try to delete a server that does not exist by id
+discovery core server delete 62127af9-0da9-4bca-86d6-40354ba196d1
+Error: Could not search for entity with name "62127af9-0da9-4bca-86d6-40354ba196d1"
+status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 62127af9-0da9-4bca-86d6-40354ba196d1"],"timestamp":"2025-10-24T23:14:35.867583300Z"}
+```
