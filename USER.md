@@ -538,7 +538,7 @@ discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
 
 ```bash
 # Delete a credential by name
-discovery core credential delete secret1
+discovery core credential delete credential1
 {"acknowledged":true}
 ```
 
