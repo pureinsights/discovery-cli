@@ -538,19 +538,19 @@ discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
 
 ```bash
 # Delete a credential by name
-discovery core credential delete secret1
+discovery core credential delete credential1
 {"acknowledged":true}
 ```
 
 ```bash
 # Try to delete a credential that does not exist by name
-discovery core credential delete secret1
-Error: Could not search for entity with name "secret1"
+discovery core credential delete credential1
+Error: Could not search for entity with name "credential1"
 status: 404, body: {
         "status": 404,
         "code": 1003,
         "messages": [
-                "Entity not found: entity with name "secret1"
+                "Entity not found: entity with name "credential1"
         ]
 }
 ```
