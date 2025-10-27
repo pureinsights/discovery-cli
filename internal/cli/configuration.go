@@ -21,10 +21,6 @@ const (
 	DefaultIngestionURL string = "http://localhost:12030"
 	// The default URL for Discovery QueryFlow
 	DefaultQueryFlowURL string = "http://localhost:12040"
-	// SaveHeader contains the instructions header printed when saving a configuration.
-	SaveHeader string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
-	// PrintHeader contains the header displayed when printing a configuration.
-	PrintHeader string = "Showing the configuration of profile %q:\n\n"
 )
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
@@ -266,12 +262,6 @@ func (d discovery) printConfig(profile, propertyName, property string, sensitive
 
 // PrintURLAndAPIKey prints the URL and API key of a Discovery component to the Out IOStream.
 func (d discovery) printURLAndAPIKey(profile, component, componentName string, standalone, sensitive bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, PrintHeader, profile)
-	}
-
 	err = d.printConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not print %s's URL", componentName)
