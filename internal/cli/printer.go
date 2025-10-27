@@ -65,9 +65,7 @@ func printArrayObject(ios iostreams.IOStreams, pretty bool, array ...gjson.Resul
 
 	if pretty {
 		_, err := fmt.Fprint(ios.Out, "]\n")
-		if err != nil {
-			return err
-		}
+		return err
 	}
 
 	return nil
