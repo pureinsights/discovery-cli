@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"bytes"
-	"flag"
 	"errors"
+	"flag"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Defines the update flag in the package
 var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Test_newRootCommand tests the newRootCommand() function.
