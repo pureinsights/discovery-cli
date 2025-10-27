@@ -13,7 +13,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "Print Discovery's configuration",
-		Long:  fmt.Sprintf(commands.LongConfig, "Platform"),
+		Long:  fmt.Sprintf(commands.LongConfigGet, "Platform"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.PrintConfigCommand(cmd, d.IOStreams(), d.PrintConfigToUser)
 		},
