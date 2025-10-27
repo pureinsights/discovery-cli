@@ -2,7 +2,6 @@ package discovery
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/tidwall/gjson"
 
@@ -23,31 +22,7 @@ func (getter getter) Get(id uuid.UUID) (gjson.Result, error) {
 // GetAll retrieves every entity. It iterates through every page to get all of the results.
 // It returns an array of JSON objects or an error if the request failed.
 func (getter getter) GetAll() ([]gjson.Result, error) {
-	response, err := execute(getter.client, http.MethodGet, "")
-	if err != nil {
-		return []gjson.Result(nil), err
-	}
-
-	elementNumber := response.Get("numberOfElements").Int()
-	pageNumber := response.Get("pageNumber").Int()
-	totalPages := response.Get("totalPages").Int()
-	totalSize := response.Get("totalSize").Int()
-	elements := response.Get("content").Array()
-	pageNumber++
-	for pageNumber < totalPages && elementNumber < totalSize {
-		response, err = execute(getter.client, http.MethodGet, "", WithQueryParameters(map[string][]string{"page": {strconv.FormatInt(pageNumber, 10)}}))
-		if err != nil {
-			return []gjson.Result(nil), err
-		}
-
-		pageElements := response.Get("content").Array()
-		elements = append(elements, pageElements...)
-
-		pageNumber++
-		pageElementNumber := response.Get("numberOfElements").Int()
-		elementNumber += pageElementNumber
-	}
-	return elements, nil
+	return executeWithPagination(getter.client, http.MethodGet, "")
 }
 
 // Crud is a struct that has creates, reads, updates, and deletes entities.
