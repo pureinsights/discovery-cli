@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Defines the update flag in the package
 var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Path creates the testdata directory when update is true.
