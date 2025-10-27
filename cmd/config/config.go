@@ -15,7 +15,7 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 		Short: "Save Discovery's configuration",
 		Long:  fmt.Sprintf(commands.LongConfig, "Platform"),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.SaveConfigCommand(cmd, d.SaveConfigFromUser)
+			return commands.SaveConfigCommand(cmd, d.IOStreams(), d.SaveConfigFromUser)
 		},
 	}
 	return config
