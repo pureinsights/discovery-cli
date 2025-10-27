@@ -86,6 +86,17 @@ It has the following method:
 | Export | GET | `{URL}/export` |  |  | `application/octet-stream` | Calls the `/export` endpoint. It returns the result of the endpoint in bytes, which should be written to a ZIP file so that it can be restored later. |
 | Import | POST | `{URL}/import` | `multipart/form-data` | `onConflict`: `UPDATE`, `IGNORE`, `FAIL` | `application/json` | Calls the `/import` endpoint. It receives the given file to restore the entities contained within. |
 
+### Searcher
+This struct has methods to search for entities in Discovery's components.
+
+It inherits from:
+* [Client](#client)
+
+It has the following method:
+| Name | Method | Path | Request Body | Response | Description |
+| --- | --- | --- | --- | --- | --- |
+| Search | POST | `{URL}/search` | `application/json` | `application/json` | Returns an array with the entities that match the given filters. |
+| SearchByName | POST | `{URL}/search` | `application/json` | `application/json` | Returns the JSON object with the best match to the given name or an error if any occured or the entity was not found. |
 
 ## Discovery Clients
 ### Core Client
@@ -94,7 +105,7 @@ Discovery has a Core client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url   | The URL of Discovery's Core component. The URL should contain the URL up to the version. For example, `http://localhost:12010/v2`. |
+| Url   | The URL of Discovery's Core component. The URL must not contain the version, as it is added automatically. For example, `http://localhost:12010`. |
 | ApiKey | The API key to authenticate each request to Discovery's Core. |
 
 #### Sub-Clients
@@ -130,6 +141,16 @@ It has the following additional method:
 
 Creating a `serversClient` can be done with `core.Servers()` or `newServersClient(URL, API Key)`.
 
+
+
+##### LabelsClient
+This struct manages labels. 
+
+It inherits from:
+* [CRUD](#crud)
+
+Creating a `labelsClient` can be done with `core.Labels()` or `newLabelsClient(URL, API Key)`.
+
 ##### FilesClient
 This struct manages Discovery's files. 
 
@@ -139,25 +160,12 @@ It inherits from:
 It has the following additional methods:
 | Name | Method | Path | Request Body | Response | Description |
 | --- | --- | --- | --- | --- | --- | 
-| Upload | PUT | `{URL}/file/{Key}` | `multipart/form-data` | `application/json` | Sends a file to Discovery. |
-| Retrieve | GET | `{URL}/file/{Key}`  |  | `application/octet-stream` | Returns file's data inside a byte array. |
+| Upload | PUT | `{URL}/file/{KEY}` | `multipart/form-data` | `application/json` | Sends a file to Discovery. |
+| Retrieve | GET | `{URL}/file/{KEY}`  |  | `application/octet-stream` | Returns file's data inside a byte array. |
 | List | GET | `{URL}/file`  |  | `application/json` | Returns an array with all of the file keys in Discovery. |
-| Delete | DELETE | `{URL}/file/{Key}`  | | `application/json` | Removes the file. |
+| Delete | DELETE | `{URL}/file/{KEY}`  | | `application/json` | Removes the file. |
 
 Creating a `filesClient` can be done with `core.Files()` or `newServersClient(URL, API Key)`.
-
-##### BackupRestore
-This struct imports and exports the Core's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
-
-Creating a `backupRestore` can be done with `core.BackupRestore()`.
-
-##### LabelsClient
-This struct manages labels. 
-
-It inherits from:
-* [CRUD](#crud)
-
-Creating a `labelsClient` can be done with `core.Labels()` or `newLabelsClient(URL, API Key)`.
 
 ##### MaintenanceClient
 The `maintenanceClient` struct carries out the Core's maintenance operations.
@@ -170,7 +178,12 @@ It has the following method:
 | --- | --- | --- | --- | --- | --- 
 | Log | POST | `{URL}/maintenance/log` | • `componentName`<br>• `level`: `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`<br>• loggerName | `application/json` | This function changes the log level of a component. It can also change the level of a specific logger inside a component. |
  
-Creating a `maintenanceClient` can be done with `core.Maintenance()` or `newMaintenanceClient(URL, API Key)`.
+ Creating a `maintenanceClient` can be done with `core.Maintenance()` or `newMaintenanceClient(URL, API Key)`.
+
+##### BackupRestore
+This struct imports and exports the Core's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
+
+Creating a `backupRestore` can be done with `core.BackupRestore()`.
 
 ### QueryFlow Client
 Discovery has a QueryFlow client struct. 
@@ -178,14 +191,14 @@ Discovery has a QueryFlow client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url   | The URL of Discovery's QueryFlow component. The URL should contain the URL up to the version. For example, `http://localhost:12040/v2`. |
+| Url   | The URL of Discovery's QueryFlow component. The URL must not contain the version, as it is added automatically. For example, `http://localhost:12040`. |
 | ApiKey | The API key to authenticate each request to Discovery's QueryFlow. |
 
 It has the following methods:
 | Name | Method | Path | Request Body | Response | Description |
 | --- | --- | --- | --- | --- | --- | 
 | Invoke | `{method}` | `{URL}/api/{URI}` | `{Functional Options}` | `application/json` | Calls the endpoint with a `/api` root path added to the URI, which makes QueryFlow return a normal response of the endpoint. It can receive the [Client's](#client) functional options to modify the request. |
-| Debug | `{method}` | `{URL}/{UUID}` | `{Functional Options}` | `application/json` | calls the endpoint with a `/debug` root path, which makes QueryFlow respond with the entire trace of execution the state machine took. Each one of the states, their output, their errors and the overall flow followed by the state machine will be displayed. It can receive the [Client's](#client) functional options to modify the request. |
+| Debug | `{method}` | `{URL}/{UUID}` | `{Functional Options}` | `application/json` | Calls the endpoint with a `/debug` root path, which makes QueryFlow respond with the entire trace of execution the state machine took. Each one of the states, their output, their errors and the overall flow followed by the state machine will be displayed. It can receive the [Client's](#client) functional options to modify the request. |
 
 These are very similar to `client.execute()`, but are used to call QueryFlow's endpoints. The response can vary depending on the URI used on the request.
 
@@ -206,6 +219,7 @@ This struct manages QueryFlow's endpoints.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Enabler](#enabler)
 
 Creating a `endpointsClient` can be done with `queryFlow.endpointsClient()` or `newEndpointsClient(URL, API Key)`.
 
@@ -220,7 +234,7 @@ Discovery has a Ingestion client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url | The URL of Discovery's Ingestion component. The URL should contain the URL up to the version. For example, `http://localhost:12030/v2`. |
+| Url | The URL of Discovery's Ingestion component. The URL must not contain the version, as it is added automatically. For example, `http://localhost:12030`. |
 | ApiKey | The API key to authenticate each request to Discovery's Ingestion. |
 
 #### Sub-Clients
@@ -298,10 +312,15 @@ It can be created with `seedExecutionsClient.Jobs(Execution ID)` or `newSeedExec
 The `seedRecordsClient` is the struct that can get the records and their summary from a seed.
 
 It inherits from:
-* [Getter](#getter)
 * [Summarizer](#summarizer)
 
-The `Get()` method had to be overridden because records do not use a UUID as their ID, so this iteration receives a string. It can be created with `seedsClient.Records()` or `newSeedRecordsClient(seedsClient, Seed ID)`.
+It has the following methods:
+| Name | Method | Path | Response | Description |
+| --- | --- | --- | --- | --- |
+| Get | GET | `{URL}/seed/{UUID}/record/{RECORDID}` | `application/json` | Returns the seed record with the given id. |
+| GetAll | GET | `{URL}/seed/{UUID}/record` | `application/json` | Returns an array with all of the seed's records. |
+
+It can be created with `seedsClient.Records()` or `newSeedRecordsClient(seedsClient, Seed ID)`.
 
 ##### BackupRestore
 This struct imports and exports Ingestion's entities. It is the same struct as the [BackupRestore](#backuprestore) struct
@@ -314,7 +333,7 @@ Discovery has a Staging client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url   | The URL of Discovery's Staging component. The URL should contain the URL up to the version. For example, `http://localhost:12020/v2`. |
+| Url   | The URL of Discovery's Staging component. The URL must not contain the version, as it is added automatically. For example, `http://localhost:12020`. |
 | ApiKey | The API key to authenticate each request to Discovery's Staging. |
 
 #### Sub-Clients

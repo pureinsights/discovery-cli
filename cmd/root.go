@@ -17,6 +17,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery := &cobra.Command{
 		Use:   "discovery [subcommand]",
 		Short: "A CLI to assist with operations on Pureinsights Discovery",
+		Long:  "discovery is the Discovery CLI's root command. This is the command used to run the CLI. It contains all of the other subcommands.",
 	}
 
 	ios := d.IOStreams()
@@ -42,7 +43,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	return discovery
 }
 
-// Run executes the root command
+// Run executes the Root command
 func Run() (cli.ExitCode, error) {
 	ios := iostreams.IOStreams{
 		In:  os.Stdin,
@@ -52,18 +53,21 @@ func Run() (cli.ExitCode, error) {
 
 	configPath, err := cli.SetDiscoveryDir()
 	if err != nil {
-		return cli.ErrorExitCode, cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not set up Discovery's directory in User's home directory")
+		cliError := cli.FromError(err)
+		return cliError.ExitCode, cliError
 	}
 
 	viper, err := cli.InitializeConfig(ios, configPath)
 	if err != nil {
-		return cli.ErrorExitCode, cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not initialize configuration")
+		cliError := cli.FromError(err)
+		return cliError.ExitCode, cliError
 	}
 	d := cli.NewDiscovery(&ios, viper, configPath)
 	root := newRootCommand(d)
 	err = root.Execute()
 	if err != nil {
-		return cli.ErrorExitCode, cli.FromError(err)
+		cliError := cli.FromError(err)
+		return cliError.ExitCode, cliError
 	}
 	return cli.SuccessExitCode, nil
 }
