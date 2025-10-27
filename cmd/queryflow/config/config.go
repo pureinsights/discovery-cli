@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+
+	"github.com/pureinsights/pdp-cli/cmd/commands"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
@@ -10,13 +13,9 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 	config := &cobra.Command{
 		Use:   "config [subcommands]",
 		Short: "Save Discovery Queryflow's configuration",
-		Long:  "config is the command used to interact with Discovery Queryflow's configuration for a profile. This command by itself asks the user to save Queryflow's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.",
+		Long:  fmt.Sprintf(commands.LongConfig, "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			profile, err := cmd.Flags().GetString("profile")
-			if err != nil {
-				return err
-			}
-			return d.SaveQueryFlowConfigFromUser(profile, true)
+			return commands.SaveConfigCommand(cmd, d.IOStreams(), d.SaveQueryFlowConfigFromUser)
 		},
 	}
 

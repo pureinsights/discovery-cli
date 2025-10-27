@@ -1,6 +1,6 @@
 Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
 
-QueryFlow URL [http://localhost:12040]: QueryFlow API Key [********w123]: Usage:
+QueryFlow URL [http://localhost:12040]: QueryFlow API key [queryflow123]: Usage:
   config [subcommands] [flags]
 
 Flags:
