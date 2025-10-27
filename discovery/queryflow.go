@@ -91,6 +91,7 @@ func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Re
 }
 
 // NewQueryFlow is the constructor for the QueryFlow struct.
+// It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewQueryFlow(url, apiKey string) queryFlow {
-	return queryFlow{Url: url, ApiKey: apiKey}
+	return queryFlow{Url: url + "/v2", ApiKey: apiKey}
 }
