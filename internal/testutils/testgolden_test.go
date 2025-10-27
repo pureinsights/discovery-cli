@@ -73,8 +73,24 @@ func TestRead_SucceedsWhenFileExists(t *testing.T) {
 	require.NoError(t, os.MkdirAll("testdata", 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join("testdata", "test.golden"), []byte("this is a test\n"), 0o644))
 
+	old := *Update
+	*Update = false
+	t.Cleanup(func() { *Update = old })
+
 	got := Read(t, "test")
 	require.Equal(t, []byte("this is a test\n"), got)
+}
+
+// TestRead_ReturnsNilWhenUpdateTrue tests the Read function when the update flag is true
+func TestRead_ReturnsNilWhenUpdateTrue(t *testing.T) {
+	changeDirectoryHelper(t)
+
+	old := *Update
+	*Update = true
+	t.Cleanup(func() { *Update = old })
+
+	got := Read(t, "test")
+	require.Nil(t, got)
 }
 
 // TestCompareBytes_UpdateWritesNewGolden tests the CompareBytes() function when the golden file needs to be updated.
@@ -85,7 +101,7 @@ func TestCompareBytes_UpdateWritesNewGolden(t *testing.T) {
 	*Update = true
 	t.Cleanup(func() { *Update = old })
 
-	CompareBytes(t, "test", []byte("test data\n"))
+	CompareBytes(t, "test", []byte{}, []byte("test data\n"))
 
 	// verify file was created with content
 	b, err := os.ReadFile(filepath.Join("testdata", "test.golden"))
@@ -104,5 +120,5 @@ func TestCompareBytes_NoUpdateMatchesPasses(t *testing.T) {
 	*Update = false
 	t.Cleanup(func() { *Update = old })
 
-	CompareBytes(t, "test", []byte("this is a test\n"))
+	CompareBytes(t, "test", Read(t, "test"), []byte("this is a test\n"))
 }
