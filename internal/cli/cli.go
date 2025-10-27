@@ -12,7 +12,7 @@ type Discovery interface {
 	Config() *viper.Viper
 	ConfigPath() string
 	SaveConfigFromUser(profile string) error
-	SaveCoreConfigFromUser(profile string, standalone bool) error
+	SaveCoreConfigFromUser(profile string) error
 	PrintConfigToUser(profile string, sensitive bool) error
 }
 

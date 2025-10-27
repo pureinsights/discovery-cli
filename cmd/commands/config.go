@@ -34,15 +34,6 @@ func SaveConfigCommand(cmd *cobra.Command, ios *iostreams.IOStreams, config func
 	return config(profile)
 }
 
-// SaveComponentConfigCommand is the generic function to run the commands that save configurations.
-func SaveComponentConfigCommand(cmd *cobra.Command, config func(string, bool) error) error {
-	profile, err := cmd.Flags().GetString("profile")
-	if err != nil {
-		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
-	}
-	return config(profile, true)
-}
-
 // PrintConfigCommand is the generic function to run the commands that print configurations.
 func PrintConfigCommand(cmd *cobra.Command, ios *iostreams.IOStreams, config func(string, bool) error) error {
 	profile, err := cmd.Flags().GetString("profile")
