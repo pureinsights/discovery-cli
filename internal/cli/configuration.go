@@ -21,10 +21,6 @@ const (
 	DefaultIngestionURL string = "http://localhost:12030"
 	// The default URL for Discovery QueryFlow
 	DefaultQueryFlowURL string = "http://localhost:12040"
-	// SaveHeader contains the instructions header printed when saving a configuration.
-	SaveHeader string = "Editing profile %q. Press Enter to keep the value shown, type a single space to set empty.\n\n"
-	// PrintHeader contains the header displayed when printing a configuration.
-	PrintHeader string = "Showing the configuration of profile %q:\n\n"
 )
 
 // ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
@@ -173,13 +169,7 @@ func SetDiscoveryDir() (string, error) {
 }
 
 // SaveUrlAndAPIKey asks the user for the URL and API key of a Discovery component and saves them.
-func (d discovery) saveUrlAndAPIKey(profile, component, componentName string, standalone bool) error {
-	ios := d.IOStreams()
-
-	if standalone {
-		fmt.Fprintf(ios.Out, SaveHeader, profile)
-	}
-
+func (d discovery) saveUrlAndAPIKey(profile, component, componentName string) error {
 	err := d.askUserConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Failed to get %s's URL", componentName)
@@ -200,50 +190,44 @@ func (d discovery) saveUrlAndAPIKey(profile, component, componentName string, st
 
 // SaveCoreConfigFromUser asks the user for the values it wants to set for Discovery Core's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
-// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
-func (d discovery) SaveCoreConfigFromUser(profile string, standalone bool) error {
-	return d.saveUrlAndAPIKey(profile, "core", "Core", standalone)
+func (d discovery) SaveCoreConfigFromUser(profile string) error {
+	return d.saveUrlAndAPIKey(profile, "core", "Core")
 }
 
 // SaveIngestionConfigFromUser asks the user for the values it wants to set for Discovery Ingestion's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
-// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
-func (d discovery) SaveIngestionConfigFromUser(profile string, standalone bool) error {
-	return d.saveUrlAndAPIKey(profile, "ingestion", "Ingestion", standalone)
+func (d discovery) SaveIngestionConfigFromUser(profile string) error {
+	return d.saveUrlAndAPIKey(profile, "ingestion", "Ingestion")
 }
 
 // SaveQueryFlowConfigFromUser asks the user for the values it wants to set for Discovery QueryFlow's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
-// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
-func (d discovery) SaveQueryFlowConfigFromUser(profile string, standalone bool) error {
-	return d.saveUrlAndAPIKey(profile, "queryflow", "QueryFlow", standalone)
+func (d discovery) SaveQueryFlowConfigFromUser(profile string) error {
+	return d.saveUrlAndAPIKey(profile, "queryflow", "QueryFlow")
 }
 
 // SaveStagingConfigFromUser asks the user for the values it wants to set for Discovery Staging's configuration properties for the given profile.
 // It then writes the new configuration to the Discovery struct's Config Path.
-// The standalone parameter is used to display the instructions in case this function is used by itself and not by the SaveConfigFromUser() function.
-func (d discovery) SaveStagingConfigFromUser(profile string, standalone bool) error {
-	return d.saveUrlAndAPIKey(profile, "staging", "Staging", standalone)
+func (d discovery) SaveStagingConfigFromUser(profile string) error {
+	return d.saveUrlAndAPIKey(profile, "staging", "Staging")
 }
 
 // SaveConfigFromUser asks the user for the URLs and API Keys of the Discovery's components to save them in a profile.
 // It then writes the current configuration into the given file.
 func (d discovery) SaveConfigFromUser(profile string) error {
-	fmt.Fprintf(d.IOStreams().Out, SaveHeader, profile)
-
-	err := d.SaveCoreConfigFromUser(profile, false)
+	err := d.SaveCoreConfigFromUser(profile)
 	if err != nil {
 		return err
 	}
-	err = d.SaveIngestionConfigFromUser(profile, false)
+	err = d.SaveIngestionConfigFromUser(profile)
 	if err != nil {
 		return err
 	}
-	err = d.SaveQueryFlowConfigFromUser(profile, false)
+	err = d.SaveQueryFlowConfigFromUser(profile)
 	if err != nil {
 		return err
 	}
-	return d.SaveStagingConfigFromUser(profile, false)
+	return d.SaveStagingConfigFromUser(profile)
 }
 
 // PrintConfig is the auxiliary function to print a property's value to the user.
@@ -265,14 +249,8 @@ func (d discovery) printConfig(profile, propertyName, property string, sensitive
 }
 
 // PrintURLAndAPIKey prints the URL and API key of a Discovery component to the Out IOStream.
-func (d discovery) printURLAndAPIKey(profile, component, componentName string, standalone, sensitive bool) error {
-	ios := d.IOStreams()
-	var err error
-	if standalone {
-		fmt.Fprintf(ios.Out, PrintHeader, profile)
-	}
-
-	err = d.printConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
+func (d discovery) printURLAndAPIKey(profile, component, componentName string, sensitive bool) error {
+	err := d.printConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not print %s's URL", componentName)
 	}
@@ -286,49 +264,42 @@ func (d discovery) printURLAndAPIKey(profile, component, componentName string, s
 
 // PrintCoreConfigToUser prints the Discovery Core's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
-// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
-func (d discovery) PrintCoreConfigToUser(profile string, sensitive, standalone bool) error {
-	return d.printURLAndAPIKey(profile, "core", "Core", standalone, sensitive)
+func (d discovery) PrintCoreConfigToUser(profile string, sensitive bool) error {
+	return d.printURLAndAPIKey(profile, "core", "Core", sensitive)
 }
 
 // PrintIngestionConfigToUser prints the Discovery Ingestion's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
-// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
-func (d discovery) PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error {
-	return d.printURLAndAPIKey(profile, "ingestion", "Ingestion", standalone, sensitive)
+func (d discovery) PrintIngestionConfigToUser(profile string, sensitive bool) error {
+	return d.printURLAndAPIKey(profile, "ingestion", "Ingestion", sensitive)
 }
 
 // PrintQueryFlowConfigToUser prints the Discovery QueryFlow's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
-// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
-func (d discovery) PrintQueryFlowConfigToUser(profile string, sensitive, standalone bool) error {
-	return d.printURLAndAPIKey(profile, "queryflow", "QueryFlow", standalone, sensitive)
+func (d discovery) PrintQueryFlowConfigToUser(profile string, sensitive bool) error {
+	return d.printURLAndAPIKey(profile, "queryflow", "QueryFlow", sensitive)
 }
 
 // PrintStagingConfigToUser prints the Discovery Staging's configuration properties for the given profile.
 // The caller of the function can determine if the API Key is sensitive so that it can be obfuscated.
-// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
-func (d discovery) PrintStagingConfigToUser(profile string, sensitive, standalone bool) error {
-	return d.printURLAndAPIKey(profile, "staging", "Staging", standalone, sensitive)
+func (d discovery) PrintStagingConfigToUser(profile string, sensitive bool) error {
+	return d.printURLAndAPIKey(profile, "staging", "Staging", sensitive)
 }
 
 // PrintConfigToUser prints the Discovery Components' configuration properties for the given profile.
 // The caller of the function can determine if the API Keys are sensitive so that they can be obfuscated.
-// The standalone parameter is used to display the header information in case this function is used by itself and not by the PrintConfigToUser() function.
 func (d discovery) PrintConfigToUser(profile string, sensitive bool) error {
-	fmt.Fprintf(d.IOStreams().Out, PrintHeader, profile)
-
-	err := d.PrintCoreConfigToUser(profile, sensitive, false)
+	err := d.PrintCoreConfigToUser(profile, sensitive)
 	if err != nil {
 		return err
 	}
-	err = d.PrintIngestionConfigToUser(profile, sensitive, false)
+	err = d.PrintIngestionConfigToUser(profile, sensitive)
 	if err != nil {
 		return err
 	}
-	err = d.PrintQueryFlowConfigToUser(profile, sensitive, false)
+	err = d.PrintQueryFlowConfigToUser(profile, sensitive)
 	if err != nil {
 		return err
 	}
-	return d.PrintStagingConfigToUser(profile, sensitive, false)
+	return d.PrintStagingConfigToUser(profile, sensitive)
 }
