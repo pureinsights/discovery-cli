@@ -168,7 +168,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
+			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 
 			var commandNames []string
 			for _, c := range configCmd.Commands() {
