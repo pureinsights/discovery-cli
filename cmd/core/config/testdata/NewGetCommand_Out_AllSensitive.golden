@@ -2,3 +2,9 @@ Showing the configuration of profile "cn":
 
 Core URL: "http://localhost:12010"
 Core API Key: "*************.core.cn"
+Ingestion URL: "http://localhost:12020"
+Ingestion API Key: "****************gestion.cn"
+QueryFlow URL: "http://localhost:12030"
+QueryFlow API Key: "****************eryflow.cn"
+Staging URL: "http://localhost:12040"
+Staging API Key: "***************taging.cn"
