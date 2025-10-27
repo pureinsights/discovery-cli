@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"math"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -153,6 +154,22 @@ func (d discovery) saveConfig() error {
 	}
 
 	return credentials.WriteConfigAs(filepath.Join(d.ConfigPath(), "credentials.toml"))
+}
+
+// SetDiscoveryDir creates the Discovery directory if it does not exist and returns its path if an error did not occur.
+func SetDiscoveryDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", NewErrorWithCause(ErrorExitCode, err, "Could not access the user's Home directory")
+	}
+
+	configPath := filepath.Join(home, ".discovery")
+
+	if err := os.MkdirAll(configPath, 0o644); err != nil {
+		return "", NewErrorWithCause(ErrorExitCode, err, "Could not create the /.discovery directory")
+	}
+
+	return configPath, nil
 }
 
 // SaveUrlAndAPIKey asks the user for the URL and API key of a Discovery component and saves them.

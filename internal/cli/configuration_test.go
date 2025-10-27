@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/fileutils"
@@ -607,6 +608,69 @@ func Test_discovery_saveConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestSetDiscoveryDir_MkDirAllFails tests the SetDiscoveryDir() function when the ~/.discovery directory could not be made
+func TestSetDiscoveryDir_MkDirAllFails(t *testing.T) {
+	tmp := t.TempDir()
+
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+
+	target := filepath.Join(tmp, ".discovery")
+
+	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o644))
+
+	_, err := SetDiscoveryDir()
+	require.Error(t, err)
+	var errStruct Error
+	require.ErrorAs(t, err, &errStruct)
+	if cliError, ok := err.(*Error); ok {
+		cause := cliError.Cause
+		isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
+		assert.True(t, isFileError)
+		assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
+		assert.Equal(t, ErrorExitCode, cliError.ExitCode)
+	}
+}
+
+// TestSetDiscoveryDir_osUserHomeDirFails tests the SetDiscoveryDir() function when the environment variables are not defined.
+func TestSetDiscoveryDir_osUserHomeDirFails(t *testing.T) {
+
+	t.Setenv("HOME", "")
+	t.Setenv("USERPROFILE", "")
+
+	_, err := SetDiscoveryDir()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "is not defined")
+}
+
+// TestSetDiscoveryDir_DiscoveryDirCreated tests the SetDiscoveryDir() function when the ~/.discovery directory could be created successfully
+func TestSetDiscoveryDir_DiscoveryDirCreated(t *testing.T) {
+	tmp := t.TempDir()
+
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+
+	configPath, err := SetDiscoveryDir()
+	require.NoError(t, err)
+	assert.Equal(t, filepath.Join(tmp, ".discovery"), configPath)
+}
+
+// TestSetDiscoveryDir_DiscoveryDirExists tests the SetDiscoveryDir() function when the ~/.discovery directory already exists
+func TestSetDiscoveryDir_DiscoveryDirExists(t *testing.T) {
+	tmp := t.TempDir()
+
+	t.Setenv("HOME", tmp)
+	t.Setenv("USERPROFILE", tmp)
+
+	target := filepath.Join(tmp, ".discovery")
+
+	require.NoError(t, os.Mkdir(target, 0o644))
+
+	configPath, err := SetDiscoveryDir()
+	require.NoError(t, err)
+	assert.Equal(t, target, configPath)
 }
 
 // Test_discovery_SaveConfigFromUser_AllConfigPresent tests the discovery.SaveConfigFromUser() when there is a configuration for every possible URL and API Key

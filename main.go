@@ -1,5 +1,12 @@
 package main
 
+import (
+	"os"
+
+	"github.com/pureinsights/pdp-cli/cmd"
+)
+
 func main() {
-	// This function is empty because it will be implemented in PDP-3273
+	exitCode, _ := cmd.Run()
+	os.Exit(int(exitCode))
 }
