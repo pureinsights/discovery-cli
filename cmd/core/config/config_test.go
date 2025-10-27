@@ -217,7 +217,9 @@ func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
 
 	err := configCmd.Execute()
 	require.Error(t, err)
-	assert.Equal(t, "flag accessed but not defined: profile", err.Error())
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
 	testutils.CompareBytes(t, "NewConfigCommand_Out_NoProfile", testutils.Read(t, "NewConfigCommand_Out_NoProfile"), out.Bytes())
 	testutils.CompareBytes(t, "NewConfigCommand_Err_NoProfile", testutils.Read(t, "NewConfigCommand_Err_NoProfile"), errBuf.Bytes())
