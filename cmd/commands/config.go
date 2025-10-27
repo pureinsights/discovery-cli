@@ -17,3 +17,17 @@ func SaveConfigCommand(cmd *cobra.Command, config func(string) error) error {
 	}
 	return config(profile)
 }
+
+// PrintConfigCommand is the generic function to run the commands that print configurations.
+func PrintConfigCommand(cmd *cobra.Command, config func(string, bool) error) error {
+	profile, err := cmd.Flags().GetString("profile")
+	if err != nil {
+		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
+	}
+	sensitive, err := cmd.Flags().GetBool("sensitive")
+	if err != nil {
+		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the sensitive flag")
+	}
+
+	return config(profile, sensitive)
+}
