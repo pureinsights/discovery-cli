@@ -143,9 +143,9 @@ func TestPrintConfigCommand_WithProfileAndSensitive(t *testing.T) {
 
 	configCmd := &cobra.Command{
 		Use:   "config [subcommands]",
-		Short: "Save Discovery's configuration",
+		Short: "Print Discovery's configuration",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return PrintConfigCommand(cmd, d.PrintConfigToUser)
+			return PrintConfigCommand(cmd, &ios, d.PrintConfigToUser)
 		},
 	}
 
@@ -182,9 +182,9 @@ func TestPrintConfigCommand_NoProfile(t *testing.T) {
 
 	configCmd := &cobra.Command{
 		Use:   "config [subcommands]",
-		Short: "Save Discovery's configuration",
+		Short: "Print Discovery's configuration",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return PrintConfigCommand(cmd, d.PrintConfigToUser)
+			return PrintConfigCommand(cmd, &ios, d.PrintConfigToUser)
 		},
 	}
 
@@ -216,9 +216,9 @@ func TestPrintConfigCommand_NoSensitive(t *testing.T) {
 
 	configCmd := &cobra.Command{
 		Use:   "config [subcommands]",
-		Short: "Save Discovery's configuration",
+		Short: "Print Discovery's configuration",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return PrintConfigCommand(cmd, d.PrintConfigToUser)
+			return PrintConfigCommand(cmd, &ios, d.PrintConfigToUser)
 		},
 	}
 
@@ -240,4 +240,45 @@ func TestPrintConfigCommand_NoSensitive(t *testing.T) {
 	var errStruct cli.Error
 	require.ErrorAs(t, err, &errStruct)
 	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: sensitive"), "Could not get the sensitive flag").Error())
+}
+
+// TestPrintConfigCommand_WithProfileAndSensitive tests the PrintConfig() function with the profile and sensitive flags.
+func TestPrintConfigCommand_ErrorPrintingHeader(t *testing.T) {
+	in := strings.NewReader(strings.Repeat("\n", 8))
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: testutils.ErrWriter{Err: errors.New("write failed")},
+		Err: errBuf,
+	}
+
+	d := cli.NewDiscovery(&ios, viper.New(), t.TempDir())
+
+	configCmd := &cobra.Command{
+		Use:   "config [subcommands]",
+		Short: "Print Discovery's configuration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return PrintConfigCommand(cmd, &ios, d.PrintConfigToUser)
+		},
+	}
+
+	configCmd.PersistentFlags().StringP(
+		"profile",
+		"p",
+		d.Config().GetString("profile"),
+		"configuration profile to use",
+	)
+	configCmd.Flags().BoolP("sensitive", "s", true, "--sensitive=true")
+
+	configCmd.SetIn(ios.In)
+	configCmd.SetOut(ios.Out)
+	configCmd.SetErr(ios.Err)
+
+	configCmd.SetArgs([]string{})
+
+	err := configCmd.Execute()
+	require.Error(t, err)
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("write failed"), "Could not print the configuration").Error())
 }

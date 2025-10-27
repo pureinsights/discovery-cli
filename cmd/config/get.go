@@ -15,7 +15,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		Short: "Print Discovery's configuration",
 		Long:  fmt.Sprintf(commands.LongConfig, "Platform"),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.PrintConfigCommand(cmd, d.PrintConfigToUser)
+			return commands.PrintConfigCommand(cmd, d.IOStreams(), d.PrintConfigToUser)
 		},
 	}
 	get.Flags().BoolP("sensitive", "s", true, "--sensitive=true")
