@@ -21,14 +21,14 @@ func TestError_Error(t *testing.T) {
 			code:     ErrorExitCode,
 			message:  "Unable to connect to Discovery",
 			cause:    errors.New(`Get "http://127.0.0.1:49190/down": dial tcp 127.0.0.1:49190: connectex: No connection could be made because the target machine actively refused it.`),
-			expected: "Message: Unable to connect to Discovery\nCause: Get \"http://127.0.0.1:49190/down\": dial tcp 127.0.0.1:49190: connectex: No connection could be made because the target machine actively refused it.",
+			expected: "Unable to connect to Discovery\nGet \"http://127.0.0.1:49190/down\": dial tcp 127.0.0.1:49190: connectex: No connection could be made because the target machine actively refused it.\n",
 		},
 		{
 			name:     "Error string with cause",
 			code:     ErrorExitCode,
 			message:  "An unknown error occurred.",
 			cause:    nil,
-			expected: "Message: An unknown error occurred.",
+			expected: "An unknown error occurred.\n",
 		},
 	}
 
@@ -158,7 +158,7 @@ func TestFromError(t *testing.T) {
 		expectedCause string
 	}{
 		{
-			name: "Input is already Error (value)",
+			name: "Input is already Error",
 			input: Error{
 				ExitCode: ErrorExitCode,
 				Message:  "An error occurred",
@@ -169,11 +169,18 @@ func TestFromError(t *testing.T) {
 			expectedCause: "Unable to connect to Discovery",
 		},
 		{
-			name:          "input is generic error",
+			name:          "Input is a generic error",
 			input:         errors.New("JSON unmarshal failed"),
 			expectedCode:  ErrorExitCode,
 			expectedMsg:   "",
 			expectedCause: "JSON unmarshal failed",
+		},
+		{
+			name:          "FromError receives nil",
+			input:         nil,
+			expectedCode:  ErrorExitCode,
+			expectedMsg:   "",
+			expectedCause: "",
 		},
 	}
 
@@ -181,14 +188,17 @@ func TestFromError(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			got := FromError(tc.input)
 
-			assert.Equal(t, tc.expectedCode, got.ExitCode)
-			assert.Equal(t, tc.expectedMsg, got.Message)
-
-			if tc.expectedCause == "" {
-				assert.Nil(t, got.Cause)
+			if tc.input != nil {
+				assert.Equal(t, tc.expectedCode, got.ExitCode)
+				assert.Equal(t, tc.expectedMsg, got.Message)
+				if tc.expectedCause == "" {
+					assert.Nil(t, got.Cause)
+				} else {
+					assert.NotNil(t, got.Cause)
+					assert.EqualError(t, got.Cause, tc.expectedCause)
+				}
 			} else {
-				assert.NotNil(t, got.Cause)
-				assert.EqualError(t, got.Cause, tc.expectedCause)
+				assert.Nil(t, got)
 			}
 		})
 	}

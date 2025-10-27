@@ -33,7 +33,7 @@ func WithExcludeProjections(exclude []string) stagingGetContentOption {
 	}
 }
 
-// ContentClient is a struct that manages the content inside the Staging Repository's buckets.
+// ContentClient is the struct that manages the content inside the Staging Repository's buckets.
 type contentClient struct {
 	client
 }
@@ -73,13 +73,18 @@ func (c contentClient) Delete(contentId string) (gjson.Result, error) {
 
 // DeleteMany deletes the documents that match the given parentId or filters.
 func (c contentClient) DeleteMany(parentId string, filter gjson.Result) (gjson.Result, error) {
-	if parentId == "" {
-		return execute(c.client, http.MethodDelete, "", WithJSONBody(filter.Raw))
-	} else {
-		return execute(c.client, http.MethodDelete, "", WithQueryParameters(map[string][]string{
+	options := []RequestOption{}
+	if parentId != "" {
+		options = append(options, WithQueryParameters(map[string][]string{
 			"parentId": {parentId},
-		}), WithJSONBody(filter.Raw))
+		}))
 	}
+
+	if filter.Exists() {
+		options = append(options, WithJSONBody(filter.Raw))
+	}
+
+	return execute(c.client, http.MethodDelete, "", options...)
 }
 
 // bucketsClient is the struct that manages buckets in the Staging Repository.
@@ -163,6 +168,7 @@ func (s staging) Content(bucket string) contentClient {
 }
 
 // NewStaging is the constructor for the staging struct.
+// It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewStaging(url, apiKey string) staging {
-	return staging{Url: url, ApiKey: apiKey}
+	return staging{Url: url + "/v2", ApiKey: apiKey}
 }

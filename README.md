@@ -43,7 +43,7 @@ Try to use meaningful short flags. A good approach could be to use the first let
 
 Documentation for each command should be added into the `USER.md` file.
 
-Each command must have its own section or sub-section, depending if its a sub-command.
+Each command must have its own section or sub-section, depending on if it is a sub-command.
 
 ````markdown
 <!-- The nesting of the title depends on the parent command -->
