@@ -13,7 +13,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		Short: "Print Discovery Core's configuration",
 		Long:  "get is the command used to obtain Discovery Core's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.PrintConfigCommand(cmd, d.IOStreams(), d.PrintConfigToUser)
+			return commands.PrintConfigCommand(cmd, d.IOStreams(), d.PrintCoreConfigToUser)
 		},
 	}
 	get.Flags().BoolP("sensitive", "s", true, "--sensitive=true")
