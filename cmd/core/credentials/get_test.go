@@ -27,6 +27,8 @@ func TestNewGetCommand(t *testing.T) {
 		apiKey     string
 		outGolden  string
 		errGolden  string
+		outBytes   []byte
+		errBytes   []byte
 		method     string
 		path       string
 		statusCode int
@@ -41,8 +43,10 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_SearchByNameReturnsObject",
 			errGolden:  "NewGetCommand_Err_SearchByNameReturnsObject",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_SearchByNameReturnsObject"),
+			errBytes:   []byte(nil),
 			method:     http.MethodPost,
-			path:       "/credential/search",
+			path:       "/v2/credential/search",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
@@ -111,10 +115,12 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_GetAllReturnsArray",
 			errGolden:  "NewGetCommand_Err_GetAllReturnsArray",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetAllReturnsArray"),
+			errBytes:   []byte(nil),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/credential",
+			path:       "/v2/credential",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
@@ -162,10 +168,12 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{"--filter", "type=mongo"},
 			outGolden:  "NewGetCommand_Out_SearchWithFiltersReturnsArray",
 			errGolden:  "NewGetCommand_Err_SearchWithFiltersReturnsArray",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_SearchWithFiltersReturnsArray"),
+			errBytes:   []byte(nil),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodPost,
-			path:       "/credential/search",
+			path:       "/v2/credential/search",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
@@ -228,10 +236,12 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_NoURL",
 			errGolden:  "NewGetCommand_Err_NoURL",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_NoURL"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_NoURL"),
 			url:        false,
 			apiKey:     "apiKey123",
 			method:     http.MethodPost,
-			path:       "/credential/search",
+			path:       "/v2/credential/search",
 			statusCode: http.StatusOK,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
@@ -241,10 +251,12 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_NoAPIKey",
 			errGolden:  "NewGetCommand_Err_NoAPIKey",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_NoAPIKey"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_NoAPIKey"),
 			url:        true,
 			apiKey:     "",
 			method:     http.MethodPost,
-			path:       "/credential",
+			path:       "/v2/credential",
 			statusCode: http.StatusNotFound,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
@@ -256,8 +268,10 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_NameDoesNotExist",
 			errGolden:  "NewGetCommand_Err_NameDoesNotExist",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_NameDoesNotExist"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_NameDoesNotExist"),
 			method:     http.MethodPost,
-			path:       "/credential/search",
+			path:       "/v2/credential/search",
 			statusCode: http.StatusNoContent,
 			response:   ``,
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
@@ -267,8 +281,7 @@ func TestNewGetCommand(t *testing.T) {
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name "test" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`),
 			}, "Could not search for entity with id \"test\""),
 		},
@@ -278,10 +291,12 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
 			outGolden:  "NewGetCommand_Out_SearchByNameHTTPError",
 			errGolden:  "NewGetCommand_Err_SearchByNameHTTPError",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_SearchByNameHTTPError"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_SearchByNameHTTPError"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodPost,
-			path:       "/credential/search",
+			path:       "/v2/credential/search",
 			statusCode: http.StatusInternalServerError,
 			response: `{
 			"status": 500,
@@ -305,10 +320,12 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_GetEntitiesHTTPError",
 			errGolden:  "NewGetCommand_Err_GetEntitiesHTTPError",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetEntitiesHTTPError"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_GetEntitiesHTTPError"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/credential",
+			path:       "/v2/credential",
 			statusCode: http.StatusUnauthorized,
 			response:   `{"error": "unauthorized"}`,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error": "unauthorized"}`)}, "Could not get all entities"),
@@ -320,8 +337,10 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_SearchHTTPError",
 			errGolden:  "NewGetCommand_Err_SearchHTTPError",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_SearchHTTPError"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_SearchHTTPError"),
 			method:     http.MethodPost,
-			path:       "/credential/search",
+			path:       "/v2/credential/search",
 			statusCode: http.StatusUnauthorized,
 			response: `{
 	"status": 401,
@@ -350,8 +369,10 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_FilterDoesNotExist",
 			errGolden:  "NewGetCommand_Err_FilterDoesNotExist",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_FilterDoesNotExist"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_FilterDoesNotExist"),
 			method:     http.MethodPost,
-			path:       "/credential/search",
+			path:       "/v2/credential/search",
 			statusCode: http.StatusBadRequest,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "Filter type \"gte\" does not exist"),
@@ -361,10 +382,12 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{"test"},
 			outGolden:  "NewGetCommand_Out_PrintJSONFails",
 			errGolden:  "NewGetCommand_Err_PrintJSONFails",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_PrintJSONFails"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_PrintJSONFails"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodPost,
-			path:       "/credential/search",
+			path:       "/v2/credential/search",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","credentials":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"test","type":mongo"}},       
@@ -389,10 +412,12 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_PrintArrayFails",
 			errGolden:  "NewGetCommand_Err_PrintArrayFails",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_PrintArrayFails"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_PrintArrayFails"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/credential",
+			path:       "/v2/credential",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","credentials":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}},     
@@ -412,7 +437,7 @@ func TestNewGetCommand(t *testing.T) {
 			"numberOfElements": 3,
 			"pageNumber": 0
 			}`,
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character 'm' looking for beginning of value"), "Could not print JSON array"),
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character 'm' looking for beginning of value"), "Could not print JSON Array"),
 		},
 	}
 
@@ -468,12 +493,12 @@ func TestNewGetCommand(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
-			testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
+			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 		})
 	}
 }
@@ -511,6 +536,6 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", out.Bytes())
-	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", errBuf.Bytes())
+	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", testutils.Read(t, "NewGetCommand_Out_NoProfile"), out.Bytes())
+	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", testutils.Read(t, "NewGetCommand_Err_NoProfile"), errBuf.Bytes())
 }
