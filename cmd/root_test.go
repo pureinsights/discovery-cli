@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Defines the update flag in the package
 var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Test_newRootCommand tests the newRootCommand() function.
@@ -41,7 +42,6 @@ func Test_newRootCommand(t *testing.T) {
 	assert.Equal(t, out, discoveryCmd.OutOrStdout())
 	assert.Equal(t, errBuf, discoveryCmd.ErrOrStderr())
 
-	discoveryCmd.PersistentFlags().Lookup("profile")
 	assert.Equal(t, "default", discoveryCmd.PersistentFlags().Lookup("profile").DefValue)
 
 	// Change flag value to check Viper binding
@@ -68,19 +68,18 @@ func TestRun_SetDiscoveryDirFails(t *testing.T) {
 
 	target := filepath.Join(tmp, ".discovery")
 
-	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o600))
+	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o644))
 	os.Args = []string{"discovery"}
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	cliError, ok := err.(cli.Error)
-	if ok {
-		cause := cliError.Cause
-		isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
-		assert.True(t, isFileError)
-		assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
-		assert.Equal(t, cli.ErrorExitCode, cliError.ExitCode)
-	}
+	var cliError *cli.Error
+	require.ErrorAs(t, err, &cliError)
+	cause := cliError.Cause
+	isFileError := errors.Is(cause, fs.ErrNotExist) || errors.Is(cause, syscall.ENOTDIR)
+	assert.True(t, isFileError)
+	assert.Equal(t, "Could not create the /.discovery directory", cliError.Message)
+	assert.Equal(t, cli.ErrorExitCode, cliError.ExitCode)
 }
 
 // TestRun_InitializeConfigFails tests the Run function when the InitializeConfig() function fails.
@@ -90,7 +89,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	t.Setenv("HOME", tmp)
 	t.Setenv("USERPROFILE", tmp)
 
-	require.NoError(t, os.Mkdir(filepath.Join(tmp, ".discovery"), 0o700))
+	require.NoError(t, os.Mkdir(filepath.Join(tmp, ".discovery"), 0o744))
 
 	config := filepath.Join(filepath.Join(tmp, ".discovery"), "config.toml")
 
@@ -103,16 +102,15 @@ func TestRun_InitializeConfigFails(t *testing.T) {
     "core_url": "http://discovery.core.cn"
   }
 }
-`), 0o700))
+`), 0o644))
 	os.Args = []string{"discovery"}
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	cliError, ok := err.(cli.Error)
-	if ok {
-		errorStruct := cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file")
-		assert.EqualError(t, cliError, errorStruct.Error())
-	}
+	var cliError *cli.Error
+	require.ErrorAs(t, err, &cliError)
+	errorStruct := cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("While parsing config: toml: invalid character at start of key: {"), "Could not read the configuration file")
+	assert.EqualError(t, cliError, errorStruct.Error())
 }
 
 // TestRun_ExecuteFails tests when the execution of the CLI results in an error
@@ -126,11 +124,10 @@ func TestRun_ExecuteFails(t *testing.T) {
 	exitCode, err := Run()
 	require.Error(t, err)
 	assert.Equal(t, cli.ErrorExitCode, exitCode)
-	cliError, ok := err.(cli.Error)
-	if ok {
-		assert.Equal(t, cliError.Message, "")
-		assert.EqualError(t, cliError.Cause, "unknown flag: --profiles")
-	}
+	var cliError *cli.Error
+	require.ErrorAs(t, err, &cliError)
+	assert.Equal(t, cliError.Message, "")
+	assert.EqualError(t, cliError.Cause, "unknown flag: --profiles")
 }
 
 // TestRun_Success tests when the Run function works
