@@ -23,13 +23,13 @@ const (
 )
 
 // Getter defines the Get and GetAll methods.
-type getter interface {
+type Getter interface {
 	Get(uuid.UUID) (gjson.Result, error)
 	GetAll() ([]gjson.Result, error)
 }
 
 // GetEntity obtains the entity with the given ID using the given client and then prints out the result using the received printer or the JSON printer.
-func (d discovery) GetEntity(client getter, id uuid.UUID, printer Printer) error {
+func (d discovery) GetEntity(client Getter, id uuid.UUID, printer Printer) error {
 	object, err := client.Get(id)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get entity with id %q", id.String())
@@ -46,7 +46,7 @@ func (d discovery) GetEntity(client getter, id uuid.UUID, printer Printer) error
 }
 
 // GetEntities obtains all of the entities using the given client and then prints out the result using the received printer or the JSON array printer.
-func (d discovery) GetEntities(client getter, printer Printer) error {
+func (d discovery) GetEntities(client Getter, printer Printer) error {
 	objects, err := client.GetAll()
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get all entities")
@@ -63,14 +63,14 @@ func (d discovery) GetEntities(client getter, printer Printer) error {
 }
 
 // Searcher is the interface that implements searching methods.
-type searcher interface {
-	getter
+type Searcher interface {
+	Getter
 	Search(gjson.Result) ([]gjson.Result, error)
 	SearchByName(name string) (gjson.Result, error)
 }
 
 // SearchEntity tries to search an entity by name, and if it fails, it tries to get the entity by its id.
-func (d discovery) searchEntity(client searcher, id string) (gjson.Result, error) {
+func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error) {
 	result, err := client.SearchByName(id)
 	if err != nil {
 		discoveryErr, ok := err.(discoveryPackage.Error)
@@ -98,7 +98,7 @@ func (d discovery) searchEntity(client searcher, id string) (gjson.Result, error
 }
 
 // SearchEntity searches for the entity and prints it into the Out IOStream.
-func (d discovery) SearchEntity(client searcher, id string, printer Printer) error {
+func (d discovery) SearchEntity(client Searcher, id string, printer Printer) error {
 	result, err := d.searchEntity(client, id)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not search for entity with id %q", id)
@@ -115,7 +115,7 @@ func (d discovery) SearchEntity(client searcher, id string, printer Printer) err
 }
 
 // SearchEntities searches for entities and prints the results into the Out IOStream.
-func (d discovery) SearchEntities(client searcher, filter gjson.Result, printer Printer) error {
+func (d discovery) SearchEntities(client Searcher, filter gjson.Result, printer Printer) error {
 	results, err := client.Search(filter)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not search for the entities")

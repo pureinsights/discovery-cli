@@ -100,7 +100,7 @@ func (g *FailingGetter) GetAll() ([]gjson.Result, error) {
 func Test_discovery_GetEntity(t *testing.T) {
 	tests := []struct {
 		name           string
-		client         getter
+		client         Getter
 		printer        Printer
 		expectedOutput string
 		outWriter      io.Writer
@@ -187,7 +187,7 @@ func Test_discovery_GetEntity(t *testing.T) {
 func Test_discovery_GetEntities(t *testing.T) {
 	tests := []struct {
 		name           string
-		client         getter
+		client         Getter
 		printer        Printer
 		expectedOutput string
 		outWriter      io.Writer
@@ -564,7 +564,7 @@ func (s *SearcherReturnsOtherError) GetAll() ([]gjson.Result, error) {
 func Test_searchEntity(t *testing.T) {
 	tests := []struct {
 		name      string
-		client    searcher
+		client    Searcher
 		id        string
 		expected  gjson.Result
 		outWriter io.Writer
@@ -712,7 +712,7 @@ func Test_searchEntity(t *testing.T) {
 func Test_discovery_SearchEntity(t *testing.T) {
 	tests := []struct {
 		name           string
-		client         searcher
+		client         Searcher
 		id             string
 		expectedOutput string
 		printer        Printer
@@ -801,7 +801,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 func Test_discovery_SearchEntities(t *testing.T) {
 	tests := []struct {
 		name           string
-		client         searcher
+		client         Searcher
 		printer        Printer
 		expectedOutput string
 		outWriter      io.Writer
