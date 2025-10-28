@@ -1,7 +1,8 @@
-package cli
+package commands
 
 import (
 	"github.com/google/uuid"
+	"github.com/pureinsights/pdp-cli/internal/cli"
 )
 
 const (
@@ -10,7 +11,7 @@ const (
 )
 
 // DeleteCommand is the function that executes the delete operation for the delete commands that do not work with names.
-func DeleteCommand(id string, d Discovery, client deleter, config commandConfig) error {
+func DeleteCommand(id string, d cli.Discovery, client cli.Deleter, config commandConfig) error {
 	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
 	if err != nil {
 		return err
@@ -18,9 +19,9 @@ func DeleteCommand(id string, d Discovery, client deleter, config commandConfig)
 
 	deleteId, err := uuid.Parse(id)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not convert given id %q to UUID. This command does not support referencing an entity by name.", id)
+		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not convert given id %q to UUID. This command does not support referencing an entity by name.", id)
 	}
-	printer := GetObjectPrinter(config.output)
+	printer := cli.GetObjectPrinter(config.output)
 	err = d.DeleteEntity(client, deleteId, printer)
 	return err
 }
