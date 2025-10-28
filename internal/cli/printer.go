@@ -31,7 +31,7 @@ func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result) 
 		return err
 	}
 
-	_, err = fmt.Fprintln(ios.Out, string(b))
+	_, err = fmt.Fprint(ios.Out, string(b))
 	return err
 }
 
@@ -46,8 +46,18 @@ func printArrayObject(ios iostreams.IOStreams, pretty bool, array ...gjson.Resul
 		}
 	}
 
-	for _, object := range array {
+	for index, object := range array {
 		err := printJsonObject(ios, pretty, object)
+		if err != nil {
+			return err
+		}
+		if pretty && index != (len(array)-1) {
+			_, err := fmt.Fprint(ios.Out, ",")
+			if err != nil {
+				return err
+			}
+		}
+		_, err = fmt.Fprint(ios.Out, "\n")
 		if err != nil {
 			return err
 		}
@@ -55,9 +65,7 @@ func printArrayObject(ios iostreams.IOStreams, pretty bool, array ...gjson.Resul
 
 	if pretty {
 		_, err := fmt.Fprint(ios.Out, "]\n")
-		if err != nil {
-			return err
-		}
+		return err
 	}
 
 	return nil
@@ -73,6 +81,11 @@ func JsonObjectPrinter(pretty bool) Printer {
 		if err != nil {
 			return NewErrorWithCause(ErrorExitCode, err, "Could not print JSON object")
 		}
+		_, err = fmt.Fprint(ios.Out, "\n")
+		if err != nil {
+			return NewErrorWithCause(ErrorExitCode, err, "Could not print JSON object")
+		}
+
 		return nil
 	}
 }
@@ -82,7 +95,7 @@ func JsonArrayPrinter(pretty bool) Printer {
 	return func(ios iostreams.IOStreams, objects ...gjson.Result) error {
 		err := printArrayObject(ios, pretty, objects...)
 		if err != nil {
-			return NewErrorWithCause(ErrorExitCode, err, "Could not print JSON array")
+			return NewErrorWithCause(ErrorExitCode, err, "Could not print JSON Array")
 		}
 		return nil
 	}
