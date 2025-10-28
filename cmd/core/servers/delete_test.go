@@ -21,144 +21,359 @@ import (
 // NewDeleteCommand tests the NewDeleteCommand function
 func TestNewDeleteCommand(t *testing.T) {
 	tests := []struct {
-		name       string
-		args       []string
-		url        bool
-		apiKey     string
-		outGolden  string
-		errGolden  string
-		outBytes   []byte
-		errBytes   []byte
-		method     string
-		path       string
-		statusCode int
-		response   string
-		err        error
+		name      string
+		args      []string
+		url       bool
+		apiKey    string
+		outGolden string
+		errGolden string
+		outBytes  []byte
+		errBytes  []byte
+		responses map[string]testutils.MockResponse
+		err       error
 	}{
 		// Working case
 		{
-			name:       "Delete by ID returns an acknowledged true",
-			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
-			url:        true,
-			apiKey:     "apiKey123",
-			outGolden:  "NewDeleteCommand_Out_DeleteByIdReturnsObject",
-			errGolden:  "NewDeleteCommand_Err_DeleteByIdReturnsObject",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
-			errBytes:   []byte(nil),
-			method:     http.MethodDelete,
-			statusCode: http.StatusOK,
-			response: `{
+			name:      "Delete by ID returns an acknowledged true",
+			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
+			errGolden: "NewDeleteCommand_Err_DeleteByIdReturnsObject",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"/v2/server/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
+					]
+				},
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 1,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 1,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
 				"acknowledged": true
 			}`,
+
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
 			err: nil,
 		},
 		{
-			name:       "Delete by name returns an acknowledged true",
-			args:       []string{""},
-			url:        true,
-			apiKey:     "apiKey123",
-			outGolden:  "NewDeleteCommand_Out_DeleteByIdReturnsObject",
-			errGolden:  "NewDeleteCommand_Err_DeleteByIdReturnsObject",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
-			errBytes:   []byte(nil),
-			method:     http.MethodDelete,
-			statusCode: http.StatusOK,
-			response: `{
+			name:      "Delete by name returns an acknowledged true",
+			args:      []string{"server clone 10"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
+			errGolden: "NewDeleteCommand_Err_DeleteByIdReturnsObject",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"/v2/server/search": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "server clone 10",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
+					]
+				},
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 18,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 18,
+			"pageNumber": 0
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
 				"acknowledged": true
 			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
 			err: nil,
 		},
 
 		// Error case
 		{
-			name:       "No URL",
-			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
-			outGolden:  "NewDeleteCommand_Out_NoURL",
-			errGolden:  "NewDeleteCommand_Err_NoURL",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_NoURL"),
-			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
-			url:        false,
-			apiKey:     "apiKey123",
-			method:     http.MethodDelete,
-			statusCode: http.StatusOK,
-			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			name:      "No URL",
+			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			outGolden: "NewDeleteCommand_Out_NoURL",
+			errGolden: "NewDeleteCommand_Err_NoURL",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NoURL"),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
+			url:       false,
+			apiKey:    "apiKey123",
+			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
 		},
 		{
-			name:       "No API key",
-			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
-			outGolden:  "NewDeleteCommand_Out_NoAPIKey",
-			errGolden:  "NewDeleteCommand_Err_NoAPIKey",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_NoAPIKey"),
-			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_NoAPIKey"),
-			url:        true,
-			apiKey:     "",
-			method:     http.MethodDelete,
-			statusCode: http.StatusNotFound,
-			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
-		},
-		// {
-		// 	name:       "user does not send a UUID",
-		// 	args:       []string{"test"},
-		// 	url:        true,
-		// 	apiKey:     "apiKey123",
-		// 	outGolden:  "NewDeleteCommand_Out_NotUUID",
-		// 	errGolden:  "NewDeleteCommand_Err_NotUUID",
-		// 	method:     http.MethodDelete,
-		// 	statusCode: http.StatusOK,
-		// 	response:   ``,
-		// 	err:        cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not convert given id \"test\" to UUID. This command does not support referencing an entity by name."),
-		// },
-		{
-			name:       "Printing JSON object fails",
-			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
-			outGolden:  "NewDeleteCommand_Out_PrintJSONFails",
-			errGolden:  "NewDeleteCommand_Err_PrintJSONFails",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_PrintJSONFails"),
-			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_PrintJSONFails"),
-			url:        true,
-			apiKey:     "apiKey123",
-			method:     http.MethodDelete,
-			statusCode: http.StatusOK,
-			response:   `{"messages": {{}`,
-			err:        cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '{' looking for beginning of object key string"), "Could not print JSON object"),
+			name:      "No API key",
+			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			outGolden: "NewDeleteCommand_Out_NoAPIKey",
+			errGolden: "NewDeleteCommand_Err_NoAPIKey",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NoAPIKey"),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NoAPIKey"),
+			url:       true,
+			apiKey:    "",
+			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
 		},
 		{
-			name:       "DeleteEntity returns HTTP error",
-			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
-			outGolden:  "NewDeleteCommand_Out_DeleteEntityHTTPError",
-			errGolden:  "NewDeleteCommand_Err_DeleteEntityHTTPError",
-			url:        true,
-			apiKey:     "apiKey123",
-			method:     http.MethodDelete,
-			statusCode: http.StatusBadRequest,
-			response: `{
-			"status": 400,
-			"code": 3002,
-			"messages": [
-				"Failed to convert argument [id] for value [test] due to: Invalid UUID string: test"
+			name:      "sent name does not exist",
+			args:      []string{"test"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDeleteCommand_Out_NameDoesNotExist",
+			errGolden: "NewDeleteCommand_Err_NameDoesNotExist",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NameDoesNotExist"),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NameDoesNotExist"),
+			responses: map[string]testutils.MockResponse{
+				"/v2/server/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "test" does not exist"
+	]
+}`),
+			}, "Could not search for entity with name \"test\""),
+		},
+		{
+			name:      "Printing JSON object fails",
+			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			outGolden: "NewDeleteCommand_Out_PrintJSONFails",
+			errGolden: "NewDeleteCommand_Err_PrintJSONFails",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_PrintJSONFails"),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_PrintJSONFails"),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"/v2/server/search": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
+					]
+				},
 			],
-			"timestamp": "2025-10-23T22:35:38.345647200Z"
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 1,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 1,
+			"pageNumber": 0
 			}`,
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
-			"status": 400,
-			"code": 3002,
-			"messages": [
-				"Failed to convert argument [id] for value [test] due to: Invalid UUID string: test"
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+				"acknowledged: true
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '\\n' in string literal"), "Could not print JSON object"),
+		},
+		{
+			name:      "Search returns invalid UUID error",
+			args:      []string{"test"},
+			outGolden: "NewDeleteCommand_Out_InvalidUUID",
+			errGolden: "NewDeleteCommand_Err_InvalidUUID",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_InvalidUUID"),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_InvalidUUID"),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"/v2/server/search": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "test",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "test",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
+					]
+				},
 			],
-			"timestamp": "2025-10-23T22:35:38.345647200Z"
-			}`)}, "Could not delete entity with id \"3d51beef-8b90-40aa-84b5-033241dc6239\""),
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 1,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 1,
+			"pageNumber": 0
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+				"acknowledged": true
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not delete entity with name \"test\""),
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
-				assert.Equal(t, tc.apiKey, r.Header.Get("X-API-Key"))
-			}))
+			srv := httptest.NewServer(testutils.HttpMultiResponseHandler(t, tc.responses))
 
 			defer srv.Close()
 
