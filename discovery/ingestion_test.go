@@ -16,7 +16,7 @@ import (
 
 // Test_newSeedExecutionsClient test the constructor of seedExecutionsClient
 func Test_newSeedExecutionsClient(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func Test_newSeedExecutionsClient(t *testing.T) {
 
 // Test_newSeedRecordsClient tests the constructor of seedRecordsClient.
 func Test_newSeedRecordsClient(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	require.NoError(t, err)
@@ -42,7 +42,7 @@ func Test_newSeedRecordsClient(t *testing.T) {
 
 // Test_newSeedExecutionRecordsClient tests the constructor of seedExecutionRecordsClient
 func Test_newSeedExecutionRecordsClient(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	require.NoError(t, err)
@@ -59,7 +59,7 @@ func Test_newSeedExecutionRecordsClient(t *testing.T) {
 
 // Test_newSeedExecutionJobsClient tests the constructor of seedExecutionJobsClient.
 func Test_newSeedExecutionJobsClient(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	require.NoError(t, err)
@@ -76,7 +76,7 @@ func Test_newSeedExecutionJobsClient(t *testing.T) {
 
 // Test_newIngestionProcessorsClient tests the constructor of ingestionProcessorsClient.
 func Test_newIngestionProcessorsClient(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	processorsClient := newIngestionProcessorsClient(url, apiKey)
 
@@ -88,7 +88,7 @@ func Test_newIngestionProcessorsClient(t *testing.T) {
 
 // Test_newPipelinesClient tests the constructor of pipelinesClient.
 func Test_newPipelinesClient(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	pipelineClient := newPipelinesClient(url, apiKey)
 
@@ -100,7 +100,7 @@ func Test_newPipelinesClient(t *testing.T) {
 
 // Test_newSeedsClient tests the constructor of seedsClient.
 func Test_newSeedsClient(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedClient := newSeedsClient(url, apiKey)
 
@@ -731,7 +731,7 @@ func Test_seedExecutionsClient_Halt(t *testing.T) {
 
 // Test_seedExecutionsClient_Records tests the seedExecutionsClient.Records() function.
 func Test_seedExecutionsClient_Records(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	require.NoError(t, err)
@@ -749,7 +749,7 @@ func Test_seedExecutionsClient_Records(t *testing.T) {
 
 // Test_seedExecutionsClient_Jobs tests the seedExecutionsClient.Jobs() function.
 func Test_seedExecutionsClient_Jobs(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	require.NoError(t, err)
@@ -1601,7 +1601,7 @@ func Test_seedsClient_Reset(t *testing.T) {
 
 // Test_seedsClient_Records tests the seedsClient.Records() function.
 func Test_seedsClient_Records(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	require.NoError(t, err)
@@ -1614,7 +1614,7 @@ func Test_seedsClient_Records(t *testing.T) {
 
 // Test_newSeedsClient tests the seedClient.Executions() function
 func Test_seedsClient_Executions(t *testing.T) {
-	url := "http://localhost:12030/v2/v2"
+	url := "http://localhost:12030/v2"
 	apiKey := "Api Key"
 	seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
 	require.NoError(t, err)
@@ -1627,7 +1627,7 @@ func Test_seedsClient_Executions(t *testing.T) {
 
 // Test_ingestion_Processors tests the ingestion.Processors() function
 func Test_ingestion_Processors(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 	ipc := i.Processors()
 
 	assert.Equal(t, i.ApiKey, ipc.crud.client.ApiKey)
@@ -1638,7 +1638,7 @@ func Test_ingestion_Processors(t *testing.T) {
 
 // Test_ingestion_Pipelines tests the ingestion.Pipelines() function
 func Test_ingestion_Pipelines(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 	ipc := i.Pipelines()
 
 	assert.Equal(t, i.ApiKey, ipc.crud.client.ApiKey)
@@ -1649,7 +1649,7 @@ func Test_ingestion_Pipelines(t *testing.T) {
 
 // Test_ingestion_Seeds test the ingestion.Seeds() function.
 func Test_ingestion_Seeds(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 	ipc := i.Seeds()
 
 	assert.Equal(t, i.ApiKey, ipc.crud.client.ApiKey)
@@ -1660,7 +1660,7 @@ func Test_ingestion_Seeds(t *testing.T) {
 
 // Test_ingestion_BackupRestore tests the ingestion.BackupRestore() function
 func Test_ingestion_BackupRestore(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 	bc := i.BackupRestore()
 
 	assert.Equal(t, i.ApiKey, bc.ApiKey)
@@ -1669,8 +1669,8 @@ func Test_ingestion_BackupRestore(t *testing.T) {
 
 // Test_NewIngestion tests the ingestion constructor
 func Test_NewIngestion(t *testing.T) {
-	i := NewIngestion("http://localhost:12030/v2/v2", "Api Key")
+	i := NewIngestion("http://localhost:12030", "Api Key")
 
-	assert.Equal(t, "http://localhost:12030/v2/v2", i.Url)
+	assert.Equal(t, "http://localhost:12030/v2", i.Url)
 	assert.Equal(t, "Api Key", i.ApiKey)
 }

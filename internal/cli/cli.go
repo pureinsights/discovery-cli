@@ -15,15 +15,15 @@ type Discovery interface {
 	Config() *viper.Viper
 	ConfigPath() string
 	SaveConfigFromUser(profile string) error
-	SaveCoreConfigFromUser(profile string, standalone bool) error
-	SaveIngestionConfigFromUser(profile string, standalone bool) error
-	SaveQueryFlowConfigFromUser(profile string, standalone bool) error
-	SaveStagingConfigFromUser(profile string, standalone bool) error
+	SaveCoreConfigFromUser(profile string) error
+	SaveIngestionConfigFromUser(profile string) error
+	SaveQueryFlowConfigFromUser(profile string) error
+	SaveStagingConfigFromUser(profile string) error
 	PrintConfigToUser(profile string, sensitive bool) error
-	PrintCoreConfigToUser(profile string, sensitive, standalone bool) error
-	PrintIngestionConfigToUser(profile string, sensitive, standalone bool) error
-	PrintQueryFlowConfigToUser(profile string, sensitive, standalone bool) error
-	PrintStagingConfigToUser(profile string, sensitive, standalone bool) error
+	PrintCoreConfigToUser(profile string, sensitive bool) error
+	PrintIngestionConfigToUser(profile string, sensitive bool) error
+	PrintQueryFlowConfigToUser(profile string, sensitive bool) error
+	PrintStagingConfigToUser(profile string, sensitive bool) error
 	GetEntity(client getter, id uuid.UUID, printer Printer) error
 	GetEntities(client getter, printer Printer) error
 }

@@ -15,7 +15,7 @@ import (
 
 // Test_newBucketsClient tests the bucketsClient constructor
 func Test_newBucketsClient(t *testing.T) {
-	url := "http://localhost:12020/v2/v2"
+	url := "http://localhost:12020/v2"
 	apiKey := "Api Key"
 	c := newBucketsClient(url, apiKey)
 
@@ -676,7 +676,7 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 
 // Test_newContentClient tests the contentClient constructor.
 func Test_newContentClient(t *testing.T) {
-	url := "http://localhost:12020/v2/v2"
+	url := "http://localhost:12020/v2"
 	apiKey := "Api Key"
 	bucketName := "testBucket"
 	c := newContentClient(url, apiKey, bucketName)
@@ -1322,33 +1322,33 @@ func TestWithExcludeProjections(t *testing.T) {
 
 // Test_staging_Buckets tests the staging.Buckets() function.
 func Test_staging_Buckets(t *testing.T) {
-	url := "http://localhost:12020/v2/v2"
+	url := "http://localhost:12020"
 	apiKey := "Api Key"
 	staging := NewStaging(url, apiKey)
 	c := staging.Buckets()
 
 	assert.Equal(t, apiKey, c.client.ApiKey)
-	assert.Equal(t, url+"/bucket", c.client.client.BaseURL)
+	assert.Equal(t, url+"/v2/bucket", c.client.client.BaseURL)
 }
 
 // Test_staging_Content tests the staging.Content() function.
 func Test_staging_Content(t *testing.T) {
-	url := "http://localhost:12020/v2/v2"
+	url := "http://localhost:12020"
 	apiKey := "Api Key"
 	bucketName := "testBucket"
 	staging := NewStaging(url, apiKey)
 	c := staging.Content(bucketName)
 
 	assert.Equal(t, apiKey, c.client.ApiKey)
-	assert.Equal(t, url+"/content/"+bucketName, c.client.client.BaseURL)
+	assert.Equal(t, url+"/v2/content/"+bucketName, c.client.client.BaseURL)
 }
 
 // TestNewStaging tests the staging client constructor.
 func TestNewStaging(t *testing.T) {
-	url := "http://localhost:12020/v2/v2"
+	url := "http://localhost:12020/v2"
 	apiKey := "Api Key"
 	s := NewStaging(url, apiKey)
 
 	assert.Equal(t, apiKey, s.ApiKey, "ApiKey should be stored")
-	assert.Equal(t, url, s.Url, "BaseURL should match server URL")
+	assert.Equal(t, url+"/v2", s.Url, "BaseURL should match server URL")
 }

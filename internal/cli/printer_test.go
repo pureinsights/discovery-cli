@@ -36,7 +36,7 @@ func Test_printJsonObject(t *testing.T) {
     "username": "user"
   },
   "name": "test-secret"
-}` + "\n",
+}`,
 			err: nil,
 		},
 		{
@@ -51,7 +51,7 @@ func Test_printJsonObject(t *testing.T) {
 			"password": "password"
 		}
 	}`),
-			expectedPrint: `{"active":true,"content":{"mechanism":"SCRAM-SHA-1","password":"password","username":"user"},"name":"test-secret"}` + "\n",
+			expectedPrint: `{"active":true,"content":{"mechanism":"SCRAM-SHA-1","password":"password","username":"user"},"name":"test-secret"}`,
 			err:           nil,
 		},
 		{
@@ -133,7 +133,7 @@ func Test_printArrayObject(t *testing.T) {
   "lastUpdatedTimestamp": "2025-08-21T17:57:16Z",
   "name": "MongoDB text processor 4",
   "type": "mongo"
-}
+},
 {
   "active": true,
   "creationTimestamp": "2025-08-14T18:02:38Z",
@@ -142,7 +142,7 @@ func Test_printArrayObject(t *testing.T) {
   "lastUpdatedTimestamp": "2025-08-18T20:55:43Z",
   "name": "MongoDB text processor",
   "type": "mongo"
-}
+},
 {
   "active": true,
   "creationTimestamp": "2025-08-14T18:02:38Z",
@@ -160,8 +160,8 @@ func Test_printArrayObject(t *testing.T) {
 			pretty: true,
 			array:  gjson.Parse(`["test1", "test2", "test3"]`).Array(),
 			expectedPrint: `[
-"test1"
-"test2"
+"test1",
+"test2",
 "test3"
 ]` + "\n",
 			err: nil,
@@ -216,6 +216,28 @@ func Test_printArrayObject(t *testing.T) {
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
 		},
 		{
+			name:   "Working JSON Array, but fail to print \",\" to ios.Out",
+			pretty: true,
+			array: gjson.Parse(`[{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"},     
+			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","labels":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":"mongo"},       
+			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}
+			]`).Array(),
+			expectedPrint: ``,
+			err:           errors.New("write failed"),
+			outWriter:     &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 3},
+		},
+		{
+			name:   "Working JSON Array, but fail to print \"\n\" to ios.Out",
+			pretty: false,
+			array: gjson.Parse(`[{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"},     
+			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","labels":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":"mongo"},       
+			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}
+			]`).Array(),
+			expectedPrint: ``,
+			err:           errors.New("write failed"),
+			outWriter:     &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+		},
+		{
 			name:   "Working JSON Array, but fail to print \"]\" to ios.Out",
 			pretty: true,
 			array: gjson.Parse(`[{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"},     
@@ -224,7 +246,7 @@ func Test_printArrayObject(t *testing.T) {
 			]`).Array(),
 			expectedPrint: ``,
 			err:           errors.New("write failed"),
-			outWriter:     &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 5},
+			outWriter:     &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 10},
 		},
 		{
 			name:   "Failing JSON, unmarshal fails",
@@ -310,6 +332,14 @@ func TestJsonObjectPrinter(t *testing.T) {
 			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
 		},
+		{
+			name:          "Working JSON Array, but failing to print \"\n\"t",
+			pretty:        false,
+			array:         gjson.Parse(`[{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"}]`).Array(),
+			expectedPrint: ``,
+			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			outWriter:     &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
+		},
 	}
 
 	for _, tc := range tests {
@@ -370,7 +400,7 @@ func TestJsonArrayPrinter(t *testing.T) {
   "lastUpdatedTimestamp": "2025-08-21T17:57:16Z",
   "name": "MongoDB text processor 4",
   "type": "mongo"
-}
+},
 {
   "active": true,
   "creationTimestamp": "2025-08-14T18:02:38Z",
@@ -379,7 +409,7 @@ func TestJsonArrayPrinter(t *testing.T) {
   "lastUpdatedTimestamp": "2025-08-18T20:55:43Z",
   "name": "MongoDB text processor",
   "type": "mongo"
-}
+},
 {
   "active": true,
   "creationTimestamp": "2025-08-14T18:02:38Z",
@@ -397,7 +427,7 @@ func TestJsonArrayPrinter(t *testing.T) {
 			pretty:        false,
 			array:         gjson.Parse(`[{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"}]`).Array(),
 			expectedPrint: ``,
-			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON array"),
+			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
 		},
 	}
