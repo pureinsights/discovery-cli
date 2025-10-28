@@ -100,7 +100,7 @@ func (g *FailingGetter) GetAll() ([]gjson.Result, error) {
 func Test_discovery_GetEntity(t *testing.T) {
 	tests := []struct {
 		name           string
-		client         getter
+		client         Getter
 		printer        Printer
 		expectedOutput string
 		outWriter      io.Writer
@@ -187,7 +187,7 @@ func Test_discovery_GetEntity(t *testing.T) {
 func Test_discovery_GetEntities(t *testing.T) {
 	tests := []struct {
 		name           string
-		client         getter
+		client         Getter
 		printer        Printer
 		expectedOutput string
 		outWriter      io.Writer
