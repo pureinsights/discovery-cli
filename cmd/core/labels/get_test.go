@@ -43,6 +43,8 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_GetByIdReturnsObject",
 			errGolden:  "NewGetCommand_Err_GetByIdReturnsObject",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetByIdReturnsObject"),
+			errBytes:   []byte(nil),
 			method:     http.MethodGet,
 			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
 			statusCode: http.StatusOK,
