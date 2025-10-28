@@ -242,7 +242,7 @@ func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
 	testutils.CompareBytes(t, "NewDeleteCommand_Out_NoProfile", testutils.Read(t, "NewDeleteCommand_Out_NoProfile"), out.Bytes())
-	testutils.CompareBytes(t, "NewDeleteCommand_Out_NoProfile", testutils.Read(t, "NewDeleteCommand_Out_NoProfile"), errBuf.Bytes())
+	testutils.CompareBytes(t, "NewDeleteCommand_Err_NoProfile", testutils.Read(t, "NewDeleteCommand_Err_NoProfile"), errBuf.Bytes())
 }
 
 // TestNewDeleteCommand_NotExactly1Arg tests the NewDeleteCommand function when it does not receive exactly one argument.
