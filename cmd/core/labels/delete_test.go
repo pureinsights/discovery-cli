@@ -27,6 +27,8 @@ func TestNewDeleteCommand(t *testing.T) {
 		apiKey     string
 		outGolden  string
 		errGolden  string
+		outBytes   []byte
+		errBytes   []byte
 		method     string
 		path       string
 		statusCode int
@@ -41,6 +43,8 @@ func TestNewDeleteCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewDeleteCommand_Out_DeleteByIdReturnsObject",
 			errGolden:  "NewDeleteCommand_Err_DeleteByIdReturnsObject",
+			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
+			errBytes:   []byte(nil),
 			method:     http.MethodDelete,
 			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
 			statusCode: http.StatusOK,
@@ -56,6 +60,8 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewDeleteCommand_Out_NoURL",
 			errGolden:  "NewDeleteCommand_Err_NoURL",
+			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_NoURL"),
+			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
 			url:        false,
 			apiKey:     "apiKey123",
 			method:     http.MethodDelete,
@@ -69,6 +75,8 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewDeleteCommand_Out_NoAPIKey",
 			errGolden:  "NewDeleteCommand_Err_NoAPIKey",
+			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_NoAPIKey"),
+			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_NoAPIKey"),
 			url:        true,
 			apiKey:     "",
 			method:     http.MethodDelete,
@@ -84,6 +92,8 @@ func TestNewDeleteCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewDeleteCommand_Out_NotUUID",
 			errGolden:  "NewDeleteCommand_Err_NotUUID",
+			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_NotUUID"),
+			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_NotUUID"),
 			method:     http.MethodDelete,
 			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
 			statusCode: http.StatusOK,
@@ -95,6 +105,8 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewDeleteCommand_Out_PrintJSONFails",
 			errGolden:  "NewDeleteCommand_Err_PrintJSONFails",
+			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_PrintJSONFails"),
+			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_PrintJSONFails"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodDelete,
@@ -108,6 +120,8 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewDeleteCommand_Out_DeleteEntityHTTPError",
 			errGolden:  "NewDeleteCommand_Err_DeleteEntityHTTPError",
+			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_DeleteEntityHTTPError"),
+			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_DeleteEntityHTTPError"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodDelete,
@@ -184,12 +198,12 @@ func TestNewDeleteCommand(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
-			testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
+			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 		})
 	}
 }
@@ -227,8 +241,8 @@ func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "NewDeleteCommand_Out_NoProfile", out.Bytes())
-	testutils.CompareBytes(t, "NewDeleteCommand_Err_NoProfile", errBuf.Bytes())
+	testutils.CompareBytes(t, "NewDeleteCommand_Out_NoProfile", testutils.Read(t, "NewDeleteCommand_Out_NoProfile"), out.Bytes())
+	testutils.CompareBytes(t, "NewDeleteCommand_Err_NoProfile", testutils.Read(t, "NewDeleteCommand_Err_NoProfile"), errBuf.Bytes())
 }
 
 // TestNewDeleteCommand_NotExactly1Arg tests the NewDeleteCommand function when it does not receive exactly one argument.
@@ -264,6 +278,6 @@ func TestNewDeleteCommand_NotExactly1Arg(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, "accepts 1 arg(s), received 0")
 
-	testutils.CompareBytes(t, "NewDeleteCommand_Out_NotExactly1Arg", out.Bytes())
-	testutils.CompareBytes(t, "NewDeleteCommand_Err_NotExactly1Arg", errBuf.Bytes())
+	testutils.CompareBytes(t, "NewDeleteCommand_Out_NotExactly1Arg", testutils.Read(t, "NewDeleteCommand_Out_NotExactly1Arg"), out.Bytes())
+	testutils.CompareBytes(t, "NewDeleteCommand_Err_NotExactly1Arg", testutils.Read(t, "NewDeleteCommand_Err_NotExactly1Arg"), errBuf.Bytes())
 }

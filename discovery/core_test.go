@@ -18,7 +18,7 @@ import (
 
 // Test_newLabelsClient tests the constructor of newLabelsClient
 func Test_newLabelsClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	lc := newLabelsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, lc.ApiKey)
@@ -27,7 +27,7 @@ func Test_newLabelsClient(t *testing.T) {
 
 // Test_newSecretsClient tests the constructor of newSecretsClient
 func Test_newSecretsClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	sc := newSecretsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, sc.ApiKey)
@@ -36,7 +36,7 @@ func Test_newSecretsClient(t *testing.T) {
 
 // Test_newCredentialsClient tests the constructor of newCredentialsClient
 func Test_newCredentialsClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	cc := newCredentialsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, cc.crud.client.ApiKey)
@@ -49,7 +49,7 @@ func Test_newCredentialsClient(t *testing.T) {
 
 // Test_newServersClient tests the constructor of newServersClient
 func Test_newServersClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	sc := newServersClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, sc.crud.ApiKey)
@@ -62,7 +62,7 @@ func Test_newServersClient(t *testing.T) {
 
 // Test_newFilesClient tests the constructor of newFilesClient
 func Test_newFilesClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	fc := newFilesClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, fc.ApiKey)
@@ -71,7 +71,7 @@ func Test_newFilesClient(t *testing.T) {
 
 // Test_newMaintenanceClient tests the constructor of newMaintenanceClient
 func Test_newMaintenanceClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	mc := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, mc.ApiKey)
