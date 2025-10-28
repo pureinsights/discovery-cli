@@ -23,10 +23,10 @@ type Discovery interface {
 	PrintIngestionConfigToUser(profile string, sensitive bool) error
 	PrintQueryFlowConfigToUser(profile string, sensitive bool) error
 	PrintStagingConfigToUser(profile string, sensitive bool) error
-	GetEntity(client getter, id uuid.UUID, printer Printer) error
-	GetEntities(client getter, printer Printer) error
-	SearchEntity(client searcher, id string, printer Printer) error
-	SearchEntities(client searcher, filter gjson.Result, printer Printer) error
+	GetEntity(client Getter, id uuid.UUID, printer Printer) error
+	GetEntities(client Getter, printer Printer) error
+	SearchEntity(client Searcher, id string, printer Printer) error
+	SearchEntities(client Searcher, filter gjson.Result, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.

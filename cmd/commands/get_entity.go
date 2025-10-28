@@ -35,19 +35,19 @@ func GetCommand(args []string, d cli.Discovery, client cli.Getter, config comman
 }
 
 // SearchCommand is the function that the get command executes when it also allows for searching by name and with filters.
-func SearchCommand(args []string, d Discovery, client searcher, config commandConfig, filters *[]string) error {
+func SearchCommand(args []string, d cli.Discovery, client cli.Searcher, config commandConfig, filters *[]string) error {
 	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
 	if err != nil {
 		return err
 	}
 
 	if len(args) > 0 {
-		printer := GetObjectPrinter(config.output)
+		printer := cli.GetObjectPrinter(config.output)
 		err = d.SearchEntity(client, args[0], printer)
 		return err
 	} else if len(*filters) > 0 {
-		printer := GetArrayPrinter(config.output)
-		filter, err := BuildEntitiesFilter(*filters)
+		printer := cli.GetArrayPrinter(config.output)
+		filter, err := cli.BuildEntitiesFilter(*filters)
 		if err != nil {
 			return err
 		}
@@ -55,7 +55,7 @@ func SearchCommand(args []string, d Discovery, client searcher, config commandCo
 		err = d.SearchEntities(client, filter, printer)
 		return err
 	} else {
-		printer := GetArrayPrinter(config.output)
+		printer := cli.GetArrayPrinter(config.output)
 		err = d.GetEntities(client, printer)
 		return err
 	}
