@@ -16,7 +16,7 @@ import (
 
 // Test_newQueryFlowProcessorsClient test the queryFlowProcessorsClient's constructor
 func Test_newQueryFlowProcessorsClient(t *testing.T) {
-	url := "http://localhost:12040/v2/v2"
+	url := "http://localhost:12040/v2"
 	apiKey := "Api Key"
 	qpc := newQueryFlowProcessorsClient(url, apiKey)
 
@@ -28,7 +28,7 @@ func Test_newQueryFlowProcessorsClient(t *testing.T) {
 
 // Test_newEndpointsClient tests the constructor of endpointsClients.
 func Test_newEndpointsClient(t *testing.T) {
-	url := "http://localhost:12040/v2/v2"
+	url := "http://localhost:12040/v2"
 	apiKey := "Api Key"
 	qec := newEndpointsClient(url, apiKey)
 
@@ -472,6 +472,6 @@ func Test_queryFlow_Debug(t *testing.T) {
 func Test_NewQueryFlow(t *testing.T) {
 	i := NewQueryFlow("http://localhost:12040", "Api Key")
 
-	assert.Equal(t, "http://localhost:12040/v2/v2", i.Url)
+	assert.Equal(t, "http://localhost:12040/v2", i.Url)
 	assert.Equal(t, "Api Key", i.ApiKey)
 }

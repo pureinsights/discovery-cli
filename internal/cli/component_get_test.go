@@ -121,7 +121,7 @@ func TestGetCommand(t *testing.T) {
 			componentName: "Core",
 			args:          []string{},
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON array"),
+			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
 		},
 	}
 
