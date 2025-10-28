@@ -452,8 +452,7 @@ func (s *FailingSearcherWorkingGetter) SearchByName(name string) (gjson.Result, 
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name %q does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`, name)),
 	}
 }
@@ -505,8 +504,7 @@ func (s *FailingSearcherFailingGetter) SearchByName(name string) (gjson.Result, 
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name %q does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`, name)),
 	}
 }
@@ -668,8 +666,7 @@ func Test_searchEntity(t *testing.T) {
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`),
 			},
 		},
@@ -753,8 +750,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`),
 			}, "Could not search for entity with id \"MongoDB Atlas Server\""),
 		},

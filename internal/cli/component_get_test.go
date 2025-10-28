@@ -248,8 +248,7 @@ func TestSearchCommand(t *testing.T) {
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name "test" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`),
 			}, "Could not search for entity with id \"test\""),
 		},
@@ -318,7 +317,7 @@ func TestSearchCommand(t *testing.T) {
 			componentName: "Core",
 			args:          []string{},
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON array"),
+			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
 		},
 	}
 
