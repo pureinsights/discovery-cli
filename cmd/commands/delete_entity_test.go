@@ -1,4 +1,4 @@
-package cli
+package commands
 
 import (
 	"bytes"
@@ -8,20 +8,55 @@ import (
 	"os"
 	"testing"
 
+	"github.com/google/uuid"
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
+	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/pureinsights/pdp-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 )
+
+// WorkingDeleter mocks when the deleter interface works correctly.
+type WorkingDeleter struct {
+	mock.Mock
+}
+
+// Get returns a working processor as if the request worked successfully.
+func (g *WorkingDeleter) Delete(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"acknowledged": true
+	}`), nil
+}
+
+// FailingDeleter mocks the deleter interface when the Delete() method fails.
+type FailingDeleter struct {
+	mock.Mock
+}
+
+// Get returns a working processor as if the request worked successfully.
+func (g *FailingDeleter) Delete(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusBadRequest,
+		Body: gjson.Parse(`{
+			"status": 400,
+			"code": 3002,
+			"messages": [
+				"Failed to convert argument [id] for value [test] due to: Invalid UUID string: test"
+			],
+			"timestamp": "2025-10-23T22:35:38.345647200Z"
+			}`),
+	}
+}
 
 // TestDeleteCommand tests the DeleteCommand() function.
 func TestDeleteCommand(t *testing.T) {
 	tests := []struct {
 		name           string
-		client         deleter
+		client         cli.Deleter
 		args           string
 		url            string
 		apiKey         string
@@ -51,7 +86,7 @@ func TestDeleteCommand(t *testing.T) {
 			componentName: "Core",
 			args:          "",
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           NewError(ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
 		},
 		{
 			name:           "id is not a UUID",
@@ -61,7 +96,7 @@ func TestDeleteCommand(t *testing.T) {
 			apiKey:         "core123",
 			componentName:  "Core",
 			expectedOutput: "",
-			err:            NewErrorWithCause(ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not convert given id \"test\" to UUID. This command does not support referencing an entity by name."),
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not convert given id \"test\" to UUID. This command does not support referencing an entity by name."),
 		},
 		{
 			name:           "DeleteEntity returns 400 Bad Request",
@@ -71,7 +106,7 @@ func TestDeleteCommand(t *testing.T) {
 			componentName:  "Core",
 			args:           "5f125024-1e5e-4591-9fee-365dc20eeeed",
 			expectedOutput: "",
-			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
 				Status: http.StatusBadRequest,
 				Body: gjson.Parse(`{
 			"status": 400,
@@ -91,7 +126,7 @@ func TestDeleteCommand(t *testing.T) {
 			componentName: "Core",
 			args:          "5f125024-1e5e-4591-9fee-365dc20eeeed",
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			err:           cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
 		},
 	}
 
@@ -121,12 +156,12 @@ func TestDeleteCommand(t *testing.T) {
 				vpr.Set("default.core_key", tc.apiKey)
 			}
 
-			d := NewDiscovery(&ios, vpr, "")
+			d := cli.NewDiscovery(&ios, vpr, "")
 			err := DeleteCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url", "core_key"))
 
 			if tc.err != nil {
 				require.Error(t, err)
-				var errStruct Error
+				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
