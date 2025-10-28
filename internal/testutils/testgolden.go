@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Defines the update flag in the package
 var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Path creates the testdata directory when update is true.
@@ -32,18 +33,21 @@ func Write(t *testing.T, name string, got []byte) {
 // Read reads the golden file contents.
 func Read(t *testing.T, name string) []byte {
 	t.Helper()
-	b, err := os.ReadFile(Path(t, name))
-	require.NoError(t, err)
-	return b
+	if !(*Update) {
+		b, err := os.ReadFile(Path(t, name))
+		require.NoError(t, err)
+		return b
+	}
+
+	return nil
 }
 
 // CompareBytes reads the golden file and verifies that its contents and the current response are the same.
-func CompareBytes(t *testing.T, name string, got []byte) {
+func CompareBytes(t *testing.T, name string, expected, got []byte) {
 	t.Helper()
 	if *Update {
 		Write(t, name, got)
 	} else {
-		expected := Read(t, name)
 		normalizedExpected := bytes.ReplaceAll(expected, []byte("\r\n"), []byte("\n"))
 		normalizedGot := bytes.ReplaceAll(got, []byte("\r\n"), []byte("\n"))
 		require.Equal(t, normalizedExpected, normalizedGot)

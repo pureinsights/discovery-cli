@@ -13,13 +13,13 @@ type searcher struct {
 }
 
 const (
+	// NotFoundError contains the template for the error that is returned when the entity could not be found.
 	NotFoundError string = `{
 	"status": 404,
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name %q does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`
 )
 
