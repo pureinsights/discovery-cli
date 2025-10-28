@@ -105,7 +105,7 @@ Discovery has a Core client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url   | The URL of Discovery's Core component. The URL should contain the URL up to the version. For example, `http://localhost:12010/v2/v2`. |
+| Url   | The URL of Discovery's Core component. The URL must not contain the version, as it is added automatically. For example, `http://localhost:12010`. |
 | ApiKey | The API key to authenticate each request to Discovery's Core. |
 
 #### Sub-Clients
@@ -192,7 +192,7 @@ Discovery has a QueryFlow client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url   | The URL of Discovery's QueryFlow component. The URL should contain the URL up to the version. For example, `http://localhost:12040/v2/v2`. |
+| Url   | The URL of Discovery's QueryFlow component. The URL must not contain the version, as it is added automatically. For example, `http://localhost:12040`. |
 | ApiKey | The API key to authenticate each request to Discovery's QueryFlow. |
 
 It has the following methods:
@@ -235,7 +235,7 @@ Discovery has a Ingestion client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url | The URL of Discovery's Ingestion component. The URL should contain the URL up to the version. For example, `http://localhost:12030/v2/v2`. |
+| Url | The URL of Discovery's Ingestion component. The URL must not contain the version, as it is added automatically. For example, `http://localhost:12030`. |
 | ApiKey | The API key to authenticate each request to Discovery's Ingestion. |
 
 #### Sub-Clients
@@ -334,7 +334,7 @@ Discovery has a Staging client struct.
 Its fields are:
 | Field | Description |
 | --- | --- |
-| Url   | The URL of Discovery's Staging component. The URL should contain the URL up to the version. For example, `http://localhost:12020/v2`. |
+| Url   | The URL of Discovery's Staging component. The URL must not contain the version, as it is added automatically. For example, `http://localhost:12020`. |
 | ApiKey | The API key to authenticate each request to Discovery's Staging. |
 
 #### Sub-Clients
