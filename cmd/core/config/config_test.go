@@ -23,6 +23,8 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 		writePath string
 		outGolden string
 		errGolden string
+		outBytes  []byte
+		errBytes  []byte
 		err       error
 	}{
 		// Working cases
@@ -42,6 +44,8 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_All",
 			errGolden: "NewConfigCommand_Err_All",
+			outBytes:  testutils.Read(t, "NewConfigCommand_Out_All"),
+			errBytes:  []byte(nil),
 			err:       nil,
 		},
 		{
@@ -56,6 +60,8 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_NoKeys",
 			errGolden: "NewConfigCommand_Err_NoKeys",
+			outBytes:  testutils.Read(t, "NewConfigCommand_Out_NoKeys"),
+			errBytes:  []byte(nil),
 			err:       nil,
 		},
 		{
@@ -69,6 +75,8 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_OnlyKeys",
 			errGolden: "NewConfigCommand_Err_OnlyKeys",
+			outBytes:  testutils.Read(t, "NewConfigCommand_Out_OnlyKeys"),
+			errBytes:  []byte(nil),
 			err:       nil,
 		},
 		{
@@ -87,6 +95,8 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_MultiplePeriods",
 			errGolden: "NewConfigCommand_Err_MultiplePeriods",
+			outBytes:  testutils.Read(t, "NewConfigCommand_Out_MultiplePeriods"),
+			errBytes:  []byte(nil),
 			err:       nil,
 		},
 
@@ -107,6 +117,8 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			},
 			outGolden: "NewConfigCommand_Out_ConfigError",
 			errGolden: "NewConfigCommand_Err_ConfigError",
+			outBytes:  testutils.Read(t, "NewConfigCommand_Out_ConfigError"),
+			errBytes:  []byte(nil),
 			err:       cli.NewErrorWithCause(cli.ErrorExitCode, fs.ErrNotExist, "Failed to save Core's configuration"),
 		},
 	}
@@ -151,7 +163,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 				cliError, _ := tc.err.(cli.Error)
 				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
 					assert.EqualError(t, err, tc.err.Error())
-					testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
+					testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 				} else {
 					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
 					assert.Equal(t, cliError.Message, errStruct.Message)
@@ -160,7 +172,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
+			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 
 			var commandNames []string
 			for _, c := range configCmd.Commands() {
@@ -215,8 +227,10 @@ func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
 
 	err := configCmd.Execute()
 	require.Error(t, err)
-	assert.Equal(t, "flag accessed but not defined: profile", err.Error())
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "NewConfigCommand_Out_NoProfile", out.Bytes())
-	testutils.CompareBytes(t, "NewConfigCommand_Err_NoProfile", errBuf.Bytes())
+	testutils.CompareBytes(t, "NewConfigCommand_Out_NoProfile", testutils.Read(t, "NewConfigCommand_Out_NoProfile"), out.Bytes())
+	testutils.CompareBytes(t, "NewConfigCommand_Err_NoProfile", testutils.Read(t, "NewConfigCommand_Err_NoProfile"), errBuf.Bytes())
 }

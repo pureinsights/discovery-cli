@@ -18,7 +18,7 @@ import (
 
 // Test_newLabelsClient tests the constructor of newLabelsClient
 func Test_newLabelsClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	lc := newLabelsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, lc.ApiKey)
@@ -27,7 +27,7 @@ func Test_newLabelsClient(t *testing.T) {
 
 // Test_newSecretsClient tests the constructor of newSecretsClient
 func Test_newSecretsClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	sc := newSecretsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, sc.ApiKey)
@@ -36,7 +36,7 @@ func Test_newSecretsClient(t *testing.T) {
 
 // Test_newCredentialsClient tests the constructor of newCredentialsClient
 func Test_newCredentialsClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	cc := newCredentialsClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, cc.crud.client.ApiKey)
@@ -49,7 +49,7 @@ func Test_newCredentialsClient(t *testing.T) {
 
 // Test_newServersClient tests the constructor of newServersClient
 func Test_newServersClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	sc := newServersClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, sc.crud.ApiKey)
@@ -60,7 +60,7 @@ func Test_newServersClient(t *testing.T) {
 
 // Test_newFilesClient tests the constructor of newFilesClient
 func Test_newFilesClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	fc := newFilesClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, fc.ApiKey)
@@ -69,7 +69,7 @@ func Test_newFilesClient(t *testing.T) {
 
 // Test_newMaintenanceClient tests the constructor of newMaintenanceClient
 func Test_newMaintenanceClient(t *testing.T) {
-	c := newClient("http://localhost:12010/v2/v2", "Api Key")
+	c := newClient("http://localhost:12010/v2", "Api Key")
 	mc := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
 
 	assert.Equal(t, c.ApiKey, mc.ApiKey)
@@ -660,7 +660,7 @@ func Test_maintenanceClient_Log(t *testing.T) {
 
 // Test_core_Labels tests the core.Labels() function
 func Test_core_Labels(t *testing.T) {
-	c := NewCore("http://localhost:12010/v2/v2", "Api Key")
+	c := NewCore("http://localhost:12010", "Api Key")
 	lc := c.Labels()
 
 	assert.Equal(t, c.ApiKey, lc.ApiKey)
@@ -669,7 +669,7 @@ func Test_core_Labels(t *testing.T) {
 
 // Test_core_Secrets tests the core.Secrets() function
 func Test_core_Secrets(t *testing.T) {
-	c := NewCore("http://localhost:12010/v2/v2", "Api Key")
+	c := NewCore("http://localhost:12010", "Api Key")
 	sc := c.Secrets()
 
 	assert.Equal(t, c.ApiKey, sc.ApiKey)
@@ -678,7 +678,7 @@ func Test_core_Secrets(t *testing.T) {
 
 // Test_core_Credentials tests the core.Credentials() function
 func Test_core_Credentials(t *testing.T) {
-	c := NewCore("http://localhost:12010/v2/v2", "Api Key")
+	c := NewCore("http://localhost:12010", "Api Key")
 	cc := c.Credentials()
 
 	assert.Equal(t, c.ApiKey, cc.crud.ApiKey)
@@ -691,7 +691,7 @@ func Test_core_Credentials(t *testing.T) {
 
 // Test_core_Servers tests the core.Servers() function
 func Test_core_Servers(t *testing.T) {
-	c := NewCore("http://localhost:12010/v2/v2", "Api Key")
+	c := NewCore("http://localhost:12010", "Api Key")
 	sc := c.Servers()
 
 	assert.Equal(t, c.ApiKey, sc.ApiKey)
@@ -702,7 +702,7 @@ func Test_core_Servers(t *testing.T) {
 
 // Test_core_Files tests the core.Files() function
 func Test_core_Files(t *testing.T) {
-	c := NewCore("http://localhost:12010/v2/v2", "Api Key")
+	c := NewCore("http://localhost:12010", "Api Key")
 	fc := c.Files()
 
 	assert.Equal(t, c.ApiKey, fc.ApiKey)
@@ -711,7 +711,7 @@ func Test_core_Files(t *testing.T) {
 
 // Test_core_Maintenance tests the core.Maintenance() function
 func Test_core_Maintenance(t *testing.T) {
-	c := NewCore("http://localhost:12010/v2/v2", "Api Key")
+	c := NewCore("http://localhost:12010", "Api Key")
 	mc := c.Maintenance()
 
 	assert.Equal(t, c.ApiKey, mc.ApiKey)
@@ -720,7 +720,7 @@ func Test_core_Maintenance(t *testing.T) {
 
 // Test_core_BackupRestore tests the core.BackupRestore() function
 func Test_core_BackupRestore(t *testing.T) {
-	c := NewCore("http://localhost:12010/v2/v2", "Api Key")
+	c := NewCore("http://localhost:12010", "Api Key")
 	bc := c.BackupRestore()
 
 	assert.Equal(t, c.ApiKey, bc.ApiKey)
@@ -730,10 +730,10 @@ func Test_core_BackupRestore(t *testing.T) {
 // Test_NewCore_UrlAndAPIKey tests the function to create a new core client.
 // It verifies that the API Key and base URL correctly match.
 func Test_NewCore_UrlAndAPIKey(t *testing.T) {
-	url := "http://localhost:12010/v2/v2"
+	url := "http://localhost:12010"
 	apiKey := "secret-key"
 	c := NewCore(url, apiKey)
 
 	assert.Equal(t, apiKey, c.ApiKey, "ApiKey should be stored")
-	assert.Equal(t, url, c.Url, "BaseURL should match server URL")
+	assert.Equal(t, url+"/v2", c.Url, "BaseURL should match server URL")
 }

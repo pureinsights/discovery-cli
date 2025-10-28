@@ -1,6 +1,6 @@
 Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
 
-Staging URL [http://localhost:12020/v2]: Staging API key [staging235]: Usage:
+Staging URL [http://localhost:12020]: Staging API key [staging235]: Usage:
   config [subcommands] [flags]
   config [command]
 

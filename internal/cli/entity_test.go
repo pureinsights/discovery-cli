@@ -198,7 +198,7 @@ func Test_discovery_GetEntities(t *testing.T) {
 			name:           "GetEntities correctly prints an array with the sent printer",
 			client:         new(WorkingGetter),
 			printer:        JsonArrayPrinter(true),
-			expectedOutput: "[\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-21T17:57:16Z\",\n  \"id\": \"3393f6d9-94c1-4b70-ba02-5f582727d998\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-21T17:57:16Z\",\n  \"name\": \"MongoDB text processor 4\",\n  \"type\": \"mongo\"\n}\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"5f125024-1e5e-4591-9fee-365dc20eeeed\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-18T20:55:43Z\",\n  \"name\": \"MongoDB text processor\",\n  \"type\": \"mongo\"\n}\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"86e7f920-a4e4-4b64-be84-5437a7673db8\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"name\": \"Script processor\",\n  \"type\": \"script\"\n}\n]\n",
+			expectedOutput: "[\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-21T17:57:16Z\",\n  \"id\": \"3393f6d9-94c1-4b70-ba02-5f582727d998\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-21T17:57:16Z\",\n  \"name\": \"MongoDB text processor 4\",\n  \"type\": \"mongo\"\n},\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"5f125024-1e5e-4591-9fee-365dc20eeeed\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-18T20:55:43Z\",\n  \"name\": \"MongoDB text processor\",\n  \"type\": \"mongo\"\n},\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"86e7f920-a4e4-4b64-be84-5437a7673db8\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"name\": \"Script processor\",\n  \"type\": \"script\"\n}\n]\n",
 			err:            nil,
 		},
 		{
@@ -222,7 +222,7 @@ func Test_discovery_GetEntities(t *testing.T) {
 			client:    new(WorkingGetter),
 			printer:   nil,
 			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
-			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON array"),
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
 		},
 	}
 
@@ -816,7 +816,7 @@ func Test_discovery_SearchEntities(t *testing.T) {
 			name:           "SearchEntities correctly prints an array with the sent printer",
 			client:         new(WorkingSearcher),
 			printer:        JsonArrayPrinter(true),
-			expectedOutput: "[\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"name\": \"MongoDB Atlas server clone\",\n    \"type\": \"mongo\"\n  }\n}\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:19Z\",\n    \"id\": \"8f14c11c-bb66-49d3-aa2a-dedff4608c17\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:19Z\",\n    \"name\": \"MongoDB Atlas server clone 1\",\n    \"type\": \"mongo\"\n  }\n}\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:20Z\",\n    \"id\": \"3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:20Z\",\n    \"name\": \"MongoDB Atlas server clone 3\",\n    \"type\": \"mongo\"\n  }\n}\n]\n",
+			expectedOutput: "[\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"name\": \"MongoDB Atlas server clone\",\n    \"type\": \"mongo\"\n  }\n},\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:19Z\",\n    \"id\": \"8f14c11c-bb66-49d3-aa2a-dedff4608c17\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:19Z\",\n    \"name\": \"MongoDB Atlas server clone 1\",\n    \"type\": \"mongo\"\n  }\n},\n{\n  \"highlight\": {},\n  \"score\": 0.20970252,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:20Z\",\n    \"id\": \"3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:20Z\",\n    \"name\": \"MongoDB Atlas server clone 3\",\n    \"type\": \"mongo\"\n  }\n}\n]\n",
 			err:            nil,
 		},
 		{
@@ -840,7 +840,7 @@ func Test_discovery_SearchEntities(t *testing.T) {
 			client:    new(WorkingSearcher),
 			printer:   nil,
 			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
-			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON array"),
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
 		},
 	}
 
