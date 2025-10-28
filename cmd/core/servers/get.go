@@ -3,6 +3,7 @@ package servers
 import (
 	"fmt"
 
+	"github.com/pureinsights/pdp-cli/cmd/commands"
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
@@ -14,7 +15,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains servers from Discovery Core.",
-		Long:  fmt.Sprintf(cli.LongGetSearch, "server", "Core"),
+		Long:  fmt.Sprintf(commands.LongGetSearch, "server", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -24,7 +25,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return cli.SearchCommand(args, d, coreClient.Servers(), cli.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url", "core_key"), &filters)
+			return commands.SearchCommand(args, d, coreClient.Servers(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url", "core_key"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
 	}
