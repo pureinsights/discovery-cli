@@ -126,6 +126,8 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_NoAPIKey",
 			errGolden:  "NewGetCommand_Err_NoAPIKey",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_NoAPIKey"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_NoAPIKey"),
 			url:        true,
 			apiKey:     "",
 			method:     http.MethodGet,
