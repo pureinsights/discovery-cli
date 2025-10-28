@@ -11,7 +11,6 @@ import (
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/pureinsights/pdp-cli/internal/testutils"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -26,9 +25,12 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 		config    map[string]string
 		outGolden string
 		errGolden string
+		outBytes  []byte
+		errBytes  []byte
 		outWriter io.Writer
 		err       error
 	}{
+		// Working cases
 		{
 			name:      "Print all values not sensitive",
 			profile:   "cn",
@@ -45,6 +47,8 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			},
 			outGolden: "NewGetCommand_Out_AllNotSensitive",
 			errGolden: "NewGetCommand_Err_AllNotSensitive",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_AllNotSensitive"),
+			errBytes:  []byte(nil),
 			outWriter: nil,
 			err:       nil,
 		},
@@ -64,6 +68,8 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			},
 			outGolden: "NewGetCommand_Out_AllSensitive",
 			errGolden: "NewGetCommand_Err_AllSensitive",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_AllSensitive"),
+			errBytes:  []byte(nil),
 			outWriter: nil,
 			err:       nil,
 		},
@@ -79,9 +85,12 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			},
 			outGolden: "NewGetCommand_Out_SomeValuesNotSensitive",
 			errGolden: "NewGetCommand_Err_SomeValuesNotSensitive",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_SomeValuesNotSensitive"),
+			errBytes:  []byte(nil),
 			outWriter: nil,
 			err:       nil,
 		},
+		// Error cases
 		{
 			name:      "Print Fail on Printing Core Config",
 			profile:   "cn",
@@ -98,6 +107,8 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			},
 			outGolden: "NewGetCommand_Out_FailPrintingCore",
 			errGolden: "NewGetCommand_Err_FailPrintingCore",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_FailPrintingCore"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_FailPrintingCore"),
 			outWriter: &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
 			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print Core's URL"),
 		},
@@ -117,6 +128,8 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			},
 			outGolden: "NewGetCommand_Out_FailPrintingIngestion",
 			errGolden: "NewGetCommand_Err_FailPrintingIngestion",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_FailPrintingIngestion"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_FailPrintingIngestion"),
 			outWriter: &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 4},
 			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print Ingestion's URL"),
 		},
@@ -136,6 +149,8 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			},
 			outGolden: "NewGetCommand_Out_FailPrintingQueryFlow",
 			errGolden: "NewGetCommand_Err_FailPrintingQueryFlow",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_FailPrintingQueryFlow"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_FailPrintingQueryFlow"),
 			outWriter: &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 6},
 			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print QueryFlow's URL"),
 		},
@@ -155,6 +170,8 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			},
 			outGolden: "NewGetCommand_Out_FailPrintingStaging",
 			errGolden: "NewGetCommand_Err_FailPrintingStaging",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_FailPrintingStaging"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_FailPrintingStaging"),
 			outWriter: &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 8},
 			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print Staging's URL"),
 		},
@@ -210,18 +227,18 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
-			testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
+			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 		})
 	}
 }
 
-// Test_getCommandExecute_NoSensitiveFlag test the get command's RunE when there is no sensitive flag
-func Test_getCommandExecute_NoProfileFlag(t *testing.T) {
+// Test_NewGetCommand_NoSensitiveFlag test the get command's RunE when there is no sensitive flag
+func Test_NewGetCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader("")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -259,66 +276,10 @@ func Test_getCommandExecute_NoProfileFlag(t *testing.T) {
 
 	err := getCmd.Execute()
 	require.Error(t, err)
-	assert.Equal(t, "flag accessed but not defined: profile", err.Error())
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "getCommandExecute_Out_NoProfile", out.Bytes())
-	testutils.CompareBytes(t, "getCommandExecute_Err_NoProfile", errBuf.Bytes())
-}
-
-// Test_getCommandExecute_NoSensitiveFlag test the get command's RunE when there is no sensitive flag
-func Test_getCommandExecute_NoSensitiveFlag(t *testing.T) {
-	in := strings.NewReader("")
-	out := &bytes.Buffer{}
-	errBuf := &bytes.Buffer{}
-	ios := iostreams.IOStreams{
-		In:  in,
-		Out: out,
-		Err: errBuf,
-	}
-
-	config := map[string]string{
-		"cn.core_url":      "http://localhost:12010/v2",
-		"cn.ingestion_url": "http://localhost:12030/v2",
-		"cn.queryflow_url": "http://localhost:12040/v2",
-		"cn.staging_url":   "http://localhost:12020/v2",
-		"cn.core_key":      "core321",
-		"cn.ingestion_key": "ingestion432",
-		"cn.queryflow_key": "queryflow123",
-		"cn.staging_key":   "staging235",
-	}
-
-	vpr := viper.New()
-	for k, v := range config {
-		vpr.Set(k, v)
-	}
-
-	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
-
-	getCmd := &cobra.Command{
-		Use:   "get",
-		Short: "Print Discovery's configuration",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return getCommandExecute(cmd, d)
-		},
-	}
-
-	getCmd.SetIn(ios.In)
-	getCmd.SetOut(ios.Out)
-	getCmd.SetErr(ios.Err)
-
-	getCmd.PersistentFlags().StringP(
-		"profile",
-		"p",
-		d.Config().GetString("profile"),
-		"configuration profile to use",
-	)
-
-	getCmd.SetArgs([]string{""})
-
-	err := getCmd.Execute()
-	require.Error(t, err)
-	assert.Equal(t, "flag accessed but not defined: sensitive", err.Error())
-
-	testutils.CompareBytes(t, "getCommandExecute_Out_NoSensitive", out.Bytes())
-	testutils.CompareBytes(t, "getCommandExecute_Err_NoSensitive", errBuf.Bytes())
+	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", testutils.Read(t, "NewGetCommand_Out_NoProfile"), out.Bytes())
+	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", testutils.Read(t, "NewGetCommand_Err_NoProfile"), errBuf.Bytes())
 }

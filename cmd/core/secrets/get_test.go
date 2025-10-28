@@ -27,6 +27,8 @@ func TestNewGetCommand(t *testing.T) {
 		apiKey     string
 		outGolden  string
 		errGolden  string
+		outBytes   []byte
+		errBytes   []byte
 		method     string
 		path       string
 		statusCode int
@@ -41,6 +43,8 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_GetByIdReturnsObject",
 			errGolden:  "NewGetCommand_Err_GetByIdReturnsObject",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetByIdReturnsObject"),
+			errBytes:   []byte(nil),
 			method:     http.MethodGet,
 			path:       "/v2/secret/81ca1ac6-3058-4ecd-a292-e439827a675a",
 			statusCode: http.StatusOK,
@@ -59,6 +63,8 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_GetAllReturnsArray",
 			errGolden:  "NewGetCommand_Err_GetAllReturnsArray",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetAllReturnsArray"),
+			errBytes:   []byte(nil),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
@@ -105,6 +111,8 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_NoURL",
 			errGolden:  "NewGetCommand_Err_NoURL",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_NoURL"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_NoURL"),
 			url:        false,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
@@ -118,6 +126,8 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_NoAPIKey",
 			errGolden:  "NewGetCommand_Err_NoAPIKey",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_NoAPIKey"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_NoAPIKey"),
 			url:        true,
 			apiKey:     "",
 			method:     http.MethodGet,
@@ -133,6 +143,8 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_NotUUID",
 			errGolden:  "NewGetCommand_Err_NotUUID",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_NotUUID"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_NotUUID"),
 			method:     http.MethodGet,
 			path:       "/v2/secret/81ca1ac6-3058-4ecd-a292-e439827a675a",
 			statusCode: http.StatusOK,
@@ -144,6 +156,8 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
 			outGolden:  "NewGetCommand_Out_PrintJSONFails",
 			errGolden:  "NewGetCommand_Err_PrintJSONFails",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_PrintJSONFails"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_PrintJSONFails"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
@@ -157,6 +171,8 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_PrintArrayFails",
 			errGolden:  "NewGetCommand_Err_PrintArrayFails",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_PrintArrayFails"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_PrintArrayFails"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
@@ -180,13 +196,15 @@ func TestNewGetCommand(t *testing.T) {
 			"numberOfElements": 3,
 			"pageNumber": 0
 			}`,
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '{' looking for beginning of object key string"), "Could not print JSON array"),
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '{' looking for beginning of object key string"), "Could not print JSON Array"),
 		},
 		{
 			name:       "GetEntity returns HTTP error",
 			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
 			outGolden:  "NewGetCommand_Out_GetEntityHTTPError",
 			errGolden:  "NewGetCommand_Err_GetEntityHTTPError",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetEntityHTTPError"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_GetEntityHTTPError"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
@@ -214,6 +232,8 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_GetEntitiesHTTPError",
 			errGolden:  "NewGetCommand_Err_GetEntitiesHTTPError",
+			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetEntitiesHTTPError"),
+			errBytes:   testutils.Read(t, "NewGetCommand_Err_GetEntitiesHTTPError"),
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
@@ -276,12 +296,12 @@ func TestNewGetCommand(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, out.Bytes())
-			testutils.CompareBytes(t, tc.errGolden, errBuf.Bytes())
+			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 		})
 	}
 }
@@ -319,6 +339,6 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", out.Bytes())
-	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", errBuf.Bytes())
+	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", testutils.Read(t, "NewGetCommand_Out_NoProfile"), out.Bytes())
+	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", testutils.Read(t, "NewGetCommand_Err_NoProfile"), errBuf.Bytes())
 }
