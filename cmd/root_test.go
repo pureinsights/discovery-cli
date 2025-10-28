@@ -57,6 +57,7 @@ func Test_newRootCommand(t *testing.T) {
 	for _, c := range expectedCommands {
 		require.Contains(t, commandNames, c)
 	}
+	assert.Equal(t, 1, len(commandNames))
 }
 
 // TestRun_SetDiscoveryDirFails tests the Run function when the SetDiscoveryDir() function fails.
