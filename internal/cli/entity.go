@@ -243,7 +243,7 @@ func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, a
 		upsert, err := d.UpsertEntity(client, config)
 		if err != nil {
 			if abortOnError {
-				return NewErrorWithCause(ErrorExitCode, err, "Could not create entities")
+				return NewErrorWithCause(ErrorExitCode, err, "Could not store entities")
 			}
 
 			var discoveryErr discoveryPackage.Error

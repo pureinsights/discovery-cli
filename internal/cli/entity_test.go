@@ -1673,7 +1673,7 @@ func Test_discovery_UpsertEntities(t *testing.T) {
     "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
   ],
   "timestamp": "2025-10-29T14:46:48.055840300Z"
-}`)}, "Could not create entities"),
+}`)}, "Could not store entities"),
 		},
 		{
 			name:   "Printing fails",
