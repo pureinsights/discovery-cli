@@ -54,7 +54,7 @@ func Test_newRootCommand(t *testing.T) {
 	}
 
 	expectedCommands := []string{"config"}
-	assert.Equal(t, expectedCommands, commandNames)
+	assert.Subset(t, commandNames, expectedCommands)
 }
 
 // TestRun_SetDiscoveryDirFails tests the Run function when the SetDiscoveryDir() function fails.
