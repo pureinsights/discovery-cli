@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"syscall"
 	"testing"
@@ -50,7 +51,9 @@ func Test_newRootCommand(t *testing.T) {
 
 	var commandNames []string
 	for _, c := range discoveryCmd.Commands() {
-		commandNames = append(commandNames, c.Name())
+		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+			commandNames = append(commandNames, c.Name())
+		}
 	}
 
 	expectedCommands := []string{"config"}
