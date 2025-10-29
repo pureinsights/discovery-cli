@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io/fs"
+	"slices"
 	"strings"
 	"testing"
 
@@ -172,11 +173,13 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 
 			var commandNames []string
 			for _, c := range configCmd.Commands() {
-				commandNames = append(commandNames, c.Name())
+				if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+					commandNames = append(commandNames, c.Name())
+				}
 			}
 
 			expectedCommands := []string{"get"}
-			assert.Subset(t, commandNames, expectedCommands)
+			assert.Equal(t, expectedCommands, commandNames)
 		})
 	}
 }
