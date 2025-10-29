@@ -1264,3 +1264,212 @@ func TestBuildEntitiesFilter(t *testing.T) {
 		})
 	}
 }
+
+// WorkingCreator mocks when creating and updating entities works.
+type WorkingCreator struct {
+	mock.Mock
+}
+
+// Create returns a JSON as if it worked successfully.
+func (g *WorkingCreator) Create(config gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// Update returns a JSON as if it worked successfully.
+func (g *WorkingCreator) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// FailingCreator mocks when creating and updating entities fails.
+type FailingCreator struct {
+	mock.Mock
+}
+
+// Create returns a JSON as if it worked successfully.
+func (g *FailingCreator) Create(config gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 400,
+  "code": 3002,
+  "messages": [
+    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
+  ],
+  "timestamp": "2025-10-29T14:46:48.055840300Z"
+}`)}
+}
+
+// Update returns a JSON as if it worked successfully.
+func (g *FailingCreator) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+  ],
+  "timestamp": "2025-10-29T14:47:36.290329Z"
+}`)}
+}
+
+func Test_discovery_UpsertEntity(t *testing.T) {
+	tests := []struct {
+		name     string
+		client   Creator
+		config   gjson.Result
+		expected gjson.Result
+		err      error
+	}{
+		// Working case
+		{
+			name:   "UpsertEntity creates an entity",
+			client: new(WorkingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			expected: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			err: nil,
+		},
+		{
+			name:   "UpsertEntity updates an entity",
+			client: new(WorkingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "OpenAI credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "openai-secret"
+	}`),
+			expected: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			err: nil,
+		},
+
+		// Error case
+		{
+			name:   "UpsertEntity fails to create an entity",
+			client: new(FailingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			expected: gjson.Result{},
+			err: discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 400,
+  "code": 3002,
+  "messages": [
+    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
+  ],
+  "timestamp": "2025-10-29T14:46:48.055840300Z"
+}`)},
+		},
+		{
+			name:   "UpsertEntity fails to update an entity",
+			client: new(FailingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "OpenAI credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "openai-secret"
+	}`),
+			expected: gjson.Result{},
+			err: discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+  ],
+  "timestamp": "2025-10-29T14:47:36.290329Z"
+}`)},
+		},
+		{
+			name:   "UpsertEntity receives an ID that is not a UUID",
+			client: new(WorkingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "OpenAI credential",
+		"labels": [],
+		"active": true,
+		"id": "test",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "openai-secret"
+	}`),
+			expected: gjson.Result{},
+			err:      errors.New("invalid UUID length: 4"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: buf,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			response, err := d.UpsertEntity(tc.client, tc.config)
+
+			assert.Equal(t, tc.expected, response)
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
