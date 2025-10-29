@@ -3,9 +3,11 @@ package cmd
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"syscall"
 	"testing"
@@ -16,6 +18,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// Defines the update flag in the package
+var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Test_newRootCommand tests the newRootCommand() function.
 func Test_newRootCommand(t *testing.T) {
@@ -43,6 +48,16 @@ func Test_newRootCommand(t *testing.T) {
 	// Change flag value to check Viper binding
 	discoveryCmd.PersistentFlags().Set("profile", "cn")
 	assert.Equal(t, "cn", vpr.GetString("profile"))
+
+	var commandNames []string
+	for _, c := range discoveryCmd.Commands() {
+		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+			commandNames = append(commandNames, c.Name())
+		}
+	}
+
+	expectedCommands := []string{"config"}
+	assert.Equal(t, expectedCommands, commandNames)
 }
 
 // TestRun_SetDiscoveryDirFails tests the Run function when the SetDiscoveryDir() function fails.

@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/pureinsights/pdp-cli/cmd/config"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/cobra"
@@ -30,6 +31,9 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	)
 
 	d.Config().BindPFlag("profile", discovery.PersistentFlags().Lookup("profile"))
+
+	discovery.AddCommand(config.NewConfigCommand(d))
+
 	return discovery
 }
 
