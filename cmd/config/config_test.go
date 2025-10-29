@@ -176,9 +176,7 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			}
 
 			expectedCommands := []string{"get"}
-			for _, c := range expectedCommands {
-				require.Contains(t, commandNames, c)
-			}
+			assert.Subset(t, commandNames, expectedCommands)
 		})
 	}
 }
