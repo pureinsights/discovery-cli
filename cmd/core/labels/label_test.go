@@ -44,7 +44,7 @@ func Test_NewLabelCommand(t *testing.T) {
 		commandNames = append(commandNames, c.Name())
 	}
 
-	expectedCommands := []string{"get"}
+	expectedCommands := []string{"get", "store"}
 	for _, c := range expectedCommands {
 		require.Contains(t, commandNames, c)
 	}
