@@ -83,7 +83,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-
 `-s, --sensitive`::
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
 
@@ -104,7 +103,7 @@ Staging API Key: "***************taging.cn"
 
 ```bash
 # Print the configuration of the "default" profile.
-discovery config get -s=true
+discovery config get -s
 Showing the configuration of profile "default":
 
 Core URL: "http://localhost:12010"
