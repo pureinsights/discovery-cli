@@ -86,6 +86,8 @@ Flags:
 `-s, --sensitive`::
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
 
+Examples:
+
 ```bash
 # Print the configuration of the "cn" profile with obfuscated API keys.
 discovery config get -p cn
@@ -187,6 +189,8 @@ Flags:
 
 `-s, --sensitive`::
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
 
 ```bash
 # Print the configuration of the "cn" profile with obfuscated API keys.
