@@ -308,6 +308,49 @@ Global Flags:
   -p, --profile string   configuration profile to use (default "default")
 ```
 
+###### Store
+`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery core label store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the address of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+```bash
+# Store a label with the JSON configuration in a file
+discovery core label store --file "labeljsonfile.golden"
+{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"label6","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"hello3"}
+{"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"status":404,"timestamp":"2025-10-30T00:05:35.995533500Z"}
+{"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"label9","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"hello6"}
+```
+
+```bash
+# Store a label with the JSON configuration in the data flag
+discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
+{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"labeltest","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
+```
+
+```bash
+# Abort the store operation when an error occurs.
+discovery core label store --file "labeljsonfile.golden" --abort-on-error
+Error: Could not store entities
+status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"timestamp":"2025-10-30T00:07:38.152325600Z"}
+```
+
 ##### Secret
 `secret` is the command used to manage secrets in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
