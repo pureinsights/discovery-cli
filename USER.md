@@ -169,7 +169,7 @@ Core API Key [*************.core.cn]:
 ```
 
 ```bash
-# Config works without setting the profile. The rest of the command's output is omitted.
+# Config works without the profile. The rest of the command's output is omitted.
 discovery core config
 Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
 ```
@@ -185,7 +185,6 @@ Flags:
 
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
-
 
 `-s, --sensitive`::
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
@@ -203,7 +202,7 @@ Core API Key: "*************.core.cn"
 
 ```bash
 # Print the configuration of the "default" profile.
-discovery core config get -p cn -s=true
+discovery core config get -s
 Showing the configuration of profile "default":
 
 Core URL: "http://localhost:12010"
