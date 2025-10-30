@@ -202,7 +202,7 @@ Core API Key: "*************.core.cn"
 
 ```bash
 # Print the configuration of the "default" profile.
-discovery core config get -p cn -s
+discovery core config get -s
 Showing the configuration of profile "default":
 
 Core URL: "http://localhost:12010"
