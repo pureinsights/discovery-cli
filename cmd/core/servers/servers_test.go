@@ -47,6 +47,6 @@ func Test_NewServerCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"get"}
+	expectedCommands := []string{"get", "store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
