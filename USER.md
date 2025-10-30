@@ -415,14 +415,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-Examples:
-
-```bash
-# Get the command's help
-discovery core server -h
-The command to interact with Discovery Core's secrets.
-```
-
 ###### Get
 `get` is the command used to obtain Discovery Core's servers. The user can send a name or UUID to get a specific server. If no argument is given, then the command retrieves every server. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
 
@@ -443,6 +435,8 @@ Flags:
 (Optional, string) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
+
+Examples:
 
 ```bash
 # Get a server by id
