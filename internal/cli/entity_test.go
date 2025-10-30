@@ -1635,7 +1635,7 @@ func Test_discovery_UpsertEntities(t *testing.T) {
 		// Error cases
 		{
 			name:   "Upsert Entities does abort with true",
-			client: new(FailingCreator),
+			client: new(FailingCreatorCreateWorksUpdateFails),
 			configurations: gjson.Parse(`[{
 		"type": "mongo",
 		"name": "MongoDB credential",
@@ -1665,15 +1665,8 @@ func Test_discovery_UpsertEntities(t *testing.T) {
 	}]`),
 			abortOnError:   true,
 			printer:        nil,
-			expectedOutput: "",
-			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
-  "status": 400,
-  "code": 3002,
-  "messages": [
-    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
-  ],
-  "timestamp": "2025-10-29T14:46:48.055840300Z"
-}`)}, "Could not store entities"),
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			err:            NewErrorWithCause(ErrorExitCode, errors.New(`invalid UUID length: 4`), "Could not store entities"),
 		},
 		{
 			name:   "Printing fails",
@@ -1690,6 +1683,32 @@ func Test_discovery_UpsertEntities(t *testing.T) {
 			printer:   nil,
 			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
 			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
+		},
+		{
+			name:   "Upsert fails with abort true and printing fails",
+			client: new(FailingCreatorCreateWorksUpdateFails),
+			configurations: gjson.Parse(`[{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},{
+		"type": "mongo",
+		"name": "MongoDB credential 2",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}]`),
+			abortOnError: true,
+			printer:      nil,
+			outWriter:    testutils.ErrWriter{Err: errors.New("write failed")},
+			err:          errors.Join(NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"), NewErrorWithCause(ErrorExitCode, errors.New(`invalid UUID length: 4`), "Could not store entities")),
 		},
 	}
 
@@ -1712,14 +1731,12 @@ func Test_discovery_UpsertEntities(t *testing.T) {
 			d := NewDiscovery(&ios, viper.New(), "")
 			err := d.UpsertEntities(tc.client, tc.configurations, tc.abortOnError, tc.printer)
 
+			assert.Equal(t, tc.expectedOutput, buf.String())
 			if tc.err != nil {
 				require.Error(t, err)
-				var errStruct Error
-				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tc.expectedOutput, buf.String())
 			}
 		})
 	}
