@@ -83,9 +83,10 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-
 `-s, --sensitive`::
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples:
 
 ```bash
 # Print the configuration of the "cn" profile with obfuscated API keys.
@@ -104,7 +105,7 @@ Staging API Key: "***************taging.cn"
 
 ```bash
 # Print the configuration of the "default" profile.
-discovery config get -s=true
+discovery config get -s
 Showing the configuration of profile "default":
 
 Core URL: "http://localhost:12010"
@@ -144,28 +145,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-Examples:
-
-```bash
-# Ask the user for the configuration of profile "cn"
-discovery core
-The main command to interact with Discovery's Core
-
-Usage:
-  discovery core [command]
-
-Available Commands:
-  config      Save Discovery Core's configuration
-
-Flags:
-  -h, --help   help for core
-
-Global Flags:
-  -p, --profile string   configuration profile to use (default "default")
-
-Use "discovery core [command] --help" for more information about a command.
-```
-
 ##### Config
 `config` is the command used to interact with Discovery Core's configuration for a profile. This command by itself asks the user to save Discovery Core's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
 
@@ -190,7 +169,7 @@ Core API Key [*************.core.cn]:
 ```
 
 ```bash
-# Config works without setting the profile. The rest of the command's output is omitted.
+# Config works without the profile. The rest of the command's output is omitted.
 discovery core config
 Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
 ```
@@ -207,9 +186,10 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-
 `-s, --sensitive`::
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
 
 ```bash
 # Print the configuration of the "cn" profile with obfuscated API keys.
@@ -222,7 +202,7 @@ Core API Key: "*************.core.cn"
 
 ```bash
 # Print the configuration of the "default" profile.
-discovery core config get -p cn -s=true
+discovery core config get -s
 Showing the configuration of profile "default":
 
 Core URL: "http://localhost:12010"
