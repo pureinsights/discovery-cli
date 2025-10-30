@@ -205,7 +205,7 @@ func TestStoreCommand(t *testing.T) {
 			err:            cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
 		},
 		{
-			name:           "UpsertEntities tries to read a file that does not exist",
+			name:           "StoreCommand tries to read a file that does not exist",
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
 			componentName:  "Core",
