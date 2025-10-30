@@ -127,3 +127,158 @@ func TestSaveConfigCommand_ErrorPrintingHeader(t *testing.T) {
 	require.ErrorAs(t, err, &errStruct)
 	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("write failed"), "Could not save the configuration").Error())
 }
+
+// TestPrintConfigCommand_WithProfileAndSensitive tests the PrintConfig() function with the profile and sensitive flags.
+func TestPrintConfigCommand_WithProfileAndSensitive(t *testing.T) {
+	in := strings.NewReader(strings.Repeat("\n", 8))
+	out := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	d := cli.NewDiscovery(&ios, viper.New(), t.TempDir())
+
+	configCmd := &cobra.Command{
+		Use:   "config [subcommands]",
+		Short: "Print Discovery's configuration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return PrintConfigCommand(cmd, &ios, d.PrintConfigToUser)
+		},
+	}
+
+	configCmd.PersistentFlags().StringP(
+		"profile",
+		"p",
+		d.Config().GetString("profile"),
+		"configuration profile to use",
+	)
+	configCmd.Flags().BoolP("sensitive", "s", true, "--sensitive=true")
+
+	configCmd.SetIn(ios.In)
+	configCmd.SetOut(ios.Out)
+	configCmd.SetErr(ios.Err)
+
+	configCmd.SetArgs([]string{})
+
+	err := configCmd.Execute()
+	require.NoError(t, err)
+}
+
+// TestPrintConfigCommand_NoProfile tests the PrintConfig() function with no profile flag.
+func TestPrintConfigCommand_NoProfile(t *testing.T) {
+	in := strings.NewReader(strings.Repeat("\n", 8))
+	out := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	d := cli.NewDiscovery(&ios, viper.New(), t.TempDir())
+
+	configCmd := &cobra.Command{
+		Use:   "config [subcommands]",
+		Short: "Print Discovery's configuration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return PrintConfigCommand(cmd, &ios, d.PrintConfigToUser)
+		},
+	}
+
+	configCmd.SetIn(ios.In)
+	configCmd.SetOut(ios.Out)
+	configCmd.SetErr(ios.Err)
+
+	configCmd.SetArgs([]string{})
+
+	err := configCmd.Execute()
+	require.Error(t, err)
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
+}
+
+// TestPrintConfigCommand_NoSensitive tests the PrintConfig() function with no sensitive flag.
+func TestPrintConfigCommand_NoSensitive(t *testing.T) {
+	in := strings.NewReader(strings.Repeat("\n", 8))
+	out := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	d := cli.NewDiscovery(&ios, viper.New(), t.TempDir())
+
+	configCmd := &cobra.Command{
+		Use:   "config [subcommands]",
+		Short: "Print Discovery's configuration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return PrintConfigCommand(cmd, &ios, d.PrintConfigToUser)
+		},
+	}
+
+	configCmd.PersistentFlags().StringP(
+		"profile",
+		"p",
+		d.Config().GetString("profile"),
+		"configuration profile to use",
+	)
+
+	configCmd.SetIn(ios.In)
+	configCmd.SetOut(ios.Out)
+	configCmd.SetErr(ios.Err)
+
+	configCmd.SetArgs([]string{})
+
+	err := configCmd.Execute()
+	require.Error(t, err)
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: sensitive"), "Could not get the sensitive flag").Error())
+}
+
+// TestPrintConfigCommand_ErrorPrintingHeader tests the PrintConfig() function when there is an error printing the header.
+func TestPrintConfigCommand_ErrorPrintingHeader(t *testing.T) {
+	in := strings.NewReader(strings.Repeat("\n", 8))
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: testutils.ErrWriter{Err: errors.New("write failed")},
+		Err: errBuf,
+	}
+
+	d := cli.NewDiscovery(&ios, viper.New(), t.TempDir())
+
+	configCmd := &cobra.Command{
+		Use:   "config [subcommands]",
+		Short: "Print Discovery's configuration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return PrintConfigCommand(cmd, &ios, d.PrintConfigToUser)
+		},
+	}
+
+	configCmd.PersistentFlags().StringP(
+		"profile",
+		"p",
+		d.Config().GetString("profile"),
+		"configuration profile to use",
+	)
+	configCmd.Flags().BoolP("sensitive", "s", true, "--sensitive=true")
+
+	configCmd.SetIn(ios.In)
+	configCmd.SetOut(ios.Out)
+	configCmd.SetErr(ios.Err)
+
+	configCmd.SetArgs([]string{})
+
+	err := configCmd.Execute()
+	require.Error(t, err)
+	var errStruct cli.Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("write failed"), "Could not print the configuration").Error())
+}

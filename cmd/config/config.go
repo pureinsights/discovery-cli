@@ -18,5 +18,6 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 			return commands.SaveConfigCommand(cmd, d.IOStreams(), d.SaveConfigFromUser)
 		},
 	}
+	config.AddCommand(NewGetCommand(d))
 	return config
 }
