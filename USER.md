@@ -399,9 +399,9 @@ Global Flags:
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's secrets. With the data flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
 
-Usage: `discovery core label store [flags]`
+Usage: `discovery core secret store [flags]`
 
 Flags:
 `-d, --data`::
@@ -483,6 +483,8 @@ Flags:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
 
+Examples:
+
 ```bash
 # Get a credential by id
 discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
@@ -509,6 +511,50 @@ discovery core credential get -p cn
 {"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"label test 2","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-10-17T22:37:56Z","id":"46cb4fff-28be-4901-b059-1dd618e74ee4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:56Z","name":"label test 1 clone 9","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"label test 1 clone","type":"mongo"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Core's credentials. With the data flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery core credential store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the address of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a credential with the JSON configuration in a file
+discovery core credential store --file "credentialjsonfile.golden"
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","secret":"mongo-secret","type":"mongo"}
+{"code":1003,"messages":["Entity not found: 3b32e410-2f33-412d-9fb8-17970131921d"],"status":404,"timestamp":"2025-10-30T16:50:38.250661200Z"}
+{"active":true,"creationTimestamp":"2025-10-30T16:50:38.262086Z","id":"5b76ae0d-f383-47e5-be6f-90e9046092cd","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-30T16:50:38.262086Z","name":"label test 1 clone 123","secret":"mongo-secret","type":"mongo"}
+```
+
+```bash
+# Store a credential with the JSON configuration in the data flag
+discovery core credential store --data '{"type":"mongo","name":"label test 1 clone 10","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"mongo-secret"}'
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","secret":"mongo-secret","type":"mongo"}
+```
+
+```bash
+# Abort the store operation when an error occurs.
+discovery core credential store --file "credentialjsonfile.golden" --abort-on-error
+Error: Could not store entities
+status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 3b32e410-2f33-412d-9fb8-17970131921d"],"timestamp":"2025-10-30T16:50:33.837498400Z"}
 ```
 
 ##### Server
@@ -551,6 +597,8 @@ Flags:
 (Optional, string) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
+
+Examples:
 
 ```bash
 # Get a server by id
