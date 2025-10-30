@@ -239,11 +239,13 @@ func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, a
 	configArray := configurations.Array()
 	upsertedEntites := []gjson.Result{}
 
+	var upsertErr error
 	for _, config := range configArray {
 		upsert, err := d.UpsertEntity(client, config)
 		if err != nil {
 			if abortOnError {
-				return NewErrorWithCause(ErrorExitCode, err, "Could not store entities")
+				upsertErr = NewErrorWithCause(ErrorExitCode, err, "Could not store entities")
+				break
 			}
 
 			var discoveryErr discoveryPackage.Error
@@ -265,5 +267,5 @@ func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, a
 	} else {
 		err = printer(*d.IOStreams(), upsertedEntites...)
 	}
-	return err
+	return errors.Join(err, upsertErr)
 }
