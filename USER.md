@@ -169,7 +169,7 @@ Core API Key [*************.core.cn]:
 ```
 
 ```bash
-# Config works without setting the profile. The rest of the command's output is omitted.
+# Config works without the profile. The rest of the command's output is omitted.
 discovery core config
 Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
 ```
