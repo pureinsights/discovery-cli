@@ -310,6 +310,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
+
 ```bash
 # Store a label with the JSON configuration in a file
 discovery core label store --file "labeljsonfile.golden"
@@ -367,6 +368,8 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
+Examples:
+
 ```bash
 # Get a secret by id
 discovery core secret get 81ca1ac6-3058-4ecd-a292-e439827a675a
@@ -393,6 +396,50 @@ Flags:
 
 Global Flags:
   -p, --profile string   configuration profile to use (default "default")
+```
+
+###### Store
+`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery core label store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the address of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a secret with the JSON configuration in a file
+discovery core secret store --file "secretjsonfile.golden"
+{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:15:22.738365Z","name":"openai-secret-test"}
+{"code":1003,"messages":["Entity not found: b8bd5ec3-8f60-4502-b25e-8f6d36c98415"],"status":404,"timestamp":"2025-10-30T15:15:22.778371Z"}
+{"active":true,"creationTimestamp":"2025-10-30T15:15:22.801771Z","id":"c9731417-38c9-4a65-8bbc-78c5f59b9cbb","lastUpdatedTimestamp":"2025-10-30T15:15:22.801771Z","name":"mongo-user-test"}
+```
+
+```bash
+# Store a secret with the JSON configuration in the data flag
+discovery core secret store --data  '{"name":"openai-secret-test","active":true,"id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","content":{"apiKey":"apiKey"}}'
+{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:43:52.496829Z","name":"openai-secret-test"}
+```
+
+```bash
+# Abort the store operation when an error occurs.
+discovery core secret store --file "secretjsonfile.golden" --abort-on-error
+Error: Could not store entities
+status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: b8bd5ec3-8f60-4502-b25e-8f6d36c98415"],"timestamp":"2025-10-30T15:46:06.029224400Z"}
 ```
 
 ##### Credential
