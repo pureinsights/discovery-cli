@@ -56,7 +56,7 @@ func Test_newRootCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config"}
+	expectedCommands := []string{"config", "core"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
 

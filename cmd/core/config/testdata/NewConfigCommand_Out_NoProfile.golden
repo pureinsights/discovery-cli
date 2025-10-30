@@ -1,0 +1,6 @@
+Usage:
+  config [subcommands] [flags]
+
+Flags:
+  -h, --help   help for config
+

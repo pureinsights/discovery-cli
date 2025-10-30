@@ -132,3 +132,44 @@ QueryFlow API Key: "queryflow213"
 Staging URL: "http://discovery.staging.cn"
 Staging API Key: "discovery.key.staging.cn"
 ```
+
+#### Core
+`core` is the main command used to interact with Discovery's Core. 
+
+Usage: `discovery core [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+##### Config
+`config` is the command used to interact with Discovery Core's configuration for a profile. This command by itself asks the user to save Discovery Core's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery core config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery core config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+Core URL [http://discovery.core.cn]: https://discovery.core.cn
+Core API Key [*************.core.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery core config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
