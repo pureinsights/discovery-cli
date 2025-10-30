@@ -169,7 +169,7 @@ Core API Key [*************.core.cn]:
 ```
 
 ```bash
-# Config works without setting the profile. The rest of the command's output is omitted.
+# Config works without the profile. The rest of the command's output is omitted.
 discovery core config
 Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
 ```
@@ -185,7 +185,6 @@ Flags:
 
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
-
 
 `-s, --sensitive`::
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
@@ -203,7 +202,7 @@ Core API Key: "*************.core.cn"
 
 ```bash
 # Print the configuration of the "default" profile.
-discovery core config get -s=true
+discovery core config get -s
 Showing the configuration of profile "default":
 
 Core URL: "http://localhost:12010/v2"
@@ -231,14 +230,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-Examples:
-
-```bash
-# Get the command's help
-discovery core label -h
-The command to interact with Discovery Core's labels.
-```
-
 ###### Get
 `get` is the command used to obtain Discovery Core's labels. The user can send a UUID to get a specific label. If no UUID is given, then the command retrieves every label. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
 
@@ -254,6 +245,8 @@ Flags:
 
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
 
 ```bash
 # Get a label by id
