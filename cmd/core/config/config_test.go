@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io/fs"
+	"slices"
 	"strings"
 	"testing"
 
@@ -173,6 +174,16 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			}
 
 			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+
+			var commandNames []string
+			for _, c := range configCmd.Commands() {
+				if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+					commandNames = append(commandNames, c.Name())
+				}
+			}
+
+			expectedCommands := []string{"get"}
+			assert.Equal(t, expectedCommands, commandNames)
 		})
 	}
 }
