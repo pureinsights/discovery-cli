@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_NewServerCommand tests the NewCoreCommand() function
-func Test_NewServerCommand(t *testing.T) {
+// TestNewServerCommand tests the NewCoreCommand() function
+func TestNewServerCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
