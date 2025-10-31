@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_NewConfigCommand tests the NewConfigCommand() function.
+// TestNewConfigCommand tests the NewConfigCommand() function when there is a profile flag.
 func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -188,7 +188,7 @@ func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 	}
 }
 
-// Test_NewConfigCommand_NoProfileFlag tests the config command when there is no profile flag defined.
+// TestNewConfigCommand_NoProfileFlag tests the config command when there is no profile flag defined.
 func TestNewConfigCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader(strings.Repeat("\n", 8))
 	out := &bytes.Buffer{}

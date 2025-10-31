@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_NewGetCommand_WithProfileAndSensitiveFlags tests the NewGetCommand() function
+// TestNewGetCommand_WithProfileAndSensitiveFlags tests the NewGetCommand() function when there are profile and sensitive flags
 func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 	tests := []struct {
 		name      string
