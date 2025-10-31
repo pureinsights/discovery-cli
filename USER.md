@@ -764,7 +764,7 @@ Examples:
 
 ```bash
 # Store a processor with the JSON configuration in a file
-discovery core processor store --file "ingestionprocessorjsonfile.golden"
+discovery ingestion processor store --file "ingestionprocessorjsonfile.golden"
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:44Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 {"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"status":404,"timestamp":"2025-10-30T20:09:29.314467Z"}
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:09:29.346792Z","id":"aef648d8-171d-479a-a6fd-14ec9b235dc7","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:09:29.346792Z","name":"MongoDB store processor clone 12345","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
@@ -772,13 +772,13 @@ discovery core processor store --file "ingestionprocessorjsonfile.golden"
 
 ```bash
 # Store a processor with the JSON configuration in the data flag
-discovery core server store --data '{"type":"mongo","name":"MongoDB store processor clone 2","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB store processor clone 2","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
 ```bash
 # Abort the store operation when an error occurs.
-discovery core server store --file "ingestionprocesorjsonfile.golden" --abort-on-error
+discovery ingestion processor store --file "ingestionprocessorjsonfile.golden" --abort-on-error
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:31Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 Error: Could not store entities
 status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"timestamp":"2025-10-30T22:02:09.308422800Z"}
