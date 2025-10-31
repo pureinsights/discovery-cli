@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_NewCredentialCommand tests the NewCoreCommand() function
-func Test_NewCredentialCommand(t *testing.T) {
+// TestNewCredentialCommand tests the NewCoreCommand() function
+func TestNewCredentialCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}

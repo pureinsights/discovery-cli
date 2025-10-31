@@ -654,6 +654,79 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
+##### Config
+`config` is the command used to interact with Discovery Ingestion's configuration for a profile. This command by itself asks the user to save Discovery Ingestion's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery ingestion config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery ingestion config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+Ingestion URL [http://discovery.ingestion.cn]: https://discovery.ingestion.cn
+Ingestion API Key [*************.ingestion.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery ingestion config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
+
+###### Get
+`get` is the command used to obtain Discovery Ingestion's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery ingestion config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery ingestion config get -p cn
+Showing the configuration of profile "cn":
+
+Ingestion URL: "https://discovery.ingestion.cn"
+Ingestion API Key: "*************.ingestion.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery ingestion config get -s
+Showing the configuration of profile "default":
+
+Ingestion URL: "http://localhost:12010"
+Ingestion API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery ingestion config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+Ingestion URL: "https://discovery.ingestion.cn"
+Ingestion API Key: "discovery.key.ingestion.cn"
+```
+
 ##### Processor
 `processor` is the command used to manage processors in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
@@ -705,8 +778,178 @@ discovery core server store --data '{"type":"mongo","name":"MongoDB store proces
 
 ```bash
 # Abort the store operation when an error occurs.
-discovery core server store --file "serverjsonfile.golden" --abort-on-error
+discovery core server store --file "ingestionprocesorjsonfile.golden" --abort-on-error
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:31Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 Error: Could not store entities
 status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"timestamp":"2025-10-30T22:02:09.308422800Z"}
+```
+
+#### QueryFlow
+`queryflow` is the main command used to interact with Discovery's QueryFlow. 
+
+Usage: `discovery queryflow [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+##### Config
+`config` is the command used to interact with Discovery QueryFlow's configuration for a profile. This command by itself asks the user to save Discovery QueryFlow's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery queryflow config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery queryflow config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+QueryFlow URL [http://discovery.queryflow.cn]: https://discovery.queryflow.cn
+QueryFlow API Key [*************.queryflow.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery queryflow config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery queryflow config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery queryflow config get -p cn
+Showing the configuration of profile "cn":
+
+QueryFlow URL: "https://discovery.queryflow.cn"
+QueryFlow API Key: "*************.queryflow.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery queryflow config get -s
+Showing the configuration of profile "default":
+
+QueryFlow URL: "http://localhost:12010"
+QueryFlow API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery queryflow config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+QueryFlow URL: "https://discovery.queryflow.cn"
+QueryFlow API Key: "discovery.key.queryflow.cn"
+```
+
+#### Staging
+`staging` is the main command used to interact with Discovery's Staging. 
+
+Usage: `discovery staging [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+##### Config
+`config` is the command used to interact with Discovery Staging's configuration for a profile. This command by itself asks the user to save Discovery Staging's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery staging config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery staging config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+Staging URL [http://discovery.staging.cn]: https://discovery.staging.cn
+Staging API Key [*************.staging.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery staging config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
+
+###### Get
+`get` is the command used to obtain Discovery Staging's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery staging config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery staging config get -p cn
+Showing the configuration of profile "cn":
+
+Staging URL: "https://discovery.staging.cn"
+Staging API Key: "*************.staging.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery staging config get -s
+Showing the configuration of profile "default":
+
+Staging URL: "http://localhost:12010"
+Staging API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery staging config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+Staging URL: "https://discovery.staging.cn"
+Staging API Key: "discovery.key.staging.cn"
 ```

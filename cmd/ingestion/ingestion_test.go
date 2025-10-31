@@ -15,8 +15,8 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// Test_NewIngestionCommand tests the NewIngestionCommand() function
-func Test_NewIngestionCommand(t *testing.T) {
+// TestNewIngestionCommand tests the NewIngestionCommand() function
+func TestNewIngestionCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
