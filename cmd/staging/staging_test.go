@@ -15,8 +15,8 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// Test_NewStagingCommand tests the NewStagingCommand() function
-func Test_NewStagingCommand(t *testing.T) {
+// TestNewStagingCommand tests the NewStagingCommand() function
+func TestNewStagingCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}

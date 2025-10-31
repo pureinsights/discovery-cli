@@ -17,7 +17,7 @@ import (
 )
 
 // TestNewGetCommand_WithProfileAndSensitiveFlags tests the NewGetCommand() function when there are profile and sensitive flags
-func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
+func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 	tests := []struct {
 		name      string
 		profile   string
@@ -173,8 +173,8 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 	}
 }
 
-// Test_NewGetCommand_NoProfileFlag test the NewGetCommand() function when there is no profile flag
-func Test_NewGetCommand_NoProfileFlag(t *testing.T) {
+// TestNewGetCommand_NoProfileFlag test the NewGetCommand() function when there is no profile flag
+func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader("")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
