@@ -6,5 +6,5 @@ Usage:
 Flags:
   -h, --help             help for get
   -p, --profile string   configuration profile to use (default "cn")
-  -s, --sensitive        --sensitive=true (default true)
+  -s, --sensitive        this flag obfuscates sensitive values before showing them to the user. (default true)
 
