@@ -112,6 +112,8 @@ func Test_newSeedsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed", seedClient.crud.getter.client.client.BaseURL)
 	assert.Equal(t, apiKey, seedClient.cloner.client.ApiKey)
 	assert.Equal(t, url+"/seed", seedClient.cloner.client.client.BaseURL)
+	assert.Equal(t, apiKey, seedClient.searcher.client.ApiKey)
+	assert.Equal(t, url+"/seed", seedClient.searcher.client.client.BaseURL)
 }
 
 // Test_seedExecutionsClient_Seed tests the seedExecutionsClient.Seed() function
@@ -1664,6 +1666,8 @@ func Test_ingestion_Seeds(t *testing.T) {
 	assert.Equal(t, i.Url+"/seed", ipc.crud.client.client.BaseURL)
 	assert.Equal(t, i.ApiKey, ipc.cloner.client.ApiKey)
 	assert.Equal(t, i.Url+"/seed", ipc.cloner.client.client.BaseURL)
+	assert.Equal(t, i.ApiKey, ipc.searcher.client.ApiKey)
+	assert.Equal(t, i.Url+"/seed", ipc.searcher.client.client.BaseURL)
 }
 
 // Test_ingestion_BackupRestore tests the ingestion.BackupRestore() function
