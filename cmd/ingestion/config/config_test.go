@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestNewConfigCommand tests the NewConfigCommand() function when there is a profile flag.
+// TestNewConfigCommand_ProfileFlag tests the NewConfigCommand() function when there is a profile flag.
 func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 	tests := []struct {
 		name      string
