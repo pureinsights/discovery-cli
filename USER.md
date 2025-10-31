@@ -302,3 +302,88 @@ Showing the configuration of profile "cn":
 Ingestion URL: "https://discovery.ingestion.cn"
 Ingestion API Key: "discovery.key.ingestion.cn"
 ```
+
+#### QueryFlow
+`queryflow` is the main command used to interact with Discovery's QueryFlow. 
+
+Usage: `discovery queryflow [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+##### Config
+`config` is the command used to interact with Discovery QueryFlow's configuration for a profile. This command by itself asks the user to save Discovery QueryFlow's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery queryflow config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery queryflow config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+QueryFlow URL [http://discovery.queryflow.cn]: https://discovery.queryflow.cn
+QueryFlow API Key [*************.queryflow.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery queryflow config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery queryflow config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery queryflow config get -p cn
+Showing the configuration of profile "cn":
+
+QueryFlow URL: "https://discovery.queryflow.cn"
+QueryFlow API Key: "*************.queryflow.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery queryflow config get -s
+Showing the configuration of profile "default":
+
+QueryFlow URL: "http://localhost:12010"
+QueryFlow API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery queryflow config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+QueryFlow URL: "https://discovery.queryflow.cn"
+QueryFlow API Key: "discovery.key.queryflow.cn"
+```
