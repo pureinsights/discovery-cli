@@ -28,7 +28,7 @@ func (d discovery) GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	return err
 }
 
-// GetEntities obtains all of the entities using the given client and then prints out the result using the received printer or the JSON array printer.
+// GetEntities obtains all the entities using the given client and then prints out the result using the received printer or the JSON array printer.
 func (d discovery) GetEntities(client Getter, printer Printer) error {
 	objects, err := client.GetAll()
 	if err != nil {
