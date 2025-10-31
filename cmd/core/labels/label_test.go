@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_NewLabelCommand tests the NewLabelCommand() function
-func Test_NewLabelCommand(t *testing.T) {
+// TestNewLabelCommand tests the NewLabelCommand() function
+func TestNewLabelCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
