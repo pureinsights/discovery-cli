@@ -1,7 +1,7 @@
 package ingestion
 
 import (
-	"github.com/pureinsights/pdp-cli/cmd/core/config"
+	"github.com/pureinsights/pdp-cli/cmd/ingestion/config"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
