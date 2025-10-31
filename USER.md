@@ -739,51 +739,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-###### Store
-`store` is the command used to create and update Discovery Ingestion's processors. With the data flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
-
-Usage: `discovery ingestion processor store [flags]`
-
-Flags:
-`-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the address of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
-
-`--abort-on-error`::
-(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
-
-`-h, --help`::
-(Optional, bool) Prints the usage of the command.
-
-`-p, --profile`::
-(Optional, string) Set the configuration profile that will execute the command.
-
-Examples:
-
-```bash
-# Store a processor with the JSON configuration in a file
-discovery ingestion processor store --file "ingestionprocessorjsonfile.golden"
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:44Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
-{"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"status":404,"timestamp":"2025-10-30T20:09:29.314467Z"}
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:09:29.346792Z","id":"aef648d8-171d-479a-a6fd-14ec9b235dc7","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:09:29.346792Z","name":"MongoDB store processor clone 12345","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
-```
-
-```bash
-# Store a processor with the JSON configuration in the data flag
-discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB store processor clone 2","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
-```
-
-```bash
-# Abort the store operation when an error occurs.
-discovery ingestion processor store --file "ingestionprocessorjsonfile.golden" --abort-on-error
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:31Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
-Error: Could not store entities
-status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"timestamp":"2025-10-30T22:02:09.308422800Z"}
-```
-
 ###### Get
 `get` is the command used to obtain Discovery Ingestion's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
 
@@ -831,6 +786,51 @@ discovery ingestion processor get -p cn
 {"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"516d4a8a-e8ae-488c-9e37-d5746a907454","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"Template processor","type":"template"}
 {"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"7569f1a5-521e-4d8c-94d1-9f53ad065320","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor clone 1","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"7b192ea1-ac43-439b-9396-5e022f81f2cb","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"OpenAI processor","type":"openai"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Ingestion's processors. With the data flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery ingestion processor store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the address of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a processor with the JSON configuration in a file
+discovery ingestion processor store --file "ingestionprocessorjsonfile.golden"
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:44Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"status":404,"timestamp":"2025-10-30T20:09:29.314467Z"}
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:09:29.346792Z","id":"aef648d8-171d-479a-a6fd-14ec9b235dc7","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:09:29.346792Z","name":"MongoDB store processor clone 12345","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+```bash
+# Store a processor with the JSON configuration in the data flag
+discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB store processor clone 2","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+```bash
+# Abort the store operation when an error occurs.
+discovery ingestion processor store --file "ingestionprocessorjsonfile.golden" --abort-on-error
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:31Z","name":"MongoDB store processor clone 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+Error: Could not store entities
+status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"timestamp":"2025-10-30T22:02:09.308422800Z"}
 ```
 
 ##### Pipeline
