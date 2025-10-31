@@ -98,6 +98,8 @@ func Test_newPipelinesClient(t *testing.T) {
 	assert.Equal(t, url+"/pipeline", pipelineClient.crud.getter.client.client.BaseURL)
 	assert.Equal(t, apiKey, pipelineClient.cloner.client.ApiKey)
 	assert.Equal(t, url+"/pipeline", pipelineClient.cloner.client.client.BaseURL)
+	assert.Equal(t, apiKey, pipelineClient.searcher.client.ApiKey)
+	assert.Equal(t, url+"/pipeline", pipelineClient.searcher.client.client.BaseURL)
 }
 
 // Test_newSeedsClient tests the constructor of seedsClient.
@@ -1649,6 +1651,8 @@ func Test_ingestion_Pipelines(t *testing.T) {
 	assert.Equal(t, i.Url+"/pipeline", ipc.crud.client.client.BaseURL)
 	assert.Equal(t, i.ApiKey, ipc.cloner.client.ApiKey)
 	assert.Equal(t, i.Url+"/pipeline", ipc.cloner.client.client.BaseURL)
+	assert.Equal(t, i.ApiKey, ipc.searcher.client.ApiKey)
+	assert.Equal(t, i.Url+"/pipeline", ipc.searcher.client.client.BaseURL)
 }
 
 // Test_ingestion_Seeds test the ingestion.Seeds() function.
