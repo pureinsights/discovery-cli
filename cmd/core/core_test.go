@@ -3,19 +3,20 @@ package core
 import (
 	"bytes"
 	"flag"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/viper"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// Test_NewCoreCommand tests the NewCoreCommand() function
-func Test_NewCoreCommand(t *testing.T) {
+// TestNewCoreCommand tests the NewCoreCommand() function
+func TestNewCoreCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -44,11 +45,11 @@ func Test_NewCoreCommand(t *testing.T) {
 
 	var commandNames []string
 	for _, c := range coreCmd.Commands() {
-		commandNames = append(commandNames, c.Name())
+		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+			commandNames = append(commandNames, c.Name())
+		}
 	}
 
 	expectedCommands := []string{"config"}
-	for _, c := range expectedCommands {
-		require.Contains(t, commandNames, c)
-	}
+	assert.Equal(t, expectedCommands, commandNames)
 }
