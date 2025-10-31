@@ -18,6 +18,6 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.PrintConfigCommand(cmd, d.IOStreams(), d.PrintIngestionConfigToUser)
 		},
 	}
-	get.Flags().BoolP("sensitive", "s", true, "--sensitive=true")
+	get.Flags().BoolP("sensitive", "s", true, "this flag obfuscates sensitive values before showing them to the user.")
 	return get
 }
