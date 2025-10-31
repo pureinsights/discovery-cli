@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io/fs"
+	"slices"
 	"strings"
 	"testing"
 
@@ -15,8 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_NewConfigCommand tests the NewConfigCommand() function.
-func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
+// TestNewConfigCommand_ProfileFlag tests the NewConfigCommand() function when there is a profile flag.
+func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 	tests := []struct {
 		name      string
 		config    map[string]string
@@ -176,19 +177,19 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 
 			var commandNames []string
 			for _, c := range configCmd.Commands() {
-				commandNames = append(commandNames, c.Name())
+				if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+					commandNames = append(commandNames, c.Name())
+				}
 			}
 
 			expectedCommands := []string{"get"}
-			for _, c := range expectedCommands {
-				require.Contains(t, commandNames, c)
-			}
+			assert.Equal(t, expectedCommands, commandNames)
 		})
 	}
 }
 
-// Test_NewConfigCommand_NoProfileFlag tests the config command when there is no profile flag defined.
-func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
+// TestNewConfigCommand_NoProfileFlag tests the config command when there is no profile flag defined.
+func TestNewConfigCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader(strings.Repeat("\n", 8))
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
