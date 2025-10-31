@@ -784,6 +784,55 @@ Error: Could not store entities
 status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"timestamp":"2025-10-30T22:02:09.308422800Z"}
 ```
 
+###### Get
+`get` is the command used to obtain Discovery Ingestion's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery ingestion processor get [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the processor that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+Examples:
+
+```bash
+# Get a processor by id
+discovery ingestion processor get 90675678-fc9f-47ec-8bab-89969dc204f0
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor clone","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+```bash
+# Get processor by name
+discovery ingestion processor get "MongoDB store processor clone"
+{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor clone","type":"mongo"}
+```
+
+```bash
+# Get processors using filters
+discovery ingestion processor get --filter label=A:A -f type=mongo
+{"active":true,"creationTimestamp":"2025-10-31T21:50:54Z","id":"89103d32-6007-489a-8e25-dc9a6001f8e8","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T21:50:54Z","name":"MongoDB processor 2","type":"mongo"}
+```
+
+```bash
+# Get all processors using the configuration in profile "cn"
+discovery ingestion processor get -p cn
+{"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"516d4a8a-e8ae-488c-9e37-d5746a907454","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"Template processor","type":"template"}
+{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"7569f1a5-521e-4d8c-94d1-9f53ad065320","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor clone 1","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"7b192ea1-ac43-439b-9396-5e022f81f2cb","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"OpenAI processor","type":"openai"}
+```
+
 ##### Pipeline
 `pipeline` is the command used to manage pipelines in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
