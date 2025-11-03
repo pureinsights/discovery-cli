@@ -28,8 +28,8 @@ func TestGetCommandConfig(t *testing.T) {
 	assert.Equal(t, key, commandConfig.apiKey)
 }
 
-// Test_checkCredentials tests the check_Credentials function.
-func Test_checkCredentials(t *testing.T) {
+// Test_CheckCredentials tests the check_Credentials function.
+func Test_CheckCredentials(t *testing.T) {
 	tests := []struct {
 		name          string
 		profile       string
@@ -91,7 +91,7 @@ func Test_checkCredentials(t *testing.T) {
 				vpr.Set(k, v)
 			}
 			d := cli.NewDiscovery(&io, vpr, "")
-			err := checkCredentials(d, tc.profile, tc.componentName, tc.url, tc.key)
+			err := CheckCredentials(d, tc.profile, tc.componentName, tc.url, tc.key)
 			if tc.err != nil {
 				require.Error(t, err)
 				var errStruct cli.Error
