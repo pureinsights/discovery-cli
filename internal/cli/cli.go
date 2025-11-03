@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/google/uuid"
+	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
@@ -28,6 +29,8 @@ type Discovery interface {
 	SearchEntity(client Searcher, id string, printer Printer) error
 	SearchEntities(client Searcher, filter gjson.Result, printer Printer) error
 	UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error
+	searchEntity(client Searcher, id string) (gjson.Result, error)
+	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.

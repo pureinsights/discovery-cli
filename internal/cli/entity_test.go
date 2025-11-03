@@ -312,7 +312,6 @@ func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 // SearchByName returns an object as if it found correctly the entity.
 func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Parse(`{
-		"source": {
 			"type": "mongo",
 			"name": "MongoDB Atlas server clone",
 			"labels": [],
@@ -320,14 +319,7 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
 			"creationTimestamp": "2025-09-29T15:50:17Z",
 			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
-	}`), nil
+		}`), nil
 }
 
 // Get returns a JSON object as if the searcher found the entity by its ID.
@@ -575,7 +567,6 @@ func Test_searchEntity(t *testing.T) {
 			client: new(WorkingSearcher),
 			id:     "MongoDB Atlas server",
 			expected: gjson.Parse(`{
-		"source": {
 			"type": "mongo",
 			"name": "MongoDB Atlas server clone",
 			"labels": [],
@@ -583,14 +574,7 @@ func Test_searchEntity(t *testing.T) {
 			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
 			"creationTimestamp": "2025-09-29T15:50:17Z",
 			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
-	}`),
+		}`),
 			err: nil,
 		},
 		{
@@ -724,7 +708,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 			client:         new(WorkingSearcher),
 			id:             "MongoDB Atlas Server",
 			printer:        JsonObjectPrinter(true),
-			expectedOutput: "{\n  \"highlight\": {\n    \"name\": [\n      \"\\u003cem\\u003eMongoDB\\u003c/em\\u003e \\u003cem\\u003eAtlas\\u003c/em\\u003e \\u003cem\\u003eserver\\u003c/em\\u003e clone\"\n    ]\n  },\n  \"score\": 0.50769836,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"name\": \"MongoDB Atlas server clone\",\n    \"type\": \"mongo\"\n  }\n}\n",
+			expectedOutput: "{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"name\": \"MongoDB Atlas server clone\",\n  \"type\": \"mongo\"\n}\n",
 			err:            nil,
 		},
 		{

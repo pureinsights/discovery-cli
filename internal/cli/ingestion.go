@@ -1,0 +1,46 @@
+package cli
+
+import (
+	"github.com/google/uuid"
+	"github.com/tidwall/gjson"
+
+	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
+)
+
+// IngestionSeedController defines the methods to start a seed.
+type IngestionSeedController interface {
+	Searcher
+	Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error)
+}
+
+// GetSeedId obtains the UUID from the result of a search
+func GetSeedId(d Discovery, client Searcher, name string) (uuid.UUID, error) {
+	seed, err := d.searchEntity(client, name)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return uuid.Parse(seed.Get("id").String())
+}
+
+// StartSeed initiates the execution of a seed with the given scanType and execution properties.
+func (d discovery) StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error {
+	seedId, err := GetSeedId(d, client, name)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to start execution.")
+	}
+
+	startResult, err := client.Start(seedId, scanType, properties)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not start seed execution for seed with id %q", seedId.String())
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonObjectPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), startResult)
+	} else {
+		err = printer(*d.IOStreams(), startResult)
+	}
+
+	return err
+}
