@@ -1,4 +1,4 @@
-package core
+package staging
 
 import (
 	"bytes"
@@ -15,8 +15,8 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// TestNewCoreCommand tests the NewCoreCommand() function
-func TestNewCoreCommand(t *testing.T) {
+// TestNewStagingCommand tests the NewStagingCommand() function
+func TestNewStagingCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -30,13 +30,13 @@ func TestNewCoreCommand(t *testing.T) {
 	vpr := viper.New()
 	vpr.SetDefault("profile", "default")
 	d := cli.NewDiscovery(&ios, vpr, dir)
-	coreCmd := NewCoreCommand(d)
+	stagingCmd := NewStagingCommand(d)
 
-	coreCmd.SetIn(ios.In)
-	coreCmd.SetOut(ios.Out)
-	coreCmd.SetErr(ios.Err)
+	stagingCmd.SetIn(ios.In)
+	stagingCmd.SetOut(ios.Out)
+	stagingCmd.SetErr(ios.Err)
 
-	coreCmd.PersistentFlags().StringP(
+	stagingCmd.PersistentFlags().StringP(
 		"profile",
 		"p",
 		d.Config().GetString("profile"),
@@ -44,7 +44,7 @@ func TestNewCoreCommand(t *testing.T) {
 	)
 
 	var commandNames []string
-	for _, c := range coreCmd.Commands() {
+	for _, c := range stagingCmd.Commands() {
 		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
 			commandNames = append(commandNames, c.Name())
 		}

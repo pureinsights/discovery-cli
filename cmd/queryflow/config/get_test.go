@@ -79,8 +79,8 @@ func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "default",
 			sensitive: false,
 			config: map[string]string{
-				"profile":          "default",
-				"default.core_url": "http://localhost:12010",
+				"profile":               "default",
+				"default.queryflow_url": "http://localhost:12040",
 			},
 			outGolden: "NewGetCommand_Out_SomeValuesNotSensitive",
 			errGolden: "NewGetCommand_Err_SomeValuesNotSensitive",
@@ -90,7 +90,7 @@ func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			err:       nil,
 		},
 		{
-			name:      "Print Fail on Printing Core Config",
+			name:      "Print Fail on Printing QueryFlow Config",
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
@@ -104,12 +104,12 @@ func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 				"cn.staging_url":   "http://localhost:12040",
 				"cn.staging_key":   "discovery.key.staging.cn",
 			},
-			outGolden: "NewGetCommand_Out_FailPrintingCore",
-			errGolden: "NewGetCommand_Err_FailPrintingCore",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_FailPrintingCore"),
-			errBytes:  testutils.Read(t, "NewGetCommand_Err_FailPrintingCore"),
+			outGolden: "NewGetCommand_Out_FailPrintingQueryFlow",
+			errGolden: "NewGetCommand_Err_FailPrintingQueryFlow",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_FailPrintingQueryFlow"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_FailPrintingQueryFlow"),
 			outWriter: &testutils.FailOnNWriter{Writer: &bytes.Buffer{}, N: 2},
-			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print Core's URL"),
+			err:       cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print QueryFlow's URL"),
 		},
 	}
 

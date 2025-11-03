@@ -452,6 +452,7 @@ func Test_discovery_saveConfig(t *testing.T) {
 			name:      "Every value exists",
 			writePath: t.TempDir(),
 			config: map[string]string{
+				"profile":          "cn",
 				"cn.core_url":      "http://localhost:12010",
 				"cn.ingestion_url": "http://localhost:12030",
 				"cn.queryflow_url": "http://localhost:12040",
