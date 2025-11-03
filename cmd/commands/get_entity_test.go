@@ -111,7 +111,7 @@ func TestGetCommand(t *testing.T) {
 		// Working case
 		{
 			name:           "GetEntity correctly prints an object",
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
@@ -122,7 +122,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetEntities correctly prints an array of objects",
 			client:         new(WorkingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{},
@@ -154,7 +154,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetEntity returns 404 Not Found",
 			client:         new(FailingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
@@ -174,7 +174,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetAll returns 401 Unauthorized",
 			client:         new(FailingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{},
@@ -184,7 +184,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:          "Printing JSON fails",
 			client:        new(WorkingGetter),
-			url:           "http://localhost:12010/v2",
+			url:           "http://localhost:12010",
 			apiKey:        "core123",
 			componentName: "Core",
 			args:          []string{"5f125024-1e5e-4591-9fee-365dc20eeeed"},
@@ -194,7 +194,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:          "Printing Array fails",
 			client:        new(WorkingGetter),
-			url:           "http://localhost:12010/v2",
+			url:           "http://localhost:12010",
 			apiKey:        "core123",
 			componentName: "Core",
 			args:          []string{},
