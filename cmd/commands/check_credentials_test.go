@@ -47,7 +47,7 @@ func Test_checkCredentials(t *testing.T) {
 			key:           "core_key",
 			componentName: "Core",
 			config: map[string]string{
-				"default.core_url": "http://localhost:12010/v2",
+				"default.core_url": "http://localhost:12010",
 				"default.core_key": "http://discovery.core.cn",
 			},
 			err: nil,
