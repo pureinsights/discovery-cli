@@ -31,6 +31,7 @@ type Discovery interface {
 	UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error
 	searchEntity(client Searcher, id string) (gjson.Result, error)
 	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
+	HaltSeed(client IngestionSeedController, name string, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.

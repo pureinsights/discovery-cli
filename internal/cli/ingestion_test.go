@@ -36,7 +36,7 @@ func (s *SearcherIDNotUUID) Search(gjson.Result) ([]gjson.Result, error) {
 func (s *SearcherIDNotUUID) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Parse(`{
 			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
+			"name": "MongoDB Atlas seed clone",
 			"labels": [],
 			"active": true,
 			"id": "test",
@@ -53,7 +53,7 @@ func (s *SearcherIDNotUUID) Get(id uuid.UUID) (gjson.Result, error) {
 			"status": 404,
 			"code": 1003,
 			"messages": [
-				"Server not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+				"Seed not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
 			],
 			"timestamp": "2025-10-16T00:15:31.888410500Z"
 		}`),
@@ -138,9 +138,14 @@ type WorkingSeedController struct {
 	WorkingSearcher
 }
 
-// Start returns a the result of a new seed execution
+// Start returns the result of a new seed execution
 func (c *WorkingSeedController) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
+}
+
+// Halt returns the results of halting a seed
+func (c *WorkingSeedController) Halt(id uuid.UUID) ([]gjson.Result, error) {
+	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
 // FailingSeedControllerGetSeedIdFails simulates a failing IngestionSeedController when GetSeedId fails.
@@ -152,6 +157,11 @@ type FailingSeedControllerGetSeedIdFails struct {
 // Start implements the interface.
 func (c *FailingSeedControllerGetSeedIdFails) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
+}
+
+// Halt implements the interface
+func (c *FailingSeedControllerGetSeedIdFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
+	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
 // FailingSeedControllerStartFails simulates when starting a seed execution fails.
@@ -170,6 +180,10 @@ func (c *FailingSeedControllerStartFails) Start(id uuid.UUID, scan discoveryPack
 			],
 			"timestamp": "2025-09-04T20:17:00.116546400Z"
 			}`)}
+}
+
+func (c *FailingSeedControllerStartFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
+	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
 // Test_discovery_StartSeed tests the discovery.StartSeed() function.
