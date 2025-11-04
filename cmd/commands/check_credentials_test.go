@@ -28,8 +28,8 @@ func TestGetCommandConfig(t *testing.T) {
 	assert.Equal(t, key, commandConfig.apiKey)
 }
 
-// Test_CheckCredentials tests the check_Credentials function.
-func Test_CheckCredentials(t *testing.T) {
+// TestCheckCredentials tests the CheckCredentials function.
+func TestCheckCredentials(t *testing.T) {
 	tests := []struct {
 		name          string
 		profile       string
