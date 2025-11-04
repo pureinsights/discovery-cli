@@ -123,7 +123,7 @@ func TestNewGetCommand(t *testing.T) {
 			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
 			statusCode: http.StatusOK,
 			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile default\n      discovery core config --profile default"),
 		},
 		{
 			name:       "No API key",
@@ -138,7 +138,7 @@ func TestNewGetCommand(t *testing.T) {
 			path:       "/v2/label",
 			statusCode: http.StatusNotFound,
 			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile default\n      discovery core config --profile default"),
 		},
 		{
 			name:       "user does not send a UUID",

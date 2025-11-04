@@ -1,5 +1,5 @@
 Error: The Discovery Core URL is missing for profile "default".
 To set the URL for the Discovery Core API, run any of the following commands:
-      discovery config  --profile {profile}
-      discovery core config --profile {profile}
+      discovery config  --profile default
+      discovery core config --profile default
 

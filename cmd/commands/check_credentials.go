@@ -29,14 +29,14 @@ func GetCommandConfig(profile, output, componentName, url, apiKey string) comman
 // CheckCredentials verifies that both the URL and API Key are set for the given profile and component in the configuration.
 // If not, it returns an error
 func checkCredentials(d cli.Discovery, profile, componentName, urlProperty, apiProperty string) error {
-	missingConfig := "The Discovery %s %s is missing for profile %q.\nTo set the %s for the Discovery %s API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery %s config --profile {profile}"
+	missingConfig := "The Discovery %[1]s %[2]s is missing for profile \"%[3]s\".\nTo set the %[2]s for the Discovery %[1]s API, run any of the following commands:\n      discovery config  --profile %[3]s\n      discovery %[4]s config --profile %[3]s"
 
 	vpr := d.Config()
 	switch {
 	case !vpr.IsSet(profile + "." + urlProperty):
-		return cli.NewError(cli.ErrorExitCode, missingConfig, componentName, "URL", profile, "URL", componentName, strings.ToLower(componentName))
+		return cli.NewError(cli.ErrorExitCode, missingConfig, componentName, "URL", profile, strings.ToLower(componentName))
 	case !vpr.IsSet(profile + "." + apiProperty):
-		return cli.NewError(cli.ErrorExitCode, missingConfig, componentName, "API key", profile, "API key", componentName, strings.ToLower(componentName))
+		return cli.NewError(cli.ErrorExitCode, missingConfig, componentName, "API key", profile, strings.ToLower(componentName))
 	}
 	return nil
 }
