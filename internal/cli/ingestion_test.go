@@ -91,7 +91,7 @@ func TestGetSeedId(t *testing.T) {
 			err:      errorErr,
 		},
 		{
-			name:     "searchEntity fails",
+			name:     "Search fails",
 			client:   new(FailingSearcher),
 			expected: uuid.Nil,
 			err: discoveryPackage.Error{
@@ -206,7 +206,7 @@ func Test_discovery_StartSeed(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:           "SearchEntities correctly prints the received object with JSON ugly printer",
+			name:           "StartSeed correctly prints the received object with JSON ugly printer",
 			client:         new(WorkingSeedController),
 			printer:        nil,
 			expectedOutput: "{\"creationTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"id\":\"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\"lastUpdatedTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"properties\":{\"stagingBucket\":\"testBucket\"},\"scanType\":\"INCREMENTAL\",\"status\":\"CREATED\",\"triggerType\":\"MANUAL\"}\n",
