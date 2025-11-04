@@ -20,6 +20,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// WorkingGetter mocks the discovery.Getter struct to always answer a working result
 type WorkingGetter struct {
 	mock.Mock
 }

@@ -28,7 +28,7 @@ func TestGetCommandConfig(t *testing.T) {
 	assert.Equal(t, key, commandConfig.apiKey)
 }
 
-// Test_checkCredentials tests the check_Credentials function.
+// Test_checkCredentials tests the checkCredentials function.
 func Test_checkCredentials(t *testing.T) {
 	tests := []struct {
 		name          string
