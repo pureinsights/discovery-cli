@@ -32,6 +32,7 @@ type Discovery interface {
 	searchEntity(client Searcher, id string) (gjson.Result, error)
 	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
 	HaltSeed(client IngestionSeedController, name string, printer Printer) error
+	HaltSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
