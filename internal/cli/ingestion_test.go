@@ -184,7 +184,17 @@ func (c *FailingSeedControllerStartFails) Start(id uuid.UUID, scan discoveryPack
 
 // Halt implements the IngestionSeedController interface
 func (c *FailingSeedControllerStartFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
-	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
+	return []gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+			],
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`),
+	}
 }
 
 // Test_discovery_StartSeed tests the discovery.StartSeed() function.
@@ -291,14 +301,14 @@ func Test_discovery_HaltSeed(t *testing.T) {
 			name:           "HaltSeed correctly prints the stopped executions with the sent printer",
 			client:         new(WorkingSeedController),
 			printer:        JsonArrayPrinter(true),
-			expectedOutput: "{\n  \"creationTimestamp\": \"2025-09-04T19:29:41.119013Z\",\n  \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n  \"lastUpdatedTimestamp\": \"2025-09-04T19:29:41.119013Z\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"scanType\": \"INCREMENTAL\",\n  \"status\": \"CREATED\",\n  \"triggerType\": \"MANUAL\"\n}\n",
+			expectedOutput: "[\n{\n  \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n  \"status\": 202\n},\n{\n  \"id\": \"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b\",\n  \"status\": 202\n}\n]\n",
 			err:            nil,
 		},
 		{
 			name:           "HaltSeed prints the halted executions with the ugly printer",
 			client:         new(WorkingSeedController),
 			printer:        nil,
-			expectedOutput: "{\"creationTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"id\":\"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\"lastUpdatedTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"properties\":{\"stagingBucket\":\"testBucket\"},\"scanType\":\"INCREMENTAL\",\"status\":\"CREATED\",\"triggerType\":\"MANUAL\"}\n",
+			expectedOutput: "{\"id\":\"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\"status\":202}\n{\"id\":\"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b\",\"status\":202}\n",
 			err:            nil,
 		},
 
@@ -308,28 +318,30 @@ func Test_discovery_HaltSeed(t *testing.T) {
 			client:         new(FailingSeedControllerGetSeedIdFails),
 			printer:        nil,
 			expectedOutput: "",
-			err:            NewErrorWithCause(ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not get seed ID to start execution."),
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not get seed ID to halt execution."),
 		},
 		{
-			name:           "Start fails because of conflict",
+			name:           "Halt fails seed not found",
 			client:         new(FailingSeedControllerStartFails),
 			printer:        nil,
 			expectedOutput: "",
-			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
-			"status": 409,
-			"code": 4001,
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
 			"messages": [
-				"The seed has 1 executions: 0c309dbb-0402-4710-8659-2c75f5d649b6"
+				"Seed not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
 			],
-			"timestamp": "2025-09-04T20:17:00.116546400Z"
-			}`)}, "Could not start seed execution for seed with id \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\""),
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`)}, "Could not halt seed execution for seed with id \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\""),
 		},
 		{
 			name:      "Printing fails",
 			client:    new(WorkingSeedController),
 			printer:   nil,
 			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
-			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
 		},
 	}
 
@@ -350,7 +362,7 @@ func Test_discovery_HaltSeed(t *testing.T) {
 			}
 
 			d := NewDiscovery(&ios, viper.New(), "")
-			err := d.StartSeed(tc.client, "", discoveryPackage.ScanFull, gjson.Result{}, tc.printer)
+			err := d.HaltSeed(tc.client, "", tc.printer)
 
 			if tc.err != nil {
 				require.Error(t, err)
