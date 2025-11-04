@@ -46,6 +46,7 @@ func (d discovery) StartSeed(client IngestionSeedController, name string, scanTy
 	return err
 }
 
+// HaltSeed stops all the seed executions of a seed
 func (d discovery) HaltSeed(client IngestionSeedController, name string, printer Printer) error {
 	seedId, err := GetSeedId(d, client, name)
 	if err != nil {

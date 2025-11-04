@@ -182,6 +182,7 @@ func (c *FailingSeedControllerStartFails) Start(id uuid.UUID, scan discoveryPack
 			}`)}
 }
 
+// Halt implements the IngestionSeedController interface
 func (c *FailingSeedControllerStartFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
@@ -206,6 +207,95 @@ func Test_discovery_StartSeed(t *testing.T) {
 		},
 		{
 			name:           "SearchEntities correctly prints the received object with JSON ugly printer",
+			client:         new(WorkingSeedController),
+			printer:        nil,
+			expectedOutput: "{\"creationTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"id\":\"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\"lastUpdatedTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"properties\":{\"stagingBucket\":\"testBucket\"},\"scanType\":\"INCREMENTAL\",\"status\":\"CREATED\",\"triggerType\":\"MANUAL\"}\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name:           "GetByIdFails",
+			client:         new(FailingSeedControllerGetSeedIdFails),
+			printer:        nil,
+			expectedOutput: "",
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not get seed ID to start execution."),
+		},
+		{
+			name:           "Start fails because of conflict",
+			client:         new(FailingSeedControllerStartFails),
+			printer:        nil,
+			expectedOutput: "",
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
+			"status": 409,
+			"code": 4001,
+			"messages": [
+				"The seed has 1 executions: 0c309dbb-0402-4710-8659-2c75f5d649b6"
+			],
+			"timestamp": "2025-09-04T20:17:00.116546400Z"
+			}`)}, "Could not start seed execution for seed with id \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\""),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(WorkingSeedController),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.StartSeed(tc.client, "", discoveryPackage.ScanFull, gjson.Result{}, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_HaltSeed tests the discovery.HaltSeed() function.
+func Test_discovery_HaltSeed(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         IngestionSeedController
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "HaltSeed correctly prints the stopped executions with the sent printer",
+			client:         new(WorkingSeedController),
+			printer:        JsonArrayPrinter(true),
+			expectedOutput: "{\n  \"creationTimestamp\": \"2025-09-04T19:29:41.119013Z\",\n  \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n  \"lastUpdatedTimestamp\": \"2025-09-04T19:29:41.119013Z\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"scanType\": \"INCREMENTAL\",\n  \"status\": \"CREATED\",\n  \"triggerType\": \"MANUAL\"\n}\n",
+			err:            nil,
+		},
+		{
+			name:           "HaltSeed prints the halted executions with the ugly printer",
 			client:         new(WorkingSeedController),
 			printer:        nil,
 			expectedOutput: "{\"creationTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"id\":\"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\"lastUpdatedTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"properties\":{\"stagingBucket\":\"testBucket\"},\"scanType\":\"INCREMENTAL\",\"status\":\"CREATED\",\"triggerType\":\"MANUAL\"}\n",
