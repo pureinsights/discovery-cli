@@ -1046,6 +1046,45 @@ Error: Could not store entities
 status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 1d81d3d5-58a2-44a5-9acf-3fc8358afe00"],"timestamp":"2025-10-31T20:33:49.516795Z"}
 ```
 
+###### Start
+`start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
+
+Usage: `discovery ingestion seed start [flags]`
+
+Flags:
+`--properties`::
+(Optional, string) Set the properties of the seed execution.
+
+`--scan-type`::
+(Optional, string) Sets the scan type of the seed execution. It can be `FULL` or `INCREMENTAL`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Start a seed seed execution with no flags
+discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
+{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
+```bash
+# Start a seed seed execution with the properties and scan-type flags
+discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
+```bash
+# Try to start a seed execution when it already has active executions
+discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
+Error: Could not start seed execution for seed with id "1d81d3d5-58a2-44a5-9acf-3fc8358afe09"
+status: 409, body: {"status":409,"code":4001,"messages":["The seed has 1 executions: f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36"],"timestamp":"2025-11-03T23:59:06.349049Z"}
+```
+
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow. 
 

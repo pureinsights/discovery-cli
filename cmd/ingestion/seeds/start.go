@@ -8,14 +8,14 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// NewGetCommand creates the seed get command
+// NewStartCommand creates the seed start command to start a seed execution
 func NewStartCommand(d cli.Discovery) *cobra.Command {
 	var scanType string
 	var executionProperties string
 	start := &cobra.Command{
 		Use:   "start",
-		Short: "The command that start a seed's  execution in Discovery Ingestion.",
-		Long:  "start is the command used to start a seed execution in Discovery Ingestion. With the data flag, the user can send a single JSON configuration or an array to upsert multiple %[1]ss. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.",
+		Short: "The command that starts a seed execution in Discovery Ingestion.",
+		Long:  "start is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: FULL or INCREMENTAL.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
