@@ -40,7 +40,7 @@ func TestNewGetCommand(t *testing.T) {
 			name:       "Get by ID returns an object",
 			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
 			url:        true,
-			apiKey:     "apiKey123",
+			apiKey:     "",
 			outGolden:  "NewGetCommand_Out_GetByIdReturnsObject",
 			errGolden:  "NewGetCommand_Err_GetByIdReturnsObject",
 			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetByIdReturnsObject"),
