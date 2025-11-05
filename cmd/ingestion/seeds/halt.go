@@ -46,7 +46,7 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 	}
 
-	halt.Flags().StringVarP(&execution, "execution", "e", "", "The execution properties of the seed execution")
+	halt.Flags().StringVarP(&execution, "execution", "e", "", "The UUID of the execution that will be halted.")
 
 	return halt
 }

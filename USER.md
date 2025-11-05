@@ -1100,7 +1100,7 @@ Arguments:
 
 Flags:
 `--execution`::
-(Optional, string) The UUID of the seed that will have its executions halted.
+(Optional, string) The UUID of the execution that will be halted.
 
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
