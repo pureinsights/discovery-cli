@@ -1049,7 +1049,11 @@ status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 1d81
 ###### Start
 `start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
 
-Usage: `discovery ingestion seed start [flags]`
+Usage: `discovery ingestion seed start <seed> [flags] `
+
+Arguments:
+`seed`::
+(Required, String) The name or UUID of the seed that will be executed.
 
 Flags:
 `--properties`::
@@ -1083,6 +1087,39 @@ discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"
 discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
 Error: Could not start seed execution for seed with id "1d81d3d5-58a2-44a5-9acf-3fc8358afe09"
 status: 409, body: {"status":409,"code":4001,"messages":["The seed has 1 executions: f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36"],"timestamp":"2025-11-03T23:59:06.349049Z"}
+```
+
+###### Halt
+`halt` is the command used to halt a seed execution in Discovery Ingestion. With the execution flag, the user can specify the specific execution that will halted. If there is no execution flag, all of the active executions are halted.
+
+Usage: `discovery ingestion seed halt <seed> [flags] `
+
+Arguments:
+`seed`::
+(Required, String) The name or UUID of the seed that will have its executions halted.
+
+Flags:
+`--execution`::
+(Optional, string) The UUID of the seed that will have its executions halted.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Halt all active seed executions
+discovery ingestion seed halt 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","status":202}
+```
+
+```bash
+# Halt a single seed execution
+discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
+{"acknowledged":true}
 ```
 
 #### QueryFlow

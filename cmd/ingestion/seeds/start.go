@@ -33,8 +33,7 @@ func NewStartCommand(d cli.Discovery) *cobra.Command {
 			scan := discoveryPackage.ScanType(scanType)
 			propertiesJSON := gjson.Parse(executionProperties)
 			printer := cli.GetObjectPrinter(vpr.GetString("output"))
-			err = d.StartSeed(ingestionClient.Seeds(), args[0], scan, propertiesJSON, printer)
-			return err
+			return d.StartSeed(ingestionClient.Seeds(), args[0], scan, propertiesJSON, printer)
 		},
 		Args: cobra.ExactArgs(1),
 	}

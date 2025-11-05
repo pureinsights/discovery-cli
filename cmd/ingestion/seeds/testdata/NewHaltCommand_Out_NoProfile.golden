@@ -1,0 +1,7 @@
+Usage:
+  halt [flags]
+
+Flags:
+  -e, --execution string   The execution properties of the seed execution
+  -h, --help               help for halt
+

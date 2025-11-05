@@ -1,0 +1,5 @@
+Error: The Discovery Ingestion API key is missing for profile "default".
+To set the API key for the Discovery Ingestion API, run any of the following commands:
+      discovery config  --profile {profile}
+      discovery ingestion config --profile {profile}
+
