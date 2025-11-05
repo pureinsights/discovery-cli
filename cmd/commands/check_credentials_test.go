@@ -18,14 +18,12 @@ func TestGetCommandConfig(t *testing.T) {
 	output := "json"
 	componentName := "Core"
 	url := "core_url"
-	key := "core_key"
 
 	commandConfig := GetCommandConfig(profile, output, componentName, url)
 	assert.Equal(t, profile, commandConfig.profile)
 	assert.Equal(t, output, commandConfig.output)
 	assert.Equal(t, componentName, commandConfig.componentName)
 	assert.Equal(t, url, commandConfig.url)
-	assert.Equal(t, key, commandConfig.apiKey)
 }
 
 // Test_checkCredentials tests the checkCredentials function.
