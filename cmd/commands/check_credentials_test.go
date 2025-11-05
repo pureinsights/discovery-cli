@@ -18,17 +18,15 @@ func TestGetCommandConfig(t *testing.T) {
 	output := "json"
 	componentName := "Core"
 	url := "core_url"
-	key := "core_key"
 
-	commandConfig := GetCommandConfig(profile, output, componentName, url, key)
+	commandConfig := GetCommandConfig(profile, output, componentName, url)
 	assert.Equal(t, profile, commandConfig.profile)
 	assert.Equal(t, output, commandConfig.output)
 	assert.Equal(t, componentName, commandConfig.componentName)
 	assert.Equal(t, url, commandConfig.url)
-	assert.Equal(t, key, commandConfig.apiKey)
 }
 
-// Test_checkCredentials tests the check_Credentials function.
+// Test_checkCredentials tests the checkCredentials function.
 func Test_checkCredentials(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -44,7 +42,6 @@ func Test_checkCredentials(t *testing.T) {
 			name:          "All the properties are set",
 			profile:       "default",
 			url:           "core_url",
-			key:           "core_key",
 			componentName: "Core",
 			config: map[string]string{
 				"default.core_url": "http://localhost:12010",
@@ -58,23 +55,11 @@ func Test_checkCredentials(t *testing.T) {
 			name:          "URL is not set",
 			profile:       "default",
 			url:           "core_url",
-			key:           "core_key",
 			componentName: "Core",
 			config: map[string]string{
 				"default.core_key": "http://discovery.core.cn",
 			},
-			err: cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
-		},
-		{
-			name:          "API Key is not set",
-			profile:       "default",
-			url:           "core_url",
-			key:           "core_key",
-			componentName: "Core",
-			config: map[string]string{
-				"default.core_url": "http://discovery.core.cn",
-			},
-			err: cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err: cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 	}
 
@@ -91,7 +76,7 @@ func Test_checkCredentials(t *testing.T) {
 				vpr.Set(k, v)
 			}
 			d := cli.NewDiscovery(&io, vpr, "")
-			err := checkCredentials(d, tc.profile, tc.componentName, tc.url, tc.key)
+			err := checkCredentials(d, tc.profile, tc.componentName, tc.url)
 			if tc.err != nil {
 				require.Error(t, err)
 				var errStruct cli.Error
