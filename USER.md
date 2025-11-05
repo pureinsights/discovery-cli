@@ -233,7 +233,7 @@ Flags:
 ###### Get
 `get` is the command used to obtain Discovery Core's labels. The user can send a UUID to get a specific label. If no UUID is given, then the command retrieves every label. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
 
-Usage: `discovery core label get [flags] <uuid>`
+Usage: `discovery core label get [flags] [<uuid>]`
 
 Arguments:
 `uuid`::
