@@ -12,7 +12,7 @@ const (
 
 // GetCommand is the function that executes the get operation for the get commands that do not work with names or filters.
 func GetCommand(args []string, d cli.Discovery, client cli.Getter, config commandConfig) error {
-	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
+	err := checkCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}
