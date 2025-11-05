@@ -132,36 +132,36 @@ func (d discovery) SearchEntities(client Searcher, filter gjson.Result, printer 
 }
 
 // ParseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery
-func parseFilter(filter string, labelFilters *[]string, typeFilters *[]string) error {
+func parseFilter(filter string) (string, []string, error) {
 	filterType, keyValue, found := strings.Cut(filter, "=")
 	if !found {
-		return NewError(ErrorExitCode, "Filter %q does not follow the format {type}={key}[:{value}]", filter)
+		return "", []string(nil), NewError(ErrorExitCode, "Filter %q does not follow the format {type}={key}[:{value}]", filter)
 	}
-
+	filters := []string{}
 	switch filterType {
 	case "label":
 		key, value, found := strings.Cut(keyValue, ":")
 		if key == "" {
-			return NewError(ErrorExitCode, "The label's key in the filter %q cannot be empty", filter)
+			return "", []string(nil), NewError(ErrorExitCode, "The label's key in the filter %q cannot be empty", filter)
 		}
-		*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.key", key))
+		filters = append(filters, fmt.Sprintf(EqualsFilter, "labels.key", key))
 		if found {
 			if value == "" {
-				return NewError(ErrorExitCode, "The label's value in the filter %q cannot be empty if ':' is included", filter)
+				return "", []string(nil), NewError(ErrorExitCode, "The label's value in the filter %q cannot be empty if ':' is included", filter)
 			}
-			*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.value", value))
+			filters = append(filters, fmt.Sprintf(EqualsFilter, "labels.value", value))
 		}
 	case "type":
 		if keyValue == "" {
-			return NewError(ErrorExitCode, "The type in the filter %q cannot be empty", filter)
+			return "", []string(nil), NewError(ErrorExitCode, "The value in the type filter %q cannot be empty", filter)
 		}
 
-		*typeFilters = append(*typeFilters, fmt.Sprintf(EqualsFilter, "type", keyValue))
+		filters = append(filters, fmt.Sprintf(EqualsFilter, "type", keyValue))
 	default:
-		return NewError(ErrorExitCode, "Filter type %q does not exist", filterType)
+		return "", []string(nil), NewError(ErrorExitCode, "Filter type %q does not exist", filterType)
 	}
 
-	return nil
+	return filterType, filters, nil
 }
 
 // BuildEntitiesFilter builds a filter based on the arguments sent to the get command.
@@ -172,9 +172,15 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 
 	var err error
 	for _, filter := range filters {
-		err := parseFilter(filter, &labelFilters, &typeFilters)
+		filterType, parsedFilters, err := parseFilter(filter)
 		if err != nil {
 			return gjson.Result{}, err
+		}
+		switch filterType {
+		case "label":
+			labelFilters = append(labelFilters, parsedFilters...)
+		case "type":
+			typeFilters = append(typeFilters, parsedFilters...)
 		}
 	}
 
