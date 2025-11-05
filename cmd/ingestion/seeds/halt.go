@@ -14,7 +14,7 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 	halt := &cobra.Command{
 		Use:   "halt",
 		Short: "The command that halts a seed execution in Discovery Ingestion.",
-		Long:  "halt is the command used to halt a seed execution in Discovery Ingestion. With the properties flag, the user set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: FULL or INCREMENTAL.",
+		Long:  "halt is the command used to halt a seed execution in Discovery Ingestion. With the execution flag, the user can specify the specific execution that will halted",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -31,12 +31,17 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
 			printer := cli.GetObjectPrinter(vpr.GetString("output"))
 			if execution == "" {
-				err = d.HaltSeed(ingestionClient.Seeds(), args[0], printer)
+				return d.HaltSeed(ingestionClient.Seeds(), args[0], printer)
 			} else {
-				executionId := uuid.Parse(execution)
-				err = d.HaltSeedExecution(ingestionClient.Seeds(), args[0], printer)
+				if executionId, err := uuid.Parse(execution); err == nil {
+					seedsClient := ingestionClient.Seeds()
+					if seedId, err := cli.GetSeedId(d, seedsClient, args[0]); err == nil {
+						return d.HaltSeedExecution(seedsClient.Executions(seedId), executionId, printer)
+					}
+				}
+
+				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Failed to convert the execution ID to UUID")
 			}
-			return err
 		},
 		Args: cobra.ExactArgs(1),
 	}
