@@ -269,7 +269,7 @@ Usage: `discovery core label delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the label that will be retrieved.
+(Required, String) The UUID of the label that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -334,7 +334,7 @@ Usage: `discovery core secret delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the secret that will be retrieved.
+(Required, String) The UUID of the secret that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -416,7 +416,7 @@ Usage: `discovery core credential delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the credential that will be deleted.
+(Required, String) The name or UUID of the credential that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -506,7 +506,7 @@ Usage: `discovery core server delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the server that will be deleted.
+(Required, String) The name or UUID of the server that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -765,7 +765,7 @@ Usage: `discovery queryflow processor delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the processor that will be deleted.
+(Required, String) The name or UUID of the processor that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -845,6 +845,34 @@ discovery queryflow endpoint get --filter label=A:B
 discovery queryflow endpoint get -p cn
 {"active":true,"creationTimestamp":"2025-11-06T16:24:54Z","httpMethod":"GET","id":"2fee5e27-4147-48de-ba1e-d7f32476a4a2","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:54Z","name":"Wikis endpoint with labels clone","timeout":"PT1H","type":"default","uri":"/wikis-search-label-clone"}
 {"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","labels":[],"lastUpdatedTimestamp":"2025-08-25T16:47:24Z","name":"Blogs endpoint","timeout":"PT1H","type":"default","uri":"/blogs-search"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's endpoints. The user must send a name or UUID to get a specific endpoint.
+
+Usage: `discovery queryflow endpoint delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, String) The name or UUID of the endpoint that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a endpoint by id
+discovery queryflow endpoint delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
+{"acknowledged":true}
+```
+
+```bash
+# Delete a endpoint by name
+discovery queryflow endpoint delete endpoint1
+{"acknowledged":true}
 ```
 
 #### Staging
