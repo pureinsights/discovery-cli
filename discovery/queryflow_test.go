@@ -16,7 +16,7 @@ import (
 
 // Test_newQueryFlowProcessorsClient test the queryFlowProcessorsClient's constructor
 func Test_newQueryFlowProcessorsClient(t *testing.T) {
-	url := "http://localhost:12040/v2"
+	url := "http://localhost:12040"
 	apiKey := "Api Key"
 	qpc := newQueryFlowProcessorsClient(url, apiKey)
 
@@ -28,7 +28,7 @@ func Test_newQueryFlowProcessorsClient(t *testing.T) {
 
 // Test_newEndpointsClient tests the constructor of endpointsClients.
 func Test_newEndpointsClient(t *testing.T) {
-	url := "http://localhost:12040/v2"
+	url := "http://localhost:12040"
 	apiKey := "Api Key"
 	qec := newEndpointsClient(url, apiKey)
 

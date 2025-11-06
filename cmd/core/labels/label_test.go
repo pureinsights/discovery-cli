@@ -2,17 +2,18 @@ package labels
 
 import (
 	"bytes"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/viper"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
-// Test_NewLabelCommand tests the NewLabelCommand() function
-func Test_NewLabelCommand(t *testing.T) {
+// TestNewLabelCommand tests the NewLabelCommand() function
+func TestNewLabelCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -41,11 +42,11 @@ func Test_NewLabelCommand(t *testing.T) {
 
 	var commandNames []string
 	for _, c := range coreCmd.Commands() {
-		commandNames = append(commandNames, c.Name())
+		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+			commandNames = append(commandNames, c.Name())
+		}
 	}
 
-	expectedCommands := []string{"get", "delete"}
-	for _, c := range expectedCommands {
-		require.Contains(t, commandNames, c)
-	}
+	expectedCommands := []string{"delete", "get"}
+	assert.Equal(t, expectedCommands, commandNames)
 }

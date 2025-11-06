@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_NewGetCommand_WithProfileAndSensitiveFlags tests the NewGetCommand() function
-func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
+// TestNewGetCommand_WithProfileAndSensitiveFlags tests the NewGetCommand() function when there are profile and sensitive flags
+func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 	tests := []struct {
 		name      string
 		profile   string
@@ -36,13 +36,13 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"cn.core_url":      "http://localhost:12010/v2",
+				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020/v2",
+				"cn.ingestion_url": "http://localhost:12020",
 				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030/v2",
+				"cn.queryflow_url": "http://localhost:12030",
 				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040/v2",
+				"cn.staging_url":   "http://localhost:12040",
 				"cn.staging_key":   "discovery.key.staging.cn",
 			},
 			outGolden: "NewGetCommand_Out_AllNotSensitive",
@@ -57,13 +57,13 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: true,
 			config: map[string]string{
-				"cn.core_url":      "http://localhost:12010/v2",
+				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020/v2",
+				"cn.ingestion_url": "http://localhost:12020",
 				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030/v2",
+				"cn.queryflow_url": "http://localhost:12030",
 				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040/v2",
+				"cn.staging_url":   "http://localhost:12040",
 				"cn.staging_key":   "discovery.key.staging.cn",
 			},
 			outGolden: "NewGetCommand_Out_AllSensitive",
@@ -78,9 +78,9 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "default",
 			sensitive: false,
 			config: map[string]string{
-				"default.core_url":      "http://localhost:12010/v2",
+				"default.core_url":      "http://localhost:12010",
 				"default.core_key":      "discovery.key.core.cn",
-				"default.ingestion_url": "http://localhost:12020/v2",
+				"default.ingestion_url": "http://localhost:12020",
 				"default.queryflow_key": "discovery.key.queryflow.cn",
 			},
 			outGolden: "NewGetCommand_Out_SomeValuesNotSensitive",
@@ -96,13 +96,13 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"cn.core_url":      "http://localhost:12010/v2",
+				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020/v2",
+				"cn.ingestion_url": "http://localhost:12020",
 				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030/v2",
+				"cn.queryflow_url": "http://localhost:12030",
 				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040/v2",
+				"cn.staging_url":   "http://localhost:12040",
 				"cn.staging_key":   "discovery.key.staging.cn",
 			},
 			outGolden: "NewGetCommand_Out_FailPrintingCore",
@@ -117,13 +117,13 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"cn.core_url":      "http://localhost:12010/v2",
+				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020/v2",
+				"cn.ingestion_url": "http://localhost:12020",
 				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030/v2",
+				"cn.queryflow_url": "http://localhost:12030",
 				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040/v2",
+				"cn.staging_url":   "http://localhost:12040",
 				"cn.staging_key":   "discovery.key.staging.cn",
 			},
 			outGolden: "NewGetCommand_Out_FailPrintingIngestion",
@@ -138,13 +138,13 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"cn.core_url":      "http://localhost:12010/v2",
+				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020/v2",
+				"cn.ingestion_url": "http://localhost:12020",
 				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030/v2",
+				"cn.queryflow_url": "http://localhost:12030",
 				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040/v2",
+				"cn.staging_url":   "http://localhost:12040",
 				"cn.staging_key":   "discovery.key.staging.cn",
 			},
 			outGolden: "NewGetCommand_Out_FailPrintingQueryFlow",
@@ -159,13 +159,13 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 			profile:   "cn",
 			sensitive: false,
 			config: map[string]string{
-				"cn.core_url":      "http://localhost:12010/v2",
+				"cn.core_url":      "http://localhost:12010",
 				"cn.core_key":      "discovery.key.core.cn",
-				"cn.ingestion_url": "http://localhost:12020/v2",
+				"cn.ingestion_url": "http://localhost:12020",
 				"cn.ingestion_key": "discovery.key.ingestion.cn",
-				"cn.queryflow_url": "http://localhost:12030/v2",
+				"cn.queryflow_url": "http://localhost:12030",
 				"cn.queryflow_key": "discovery.key.queryflow.cn",
-				"cn.staging_url":   "http://localhost:12040/v2",
+				"cn.staging_url":   "http://localhost:12040",
 				"cn.staging_key":   "discovery.key.staging.cn",
 			},
 			outGolden: "NewGetCommand_Out_FailPrintingStaging",
@@ -237,8 +237,8 @@ func Test_NewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 	}
 }
 
-// Test_NewGetCommand_NoSensitiveFlag test the get command's RunE when there is no sensitive flag
-func Test_NewGetCommand_NoProfileFlag(t *testing.T) {
+// TestNewGetCommand_NoProfileFlag test the NewGetCommand() function when there is no profile flag
+func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader("")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -249,10 +249,10 @@ func Test_NewGetCommand_NoProfileFlag(t *testing.T) {
 	}
 
 	config := map[string]string{
-		"cn.core_url":      "http://localhost:12010/v2",
-		"cn.ingestion_url": "http://localhost:12030/v2",
-		"cn.queryflow_url": "http://localhost:12040/v2",
-		"cn.staging_url":   "http://localhost:12020/v2",
+		"cn.core_url":      "http://localhost:12010",
+		"cn.ingestion_url": "http://localhost:12030",
+		"cn.queryflow_url": "http://localhost:12040",
+		"cn.staging_url":   "http://localhost:12020",
 		"cn.core_key":      "core321",
 		"cn.ingestion_key": "ingestion432",
 		"cn.queryflow_key": "queryflow123",

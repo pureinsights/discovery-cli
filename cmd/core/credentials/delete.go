@@ -24,7 +24,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return commands.SearchDeleteCommand(args[0], d, coreClient.Credentials(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url", "core_key"))
+			return commands.SearchDeleteCommand(args[0], d, coreClient.Credentials(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.ExactArgs(1),
 	}
