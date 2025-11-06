@@ -21,6 +21,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// WorkingGetter mocks the discovery.Getter struct to always answer a working result
 type WorkingGetter struct {
 	mock.Mock
 }
@@ -112,7 +113,7 @@ func TestGetCommand(t *testing.T) {
 		// Working case
 		{
 			name:           "GetEntity correctly prints an object",
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
@@ -123,7 +124,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetEntities correctly prints an array of objects",
 			client:         new(WorkingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{},
@@ -140,7 +141,7 @@ func TestGetCommand(t *testing.T) {
 			componentName: "Core",
 			args:          []string{},
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:           "id is not a UUID",
@@ -155,7 +156,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetEntity returns 404 Not Found",
 			client:         new(FailingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
@@ -175,7 +176,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetAll returns 401 Unauthorized",
 			client:         new(FailingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{},
@@ -185,7 +186,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:          "Printing JSON fails",
 			client:        new(WorkingGetter),
-			url:           "http://localhost:12010/v2",
+			url:           "http://localhost:12010",
 			apiKey:        "core123",
 			componentName: "Core",
 			args:          []string{"5f125024-1e5e-4591-9fee-365dc20eeeed"},
@@ -195,7 +196,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:          "Printing Array fails",
 			client:        new(WorkingGetter),
-			url:           "http://localhost:12010/v2",
+			url:           "http://localhost:12010",
 			apiKey:        "core123",
 			componentName: "Core",
 			args:          []string{},
@@ -231,7 +232,7 @@ func TestGetCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := GetCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url", "core_key"))
+			err := GetCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url"))
 
 			if tc.err != nil {
 				require.Error(t, err)
@@ -608,7 +609,7 @@ func TestSearchCommand(t *testing.T) {
 			componentName: "Core",
 			args:          []string{},
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:           "user sends a name that does not exist",
@@ -724,7 +725,7 @@ func TestSearchCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := SearchCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url", "core_key"), &tc.filters)
+			err := SearchCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url"), &tc.filters)
 
 			if tc.err != nil {
 				require.Error(t, err)

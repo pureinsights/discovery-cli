@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io/fs"
+	"slices"
 	"strings"
 	"testing"
 
@@ -15,8 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_NewConfigCommand tests the NewConfigCommand() function.
-func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
+// TestNewConfigCommand_ProfileFlag tests the NewConfigCommand() function when there is a profile flag.
+func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 	tests := []struct {
 		name      string
 		config    map[string]string
@@ -33,10 +34,10 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			writePath: t.TempDir(),
 			config: map[string]string{
 				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010/v2",
-				"cn.ingestion_url": "http://localhost:12030/v2",
-				"cn.queryflow_url": "http://localhost:12040/v2",
-				"cn.staging_url":   "http://localhost:12020/v2",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
 				"cn.core_key":      "core321",
 				"cn.ingestion_key": "ingestion432",
 				"cn.queryflow_key": "queryflow123",
@@ -53,10 +54,10 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			writePath: t.TempDir(),
 			config: map[string]string{
 				"profile":          "cn",
-				"cn.core_url":      "http://localhost:12010/v2",
-				"cn.ingestion_url": "http://localhost:12030/v2",
-				"cn.queryflow_url": "http://localhost:12040/v2",
-				"cn.staging_url":   "http://localhost:12020/v2",
+				"cn.core_url":      "http://localhost:12010",
+				"cn.ingestion_url": "http://localhost:12030",
+				"cn.queryflow_url": "http://localhost:12040",
+				"cn.staging_url":   "http://localhost:12020",
 			},
 			outGolden: "NewConfigCommand_Out_NoKeys",
 			errGolden: "NewConfigCommand_Err_NoKeys",
@@ -84,10 +85,10 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 			writePath: t.TempDir(),
 			config: map[string]string{
 				"profile":                "cn",
-				"cn.core_url":            "http://localhost:12010/v2",
-				"cn.ingestion_url":       "http://localhost:12030/v2",
-				"cn.queryflow_url":       "http://localhost:12040/v2",
-				"cn.staging_url":         "http://localhost:12020/v2",
+				"cn.core_url":            "http://localhost:12010",
+				"cn.ingestion_url":       "http://localhost:12030",
+				"cn.queryflow_url":       "http://localhost:12040",
+				"cn.staging_url":         "http://localhost:12020",
 				"cn.core_key":            "core321",
 				"cn.cn.ingestion_key":    "ingestion432",
 				"cn.cn.cn.queryflow_key": "queryflow123",
@@ -176,19 +177,19 @@ func Test_NewConfigCommand_ProfileFlag(t *testing.T) {
 
 			var commandNames []string
 			for _, c := range configCmd.Commands() {
-				commandNames = append(commandNames, c.Name())
+				if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+					commandNames = append(commandNames, c.Name())
+				}
 			}
 
 			expectedCommands := []string{"get"}
-			for _, c := range expectedCommands {
-				require.Contains(t, commandNames, c)
-			}
+			assert.Equal(t, expectedCommands, commandNames)
 		})
 	}
 }
 
-// Test_NewConfigCommand_NoProfileFlag tests the config command when there is no profile flag defined.
-func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
+// TestNewConfigCommand_NoProfileFlag tests the config command when there is no profile flag defined.
+func TestNewConfigCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader(strings.Repeat("\n", 8))
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -200,10 +201,10 @@ func Test_NewConfigCommand_NoProfileFlag(t *testing.T) {
 
 	config := map[string]string{
 		"profile":          "cn",
-		"cn.core_url":      "http://localhost:12010/v2",
-		"cn.ingestion_url": "http://localhost:12030/v2",
-		"cn.queryflow_url": "http://localhost:12040/v2",
-		"cn.staging_url":   "http://localhost:12020/v2",
+		"cn.core_url":      "http://localhost:12010",
+		"cn.ingestion_url": "http://localhost:12030",
+		"cn.queryflow_url": "http://localhost:12040",
+		"cn.staging_url":   "http://localhost:12020",
 		"cn.core_key":      "core321",
 		"cn.ingestion_key": "ingestion432",
 		"cn.queryflow_key": "queryflow123",

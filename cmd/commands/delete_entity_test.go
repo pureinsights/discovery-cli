@@ -87,7 +87,7 @@ func TestDeleteCommand(t *testing.T) {
 			componentName: "Core",
 			args:          "",
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:           "id is not a UUID",
@@ -158,7 +158,7 @@ func TestDeleteCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := DeleteCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url", "core_key"))
+			err := DeleteCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url"))
 
 			if tc.err != nil {
 				require.Error(t, err)
@@ -383,7 +383,7 @@ func TestSearchDeleteCommand(t *testing.T) {
 			componentName: "Core",
 			args:          "",
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:           "SearchDeleteEntity returns 400 Bad Request",
@@ -444,7 +444,7 @@ func TestSearchDeleteCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := SearchDeleteCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url", "core_key"))
+			err := SearchDeleteCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url"))
 
 			if tc.err != nil {
 				require.Error(t, err)

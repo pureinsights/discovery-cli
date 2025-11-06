@@ -1,6 +1,6 @@
 Showing the configuration of profile "default":
 
-Core URL: "http://localhost:12010/v2"
+Core URL: "http://localhost:12010"
 Core API Key: "discovery.key.core.cn"
-Ingestion URL: "http://localhost:12020/v2"
+Ingestion URL: "http://localhost:12020"
 QueryFlow API Key: "discovery.key.queryflow.cn"

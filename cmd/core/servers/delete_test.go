@@ -37,7 +37,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			name:      "Delete by ID returns an acknowledged true",
 			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			url:       true,
-			apiKey:    "apiKey123",
+			apiKey:    "",
 			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
 			errGolden: "NewDeleteCommand_Err_DeleteByIdReturnsObject",
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
@@ -85,7 +85,6 @@ func TestNewDeleteCommand(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/server/search", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
 				"/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239": {
@@ -98,7 +97,6 @@ func TestNewDeleteCommand(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
 						assert.Equal(t, "/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
 			},
@@ -185,18 +183,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
-			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
-		},
-		{
-			name:      "No API key",
-			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
-			outGolden: "NewDeleteCommand_Out_NoAPIKey",
-			errGolden: "NewDeleteCommand_Err_NoAPIKey",
-			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NoAPIKey"),
-			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NoAPIKey"),
-			url:       true,
-			apiKey:    "",
-			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:      "sent name does not exist",
