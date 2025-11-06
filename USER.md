@@ -262,6 +262,28 @@ discovery core label get -p cn
 {"creationTimestamp":"2025-09-29T17:00:47Z","id":"a77fed6a-021e-440b-bb32-91e22ea31598","key":"A","lastUpdatedTimestamp":"2025-09-29T17:00:47Z","value":"A"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Core's labels. The user must send a UUID to delete a specific label. If no UUID is given, then an error is returned. This command does not support referencing an entity by name.
+
+Usage: `discovery core label delete [flags] <uuid>`
+
+Arguments:
+`uuid`::
+(Optional, String) The UUID of the label that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a label by id
+discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
 ##### Secret
 `secret` is the command used to manage secrets in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
@@ -305,6 +327,28 @@ discovery core secret get -p cn
 {"active":true,"creationTimestamp":"2025-08-14T18:01:59Z","id":"cfa0ef51-1fd9-47e2-8fdb-262ac9712781","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:01:59Z","name":"mongo-secret"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Core's secrets. The user must send a UUID to delete a specific secret. If no UUID is given, then an error is returned. This command does not support referencing an entity by name.
+
+Usage: `discovery core secret delete [flags] <uuid>`
+
+Arguments:
+`uuid`::
+(Optional, String) The UUID of the secret that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a secret by id
+discovery core secret delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
 ##### Credential
 `credential` is the command used to manage credentials in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
@@ -344,7 +388,6 @@ Examples:
 # Get a credential by id
 discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
 {"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","secret":"mongo-secret","type":"mongo"}
-
 ```
 
 ```bash
@@ -364,6 +407,34 @@ discovery core credential get --filter label=A:A --filter type=mongo
 discovery core credential get -p cn
 {"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"label test 2","type":"mongo"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Core's credentials. The user must send a name or UUID to get a specific credential.
+
+Usage: `discovery core credential delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the credential that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a credential by id
+discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Delete a credential by name
+discovery core credential delete credential1
+{"acknowledged":true}
 ```
 
 ##### Server
@@ -426,6 +497,34 @@ discovery core server get --filter label=A:A -f type=mongo
 discovery core server get -p cn
 {"active":true,"creationTimestamp":"2025-09-29T15:50:37Z","id":"025347a7-e2bd-4ba1-880f-db3e51319abb","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:37Z","name":"MongoDB Atlas server clone 11","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-10-15T20:26:27Z","id":"192c3793-600a-4366-9778-7d80a0df07ce","labels":[{"key":"E","value":"G"},{"key":"H","value":"F"},{"key":"D","value":"D"}],"lastUpdatedTimestamp":"2025-10-15T20:26:27Z","name":"filter 2","type":"openai"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Core's servers. The user must send a name or UUID to get a specific server.
+
+Usage: `discovery core server delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the server that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a server by id
+discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Delete a server by name
+discovery core server delete secret1
+{"acknowledged":true}
 ```
 
 #### Ingestion

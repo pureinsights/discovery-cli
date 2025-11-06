@@ -223,3 +223,46 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 
 	return gjson.Parse(filterString), nil
 }
+
+// Deleter is the interface that implements the delete method
+type Deleter interface {
+	Delete(uuid.UUID) (gjson.Result, error)
+}
+
+// DeleteEntity deletes an entity with the received ID and prints the result using the given printer.
+func (d discovery) DeleteEntity(client Deleter, id uuid.UUID, printer Printer) error {
+	object, err := client.Delete(id)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not delete entity with id %q", id.String())
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonObjectPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), object)
+	} else {
+		err = printer(*d.IOStreams(), object)
+	}
+
+	return err
+}
+
+// SearchDeleter is the interface that implements the delete method that works with names.
+type SearchDeleter interface {
+	Deleter
+	Searcher
+}
+
+// SearchDeleteEntity searches for the entity with the given name and then deletes it.
+// It then prints out the results using the printer parameter.
+func (d discovery) SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error {
+	result, err := d.searchEntity(client, name)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not search for entity with name %q", name)
+	}
+
+	deleteId, err := uuid.Parse(result.Get("id").String())
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not delete entity with name %q", name)
+	}
+	return d.DeleteEntity(client, deleteId, printer)
+}

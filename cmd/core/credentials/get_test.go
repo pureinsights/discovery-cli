@@ -270,7 +270,6 @@ func TestNewGetCommand(t *testing.T) {
 }`),
 			}, "Could not search for entity with id \"test\""),
 		},
-
 		{
 			name:       "Search By Name returns HTTP error",
 			args:       []string{"3b32e410-2F33-412d-9fb8-17970131921c"},

@@ -37,3 +37,31 @@ func HttpNoContentHandler(
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+// MockResponse mocks an HTTP response from Discovery
+type MockResponse struct {
+	StatusCode  int
+	ContentType string
+	Body        string
+	Assertions  func(*testing.T, *http.Request)
+}
+
+// HttpMultiResponseHandler returns different HTTP responses depending on the received path
+func HttpMultiResponseHandler(
+	t *testing.T,
+	responses map[string]MockResponse,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		for path, response := range responses {
+			if r.URL.Path == path {
+				if response.Assertions != nil {
+					response.Assertions(t, r)
+				}
+				w.Header().Set("Content-Type", response.ContentType)
+				w.WriteHeader(response.StatusCode)
+				w.Write([]byte(response.Body))
+				return
+			}
+		}
+	}
+}
