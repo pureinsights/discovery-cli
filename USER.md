@@ -262,6 +262,49 @@ discovery core label get -p cn
 {"creationTimestamp":"2025-09-29T17:00:47Z","id":"a77fed6a-021e-440b-bb32-91e22ea31598","key":"A","lastUpdatedTimestamp":"2025-09-29T17:00:47Z","value":"A"}
 ```
 
+##### Secret
+`secret` is the command used to manage secrets in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery core secret [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Core's secrets. The user can send a UUID to get a specific secret. If no UUID is given, then the command retrieves every secret. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
+
+Usage: `discovery core secret get [flags] [<uuid>]`
+
+Arguments:
+`uuid`::
+(Optional, String) The UUID of the secret that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get a secret by id
+discovery core secret get 81ca1ac6-3058-4ecd-a292-e439827a675a
+{"active":true,"creationTimestamp":"2025-08-26T21:56:50Z","id":"81ca1ac6-3058-4ecd-a292-e439827a675a","labels":[],"lastUpdatedTimestamp":"2025-08-26T21:56:50Z","name":"openai-secret"}
+```
+
+```bash
+# Get all secrets using the configuration in profile "cn"
+discovery core secret get -p cn
+{"active":true,"creationTimestamp":"2025-08-26T21:56:50Z","id":"81ca1ac6-3058-4ecd-a292-e439827a675a","labels":[],"lastUpdatedTimestamp":"2025-08-26T21:56:50Z","name":"openai-secret"}
+{"active":true,"creationTimestamp":"2025-08-14T18:01:59Z","id":"cfa0ef51-1fd9-47e2-8fdb-262ac9712781","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:01:59Z","name":"mongo-secret"}
+```
+
 #### Ingestion
 `ingestion` is the main command used to interact with Discovery's Ingestion. 
 

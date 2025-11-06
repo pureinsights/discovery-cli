@@ -1,4 +1,4 @@
-package labels
+package secrets
 
 import (
 	"bytes"
@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// NewGetCommand tests the NewGetCommand function
+// NewGetCommand creates the secret get command
 func TestNewGetCommand(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -38,7 +38,7 @@ func TestNewGetCommand(t *testing.T) {
 		// Working case
 		{
 			name:       "Get by ID returns an object",
-			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
 			url:        true,
 			apiKey:     "",
 			outGolden:  "NewGetCommand_Out_GetByIdReturnsObject",
@@ -46,14 +46,15 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetByIdReturnsObject"),
 			errBytes:   []byte(nil),
 			method:     http.MethodGet,
-			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
+			path:       "/v2/secret/81ca1ac6-3058-4ecd-a292-e439827a675a",
 			statusCode: http.StatusOK,
 			response: `{
-				"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
-				"creationTimestamp": "2025-08-27T19:22:06Z",
-				"lastUpdatedTimestamp": "2025-08-27T19:22:47Z",
-				"key": "label6",
-				"value": "hello2"
+				"name": "openai-secret",
+				"labels": [],
+				"active": true,
+				"id": "81ca1ac6-3058-4ecd-a292-e439827a675a",
+				"creationTimestamp": "2025-08-26T21:56:50Z",
+				"lastUpdatedTimestamp": "2025-08-26T21:56:50Z"
 			}`,
 			err: nil,
 		},
@@ -67,44 +68,39 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/v2/label",
+			path:       "/v2/secret",
 			statusCode: http.StatusOK,
 			response: `{
 			"content": [
-				{
-				"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
-				"creationTimestamp": "2025-08-27T19:22:06Z",
-				"lastUpdatedTimestamp": "2025-08-27T19:22:47Z",
-				"key": "label6",
-				"value": "hello2"
-				},
-				{
-				"id": "5467ab23-7827-4fae-aa78-dfd4800549ee",
-				"creationTimestamp": "2025-10-15T20:28:39Z",
-				"lastUpdatedTimestamp": "2025-10-15T20:28:39Z",
-				"key": "D",
-				"value": "F"
-				},
-				{
-				"id": "7d0cb8c9-6555-4592-9b6c-1f4ed7fca9f4",
-				"creationTimestamp": "2025-10-15T20:25:29Z",
-				"lastUpdatedTimestamp": "2025-10-15T20:25:29Z",
-				"key": "D",
-				"value": "D"
-				}
-			],
+                  {
+                          "name": "openai-secret",
+                          "labels": [],
+                          "active": true,
+                          "id": "81ca1ac6-3058-4ecd-a292-e439827a675a",
+                          "creationTimestamp": "2025-08-26T21:56:50Z",
+                          "lastUpdatedTimestamp": "2025-08-26T21:56:50Z"
+                  },
+                  {
+                          "name": "mongo-secret",
+                          "labels": [],
+                          "active": true,
+                          "id": "cfa0ef51-1fd9-47e2-8fdb-262ac9712781",
+                          "creationTimestamp": "2025-08-14T18:01:59Z",
+                          "lastUpdatedTimestamp": "2025-08-14T18:01:59Z"
+                  }
+          ],
 			"pageable": {
 				"page": 0,
 				"size": 25,
 				"sort": []
 			},
-			"totalSize": 3,
+			"totalSize": 2,
 			"totalPages": 1,
 			"empty": false,
 			"size": 25,
 			"offset": 0,
 			"pageNumber": 0,
-			"numberOfElements": 3
+			"numberOfElements": 2
 			}`,
 			err: nil,
 		},
@@ -120,7 +116,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        false,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
+			path:       "/v2/secret/81ca1ac6-3058-4ecd-a292-e439827a675a",
 			statusCode: http.StatusOK,
 			response:   ``,
 			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
@@ -135,14 +131,14 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:   testutils.Read(t, "NewGetCommand_Out_NotUUID"),
 			errBytes:   testutils.Read(t, "NewGetCommand_Err_NotUUID"),
 			method:     http.MethodGet,
-			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
+			path:       "/v2/secret/81ca1ac6-3058-4ecd-a292-e439827a675a",
 			statusCode: http.StatusOK,
 			response:   ``,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not convert given id \"test\" to UUID. This command does not support filters or referencing an entity by name."),
 		},
 		{
 			name:       "Printing JSON object fails",
-			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
 			outGolden:  "NewGetCommand_Out_PrintJSONFails",
 			errGolden:  "NewGetCommand_Err_PrintJSONFails",
 			outBytes:   testutils.Read(t, "NewGetCommand_Out_PrintJSONFails"),
@@ -150,7 +146,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
+			path:       "/v2/secret/81ca1ac6-3058-4ecd-a292-e439827a675a",
 			statusCode: http.StatusOK,
 			response:   `{"messages": {{}`,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '{' looking for beginning of object key string"), "Could not print JSON object"),
@@ -165,12 +161,12 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/v2/label",
+			path:       "/v2/secret",
 			statusCode: http.StatusOK,
 			response: `{
-			"content": [{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"},     
-			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","labels":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":"mongo",       
-			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}
+			"content": [{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","secrets":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"MongoDB text processor 4","type":"mongo"},     
+			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","secrets":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":"mongo",       
+			{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","secrets":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}
 			],
 			"pageable": {
 				"page": 0,
@@ -189,7 +185,7 @@ func TestNewGetCommand(t *testing.T) {
 		},
 		{
 			name:       "GetEntity returns HTTP error",
-			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			args:       []string{"81ca1ac6-3058-4ecd-a292-e439827a675a"},
 			outGolden:  "NewGetCommand_Out_GetEntityHTTPError",
 			errGolden:  "NewGetCommand_Err_GetEntityHTTPError",
 			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetEntityHTTPError"),
@@ -197,13 +193,13 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
+			path:       "/v2/secret/81ca1ac6-3058-4ecd-a292-e439827a675a",
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
 			"code": 1003,
 			"messages": [
-				"Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6239"
+				"Entity not found: 81ca1ac6-3058-4ecd-a292-e439827a675a"
 			],
 			"timestamp": "2025-10-16T17:46:45.386963700Z"
 			}`,
@@ -211,10 +207,10 @@ func TestNewGetCommand(t *testing.T) {
 			"status": 404,
 			"code": 1003,
 			"messages": [
-				"Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6239"
+				"Entity not found: 81ca1ac6-3058-4ecd-a292-e439827a675a"
 			],
 			"timestamp": "2025-10-16T17:46:45.386963700Z"
-			}`)}, "Could not get entity with id \"3d51beef-8b90-40aa-84b5-033241dc6239\""),
+			}`)}, "Could not get entity with id \"81ca1ac6-3058-4ecd-a292-e439827a675a\""),
 		},
 		{
 			name:       "GetEntities returns HTTP error",
@@ -226,7 +222,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:        true,
 			apiKey:     "apiKey123",
 			method:     http.MethodGet,
-			path:       "/v2/label",
+			path:       "/v2/secret",
 			statusCode: http.StatusUnauthorized,
 			response:   `{"error": "unauthorized"}`,
 			err:        cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error": "unauthorized"}`)}, "Could not get all entities"),
