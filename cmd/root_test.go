@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"syscall"
 	"testing"
@@ -50,13 +51,13 @@ func Test_newRootCommand(t *testing.T) {
 
 	var commandNames []string
 	for _, c := range discoveryCmd.Commands() {
-		commandNames = append(commandNames, c.Name())
+		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+			commandNames = append(commandNames, c.Name())
+		}
 	}
 
 	expectedCommands := []string{"config", "core", "ingestion", "queryflow", "staging"}
-	for _, c := range expectedCommands {
-		require.Contains(t, commandNames, c)
-	}
+	assert.Equal(t, expectedCommands, commandNames)
 }
 
 // TestRun_SetDiscoveryDirFails tests the Run function when the SetDiscoveryDir() function fails.
@@ -96,7 +97,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	require.NoError(t, os.WriteFile(config, []byte(`
 {
   "default": {
-    "core_url": "http://localhost:12010/v2"
+    "core_url": "http://localhost:12010"
   },
   "cn": {
     "core_url": "http://discovery.core.cn"

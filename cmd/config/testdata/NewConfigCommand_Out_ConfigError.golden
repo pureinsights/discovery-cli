@@ -1,6 +1,6 @@
 Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
 
-Core URL [http://localhost:12010/v2]: Core API key [core321]: Usage:
+Core URL [http://localhost:12010]: Core API key [core321]: Usage:
   config [subcommands] [flags]
   config [command]
 
