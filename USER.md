@@ -437,26 +437,6 @@ discovery core credential delete credential1
 {"acknowledged":true}
 ```
 
-```bash
-# Try to delete a credential that does not exist by name
-discovery core credential delete credential1
-Error: Could not search for entity with name "credential1"
-status: 404, body: {
-        "status": 404,
-        "code": 1003,
-        "messages": [
-                "Entity not found: entity with name "credential1"
-        ]
-}
-```
-
-```bash
-# Try to delete a credential that does not exist by id
-discovery core credential delete 62127af9-0da9-4bca-86d6-40354ba196d1
-Error: Could not search for entity with name "62127af9-0da9-4bca-86d6-40354ba196d1"
-status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 62127af9-0da9-4bca-86d6-40354ba196d1"],"timestamp":"2025-10-24T23:14:35.867583300Z"}
-```
-
 ##### Server
 `server` is the command used to manage servers in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
