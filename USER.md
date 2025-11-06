@@ -506,7 +506,7 @@ Usage: `discovery core server delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the server that will be deleted.
+(Required, String) The name or UUID of the server that will be deleted.
 
 Flags:
 `-h, --help`::
