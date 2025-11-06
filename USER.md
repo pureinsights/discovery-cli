@@ -269,7 +269,7 @@ Usage: `discovery core label delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the label that will be retrieved.
+(Required, String) The UUID of the label that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -334,7 +334,7 @@ Usage: `discovery core secret delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the secret that will be retrieved.
+(Required, String) The UUID of the secret that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -416,7 +416,7 @@ Usage: `discovery core credential delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the credential that will be deleted.
+(Required, String) The name or UUID of the credential that will be deleted.
 
 Flags:
 `-h, --help`::
