@@ -21,7 +21,7 @@ Flags:
 (Optional, bool) Prints the usage of the command.
 
 `-p, --profile`::
-(Optional, string) Set the configuration profile that will execute the command
+(Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
 
