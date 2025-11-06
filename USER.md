@@ -523,7 +523,7 @@ discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
 
 ```bash
 # Delete a server by name
-discovery core server delete secret1
+discovery core server delete server1
 {"acknowledged":true}
 ```
 
