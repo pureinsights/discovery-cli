@@ -660,6 +660,67 @@ queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
 {"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor clone clone","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
+##### Endpoint
+`endpoint` is the command used to manage endpoints in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery queryflow endpoint [subcommand] [flags]
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's endpoints. The user can send a name or UUID to get a specific endpoint. If no argument is given, then the command retrieves every endpoint. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery queryflow endpoint get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the endpoint that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+Examples:
+
+```bash
+# Get a endpoint by id
+discovery queryflow endpoint get cf56470f-0ab4-4754-b05c-f760669315af
+{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"Wikis endpoint with labels","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search-label"}
+```
+
+```bash
+# Get endpoint by name
+discovery queryflow endpoint get "Wikis endpoint with labels"
+{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"Wikis endpoint with labels","timeout":"PT1H","type":"default","uri":"/wikis-search-label"
+```
+
+```bash
+# Get endpoints using filters
+discovery queryflow endpoint get --filter label=A:B
+{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"Wikis endpoint with labels","timeout":"PT1H","type":"default","uri":"/wikis-search-label"}
+{"active":true,"creationTimestamp":"2025-11-06T16:24:54Z","httpMethod":"GET","id":"2fee5e27-4147-48de-ba1e-d7f32476a4a2","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:54Z","name":"Wikis endpoint with labels clone","timeout":"PT1H","type":"default","uri":"/wikis-search-label-clone"}
+```
+
+```bash
+# Get all endpoints using the configuration in profile "cn"
+discovery queryflow endpoint get -p cn
+{"active":true,"creationTimestamp":"2025-11-06T16:24:54Z","httpMethod":"GET","id":"2fee5e27-4147-48de-ba1e-d7f32476a4a2","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:54Z","name":"Wikis endpoint with labels clone","timeout":"PT1H","type":"default","uri":"/wikis-search-label-clone"}
+{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","labels":[],"lastUpdatedTimestamp":"2025-08-25T16:47:24Z","name":"Blogs endpoint","timeout":"PT1H","type":"default","uri":"/blogs-search"}
+```
+
 #### Staging
 `staging` is the main command used to interact with Discovery's Staging. 
 
