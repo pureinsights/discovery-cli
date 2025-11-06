@@ -523,7 +523,7 @@ discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
 
 ```bash
 # Delete a server by name
-discovery core server delete secret1
+discovery core server delete server1
 {"acknowledged":true}
 ```
 
@@ -756,6 +756,34 @@ discovery queryflow processor get --filter label=A:A -f type=mongo
 discovery queryflow processor get -p cn
 {"active":true,"creationTimestamp":"2025-11-06T14:52:16Z","id":"019ecd8e-76c9-41ee-b047-299b8aa14aba","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:16Z","name":"MongoDB text processor clone clone 1","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-11-06T14:52:17Z","id":"0a7caa9b-99aa-4a63-aa6d-a1e40941984d","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:17Z","name":"MongoDB text processor clone clone 2","type":"mongo"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's processors. The user must send a name or UUID to get a specific processor.
+
+Usage: `discovery queryflow processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the processor that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery queryflow processor delete processor1
+{"acknowledged":true}
 ```
 
 ##### Endpoint
