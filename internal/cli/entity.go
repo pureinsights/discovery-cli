@@ -1,8 +1,25 @@
 package cli
 
 import (
+	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
+
+	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
+)
+
+const (
+	// EqualsFilter contains the JSON string for the Equals DSL filter.
+	EqualsFilter = `{
+	"equals": {
+		"field": "%s",
+		"value": "%s"
+		}
+	}`
 )
 
 // Getter defines the Get and GetAll methods.
@@ -43,4 +60,166 @@ func (d discovery) GetEntities(client Getter, printer Printer) error {
 	}
 
 	return err
+}
+
+// Searcher is the interface that implements searching methods.
+type Searcher interface {
+	Getter
+	Search(gjson.Result) ([]gjson.Result, error)
+	SearchByName(name string) (gjson.Result, error)
+}
+
+// SearchEntity tries to search an entity by name, and if it fails, it tries to get the entity by its id.
+func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error) {
+	result, err := client.SearchByName(id)
+	if err != nil {
+		discoveryErr, ok := err.(discoveryPackage.Error)
+		if !ok {
+			return gjson.Result{}, err
+		}
+
+		if discoveryErr.Status != http.StatusNotFound {
+			return gjson.Result{}, discoveryErr
+		}
+
+		if parsedId, uuidErr := uuid.Parse(id); uuidErr == nil {
+			result, err = client.Get(parsedId)
+			if err != nil {
+				return gjson.Result{}, err
+			}
+
+			return result, nil
+		}
+
+		return gjson.Result{}, discoveryErr
+	}
+
+	return result, nil
+}
+
+// SearchEntity searches for the entity and prints it into the Out IOStream.
+func (d discovery) SearchEntity(client Searcher, id string, printer Printer) error {
+	result, err := d.searchEntity(client, id)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not search for entity with id %q", id)
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonObjectPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), result)
+	} else {
+		err = printer(*d.IOStreams(), result)
+	}
+
+	return err
+}
+
+// SearchEntities searches for entities and prints the results into the Out IOStream.
+func (d discovery) SearchEntities(client Searcher, filter gjson.Result, printer Printer) error {
+	results, err := client.Search(filter)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not search for the entities")
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonArrayPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), results...)
+	} else {
+		err = printer(*d.IOStreams(), results...)
+	}
+
+	return err
+}
+
+// ParseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery
+func parseFilter(filter string) (string, []string, error) {
+	filterType, keyValue, found := strings.Cut(filter, "=")
+	if !found {
+		return "", []string(nil), NewError(ErrorExitCode, "Filter %q does not follow the format {type}={key}[:{value}]", filter)
+	}
+	filters := []string{}
+	switch filterType {
+	case "label":
+		key, value, found := strings.Cut(keyValue, ":")
+		if key == "" {
+			return "", []string(nil), NewError(ErrorExitCode, "The label's key in the filter %q cannot be empty", filter)
+		}
+		filters = append(filters, fmt.Sprintf(EqualsFilter, "labels.key", key))
+		if found {
+			if value == "" {
+				return "", []string(nil), NewError(ErrorExitCode, "The label's value in the filter %q cannot be empty if ':' is included", filter)
+			}
+			filters = append(filters, fmt.Sprintf(EqualsFilter, "labels.value", value))
+		}
+	case "type":
+		if keyValue == "" {
+			return "", []string(nil), NewError(ErrorExitCode, "The value in the type filter %q cannot be empty", filter)
+		}
+
+		filters = append(filters, fmt.Sprintf(EqualsFilter, "type", keyValue))
+	default:
+		return "", []string(nil), NewError(ErrorExitCode, "Filter type %q does not exist", filterType)
+	}
+
+	return filterType, filters, nil
+}
+
+// getAndFilterString returns the filter string for the given filters.
+// If there are multiple filters, they are joined with an "and" filter.
+// If there is only one filter, it is returned.
+// If there are no filters, an empty filter is returend.
+func getAndFilterString(filters []string) (string, error) {
+	if len(filters) > 1 {
+		return sjson.SetRaw("{}", "and", "["+strings.Join(filters, ",")+"]")
+	} else if len(filters) == 1 {
+		return filters[0], nil
+	}
+
+	return "{}", nil
+}
+
+// BuildEntitiesFilter builds a filter based on the arguments sent to the get command.
+// The filters are combined through the "and" operator.
+func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
+	labelFilters := []string{}
+	typeFilters := []string{}
+
+	var err error
+	for _, filter := range filters {
+		filterType, parsedFilters, err := parseFilter(filter)
+		if err != nil {
+			return gjson.Result{}, err
+		}
+		switch filterType {
+		case "label":
+			labelFilters = append(labelFilters, parsedFilters...)
+		case "type":
+			typeFilters = append(typeFilters, parsedFilters...)
+		}
+	}
+
+	labelFilterString, err := getAndFilterString(labelFilters)
+	if err != nil {
+		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create label filters")
+	}
+
+	typeFilterString, err := getAndFilterString(typeFilters)
+	if err != nil {
+		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create type filters")
+	}
+
+	filterString := "{}"
+	switch {
+	case len(labelFilters) > 0 && len(typeFilters) > 0:
+		filterString, err = getAndFilterString([]string{labelFilterString, typeFilterString})
+		if err != nil {
+			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not combine label and type filters")
+		}
+	case len(labelFilters) > 0:
+		filterString = labelFilterString
+	default:
+		filterString = typeFilterString
+	}
+
+	return gjson.Parse(filterString), nil
 }

@@ -33,7 +33,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 	}{
 		// Working cases
 		{
-			name:       "Search returns array",
+			name:       "executeWithPagination returns array",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusOK,
@@ -96,7 +96,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 			err:         nil,
 		},
 		{
-			name:        "Search returns no content",
+			name:        "executeWithPagination returns no content",
 			method:      http.MethodPost,
 			path:        "/search",
 			statusCode:  http.StatusNoContent,
@@ -105,7 +105,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 			err:         nil,
 		},
 		{
-			name:        "Search has no content field",
+			name:        "executeWithPagination has no content field",
 			method:      http.MethodPost,
 			path:        "/search",
 			statusCode:  http.StatusNoContent,
@@ -116,7 +116,7 @@ func Test_searcher_Search_HTTPResponseCases(t *testing.T) {
 
 		// Error cases
 		{
-			name:       "Search returns a 401 Unauthorized",
+			name:       "executeWithPagination returns a 401 Unauthorized",
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusUnauthorized,
