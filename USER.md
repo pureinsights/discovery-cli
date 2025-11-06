@@ -53,7 +53,7 @@ Core URL [http://discovery.core.cn]: https://discovery.core.cn
 Core API Key [*************.core.cn]: 
 Ingestion URL [http://discovery.ingestion.cn]:      
 Ingestion API Key [****************gestion.cn]: ingestion123
-QueryFlow URL [http://discovery.queryflow.cn]: http://localhost:12040/v2 
+QueryFlow URL [http://discovery.queryflow.cn]: http://localhost:12040 
 QueryFlow API Key [****************eryflow.cn]: queryflow213
 Staging URL [http://discovery.staging.cn]: 
 Staging API Key [***************taging.cn]: 
@@ -97,7 +97,7 @@ Core URL: "https://discovery.core.cn"
 Core API Key: "*************.core.cn"
 Ingestion URL: "http://discovery.ingestion.cn"
 Ingestion API Key: "********n123"
-QueryFlow URL: "http://localhost:12040/v2"
+QueryFlow URL: "http://localhost:12040"
 QueryFlow API Key: "********w213"
 Staging URL: "http://discovery.staging.cn"
 Staging API Key: "***************taging.cn"
@@ -108,13 +108,13 @@ Staging API Key: "***************taging.cn"
 discovery config get -s
 Showing the configuration of profile "default":
 
-Core URL: "http://localhost:12010/v2"
+Core URL: "http://localhost:12010"
 Core API Key: ""
-Ingestion URL: "http://localhost:12030/v2"
+Ingestion URL: "http://localhost:12030"
 Ingestion API Key: ""
-QueryFlow URL: "http://localhost:12040/v2"
+QueryFlow URL: "http://localhost:12040"
 QueryFlow API Key: ""
-Staging URL: "http://localhost:12020/v2"
+Staging URL: "http://localhost:12020"
 Staging API Key: ""
 ```
 
@@ -127,7 +127,7 @@ Core URL: "https://discovery.core.cn"
 Core API Key: "discovery.key.core.cn"
 Ingestion URL: "http://discovery.ingestion.cn"
 Ingestion API Key: "ingestion123"
-QueryFlow URL: "http://localhost:12040/v2"
+QueryFlow URL: "http://localhost:12040"
 QueryFlow API Key: "queryflow213"
 Staging URL: "http://discovery.staging.cn"
 Staging API Key: "discovery.key.staging.cn"
@@ -205,7 +205,7 @@ Core API Key: "*************.core.cn"
 discovery core config get -s
 Showing the configuration of profile "default":
 
-Core URL: "http://localhost:12010/v2"
+Core URL: "http://localhost:12010"
 Core API Key: ""
 ```
 
@@ -233,7 +233,7 @@ Flags:
 ###### Get
 `get` is the command used to obtain Discovery Core's labels. The user can send a UUID to get a specific label. If no UUID is given, then the command retrieves every label. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
 
-Usage: `discovery core label get [flags] <uuid>`
+Usage: `discovery core label get [flags] [<uuid>]`
 
 Arguments:
 `uuid`::
@@ -260,26 +260,6 @@ discovery core label get -p cn
 {"creationTimestamp":"2025-10-15T20:28:39Z","id":"5467ab23-7827-4fae-aa78-dfd4800549ee","key":"D","lastUpdatedTimestamp":"2025-10-15T20:28:39Z","value":"F"}
 {"creationTimestamp":"2025-10-15T20:25:29Z","id":"7d0cb8c9-6555-4592-9b6c-1f4ed7fca9f4","key":"D","lastUpdatedTimestamp":"2025-10-15T20:25:29Z","value":"D"}
 {"creationTimestamp":"2025-09-29T17:00:47Z","id":"a77fed6a-021e-440b-bb32-91e22ea31598","key":"A","lastUpdatedTimestamp":"2025-09-29T17:00:47Z","value":"A"}
-{"creationTimestamp":"2025-09-29T19:45:51Z","id":"b667b650-9ddf-490a-bc89-276987c4076f","key":"B","lastUpdatedTimestamp":"2025-09-29T19:45:51Z","value":"B"}
-{"creationTimestamp":"2025-10-15T20:25:29Z","id":"bf0e20b7-24de-448d-b7c8-e4721f51e3dc","key":"E","lastUpdatedTimestamp":"2025-10-15T20:25:29Z","value":"F"}
-{"creationTimestamp":"2025-10-15T20:26:27Z","id":"e113751a-b063-40f5-9a8b-f7cd82094cc7","key":"E","lastUpdatedTimestamp":"2025-10-15T20:26:27Z","value":"G"}
-{"creationTimestamp":"2025-10-15T20:26:27Z","id":"f37907e3-1f7a-481c-88f4-bc263eff2613","key":"H","lastUpdatedTimestamp":"2025-10-15T20:26:27Z","value":"F"}
-{"creationTimestamp":"2025-09-29T19:45:52Z","id":"f5e01fb8-1503-4401-ba56-039548259739","key":"C","lastUpdatedTimestamp":"2025-09-29T19:45:52Z","value":"C"}
-```
-
-```bash
-# Try to get label by name
-discovery core label get label1
-Error: Could not convert given id "label1" to UUID. This command does not support filters or referencing an entity by name
-invalid UUID length: 6
-Usage:
-  discovery core label get [flags]
-
-Flags:
-  -h, --help        help for get
-
-Global Flags:
-  -p, --profile string   configuration profile to use (default "default")
 ```
 
 ##### Secret
@@ -297,7 +277,7 @@ Flags:
 ###### Get
 `get` is the command used to obtain Discovery Core's secrets. The user can send a UUID to get a specific secret. If no UUID is given, then the command retrieves every secret. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
 
-Usage: `discovery core secret get [flags] <uuid>`
+Usage: `discovery core secret get [flags] [<uuid>]`
 
 Arguments:
 `uuid`::
@@ -325,21 +305,6 @@ discovery core secret get -p cn
 {"active":true,"creationTimestamp":"2025-08-14T18:01:59Z","id":"cfa0ef51-1fd9-47e2-8fdb-262ac9712781","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:01:59Z","name":"mongo-secret"}
 ```
 
-```bash
-# Try to get secret by name
-discovery core secret get secret1
-Error: Could not convert given id "secret1" to UUID. This command does not support filters or referencing an entity by name
-invalid UUID length: 7
-Usage:
-  discovery core secret get [flags]
-
-Flags:
-  -h, --help        help for get
-
-Global Flags:
-  -p, --profile string   configuration profile to use (default "default")
-```
-
 ##### Credential
 `credential` is the command used to manage credentials in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
@@ -355,7 +320,7 @@ Flags:
 ###### Get
 `get` is the command used to obtain Discovery Core's credentials. The user can send a name or UUID to get a specific credential. If no argument is given, then the command retrieves every credential. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
 
-Usage: `discovery core credential get [flags] <arg>`
+Usage: `discovery core credential get [flags] [<arg>]`
 
 Arguments:
 `arg`::
@@ -399,14 +364,12 @@ discovery core credential get --filter label=A:A --filter type=mongo
 discovery core credential get -p cn
 {"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"label test 2","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-10-17T22:37:56Z","id":"46cb4fff-28be-4901-b059-1dd618e74ee4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:56Z","name":"label test 1 clone 9","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"label test 1 clone","type":"mongo"}
 ```
 
 ##### Server
 `server` is the command used to manage servers in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
-Usage: `discovery core server [subcommand] [flags]`
+Usage: `discovery core server [subcommand] [flags]
 
 Flags:
 `-h, --help`::
@@ -418,7 +381,7 @@ Flags:
 ###### Get
 `get` is the command used to obtain Discovery Core's servers. The user can send a name or UUID to get a specific server. If no argument is given, then the command retrieves every server. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
 
-Usage: `discovery core server get [flags] <arg>`
+Usage: `discovery core server get [flags] [<arg>]`
 
 Arguments:
 `arg`::
@@ -463,7 +426,6 @@ discovery core server get --filter label=A:A -f type=mongo
 discovery core server get -p cn
 {"active":true,"creationTimestamp":"2025-09-29T15:50:37Z","id":"025347a7-e2bd-4ba1-880f-db3e51319abb","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:37Z","name":"MongoDB Atlas server clone 11","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-10-15T20:26:27Z","id":"192c3793-600a-4366-9778-7d80a0df07ce","labels":[{"key":"E","value":"G"},{"key":"H","value":"F"},{"key":"D","value":"D"}],"lastUpdatedTimestamp":"2025-10-15T20:26:27Z","name":"filter 2","type":"openai"}
-{"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server clone 2","type":"mongo"}
 ```
 
 #### Ingestion

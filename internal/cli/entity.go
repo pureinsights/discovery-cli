@@ -133,36 +133,50 @@ func (d discovery) SearchEntities(client Searcher, filter gjson.Result, printer 
 }
 
 // ParseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery
-func parseFilter(filter string, labelFilters *[]string, typeFilters *[]string) error {
+func parseFilter(filter string) (string, []string, error) {
 	filterType, keyValue, found := strings.Cut(filter, "=")
 	if !found {
-		return NewError(ErrorExitCode, "Filter %q does not follow the format {type}={key}[:{value}]", filter)
+		return "", []string(nil), NewError(ErrorExitCode, "Filter %q does not follow the format {type}={key}[:{value}]", filter)
 	}
-
+	filters := []string{}
 	switch filterType {
 	case "label":
 		key, value, found := strings.Cut(keyValue, ":")
 		if key == "" {
-			return NewError(ErrorExitCode, "The label's key in the filter %q cannot be empty", filter)
+			return "", []string(nil), NewError(ErrorExitCode, "The label's key in the filter %q cannot be empty", filter)
 		}
-		*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.key", key))
+		filters = append(filters, fmt.Sprintf(EqualsFilter, "labels.key", key))
 		if found {
 			if value == "" {
-				return NewError(ErrorExitCode, "The label's value in the filter %q cannot be empty if ':' is included", filter)
+				return "", []string(nil), NewError(ErrorExitCode, "The label's value in the filter %q cannot be empty if ':' is included", filter)
 			}
-			*labelFilters = append(*labelFilters, fmt.Sprintf(EqualsFilter, "labels.value", value))
+			filters = append(filters, fmt.Sprintf(EqualsFilter, "labels.value", value))
 		}
 	case "type":
 		if keyValue == "" {
-			return NewError(ErrorExitCode, "The type in the filter %q cannot be empty", filter)
+			return "", []string(nil), NewError(ErrorExitCode, "The value in the type filter %q cannot be empty", filter)
 		}
 
-		*typeFilters = append(*typeFilters, fmt.Sprintf(EqualsFilter, "type", keyValue))
+		filters = append(filters, fmt.Sprintf(EqualsFilter, "type", keyValue))
 	default:
-		return NewError(ErrorExitCode, "Filter type %q does not exist", filterType)
+		return "", []string(nil), NewError(ErrorExitCode, "Filter type %q does not exist", filterType)
 	}
 
-	return nil
+	return filterType, filters, nil
+}
+
+// getAndFilterString returns the filter string for the given filters.
+// If there are multiple filters, they are joined with an "and" filter.
+// If there is only one filter, it is returned.
+// If there are no filters, an empty filter is returend.
+func getAndFilterString(filters []string) (string, error) {
+	if len(filters) > 1 {
+		return sjson.SetRaw("{}", "and", "["+strings.Join(filters, ",")+"]")
+	} else if len(filters) == 1 {
+		return filters[0], nil
+	}
+
+	return "{}", nil
 }
 
 // BuildEntitiesFilter builds a filter based on the arguments sent to the get command.
@@ -173,36 +187,32 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 
 	var err error
 	for _, filter := range filters {
-		err := parseFilter(filter, &labelFilters, &typeFilters)
+		filterType, parsedFilters, err := parseFilter(filter)
 		if err != nil {
 			return gjson.Result{}, err
 		}
+		switch filterType {
+		case "label":
+			labelFilters = append(labelFilters, parsedFilters...)
+		case "type":
+			typeFilters = append(typeFilters, parsedFilters...)
+		}
 	}
 
-	labelFilterString := "{}"
-	if len(labelFilters) > 1 {
-		labelFilterString, err = sjson.SetRaw(labelFilterString, "and", "["+strings.Join(labelFilters, ",")+"]")
-		if err != nil {
-			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create label filters")
-		}
-	} else if len(labelFilters) == 1 {
-		labelFilterString = labelFilters[0]
+	labelFilterString, err := getAndFilterString(labelFilters)
+	if err != nil {
+		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create label filters")
 	}
 
-	typeFilterString := "{}"
-	if len(typeFilters) > 1 {
-		typeFilterString, err = sjson.SetRaw(typeFilterString, "and", "["+strings.Join(typeFilters, ",")+"]")
-		if err != nil {
-			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create type filters")
-		}
-	} else if len(typeFilters) == 1 {
-		typeFilterString = typeFilters[0]
+	typeFilterString, err := getAndFilterString(typeFilters)
+	if err != nil {
+		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create type filters")
 	}
 
 	filterString := "{}"
 	switch {
 	case len(labelFilters) > 0 && len(typeFilters) > 0:
-		filterString, err = sjson.SetRaw(filterString, "and", fmt.Sprintf("[%s,%s]", labelFilterString, typeFilterString))
+		filterString, err = getAndFilterString([]string{labelFilterString, typeFilterString})
 		if err != nil {
 			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not combine label and type filters")
 		}
