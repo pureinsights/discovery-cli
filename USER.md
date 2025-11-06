@@ -612,6 +612,46 @@ Ingestion URL: "https://discovery.ingestion.cn"
 Ingestion API Key: "discovery.key.ingestion.cn"
 ```
 
+##### Processor
+`processor` is the command used to manage processors in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery ingestion processor [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's processors. The user must send a name or UUID to get a specific processor.
+
+Usage: `discovery ingestion processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the processor that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery ingestion processor delete "MongoDB store processor clone 12345 clone"
+{"acknowledged":true}
+```
+
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow. 
 
