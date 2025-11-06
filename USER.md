@@ -598,6 +598,68 @@ QueryFlow URL: "https://discovery.queryflow.cn"
 QueryFlow API Key: "discovery.key.queryflow.cn"
 ```
 
+##### Processor
+`processor` is the command used to manage processors in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery queryflow processor [subcommand] [flags]
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery queryflow processor get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the processor that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+Examples:
+
+```bash
+# Get a processor by id
+discovery queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+
+```
+
+```bash
+# Get processor by name
+discovery queryflow processor get "MongoDB text processor"
+{"active":true,"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor","type":"mongo"}
+```
+
+```bash
+# Get processors using filters
+discovery queryflow processor get --filter label=A:A -f type=mongo
+{"active":true,"creationTimestamp":"2025-11-06T14:52:01Z","id":"628d4b24-84cc-4070-8eed-c3155cf40fe9","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:01Z","name":"MongoDB text processor clone","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor clone clone","type":"mongo"}
+```
+
+```bash
+# Get all processors using the configuration in profile "cn"
+discovery queryflow processor get -p cn
+queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor clone clone","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
 #### Staging
 `staging` is the main command used to interact with Discovery's Staging. 
 

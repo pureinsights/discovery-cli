@@ -244,7 +244,7 @@ func TestNewGetCommand(t *testing.T) {
 			path:       "/v2/processor/search",
 			statusCode: http.StatusOK,
 			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "The Discovery QueryFlow URL is missing for profile \"default\".\nTo set the URL for the Discovery QueryFlow API, run any of the following commands:\n      discovery config  --profile \n      discovery queryflow config --profile \"default\""),
+			err:        cli.NewError(cli.ErrorExitCode, "The Discovery QueryFlow URL is missing for profile \"default\".\nTo set the URL for the Discovery QueryFlow API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery queryflow config --profile \"default\""),
 		},
 		{
 			name:       "user sends a name that does not exist",
