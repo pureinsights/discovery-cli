@@ -637,7 +637,6 @@ Examples:
 # Get a processor by id
 discovery queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
 {"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
-
 ```
 
 ```bash
@@ -656,8 +655,8 @@ discovery queryflow processor get --filter label=A:A -f type=mongo
 ```bash
 # Get all processors using the configuration in profile "cn"
 discovery queryflow processor get -p cn
-queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
-{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor clone clone","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"active":true,"creationTimestamp":"2025-11-06T14:52:16Z","id":"019ecd8e-76c9-41ee-b047-299b8aa14aba","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:16Z","name":"MongoDB text processor clone clone 1","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-11-06T14:52:17Z","id":"0a7caa9b-99aa-4a63-aa6d-a1e40941984d","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:17Z","name":"MongoDB text processor clone clone 2","type":"mongo"}
 ```
 
 ##### Endpoint
