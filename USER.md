@@ -218,6 +218,50 @@ Core URL: "https://discovery.core.cn"
 Core API Key: "discovery.key.core.cn"
 ```
 
+##### Label
+`label` is the command used to manage labels in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery core label [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Core's labels. The user can send a UUID to get a specific label. If no UUID is given, then the command retrieves every label. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
+
+Usage: `discovery core label get [flags] [<uuid>]`
+
+Arguments:
+`uuid`::
+(Optional, String) The UUID of the label that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get a label by id
+discovery core label get 3d51beef-8b90-40aa-84b5-033241dc6239
+{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"A","lastUpdatedTimestamp":"2025-08-27T19:22:47Z","value":"B"}
+```
+
+```bash
+# Get all labels using the configuration in profile "cn"
+discovery core label get -p cn
+{"creationTimestamp":"2025-10-15T20:28:39Z","id":"5467ab23-7827-4fae-aa78-dfd4800549ee","key":"D","lastUpdatedTimestamp":"2025-10-15T20:28:39Z","value":"F"}
+{"creationTimestamp":"2025-10-15T20:25:29Z","id":"7d0cb8c9-6555-4592-9b6c-1f4ed7fca9f4","key":"D","lastUpdatedTimestamp":"2025-10-15T20:25:29Z","value":"D"}
+{"creationTimestamp":"2025-09-29T17:00:47Z","id":"a77fed6a-021e-440b-bb32-91e22ea31598","key":"A","lastUpdatedTimestamp":"2025-09-29T17:00:47Z","value":"A"}
+```
+
 #### Ingestion
 `ingestion` is the main command used to interact with Discovery's Ingestion. 
 
