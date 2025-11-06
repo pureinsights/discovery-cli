@@ -164,8 +164,11 @@ func parseFilter(filter string) (string, []string, error) {
 	return filterType, filters, nil
 }
 
-// getFilterString returns the filter string for the given filters.
-func getFilterString(filters []string) (string, error) {
+// getAndFilterString returns the filter string for the given filters.
+// If there are multiple filters, they are joined with an "and" filter.
+// If there is only one filter, it is returned.
+// If there are no filters, an empty filter is returend.
+func getAndFilterString(filters []string) (string, error) {
 	if len(filters) > 1 {
 		return sjson.SetRaw("{}", "and", "["+strings.Join(filters, ",")+"]")
 	} else if len(filters) == 1 {
@@ -195,12 +198,12 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 		}
 	}
 
-	labelFilterString, err := getFilterString(labelFilters)
+	labelFilterString, err := getAndFilterString(labelFilters)
 	if err != nil {
 		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create label filters")
 	}
 
-	typeFilterString, err := getFilterString(typeFilters)
+	typeFilterString, err := getAndFilterString(typeFilters)
 	if err != nil {
 		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create type filters")
 	}
@@ -208,7 +211,7 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 	filterString := "{}"
 	switch {
 	case len(labelFilters) > 0 && len(typeFilters) > 0:
-		filterString, err = sjson.SetRaw(filterString, "and", fmt.Sprintf("[%s,%s]", labelFilterString, typeFilterString))
+		filterString, err = getAndFilterString([]string{labelFilterString, typeFilterString})
 		if err != nil {
 			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not combine label and type filters")
 		}
