@@ -284,21 +284,6 @@ discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
 {"acknowledged":true}
 ```
 
-```bash
-# Try to delete label by name
-discovery core label delete label1
-Error: Could not convert given id "label1" to UUID. This command does not support filters or referencing an entity by name
-invalid UUID length: 6
-Usage:
-  discovery core label delete [flags]
-
-Flags:
-  -h, --help        help for delete
-
-Global Flags:
-  -p, --profile string   configuration profile to use (default "default")
-```
-
 ##### Secret
 `secret` is the command used to manage secrets in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 

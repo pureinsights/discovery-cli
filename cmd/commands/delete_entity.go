@@ -12,7 +12,7 @@ const (
 
 // DeleteCommand is the function that executes the delete operation for the delete commands that do not work with names.
 func DeleteCommand(id string, d cli.Discovery, client cli.Deleter, config commandConfig) error {
-	err := checkCredentials(d, config.profile, config.componentName, config.url, config.apiKey)
+	err := checkCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}

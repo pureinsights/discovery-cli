@@ -47,6 +47,6 @@ func TestNewLabelCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"get", "delete"}
+	expectedCommands := []string{"delete", "get"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

@@ -1,7 +1,0 @@
-Usage:
-  delete [flags]
-
-Flags:
-  -h, --help             help for delete
-  -p, --profile string   configuration profile to use (default "default")
-
