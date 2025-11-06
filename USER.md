@@ -648,7 +648,7 @@ discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
 
 ```bash
 # Delete a processor by name
-discovery ingestion processor delete "MongoDB store processor clone 12345 clone"
+discovery ingestion processor delete "MongoDB store processor"
 {"acknowledged":true}
 ```
 
