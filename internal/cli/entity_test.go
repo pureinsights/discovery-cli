@@ -950,8 +950,8 @@ func Test_parseFilter(t *testing.T) {
 	}
 }
 
-// Test_getFilterString tests the getFilterString() function
-func Test_getFilterString(t *testing.T) {
+// Test_getAndFilterString tests the getAndFilterString() function
+func Test_getAndFilterString(t *testing.T) {
 	tests := []struct {
 		name                 string
 		filters              []string
@@ -1000,7 +1000,7 @@ func Test_getFilterString(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			filterString, err := getFilterString(tc.filters)
+			filterString, err := getAndFilterString(tc.filters)
 
 			if tc.err != nil {
 				assert.EqualError(t, err, tc.err.Error())
