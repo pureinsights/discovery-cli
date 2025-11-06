@@ -269,7 +269,7 @@ Usage: `discovery core label delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the label that will be retrieved.
+(Required, String) The UUID of the label that will be retrieved.
 
 Flags:
 `-h, --help`::
