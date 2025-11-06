@@ -346,7 +346,7 @@ Usage: `discovery core credential get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the credential that will be retrieved.
+(Optional, String) The name or UUID of the credential that will be retrieved
 
 Flags:
 `-h, --help`::
