@@ -269,7 +269,7 @@ Usage: `discovery core label delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the label that will be retrieved.
+(Required, String) The UUID of the label that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -334,7 +334,7 @@ Usage: `discovery core secret delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the secret that will be retrieved.
+(Required, String) The UUID of the secret that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -416,7 +416,7 @@ Usage: `discovery core credential delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the credential that will be deleted.
+(Required, String) The name or UUID of the credential that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -506,7 +506,7 @@ Usage: `discovery core server delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the server that will be deleted.
+(Required, String) The name or UUID of the server that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -523,7 +523,7 @@ discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
 
 ```bash
 # Delete a server by name
-discovery core server delete secret1
+discovery core server delete server1
 {"acknowledged":true}
 ```
 
@@ -631,7 +631,7 @@ Usage: `discovery ingestion processor delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the processor that will be deleted.
+(Required, String) The name or UUID of the processor that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -671,7 +671,7 @@ Usage: `discovery ingestion pipeline delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the pipeline that will be deleted.
+(Required, String) The name or UUID of the pipeline that will be deleted.
 
 Flags:
 `-h, --help`::
