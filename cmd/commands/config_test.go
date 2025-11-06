@@ -242,7 +242,7 @@ func TestPrintConfigCommand_NoSensitive(t *testing.T) {
 	assert.EqualError(t, errStruct, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: sensitive"), "Could not get the sensitive flag").Error())
 }
 
-// TestPrintConfigCommand_WithProfileAndSensitive tests the PrintConfig() function with the profile and sensitive flags.
+// TestPrintConfigCommand_ErrorPrintingHeader tests the PrintConfig() function when there is an error printing the header.
 func TestPrintConfigCommand_ErrorPrintingHeader(t *testing.T) {
 	in := strings.NewReader(strings.Repeat("\n", 8))
 	errBuf := &bytes.Buffer{}
