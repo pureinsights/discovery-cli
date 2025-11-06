@@ -692,6 +692,46 @@ discovery ingestion pipeline delete "Search pipeline"
 {"acknowledged":true}
 ```
 
+##### Seed
+`seed` is the command used to manage seeds in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery ingestion seed [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's seeds. The user must send a name or UUID to get a specific seed.
+
+Usage: `discovery ingestion seed delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Optional, String) The name or UUID of the seed that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a seed by id
+discovery ingestion seed delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a seed by name
+discovery ingestion seed delete "Search seed"
+{"acknowledged":true}
+```
+
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow. 
 
