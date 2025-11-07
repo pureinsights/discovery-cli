@@ -44,6 +44,7 @@ func newSecretsClient(url, apiKey string) secretsClient {
 type credentialsClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewCredentialsClient creates a new credentialsClient.
@@ -56,6 +57,9 @@ func newCredentialsClient(url, apiKey string) credentialsClient {
 			},
 		},
 		cloner: cloner{
+			client: client,
+		},
+		searcher: searcher{
 			client: client,
 		},
 	}

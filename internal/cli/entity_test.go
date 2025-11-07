@@ -312,21 +312,23 @@ func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 // SearchByName returns an object as if it found correctly the entity.
 func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Parse(`{
-		"source": {
-			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
-			"labels": [],
-			"active": true,
-			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`), nil
 }
 
@@ -334,7 +336,7 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
-		"name": "MongoDB Atlas server clone",
+		"name": "MongoDB Atlas server",
 		"labels": [],
 		"active": true,
 		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
@@ -355,7 +357,31 @@ func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 
 // GetAll returns
 func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
-	return gjson.Parse(`[]`).Array(), nil
+	return gjson.Parse(`[
+		{
+		"type": "mongo",
+		"name": "my-credential",
+		"labels": [
+			{
+			"key": "A",
+			"value": "A"
+			}
+		],
+		"active": true,
+		"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+		"creationTimestamp": "2025-10-17T22:37:57Z",
+		"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+		},
+		{
+		"type": "openai",
+		"name": "OpenAI credential clone clone",
+		"labels": [],
+		"active": true,
+		"id": "5c09589e-b643-41aa-a766-3b7fc3660473",
+		"creationTimestamp": "2025-10-17T22:38:12Z",
+		"lastUpdatedTimestamp": "2025-10-17T22:38:12Z"
+		},
+	]`).Array(), nil
 }
 
 // FailingSearcher mocks the discovery.Searcher struct when its functions return errors.
@@ -428,8 +454,7 @@ func (s *FailingSearcherWorkingGetter) SearchByName(name string) (gjson.Result, 
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name %q does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`, name)),
 	}
 }
@@ -481,8 +506,7 @@ func (s *FailingSearcherFailingGetter) SearchByName(name string) (gjson.Result, 
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name %q does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`, name)),
 	}
 }
@@ -553,21 +577,23 @@ func Test_searchEntity(t *testing.T) {
 			client: new(WorkingSearcher),
 			id:     "MongoDB Atlas server",
 			expected: gjson.Parse(`{
-		"source": {
-			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
-			"labels": [],
-			"active": true,
-			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`),
 			err: nil,
 		},
@@ -639,14 +665,7 @@ func Test_searchEntity(t *testing.T) {
 			expected: gjson.Result{},
 			err: discoveryPackage.Error{
 				Status: http.StatusNotFound,
-				Body: gjson.Parse(`{
-	"status": 404,
-	"code": 1003,
-	"messages": [
-		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
-}`),
+				Body:   gjson.Parse("{\n\t\"status\": 404,\n\t\"code\": 1003,\n\t\"messages\": [\n\t\t\"Entity not found: entity with name \"MongoDB Atlas Server\" does not exist\"\n\t]\n}"),
 			},
 		},
 		{
@@ -703,7 +722,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 			client:         new(WorkingSearcher),
 			id:             "MongoDB Atlas Server",
 			printer:        JsonObjectPrinter(true),
-			expectedOutput: "{\n  \"highlight\": {\n    \"name\": [\n      \"\\u003cem\\u003eMongoDB\\u003c/em\\u003e \\u003cem\\u003eAtlas\\u003c/em\\u003e \\u003cem\\u003eserver\\u003c/em\\u003e clone\"\n    ]\n  },\n  \"score\": 0.50769836,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"name\": \"MongoDB Atlas server clone\",\n    \"type\": \"mongo\"\n  }\n}\n",
+			expectedOutput: "{\n  \"active\": true,\n  \"config\": {\n    \"connection\": {\n      \"connectTimeout\": \"1m\",\n      \"readTimeout\": \"30s\"\n    },\n    \"credentialId\": \"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\n    \"servers\": [\n      \"mongodb+srv://cluster0.dleud.mongodb.net/\"\n    ]\n  },\n  \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"name\": \"MongoDB Atlas server\",\n  \"type\": \"mongo\"\n}\n",
 			err:            nil,
 		},
 		{
@@ -718,7 +737,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 		// Error case
 		{
 			name:           "Search returns 404 Not Found",
-			client:         new(FailingSearcherWorkingGetter),
+			client:         new(FailingSearcherFailingGetter),
 			id:             "MongoDB Atlas Server",
 			printer:        nil,
 			expectedOutput: "",
@@ -729,8 +748,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 	"code": 1003,
 	"messages": [
 		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	],
-	"timestamp": "2025-09-30T15:38:42.885125200Z"
+	]
 }`),
 			}, "Could not search for entity with id \"MongoDB Atlas Server\""),
 		},

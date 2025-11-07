@@ -124,6 +124,7 @@ This struct manages credentials.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 Creating a `credentialsClient` can be done with `core.Credentials()` or `newCredentialsClient(URL, API Key)`.
 

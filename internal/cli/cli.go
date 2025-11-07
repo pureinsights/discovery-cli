@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
 )
 
 // Discovery is the interface for the struct that represents Discovery.
@@ -24,6 +25,8 @@ type Discovery interface {
 	PrintStagingConfigToUser(profile string, sensitive bool) error
 	GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	GetEntities(client Getter, printer Printer) error
+	SearchEntity(client Searcher, id string, printer Printer) error
+	SearchEntities(client Searcher, filter gjson.Result, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.

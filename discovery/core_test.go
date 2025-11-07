@@ -43,6 +43,8 @@ func Test_newCredentialsClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/credential", cc.crud.client.client.BaseURL)
 	assert.Equal(t, c.ApiKey, cc.cloner.client.ApiKey)
 	assert.Equal(t, c.client.BaseURL+"/credential", cc.cloner.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, cc.searcher.client.ApiKey)
+	assert.Equal(t, c.client.BaseURL+"/credential", cc.searcher.client.client.BaseURL)
 }
 
 // Test_newServersClient tests the constructor of newServersClient
@@ -679,10 +681,12 @@ func Test_core_Credentials(t *testing.T) {
 	c := NewCore("http://localhost:12010", "Api Key")
 	cc := c.Credentials()
 
-	assert.Equal(t, c.ApiKey, cc.ApiKey)
-	assert.Equal(t, c.Url+"/credential", cc.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, cc.crud.ApiKey)
+	assert.Equal(t, c.Url+"/credential", cc.crud.client.client.BaseURL)
 	assert.Equal(t, c.ApiKey, cc.cloner.client.ApiKey)
 	assert.Equal(t, c.Url+"/credential", cc.cloner.client.client.BaseURL)
+	assert.Equal(t, c.ApiKey, cc.searcher.client.ApiKey)
+	assert.Equal(t, c.Url+"/credential", cc.searcher.client.client.BaseURL)
 }
 
 // Test_core_Servers tests the core.Servers() function
