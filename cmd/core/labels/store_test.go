@@ -57,7 +57,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/label": {
+				"POST:/v2/label": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -119,7 +119,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/label": {
+				"POST:/v2/label": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -138,7 +138,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -155,7 +155,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -189,7 +189,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "testdata/StoreCommand_JSONFile.golden",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/label": {
+				"POST:/v2/label": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -208,7 +208,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -225,7 +225,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -311,7 +311,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"/v2/label": {
+				"POST:/v2/label": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -330,7 +330,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -346,7 +346,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/label/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -433,7 +433,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/label": {
+				"POST:/v2/label": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -475,7 +475,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"/v2/label": {
+				"POST:/v2/label": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
