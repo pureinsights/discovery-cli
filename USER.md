@@ -299,13 +299,6 @@ discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
 {"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label2","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
 ```
 
-```bash
-# Abort the store operation when an error occurs.
-discovery core label store --file "labeljsonfile.txt" --abort-on-error
-Error: Could not store entities
-status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"timestamp":"2025-10-30T00:07:38.152325600Z"}
-```
-
 ##### Secret
 `secret` is the command used to manage secrets in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
