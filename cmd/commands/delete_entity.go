@@ -22,6 +22,5 @@ func DeleteCommand(id string, d cli.Discovery, client cli.Deleter, config comman
 		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not convert given id %q to UUID. This command does not support referencing an entity by name.", id)
 	}
 	printer := cli.GetObjectPrinter(config.output)
-	err = d.DeleteEntity(client, deleteId, printer)
-	return err
+	return d.DeleteEntity(client, deleteId, printer)
 }
