@@ -307,7 +307,17 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 		"active": true,
 		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
 		"creationTimestamp": "2025-09-29T15:50:17Z",
-		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`), nil
 }
 
