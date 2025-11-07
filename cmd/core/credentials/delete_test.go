@@ -43,7 +43,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -87,7 +87,7 @@ func TestNewDeleteCommand(t *testing.T) {
 						assert.Equal(t, "/v2/credential/search", r.URL.Path)
 					},
 				},
-				"/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 				"acknowledged": true
@@ -112,7 +112,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -157,7 +157,7 @@ func TestNewDeleteCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -195,7 +195,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NameDoesNotExist"),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode:  http.StatusNoContent,
 					Body:        ``,
 					ContentType: "application/json",
@@ -227,7 +227,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -272,7 +272,7 @@ func TestNewDeleteCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -297,7 +297,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -342,7 +342,7 @@ func TestNewDeleteCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 				"acknowledged": true

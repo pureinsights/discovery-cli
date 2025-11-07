@@ -43,7 +43,7 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchByNameReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -107,7 +107,7 @@ func TestNewGetCommand(t *testing.T) {
 						assert.Equal(t, "/v2/credential/search", r.URL.Path)
 					},
 				},
-				"/v2/credential/3b32e410-2f33-412d-9fb8-17970131921c": {
+				"GET:/v2/credential/3b32e410-2f33-412d-9fb8-17970131921c": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -142,7 +142,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"GET:/v2/credential": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -203,7 +203,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -322,7 +322,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode: http.StatusInternalServerError,
 					Body: `{
 			"status": 500,
@@ -359,7 +359,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"GET:/v2/credential": {
 					StatusCode:  http.StatusUnauthorized,
 					Body:        `{"error": "unauthorized"}`,
 					ContentType: "application/json",
@@ -382,7 +382,7 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchHTTPError"),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_SearchHTTPError"),
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode: http.StatusUnauthorized,
 					Body: `{
 	"status": 401,
@@ -422,7 +422,7 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewGetCommand_Out_FilterDoesNotExist"),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_FilterDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode:  http.StatusBadRequest,
 					Body:        ``,
 					ContentType: "application/json",
@@ -445,7 +445,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential/search": {
+				"POST:/v2/credential/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -486,7 +486,7 @@ func TestNewGetCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -522,7 +522,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"GET:/v2/credential": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","credentials":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}},     
