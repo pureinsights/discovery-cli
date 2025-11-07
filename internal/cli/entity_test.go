@@ -1546,7 +1546,15 @@ func (g *WorkingSearchDeleter) Search(filter gjson.Result) ([]gjson.Result, erro
 
 // Get implements the searchDeleter interface.
 func (g *WorkingSearchDeleter) Get(id uuid.UUID) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB text processor",
+		"labels": [],
+		"active": true,
+		"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+		"creationTimestamp": "2025-08-14T18:02:38Z",
+		"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+	}`), nil
 }
 
 // GetAll implements the searchDeleter interface.
@@ -1629,7 +1637,15 @@ func (g *FailingSearchDeleterDeleteFails) Search(filter gjson.Result) ([]gjson.R
 
 // Get implements the searchDeleter interface.
 func (g *FailingSearchDeleterDeleteFails) Get(id uuid.UUID) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB text processor",
+		"labels": [],
+		"active": true,
+		"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+		"creationTimestamp": "2025-08-14T18:02:38Z",
+		"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+	}`), nil
 }
 
 // GetAll implements the searchDeleter interface.
@@ -1664,7 +1680,7 @@ func (g *FailingSearchDeleterParsingUUIDFails) SearchByName(name string) (gjson.
 		"name": "MongoDB text processor",
 		"labels": [],
 		"active": true,
-		"id": "notuuid",
+		"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
 		"creationTimestamp": "2025-08-14T18:02:38Z",
 		"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
 	}`), nil
@@ -1677,7 +1693,15 @@ func (g *FailingSearchDeleterParsingUUIDFails) Search(filter gjson.Result) ([]gj
 
 // Get implements the searchDeleter interface.
 func (g *FailingSearchDeleterParsingUUIDFails) Get(id uuid.UUID) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB text processor",
+		"labels": [],
+		"active": true,
+		"id": "notuuid",
+		"creationTimestamp": "2025-08-14T18:02:38Z",
+		"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+	}`), nil
 }
 
 // GetAll implements the searchDeleter interface.
