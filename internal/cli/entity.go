@@ -84,12 +84,7 @@ func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error
 		}
 
 		if parsedId, uuidErr := uuid.Parse(id); uuidErr == nil {
-			result, err = client.Get(parsedId)
-			if err != nil {
-				return gjson.Result{}, err
-			}
-
-			return result, nil
+			return client.Get(parsedId)
 		}
 
 		return gjson.Result{}, discoveryErr

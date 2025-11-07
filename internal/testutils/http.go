@@ -53,7 +53,7 @@ func HttpMultiResponseHandler(
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		for path, response := range responses {
-			if r.URL.Path == path {
+			if r.Method+":"+r.URL.Path == path {
 				if response.Assertions != nil {
 					response.Assertions(t, r)
 				}
