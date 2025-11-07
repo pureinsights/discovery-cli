@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 )
@@ -89,4 +90,64 @@ func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, ex
 	}
 
 	return err
+}
+
+type RecordGetter interface {
+	Get(id string) (gjson.Result, error)
+	GetAll() ([]gjson.Result, error)
+}
+
+func AppendSeedRecords(seed gjson.Result, client RecordGetter) (gjson.Result, error) {
+	records, err := client.GetAll()
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	raw, err := sjson.Set(seed.Raw, "records", records)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	return gjson.Parse(raw), err 
+}
+
+
+func AppendSeedRecord(seed gjson.Result, client RecordGetter, id string) (gjson.Result, error) {
+	records, err := client.Get(id)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	raw, err := sjson.Set(seed.Raw, "record", records)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	return gjson.Parse(raw), err 
+}
+
+func (d discovery) AppendSeedRecords(seed gjson.Result, client RecordGetter, printer Printer) error {
+	seed, err := AppendSeedRecords(seed, client)
+	if err != nil {
+		return err
+	}
+
+	if printer != nil {
+		printer = JsonObjectPrinter(false)
+	}
+
+	return printer(*d.iostreams, seed)
+}
+
+func (d discovery) AppendSeedRecord(seed gjson.Result, client RecordGetter, id string, printer Printer) error {
+	seed, err := AppendSeedRecord(seed, client, id)
+	if err != nil {
+		return err
+	}
+
+	if printer != nil {
+		printer = JsonObjectPrinter(false)
+	}
+
+	return printer(*d.iostreams, seed)
 }

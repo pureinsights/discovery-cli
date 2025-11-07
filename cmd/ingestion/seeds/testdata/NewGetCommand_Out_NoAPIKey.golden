@@ -7,4 +7,5 @@ Flags:
                              - Type: The format is type={type}.
   -h, --help                 help for get
   -p, --profile string       configuration profile to use (default "default")
+      --records              Show the records
 
