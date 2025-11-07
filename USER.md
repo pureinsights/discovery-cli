@@ -287,21 +287,21 @@ Examples:
 
 ```bash
 # Store a label with the JSON configuration in a file
-discovery core label store --file "labeljsonfile.golden"
-{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"label6","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"hello3"}
+discovery core label store --file "labeljsonfile.txt"
+{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"label1","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"value1"}
 {"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"status":404,"timestamp":"2025-10-30T00:05:35.995533500Z"}
-{"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"label9","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"hello6"}
+{"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"label3","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"value3"}
 ```
 
 ```bash
 # Store a label with the JSON configuration in the data flag
 discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
-{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"labeltest","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
+{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label2","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
 ```
 
 ```bash
 # Abort the store operation when an error occurs.
-discovery core label store --file "labeljsonfile.golden" --abort-on-error
+discovery core label store --file "labeljsonfile.txt" --abort-on-error
 Error: Could not store entities
 status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"timestamp":"2025-10-30T00:07:38.152325600Z"}
 ```
