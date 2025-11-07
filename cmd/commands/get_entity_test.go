@@ -301,21 +301,13 @@ func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 // SearchByName returns an object as if it found correctly the entity.
 func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Parse(`{
-		"source": {
-			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
-			"labels": [],
-			"active": true,
-			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
 	}`), nil
 }
 
@@ -323,7 +315,7 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
-		"name": "MongoDB Atlas server clone",
+		"name": "MongoDB Atlas server",
 		"labels": [],
 		"active": true,
 		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
@@ -347,7 +339,7 @@ func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{
 		"type": "mongo",
-		"name": "label test 1 clone 10",
+		"name": "my-credential",
 		"labels": [
 			{
 			"key": "A",
@@ -544,6 +536,11 @@ func (s *SearcherReturnsOtherError) Get(id uuid.UUID) (gjson.Result, error) {
 	}
 }
 
+// GetAll implements the searcher interface
+func (s *SearcherReturnsOtherError) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(``)}
+}
+
 // TestSearchCommand tests the SearchCommand() function.
 func TestSearchCommand(t *testing.T) {
 	tests := []struct {
@@ -566,7 +563,7 @@ func TestSearchCommand(t *testing.T) {
 			apiKey:         "apiKey123",
 			componentName:  "Core",
 			client:         new(WorkingSearcher),
-			expectedOutput: "{\"highlight\":{\"name\":[\"\\u003cem\\u003eMongoDB\\u003c/em\\u003e \\u003cem\\u003eAtlas\\u003c/em\\u003e \\u003cem\\u003eserver\\u003c/em\\u003e clone\"]},\"score\":0.50769836,\"source\":{\"active\":true,\"creationTimestamp\":\"2025-09-29T15:50:17Z\",\"id\":\"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:17Z\",\"name\":\"MongoDB Atlas server clone\",\"type\":\"mongo\"}}\n",
+			expectedOutput: "{\"active\":true,\"config\":{\"connection\":{\"connectTimeout\":\"1m\",\"readTimeout\":\"30s\"},\"credentialId\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"servers\":[\"mongodb+srv://cluster0.dleud.mongodb.net/\"]},\"creationTimestamp\":\"2025-09-29T15:50:17Z\",\"id\":\"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:17Z\",\"name\":\"MongoDB Atlas server\",\"type\":\"mongo\"}\n",
 			err:            nil,
 		},
 		{
@@ -586,7 +583,7 @@ func TestSearchCommand(t *testing.T) {
 			apiKey:         "apiKey123",
 			componentName:  "Core",
 			client:         new(WorkingSearcher),
-			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-10-17T22:37:57Z\",\"id\":\"3b32e410-2f33-412d-9fb8-17970131921c\",\"labels\":[{\"key\":\"A\",\"value\":\"A\"}],\"lastUpdatedTimestamp\":\"2025-10-17T22:37:57Z\",\"name\":\"label test 1 clone 10\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-10-17T22:38:12Z\",\"id\":\"5c09589e-b643-41aa-a766-3b7fc3660473\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-10-17T22:38:12Z\",\"name\":\"OpenAI credential clone clone\",\"type\":\"openai\"}\n",
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-10-17T22:37:57Z\",\"id\":\"3b32e410-2f33-412d-9fb8-17970131921c\",\"labels\":[{\"key\":\"A\",\"value\":\"A\"}],\"lastUpdatedTimestamp\":\"2025-10-17T22:37:57Z\",\"name\":\"my-credential\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-10-17T22:38:12Z\",\"id\":\"5c09589e-b643-41aa-a766-3b7fc3660473\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-10-17T22:38:12Z\",\"name\":\"OpenAI credential clone clone\",\"type\":\"openai\"}\n",
 			err:            nil,
 		},
 		{
