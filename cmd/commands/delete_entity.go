@@ -22,8 +22,7 @@ func DeleteCommand(id string, d cli.Discovery, client cli.Deleter, config comman
 		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not convert given id %q to UUID. This command does not support referencing an entity by name.", id)
 	}
 	printer := cli.GetObjectPrinter(config.output)
-	err = d.DeleteEntity(client, deleteId, printer)
-	return err
+	return d.DeleteEntity(client, deleteId, printer)
 }
 
 // SearchDeleteCommand is the function that executes the delete operation for the delete commands that can also work with names.
@@ -34,6 +33,5 @@ func SearchDeleteCommand(id string, d cli.Discovery, client cli.SearchDeleter, c
 	}
 
 	printer := cli.GetObjectPrinter(config.output)
-	err = d.SearchDeleteEntity(client, id, printer)
-	return err
+	return d.SearchDeleteEntity(client, id, printer)
 }
