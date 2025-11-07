@@ -344,7 +344,6 @@ Examples:
 # Get a credential by id
 discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
 {"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","secret":"mongo-secret","type":"mongo"}
-
 ```
 
 ```bash
@@ -406,7 +405,6 @@ Examples:
 # Get a server by id
 discovery core server get 21029da3-041c-43b5-a67e-870251f2f6a6
 {"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
-
 ```
 
 ```bash
