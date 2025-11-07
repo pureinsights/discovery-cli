@@ -35,7 +35,7 @@ func TestNewDeleteCommand(t *testing.T) {
 		// Working case
 		{
 			name:      "Delete by ID returns an acknowledged true",
-			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			args:      []string{"my-credential"},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
@@ -50,7 +50,7 @@ func TestNewDeleteCommand(t *testing.T) {
 				{
 				"source": {
 					"type": "mongo",
-					"name": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"name": "my-credential",
 					"labels": [
 					{
 						"key": "A",
@@ -62,11 +62,7 @@ func TestNewDeleteCommand(t *testing.T) {
 					"creationTimestamp": "2025-10-17T22:37:57Z",
 					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
 				},
-				"highlight": {
-					"name": [
-					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
-					]
-				},
+				"highlight": {}
 			],
 			"pageable": {
 				"page": 0,
@@ -87,6 +83,28 @@ func TestNewDeleteCommand(t *testing.T) {
 						assert.Equal(t, "/v2/credential/search", r.URL.Path)
 					},
 				},
+				"GET:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
 				"DELETE:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
@@ -104,7 +122,7 @@ func TestNewDeleteCommand(t *testing.T) {
 		},
 		{
 			name:      "Delete by name returns an acknowledged true",
-			args:      []string{"credential clone 10"},
+			args:      []string{"my-credential"},
 			url:       true,
 			apiKey:    "apiKey123",
 			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
@@ -120,7 +138,7 @@ func TestNewDeleteCommand(t *testing.T) {
 				{
 				"source": {
 					"type": "mongo",
-					"name": "credential clone 10",
+					"name": "my-credential",
 					"labels": [
 					{
 						"key": "A",
@@ -132,11 +150,7 @@ func TestNewDeleteCommand(t *testing.T) {
 					"creationTimestamp": "2025-10-17T22:37:57Z",
 					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
 				},
-				"highlight": {
-					"name": [
-					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
-					]
-				},
+				"highlight": {}
 			],
 			"pageable": {
 				"page": 0,
@@ -155,6 +169,28 @@ func TestNewDeleteCommand(t *testing.T) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/credential/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"GET:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
 				"DELETE:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
@@ -176,7 +212,7 @@ func TestNewDeleteCommand(t *testing.T) {
 		// Error case
 		{
 			name:      "No URL",
-			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			args:      []string{"my-credential"},
 			outGolden: "NewDeleteCommand_Out_NoURL",
 			errGolden: "NewDeleteCommand_Err_NoURL",
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NoURL"),
@@ -219,7 +255,7 @@ func TestNewDeleteCommand(t *testing.T) {
 		},
 		{
 			name:      "Printing JSON object fails",
-			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			args:      []string{"my-credential"},
 			outGolden: "NewDeleteCommand_Out_PrintJSONFails",
 			errGolden: "NewDeleteCommand_Err_PrintJSONFails",
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_PrintJSONFails"),
@@ -235,7 +271,7 @@ func TestNewDeleteCommand(t *testing.T) {
 				{
 				"source": {
 					"type": "mongo",
-					"name": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"name": "my-credential",
 					"labels": [
 					{
 						"key": "A",
@@ -247,11 +283,7 @@ func TestNewDeleteCommand(t *testing.T) {
 					"creationTimestamp": "2025-10-17T22:37:57Z",
 					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
 				},
-				"highlight": {
-					"name": [
-					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
-					]
-				},
+				"highlight": {}
 			],
 			"pageable": {
 				"page": 0,
@@ -270,6 +302,28 @@ func TestNewDeleteCommand(t *testing.T) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/credential/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"GET:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
 				"DELETE:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
@@ -313,15 +367,11 @@ func TestNewDeleteCommand(t *testing.T) {
 					}
 					],
 					"active": true,
-					"id": "test",
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
 					"creationTimestamp": "2025-10-17T22:37:57Z",
 					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
 				},
-				"highlight": {
-					"name": [
-					"<em>label</em> <em>test</em> <em>clone</em> <em>10</em>"
-					]
-				},
+				"highlight": {}
 			],
 			"pageable": {
 				"page": 0,
@@ -340,6 +390,28 @@ func TestNewDeleteCommand(t *testing.T) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/credential/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"GET:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "test",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "test",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
 				"DELETE:/v2/credential/3d51beef-8b90-40aa-84b5-033241dc6239": {
@@ -443,7 +515,7 @@ func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
 	deleteCmd.SetOut(ios.Out)
 	deleteCmd.SetErr(ios.Err)
 
-	deleteCmd.SetArgs([]string{"3d51beef-8b90-40aa-84b5-033241dc6239"})
+	deleteCmd.SetArgs([]string{"my-credential"})
 
 	err := deleteCmd.Execute()
 	require.Error(t, err)
