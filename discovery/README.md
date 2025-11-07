@@ -134,6 +134,7 @@ This struct manages servers.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 It has the following additional method:
 | Name | Method | Path | Response | Description |
