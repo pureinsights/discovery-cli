@@ -166,7 +166,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 		path       string
 		statusCode int
 		nameFilter string
-		response   string
+		responses  map[string]testutils.MockResponse
 		result     gjson.Result
 		err        error
 	}{
@@ -176,82 +176,112 @@ func Test_searcher_SearchByName(t *testing.T) {
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusOK,
-			nameFilter: "MongoDB Atlas Server",
+			nameFilter: "my-credential",
 			result: gjson.Parse(`{
 					"type": "mongo",
-					"name": "MongoDB Atlas Server",
-					"labels": [],
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
 					"active": true,
-					"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-					"creationTimestamp": "2025-09-29T15:50:17Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
 				}`),
-			response: `{
+			responses: map[string]testutils.MockResponse{
+				"/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
 			"content": [
 				{
 				"source": {
 					"type": "mongo",
-					"name": "MongoDB Atlas Server",
-					"labels": [],
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
 					"active": true,
-					"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-					"creationTimestamp": "2025-09-29T15:50:17Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+					"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
 				},
-				"highlight": {
-					"name": [
-						"<em>MongoDB</em> <em>Atlas</em> <em>Server</em>"
-					]
-				},
-				"score": 0.321809,
+				"highlight": {}
+				"score": 1.4854797
 				},
 				{
 				"source": {
 					"type": "mongo",
-					"name": "MongoDB Atlas server clone 1",
-					"labels": [],
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
 					"active": true,
-					"id": "8f14c11c-bb66-49d3-aa2a-dedff4608c17",
-					"creationTimestamp": "2025-09-29T15:50:19Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
 				},
 				"highlight": {
 					"name": [
-						"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone 1"
+					"<em>label</em> <em>test</em> 1 <em>clone</em>"
 					]
 				},
-				"score": 0.29428056,
-				},
-				{
-				"source": {
-					"type": "openai",
-					"name": "OpenAI server",
-					"labels": [],
-					"active": true,
-					"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
-					"creationTimestamp": "2025-09-29T15:50:20Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
-				},
-				"highlight": {
-					"name": [
-                        "OpenAI <em>Server</em>"
-                ]},
-				"score": 0.013445788
-				},
+				"score": 0.3980717
+				}
 			],
 			"pageable": {
 				"page": 0,
 				"size": 25,
 				"sort": []
 			},
-			"totalSize": 3,
+			"totalSize": 18,
 			"totalPages": 1,
 			"empty": false,
 			"size": 25,
 			"offset": 0,
-			"pageNumber": 0,
-			"numberOfElements": 3
+			"numberOfElements": 18,
+			"pageNumber": 0
 			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/search", r.URL.Path)
+						assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+						requestBody, _ := io.ReadAll(r.Body)
+						assert.Equal(t, fmt.Sprintf(filterString, "my-credential"), string(requestBody))
+					},
+				},
+				"/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+			},
 			err: nil,
 		},
 
@@ -261,7 +291,20 @@ func Test_searcher_SearchByName(t *testing.T) {
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusNoContent,
-			response:   `{"content": []}`,
+			responses: map[string]testutils.MockResponse{
+				"/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        `{"content": []}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/search", r.URL.Path)
+						assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+						requestBody, _ := io.ReadAll(r.Body)
+						assert.Equal(t, fmt.Sprintf(filterString, "MongoDB Atlas Server"), string(requestBody))
+					},
+				},
+			},
 			nameFilter: "MongoDB Atlas Server",
 			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 	"status": 404,
@@ -276,7 +319,20 @@ func Test_searcher_SearchByName(t *testing.T) {
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusNoContent,
-			response:   ``,
+			responses: map[string]testutils.MockResponse{
+				"/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/search", r.URL.Path)
+						assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+						requestBody, _ := io.ReadAll(r.Body)
+						assert.Equal(t, fmt.Sprintf(filterString, "MongoDB Atlas Server"), string(requestBody))
+					},
+				},
+			},
 			nameFilter: "MongoDB Atlas Server",
 			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 	"status": 404,
@@ -292,72 +348,75 @@ func Test_searcher_SearchByName(t *testing.T) {
 			path:       "/search",
 			statusCode: http.StatusOK,
 			nameFilter: "MongoDB Atlas Server",
-			response: `{
+			responses: map[string]testutils.MockResponse{
+				"/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
 			"content": [
 				{
 				"source": {
 					"type": "mongo",
-					"name": "MongoDB Atlas server clone",
-					"labels": [],
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
 					"active": true,
-					"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-					"creationTimestamp": "2025-09-29T15:50:17Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+					"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
 				},
-				"highlight": {
-					"name": [
-						"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-					]
-				},
-				"score": 0.321809,
+				"highlight": {}
+				"score": 1.4854797
 				},
 				{
 				"source": {
 					"type": "mongo",
-					"name": "MongoDB Atlas server clone 1",
-					"labels": [],
+					"name": "my-credential",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
 					"active": true,
-					"id": "8f14c11c-bb66-49d3-aa2a-dedff4608c17",
-					"creationTimestamp": "2025-09-29T15:50:19Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
 				},
 				"highlight": {
 					"name": [
-						"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone 1"
+					"<em>label</em> <em>test</em> 1 <em>clone</em>"
 					]
 				},
-				"score": 0.29428056,
-				},
-				{
-				"source": {
-					"type": "openai",
-					"name": "OpenAI server",
-					"labels": [],
-					"active": true,
-					"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
-					"creationTimestamp": "2025-09-29T15:50:20Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
-				},
-				"highlight": {
-					"name": [
-                        "OpenAI <em>Server</em>"
-                ]},
-				"score": 0.013445788
-				},
+				"score": 0.3980717
+				}
 			],
 			"pageable": {
 				"page": 0,
 				"size": 25,
 				"sort": []
 			},
-			"totalSize": 3,
+			"totalSize": 18,
 			"totalPages": 1,
 			"empty": false,
 			"size": 25,
 			"offset": 0,
-			"pageNumber": 0,
-			"numberOfElements": 3
+			"numberOfElements": 18,
+			"pageNumber": 0
 			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/search", r.URL.Path)
+						assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+						requestBody, _ := io.ReadAll(r.Body)
+						assert.Equal(t, fmt.Sprintf(filterString, "MongoDB Atlas Server"), string(requestBody))
+					},
+				},
+			},
 			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 	"status": 404,
 	"code": 1003,
@@ -371,20 +430,28 @@ func Test_searcher_SearchByName(t *testing.T) {
 			method:     http.MethodPost,
 			path:       "/search",
 			statusCode: http.StatusUnauthorized,
-			response:   `{"error":"unauthorized"}`,
-			err:        Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
+			nameFilter: "MongoDB Atlas Server",
+			responses: map[string]testutils.MockResponse{
+				"/search": {
+					StatusCode:  http.StatusUnauthorized,
+					Body:        `{"error":"unauthorized"}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/search", r.URL.Path)
+						assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+						requestBody, _ := io.ReadAll(r.Body)
+						assert.Equal(t, fmt.Sprintf(filterString, "MongoDB Atlas Server"), string(requestBody))
+					},
+				},
+			},
+			err: Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
-				requestBody, _ := io.ReadAll(r.Body)
-				assert.Equal(t, fmt.Sprintf(filterString, tc.nameFilter), string(requestBody))
-				assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
-			}))
+			srv := httptest.NewServer(testutils.HttpMultiResponseHandler(t, tc.responses))
 
 			defer srv.Close()
 
