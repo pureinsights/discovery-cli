@@ -192,7 +192,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
 				}`),
 			responses: map[string]testutils.MockResponse{
-				"/search": {
+				"POST:/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -259,7 +259,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 						assert.Equal(t, fmt.Sprintf(filterString, "my-credential"), string(requestBody))
 					},
 				},
-				"/3b32e410-2f33-412d-9fb8-17970131921c": {
+				"GET:/3b32e410-2f33-412d-9fb8-17970131921c": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -292,7 +292,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 			path:       "/search",
 			statusCode: http.StatusNoContent,
 			responses: map[string]testutils.MockResponse{
-				"/search": {
+				"POST:/search": {
 					StatusCode:  http.StatusNoContent,
 					Body:        `{"content": []}`,
 					ContentType: "application/json",
@@ -320,7 +320,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 			path:       "/search",
 			statusCode: http.StatusNoContent,
 			responses: map[string]testutils.MockResponse{
-				"/search": {
+				"POST:/search": {
 					StatusCode:  http.StatusNoContent,
 					Body:        ``,
 					ContentType: "application/json",
@@ -349,7 +349,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 			statusCode: http.StatusOK,
 			nameFilter: "MongoDB Atlas Server",
 			responses: map[string]testutils.MockResponse{
-				"/search": {
+				"POST:/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -432,7 +432,7 @@ func Test_searcher_SearchByName(t *testing.T) {
 			statusCode: http.StatusUnauthorized,
 			nameFilter: "MongoDB Atlas Server",
 			responses: map[string]testutils.MockResponse{
-				"/search": {
+				"POST:/search": {
 					StatusCode:  http.StatusUnauthorized,
 					Body:        `{"error":"unauthorized"}`,
 					ContentType: "application/json",
