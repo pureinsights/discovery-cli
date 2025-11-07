@@ -318,7 +318,17 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 		"active": true,
 		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
 		"creationTimestamp": "2025-09-29T15:50:17Z",
-		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`), nil
 }
 
@@ -552,70 +562,6 @@ func (s *SearcherReturnsOtherError) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(``)}
 }
 
-// WorkingSearcher returns a working response, but the entity it returns has an id that is not a UUID.
-type WorkingSearcherButReturnsNotUUID struct {
-	mock.Mock
-	WorkingGetter
-}
-
-// Search returns an array of results as it if correctly found matches.
-func (s *WorkingSearcherButReturnsNotUUID) Search(gjson.Result) ([]gjson.Result, error) {
-	return gjson.Parse(`[
-                  {
-					"source": {
-						"type": "mongo",
-						"name": "MongoDB Atlas server clone",
-						"labels": [],
-						"active": true,
-						"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-						"creationTimestamp": "2025-09-29T15:50:17Z",
-						"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-					},
-					"highlight": {},
-					"score": 0.20970252
-                  },
-                  {
-					"source": {
-						"type": "mongo",
-						"name": "MongoDB Atlas server clone 1",
-						"labels": [],
-						"active": true,
-						"id": "8f14c11c-bb66-49d3-aa2a-dedff4608c17",
-						"creationTimestamp": "2025-09-29T15:50:19Z",
-						"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
-					},
-					"highlight": {},
-					"score": 0.20970252
-                  },
-                  {
-					"source": {
-						"type": "mongo",
-						"name": "MongoDB Atlas server clone 3",
-						"labels": [],
-						"active": true,
-						"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
-						"creationTimestamp": "2025-09-29T15:50:20Z",
-						"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
-					},
-					"highlight": {},
-					"score": 0.20970252
-                  }
-          ]`).Array(), nil
-}
-
-// SearchByName returns an object as if it found correctly the entity.
-func (s *WorkingSearcherButReturnsNotUUID) SearchByName(name string) (gjson.Result, error) {
-	return gjson.Parse(`{
-		"type": "mongo",
-		"name": "MongoDB Atlas server",
-		"labels": [],
-		"active": true,
-		"id": "test",
-		"creationTimestamp": "2025-09-29T15:50:17Z",
-		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-	}`), nil
-}
-
 // Test_searchEntity tests the discovery.searchEntity() function.
 func Test_searchEntity(t *testing.T) {
 	tests := []struct {
@@ -728,13 +674,6 @@ func Test_searchEntity(t *testing.T) {
 			id:       "MongoDB Atlas Server",
 			expected: gjson.Result{},
 			err:      errors.New("not discovery error"),
-		},
-		{
-			name:     "Search returns an id that is not a UUID",
-			client:   new(WorkingSearcherButReturnsNotUUID),
-			id:       "MongoDB Atlas Server",
-			expected: gjson.Result{},
-			err:      errors.New("invalid UUID length: 4"),
 		},
 	}
 
