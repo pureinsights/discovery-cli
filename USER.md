@@ -344,7 +344,6 @@ Examples:
 # Get a credential by id
 discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
 {"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","secret":"mongo-secret","type":"mongo"}
-
 ```
 
 ```bash
