@@ -69,7 +69,9 @@ type Searcher interface {
 	SearchByName(name string) (gjson.Result, error)
 }
 
-// SearchEntity tries to search an entity by name, and if it fails, it tries to get the entity by its id.
+// SearchEntity tries to search an entity by name.
+// If the entity could not be found, it tries to get it with the given id.
+// If the entity was found, it triesto get it to obtains its complete configuration.
 func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error) {
 	result, err := client.SearchByName(id)
 	if err != nil {
@@ -81,20 +83,22 @@ func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error
 		if discoveryErr.Status != http.StatusNotFound {
 			return gjson.Result{}, discoveryErr
 		}
-
-		if parsedId, uuidErr := uuid.Parse(id); uuidErr == nil {
-			result, err = client.Get(parsedId)
-			if err != nil {
-				return gjson.Result{}, err
-			}
-
-			return result, nil
-		}
-
-		return gjson.Result{}, discoveryErr
+	} else {
+		id = result.Get("id").String()
 	}
 
-	return result, nil
+	if parsedId, uuidErr := uuid.Parse(id); uuidErr == nil {
+		result, err = client.Get(parsedId)
+		if err != nil {
+			return gjson.Result{}, err
+		}
+
+		return result, nil
+	} else if err != nil {
+		return gjson.Result{}, err
+	} else {
+		return gjson.Result{}, uuidErr
+	}
 }
 
 // SearchEntity searches for the entity and prints it into the Out IOStream.
