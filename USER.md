@@ -287,23 +287,16 @@ Examples:
 
 ```bash
 # Store a label with the JSON configuration in a file
-discovery core label store --file "labeljsonfile.golden"
-{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"label6","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"hello3"}
+discovery core label store --file "labeljsonfile.txt"
+{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"label1","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"value1"}
 {"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"status":404,"timestamp":"2025-10-30T00:05:35.995533500Z"}
-{"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"label9","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"hello6"}
+{"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"label3","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"value3"}
 ```
 
 ```bash
 # Store a label with the JSON configuration in the data flag
 discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
-{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"labeltest","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
-```
-
-```bash
-# Abort the store operation when an error occurs.
-discovery core label store --file "labeljsonfile.golden" --abort-on-error
-Error: Could not store entities
-status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"timestamp":"2025-10-30T00:07:38.152325600Z"}
+{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label2","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
 ```
 
 ##### Secret
@@ -374,23 +367,16 @@ Examples:
 
 ```bash
 # Store a secret with the JSON configuration in a file
-discovery core secret store --file "secretjsonfile.golden"
-{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:15:22.738365Z","name":"openai-secret-test"}
+discovery core secret store --file "secretjsonfile.txt"
+{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:15:22.738365Z","name":"openai-secret"}
 {"code":1003,"messages":["Entity not found: b8bd5ec3-8f60-4502-b25e-8f6d36c98415"],"status":404,"timestamp":"2025-10-30T15:15:22.778371Z"}
-{"active":true,"creationTimestamp":"2025-10-30T15:15:22.801771Z","id":"c9731417-38c9-4a65-8bbc-78c5f59b9cbb","lastUpdatedTimestamp":"2025-10-30T15:15:22.801771Z","name":"mongo-user-test"}
+{"active":true,"creationTimestamp":"2025-10-30T15:15:22.801771Z","id":"c9731417-38c9-4a65-8bbc-78c5f59b9cbb","lastUpdatedTimestamp":"2025-10-30T15:15:22.801771Z","name":"mongo-user"}
 ```
 
 ```bash
 # Store a secret with the JSON configuration in the data flag
 discovery core secret store --data  '{"name":"openai-secret-test","active":true,"id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","content":{"apiKey":"apiKey"}}'
-{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:43:52.496829Z","name":"openai-secret-test"}
-```
-
-```bash
-# Abort the store operation when an error occurs.
-discovery core secret store --file "secretjsonfile.golden" --abort-on-error
-Error: Could not store entities
-status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: b8bd5ec3-8f60-4502-b25e-8f6d36c98415"],"timestamp":"2025-10-30T15:46:06.029224400Z"}
+{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:43:52.496829Z","name":"openai-secret"}
 ```
 
 ##### Credential
@@ -422,7 +408,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 `-f, --filter`::
-(Optional, string) Add a filter to the search. The available filters are the following:
+(Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
 
@@ -431,27 +417,27 @@ Examples:
 ```bash
 # Get a credential by id
 discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","secret":"mongo-secret","type":"mongo"}
-
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","secret":"mongo-secret","type":"mongo"}
 ```
 
 ```bash
 # Get credential by name
-discovery core credential get "label test 1 clone 10"
-{"highlight":{"name":["\u003cem\u003elabel\u003c/em\u003e \u003cem\u003etest\u003c/em\u003e \u003cem\u003e1\u003c/em\u003e \u003cem\u003eclone\u003c/em\u003e \u003cem\u003e10\u003c/em\u003e"]},"score":1.63641,"source":{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","type":"mongo"}}
+discovery core credential get "my-credential"
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","type":"mongo"}
 ```
 
 ```bash
 # Get credentials using filters
 discovery core credential get --filter label=A:A --filter type=mongo
-{"highlight":{},"score":0.22338435,"source":{"active":true,"creationTimestamp":"2025-10-17T15:33:58Z","id":"8c243a1d-9384-421d-8f99-4ef28d4e0ab0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T15:33:58Z","name":"label test 1","type":"mongo"}}
+{"active":true,"creationTimestamp":"2025-10-17T15:33:58Z","id":"8c243a1d-9384-421d-8f99-4ef28d4e0ab0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T15:33:58Z","name":"my-credential","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"mongo-credential-2","type":"mongo"}
 ```
 
 ```bash
 # Get all credentials using the configuration in profile "cn"
 discovery core credential get -p cn
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"label test 2","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"openai-credential","type":"openai"}
 ```
 
 ###### Store
@@ -479,23 +465,16 @@ Examples:
 
 ```bash
 # Store a credential with the JSON configuration in a file
-discovery core credential store --file "credentialjsonfile.golden"
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","secret":"mongo-secret","type":"mongo"}
+discovery core credential store --file "credentialjsonfile.txt"
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"mongo-secret","type":"mongo"}
 {"code":1003,"messages":["Entity not found: 3b32e410-2f33-412d-9fb8-17970131921d"],"status":404,"timestamp":"2025-10-30T16:50:38.250661200Z"}
-{"active":true,"creationTimestamp":"2025-10-30T16:50:38.262086Z","id":"5b76ae0d-f383-47e5-be6f-90e9046092cd","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-30T16:50:38.262086Z","name":"label test 1 clone 123","secret":"mongo-secret","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-30T16:50:38.262086Z","id":"5b76ae0d-f383-47e5-be6f-90e9046092cd","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-30T16:50:38.262086Z","name":"my-credential-2","secret":"mongo-secret","type":"mongo"}
 ```
 
 ```bash
 # Store a credential with the JSON configuration in the data flag
-discovery core credential store --data '{"type":"mongo","name":"label test 1 clone 10","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"mongo-secret"}'
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"label test 1 clone 10","secret":"mongo-secret","type":"mongo"}
-```
-
-```bash
-# Abort the store operation when an error occurs.
-discovery core credential store --file "credentialjsonfile.golden" --abort-on-error
-Error: Could not store entities
-status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 3b32e410-2f33-412d-9fb8-17970131921d"],"timestamp":"2025-10-30T16:50:33.837498400Z"}
+discovery core credential store --data '{"type":"mongo","name":"my-credential-1","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"mongo-secret"}'
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"mongo-secret","type":"mongo"}
 ```
 
 ##### Server
@@ -527,7 +506,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 `-f, --filter`::
-(Optional, string) Add a filter to the search. The available filters are the following:
+(Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
 
@@ -536,28 +515,27 @@ Examples:
 ```bash
 # Get a server by id
 discovery core server get 21029da3-041c-43b5-a67e-870251f2f6a6
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server clone 2","type":"mongo"}
-
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
 ```
 
 ```bash
 # Get server by name
-discovery core server get "MongoDB Atlas server clone 2"
-{"highlight":{"name":["\u003cem\u003eMongoDB\u003c/em\u003e \u003cem\u003eAtlas\u003c/em\u003e \u003cem\u003eserver\u003c/em\u003e \u003cem\u003eclone\u003c/em\u003e \u003cem\u003e2\u003c/em\u003e"]},"score":1.2256832,"source":{"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server clone 2","type":"mongo"}}
+discovery core server get "MongoDB Atlas server"
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
 ```
 
 ```bash
 # Get servers using filters
 discovery core server get --filter label=A:A -f type=mongo
-{"highlight":{},"score":0.82416904,"source":{"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server clone 2","type":"mongo"}}
-{"highlight":{},"score":0.82416904,"source":{"active":true,"creationTimestamp":"2025-09-29T15:50:21Z","id":"a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:21Z","name":"MongoDB Atlas server clone 4","type":"mongo"}}
+{"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-09-29T15:50:21Z","id":"a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:21Z","name":"MongoDB Atlas server 2","type":"mongo"}
 ```
 
 ```bash
 # Get all servers using the configuration in profile "cn"
 discovery core server get -p cn
-{"active":true,"creationTimestamp":"2025-09-29T15:50:37Z","id":"025347a7-e2bd-4ba1-880f-db3e51319abb","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:37Z","name":"MongoDB Atlas server clone 11","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-10-15T20:26:27Z","id":"192c3793-600a-4366-9778-7d80a0df07ce","labels":[{"key":"E","value":"G"},{"key":"H","value":"F"},{"key":"D","value":"D"}],"lastUpdatedTimestamp":"2025-10-15T20:26:27Z","name":"filter 2","type":"openai"}
+{"active":true,"creationTimestamp":"2025-09-29T15:50:37Z","id":"025347a7-e2bd-4ba1-880f-db3e51319abb","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:37Z","name":"MongoDB Atlas server","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-15T20:26:27Z","id":"192c3793-600a-4366-9778-7d80a0df07ce","labels":[{"key":"E","value":"G"},{"key":"H","value":"F"},{"key":"D","value":"D"}],"lastUpdatedTimestamp":"2025-10-15T20:26:27Z","name":"OpenAI Server","type":"openai"}
 ```
 
 ###### Store
@@ -585,23 +563,16 @@ Examples:
 
 ```bash
 # Store a server with the JSON configuration in a file
-discovery core server store --file "serverjsonfile.golden"
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server clone 9","type":"mongo"}       
+discovery core server store --file "serverjsonfile.txt"
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server","type":"mongo"}       
 {"code":1003,"messages":["Entity not found: 2b839453-ddad-4ced-8e13-2c7860af60a8"],"status":404,"timestamp":"2025-10-30T17:45:48.176913700Z"}
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-10-30T17:45:48.184774Z","id":"152e1175-e54d-4de6-90b9-388d45f8256e","labels":[],"lastUpdatedTimestamp":"2025-10-30T17:45:48.184774Z","name":"MongoDB Atlas server clone 12345","type":"mongo"}
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-10-30T17:45:48.184774Z","id":"152e1175-e54d-4de6-90b9-388d45f8256e","labels":[],"lastUpdatedTimestamp":"2025-10-30T17:45:48.184774Z","name":"MongoDB Atlas server 2","type":"mongo"}
 ```
 
 ```bash
 # Store a server with the JSON configuration in the data flag
-discovery core server store --data '{"type":"mongo","name":"MongoDB Atlas server clone 9","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.dleud.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server clone 9","type":"mongo"}
-```
-
-```bash
-# Abort the store operation when an error occurs.
-discovery core server store --file "serverjsonfile.golden" --abort-on-error
-Error: Could not store entities
-status: 404, body: {"status":404,"code":1003,"messages":["Entity not found: 32b839453-ddad-4ced-8e13-2c7860af60a8"],"timestamp":"2025-10-30T16:50:33.837498400Z"}
+discovery core server store --data '{"type":"mongo","name":"MongoDB Atlas server","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.dleud.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server","type":"mongo"}
 ```
 
 #### Ingestion
