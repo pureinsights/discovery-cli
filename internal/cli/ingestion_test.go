@@ -267,3 +267,232 @@ func Test_discovery_AppendSeedRecord(t *testing.T) {
 		})
 	}
 }
+
+func TestAppendSeedRecords(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          RecordGetter
+		expectedRecords string
+		err             error
+	}{
+		{
+			name:   "Getting the records and setting the record field works",
+			client: new(WorkingRecordGetter),
+			expectedRecords: `[
+{"id":{"plain":"4e7c8a47efd829ef7f710d64da661786","hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="},"creationTimestamp":"2025-09-05T20:13:47Z","lastUpdatedTimestamp":"2025-09-05T20:13:47Z","status":"SUCCESS"},
+{"id":{"plain":"8148e6a7b952a3b2964f706ced8c6885","hash":"IJeF-losyj33EAuqjgGW2G7sT-eE7poejQ5HokerZio="},"creationTimestamp":"2025-09-05T20:13:47Z","lastUpdatedTimestamp":"2025-09-05T20:13:47Z","status":"SUCCESS"},
+{"id":{"plain":"b1e3e4f42c0818b1580e306eb776d4a1","hash":"N2lubqCWTqEEaymQVntpdP5dqKDP-LYk81C_PCr6btQ="},"creationTimestamp":"2025-09-05T20:13:47Z","lastUpdatedTimestamp":"2025-09-05T20:13:47Z","status":"SUCCESS"}
+]`,
+			err: nil,
+		},
+		{
+			name:            "Getting the records fails",
+			client:          new(FailingRecordGetter),
+			expectedRecords: "",
+			err:             discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			seed := gjson.Parse(`{
+  "type": "staging",
+  "name": "Search seed",
+  "labels": [],
+  "active": true,
+  "id": "2acd0a61-852c-4f38-af2b-9c84e152873e",
+  "creationTimestamp": "2025-08-21T21:52:03Z",
+  "lastUpdatedTimestamp": "2025-08-21T21:52:03Z",
+  "config": {
+    "action": "scroll",
+    "bucket": "blogs"
+  },
+  "pipeline": "9a74bf3a-eb2a-4334-b803-c92bf1bc45fe",
+  "recordPolicy": {
+    "errorPolicy": "FATAL",
+    "timeoutPolicy": {
+      "slice": "PT1H"
+    },
+    "outboundPolicy": {
+      "idPolicy": {},
+      "batchPolicy": {
+        "maxCount": 25,
+        "flushAfter": "PT1M"
+      }
+    }
+  }
+}`)
+			result, err := AppendSeedRecords(seed, tc.client)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tc.expectedRecords, result.Get("records").Raw)
+			}
+		})
+	}
+}
+
+// Test_discovery_AppendSeedRecord tests the discovery.AppendSeedRecord function
+func Test_discovery_AppendSeedRecords(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         RecordGetter
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working cases
+		{
+			name:    "Getting the records and printing the result with pretty printer works",
+			client:  new(WorkingRecordGetter),
+			printer: JsonObjectPrinter(true),
+			expectedOutput: `{
+  "active": true,
+  "config": {
+    "action": "scroll",
+    "bucket": "blogs"
+  },
+  "creationTimestamp": "2025-08-21T21:52:03Z",
+  "id": "2acd0a61-852c-4f38-af2b-9c84e152873e",
+  "labels": [],
+  "lastUpdatedTimestamp": "2025-08-21T21:52:03Z",
+  "name": "Search seed",
+  "pipeline": "9a74bf3a-eb2a-4334-b803-c92bf1bc45fe",
+  "recordPolicy": {
+    "errorPolicy": "FATAL",
+    "outboundPolicy": {
+      "batchPolicy": {
+        "flushAfter": "PT1M",
+        "maxCount": 25
+      },
+      "idPolicy": {}
+    },
+    "timeoutPolicy": {
+      "slice": "PT1H"
+    }
+  },
+  "records": [
+    {
+      "creationTimestamp": "2025-09-05T20:13:47Z",
+      "id": {
+        "hash": "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=",
+        "plain": "4e7c8a47efd829ef7f710d64da661786"
+      },
+      "lastUpdatedTimestamp": "2025-09-05T20:13:47Z",
+      "status": "SUCCESS"
+    },
+    {
+      "creationTimestamp": "2025-09-05T20:13:47Z",
+      "id": {
+        "hash": "IJeF-losyj33EAuqjgGW2G7sT-eE7poejQ5HokerZio=",
+        "plain": "8148e6a7b952a3b2964f706ced8c6885"
+      },
+      "lastUpdatedTimestamp": "2025-09-05T20:13:47Z",
+      "status": "SUCCESS"
+    },
+    {
+      "creationTimestamp": "2025-09-05T20:13:47Z",
+      "id": {
+        "hash": "N2lubqCWTqEEaymQVntpdP5dqKDP-LYk81C_PCr6btQ=",
+        "plain": "b1e3e4f42c0818b1580e306eb776d4a1"
+      },
+      "lastUpdatedTimestamp": "2025-09-05T20:13:47Z",
+      "status": "SUCCESS"
+    }
+  ],
+  "type": "staging"
+}
+`,
+			err: nil,
+		},
+		{
+			name:           "Getting the records and printing the result with ugly printer works",
+			client:         new(WorkingRecordGetter),
+			expectedOutput: "{\"active\":true,\"config\":{\"action\":\"scroll\",\"bucket\":\"blogs\"},\"creationTimestamp\":\"2025-08-21T21:52:03Z\",\"id\":\"2acd0a61-852c-4f38-af2b-9c84e152873e\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-21T21:52:03Z\",\"name\":\"Search seed\",\"pipeline\":\"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe\",\"recordPolicy\":{\"errorPolicy\":\"FATAL\",\"outboundPolicy\":{\"batchPolicy\":{\"flushAfter\":\"PT1M\",\"maxCount\":25},\"idPolicy\":{}},\"timeoutPolicy\":{\"slice\":\"PT1H\"}},\"records\":[{\"creationTimestamp\":\"2025-09-05T20:13:47Z\",\"id\":{\"hash\":\"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=\",\"plain\":\"4e7c8a47efd829ef7f710d64da661786\"},\"lastUpdatedTimestamp\":\"2025-09-05T20:13:47Z\",\"status\":\"SUCCESS\"},{\"creationTimestamp\":\"2025-09-05T20:13:47Z\",\"id\":{\"hash\":\"IJeF-losyj33EAuqjgGW2G7sT-eE7poejQ5HokerZio=\",\"plain\":\"8148e6a7b952a3b2964f706ced8c6885\"},\"lastUpdatedTimestamp\":\"2025-09-05T20:13:47Z\",\"status\":\"SUCCESS\"},{\"creationTimestamp\":\"2025-09-05T20:13:47Z\",\"id\":{\"hash\":\"N2lubqCWTqEEaymQVntpdP5dqKDP-LYk81C_PCr6btQ=\",\"plain\":\"b1e3e4f42c0818b1580e306eb776d4a1\"},\"lastUpdatedTimestamp\":\"2025-09-05T20:13:47Z\",\"status\":\"SUCCESS\"}],\"type\":\"staging\"}\n",
+			err:            nil,
+		},
+		// Error cases
+		{
+			name:           "Getting the records fails",
+			client:         new(FailingRecordGetter),
+			expectedOutput: "",
+			err:            NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not get records"),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(WorkingRecordGetter),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			seed := gjson.Parse(`{
+  "type": "staging",
+  "name": "Search seed",
+  "labels": [],
+  "active": true,
+  "id": "2acd0a61-852c-4f38-af2b-9c84e152873e",
+  "creationTimestamp": "2025-08-21T21:52:03Z",
+  "lastUpdatedTimestamp": "2025-08-21T21:52:03Z",
+  "config": {
+    "action": "scroll",
+    "bucket": "blogs"
+  },
+  "pipeline": "9a74bf3a-eb2a-4334-b803-c92bf1bc45fe",
+  "recordPolicy": {
+    "errorPolicy": "FATAL",
+    "timeoutPolicy": {
+      "slice": "PT1H"
+    },
+    "outboundPolicy": {
+      "idPolicy": {},
+      "batchPolicy": {
+        "maxCount": 25,
+        "flushAfter": "PT1M"
+      }
+    }
+  }
+}`)
+
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			// ios = iostreams.IOStreams{
+			// 	In:  os.Stdin,
+			// 	Out: os.Stdout,
+			// 	Err: os.Stderr,
+			// }
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.AppendSeedRecords(seed, tc.client, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}

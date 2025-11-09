@@ -38,3 +38,39 @@ func (d discovery) AppendSeedRecord(seed gjson.Result, client RecordGetter, id s
 
 	return err
 }
+
+// AppendSeedRecord adds a "record" field to the seed, which contains the record obtained using the given id.
+func AppendSeedRecords(seed gjson.Result, client RecordGetter) (gjson.Result, error) {
+	records, err := client.GetAll()
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	recordsString := "[\n"
+	for index, record := range records {
+		recordsString = recordsString + record.Raw
+		if index != (len(records) - 1) {
+			recordsString = recordsString + ","
+		}
+		recordsString = recordsString + "\n"
+	}
+	seedWithRecord, err := sjson.SetRaw(seed.Raw, "records", recordsString+"]")
+	return gjson.Parse(seedWithRecord), err
+}
+
+// AppendSeedRecord obtains a seed record, appends it to the seed, and prints out the seed.
+func (d discovery) AppendSeedRecords(seed gjson.Result, client RecordGetter, printer Printer) error {
+	seedWithRecords, err := AppendSeedRecords(seed, client)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get records")
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonObjectPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), seedWithRecords)
+	} else {
+		err = printer(*d.IOStreams(), seedWithRecords)
+	}
+
+	return err
+}
