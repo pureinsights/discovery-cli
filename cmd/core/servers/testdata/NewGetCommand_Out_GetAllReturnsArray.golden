@@ -1,3 +1,2 @@
-{"active":true,"creationTimestamp":"2025-09-29T15:50:22Z","id":"226e8a0b-5016-4ebe-9963-1461edd39d0a","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:22Z","name":"MongoDB Atlas server clone 6","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server clone 9","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-09-29T15:50:20Z","id":"3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:20Z","name":"MongoDB Atlas server clone 3","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-server","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:38:12Z","id":"5c09589e-b643-41aa-a766-3b7fc3660473","labels":[],"lastUpdatedTimestamp":"2025-10-17T22:38:12Z","name":"OpenAI server","type":"openai"}
