@@ -268,6 +268,7 @@ func Test_discovery_AppendSeedRecord(t *testing.T) {
 	}
 }
 
+// TestAppendSeedRecords tests the AppendSeedRecords() function.
 func TestAppendSeedRecords(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -275,6 +276,7 @@ func TestAppendSeedRecords(t *testing.T) {
 		expectedRecords string
 		err             error
 	}{
+		// Working case
 		{
 			name:   "Getting the records and setting the record field works",
 			client: new(WorkingRecordGetter),
@@ -285,6 +287,7 @@ func TestAppendSeedRecords(t *testing.T) {
 ]`,
 			err: nil,
 		},
+		// Error case
 		{
 			name:            "Getting the records fails",
 			client:          new(FailingRecordGetter),
@@ -474,12 +477,6 @@ func Test_discovery_AppendSeedRecords(t *testing.T) {
 				Out: out,
 				Err: os.Stderr,
 			}
-
-			// ios = iostreams.IOStreams{
-			// 	In:  os.Stdin,
-			// 	Out: os.Stdout,
-			// 	Err: os.Stderr,
-			// }
 
 			d := NewDiscovery(&ios, viper.New(), "")
 			err := d.AppendSeedRecords(seed, tc.client, tc.printer)
