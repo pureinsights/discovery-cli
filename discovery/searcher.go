@@ -57,5 +57,5 @@ func (s searcher) SearchByName(name string) (gjson.Result, error) {
 		}
 	}
 
-	return results[0], nil
+	return execute(s.client, http.MethodGet, "/"+results[0].Get("id").String())
 }
