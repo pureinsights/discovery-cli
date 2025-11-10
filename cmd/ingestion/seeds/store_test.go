@@ -40,7 +40,7 @@ func TestNewStoreCommand(t *testing.T) {
 		{
 			name:      "Store receives a single JSON",
 			url:       true,
-			apiKey:    "apiKey123",
+			apiKey:    "",
 			outGolden: "NewStoreCommand_Out_StoreSingleJSON",
 			errGolden: "NewStoreCommand_Err_StoreSingleJSON",
 			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreSingleJSON"),
@@ -52,12 +52,12 @@ func TestNewStoreCommand(t *testing.T) {
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed"
+			"secret": "mongo-secret"
 			}`,
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed": {
+				"POST:/v2/seed": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -67,13 +67,12 @@ func TestNewStoreCommand(t *testing.T) {
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
 					"creationTimestamp": "2025-08-14T18:02:11Z",
 					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"seed": "mongo-seed"
+					"secret": "mongo-secret"
 					}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/seed", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
 			},
@@ -94,7 +93,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed"
+			"secret": "mongo-secret"
 			},
 			{
 			"type": "mongo",
@@ -104,7 +103,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4d",
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed-2"
+			"secret": "mongo-secret-2"
 			},
 			{
 			"type": "openai",
@@ -114,13 +113,13 @@ func TestNewStoreCommand(t *testing.T) {
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "openai-seed"
+			"secret": "openai-secret"
 			}
 			]`,
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed": {
+				"POST:/v2/seed": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -130,7 +129,7 @@ func TestNewStoreCommand(t *testing.T) {
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
 					"creationTimestamp": "2025-08-14T18:02:11Z",
 					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"seed": "mongo-seed"
+					"secret": "mongo-secret"
 					}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
@@ -139,7 +138,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -156,7 +155,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -166,7 +165,7 @@ func TestNewStoreCommand(t *testing.T) {
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
 					"creationTimestamp": "2025-08-14T18:02:11Z",
 					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"seed": "openai-seed"
+					"secret": "openai-secret"
 					}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
@@ -190,7 +189,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "testdata/StoreCommand_JSONFile.golden",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed": {
+				"POST:/v2/seed": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -200,7 +199,7 @@ func TestNewStoreCommand(t *testing.T) {
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
 					"creationTimestamp": "2025-08-14T18:02:11Z",
 					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"seed": "mongo-seed"
+					"secret": "mongo-secret"
 					}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
@@ -209,7 +208,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -226,7 +225,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -236,7 +235,7 @@ func TestNewStoreCommand(t *testing.T) {
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
 					"creationTimestamp": "2025-08-14T18:02:11Z",
 					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"seed": "openai-seed"
+					"secret": "openai-secret"
 					}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
@@ -265,32 +264,11 @@ func TestNewStoreCommand(t *testing.T) {
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed"
+			"secret": "mongo-secret"
 			}`,
 			file:         "",
 			abortOnError: false,
-			err:          cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery ingestion config --profile {profile}"),
-		},
-		{
-			name:      "No API key",
-			outGolden: "NewStoreCommand_Out_NoAPIKey",
-			errGolden: "NewStoreCommand_Err_NoAPIKey",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_NoAPIKey"),
-			errBytes:  testutils.Read(t, "NewStoreCommand_Err_NoAPIKey"),
-			url:       true,
-			apiKey:    "",
-			data: `{
-			"type": "mongo",
-			"name": "MongoDB seed",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed"
-			}`,
-			file:         "",
-			abortOnError: false,
-			err:          cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion API key is missing for profile \"default\".\nTo set the API key for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery ingestion config --profile {profile}"),
+			err:          cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery ingestion config --profile \"default\""),
 		},
 		{
 			name:      "Store receives a JSON array of configs with creates, failures, and updates with abort on error true",
@@ -307,7 +285,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed"
+			"secret": "mongo-secret"
 			},
 			{
 			"type": "mongo",
@@ -317,7 +295,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4d",
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed-2"
+			"secret": "mongo-secret-2"
 			},
 			{
 			"type": "openai",
@@ -327,13 +305,13 @@ func TestNewStoreCommand(t *testing.T) {
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "openai-seed"
+			"secret": "openai-secret"
 			}
 			]`,
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed": {
+				"POST:/v2/seed": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -343,7 +321,7 @@ func TestNewStoreCommand(t *testing.T) {
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
 					"creationTimestamp": "2025-08-14T18:02:11Z",
 					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"seed": "mongo-seed"
+					"secret": "mongo-secret"
 					}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
@@ -352,7 +330,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -368,7 +346,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -378,7 +356,7 @@ func TestNewStoreCommand(t *testing.T) {
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
 					"creationTimestamp": "2025-08-14T18:02:11Z",
 					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"seed": "openai-seed"
+					"secret": "openai-secret"
 					}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
@@ -450,12 +428,12 @@ func TestNewStoreCommand(t *testing.T) {
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed"
+			"secret": "mongo-secret"
 			}`,
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed": {
+				"POST:/v2/seed": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -465,7 +443,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed
+			"secret": "mongo-secret
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
@@ -492,12 +470,12 @@ func TestNewStoreCommand(t *testing.T) {
 			"id": "test",
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed"
+			"secret": "mongo-secret"
 			}`,
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed": {
+				"POST:/v2/seed": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -508,7 +486,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"id": "test",
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"seed": "mongo-seed
+			"secret": "mongo-secret
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)

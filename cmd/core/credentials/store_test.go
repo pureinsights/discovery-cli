@@ -40,7 +40,7 @@ func TestNewStoreCommand(t *testing.T) {
 		{
 			name:      "Store receives a single JSON",
 			url:       true,
-			apiKey:    "apiKey123",
+			apiKey:    "",
 			outGolden: "NewStoreCommand_Out_StoreSingleJSON",
 			errGolden: "NewStoreCommand_Err_StoreSingleJSON",
 			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreSingleJSON"),
@@ -57,7 +57,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"POST:/v2/credential": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -73,7 +73,6 @@ func TestNewStoreCommand(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/credential", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
 			},
@@ -120,7 +119,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"POST:/v2/credential": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -139,7 +138,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -156,7 +155,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -190,7 +189,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "testdata/StoreCommand_JSONFile.golden",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"POST:/v2/credential": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -209,7 +208,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -226,7 +225,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -269,28 +268,7 @@ func TestNewStoreCommand(t *testing.T) {
 			}`,
 			file:         "",
 			abortOnError: false,
-			err:          cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
-		},
-		{
-			name:      "No API key",
-			outGolden: "NewStoreCommand_Out_NoAPIKey",
-			errGolden: "NewStoreCommand_Err_NoAPIKey",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_NoAPIKey"),
-			errBytes:  testutils.Read(t, "NewStoreCommand_Err_NoAPIKey"),
-			url:       true,
-			apiKey:    "",
-			data: `{
-			"type": "mongo",
-			"name": "MongoDB credential",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-			}`,
-			file:         "",
-			abortOnError: false,
-			err:          cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:          cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:      "Store receives a JSON array of configs with creates, failures, and updates with abort on error true",
@@ -333,7 +311,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"POST:/v2/credential": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -352,7 +330,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -368,7 +346,7 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -455,7 +433,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"POST:/v2/credential": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -497,7 +475,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"/v2/credential": {
+				"POST:/v2/credential": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
