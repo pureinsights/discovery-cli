@@ -247,6 +247,7 @@ This struct manages Ingestion's processors.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 Creating a `ingestionProcessorsClient` can be done with `ingestion.Processors()` or `newIngestionProcessorsClient(URL, API Key)`.
 
