@@ -72,5 +72,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 
 	get.Flags().BoolVar(&records, "records", false, "get all the records of the seed")
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
+
+	get.MarkFlagsMutuallyExclusive("filter", "record", "records")
 	return get
 }
