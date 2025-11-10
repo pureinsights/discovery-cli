@@ -25,12 +25,10 @@ func GetCommand(args []string, d cli.Discovery, client cli.Getter, config comman
 			return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not convert given id %q to UUID. This command does not support filters or referencing an entity by name.", args[0])
 		}
 		printer := cli.GetObjectPrinter(config.output)
-		err = d.GetEntity(client, id, printer)
-		return err
+		return d.GetEntity(client, id, printer)
 	} else {
 		printer := cli.GetArrayPrinter(config.output)
-		err = d.GetEntities(client, printer)
-		return err
+		return d.GetEntities(client, printer)
 	}
 }
 

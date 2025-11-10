@@ -69,6 +69,7 @@ func newCredentialsClient(url, apiKey string) credentialsClient {
 type serversClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewServersClient creates a new serversClient
@@ -83,13 +84,16 @@ func newServersClient(url, apiKey string) serversClient {
 		cloner: cloner{
 			client: client,
 		},
+		searcher: searcher{
+			client: client,
+		},
 	}
 }
 
 // Ping calls the endpoint to verify the connection to a server.
 // It returns acknowledged: true if the connection was successful.
 func (sc serversClient) Ping(id uuid.UUID) (gjson.Result, error) {
-	return execute(sc.client, http.MethodGet, "/"+id.String()+"/ping")
+	return execute(sc.crud.client, http.MethodGet, "/"+id.String()+"/ping")
 }
 
 // FilesClient is the struct that performs the CRUD of files

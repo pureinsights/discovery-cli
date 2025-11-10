@@ -1,8 +1,7 @@
-package core
+package servers
 
 import (
 	"bytes"
-	"flag"
 	"slices"
 	"strings"
 	"testing"
@@ -13,10 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var Update = flag.Bool("update", false, "rewrite golden files")
-
-// TestNewCoreCommand tests the NewCoreCommand() function
-func TestNewCoreCommand(t *testing.T) {
+// TestNewServerCommand tests the NewCoreCommand() function
+func TestNewServerCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -30,7 +27,7 @@ func TestNewCoreCommand(t *testing.T) {
 	vpr := viper.New()
 	vpr.SetDefault("profile", "default")
 	d := cli.NewDiscovery(&ios, vpr, dir)
-	coreCmd := NewCoreCommand(d)
+	coreCmd := NewServerCommand(d)
 
 	coreCmd.SetIn(ios.In)
 	coreCmd.SetOut(ios.Out)
@@ -50,6 +47,6 @@ func TestNewCoreCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "credential", "label", "secret", "server"}
+	expectedCommands := []string{"get"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

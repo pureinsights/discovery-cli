@@ -1,0 +1,11 @@
+{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","credentials":[],"id":"3393f6d9-94c1-4b70-ba02-5f582727d998","lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}}
+Usage:
+  get [flags]
+
+Flags:
+  -f, --filter stringArray   Apply filters in the format "filter=key:value". The available filters are:
+                             - Label: The format is label={key}[:{value}], where the value is optional.
+                             - Type: The format is type={type}.
+  -h, --help                 help for get
+  -p, --profile string       configuration profile to use (default "default")
+
