@@ -28,7 +28,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			if !cmd.Flags().Changed("records") && !cmd.Flags().Changed("record") {
+			if !cmd.Flags().Changed("record") && !records {
 				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 			}
 
@@ -43,12 +43,12 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 
 			seed, err := cli.SearchEntity(d, ingestionClient.Seeds(), args[0])
 			if err != nil {
-				return err
+				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not search for entity with id %q", args[0])
 			}
 
 			seedId, err := uuid.Parse(seed.Get("id").String())
 			if err != nil {
-				return err
+				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
 			}
 
 			printer := cli.GetObjectPrinter(vpr.GetString("output"))
@@ -57,11 +57,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
 			}
 
-			if records {
-				return d.AppendSeedRecords(seed, ingestionClient.Seeds().Records(seedId), printer)
-			}
-
-			return nil
+			return d.AppendSeedRecords(seed, ingestionClient.Seeds().Records(seedId), printer)
 		},
 		Args: cobra.MaximumNArgs(1),
 	}

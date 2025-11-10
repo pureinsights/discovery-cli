@@ -59,7 +59,7 @@ func TestCheckCredentials(t *testing.T) {
 			config: map[string]string{
 				"default.core_key": "http://discovery.core.cn",
 			},
-			err: cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err: cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 	}
 

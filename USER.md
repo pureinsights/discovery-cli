@@ -869,7 +869,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record` and `records` flags.
 
 Usage: `discovery ingestion seed get [flags] [<arg>]`
 
@@ -888,6 +888,14 @@ Flags:
 (Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
+
+`--record`::
+(Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
+
+`--records`::
+(Optional, bool) Makes the command obtain all of the records of the seed. The results are appended to the seed in a `records` field.
+
+The `filter`, `record`, and `records` flags are mutually exclusive.
 
 Examples:
 
@@ -916,6 +924,18 @@ discovery ingestion seed get -p cn
 {"active":true,"creationTimestamp":"2025-09-05T19:19:30Z","id":"026c6cf3-cba4-4d68-9806-1e534eebb99d","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:19:30Z","name":"Search seed","type":"staging"}
 {"active":true,"creationTimestamp":"2025-10-31T22:54:05Z","id":"028120a6-1859-47c7-b69a-f417e54b4a4a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:05Z","name":"ChatGPT seed","type":"staging"}
 {"active":true,"creationTimestamp":"2025-09-05T19:48:00Z","id":"0517a87a-86f7-4a71-bb3f-adfa0c87a269","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:48:00Z","name":"Staging ingestion seed","type":"staging"}
+```
+
+```bash
+# Get a seed record by id
+discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","record":{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},"recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+```
+
+```bash
+# Get all seed records
+discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --records
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"records":[{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},{"creationTimestamp":"2025-09-04T21:05:26Z","id":{"hash":"IJeF-losyj33EAuqjgGW2G7sT-eE7poejQ5HokerZio=","plain":"8148e6a7b952a3b2964f706ced8c6885"},"lastUpdatedTimestamp":"2025-09-04T21:05:26Z","status":"SUCCESS"}],"type":"staging"}
 ```
 
 ###### Store
