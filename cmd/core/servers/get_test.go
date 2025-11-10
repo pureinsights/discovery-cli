@@ -21,71 +21,72 @@ import (
 // NewGetCommand creates the server get command
 func TestNewGetCommand(t *testing.T) {
 	tests := []struct {
-		name       string
-		args       []string
-		url        bool
-		apiKey     string
-		outGolden  string
-		errGolden  string
-		outBytes   []byte
-		errBytes   []byte
-		method     string
-		path       string
-		statusCode int
-		response   string
-		err        error
+		name      string
+		args      []string
+		url       bool
+		apiKey    string
+		outGolden string
+		errGolden string
+		outBytes  []byte
+		errBytes  []byte
+		responses map[string]testutils.MockResponse
+		err       error
 	}{
 		// Working case
 		{
-			name:       "Search by name returns an array of which the first object is returned",
-			args:       []string{"MongoDB Atlas Server Clone 2"},
-			url:        true,
-			apiKey:     "apiKey123",
-			outGolden:  "NewGetCommand_Out_SearchByNameReturnsObject",
-			errGolden:  "NewGetCommand_Err_SearchByNameReturnsObject",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_SearchByNameReturnsObject"),
-			errBytes:   []byte(nil),
-			method:     http.MethodPost,
-			path:       "/v2/server/search",
-			statusCode: http.StatusOK,
-			response: `{
+			name:      "Search by name returns an array of which the first object is returned",
+			args:      []string{"my-server"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewGetCommand_Out_SearchByNameReturnsObject",
+			errGolden: "NewGetCommand_Err_SearchByNameReturnsObject",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchByNameReturnsObject"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/server/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
 			"content": [
 				{
 				"source": {
-				"type": "mongo",
-				"name": "MongoDB Atlas Server Clone 2",
-				"labels": [
+					"type": "mongo",
+					"name": "my-server",
+					"labels": [
 					{
 						"key": "A",
 						"value": "A"
 					}
-				],
-				"active": true,
-				"id": "21029da3-041c-43b5-a67e-870251f2f6a6",
-				"creationTimestamp": "2025-09-29T15:50:19Z",
-				"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
+					],
+					"active": true,
+					"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
 				},
-				"highlight": {},
-				"score": 0.30723327
-			},
-			{
+				"highlight": {}
+				"score": 1.4854797
+				},
+				{
 				"source": {
-				"type": "mongo",
-				"name": "MongoDB Atlas server clone 4",
-				"labels": [
+					"type": "mongo",
+					"name": "my-server",
+					"labels": [
 					{
 						"key": "A",
 						"value": "A"
 					}
-				],
-				"active": true,
-				"id": "a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f",
-				"creationTimestamp": "2025-09-29T15:50:21Z",
-				"lastUpdatedTimestamp": "2025-09-29T15:50:21Z"
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
 				},
-				"highlight": {},
-				"score": 0.30723327
-			}
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> 1 <em>clone</em>"
+					]
+				},
+				"score": 0.3980717
+				}
 			],
 			"pageable": {
 				"page": 0,
@@ -100,179 +101,206 @@ func TestNewGetCommand(t *testing.T) {
 			"numberOfElements": 18,
 			"pageNumber": 0
 			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/server/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/server/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+			},
 			err: nil,
 		},
 		{
-			name:       "Get with no args returns an array",
-			args:       []string{},
-			outGolden:  "NewGetCommand_Out_GetAllReturnsArray",
-			errGolden:  "NewGetCommand_Err_GetAllReturnsArray",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetAllReturnsArray"),
-			errBytes:   []byte(nil),
-			url:        true,
-			apiKey:     "apiKey123",
-			method:     http.MethodGet,
-			path:       "/v2/server",
-			statusCode: http.StatusOK,
-			response: `{
+			name:      "Get with no args returns an array",
+			args:      []string{},
+			outGolden: "NewGetCommand_Out_GetAllReturnsArray",
+			errGolden: "NewGetCommand_Err_GetAllReturnsArray",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_GetAllReturnsArray"),
+			errBytes:  []byte(nil),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"GET:/v2/server": {
+					StatusCode: http.StatusOK,
+					Body: `{
 			"content": [
-			{
+				{
 				"type": "mongo",
-				"name": "MongoDB Atlas server clone 6",
+				"name": "my-server",
+				"labels": [
+					{
+					"key": "A",
+					"value": "A"
+					}
+				],
+				"active": true,
+				"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+				"creationTimestamp": "2025-10-17T22:37:57Z",
+				"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				{
+				"type": "openai",
+				"name": "OpenAI server",
 				"labels": [],
 				"active": true,
-				"id": "226e8a0b-5016-4ebe-9963-1461edd39d0a",
-				"creationTimestamp": "2025-09-29T15:50:22Z",
-				"lastUpdatedTimestamp": "2025-09-29T15:50:22Z"
-			},
-			{
-				"type": "mongo",
-				"name": "MongoDB Atlas server clone 9",
-				"labels": [],
-				"active": true,
-				"id": "2b839453-ddad-4ced-8e13-2c7860af60a7",
-				"creationTimestamp": "2025-09-29T15:50:26Z",
-				"lastUpdatedTimestamp": "2025-09-29T15:50:26Z"
-			},
-			{
-				"type": "mongo",
-				"name": "MongoDB Atlas server clone 3",
-				"labels": [],
-				"active": true,
-				"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
-				"creationTimestamp": "2025-09-29T15:50:20Z",
-				"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
-            }
+				"id": "5c09589e-b643-41aa-a766-3b7fc3660473",
+				"creationTimestamp": "2025-10-17T22:38:12Z",
+				"lastUpdatedTimestamp": "2025-10-17T22:38:12Z"
+				},
 			],
 			"pageable": {
 				"page": 0,
 				"size": 25,
 				"sort": []
 			},
-			"totalSize": 3,
+			"totalSize": 2,
 			"totalPages": 1,
 			"empty": false,
 			"size": 25,
 			"offset": 0,
-			"numberOfElements": 3,
+			"numberOfElements": 2,
 			"pageNumber": 0
 			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/server", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
 			err: nil,
 		},
 		{
-			name:       "Get with args returns a search array",
-			args:       []string{"--filter", "type=mongo"},
-			outGolden:  "NewGetCommand_Out_SearchWithFiltersReturnsArray",
-			errGolden:  "NewGetCommand_Err_SearchWithFiltersReturnsArray",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_SearchWithFiltersReturnsArray"),
-			errBytes:   []byte(nil),
-			url:        true,
-			apiKey:     "apiKey123",
-			method:     http.MethodPost,
-			path:       "/v2/server/search",
-			statusCode: http.StatusOK,
-			response: `{
+			name:      "Get with args returns a search array",
+			args:      []string{"--filter", "type=mongo"},
+			outGolden: "NewGetCommand_Out_SearchWithFiltersReturnsArray",
+			errGolden: "NewGetCommand_Err_SearchWithFiltersReturnsArray",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchWithFiltersReturnsArray"),
+			errBytes:  []byte(nil),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/server/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
 			"content": [
-			{
+				{
 				"source": {
 					"type": "mongo",
-					"name": "MongoDB Atlas server clone",
-					"labels": [],
+					"name": "server-2",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
 					"active": true,
-					"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-					"creationTimestamp": "2025-09-29T15:50:17Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
+					"id": "8c243a1d-9384-421d-8f99-4ef28d4e0ab0",
+					"creationTimestamp": "2025-10-17T15:33:58Z",
+					"lastUpdatedTimestamp": "2025-10-17T15:33:58Z"
 				},
 				"highlight": {},
-				"score": 0.20970252
-			},
-			{
+				"score": 0.15534057
+				},
+				{
 				"source": {
 					"type": "mongo",
-					"name": "MongoDB Atlas server clone 1",
-					"labels": [],
+					"name": "my-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
 					"active": true,
-					"id": "8f14c11c-bb66-49d3-aa2a-dedff4608c17",
-					"creationTimestamp": "2025-09-29T15:50:19Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:19Z"
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
 				},
 				"highlight": {},
-				"score": 0.20970252
-			},
-            {
-				"source": {
-					"type": "mongo",
-					"name": "MongoDB Atlas server clone 3",
-					"labels": [],
-					"active": true,
-					"id": "3a0214a4-72cc-4eee-ad0c-9e3af9b08a6c",
-					"creationTimestamp": "2025-09-29T15:50:20Z",
-					"lastUpdatedTimestamp": "2025-09-29T15:50:20Z"
-				},
-				"highlight": {},
-				"score": 0.20970252
-			}
+				"score": 0.15534057
+				}
 			],
 			"pageable": {
 				"page": 0,
 				"size": 25,
 				"sort": []
 			},
-			"totalSize": 3,
+			"totalSize": 13,
 			"totalPages": 1,
 			"empty": false,
 			"size": 25,
 			"offset": 0,
-			"numberOfElements": 3,
+			"numberOfElements": 13,
 			"pageNumber": 0
 			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
 			err: nil,
 		},
 
 		// Error case
 		{
-			name:       "No URL",
-			args:       []string{},
-			outGolden:  "NewGetCommand_Out_NoURL",
-			errGolden:  "NewGetCommand_Err_NoURL",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_NoURL"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_NoURL"),
-			url:        false,
-			apiKey:     "apiKey123",
-			method:     http.MethodPost,
-			path:       "/v2/server/search",
-			statusCode: http.StatusOK,
-			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			name:      "No URL",
+			args:      []string{},
+			outGolden: "NewGetCommand_Out_NoURL",
+			errGolden: "NewGetCommand_Err_NoURL",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_NoURL"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_NoURL"),
+			url:       false,
+			apiKey:    "apiKey123",
+			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
-			name:       "No API key",
-			args:       []string{},
-			outGolden:  "NewGetCommand_Out_NoAPIKey",
-			errGolden:  "NewGetCommand_Err_NoAPIKey",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_NoAPIKey"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_NoAPIKey"),
-			url:        true,
-			apiKey:     "",
-			method:     http.MethodPost,
-			path:       "/v2/server",
-			statusCode: http.StatusNotFound,
-			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "The Discovery Core API key is missing for profile \"default\".\nTo set the API key for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
-		},
-		{
-			name:       "user sends a name that does not exist",
-			args:       []string{"test"},
-			url:        true,
-			apiKey:     "apiKey123",
-			outGolden:  "NewGetCommand_Out_NameDoesNotExist",
-			errGolden:  "NewGetCommand_Err_NameDoesNotExist",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_NameDoesNotExist"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_NameDoesNotExist"),
-			method:     http.MethodPost,
-			path:       "/v2/server/search",
-			statusCode: http.StatusNoContent,
-			response:   ``,
+			name:      "user sends a name that does not exist",
+			args:      []string{"test"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewGetCommand_Out_NameDoesNotExist",
+			errGolden: "NewGetCommand_Err_NameDoesNotExist",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_NameDoesNotExist"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_NameDoesNotExist"),
+			responses: map[string]testutils.MockResponse{
+				"/v2/server/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
 				Status: http.StatusNotFound,
 				Body: gjson.Parse(`{
@@ -284,62 +312,79 @@ func TestNewGetCommand(t *testing.T) {
 }`),
 			}, "Could not search for entity with id \"test\""),
 		},
-
 		{
-			name:       "Search By Name returns HTTP error",
-			args:       []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
-			outGolden:  "NewGetCommand_Out_SearchByNameHTTPError",
-			errGolden:  "NewGetCommand_Err_SearchByNameHTTPError",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_SearchByNameHTTPError"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_SearchByNameHTTPError"),
-			url:        true,
-			apiKey:     "apiKey123",
-			method:     http.MethodPost,
-			path:       "/v2/server/search",
-			statusCode: http.StatusInternalServerError,
-			response: `{
+			name:      "Search By Name returns HTTP error",
+			args:      []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
+			outGolden: "NewGetCommand_Out_SearchByNameHTTPError",
+			errGolden: "NewGetCommand_Err_SearchByNameHTTPError",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchByNameHTTPError"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_SearchByNameHTTPError"),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/server/search": {
+					StatusCode: http.StatusInternalServerError,
+					Body: `{
 			"status": 500,
 			"code": 1003,
 			"messages": [
 				"Internal server error"
-			]
+			],
+			"timestamp": "2025-10-16T17:46:45.386963700Z"
 			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{
 			"status": 500,
 			"code": 1003,
 			"messages": [
 				"Internal server error"
-			]
+			],
+			"timestamp": "2025-10-16T17:46:45.386963700Z"
 			}`)}, "Could not search for entity with id \"3b32e410-2F33-412d-9fb8-17970131921c\""),
 		},
 		{
-			name:       "GetEntities returns HTTP error",
-			args:       []string{},
-			outGolden:  "NewGetCommand_Out_GetEntitiesHTTPError",
-			errGolden:  "NewGetCommand_Err_GetEntitiesHTTPError",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetEntitiesHTTPError"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_GetEntitiesHTTPError"),
-			url:        true,
-			apiKey:     "apiKey123",
-			method:     http.MethodGet,
-			path:       "/v2/server",
-			statusCode: http.StatusUnauthorized,
-			response:   `{"error": "unauthorized"}`,
-			err:        cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error": "unauthorized"}`)}, "Could not get all entities"),
+			name:      "GetEntities returns HTTP error",
+			args:      []string{},
+			outGolden: "NewGetCommand_Out_GetEntitiesHTTPError",
+			errGolden: "NewGetCommand_Err_GetEntitiesHTTPError",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_GetEntitiesHTTPError"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_GetEntitiesHTTPError"),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"GET:/v2/server": {
+					StatusCode:  http.StatusUnauthorized,
+					Body:        `{"error": "unauthorized"}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/server", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error": "unauthorized"}`)}, "Could not get all entities"),
 		},
 		{
-			name:       "SearchEntities returns HTTP error",
-			args:       []string{"--filter", "label=A"},
-			url:        true,
-			apiKey:     "apiKey123",
-			outGolden:  "NewGetCommand_Out_SearchHTTPError",
-			errGolden:  "NewGetCommand_Err_SearchHTTPError",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_SearchHTTPError"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_SearchHTTPError"),
-			method:     http.MethodPost,
-			path:       "/v2/server/search",
-			statusCode: http.StatusUnauthorized,
-			response: `{
+			name:      "SearchEntities returns HTTP error",
+			args:      []string{"--filter", "label=A"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewGetCommand_Out_SearchHTTPError",
+			errGolden: "NewGetCommand_Err_SearchHTTPError",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchHTTPError"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_SearchHTTPError"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/server/search": {
+					StatusCode: http.StatusUnauthorized,
+					Body: `{
 	"status": 401,
 	"code": 1003,
 	"messages": [
@@ -347,6 +392,14 @@ func TestNewGetCommand(t *testing.T) {
 	],
 	"timestamp": "2025-09-30T15:38:42.885125200Z"
 }`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
 				Status: http.StatusUnauthorized,
 				Body: gjson.Parse(`{
@@ -360,63 +413,118 @@ func TestNewGetCommand(t *testing.T) {
 			}, "Could not search for the entities"),
 		},
 		{
-			name:       "Filter does not exist",
-			args:       []string{"--filter", "gte=field:1"},
-			url:        true,
-			apiKey:     "apiKey123",
-			outGolden:  "NewGetCommand_Out_FilterDoesNotExist",
-			errGolden:  "NewGetCommand_Err_FilterDoesNotExist",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_FilterDoesNotExist"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_FilterDoesNotExist"),
-			method:     http.MethodPost,
-			path:       "/v2/server/search",
-			statusCode: http.StatusBadRequest,
-			response:   ``,
-			err:        cli.NewError(cli.ErrorExitCode, "Filter type \"gte\" does not exist"),
+			name:      "Filter does not exist",
+			args:      []string{"--filter", "gte=field:1"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewGetCommand_Out_FilterDoesNotExist",
+			errGolden: "NewGetCommand_Err_FilterDoesNotExist",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_FilterDoesNotExist"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_FilterDoesNotExist"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/server/search": {
+					StatusCode:  http.StatusBadRequest,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewError(cli.ErrorExitCode, "Filter type \"gte\" does not exist"),
 		},
 		{
-			name:       "Printing JSON object fails",
-			args:       []string{"test"},
-			outGolden:  "NewGetCommand_Out_PrintJSONFails",
-			errGolden:  "NewGetCommand_Err_PrintJSONFails",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_PrintJSONFails"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_PrintJSONFails"),
-			url:        true,
-			apiKey:     "apiKey123",
-			method:     http.MethodPost,
-			path:       "/v2/server/search",
-			statusCode: http.StatusOK,
-			response: `{
-			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","credentials":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"test","type":mongo"}},       
-			{{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","credentials":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}],
+			name:      "Printing JSON object fails",
+			args:      []string{"test"},
+			outGolden: "NewGetCommand_Out_PrintJSONFails",
+			errGolden: "NewGetCommand_Err_PrintJSONFails",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_PrintJSONFails"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_PrintJSONFails"),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/server/search": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "test",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+			],
 			"pageable": {
 				"page": 0,
-				"size": 3,
+				"size": 25,
 				"sort": []
-			}},
-			"totalSize": 2,
-			"totalPages": 4,
+			},
+			"totalSize": 1,
+			"totalPages": 1,
 			"empty": false,
-			"size": 3,
+			"size": 25,
 			"offset": 0,
-			"numberOfElements": 2,
+			"numberOfElements": 1,
 			"pageNumber": 0
 			}`,
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character 'm' looking for beginning of value"), "Could not print JSON object"),
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/server/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"GET:/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+					"type": "mongo",
+					"name": "my-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active: true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/server/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '\\n' in string literal"), "Could not print JSON object"),
 		},
 		{
-			name:       "Printing JSON array fails",
-			args:       []string{},
-			outGolden:  "NewGetCommand_Out_PrintArrayFails",
-			errGolden:  "NewGetCommand_Err_PrintArrayFails",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_PrintArrayFails"),
-			errBytes:   testutils.Read(t, "NewGetCommand_Err_PrintArrayFails"),
-			url:        true,
-			apiKey:     "apiKey123",
-			method:     http.MethodGet,
-			path:       "/v2/server",
-			statusCode: http.StatusOK,
-			response: `{
+			name:      "Printing JSON array fails",
+			args:      []string{},
+			outGolden: "NewGetCommand_Out_PrintArrayFails",
+			errGolden: "NewGetCommand_Err_PrintArrayFails",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_PrintArrayFails"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_PrintArrayFails"),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"GET:/v2/server": {
+					StatusCode: http.StatusOK,
+					Body: `{
 			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","credentials":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}},     
 			{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","credentials":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":mongo}},       
 			{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","credentials":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}}
@@ -434,17 +542,21 @@ func TestNewGetCommand(t *testing.T) {
 			"numberOfElements": 3,
 			"pageNumber": 0
 			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/server", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character 'm' looking for beginning of value"), "Could not print JSON Array"),
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
-				assert.Equal(t, tc.apiKey, r.Header.Get("X-API-Key"))
-			}))
+			srv := httptest.NewServer(testutils.HttpMultiResponseHandler(t, tc.responses))
 
 			defer srv.Close()
 
