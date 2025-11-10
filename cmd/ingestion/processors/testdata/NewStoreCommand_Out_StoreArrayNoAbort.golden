@@ -1,3 +1,3 @@
-{"active":true,"creationTimestamp":"2025-08-14T18:02:11Z","id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"MongoDB processor","processor":"mongo-processor","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-08-14T18:02:11Z","id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"MongoDB processor","secret":"mongo-secret","type":"mongo"}
 {"code":1003,"messages":["Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"],"status":404,"timestamp":"2025-10-29T23:12:08.002244700Z"}
-{"active":true,"creationTimestamp":"2025-08-14T18:02:11Z","id":"9ababe08-0b74-4672-bb7c-e7a8227d6dad","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"OpenAI processor","processor":"openai-processor","type":"openai"}
+{"active":true,"creationTimestamp":"2025-08-14T18:02:11Z","id":"9ababe08-0b74-4672-bb7c-e7a8227d6dad","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"OpenAI processor","secret":"openai-secret","type":"openai"}
