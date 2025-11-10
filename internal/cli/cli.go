@@ -25,9 +25,12 @@ type Discovery interface {
 	PrintStagingConfigToUser(profile string, sensitive bool) error
 	GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	GetEntities(client Getter, printer Printer) error
+	searchEntity(client Searcher, id string) (gjson.Result, error)
 	SearchEntity(client Searcher, id string, printer Printer) error
 	SearchEntities(client Searcher, filter gjson.Result, printer Printer) error
 	UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error
+	AppendSeedRecord(seed gjson.Result, client RecordGetter, id string, printer Printer) error
+	AppendSeedRecords(seed gjson.Result, client RecordGetter, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.

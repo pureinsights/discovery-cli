@@ -26,8 +26,8 @@ func TestGetCommandConfig(t *testing.T) {
 	assert.Equal(t, url, commandConfig.url)
 }
 
-// Test_checkCredentials tests the checkCredentials function.
-func Test_checkCredentials(t *testing.T) {
+// TestCheckCredentials tests the CheckCredentials function.
+func TestCheckCredentials(t *testing.T) {
 	tests := []struct {
 		name          string
 		profile       string
@@ -44,7 +44,7 @@ func Test_checkCredentials(t *testing.T) {
 			url:           "core_url",
 			componentName: "Core",
 			config: map[string]string{
-				"default.core_url": "http://localhost:12010",
+				"default.core_url": "http://localhost:12010/v2",
 				"default.core_key": "http://discovery.core.cn",
 			},
 			err: nil,
@@ -59,7 +59,7 @@ func Test_checkCredentials(t *testing.T) {
 			config: map[string]string{
 				"default.core_key": "http://discovery.core.cn",
 			},
-			err: cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
+			err: cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
 		},
 	}
 
@@ -76,7 +76,7 @@ func Test_checkCredentials(t *testing.T) {
 				vpr.Set(k, v)
 			}
 			d := cli.NewDiscovery(&io, vpr, "")
-			err := checkCredentials(d, tc.profile, tc.componentName, tc.url)
+			err := CheckCredentials(d, tc.profile, tc.componentName, tc.url)
 			if tc.err != nil {
 				require.Error(t, err)
 				var errStruct cli.Error
