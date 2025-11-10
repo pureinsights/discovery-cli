@@ -312,21 +312,23 @@ func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 // SearchByName returns an object as if it found correctly the entity.
 func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Parse(`{
-		"source": {
-			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
-			"labels": [],
-			"active": true,
-			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`), nil
 }
 
@@ -334,7 +336,7 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
-		"name": "MongoDB Atlas server clone",
+		"name": "MongoDB Atlas server",
 		"labels": [],
 		"active": true,
 		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
@@ -358,7 +360,7 @@ func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{
 		"type": "mongo",
-		"name": "label test 1 clone 10",
+		"name": "my-credential",
 		"labels": [
 			{
 			"key": "A",
@@ -575,21 +577,23 @@ func Test_searchEntity(t *testing.T) {
 			client: new(WorkingSearcher),
 			id:     "MongoDB Atlas server",
 			expected: gjson.Parse(`{
-		"source": {
-			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
-			"labels": [],
-			"active": true,
-			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`),
 			err: nil,
 		},
@@ -661,13 +665,7 @@ func Test_searchEntity(t *testing.T) {
 			expected: gjson.Result{},
 			err: discoveryPackage.Error{
 				Status: http.StatusNotFound,
-				Body: gjson.Parse(`{
-	"status": 404,
-	"code": 1003,
-	"messages": [
-		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	]
-}`),
+				Body:   gjson.Parse("{\n\t\"status\": 404,\n\t\"code\": 1003,\n\t\"messages\": [\n\t\t\"Entity not found: entity with name \"MongoDB Atlas Server\" does not exist\"\n\t]\n}"),
 			},
 		},
 		{
@@ -724,7 +722,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 			client:         new(WorkingSearcher),
 			id:             "MongoDB Atlas Server",
 			printer:        JsonObjectPrinter(true),
-			expectedOutput: "{\n  \"highlight\": {\n    \"name\": [\n      \"\\u003cem\\u003eMongoDB\\u003c/em\\u003e \\u003cem\\u003eAtlas\\u003c/em\\u003e \\u003cem\\u003eserver\\u003c/em\\u003e clone\"\n    ]\n  },\n  \"score\": 0.50769836,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"name\": \"MongoDB Atlas server clone\",\n    \"type\": \"mongo\"\n  }\n}\n",
+			expectedOutput: "{\n  \"active\": true,\n  \"config\": {\n    \"connection\": {\n      \"connectTimeout\": \"1m\",\n      \"readTimeout\": \"30s\"\n    },\n    \"credentialId\": \"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\n    \"servers\": [\n      \"mongodb+srv://cluster0.dleud.mongodb.net/\"\n    ]\n  },\n  \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"name\": \"MongoDB Atlas server\",\n  \"type\": \"mongo\"\n}\n",
 			err:            nil,
 		},
 		{
@@ -739,7 +737,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 		// Error case
 		{
 			name:           "Search returns 404 Not Found",
-			client:         new(FailingSearcherWorkingGetter),
+			client:         new(FailingSearcherFailingGetter),
 			id:             "MongoDB Atlas Server",
 			printer:        nil,
 			expectedOutput: "",
@@ -875,16 +873,17 @@ func Test_discovery_SearchEntities(t *testing.T) {
 // Test_parseFilter tests the parseFilter() function.
 func Test_parseFilter(t *testing.T) {
 	tests := []struct {
-		name                 string
-		filters              []string
-		expectedLabelFilters []string
-		expectedTypeFilters  []string
-		err                  error
+		name               string
+		filter             string
+		expectedFilterType string
+		expectedFilters    []string
+		err                error
 	}{
 		{
-			name:    "Send label with key and value, label with only key, and type filter",
-			filters: []string{"label=A:C", "label=B", "type=mongo"},
-			expectedLabelFilters: []string{`{
+			name:               "Send label with key and value",
+			filter:             "label=A:C",
+			expectedFilterType: "label",
+			expectedFilters: []string{`{
 	"equals": {
 		"field": "labels.key",
 		"value": "A"
@@ -894,13 +893,26 @@ func Test_parseFilter(t *testing.T) {
 		"field": "labels.value",
 		"value": "C"
 		}
-	}`, `{
+	}`},
+			err: nil,
+		},
+		{
+			name:               "Send label with only key",
+			filter:             "label=B",
+			expectedFilterType: "label",
+			expectedFilters: []string{`{
 	"equals": {
 		"field": "labels.key",
 		"value": "B"
 		}
 	}`},
-			expectedTypeFilters: []string{`{
+			err: nil,
+		},
+		{
+			name:               "Send type filter",
+			filter:             "type=mongo",
+			expectedFilterType: "type",
+			expectedFilters: []string{`{
 	"equals": {
 		"field": "type",
 		"value": "mongo"
@@ -910,52 +922,109 @@ func Test_parseFilter(t *testing.T) {
 			err: nil,
 		},
 		{
-			name:    "Send unknown filter",
-			filters: []string{"name=mongo"},
-			err:     NewError(ErrorExitCode, "Filter type \"name\" does not exist"),
+			name:   "Send unknown filter",
+			filter: "name=mongo",
+			err:    NewError(ErrorExitCode, "Filter type \"name\" does not exist"),
 		},
 		{
-			name:    "Send filter with no =",
-			filters: []string{"label"},
-			err:     NewError(ErrorExitCode, "Filter \"label\" does not follow the format {type}={key}[:{value}]"),
+			name:   "Send filter with no =",
+			filter: "label",
+			err:    NewError(ErrorExitCode, "Filter \"label\" does not follow the format {type}={key}[:{value}]"),
 		},
 		{
-			name:    "Send label filter with empty key",
-			filters: []string{"label="},
-			err:     NewError(ErrorExitCode, "The label's key in the filter \"label=\" cannot be empty"),
+			name:   "Send label filter with empty key",
+			filter: "label=",
+			err:    NewError(ErrorExitCode, "The label's key in the filter \"label=\" cannot be empty"),
 		},
 		{
-			name:    "Send label filter with empty value",
-			filters: []string{"label=key:"},
-			err:     NewError(ErrorExitCode, "The label's value in the filter \"label=key:\" cannot be empty if ':' is included"),
+			name:   "Send label filter with empty value",
+			filter: "label=key:",
+			err:    NewError(ErrorExitCode, "The label's value in the filter \"label=key:\" cannot be empty if ':' is included"),
 		},
 		{
-			name:    "Send type filter with empty type",
-			filters: []string{"type="},
-			err:     NewError(ErrorExitCode, "The type in the filter \"type=\" cannot be empty"),
+			name:   "Send type filter with empty type",
+			filter: "type=",
+			err:    NewError(ErrorExitCode, "The value in the type filter \"type=\" cannot be empty"),
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			labelFilters := []string{}
-			typeFilters := []string{}
+			filterType, filters, err := parseFilter(tc.filter)
 
-			for _, filter := range tc.filters {
-				err := parseFilter(filter, &labelFilters, &typeFilters)
-
-				if tc.err != nil {
-					require.Error(t, err)
-					var errStruct Error
-					require.ErrorAs(t, err, &errStruct)
-					assert.EqualError(t, err, tc.err.Error())
-				} else {
-					require.NoError(t, err)
-				}
+			if tc.err != nil {
+				assert.Empty(t, filterType)
+				assert.Empty(t, filters)
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tc.expectedFilterType, filterType)
+				assert.Equal(t, tc.expectedFilters, filters)
 			}
-			if tc.err == nil {
-				assert.Equal(t, tc.expectedLabelFilters, labelFilters)
-				assert.Equal(t, tc.expectedTypeFilters, typeFilters)
+		})
+	}
+}
+
+// Test_getAndFilterString tests the getAndFilterString() function
+func Test_getAndFilterString(t *testing.T) {
+	tests := []struct {
+		name                 string
+		filters              []string
+		expectedFilterString string
+		err                  error
+	}{
+		{
+			name: "Send two filters",
+			filters: []string{`{
+	"equals": {
+		"field": "labels.key",
+		"value": "A"
+		}
+	}`, `{
+	"equals": {
+		"field": "labels.value",
+		"value": "C"
+		}
+	}`},
+			expectedFilterString: "{\"and\":[{\n\t\"equals\": {\n\t\t\"field\": \"labels.key\",\n\t\t\"value\": \"A\"\n\t\t}\n\t},{\n\t\"equals\": {\n\t\t\"field\": \"labels.value\",\n\t\t\"value\": \"C\"\n\t\t}\n\t}]}",
+			err:                  nil,
+		},
+		{
+			name: "Send one filter",
+			filters: []string{`{
+	"equals": {
+		"field": "labels.key",
+		"value": "A"
+		}
+	}`},
+			expectedFilterString: `{
+	"equals": {
+		"field": "labels.key",
+		"value": "A"
+		}
+	}`,
+			err: nil,
+		},
+		{
+			name:                 "Send no filters",
+			filters:              []string{},
+			expectedFilterString: `{}`,
+			err:                  nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			filterString, err := getAndFilterString(tc.filters)
+
+			if tc.err != nil {
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tc.expectedFilterString, filterString)
 			}
 		})
 	}
