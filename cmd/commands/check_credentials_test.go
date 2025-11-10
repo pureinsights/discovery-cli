@@ -76,7 +76,7 @@ func TestCheckCredentials(t *testing.T) {
 				vpr.Set(k, v)
 			}
 			d := cli.NewDiscovery(&io, vpr, "")
-			err := checkCredentials(d, tc.profile, tc.componentName, tc.url)
+			err := CheckCredentials(d, tc.profile, tc.componentName, tc.url)
 			if tc.err != nil {
 				require.Error(t, err)
 				var errStruct cli.Error

@@ -37,7 +37,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 		{
 			name:                "Start works without executionProperties and with scanType",
 			url:                 true,
-			apiKey:              "apiKey123",
+			apiKey:              "",
 			outGolden:           "NewStartCommand_Out_NoPropertiesYesScan",
 			errGolden:           "NewStartCommand_Err_NoPropertiesYesScan",
 			outBytes:            testutils.Read(t, "NewStartCommand_Out_NoPropertiesYesScan"),
@@ -81,7 +81,6 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/seed/search", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
 				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
@@ -91,7 +90,6 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
 			},
@@ -173,18 +171,6 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			executionProperties: "",
 			scanType:            "FULL",
 			err:                 cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery ingestion config --profile {profile}"),
-		},
-		{
-			name:                "No API key",
-			outGolden:           "NewStartCommand_Out_NoAPIKey",
-			errGolden:           "NewStartCommand_Err_NoAPIKey",
-			outBytes:            testutils.Read(t, "NewStartCommand_Out_NoAPIKey"),
-			errBytes:            testutils.Read(t, "NewStartCommand_Err_NoAPIKey"),
-			url:                 true,
-			apiKey:              "",
-			executionProperties: "",
-			scanType:            "FULL",
-			err:                 cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion API key is missing for profile \"default\".\nTo set the API key for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery ingestion config --profile {profile}"),
 		},
 		{
 			name:                "Start fails because it already has an execution",

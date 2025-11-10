@@ -987,13 +987,6 @@ discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"
 {"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
-```bash
-# Try to start a seed execution when it already has active executions
-discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
-Error: Could not start seed execution for seed with id "1d81d3d5-58a2-44a5-9acf-3fc8358afe09"
-status: 409, body: {"status":409,"code":4001,"messages":["The seed has 1 executions: f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36"],"timestamp":"2025-11-03T23:59:06.349049Z"}
-```
-
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow. 
 
