@@ -679,7 +679,7 @@ Usage: `discovery ingestion processor get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the server that will be retrieved.
+(Optional, String) The name or UUID of the processor that will be retrieved.
 
 Flags:
 `-h, --help`::
