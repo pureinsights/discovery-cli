@@ -129,7 +129,7 @@ func TestStoreCommand(t *testing.T) {
 		{
 			name:           "UpsertEntities correctly prints the array",
 			url:            "http://localhost:12010/v2",
-			apiKey:         "core123",
+			apiKey:         "",
 			componentName:  "Core",
 			client:         new(WorkingCreator),
 			abortOnError:   false,
@@ -159,7 +159,7 @@ func TestStoreCommand(t *testing.T) {
 			apiKey:        "core123",
 			componentName: "Core",
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:           "UpsertEntities returns 404 Not Found",
@@ -257,7 +257,7 @@ func TestStoreCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := StoreCommand(d, tc.client, StoreCommandConfig(GetCommandConfig("default", "json", tc.componentName, "core_url", "core_key"), tc.abortOnError, tc.data, tc.file))
+			err := StoreCommand(d, tc.client, StoreCommandConfig(GetCommandConfig("default", "json", tc.componentName, "core_url"), tc.abortOnError, tc.data, tc.file))
 
 			if tc.err != nil {
 				require.Error(t, err)
