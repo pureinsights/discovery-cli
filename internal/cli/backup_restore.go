@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -20,7 +19,8 @@ type BackupRestore interface {
 
 func RenderExportStatus(err error) (gjson.Result, error) {
 	if err != nil {
-		return gjson.Parse(`{"acknowledged": false}`), NewErrorWithCause(ErrorExitCode, err, "Could not export entities")
+		acknowledged, _ := sjson.Set(`{"acknowledged": false}`, "error", err.Error())
+		return gjson.Parse(acknowledged), NewErrorWithCause(ErrorExitCode, err, "Could not export entities")
 	}
 	return gjson.Parse(`{"acknowledged": true}`), nil
 }
@@ -52,10 +52,11 @@ func (d discovery) ExportEntitiesFromClient(client BackupRestore, path string, p
 	return printer(*d.iostreams, result)
 }
 
-type BackupRestoreClientEntry struct  {
-	Name string
+type BackupRestoreClientEntry struct {
+	Name   string
 	Client BackupRestore
 }
+
 func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error {
 	result := `{}`
 
@@ -81,7 +82,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
 
-	for _,entry := range clients {
+	for _, entry := range clients {
 		apiName := entry.Name
 		client := entry.Client
 		zipBytes, name, err := client.Export()
@@ -94,9 +95,8 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 		}
 
 		h := &zip.FileHeader{
-			Name:     fmt.Sprintf("%s-%s", apiName, name), // path inside outer zip, e.g. "folder/a.zip"
-			Method:   zip.Store,                           // inner zip is already compressed; avoid recompressing
-			Modified: time.Now(),                          // optional, set a timestamp
+			Name:   fmt.Sprintf("%s-%s", apiName, name),
+			Method: zip.Store,
 		}
 
 		fw, err := zipWriter.CreateHeader(h)
