@@ -185,7 +185,7 @@ func Test_backupRestore_Export(t *testing.T) {
 			defer srv.Close()
 
 			b := backupRestore{client: newClient(srv.URL, "")}
-			response, err := b.Export()
+			response, _, err := b.Export()
 			if tc.err == nil {
 				require.NoError(t, err)
 				assert.Equal(t, bytes, response)

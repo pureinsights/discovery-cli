@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	backupRestore "github.com/pureinsights/pdp-cli/cmd/backup_restore"
 	"github.com/pureinsights/pdp-cli/cmd/config"
 	"github.com/pureinsights/pdp-cli/cmd/core"
 	"github.com/pureinsights/pdp-cli/cmd/ingestion"
@@ -41,6 +42,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery.AddCommand(ingestion.NewIngestionCommand(d))
 	discovery.AddCommand(queryflow.NewQueryFlowCommand(d))
 	discovery.AddCommand(staging.NewStagingCommand(d))
+	discovery.AddCommand(backupRestore.NewExportCommand(d))
 
 	return discovery
 }
