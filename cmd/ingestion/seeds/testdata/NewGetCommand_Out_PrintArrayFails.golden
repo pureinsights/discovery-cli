@@ -9,5 +9,4 @@ Flags:
   -h, --help                 help for get
   -p, --profile string       configuration profile to use (default "default")
       --record string        the id of the record that will be retrieved
-      --records              get all the records of the seed
 

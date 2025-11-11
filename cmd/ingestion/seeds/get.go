@@ -14,7 +14,6 @@ import (
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var filters []string
 	var recordId string
-	var records bool
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains seeds from Discovery Ingestion.",
@@ -28,7 +27,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			if !cmd.Flags().Changed("record") && !records {
+			if !cmd.Flags().Changed("record") {
 				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 			}
 
@@ -51,13 +50,13 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
 			}
 
-			printer := cli.GetObjectPrinter(vpr.GetString("output"))
-
-			if cmd.Flags().Changed("record") {
-				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
+			output := vpr.GetString("output")
+			if output == "json" {
+				output = "pretty-json"
 			}
+			printer := cli.GetObjectPrinter(output)
 
-			return d.AppendSeedRecords(seed, ingestionClient.Seeds().Records(seedId), printer)
+			return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
 		},
 		Args: cobra.MaximumNArgs(1),
 	}
@@ -66,9 +65,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 - Label: The format is label={key}[:{value}], where the value is optional.
 - Type: The format is type={type}.`)
 
-	get.Flags().BoolVar(&records, "records", false, "get all the records of the seed")
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
 
-	get.MarkFlagsMutuallyExclusive("filter", "record", "records")
+	get.MarkFlagsMutuallyExclusive("filter", "record")
 	return get
 }
