@@ -55,7 +55,11 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
 			}
 
-			printer := cli.GetObjectPrinter(vpr.GetString("output"))
+			output := vpr.GetString("output")
+			if output == "json" {
+				output = "pretty-json"
+			}
+			printer := cli.GetObjectPrinter(output)
 
 			if cmd.Flags().Changed("record") && !records {
 				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
