@@ -330,7 +330,7 @@ func TestNewGetCommand(t *testing.T) {
 		},
 		{
 			name:      "The user gets all records",
-			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--records"},
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--record", ""},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewGetCommand_Out_GetAllRecords",
@@ -719,7 +719,7 @@ func TestNewGetCommand(t *testing.T) {
 		},
 		{
 			name:      "The user fails to get all records",
-			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--records"},
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--record", ""},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewGetCommand_Out_GetRecordsFails",

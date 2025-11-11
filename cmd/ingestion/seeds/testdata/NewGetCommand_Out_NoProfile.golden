@@ -7,5 +7,4 @@ Flags:
                              - Type: The format is type={type}.
   -h, --help                 help for get
       --record string        the id of the record that will be retrieved
-      --records              get all the records of the seed
 

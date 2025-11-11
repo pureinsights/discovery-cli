@@ -25,6 +25,10 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
 			}
 
+			if cmd.Flags().Changed("record") && recordId == "" {
+				records = true
+			}
+
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
@@ -53,7 +57,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 
 			printer := cli.GetObjectPrinter(vpr.GetString("output"))
 
-			if cmd.Flags().Changed("record") {
+			if cmd.Flags().Changed("record") && !records {
 				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
 			}
 
@@ -66,9 +70,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 - Label: The format is label={key}[:{value}], where the value is optional.
 - Type: The format is type={type}.`)
 
-	get.Flags().BoolVar(&records, "records", false, "get all the records of the seed")
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
 
-	get.MarkFlagsMutuallyExclusive("filter", "record", "records")
+	get.MarkFlagsMutuallyExclusive("filter", "record")
 	return get
 }

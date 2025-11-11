@@ -869,7 +869,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record` and `records` flags.
+`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record`  flags.
 
 Usage: `discovery ingestion seed get [flags] [<arg>]`
 
@@ -892,10 +892,7 @@ Flags:
 `--record`::
 (Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
 
-`--records`::
-(Optional, bool) Makes the command obtain all of the records of the seed. The results are appended to the seed in a `records` field.
-
-The `filter`, `record`, and `records` flags are mutually exclusive.
+The `filter`, and `record` flags are mutually exclusive.
 
 Examples:
 
