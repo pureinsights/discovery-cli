@@ -414,6 +414,34 @@ discovery core credential get -p cn
 {"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"openai-credential","type":"openai"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Core's credentials. The user must send a name or UUID to delete a specific credential.
+
+Usage: `discovery core credential delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, String) The name or UUID of the credential that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a credential by id
+discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Delete a credential by name
+discovery core credential delete credential1
+{"acknowledged":true}
+```
+
 ##### Server
 `server` is the command used to manage servers in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
