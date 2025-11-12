@@ -19,6 +19,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// TestRenderExportStatus tests the RenderExportStatus() function()
 func TestRenderExportStatus(t *testing.T) {
 	tests := []struct {
 		name                string
