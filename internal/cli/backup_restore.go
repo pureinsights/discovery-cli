@@ -119,7 +119,7 @@ func WriteExportsIntoFile(path string, clients []BackupRestoreClientEntry) (stri
 	return result, nil
 }
 
-// ExportEntitiesFromClients exports the entities from Discovery Core, Ingestion, and QueryFlow.
+// ExportEntitiesFromClients exports the entities from Discovery Core, Ingestion, and QueryFlow, writes the export files into the given path, and prints out the results.
 func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error {
 	if path == "" {
 		path = filepath.Join(".", "discovery.zip")
@@ -127,7 +127,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 
 	result, err := WriteExportsIntoFile(path, clients)
 	if err != nil {
-		return err
+		return NewErrorWithCause(ErrorExitCode, err, "Could not export entities")
 	}
 
 	if printer == nil {
