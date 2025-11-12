@@ -629,7 +629,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Delete
-`delete` is the command used to delete Discovery Ingestion's processors. The user must send a name or UUID to get a specific processor.
+`delete` is the command used to delete Discovery Ingestion's processors. The user must send a name or UUID to delete a specific processor.
 
 Usage: `discovery ingestion processor delete [flags] <arg>`
 
