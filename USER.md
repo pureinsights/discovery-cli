@@ -956,7 +956,7 @@ discovery ingestion seed store --data '{"type":"staging","name":"Search seed","l
 ```
 
 ###### Start
-`start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
+`start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user can set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
 
 Usage: `discovery ingestion seed start [flags]`
 
