@@ -3,7 +3,6 @@ package cli
 import (
 	"archive/zip"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
@@ -64,7 +63,16 @@ type BackupRestoreClientEntry struct {
 }
 
 // WriteExportsIntoZip calls the export endpoints and writes the information into a file.
-func WriteExportsIntoFile(zipFile io.Writer, clients []BackupRestoreClientEntry) (string, error) {
+func WriteExportsIntoFile(path string, clients []BackupRestoreClientEntry) (string, error) {
+	zipFile, err := os.OpenFile(
+		path,
+		os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
+		0o644,
+	)
+	if err != nil {
+		return "", err
+	}
+	defer zipFile.Close()
 	result := `{}`
 
 	zipWriter := zip.NewWriter(zipFile)
@@ -117,17 +125,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 		path = filepath.Join(".", "discovery.zip")
 	}
 
-	zipFile, err := os.OpenFile(
-		path,
-		os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
-		0o644,
-	)
-	if err != nil {
-		return err
-	}
-	defer zipFile.Close()
-
-	result, err := WriteExportsIntoFile(zipFile, clients)
+	result, err := WriteExportsIntoFile(path, clients)
 	if err != nil {
 		return err
 	}
