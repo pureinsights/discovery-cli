@@ -219,7 +219,7 @@ Core API Key: "discovery.key.core.cn"
 ```
 
 ##### Export
-`export` is the command used to backup Discovery Core's entities. With the `file`, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+`export` is the command used to backup Discovery Core's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
 
 Usage: `discovery core export [flags]`
 
