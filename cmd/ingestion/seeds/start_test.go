@@ -37,7 +37,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 		{
 			name:                "Start works without executionProperties and with scanType",
 			url:                 true,
-			apiKey:              "apiKey123",
+			apiKey:              "",
 			outGolden:           "NewStartCommand_Out_NoPropertiesYesScan",
 			errGolden:           "NewStartCommand_Err_NoPropertiesYesScan",
 			outBytes:            testutils.Read(t, "NewStartCommand_Out_NoPropertiesYesScan"),
@@ -45,7 +45,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			scanType:            "FULL",
 			executionProperties: "",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -81,17 +81,32 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/seed/search", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
 					StatusCode:  http.StatusOK,
 					Body:        `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"FULL"}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
 			},
@@ -108,7 +123,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			scanType:            "",
 			executionProperties: "{\"stagingBucket\":\"testBucket\"}",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -144,10 +159,26 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/seed/search", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
 					StatusCode:  http.StatusOK,
 					Body:        `{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`,
 					ContentType: "application/json",
@@ -172,19 +203,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			apiKey:              "apiKey123",
 			executionProperties: "",
 			scanType:            "FULL",
-			err:                 cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery ingestion config --profile {profile}"),
-		},
-		{
-			name:                "No API key",
-			outGolden:           "NewStartCommand_Out_NoAPIKey",
-			errGolden:           "NewStartCommand_Err_NoAPIKey",
-			outBytes:            testutils.Read(t, "NewStartCommand_Out_NoAPIKey"),
-			errBytes:            testutils.Read(t, "NewStartCommand_Err_NoAPIKey"),
-			url:                 true,
-			apiKey:              "",
-			executionProperties: "",
-			scanType:            "FULL",
-			err:                 cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion API key is missing for profile \"default\".\nTo set the API key for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery ingestion config --profile {profile}"),
+			err:                 cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery ingestion config --profile \"default\""),
 		},
 		{
 			name:                "Start fails because it already has an execution",
@@ -197,7 +216,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			scanType:            "FULL",
 			executionProperties: "",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -233,10 +252,26 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/seed/search", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
 					StatusCode: http.StatusConflict,
 					Body: `{
 			"status": 409,
@@ -274,7 +309,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			scanType:            "FULL",
 			executionProperties: "",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -312,7 +347,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			scanType:            "FULL",
 			executionProperties: "",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -348,10 +383,26 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
 						assert.Equal(t, "/v2/seed/search", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
 					StatusCode:  http.StatusOK,
 					Body:        `{"id:"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`,
 					ContentType: "application/json",
