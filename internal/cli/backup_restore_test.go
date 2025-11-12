@@ -71,7 +71,6 @@ type WorkingCoreBackupRestore struct {
 
 // Get returns zip bytes as if the request worked successfully.
 func (g *WorkingCoreBackupRestore) Export() ([]byte, string, error) {
-
 	return coreBytes, "export-20251110T1455.zip", nil
 }
 
@@ -87,7 +86,6 @@ type WorkingIngestionBackupRestore struct {
 
 // Get returns zip bytes as if the request worked successfully.
 func (g *WorkingIngestionBackupRestore) Export() ([]byte, string, error) {
-
 	return ingestionBytes, "export-20251110T1455.zip", nil
 }
 
@@ -103,7 +101,6 @@ type WorkingQueryFlowBackupRestore struct {
 
 // Get returns zip bytes as if the request worked successfully.
 func (g *WorkingQueryFlowBackupRestore) Export() ([]byte, string, error) {
-
 	return queryflowBytes, "export-20251110T1455.zip", nil
 }
 
