@@ -66,7 +66,6 @@ var zipBytes, _ = os.ReadFile("testdata/test-export.zip")
 
 // Get returns zip bytes as if the request worked successfully.
 func (g *WorkingBackupRestore) Export() ([]byte, string, error) {
-
 	return zipBytes, "export-20251110T1455.zip", nil
 }
 
