@@ -15,7 +15,7 @@ import (
 
 // Test_newBucketsClient tests the bucketsClient constructor
 func Test_newBucketsClient(t *testing.T) {
-	url := "http://localhost:12020/v2"
+	url := "http://localhost:12020"
 	apiKey := "Api Key"
 	c := newBucketsClient(url, apiKey)
 
@@ -676,7 +676,7 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 
 // Test_newContentClient tests the contentClient constructor.
 func Test_newContentClient(t *testing.T) {
-	url := "http://localhost:12020/v2"
+	url := "http://localhost:12020"
 	apiKey := "Api Key"
 	bucketName := "testBucket"
 	c := newContentClient(url, apiKey, bucketName)

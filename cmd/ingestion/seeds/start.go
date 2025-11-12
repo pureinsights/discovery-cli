@@ -22,7 +22,7 @@ func NewStartCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
 			}
 
-			err = commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url", "ingestion_key")
+			err = commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url")
 			if err != nil {
 				return err
 			}

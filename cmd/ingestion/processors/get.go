@@ -25,7 +25,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			return commands.SearchCommand(args, d, ingestionClient.Processors(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url", "ingestion_key"), &filters)
+			return commands.SearchCommand(args, d, ingestionClient.Processors(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
 	}

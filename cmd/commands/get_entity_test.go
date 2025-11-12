@@ -21,6 +21,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// WorkingGetter mocks the discovery.Getter struct to always answer a working result
 type WorkingGetter struct {
 	mock.Mock
 }
@@ -112,7 +113,7 @@ func TestGetCommand(t *testing.T) {
 		// Working case
 		{
 			name:           "GetEntity correctly prints an object",
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
@@ -123,7 +124,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetEntities correctly prints an array of objects",
 			client:         new(WorkingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{},
@@ -140,7 +141,7 @@ func TestGetCommand(t *testing.T) {
 			componentName: "Core",
 			args:          []string{},
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:           "id is not a UUID",
@@ -155,7 +156,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetEntity returns 404 Not Found",
 			client:         new(FailingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
@@ -175,7 +176,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:           "GetAll returns 401 Unauthorized",
 			client:         new(FailingGetter),
-			url:            "http://localhost:12010/v2",
+			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			componentName:  "Core",
 			args:           []string{},
@@ -185,7 +186,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:          "Printing JSON fails",
 			client:        new(WorkingGetter),
-			url:           "http://localhost:12010/v2",
+			url:           "http://localhost:12010",
 			apiKey:        "core123",
 			componentName: "Core",
 			args:          []string{"5f125024-1e5e-4591-9fee-365dc20eeeed"},
@@ -195,7 +196,7 @@ func TestGetCommand(t *testing.T) {
 		{
 			name:          "Printing Array fails",
 			client:        new(WorkingGetter),
-			url:           "http://localhost:12010/v2",
+			url:           "http://localhost:12010",
 			apiKey:        "core123",
 			componentName: "Core",
 			args:          []string{},
@@ -231,7 +232,7 @@ func TestGetCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := GetCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url", "core_key"))
+			err := GetCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url"))
 
 			if tc.err != nil {
 				require.Error(t, err)
@@ -300,21 +301,23 @@ func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 // SearchByName returns an object as if it found correctly the entity.
 func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Parse(`{
-		"source": {
-			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
-			"labels": [],
-			"active": true,
-			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`), nil
 }
 
@@ -322,7 +325,7 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
-		"name": "MongoDB Atlas server clone",
+		"name": "MongoDB Atlas server",
 		"labels": [],
 		"active": true,
 		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
@@ -346,7 +349,7 @@ func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{
 		"type": "mongo",
-		"name": "label test 1 clone 10",
+		"name": "my-credential",
 		"labels": [
 			{
 			"key": "A",
@@ -543,6 +546,11 @@ func (s *SearcherReturnsOtherError) Get(id uuid.UUID) (gjson.Result, error) {
 	}
 }
 
+// GetAll implements the searcher interface
+func (s *SearcherReturnsOtherError) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(``)}
+}
+
 // TestSearchCommand tests the SearchCommand() function.
 func TestSearchCommand(t *testing.T) {
 	tests := []struct {
@@ -565,7 +573,7 @@ func TestSearchCommand(t *testing.T) {
 			apiKey:         "apiKey123",
 			componentName:  "Core",
 			client:         new(WorkingSearcher),
-			expectedOutput: "{\"highlight\":{\"name\":[\"\\u003cem\\u003eMongoDB\\u003c/em\\u003e \\u003cem\\u003eAtlas\\u003c/em\\u003e \\u003cem\\u003eserver\\u003c/em\\u003e clone\"]},\"score\":0.50769836,\"source\":{\"active\":true,\"creationTimestamp\":\"2025-09-29T15:50:17Z\",\"id\":\"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:17Z\",\"name\":\"MongoDB Atlas server clone\",\"type\":\"mongo\"}}\n",
+			expectedOutput: "{\"active\":true,\"config\":{\"connection\":{\"connectTimeout\":\"1m\",\"readTimeout\":\"30s\"},\"credentialId\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"servers\":[\"mongodb+srv://cluster0.dleud.mongodb.net/\"]},\"creationTimestamp\":\"2025-09-29T15:50:17Z\",\"id\":\"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:17Z\",\"name\":\"MongoDB Atlas server\",\"type\":\"mongo\"}\n",
 			err:            nil,
 		},
 		{
@@ -585,7 +593,7 @@ func TestSearchCommand(t *testing.T) {
 			apiKey:         "apiKey123",
 			componentName:  "Core",
 			client:         new(WorkingSearcher),
-			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-10-17T22:37:57Z\",\"id\":\"3b32e410-2f33-412d-9fb8-17970131921c\",\"labels\":[{\"key\":\"A\",\"value\":\"A\"}],\"lastUpdatedTimestamp\":\"2025-10-17T22:37:57Z\",\"name\":\"label test 1 clone 10\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-10-17T22:38:12Z\",\"id\":\"5c09589e-b643-41aa-a766-3b7fc3660473\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-10-17T22:38:12Z\",\"name\":\"OpenAI credential clone clone\",\"type\":\"openai\"}\n",
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-10-17T22:37:57Z\",\"id\":\"3b32e410-2f33-412d-9fb8-17970131921c\",\"labels\":[{\"key\":\"A\",\"value\":\"A\"}],\"lastUpdatedTimestamp\":\"2025-10-17T22:37:57Z\",\"name\":\"my-credential\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-10-17T22:38:12Z\",\"id\":\"5c09589e-b643-41aa-a766-3b7fc3660473\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-10-17T22:38:12Z\",\"name\":\"OpenAI credential clone clone\",\"type\":\"openai\"}\n",
 			err:            nil,
 		},
 		{
@@ -608,7 +616,7 @@ func TestSearchCommand(t *testing.T) {
 			componentName: "Core",
 			args:          []string{},
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
-			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery core config --profile {profile}"),
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
 			name:           "user sends a name that does not exist",
@@ -628,7 +636,6 @@ func TestSearchCommand(t *testing.T) {
 }`),
 			}, "Could not search for entity with id \"test\""),
 		},
-
 		{
 			name:   "Search By Name returns HTTP error",
 			args:   []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
@@ -724,7 +731,7 @@ func TestSearchCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := SearchCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url", "core_key"), &tc.filters)
+			err := SearchCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url"), &tc.filters)
 
 			if tc.err != nil {
 				require.Error(t, err)

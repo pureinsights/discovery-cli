@@ -134,6 +134,7 @@ This struct manages servers.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 It has the following additional method:
 | Name | Method | Path | Response | Description |
@@ -246,6 +247,7 @@ This struct manages Ingestion's processors.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 Creating a `ingestionProcessorsClient` can be done with `ingestion.Processors()` or `newIngestionProcessorsClient(URL, API Key)`.
 
@@ -255,6 +257,7 @@ This struct manages Ingestion's pipelines.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 Creating a `pipelinesClient` can be done with `ingestion.Pipelines()` or `newPipelinesClient(URL, API Key)`.
 
@@ -264,6 +267,7 @@ This struct manages Ingestion's seeds.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 It has the following methods:
 | Name | Method | Path | Query Parameters | Response | Description |
