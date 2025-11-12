@@ -36,14 +36,14 @@ func TestNewHaltCommand(t *testing.T) {
 		{
 			name:      "Halt works without execution",
 			url:       true,
-			apiKey:    "apiKey123",
+			apiKey:    "",
 			outGolden: "NewHaltCommand_Out_NoExecution",
 			errGolden: "NewHaltCommand_Err_NoExecution",
 			outBytes:  testutils.Read(t, "NewHaltCommand_Out_NoExecution"),
 			errBytes:  []byte(nil),
 			execution: "",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -81,7 +81,24 @@ func TestNewHaltCommand(t *testing.T) {
 						assert.Equal(t, "/v2/seed/search", r.URL.Path)
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/halt": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/halt": {
 					StatusCode:  http.StatusOK,
 					Body:        `[{"id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","status":202}]`,
 					ContentType: "application/json",
@@ -103,7 +120,7 @@ func TestNewHaltCommand(t *testing.T) {
 			errBytes:  []byte(nil),
 			execution: "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -142,7 +159,25 @@ func TestNewHaltCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/execution/f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36/halt": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/execution/f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36/halt": {
 					StatusCode:  http.StatusOK,
 					Body:        `{"acknowledged":true}`,
 					ContentType: "application/json",
@@ -166,18 +201,7 @@ func TestNewHaltCommand(t *testing.T) {
 			url:       false,
 			apiKey:    "apiKey123",
 			execution: "",
-			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery ingestion config --profile {profile}"),
-		},
-		{
-			name:      "No API key",
-			outGolden: "NewHaltCommand_Out_NoAPIKey",
-			errGolden: "NewHaltCommand_Err_NoAPIKey",
-			outBytes:  testutils.Read(t, "NewHaltCommand_Out_NoAPIKey"),
-			errBytes:  testutils.Read(t, "NewHaltCommand_Err_NoAPIKey"),
-			url:       true,
-			apiKey:    "",
-			execution: "",
-			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion API key is missing for profile \"default\".\nTo set the API key for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile {profile}\n      discovery ingestion config --profile {profile}"),
+			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery ingestion config --profile \"default\""),
 		},
 		{
 			name:      "Halt fails because the execution is already halting",
@@ -189,7 +213,7 @@ func TestNewHaltCommand(t *testing.T) {
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_ErrorExecutionIsHalting"),
 			execution: "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -228,7 +252,25 @@ func TestNewHaltCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/execution/f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36/halt": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/execution/f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36/halt": {
 					StatusCode:  http.StatusConflict,
 					Body:        `{"status":409,"code":4001,"messages":["Action HALT cannot be applied to seed execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36 because of its current status: HALTING"],"timestamp":"2025-11-05T21:22:43.927371900Z"}`,
 					ContentType: "application/json",
@@ -251,7 +293,7 @@ func TestNewHaltCommand(t *testing.T) {
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_ErrorSeedNotFound"),
 			execution: "",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -288,7 +330,7 @@ func TestNewHaltCommand(t *testing.T) {
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_ErrorExecutionNotFound"),
 			execution: "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -327,7 +369,25 @@ func TestNewHaltCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/execution/f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36/halt": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/execution/f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36/halt": {
 					StatusCode:  http.StatusNotFound,
 					Body:        `{"status":404,"code":1003,"messages":["Seed execution not found: f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36"],"timestamp":"2025-11-05T21:24:31.858049700Z"}`,
 					ContentType: "application/json",
@@ -350,7 +410,7 @@ func TestNewHaltCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			execution: "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
 			responses: map[string]testutils.MockResponse{
-				"/v2/seed/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -389,7 +449,25 @@ func TestNewHaltCommand(t *testing.T) {
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/execution/f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36/halt": {
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/execution/f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36/halt": {
 					StatusCode:  http.StatusOK,
 					Body:        `{"acknowledged:true}`,
 					ContentType: "application/json",

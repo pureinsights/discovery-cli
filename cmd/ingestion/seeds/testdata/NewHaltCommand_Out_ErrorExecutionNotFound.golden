@@ -2,7 +2,7 @@ Usage:
   halt [flags]
 
 Flags:
-  -e, --execution string   The execution properties of the seed execution
+  -e, --execution string   The UUID of the execution that will be halted.
   -h, --help               help for halt
   -p, --profile string     configuration profile to use (default "default")
 
