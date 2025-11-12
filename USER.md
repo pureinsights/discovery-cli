@@ -218,6 +218,35 @@ Core URL: "https://discovery.core.cn"
 Core API Key: "discovery.key.core.cn"
 ```
 
+##### Export
+`export` is the command used to backup Discovery Core's entities. With the `file`, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+
+Usage: `discovery core export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery core export -p cn
+{"acknowledged":true}
+```
+
+```bash
+# Export the entities to a specific file
+discovery core export --file "entities/core.zip".
+{"acknowledged":true}
+```
+
 ##### Label
 `label` is the command used to manage labels in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/pureinsights/pdp-cli/cmd/core/backuprestore"
 	"github.com/pureinsights/pdp-cli/cmd/core/config"
 	"github.com/pureinsights/pdp-cli/cmd/core/credentials"
 	"github.com/pureinsights/pdp-cli/cmd/core/labels"
@@ -22,6 +23,7 @@ func NewCoreCommand(d cli.Discovery) *cobra.Command {
 	core.AddCommand(secrets.NewSecretCommand(d))
 	core.AddCommand(credentials.NewCredentialCommand(d))
 	core.AddCommand(servers.NewServerCommand(d))
+	core.AddCommand(backuprestore.NewExportCommand(d))
 
 	return core
 }

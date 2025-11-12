@@ -39,6 +39,7 @@ func WriteExport(client BackupRestore, path string) (gjson.Result, error) {
 	}
 
 	err = os.WriteFile(path, zipBytes, 0o644)
+	fmt.Println("File written at " + path)
 	return RenderExportStatus(err)
 }
 

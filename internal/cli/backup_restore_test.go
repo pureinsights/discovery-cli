@@ -185,8 +185,9 @@ func TestWriteExport(t *testing.T) {
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
-				_, err := os.Stat(tc.expectedPath)
+				readBytes, err := os.ReadFile(tc.expectedPath)
 				require.NoError(t, err)
+				assert.Equal(t, readBytes, ingestionBytes)
 			}
 		})
 	}
