@@ -1,1 +1,1 @@
-{"active":true,"creationTimestamp":"2025-08-14T18:02:11Z","id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"MongoDB pipeline","pipeline":"mongo-pipeline","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-08-14T18:02:11Z","id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"MongoDB pipeline","secret":"mongo-secret","type":"mongo"}

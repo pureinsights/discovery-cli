@@ -1,5 +1,3 @@
-Error: The Discovery Core API key is missing for profile "default".
-To set the API key for the Discovery Core API, run any of the following commands:
-      discovery config  --profile {profile}
-      discovery core config --profile {profile}
+Error: Could not print JSON Array
+unexpected end of JSON input
 
