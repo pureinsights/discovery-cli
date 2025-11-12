@@ -13,6 +13,7 @@ func NewLabelCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	label.AddCommand(NewGetCommand(d))
+	label.AddCommand(NewDeleteCommand(d))
 
 	return label
 }
