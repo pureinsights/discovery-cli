@@ -705,7 +705,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Delete
-`delete` is the command used to delete Discovery Ingestion's seeds. The user must send a name or UUID to get a specific seed.
+`delete` is the command used to delete Discovery Ingestion's seeds. The user must send a name or UUID to delete a specific seed.
 
 Usage: `discovery ingestion seed delete [flags] <arg>`
 
