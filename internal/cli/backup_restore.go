@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"archive/zip"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -52,4 +55,86 @@ func (d discovery) ExportEntitiesFromClient(client BackupRestore, path string, p
 	}
 
 	return printer(*d.iostreams, result)
+}
+
+// BackupRestoreClientEntry is used to easily store the different backup and restore structs of the Discovery components.
+type BackupRestoreClientEntry struct {
+	Name   string
+	Client BackupRestore
+}
+
+// WriteExportsIntoZip calls the export endpoints and writes the information into a file.
+func WriteExportsIntoFile(zipFile io.Writer, clients []BackupRestoreClientEntry) (string, error) {
+	result := `{}`
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	appendStatus := func(apiName string, err error) (string, error) {
+		exportResult, _ := RenderExportStatus(err)
+		return sjson.SetRaw(result, apiName, exportResult.Raw)
+	}
+
+	for _, entry := range clients {
+		apiName := entry.Name
+		client := entry.Client
+		zipBytes, name, err := client.Export()
+		if err != nil {
+			result, err = appendStatus(apiName, err)
+			if err != nil {
+				return "", err
+			}
+			continue
+		}
+
+		h := &zip.FileHeader{
+			Name:   fmt.Sprintf("%s-%s", apiName, name),
+			Method: zip.Store,
+		}
+
+		fw, err := zipWriter.CreateHeader(h)
+		if err != nil {
+			result, err = appendStatus(apiName, err)
+			if err != nil {
+				return "", err
+			}
+			continue
+		}
+
+		_, err = fw.Write(zipBytes)
+		result, err = appendStatus(apiName, err)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return result, nil
+}
+
+// ExportEntitiesFromClients exports the entities from Discovery Core, Ingestion, and QueryFlow.
+func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error {
+	if path == "" {
+		path = filepath.Join(".", "discovery.zip")
+	}
+
+	zipFile, err := os.OpenFile(
+		path,
+		os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
+		0o644,
+	)
+	if err != nil {
+		return err
+	}
+	defer zipFile.Close()
+
+	result, err := WriteExportsIntoFile(zipFile, clients)
+	if err != nil {
+		return err
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(false)
+	}
+
+	return printer(*d.iostreams, gjson.Parse(result))
 }
