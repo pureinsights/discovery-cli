@@ -329,6 +329,30 @@ discovery core secret get -p cn
 {"active":true,"creationTimestamp":"2025-08-14T18:01:59Z","id":"cfa0ef51-1fd9-47e2-8fdb-262ac9712781","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:01:59Z","name":"mongo-secret"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Core's secrets. The user must send a UUID to delete a specific secret. If no UUID is given, then an error is returned. This command does not support referencing an entity by name.
+
+Usage: `discovery core secret delete [flags] <uuid>`
+
+Arguments:
+`uuid`::
+(Required, String) The UUID of the secret that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a secret by id
+discovery core secret delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
 ##### Credential
 `credential` is the command used to manage credentials in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
