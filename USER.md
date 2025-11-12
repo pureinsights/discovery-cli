@@ -759,7 +759,7 @@ discovery queryflow processor get -p cn
 ```
 
 ###### Delete
-`delete` is the command used to delete Discovery QueryFlow's processors. The user must send a name or UUID to get a specific processor.
+`delete` is the command used to delete Discovery QueryFlow's processors. The user must send a name or UUID to delete a specific processor.
 
 Usage: `discovery queryflow processor delete [flags] <arg>`
 
@@ -848,7 +848,7 @@ discovery queryflow endpoint get -p cn
 ```
 
 ###### Delete
-`delete` is the command used to delete Discovery QueryFlow's endpoints. The user must send a name or UUID to get a specific endpoint.
+`delete` is the command used to delete Discovery QueryFlow's endpoints. The user must send a name or UUID to delete a specific endpoint.
 
 Usage: `discovery queryflow endpoint delete [flags] <arg>`
 
