@@ -336,7 +336,7 @@ Usage: `discovery core secret delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Required, String) The UUID of the secret that will be retrieved.
+(Required, String) The UUID of the secret that will be deleted.
 
 Flags:
 `-h, --help`::
