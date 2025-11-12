@@ -665,7 +665,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Delete
-`delete` is the command used to delete Discovery Ingestion's pipelines. The user must send a name or UUID to get a specific pipeline.
+`delete` is the command used to delete Discovery Ingestion's pipelines. The user must send a name or UUID to delete a specific pipeline.
 
 Usage: `discovery ingestion pipeline delete [flags] <arg>`
 
