@@ -415,7 +415,7 @@ discovery core credential get -p cn
 ```
 
 ###### Delete
-`delete` is the command used to delete Discovery Core's credentials. The user must send a name or UUID to get a specific credential.
+`delete` is the command used to delete Discovery Core's credentials. The user must send a name or UUID to delete a specific credential.
 
 Usage: `discovery core credential delete [flags] <arg>`
 
