@@ -503,6 +503,34 @@ discovery core server get -p cn
 {"active":true,"creationTimestamp":"2025-10-15T20:26:27Z","id":"192c3793-600a-4366-9778-7d80a0df07ce","labels":[{"key":"E","value":"G"},{"key":"H","value":"F"},{"key":"D","value":"D"}],"lastUpdatedTimestamp":"2025-10-15T20:26:27Z","name":"OpenAI Server","type":"openai"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Core's servers. The user must send a name or UUID to delete a specific server.
+
+Usage: `discovery core server delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, String) The name or UUID of the server that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a server by id
+discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Delete a server by name
+discovery core server delete server1
+{"acknowledged":true}
+```
+
 #### Ingestion
 `ingestion` is the main command used to interact with Discovery's Ingestion. 
 
