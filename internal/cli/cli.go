@@ -58,7 +58,7 @@ func NewDiscovery(io *iostreams.IOStreams, config *viper.Viper, configPath strin
 	}
 }
 
-// ConfigPath returns the address that contains Discovery's configuration.
+// ConfigPath returns the path that contains Discovery's configuration.
 func (d discovery) ConfigPath() string {
 	return d.configPath
 }

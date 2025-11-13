@@ -263,7 +263,7 @@ discovery core label get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
 
 Usage: `discovery core label store [flags]`
 
@@ -272,7 +272,7 @@ Flags:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
 `-f, --file`::
-(Required, string) Set the address of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -287,7 +287,7 @@ Examples:
 
 ```bash
 # Store a label with the JSON configuration in a file
-discovery core label store --file "labeljsonfile.txt"
+discovery core label store --file "labeljsonfile.json"
 {"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"label1","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"value1"}
 {"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"status":404,"timestamp":"2025-10-30T00:05:35.995533500Z"}
 {"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"label3","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"value3"}
@@ -367,7 +367,7 @@ discovery core secret get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's secrets. With the data flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's secrets. With the data flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
 
 Usage: `discovery core secret store [flags]`
 
@@ -376,7 +376,7 @@ Flags:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
 `-f, --file`::
-(Required, string) Set the address of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -391,7 +391,7 @@ Examples:
 
 ```bash
 # Store a secret with the JSON configuration in a file
-discovery core secret store --file "secretjsonfile.txt"
+discovery core secret store --file "secretjsonfile.json"
 {"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:15:22.738365Z","name":"openai-secret"}
 {"code":1003,"messages":["Entity not found: b8bd5ec3-8f60-4502-b25e-8f6d36c98415"],"status":404,"timestamp":"2025-10-30T15:15:22.778371Z"}
 {"active":true,"creationTimestamp":"2025-10-30T15:15:22.801771Z","id":"c9731417-38c9-4a65-8bbc-78c5f59b9cbb","lastUpdatedTimestamp":"2025-10-30T15:15:22.801771Z","name":"mongo-user"}
@@ -489,7 +489,7 @@ discovery core credential get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's credentials. With the data flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's credentials. With the data flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
 
 Usage: `discovery core credential store [flags]`
 
@@ -498,7 +498,7 @@ Flags:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
 `-f, --file`::
-(Required, string) Set the address of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
