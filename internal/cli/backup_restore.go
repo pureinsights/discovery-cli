@@ -159,6 +159,10 @@ func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 		return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not read file with the entities")
 	}
 
+	if len(zipReader.File) > 3 {
+		return "", nil, NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files.")
+	}
+
 	tmpDir, err := os.MkdirTemp("", "discovery-import-*")
 	if err != nil {
 		return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not create temporary directory to import entities")
@@ -175,35 +179,28 @@ func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 		destPath := filepath.Join(tmpDir, base)
 		if !strings.HasPrefix(filepath.Clean(destPath)+string(os.PathSeparator),
 			filepath.Clean(tmpDir)+string(os.PathSeparator)) {
-			return "", nil, NewErrorWithCause(ErrorExitCode, err, "The sent file contains malicious entries.")
+			return "", nil, NewError(ErrorExitCode, "The sent file contains malicious entries.")
 		}
 
 		if file.FileInfo().IsDir() {
-			NewErrorWithCause(ErrorExitCode, err, "The sent file should only contain the Core, Ingestion, or QueryFlow export files.")
-			continue
+			return "", nil, NewErrorWithCause(ErrorExitCode, err, "The sent file should only contain the Core, Ingestion, or QueryFlow export files.")
 		}
 
-		if err := os.MkdirAll(filepath.Dir(destPath), 0o644); err != nil {
-			return "", nil, err
-		}
-
-		rc, err := file.Open()
+		readCloser, err := file.Open()
 		if err != nil {
 			return "", nil, err
 		}
+		defer readCloser.Close()
 
 		out, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, file.Mode())
 		if err != nil {
-			rc.Close()
 			return "", nil, err
 		}
-		if _, err := io.Copy(out, rc); err != nil {
-			out.Close()
-			rc.Close()
+		defer out.Close()
+
+		if _, err := io.Copy(out, readCloser); err != nil {
 			return "", nil, err
 		}
-		out.Close()
-		rc.Close()
 
 		for _, prefix := range expectedPrefixes {
 			if strings.HasPrefix(base, prefix) {
@@ -222,10 +219,10 @@ func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, p
 	}
 
 	tmpDir, zipPaths, err := UnzipExportsToTemp(zipFile)
-	defer os.RemoveAll(tmpDir)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not extract the export files with the entities")
 	}
+	defer os.RemoveAll(tmpDir)
 
 	results := "{}"
 	for _, client := range clients {

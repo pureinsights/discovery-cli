@@ -106,6 +106,8 @@ func GetObjectPrinter(name string) Printer {
 	switch name {
 	case "json":
 		return JsonObjectPrinter(false)
+	case "pretty-json":
+		return JsonObjectPrinter(true)
 	default:
 		return nil
 	}
@@ -116,6 +118,8 @@ func GetArrayPrinter(name string) Printer {
 	switch name {
 	case "json":
 		return JsonArrayPrinter(false)
+	case "pretty-json":
+		return JsonArrayPrinter(true)
 	default:
 		return nil
 	}
