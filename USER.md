@@ -133,6 +133,36 @@ Staging URL: "http://discovery.staging.cn"
 Staging API Key: "discovery.key.staging.cn"
 ```
 
+#### Export
+`export` is the command used to backup all of Discovery's entities at once. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the return JSON.
+
+Usage: `discovery export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery export -p cn
+{"core":{"acknowledged":true},"ingestion":{"acknowledged":true},"queryflow":{"acknowledged":true}}
+```
+
+```bash
+# Export the entities to a specific file.
+# In this example, the Ingestion export failed.
+discovery export --file "entities/discovery.zip".
+{"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
+```
+
 #### Core
 `core` is the main command used to interact with Discovery's Core. 
 

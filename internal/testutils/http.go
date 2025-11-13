@@ -3,6 +3,8 @@ package testutils
 import (
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // HttpHandler returns a handler that performs given assertions and responds
@@ -21,6 +23,32 @@ func HttpHandler(
 		w.Header().Set("Content-Type", contentType)
 		w.WriteHeader(statusCode)
 		w.Write([]byte(body))
+	}
+}
+
+func HttpHandlerWithContentDisposition(
+	t *testing.T,
+	apiKey string,
+	statusCode int,
+	method string,
+	path string,
+	contentType string,
+	contentDisposition string,
+	body []byte,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if apiKey != "" {
+			assert.Equal(t, apiKey, r.Header.Get("X-API-KEY"))
+		}
+		assert.Equal(t, method, r.Method)
+		assert.Equal(t, path, r.URL.Path)
+		w.Header().Set("Content-Type", contentType)
+		w.Header().Set(
+			"Content-Disposition",
+			contentDisposition,
+		)
+		w.WriteHeader(statusCode)
+		w.Write(body)
 	}
 }
 

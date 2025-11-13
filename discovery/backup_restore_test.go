@@ -227,20 +227,17 @@ func Test_backupRestore_Export(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if tc.apiKey != "" {
-					assert.Equal(t, tc.apiKey, r.Header.Get("X-API-KEY"))
-				}
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
-				w.Header().Set("Content-Type", "application/octet-stream")
-				w.Header().Set(
-					"Content-Disposition",
+			srv := httptest.NewServer(http.HandlerFunc(
+				testutils.HttpHandlerWithContentDisposition(
+					t,
+					tc.apiKey,
+					tc.statusCode,
+					tc.method,
+					tc.path,
+					"application/octet-stream",
 					tc.contentDisposition,
-				)
-				w.WriteHeader(tc.statusCode)
-				w.Write(tc.response)
-			}))
+					tc.response,
+				)))
 			defer srv.Close()
 
 			b := backupRestore{client: newClient(srv.URL, tc.apiKey)}
