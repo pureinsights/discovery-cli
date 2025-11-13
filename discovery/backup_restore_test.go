@@ -230,13 +230,17 @@ func Test_backupRestore_Export(t *testing.T) {
 			srv := httptest.NewServer(http.HandlerFunc(
 				testutils.HttpHandlerWithContentDisposition(
 					t,
-					tc.apiKey,
 					tc.statusCode,
-					tc.method,
-					tc.path,
 					"application/octet-stream",
 					tc.contentDisposition,
 					tc.response,
+					func(t *testing.T, r *http.Request) {
+						if tc.apiKey != "" {
+							assert.Equal(t, tc.apiKey, r.Header.Get("X-API-KEY"))
+						}
+						assert.Equal(t, tc.method, r.Method)
+						assert.Equal(t, tc.path, r.URL.Path)
+					},
 				)))
 			defer srv.Close()
 

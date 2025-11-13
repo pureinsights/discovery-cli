@@ -212,13 +212,17 @@ func TestNewExportCommand(t *testing.T) {
 			coreServer := httptest.NewServer(http.HandlerFunc(
 				testutils.HttpHandlerWithContentDisposition(
 					t,
-					tc.apiKey,
 					coreResponse.StatusCode,
-					tc.method,
-					tc.path,
 					coreResponse.ContentType,
 					coreResponse.ContentDisposition,
 					coreResponse.Body,
+					func(t *testing.T, r *http.Request) {
+						if tc.apiKey != "" {
+							assert.Equal(t, tc.apiKey, r.Header.Get("X-API-KEY"))
+						}
+						assert.Equal(t, tc.method, r.Method)
+						assert.Equal(t, tc.path, r.URL.Path)
+					},
 				)))
 			defer coreServer.Close()
 
@@ -226,13 +230,17 @@ func TestNewExportCommand(t *testing.T) {
 			ingestionServer := httptest.NewServer(http.HandlerFunc(
 				testutils.HttpHandlerWithContentDisposition(
 					t,
-					tc.apiKey,
 					ingestionResponse.StatusCode,
-					tc.method,
-					tc.path,
 					ingestionResponse.ContentType,
 					ingestionResponse.ContentDisposition,
 					ingestionResponse.Body,
+					func(t *testing.T, r *http.Request) {
+						if tc.apiKey != "" {
+							assert.Equal(t, tc.apiKey, r.Header.Get("X-API-KEY"))
+						}
+						assert.Equal(t, tc.method, r.Method)
+						assert.Equal(t, tc.path, r.URL.Path)
+					},
 				)))
 			defer ingestionServer.Close()
 
@@ -240,13 +248,17 @@ func TestNewExportCommand(t *testing.T) {
 			queryflowServer := httptest.NewServer(http.HandlerFunc(
 				testutils.HttpHandlerWithContentDisposition(
 					t,
-					tc.apiKey,
 					queryflowResponse.StatusCode,
-					tc.method,
-					tc.path,
 					queryflowResponse.ContentType,
 					queryflowResponse.ContentDisposition,
 					queryflowResponse.Body,
+					func(t *testing.T, r *http.Request) {
+						if tc.apiKey != "" {
+							assert.Equal(t, tc.apiKey, r.Header.Get("X-API-KEY"))
+						}
+						assert.Equal(t, tc.method, r.Method)
+						assert.Equal(t, tc.path, r.URL.Path)
+					},
 				)))
 			defer queryflowServer.Close()
 

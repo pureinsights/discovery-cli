@@ -3,9 +3,10 @@ package testutils
 import (
 	"net/http"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
+
+// ContentType is a string that contains the content type key
+const ContentType string = "Content-Type"
 
 // HttpHandler returns a handler that performs given assertions and responds
 // with the provided status, content type, and body.
@@ -20,7 +21,7 @@ func HttpHandler(
 		if assertions != nil {
 			assertions(t, r)
 		}
-		w.Header().Set("Content-Type", contentType)
+		w.Header().Set(ContentType, contentType)
 		w.WriteHeader(statusCode)
 		w.Write([]byte(body))
 	}
@@ -28,21 +29,17 @@ func HttpHandler(
 
 func HttpHandlerWithContentDisposition(
 	t *testing.T,
-	apiKey string,
 	statusCode int,
-	method string,
-	path string,
 	contentType string,
 	contentDisposition string,
 	body []byte,
+	assertions func(*testing.T, *http.Request),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if apiKey != "" {
-			assert.Equal(t, apiKey, r.Header.Get("X-API-KEY"))
+		if assertions != nil {
+			assertions(t, r)
 		}
-		assert.Equal(t, method, r.Method)
-		assert.Equal(t, path, r.URL.Path)
-		w.Header().Set("Content-Type", contentType)
+		w.Header().Set(ContentType, contentType)
 		w.Header().Set(
 			"Content-Disposition",
 			contentDisposition,
@@ -85,7 +82,7 @@ func HttpMultiResponseHandler(
 				if response.Assertions != nil {
 					response.Assertions(t, r)
 				}
-				w.Header().Set("Content-Type", response.ContentType)
+				w.Header().Set(ContentType, response.ContentType)
 				w.WriteHeader(response.StatusCode)
 				w.Write([]byte(response.Body))
 				return
