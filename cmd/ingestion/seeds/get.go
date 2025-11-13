@@ -5,16 +5,23 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pureinsights/pdp-cli/cmd/commands"
+	"github.com/pureinsights/pdp-cli/discovery"
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
 )
 
 // NewGetCommand creates the seed get command
 func NewGetCommand(d cli.Discovery) *cobra.Command {
-	var filters []string
-	var recordId string
-	var records bool
+	var (
+		filters     []string
+		recordId    string
+		executionId string
+		details     bool
+		records     bool
+	)
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains seeds from Discovery Ingestion.",
@@ -55,17 +62,29 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
 			}
 
-			output := vpr.GetString("output")
-			if output == "json" {
+			output := d.Config().GetString("output")
+			if output == "json" && (cmd.Flags().Changed("record") || cmd.Flags().Changed("seed-execution")) {
 				output = "pretty-json"
 			}
 			printer := cli.GetObjectPrinter(output)
 
-			if cmd.Flags().Changed("record") && !records {
+			if cmd.Flags().Changed("record") {
 				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
 			}
 
-			return d.AppendSeedRecords(seed, ingestionClient.Seeds().Records(seedId), printer)
+			seedExecutionId, err := uuid.Parse(executionId)
+			if err != nil {
+				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
+			}
+
+			seedExecutionClient := ingestionClient.Seeds().Executions(seedId)
+
+			summarizers := map[string]cli.Summarizer{
+				"records": seedExecutionClient.Records(seedExecutionId),
+				"jobs":    seedExecutionClient.Jobs(seedExecutionId),
+			}
+
+			return d.GetSeedExecution(seedExecutionClient, seedExecutionId, summarizers, details, printer)
 		},
 		Args: cobra.MaximumNArgs(1),
 	}
@@ -75,7 +94,9 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 - Type: The format is type={type}.`)
 
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
+	get.Flags().StringVar(&executionId, "seed-execution", "", "the id of the seed exectuion that will be retrieved")
+	get.Flags().BoolVar(&details, "details", false, "flag documentation")
 
-	get.MarkFlagsMutuallyExclusive("filter", "record")
+	get.MarkFlagsMutuallyExclusive("filter", "record", "seed-execution")
 	return get
 }

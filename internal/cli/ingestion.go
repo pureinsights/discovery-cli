@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -73,4 +74,58 @@ func (d discovery) AppendSeedRecords(seed gjson.Result, client RecordGetter, pri
 	}
 
 	return err
+}
+
+type Summarizer interface {
+	Summarize() (gjson.Result, error)
+}
+
+type SeedExecutionGetter interface {
+	Getter
+	Audit(executionId uuid.UUID) ([]gjson.Result, error)
+}
+
+func (d discovery) GetSeedExecution(client SeedExecutionGetter, seedExecutionId uuid.UUID, summarizers map[string]Summarizer, details bool, printer Printer) error {
+	execution, err := client.Get(seedExecutionId)
+	if err != nil {
+		return err
+	}
+
+	if details {
+		execution, err = AppendSeedExecutionDetails(execution, seedExecutionId, client, summarizers)
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonObjectPrinter(true)
+		err = jsonPrinter(*d.IOStreams(), execution)
+	} else {
+		err = printer(*d.IOStreams(), execution)
+	}
+	return err
+}
+
+func AppendSeedExecutionDetails(seedExecution gjson.Result, seedExecutionId uuid.UUID, client SeedExecutionGetter, summarizers map[string]Summarizer) (gjson.Result, error) {
+	auditLogs, err := client.Audit(seedExecutionId)
+	if err != nil {
+		return seedExecution, err
+	}
+
+	raw, err := sjson.Set(seedExecution.Raw, "audit", auditLogs)
+	if err != nil {
+		return seedExecution, err
+	}
+
+	for field, summarizer := range summarizers {
+		summary, err := summarizer.Summarize()
+		if err != nil {
+			return gjson.Parse(raw), err
+		}
+
+		raw, err = sjson.SetRaw(raw, field, summary.Raw)
+		if err != nil {
+			return gjson.Parse(raw), err
+		}
+	} 
+
+	return gjson.Parse(raw), nil
 }
