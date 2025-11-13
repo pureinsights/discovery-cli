@@ -2,9 +2,12 @@ package cli
 
 import (
 	"archive/zip"
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -135,4 +138,116 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 	}
 
 	return printer(*d.iostreams, gjson.Parse(result))
+}
+
+func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
+	results, err := client.Import(onConflict, path)
+	if err != nil {
+		return err
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(false)
+	}
+
+	return printer(*d.iostreams, results)
+}
+
+func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
+	zipReader, err := zip.NewReader(bytes.NewReader(zipBytes), int64(len(zipBytes)))
+	if err != nil {
+		return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not read file with the entities")
+	}
+
+	tmpDir, err := os.MkdirTemp("", "discovery-import-*")
+	if err != nil {
+		return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not create temporary directory to import entities")
+	}
+
+	paths := map[string]string{}
+	expectedPrefixes := []string{"core", "ingestion", "queryflow"}
+
+	for _, file := range zipReader.File {
+		name := file.Name
+		base := filepath.Base(name)
+
+		// Validate zip slip vulnerability
+		destPath := filepath.Join(tmpDir, base)
+		if !strings.HasPrefix(filepath.Clean(destPath)+string(os.PathSeparator),
+			filepath.Clean(tmpDir)+string(os.PathSeparator)) {
+			return "", nil, NewErrorWithCause(ErrorExitCode, err, "The sent file contains malicious entries.")
+		}
+
+		if file.FileInfo().IsDir() {
+			NewErrorWithCause(ErrorExitCode, err, "The sent file should only contain the Core, Ingestion, or QueryFlow export files.")
+			continue
+		}
+
+		if err := os.MkdirAll(filepath.Dir(destPath), 0o644); err != nil {
+			return "", nil, err
+		}
+
+		rc, err := file.Open()
+		if err != nil {
+			return "", nil, err
+		}
+
+		out, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, file.Mode())
+		if err != nil {
+			rc.Close()
+			return "", nil, err
+		}
+		if _, err := io.Copy(out, rc); err != nil {
+			out.Close()
+			rc.Close()
+			return "", nil, err
+		}
+		out.Close()
+		rc.Close()
+
+		for _, prefix := range expectedPrefixes {
+			if strings.HasPrefix(base, prefix) {
+				paths[prefix] = destPath
+			}
+		}
+	}
+
+	return tmpDir, paths, nil
+}
+
+func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
+	zipFile, err := os.ReadFile(path)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not open file with the entities")
+	}
+
+	tmpDir, zipPaths, err := UnzipExportsToTemp(zipFile)
+	defer os.RemoveAll(tmpDir)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not extract the export files with the entities")
+	}
+
+	results := "{}"
+	for _, client := range clients {
+		if path, ok := zipPaths[client.Name]; ok {
+			importResult, err := client.Client.Import(onConflict, path)
+			if err == nil {
+				results, err = sjson.SetRaw(results, client.Name, importResult.Raw)
+				if err != nil {
+					return NewErrorWithCause(ErrorExitCode, err, "Could not write import entities")
+				}
+			} else {
+				results, err = sjson.SetRaw(results, client.Name, err.Error())
+				if err != nil {
+					return NewErrorWithCause(ErrorExitCode, err, "Could not write import entities")
+				}
+			}
+		}
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(false)
+	}
+
+	return printer(*d.iostreams, gjson.Parse(results))
 }
