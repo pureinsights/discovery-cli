@@ -33,7 +33,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "Aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted.")
-	store.Flags().StringVarP(&file, "file", "f", "", "The address of the file that contains the JSON data")
+	store.Flags().StringVarP(&file, "file", "f", "", "The path of the file that contains the JSON data")
 
 	store.MarkFlagsOneRequired("data", "file")
 	store.MarkFlagsMutuallyExclusive("data", "file")
