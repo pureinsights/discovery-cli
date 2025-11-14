@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewExportCommand creates the discovery queryflow export command that exports Discovery QueryFlow's configuration
+// NewExportCommand creates the discovery queryflow export command that exports Discovery QueryFlow's entities
 func NewExportCommand(d cli.Discovery) *cobra.Command {
 	var file string
 	export := &cobra.Command{
