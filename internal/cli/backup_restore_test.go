@@ -517,3 +517,206 @@ func TestImportEntitiesFromClient(t *testing.T) {
 		})
 	}
 }
+
+// createZipSlipPayload creates a malicious zip to test the zip slip detection.
+func createZipSlipPayload(t *testing.T) []byte {
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+
+	hdr := &zip.FileHeader{
+		Name:   "../../core-export.txt",
+		Method: zip.Deflate,
+	}
+	f, err := zw.CreateHeader(hdr)
+	require.NoError(t, err)
+
+	_, err = f.Write([]byte("malicious zip file"))
+	require.NoError(t, err)
+
+	require.NoError(t, zw.Close())
+	return buf.Bytes()
+}
+
+// TestUnzipExportsToTemp tests the UnzipExportsToTemp() function.
+func TestUnzipExportsToTemp(t *testing.T) {
+	correctZip, err := os.ReadFile("testdata/discovery.zip")
+	require.NoError(t, err)
+	fourFilesZip, err := os.ReadFile("testdata/4-files.zip")
+	require.NoError(t, err)
+	directoryZip, err := os.ReadFile("testdata/directory.zip")
+	require.NoError(t, err)
+	coreQueryFlowZip, err := os.ReadFile("testdata/OnlyCoreQueryFlow.zip")
+	require.NoError(t, err)
+
+	tests := []struct {
+		name             string
+		zipBytes         []byte
+		expectedPrefixes []string
+		err              error
+	}{
+		// Working cases
+		{
+			name:             "Receives a zip file with Core, QueryFlow, and Ingestion exports",
+			zipBytes:         correctZip,
+			expectedPrefixes: []string{"core", "ingestion", "queryflow"},
+			err:              nil,
+		},
+		{
+			name:             "Receives a file with only Core and QueryFlow exports",
+			zipBytes:         coreQueryFlowZip,
+			expectedPrefixes: []string{"core", "queryflow"},
+			err:              nil,
+		},
+		// Error cases
+		{
+			name:     "Receives a zip file with too many files",
+			zipBytes: fourFilesZip,
+			err:      NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
+		},
+		{
+			name:     "Receives an invalid zip",
+			zipBytes: []byte("this is not a valid zip"),
+			err:      NewErrorWithCause(ErrorExitCode, errors.New("zip: not a valid zip file"), "Could not read file with the entities"),
+		},
+		{
+			name:     "Receives a zip file with a directory entry",
+			zipBytes: directoryZip,
+			err:      NewErrorWithCause(ErrorExitCode, err, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
+		},
+		{
+			name:     "Receives a malicious zip file with a zip slip",
+			zipBytes: createZipSlipPayload(t),
+			err:      NewError(ErrorExitCode, "The sent file contains malicious entries."),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			actualTmpDir, actualPaths, actualErr := UnzipExportsToTemp(tc.zipBytes)
+
+			if tc.err != nil {
+				require.Error(t, actualErr)
+				var errStruct Error
+				require.ErrorAs(t, actualErr, &errStruct)
+				assert.EqualError(t, actualErr, tc.err.Error())
+
+				assert.Equal(t, "", actualTmpDir)
+				assert.Equal(t, map[string]string(nil), actualPaths)
+				return
+			} else {
+				require.NoError(t, actualErr)
+				defer os.RemoveAll(actualTmpDir)
+
+				for _, prefix := range tc.expectedPrefixes {
+					actualPath, ok := actualPaths[prefix]
+					assert.True(t, ok)
+
+					fileInfo, statErr := os.Stat(actualPath)
+					require.NoError(t, statErr)
+					assert.False(t, fileInfo.IsDir())
+				}
+			}
+
+		})
+	}
+}
+
+// TestImportEntitiesFromClients tests the ImportEntitiesFromClients() function.
+func TestImportEntitiesFromClients(t *testing.T) {
+	tests := []struct {
+		name        string
+		clients     []BackupRestoreClientEntry
+		path        string
+		printer     Printer
+		goldenFile  string
+		goldenBytes []byte
+		outWriter   io.Writer
+		err         error
+	}{
+		// Working cases
+		{
+			name:        "ImportEntitiesFromClients correctly prints with pretty printer when one of the imports fails",
+			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:        "testdata/discovery.zip",
+			printer:     JsonObjectPrinter(false),
+			goldenFile:  "FailingIngestionImport",
+			goldenBytes: testutils.Read(t, "FailingIngestionImport"),
+			err:         nil,
+		},
+		{
+			name:        "ImportEntitiesFromClients correctly prints the results with ugly printer when the imports succeed",
+			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:        "testdata/discovery.zip",
+			printer:     nil,
+			goldenFile:  "UglyImport",
+			goldenBytes: testutils.Read(t, "UglyImport"),
+			err:         nil,
+		},
+		{
+			name:        "ImportEntitiesFromClients correctly prints with pretty printer when the imports and it only prints the results of the received products",
+			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:        "testdata/OnlyCoreQueryFlow.zip",
+			printer:     JsonObjectPrinter(true),
+			goldenFile:  "PrettyImport",
+			goldenBytes: testutils.Read(t, "PrettyImport"),
+			err:         nil,
+		},
+		// Error cases
+		{
+			name:    "The given file does not exist",
+			clients: []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:    filepath.Join("doesnotexist", "export.zip"),
+			err:     NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not open file with the entities"),
+		},
+		{
+			name:    "UnzipExportsToTemp fails",
+			clients: []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:    "testdata/4-files.zip",
+			err:     NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
+		},
+		{
+			name:      "Printing fails",
+			clients:   []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:      "testdata/discovery.zip",
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.ImportEntitiesToClients(tc.clients, tc.path, discoveryPackage.OnConflictUpdate, tc.printer)
+
+			if tc.err != nil {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				cliError, _ := tc.err.(Error)
+				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
+					assert.EqualError(t, err, tc.err.Error())
+				} else {
+					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
+					assert.Equal(t, cliError.Message, errStruct.Message)
+				}
+			} else {
+				require.NoError(t, err)
+				testutils.CompareBytes(t, tc.goldenFile, tc.goldenBytes, buf.Bytes())
+			}
+		})
+	}
+}
