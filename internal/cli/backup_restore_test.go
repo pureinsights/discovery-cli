@@ -434,3 +434,81 @@ func TestExportEntitiesFromClients(t *testing.T) {
 		})
 	}
 }
+
+func TestImportEntitiesFromClient(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         BackupRestore
+		path           string
+		onConfict      discoveryPackage.OnConflict
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "ImportEntitiesFromClient correctly prints import results with the pretty printer",
+			client:         new(WorkingCoreBackupRestore),
+			path:           filepath.Join("testdata", "core-import.json"),
+			onConfict:      discoveryPackage.OnConflictUpdate,
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
+			printer:        JsonObjectPrinter(true),
+			err:            nil,
+		},
+		{
+			name:           "ExportEntitiesFromClient correctly writes the file with no path and prints with the ugly printer",
+			client:         new(WorkingIngestionBackupRestore),
+			path:           filepath.Join("testdata", "ingestion-import.json"),
+			onConfict:      discoveryPackage.OnConflictFail,
+			expectedOutput: "{\"acknowledged\":true}\n",
+			printer:        nil,
+			err:            nil,
+		},
+		// Error case
+		{
+			name:   "Export fails",
+			client: new(FailingBackupRestore),
+			path:   filepath.Join(t.TempDir(), "export.zip"),
+			err:    NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not export entities"),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(WorkingIngestionBackupRestore),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.ExportEntitiesFromClient(tc.client, tc.path, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
