@@ -225,7 +225,7 @@ func TestExportEntitiesFromClient(t *testing.T) {
 			printer:        nil,
 			err:            nil,
 		},
-		// Error caes
+		// Error case
 		{
 			name:   "Export fails",
 			client: new(FailingBackupRestore),
