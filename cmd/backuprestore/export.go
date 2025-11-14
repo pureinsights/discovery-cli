@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewExportCommand creates the discovery ingestion export command that exports Discovery Ingestion's configuration
+// NewExportCommand creates the discovery export command that exports all Discovery's entities
 func NewExportCommand(d cli.Discovery) *cobra.Command {
 	var file string
 	export := &cobra.Command{
 		Use:   "export [subcommands]",
-		Short: "Export all of Discovery Ingestion's entities",
+		Short: "Export all of Discovery's entities",
 		Long:  "export is the command used to backup all of Discovery's entities at once. With the file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the return JSON.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
