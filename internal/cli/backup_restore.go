@@ -142,7 +142,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	results, err := client.Import(onConflict, path)
 	if err != nil {
-		return err
+		return NewErrorWithCause(ErrorExitCode, err, "Could not import entities")
 	}
 
 	if printer == nil {
