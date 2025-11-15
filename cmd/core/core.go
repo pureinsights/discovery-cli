@@ -24,6 +24,7 @@ func NewCoreCommand(d cli.Discovery) *cobra.Command {
 	core.AddCommand(credentials.NewCredentialCommand(d))
 	core.AddCommand(servers.NewServerCommand(d))
 	core.AddCommand(backuprestore.NewExportCommand(d))
+	core.AddCommand(backuprestore.NewImportCommand(d))
 
 	return core
 }
