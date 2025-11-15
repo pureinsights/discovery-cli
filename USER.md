@@ -662,7 +662,7 @@ Flags:
 Examples:
 
 ```bash
-# Import the entities using profile "cn" and update conflict resolution strategy.
+# Import the entities using profile "cn" and ignore conflict resolution strategy.
 # The rest of the command's output is omitted.
 discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict IGNORE
 {
