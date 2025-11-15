@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/google/uuid"
+	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
@@ -31,6 +32,8 @@ type Discovery interface {
 	SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error
 	ExportEntitiesFromClient(client BackupRestore, path string, printer Printer) error
 	ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error
+	ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
+	ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
