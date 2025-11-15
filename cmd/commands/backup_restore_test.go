@@ -140,7 +140,7 @@ func TestExportCommand(t *testing.T) {
 	}
 }
 
-// TestImportCommand tests teh ImportCommand() function.
+// TestImportCommand tests the ImportCommand() function.
 func TestImportCommand(t *testing.T) {
 	tests := []struct {
 		name           string
