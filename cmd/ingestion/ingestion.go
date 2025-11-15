@@ -16,6 +16,7 @@ func NewIngestionCommand(d cli.Discovery) *cobra.Command {
 
 	ingestion.AddCommand(config.NewConfigCommand(d))
 	ingestion.AddCommand(backuprestore.NewExportCommand(d))
+	ingestion.AddCommand(backuprestore.NewImportCommand(d))
 
 	return ingestion
 }
