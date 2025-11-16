@@ -666,7 +666,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 			name:    "The given file does not exist",
 			clients: []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:    filepath.Join("doesnotexist", "export.zip"),
-			err:     NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not open file with the entities"),
+			err:     NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not open the file with the entities"),
 		},
 		{
 			name:    "UnzipExportsToTemp fails",

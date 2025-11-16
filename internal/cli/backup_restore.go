@@ -219,7 +219,7 @@ func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	zipFile, err := os.ReadFile(path)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not open file with the entities")
+		return NewErrorWithCause(ErrorExitCode, err, "Could not open the file with the entities")
 	}
 
 	tmpDir, zipPaths, err := UnzipExportsToTemp(zipFile)

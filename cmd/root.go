@@ -39,6 +39,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 
 	discovery.AddCommand(config.NewConfigCommand(d))
 	discovery.AddCommand(backuprestore.NewExportCommand(d))
+	discovery.AddCommand(backuprestore.NewImportCommand(d))
 	discovery.AddCommand(core.NewCoreCommand(d))
 	discovery.AddCommand(ingestion.NewIngestionCommand(d))
 	discovery.AddCommand(queryflow.NewQueryFlowCommand(d))
