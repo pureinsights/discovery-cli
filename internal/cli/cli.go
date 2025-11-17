@@ -28,6 +28,8 @@ type Discovery interface {
 	SearchEntity(client Searcher, id string, printer Printer) error
 	SearchEntities(client Searcher, filter gjson.Result, printer Printer) error
 	UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error
+	DeleteEntity(client Deleter, id uuid.UUID, printer Printer) error
+	SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
@@ -56,7 +58,7 @@ func NewDiscovery(io *iostreams.IOStreams, config *viper.Viper, configPath strin
 	}
 }
 
-// ConfigPath returns the address that contains Discovery's configuration.
+// ConfigPath returns the path that contains Discovery's configuration.
 func (d discovery) ConfigPath() string {
 	return d.configPath
 }
