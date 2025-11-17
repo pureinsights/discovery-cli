@@ -813,6 +813,55 @@ discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB stor
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
+##### Pipeline
+`pipeline` is the command used to manage pipelines in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery ingestion pipeline [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Store
+`store` is the command used to create and update Discovery Ingestion's pipelines. With the data flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery ingestion pipeline store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a pipeline with the JSON configuration in a file
+discovery ingestion pipeline store --file pipelines.json
+{"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+{"code":1003,"messages":["Entity not found: 5888b852-d7d4-4761-9058-738b2ad1b5c9"],"status":404,"timestamp":"2025-10-31T19:55:34.723693100Z"}
+{"active":true,"creationTimestamp":"2025-10-31T19:55:34.758757Z","id":"bfb882a7-59e6-4cd6-afe4-7732163637f1","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:55:34.758757Z","name":"Search pipeline 2","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+```
+
+```bash
+# Store a pipeline with the JSON configuration in the data flag
+discovery ingestion pipeline store --data '{"name":"Search pipeline","labels":[],"active":true,"id":"36f8ce72-f23d-4768-91e8-58693ff1b272","creationTimestamp":"2025-10-31T19:41:13Z","lastUpdatedTimestamp":"2025-10-31T19:41:13Z","initialState":"ingestionState","states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header","active":true},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"recordPolicy":{"idPolicy":{},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"errorPolicy":"FAIL","outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
+{"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+```
+
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow. 
 
