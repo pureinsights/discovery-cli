@@ -47,6 +47,6 @@ func TestNewCredentialCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"get"}
+	expectedCommands := []string{"delete", "get", "store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
