@@ -12,6 +12,18 @@ type RecordGetter interface {
 	GetAll() ([]gjson.Result, error)
 }
 
+func ConvertJSONArrayToString(array []gjson.Result) string {
+	arrayString := "[\n"
+	for index, record := range array {
+		arrayString = arrayString + record.Raw
+		if index != (len(array) - 1) {
+			arrayString = arrayString + ","
+		}
+		arrayString = arrayString + "\n"
+	}
+	return arrayString + "]"
+}
+
 // AppendSeedRecord adds a "record" field to the seed, which contains the record obtained using the given id.
 func AppendSeedRecord(seed gjson.Result, client RecordGetter, id string) (gjson.Result, error) {
 	record, err := client.Get(id)
@@ -47,15 +59,8 @@ func AppendSeedRecords(seed gjson.Result, client RecordGetter) (gjson.Result, er
 		return gjson.Result{}, err
 	}
 
-	recordsString := "[\n"
-	for index, record := range records {
-		recordsString = recordsString + record.Raw
-		if index != (len(records) - 1) {
-			recordsString = recordsString + ","
-		}
-		recordsString = recordsString + "\n"
-	}
-	seedWithRecord, err := sjson.SetRaw(seed.Raw, "records", recordsString+"]")
+	recordsString := ConvertJSONArrayToString(records)
+	seedWithRecord, err := sjson.SetRaw(seed.Raw, "records", recordsString)
 	return gjson.Parse(seedWithRecord), err
 }
 
@@ -93,6 +98,9 @@ func (d discovery) GetSeedExecution(client SeedExecutionGetter, seedExecutionId 
 
 	if details {
 		execution, err = AppendSeedExecutionDetails(execution, seedExecutionId, client, summarizers)
+		if err != nil {
+			return err
+		}
 	}
 
 	if printer == nil {
@@ -110,7 +118,8 @@ func AppendSeedExecutionDetails(seedExecution gjson.Result, seedExecutionId uuid
 		return seedExecution, err
 	}
 
-	raw, err := sjson.Set(seedExecution.Raw, "audit", auditLogs)
+	auditString := ConvertJSONArrayToString(auditLogs)
+	raw, err := sjson.SetRaw(seedExecution.Raw, "audit", auditString)
 	if err != nil {
 		return seedExecution, err
 	}
@@ -121,11 +130,15 @@ func AppendSeedExecutionDetails(seedExecution gjson.Result, seedExecutionId uuid
 			return gjson.Parse(raw), err
 		}
 
-		raw, err = sjson.SetRaw(raw, field, summary.Raw)
+		sumString := "{}"
+		if summary.Exists() {
+			sumString = summary.Raw
+		}
+		raw, err = sjson.SetRaw(raw, field, sumString)
 		if err != nil {
 			return gjson.Parse(raw), err
 		}
-	} 
+	}
 
 	return gjson.Parse(raw), nil
 }
