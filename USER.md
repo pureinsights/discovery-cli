@@ -262,6 +262,43 @@ discovery core label get -p cn
 {"creationTimestamp":"2025-09-29T17:00:47Z","id":"a77fed6a-021e-440b-bb32-91e22ea31598","key":"A","lastUpdatedTimestamp":"2025-09-29T17:00:47Z","value":"A"}
 ```
 
+###### Store
+`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery core label store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a label with the JSON configuration in a file
+discovery core label store --file "labeljsonfile.json"
+{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"label1","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"value1"}
+{"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"status":404,"timestamp":"2025-10-30T00:05:35.995533500Z"}
+{"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"label3","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"value3"}
+```
+
+```bash
+# Store a label with the JSON configuration in the data flag
+discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
+{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label2","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
+```
+
 ###### Delete
 `delete` is the command used to delete Discovery Core's labels. The user must send a UUID to delete a specific label. If no UUID is given, then an error is returned. This command does not support referencing an entity by name.
 
