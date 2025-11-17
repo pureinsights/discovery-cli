@@ -5,12 +5,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pureinsights/pdp-cli/cmd/commands"
-	"github.com/pureinsights/pdp-cli/discovery"
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/tidwall/gjson"
 )
 
 // NewGetCommand creates the seed get command
@@ -20,7 +17,6 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		recordId    string
 		executionId string
 		details     bool
-		records     bool
 	)
 	get := &cobra.Command{
 		Use:   "get",
@@ -32,14 +28,10 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
 			}
 
-			if cmd.Flags().Changed("record") && recordId == "" {
-				records = true
-			}
-
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			if !cmd.Flags().Changed("record") {
+			if !cmd.Flags().Changed("record") && !cmd.Flags().Changed("seed-execution") {
 				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 			}
 
@@ -62,8 +54,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
 			}
 
-			output := d.Config().GetString("output")
-			if output == "json" && (cmd.Flags().Changed("record") || cmd.Flags().Changed("seed-execution")) {
+			output := vpr.GetString("output")
+			if output == "json" {
 				output = "pretty-json"
 			}
 			printer := cli.GetObjectPrinter(output)
@@ -71,7 +63,6 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			if cmd.Flags().Changed("record") {
 				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
 			}
-			printer := cli.GetObjectPrinter(output)
 
 			seedExecutionId, err := uuid.Parse(executionId)
 			if err != nil {
@@ -95,7 +86,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 - Type: The format is type={type}.`)
 
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
-	get.Flags().StringVar(&executionId, "seed-execution", "", "the id of the seed exectuion that will be retrieved")
+	get.Flags().StringVar(&executionId, "seed-execution", "", "the id of the seed execution that will be retrieved")
 	get.Flags().BoolVar(&details, "details", false, "flag documentation")
 
 	get.MarkFlagsMutuallyExclusive("filter", "record", "seed-execution")
