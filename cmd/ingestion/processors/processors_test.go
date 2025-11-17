@@ -1,8 +1,7 @@
-package ingestion
+package processors
 
 import (
 	"bytes"
-	"flag"
 	"slices"
 	"strings"
 	"testing"
@@ -13,10 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var Update = flag.Bool("update", false, "rewrite golden files")
-
-// TestNewIngestionCommand tests the NewIngestionCommand() function
-func TestNewIngestionCommand(t *testing.T) {
+// Test_NewProcessorCommand tests the NewProcessorCommand() function
+func Test_NewProcessorCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -30,13 +27,13 @@ func TestNewIngestionCommand(t *testing.T) {
 	vpr := viper.New()
 	vpr.SetDefault("profile", "default")
 	d := cli.NewDiscovery(&ios, vpr, dir)
-	ingestionCmd := NewIngestionCommand(d)
+	coreCmd := NewProcessorCommand(d)
 
-	ingestionCmd.SetIn(ios.In)
-	ingestionCmd.SetOut(ios.Out)
-	ingestionCmd.SetErr(ios.Err)
+	coreCmd.SetIn(ios.In)
+	coreCmd.SetOut(ios.Out)
+	coreCmd.SetErr(ios.Err)
 
-	ingestionCmd.PersistentFlags().StringP(
+	coreCmd.PersistentFlags().StringP(
 		"profile",
 		"p",
 		d.Config().GetString("profile"),
@@ -44,12 +41,12 @@ func TestNewIngestionCommand(t *testing.T) {
 	)
 
 	var commandNames []string
-	for _, c := range ingestionCmd.Commands() {
+	for _, c := range coreCmd.Commands() {
 		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
 			commandNames = append(commandNames, c.Name())
 		}
 	}
 
-	expectedCommands := []string{"config", "processor"}
+	expectedCommands := []string{"store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
