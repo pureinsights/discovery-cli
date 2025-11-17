@@ -961,7 +961,7 @@ discovery ingestion seed store --data '{"type":"staging","name":"Search seed","l
 ```
 
 #### QueryFlow
-`queryflow` is the main command used to interact with Discovery's QueryFlow. 
+`queryflow` is the main command used to interact with Discovery's QueryFlow.
 
 Usage: `discovery queryflow [subcommand] [flags]`
 
