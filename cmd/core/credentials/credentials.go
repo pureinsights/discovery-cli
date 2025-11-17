@@ -13,6 +13,7 @@ func NewCredentialCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	credential.AddCommand(NewGetCommand(d))
+	credential.AddCommand(NewStoreCommand(d))
 	credential.AddCommand(NewDeleteCommand(d))
 
 	return credential
