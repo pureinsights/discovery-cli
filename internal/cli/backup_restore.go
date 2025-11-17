@@ -159,7 +159,7 @@ func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onC
 func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(zipBytes), int64(len(zipBytes)))
 	if err != nil {
-		return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not read file with the entities")
+		return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not read the file with the entities")
 	}
 
 	if len(zipReader.File) > 3 {
@@ -188,7 +188,7 @@ func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 
 		readCloser, err := file.Open()
 		if err != nil {
-			return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not create the open a file contained within the zip")
+			return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not open a file contained within the zip")
 		}
 		defer readCloser.Close()
 
@@ -219,7 +219,7 @@ func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	zipFile, err := os.ReadFile(path)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not open file with the entities")
+		return NewErrorWithCause(ErrorExitCode, err, "Could not open the file with the entities")
 	}
 
 	tmpDir, zipPaths, err := UnzipExportsToTemp(zipFile)
@@ -250,6 +250,5 @@ func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, p
 		printer = JsonObjectPrinter(false)
 	}
 
-	fmt.Println(results)
 	return printer(*d.iostreams, gjson.Parse(results))
 }
