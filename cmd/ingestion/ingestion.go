@@ -4,6 +4,7 @@ import (
 	"github.com/pureinsights/pdp-cli/cmd/ingestion/config"
 	"github.com/pureinsights/pdp-cli/cmd/ingestion/pipelines"
 	"github.com/pureinsights/pdp-cli/cmd/ingestion/processors"
+	"github.com/pureinsights/pdp-cli/cmd/ingestion/seeds"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
@@ -18,6 +19,7 @@ func NewIngestionCommand(d cli.Discovery) *cobra.Command {
 	ingestion.AddCommand(config.NewConfigCommand(d))
 	ingestion.AddCommand(processors.NewProcessorCommand(d))
 	ingestion.AddCommand(pipelines.NewPipelineCommand(d))
+	ingestion.AddCommand(seeds.NewSeedCommand(d))
 
 	return ingestion
 }
