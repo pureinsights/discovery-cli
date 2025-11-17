@@ -869,7 +869,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record`  flags.
+`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record` flag.
 
 Usage: `discovery ingestion seed get [flags] [<arg>]`
 
@@ -891,8 +891,7 @@ Flags:
 
 `--record`::
 (Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
-
-The `filter`, and `record` flags are mutually exclusive.
+The `filter`, `seed-execution`, and `record` flags are mutually exclusive.
 
 Examples:
 
@@ -931,7 +930,7 @@ discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTD
 
 ```bash
 # Get all seed records
-discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --records
+discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"records":[{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},{"creationTimestamp":"2025-09-04T21:05:26Z","id":{"hash":"IJeF-losyj33EAuqjgGW2G7sT-eE7poejQ5HokerZio=","plain":"8148e6a7b952a3b2964f706ced8c6885"},"lastUpdatedTimestamp":"2025-09-04T21:05:26Z","status":"SUCCESS"}],"type":"staging"}
 ```
 

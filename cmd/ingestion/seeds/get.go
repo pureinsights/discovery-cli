@@ -39,7 +39,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			if !cmd.Flags().Changed("record") && !records {
+			if !cmd.Flags().Changed("record") {
 				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 			}
 
@@ -71,6 +71,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			if cmd.Flags().Changed("record") {
 				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
 			}
+			printer := cli.GetObjectPrinter(output)
 
 			seedExecutionId, err := uuid.Parse(executionId)
 			if err != nil {
