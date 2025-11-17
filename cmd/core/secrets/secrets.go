@@ -13,6 +13,8 @@ func NewSecretCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	secret.AddCommand(NewGetCommand(d))
+	secret.AddCommand(NewStoreCommand(d))
+	secret.AddCommand(NewDeleteCommand(d))
 
 	return secret
 }
