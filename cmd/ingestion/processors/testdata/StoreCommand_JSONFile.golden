@@ -1,7 +1,7 @@
 [
     {
         "type": "mongo",
-        "name": "MongoDB label",
+        "name": "MongoDB processor",
         "labels": [],
         "active": true,
         "creationTimestamp": "2025-08-14T18:02:11Z",
@@ -10,7 +10,7 @@
     },
     {
         "type": "mongo",
-        "name": "MongoDB label 2",
+        "name": "MongoDB processor 2",
         "labels": [],
         "active": true,
         "id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4d",
@@ -20,7 +20,7 @@
     },
     {
         "type": "openai",
-        "name": "OpenAI label 3",
+        "name": "OpenAI processor 3",
         "labels": [],
         "active": true,
         "id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
