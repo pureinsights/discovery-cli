@@ -1,7 +1,7 @@
 [
     {
         "type": "mongo",
-        "name": "MongoDB label",
+        "name": "MongoDB secret",
         "labels": [],
         "active": true,
         "creationTimestamp": "2025-08-14T18:02:11Z",
