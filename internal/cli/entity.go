@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -217,6 +218,61 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 	}
 
 	return gjson.Parse(filterString), nil
+}
+
+// Creator defines the methods to create and update entities.
+type Creator interface {
+	Create(config gjson.Result) (gjson.Result, error)
+	Update(id uuid.UUID, config gjson.Result) (gjson.Result, error)
+}
+
+// UpsertEntity creates or updates an entity in Discovery with the given configuration.
+func (d discovery) UpsertEntity(client Creator, config gjson.Result) (gjson.Result, error) {
+	if config.Get("id").Exists() {
+		if parsedId, uuidErr := uuid.Parse(config.Get("id").String()); uuidErr == nil {
+			return client.Update(parsedId, config)
+		} else {
+			return gjson.Result{}, uuidErr
+		}
+	} else {
+		return client.Create(config)
+	}
+}
+
+// UpsertEntities creates or updates one or multiple entities based on the array of configurations it receives.
+func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error {
+	configArray := configurations.Array()
+	upsertedEntites := []gjson.Result{}
+
+	var upsertErr error
+	for _, config := range configArray {
+		upsert, err := d.UpsertEntity(client, config)
+		if err != nil {
+			if abortOnError {
+				upsertErr = NewErrorWithCause(ErrorExitCode, err, "Could not store entities")
+				break
+			}
+
+			var discoveryErr discoveryPackage.Error
+			if errors.As(err, &discoveryErr) {
+				upsertedEntites = append(upsertedEntites, discoveryErr.Body)
+			} else {
+				errJson := gjson.Parse(fmt.Sprintf("{\"error\":%q}", err.Error()))
+				upsertedEntites = append(upsertedEntites, errJson)
+			}
+		} else {
+			upsertedEntites = append(upsertedEntites, upsert)
+		}
+	}
+
+	var err error
+	if printer == nil {
+		jsonPrinter := JsonArrayPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), upsertedEntites...)
+	} else {
+		err = printer(*d.IOStreams(), upsertedEntites...)
+	}
+	return errors.Join(err, upsertErr)
 }
 
 // Deleter is the interface that implements the delete method
