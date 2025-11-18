@@ -22,6 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// ExportResponse is used to store the response of the export endpoint in the test cases.
 type ExportResponse struct {
 	StatusCode         int
 	ContentType        string
