@@ -183,7 +183,7 @@ Flags:
 Examples:
 
 ```bash
-# Import the entities using profile "cn" and ignore conflict resolution strategy.
+# Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
 # The rest of the command's output is omitted.
 discovery import -p cn --file "entities/core.zip" --on-conflict IGNORE
 {
