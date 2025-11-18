@@ -84,6 +84,8 @@ func Test_newIngestionProcessorsClient(t *testing.T) {
 	assert.Equal(t, url+"/processor", processorsClient.crud.getter.client.client.BaseURL)
 	assert.Equal(t, apiKey, processorsClient.cloner.client.ApiKey)
 	assert.Equal(t, url+"/processor", processorsClient.cloner.client.client.BaseURL)
+	assert.Equal(t, apiKey, processorsClient.searcher.client.ApiKey)
+	assert.Equal(t, url+"/processor", processorsClient.searcher.client.client.BaseURL)
 }
 
 // Test_newPipelinesClient tests the constructor of pipelinesClient.
@@ -1634,6 +1636,8 @@ func Test_ingestion_Processors(t *testing.T) {
 	assert.Equal(t, i.Url+"/processor", ipc.crud.client.client.BaseURL)
 	assert.Equal(t, i.ApiKey, ipc.cloner.client.ApiKey)
 	assert.Equal(t, i.Url+"/processor", ipc.cloner.client.client.BaseURL)
+	assert.Equal(t, i.ApiKey, ipc.searcher.client.ApiKey)
+	assert.Equal(t, i.Url+"/processor", ipc.searcher.client.client.BaseURL)
 }
 
 // Test_ingestion_Pipelines tests the ingestion.Pipelines() function
