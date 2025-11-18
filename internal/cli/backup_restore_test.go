@@ -576,7 +576,7 @@ func TestUnzipExportsToTemp(t *testing.T) {
 		{
 			name:     "Receives an invalid zip",
 			zipBytes: []byte("this is not a valid zip"),
-			err:      NewErrorWithCause(ErrorExitCode, errors.New("zip: not a valid zip file"), "Could not read file with the entities"),
+			err:      NewErrorWithCause(ErrorExitCode, errors.New("zip: not a valid zip file"), "Could not read the file with the entities"),
 		},
 		{
 			name:     "Receives a zip file with a directory entry",
