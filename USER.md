@@ -165,7 +165,7 @@ discovery export --file "entities/discovery.zip".
 #### Import
 `import` is the command used to restore entities to all of Discovery's products at once. With the `file` flag, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files product by the `/export` endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format `productName-*`. For example, the Core can be called `core-export-20251112T1629.zip` and the one for Ingestion can be called `ingestion-export-20251110T1607.zip`. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
 
-Usage: `discovery core import [flags]`
+Usage: `discovery import [flags]`
 
 Flags:
 `-h, --help`::
@@ -183,24 +183,54 @@ Flags:
 Examples:
 
 ```bash
-# Import the entities using profile "cn" and update conflict resolution strategy.
+# Import the entities using profile "cn" and ignore conflict resolution strategy.
 # The rest of the command's output is omitted.
-discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
+discovery import -p cn --file "entities/core.zip" --on-conflict IGNORE
 {
-  "Credential": [
-    {
-      "id": "3b32e410-2f33-412d-9fb8-17970131921c",
-      "status": 200
-    },
-    {
-      "id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
-      "status": 200
-    },
-    {
-      "id": "46cb4fff-28be-4901-b059-1dd618e74ee4",
-      "status": 200
-    },
-    ...
+  "core": {
+    "Credential": [
+      {
+        "id": "6e2f1c2a-9885-4263-8945-38b0cda4b6d3",
+        "status": 204
+      },
+      {
+        "id": "721997cd-b16f-4acb-93cf-b44a959dbcf2",
+        "status": 204
+      }
+    ],
+    "Server": [
+      {
+        "id": "6817ccf5-b4bc-4f97-82f5-c8016d26f2fb",
+        "status": 204
+      },
+      {
+        "id": "f7a65744-a3b1-4655-b472-c612bb490ff9",
+        "status": 204
+      }
+    ]
+  },
+  "ingestion": {
+    "Pipeline": [
+      {
+        "id": "128b1127-0ea0-4aa5-9a4e-9160285d2f61",
+        "status": 204
+      }
+    ],
+    "Processor": [
+      {
+        "id": "11de1d9b-d037-4d27-8304-37b62e79d044",
+        "status": 204
+      }
+    ],
+    "Seed": [
+      {
+        "id": "bb8d13c6-73b5-47a1-b0fb-06a141e32309",
+        "status": 204
+      }
+    ],
+    "SeedSchedule": []
+  }
+}
 ```
 
 #### Core
