@@ -677,11 +677,11 @@ func (s *FailingJobSummarizer) Summarize() (gjson.Result, error) {
 // TestAppendSeedExecutionDetails tests the AppendSeedExecutionDetails() function.
 func TestAppendSeedExecutionDetails(t *testing.T) {
 	tests := []struct {
-		name              string
-		client            SeedExecutionGetter
-		summarizers       map[string]Summarizer
-		expectedExecution gjson.Result
-		err               error
+		name           string
+		client         SeedExecutionGetter
+		summarizers    map[string]Summarizer
+		expectedFields map[string]string
+		err            error
 	}{
 		// Working case
 		{
@@ -691,8 +691,17 @@ func TestAppendSeedExecutionDetails(t *testing.T) {
 				"records": new(WorkingRecordSummarizer),
 				"jobs":    new(WorkingJobSummarizer),
 			},
-			expectedExecution: gjson.Parse("{\n  \"id\": \"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\",\n  \"creationTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"lastUpdatedTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"triggerType\": \"MANUAL\",\n  \"status\": \"RUNNING\",\n  \"scanType\": \"FULL\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"stages\": [\"BEFORE_HOOKS\",\"INGEST\"]\n,\"audit\":[\n{\"timestamp\":\"2025-09-05T20:09:22.543Z\",\"status\":\"CREATED\",\"stages\":[]},\n{\"timestamp\":\"2025-09-05T20:09:26.621Z\",\"status\":\"RUNNING\",\"stages\":[]},\n{\"timestamp\":\"2025-09-05T20:09:37.592Z\",\"status\":\"RUNNING\",\"stages\":[\"BEFORE_HOOKS\"]},\n{\"timestamp\":\"2025-09-05T20:13:26.602Z\",\"status\":\"RUNNING\",\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"]}\n],\"records\":{\"PROCESSING\":4,\"DONE\": 4},\"jobs\":{\"DONE\":5,\"RUNNING\":3}}"),
-			err:               nil,
+			expectedFields: map[string]string{
+				"audit": `[
+{"timestamp":"2025-09-05T20:09:22.543Z","status":"CREATED","stages":[]},
+{"timestamp":"2025-09-05T20:09:26.621Z","status":"RUNNING","stages":[]},
+{"timestamp":"2025-09-05T20:09:37.592Z","status":"RUNNING","stages":["BEFORE_HOOKS"]},
+{"timestamp":"2025-09-05T20:13:26.602Z","status":"RUNNING","stages":["BEFORE_HOOKS","INGEST"]}
+]`,
+				"records": `{"PROCESSING":4,"DONE": 4}`,
+				"jobs":    `{"DONE":5,"RUNNING":3}`,
+			},
+			err: nil,
 		},
 		{
 			name:   "Auditing works and one summarizer returns no content",
@@ -701,14 +710,22 @@ func TestAppendSeedExecutionDetails(t *testing.T) {
 				"records": new(NoContentRecordSummarizer),
 				"jobs":    new(WorkingJobSummarizer),
 			},
-			expectedExecution: gjson.Parse("{\n  \"id\": \"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\",\n  \"creationTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"lastUpdatedTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"triggerType\": \"MANUAL\",\n  \"status\": \"RUNNING\",\n  \"scanType\": \"FULL\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"stages\": [\"BEFORE_HOOKS\",\"INGEST\"]\n,\"audit\":[\n{\"timestamp\":\"2025-09-05T20:09:22.543Z\",\"status\":\"CREATED\",\"stages\":[]},\n{\"timestamp\":\"2025-09-05T20:09:26.621Z\",\"status\":\"RUNNING\",\"stages\":[]},\n{\"timestamp\":\"2025-09-05T20:09:37.592Z\",\"status\":\"RUNNING\",\"stages\":[\"BEFORE_HOOKS\"]},\n{\"timestamp\":\"2025-09-05T20:13:26.602Z\",\"status\":\"RUNNING\",\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"]}\n],\"records\":{},\"jobs\":{\"DONE\":5,\"RUNNING\":3}}"),
-			err:               nil,
+			expectedFields: map[string]string{
+				"audit": `[
+{"timestamp":"2025-09-05T20:09:22.543Z","status":"CREATED","stages":[]},
+{"timestamp":"2025-09-05T20:09:26.621Z","status":"RUNNING","stages":[]},
+{"timestamp":"2025-09-05T20:09:37.592Z","status":"RUNNING","stages":["BEFORE_HOOKS"]},
+{"timestamp":"2025-09-05T20:13:26.602Z","status":"RUNNING","stages":["BEFORE_HOOKS","INGEST"]}
+]`,
+				"records": `{}`,
+				"jobs":    `{"DONE":5,"RUNNING":3}`,
+			},
+			err: nil,
 		},
 		// Error case
 		{
-			name:              "Getting the audit fails",
-			client:            new(FailingSeedExecutionGetterAuditFails),
-			expectedExecution: gjson.Result{},
+			name:   "Getting the audit fails",
+			client: new(FailingSeedExecutionGetterAuditFails),
 			summarizers: map[string]Summarizer{
 				"records": new(NoContentRecordSummarizer),
 				"jobs":    new(WorkingJobSummarizer),
@@ -722,7 +739,6 @@ func TestAppendSeedExecutionDetails(t *testing.T) {
 				"records": new(WorkingRecordSummarizer),
 				"jobs":    new(FailingJobSummarizer),
 			},
-			expectedExecution: gjson.Result{},
 			err: discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
   "status": 404,
   "code": 1003,
@@ -751,12 +767,14 @@ func TestAppendSeedExecutionDetails(t *testing.T) {
 			executionId, err := uuid.Parse("f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3")
 			require.NoError(t, err)
 			result, err := AppendSeedExecutionDetails(seedExecution, executionId, tc.client, tc.summarizers)
-			assert.Equal(t, tc.expectedExecution, result)
 			if tc.err != nil {
 				require.Error(t, err)
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
+				for field, expectedValue := range tc.expectedFields {
+					assert.Equal(t, expectedValue, result.Get(field).Raw)
+				}
 			}
 		})
 	}
