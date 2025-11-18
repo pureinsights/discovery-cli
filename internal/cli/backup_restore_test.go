@@ -576,7 +576,7 @@ func TestUnzipExportsToTemp(t *testing.T) {
 		{
 			name:     "Receives an invalid zip",
 			zipBytes: []byte("this is not a valid zip"),
-			err:      NewErrorWithCause(ErrorExitCode, errors.New("zip: not a valid zip file"), "Could not read file with the entities"),
+			err:      NewErrorWithCause(ErrorExitCode, errors.New("zip: not a valid zip file"), "Could not read the file with the entities"),
 		},
 		{
 			name:     "Receives a zip file with a directory entry",
@@ -666,7 +666,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 			name:    "The given file does not exist",
 			clients: []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:    filepath.Join("doesnotexist", "export.zip"),
-			err:     NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not open file with the entities"),
+			err:     NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not open the file with the entities"),
 		},
 		{
 			name:    "UnzipExportsToTemp fails",
