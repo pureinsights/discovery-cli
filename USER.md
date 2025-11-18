@@ -162,6 +162,46 @@ discovery export -p cn
 discovery export --file "entities/discovery.zip".
 {"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
 ```
+#### Import
+`import` is the command used to restore entities to all of Discovery's products at once. With the `file` flag, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files product by the `/export` endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format `productName-*`. For example, the Core can be called `core-export-20251112T1629.zip` and the one for Ingestion can be called `ingestion-export-20251110T1607.zip`. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery core import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the files with the exported entities of the Discovery products.
+
+`--on-conflict`::
+(Optional, string) Set the configuration profile that will execute the command. The default value is "FAIL"
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and update conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
+{
+  "Credential": [
+    {
+      "id": "3b32e410-2f33-412d-9fb8-17970131921c",
+      "status": 200
+    },
+    {
+      "id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
+      "status": 200
+    },
+    {
+      "id": "46cb4fff-28be-4901-b059-1dd618e74ee4",
+      "status": 200
+    },
+    ...
+```
 
 #### Core
 `core` is the main command used to interact with Discovery's Core. 

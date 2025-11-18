@@ -1,9 +1,6 @@
 package backuprestore
 
 import (
-	"fmt"
-
-	"github.com/pureinsights/pdp-cli/cmd/commands"
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
@@ -16,7 +13,7 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 	importCmd := &cobra.Command{
 		Use:   "import [subcommands]",
 		Short: "import entities to all of Discovery's products",
-		Long:  fmt.Sprintf(commands.LongImport, "Core"),
+		Long:  "import is the command used to restore entities to all of Discovery's products at once. With the file flag, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files product by the /export endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format productName-*. For example, the Core can be called core-export-20251112T1629.zip and the one for Ingestion can be called ingestion-export-20251110T1607.zip. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the on-conflict flag, the user can send the conflict resolution strategy in case there are duplicate entities.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -45,7 +42,7 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.NoArgs,
 	}
 
-	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the entities that will be restored")
+	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the files with the exported entities of the Discovery products.")
 	importCmd.Flags().StringVar(&onConflict, "on-conflict", string(discoveryPackage.OnConflictFail), "the conflict resolution strategy that will be used")
 
 	importCmd.MarkFlagRequired("file")
