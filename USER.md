@@ -935,6 +935,50 @@ discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTD
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","record":{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},"recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
+```bash
+# Get a seed execution by id and with details
+discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --seed-execution 0f20f984-1854-4741-81ea-30f8b965b007 --details
+{
+  "audit": [
+    {
+      "stages": [],
+      "status": "CREATED",
+      "timestamp": "2025-11-18T16:22:23.865Z"
+    },
+    {
+      "stages": [],
+      "status": "RUNNING",
+      "timestamp": "2025-11-18T16:22:34.655Z"
+    },
+    {
+      "stages": [
+        "BEFORE_HOOKS"
+      ],
+      "status": "RUNNING",
+      "timestamp": "2025-11-18T16:23:13.120Z"
+    }
+  ],
+  "creationTimestamp": "2025-11-18T16:22:24Z",
+  "id": "0f20f984-1854-4741-81ea-30f8b965b007",
+  "jobs": {
+    "DONE": 3,
+    "RUNNING": 1
+  },
+  "lastUpdatedTimestamp": "2025-11-18T16:23:13Z",
+  "records": {
+    "CREATE": {
+      "PROCESSING": 2
+    }
+  },
+  "scanType": "FULL",
+  "stages": [
+    "BEFORE_HOOKS"
+  ],
+  "status": "RUNNING",
+  "triggerType": "MANUAL"
+}
+```
+
 ###### Store
 `store` is the command used to create and update Discovery Ingestion's seeds. With the data flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
 
