@@ -2,10 +2,12 @@ Usage:
   get [flags]
 
 Flags:
-  -f, --filter stringArray   Apply filters in the format "filter=key:value". The available filters are:
-                             - Label: The format is label={key}[:{value}], where the value is optional.
-                             - Type: The format is type={type}.
-  -h, --help                 help for get
-  -p, --profile string       configuration profile to use (default "default")
-      --record string        the id of the record that will be retrieved
+      --details                 gets more information when getting a seed execution, like the audited changes and record and job summaries
+  -f, --filter stringArray      Apply filters in the format "filter=key:value". The available filters are:
+                                - Label: The format is label={key}[:{value}], where the value is optional.
+                                - Type: The format is type={type}.
+  -h, --help                    help for get
+  -p, --profile string          configuration profile to use (default "default")
+      --record string           the id of the record that will be retrieved
+      --seed-execution string   the id of the seed execution that will be retrieved
 

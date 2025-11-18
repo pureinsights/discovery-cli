@@ -12,8 +12,12 @@ import (
 
 // NewGetCommand creates the seed get command
 func NewGetCommand(d cli.Discovery) *cobra.Command {
-	var filters []string
-	var recordId string
+	var (
+		filters     []string
+		recordId    string
+		executionId string
+		details     bool
+	)
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains seeds from Discovery Ingestion.",
@@ -27,7 +31,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			if !cmd.Flags().Changed("record") {
+			if !cmd.Flags().Changed("record") && !cmd.Flags().Changed("seed-execution") {
 				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 			}
 
@@ -56,17 +60,36 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			}
 			printer := cli.GetObjectPrinter(output)
 
-			return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
+			if cmd.Flags().Changed("record") {
+				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
+			}
+
+			seedExecutionId, err := uuid.Parse(executionId)
+			if err != nil {
+				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed execution id")
+			}
+
+			seedExecutionClient := ingestionClient.Seeds().Executions(seedId)
+
+			summarizers := map[string]cli.Summarizer{
+				"records": seedExecutionClient.Records(seedExecutionId),
+				"jobs":    seedExecutionClient.Jobs(seedExecutionId),
+			}
+
+			return d.GetSeedExecution(seedExecutionClient, seedExecutionId, summarizers, details, printer)
 		},
 		Args: cobra.MaximumNArgs(1),
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
 - Label: The format is label={key}[:{value}], where the value is optional.
 - Type: The format is type={type}.`)
 
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
+	get.Flags().StringVar(&executionId, "seed-execution", "", "the id of the seed execution that will be retrieved")
+	get.Flags().BoolVar(&details, "details", false, "gets more information when getting a seed execution, like the audited changes and record and job summaries")
 
-	get.MarkFlagsMutuallyExclusive("filter", "record")
+	get.MarkFlagsMutuallyExclusive("filter", "record", "seed-execution")
+	get.MarkFlagsMutuallyExclusive("filter", "record", "details")
 	return get
 }
