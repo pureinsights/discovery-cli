@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// ImportResponse stores the response of the Import command to use in the test cases.
 type ImportResponse struct {
 	StatusCode int
 	Body       []byte
