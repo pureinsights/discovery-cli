@@ -32,7 +32,7 @@ func StoreCommandConfig(baseConfig commandConfig, abortOnError bool, data, file 
 
 // StoreCommand has the command logic to upsert an entity into Discovery.
 func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig) error {
-	err := checkCredentials(d, config.profile, config.componentName, config.url)
+	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}
