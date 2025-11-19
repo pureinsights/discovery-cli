@@ -126,6 +126,7 @@ func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClien
 type ingestionProcessorsClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewIngestionProcessorsClient is the constructor of a ingestionProcessorsClient
@@ -140,6 +141,9 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 		cloner: cloner{
 			client: client,
 		},
+		searcher: searcher{
+			client: client,
+		},
 	}
 }
 
@@ -147,6 +151,7 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 type pipelinesClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewPipelinesClient is the constructor of a pipelinesClient
@@ -159,6 +164,9 @@ func newPipelinesClient(url, apiKey string) pipelinesClient {
 			},
 		},
 		cloner: cloner{
+			client: client,
+		},
+		searcher: searcher{
 			client: client,
 		},
 	}
