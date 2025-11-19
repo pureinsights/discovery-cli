@@ -338,7 +338,7 @@ func TestWriteExportsIntoFile(t *testing.T) {
 
 // TestExportEntitiesFromClients tests the TestExportEntitiesFromClients() function.
 func TestExportEntitiesFromClients(t *testing.T) {
-	changeDirectoryHelper(t)
+	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
 	tests := []struct {
 		name           string
