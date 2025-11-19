@@ -47,6 +47,6 @@ func Test_NewSeedCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"store"}
+	expectedCommands := []string{"get", "start", "store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

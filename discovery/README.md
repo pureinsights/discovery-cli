@@ -267,6 +267,7 @@ This struct manages Ingestion's seeds.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 It has the following methods:
 | Name | Method | Path | Query Parameters | Response | Description |
