@@ -151,6 +151,7 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 type pipelinesClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewPipelinesClient is the constructor of a pipelinesClient
@@ -163,6 +164,9 @@ func newPipelinesClient(url, apiKey string) pipelinesClient {
 			},
 		},
 		cloner: cloner{
+			client: client,
+		},
+		searcher: searcher{
 			client: client,
 		},
 	}

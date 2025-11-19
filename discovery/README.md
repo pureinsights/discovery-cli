@@ -257,6 +257,7 @@ This struct manages Ingestion's pipelines.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 Creating a `pipelinesClient` can be done with `ingestion.Pipelines()` or `newPipelinesClient(URL, API Key)`.
 
