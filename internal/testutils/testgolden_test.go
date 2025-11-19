@@ -8,20 +8,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// changeDirectoryHelper changes the working directory to t.TempDir()
-func changeDirectoryHelper(t *testing.T) string {
-	t.Helper()
-	tmp := t.TempDir()
-	wd, err := os.Getwd()
-	require.NoError(t, err)
-	require.NoError(t, os.Chdir(tmp))
-	t.Cleanup(func() { _ = os.Chdir(wd) })
-	return tmp
-}
-
 // TestPath_CreatesTestdataDirWhenUpdate tests the Path() function when the Update flag is true
 func TestPath_CreatesTestdataDirWhenUpdate(t *testing.T) {
-	changeDirectoryHelper(t)
+	ChangeDirectoryHelper(t)
 
 	old := *Update
 	*Update = true
@@ -37,7 +26,7 @@ func TestPath_CreatesTestdataDirWhenUpdate(t *testing.T) {
 
 // TestPath_DoesNotCreateTestdataDirWhenNotUpdate tests the Path() function when update is false
 func TestPath_DoesNotCreateTestdataDirWhenNotUpdate(t *testing.T) {
-	changeDirectoryHelper(t)
+	ChangeDirectoryHelper(t)
 
 	old := *Update
 	*Update = false
@@ -53,7 +42,7 @@ func TestPath_DoesNotCreateTestdataDirWhenNotUpdate(t *testing.T) {
 
 // TestWrite_UpdateTrueWritesFile tests the Write() function fails when update is false.
 func TestWrite_UpdateTrueWritesFile(t *testing.T) {
-	changeDirectoryHelper(t)
+	ChangeDirectoryHelper(t)
 
 	old := *Update
 	*Update = true
@@ -68,7 +57,7 @@ func TestWrite_UpdateTrueWritesFile(t *testing.T) {
 
 // TestRead_SucceedsWhenFileExists tests the Read() function when the file exists.
 func TestRead_SucceedsWhenFileExists(t *testing.T) {
-	changeDirectoryHelper(t)
+	ChangeDirectoryHelper(t)
 
 	require.NoError(t, os.MkdirAll("testdata", 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join("testdata", "test.golden"), []byte("this is a test\n"), 0o644))
@@ -83,7 +72,7 @@ func TestRead_SucceedsWhenFileExists(t *testing.T) {
 
 // TestRead_ReturnsNilWhenUpdateTrue tests the Read function when the update flag is true
 func TestRead_ReturnsNilWhenUpdateTrue(t *testing.T) {
-	changeDirectoryHelper(t)
+	ChangeDirectoryHelper(t)
 
 	old := *Update
 	*Update = true
@@ -95,7 +84,7 @@ func TestRead_ReturnsNilWhenUpdateTrue(t *testing.T) {
 
 // TestCompareBytes_UpdateWritesNewGolden tests the CompareBytes() function when the golden file needs to be updated.
 func TestCompareBytes_UpdateWritesNewGolden(t *testing.T) {
-	changeDirectoryHelper(t)
+	ChangeDirectoryHelper(t)
 
 	old := *Update
 	*Update = true
@@ -111,7 +100,7 @@ func TestCompareBytes_UpdateWritesNewGolden(t *testing.T) {
 
 // TestCompareBytes_NoUpdateMatchesPasses tests the CompareBytes() function when the golden file is the same as the result
 func TestCompareBytes_NoUpdateMatchesPasses(t *testing.T) {
-	changeDirectoryHelper(t)
+	ChangeDirectoryHelper(t)
 
 	require.NoError(t, os.MkdirAll("testdata", 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join("testdata", "test.golden"), []byte("this is a test\n"), 0o644))
