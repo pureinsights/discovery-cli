@@ -13,6 +13,7 @@ func NewPipelineCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	pipeline.AddCommand(NewStoreCommand(d))
+	pipeline.AddCommand(NewGetCommand(d))
 
 	return pipeline
 }
