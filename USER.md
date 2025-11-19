@@ -237,7 +237,7 @@ Usage: `discovery core label get [flags] [<uuid>]`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the label that will be retrieved.
+(Optional, string) The UUID of the label that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -306,7 +306,7 @@ Usage: `discovery core label delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Required, String) The UUID of the label that will be deleted.
+(Required, string) The UUID of the label that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -342,7 +342,7 @@ Usage: `discovery core secret get [flags] [<uuid>]`
 
 Arguments:
 `uuid`::
-(Optional, String) The UUID of the secret that will be retrieved.
+(Optional, string) The UUID of the secret that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -410,7 +410,7 @@ Usage: `discovery core secret delete [flags] <uuid>`
 
 Arguments:
 `uuid`::
-(Required, String) The UUID of the secret that will be deleted.
+(Required, string) The UUID of the secret that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -446,7 +446,7 @@ Usage: `discovery core credential get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the credential that will be retrieved.
+(Optional, string) The name or UUID of the credential that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -532,7 +532,7 @@ Usage: `discovery core credential delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the credential that will be deleted.
+(Required, string) The name or UUID of the credential that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -572,7 +572,7 @@ Usage: `discovery core server get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the server that will be retrieved.
+(Optional, string) The name or UUID of the server that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -658,7 +658,7 @@ Usage: `discovery core server delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the server that will be deleted.
+(Required, string) The name or UUID of the server that will be deleted.
 
 Flags:
 `-h, --help`::
@@ -783,7 +783,7 @@ Usage: `discovery ingestion processor get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the processor that will be retrieved.
+(Optional, string) The name or UUID of the processor that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -881,7 +881,7 @@ Usage: `discovery ingestion pipeline get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the pipeline that will be retrieved.
+(Optional, string) The name or UUID of the pipeline that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -979,7 +979,7 @@ Usage: `discovery ingestion seed get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the seed that will be retrieved.
+(Optional, string) The name or UUID of the seed that will be retrieved.
 
 Flags:
 `-h, --help`::
@@ -1057,6 +1057,48 @@ discovery ingestion seed store --file seeds.json
 # Store a seed with the JSON configuration in the data flag
 discovery ingestion seed store --data '{"type":"staging","name":"Search seed","labels":[],"active":true,"id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","creationTimestamp":"2025-09-04T15:50:08Z","lastUpdatedTimestamp":"2025-09-04T15:50:08Z","config":{"action":"scroll","bucket":"blogs"},"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+```
+
+###### Start
+`start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user can set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
+
+Usage: `discovery ingestion seed start <arg> [flags]`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the seed that will be executed.
+
+Flags:
+`--properties`::
+(Optional, string) Set the properties of the seed execution.
+
+`--scan-type`::
+(Optional, string) Sets the scan type of the seed execution. It can be `FULL` or `INCREMENTAL`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Start a seed seed execution with no flags
+discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
+{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
+```bash
+# Start a seed seed execution with no flags using the seed's name
+discovery ingestion seed start "Search seed"
+{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
+```bash
+# Start a seed seed execution with the properties and scan-type flags
+discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 #### QueryFlow

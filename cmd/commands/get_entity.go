@@ -14,7 +14,7 @@ const (
 
 // GetCommand is the function that executes the get operation for the get commands that do not work with names or filters.
 func GetCommand(args []string, d cli.Discovery, client cli.Getter, config commandConfig) error {
-	err := checkCredentials(d, config.profile, config.componentName, config.url)
+	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func GetCommand(args []string, d cli.Discovery, client cli.Getter, config comman
 
 // SearchCommand is the function that the get command executes when it also allows for searching by name and with filters.
 func SearchCommand(args []string, d cli.Discovery, client cli.Searcher, config commandConfig, filters *[]string) error {
-	err := checkCredentials(d, config.profile, config.componentName, config.url)
+	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}
