@@ -1,0 +1,9 @@
+Usage:
+  start [flags]
+
+Flags:
+  -h, --help                help for start
+  -p, --profile string      configuration profile to use (default "default")
+      --properties string   The execution properties of the seed execution
+      --scan-type string    The scan type of the seed execution (default "FULL")
+
