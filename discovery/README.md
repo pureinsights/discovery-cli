@@ -83,7 +83,7 @@ It inherits from:
 It has the following method:
 | Name | Method | Path | Request Body | Query Parameters | Response | Description |
 | --- | --- | --- | --- | --- | --- | --- | 
-| Export | GET | `{URL}/export` |  |  | `application/octet-stream` | Calls the `/export` endpoint. It returns the result of the endpoint in bytes, which should be written to a ZIP file so that it can be restored later. |
+| Export | GET | `{URL}/export` |  |  | `application/octet-stream` | Calls the `/export` endpoint. It returns two results. The first one is the bytes of the export, which should be written to a ZIP file so that it can be restored later. The second result is the name of the file of the export that is sent by Discovery in the response's headers. This name is `export-{TIMESTAMP}.zip` or `discovery.zip` if the file name could not be retrieved. |
 | Import | POST | `{URL}/import` | `multipart/form-data` | `onConflict`: `UPDATE`, `IGNORE`, `FAIL` | `application/json` | Calls the `/import` endpoint. It receives the given file to restore the entities contained within. |
 
 ### Searcher
@@ -247,6 +247,7 @@ This struct manages Ingestion's processors.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 Creating a `ingestionProcessorsClient` can be done with `ingestion.Processors()` or `newIngestionProcessorsClient(URL, API Key)`.
 
@@ -256,6 +257,7 @@ This struct manages Ingestion's pipelines.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 Creating a `pipelinesClient` can be done with `ingestion.Pipelines()` or `newPipelinesClient(URL, API Key)`.
 
@@ -265,6 +267,7 @@ This struct manages Ingestion's seeds.
 It inherits from:
 * [CRUD](#crud)
 * [Cloner](#cloner)
+* [Searcher](#searcher)
 
 It has the following methods:
 | Name | Method | Path | Query Parameters | Response | Description |
