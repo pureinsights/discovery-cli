@@ -42,7 +42,7 @@ type seedRecordsClient struct {
 
 // NewSeedRecordsClient is the constructor of seedRecordsClient
 func newSeedRecordsClient(sc seedsClient, seedId uuid.UUID) seedRecordsClient {
-	client := newSubClient(sc.client, "/"+seedId.String()+"/record")
+	client := newSubClient(sc.crud.client, "/"+seedId.String()+"/record")
 	return seedRecordsClient{
 		summarizer: summarizer{
 			client: client,
@@ -71,7 +71,7 @@ type seedExecutionsClient struct {
 func newSeedExecutionsClient(sc seedsClient, seedId uuid.UUID) seedExecutionsClient {
 	return seedExecutionsClient{
 		getter: getter{
-			client: newSubClient(sc.client, "/"+seedId.String()+"/execution"),
+			client: newSubClient(sc.crud.client, "/"+seedId.String()+"/execution"),
 		},
 	}
 }
@@ -126,6 +126,7 @@ func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClien
 type ingestionProcessorsClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewIngestionProcessorsClient is the constructor of a ingestionProcessorsClient
@@ -140,6 +141,9 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 		cloner: cloner{
 			client: client,
 		},
+		searcher: searcher{
+			client: client,
+		},
 	}
 }
 
@@ -147,6 +151,7 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 type pipelinesClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewPipelinesClient is the constructor of a pipelinesClient
@@ -161,6 +166,9 @@ func newPipelinesClient(url, apiKey string) pipelinesClient {
 		cloner: cloner{
 			client: client,
 		},
+		searcher: searcher{
+			client: client,
+		},
 	}
 }
 
@@ -168,6 +176,7 @@ func newPipelinesClient(url, apiKey string) pipelinesClient {
 type seedsClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewSeedsClient is the constructor of seedsClient.
@@ -180,6 +189,9 @@ func newSeedsClient(url, apiKey string) seedsClient {
 			},
 		},
 		cloner: cloner{
+			client: client,
+		},
+		searcher: searcher{
 			client: client,
 		},
 	}
@@ -197,11 +209,11 @@ const (
 // Start starts the execution of seed.
 func (sc seedsClient) Start(id uuid.UUID, scan ScanType, executionProperties gjson.Result) (gjson.Result, error) {
 	if !executionProperties.Exists() {
-		return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+		return execute(sc.crud.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
 			"scanType": {string(scan)},
 		}))
 	} else {
-		return execute(sc.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
+		return execute(sc.crud.client, http.MethodPost, "/"+id.String(), WithQueryParameters(map[string][]string{
 			"scanType": {string(scan)},
 		}), WithJSONBody(executionProperties.Raw))
 	}
@@ -209,7 +221,7 @@ func (sc seedsClient) Start(id uuid.UUID, scan ScanType, executionProperties gjs
 
 // Halt stops all the executions of a seed.
 func (sc seedsClient) Halt(id uuid.UUID) ([]gjson.Result, error) {
-	haltings, err := execute(sc.client, http.MethodPost, "/"+id.String()+"/halt")
+	haltings, err := execute(sc.crud.client, http.MethodPost, "/"+id.String()+"/halt")
 	if err != nil {
 		return []gjson.Result(nil), err
 	}
@@ -220,7 +232,7 @@ func (sc seedsClient) Halt(id uuid.UUID) ([]gjson.Result, error) {
 // Reset resets a seed.
 // If the seed has no active executions, then the seed's metadata is reset and its records deleted.
 func (sc seedsClient) Reset(id uuid.UUID) (gjson.Result, error) {
-	return execute(sc.client, http.MethodPost, "/"+id.String()+"/reset")
+	return execute(sc.crud.client, http.MethodPost, "/"+id.String()+"/reset")
 }
 
 // Records creates a new seedRecordsClient.

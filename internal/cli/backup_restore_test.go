@@ -22,7 +22,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestRenderExportStatus tests the RenderExportStatus() function()
+// TestRenderExportStatus tests the RenderExportStatus() function
 func TestRenderExportStatus(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -31,13 +31,13 @@ func TestRenderExportStatus(t *testing.T) {
 		expectedErr         error
 	}{
 		{
-			name:                "Render export status returns acknoledged true if no error",
+			name:                "Render export status returns acknowledged true if no error",
 			err:                 nil,
 			expectedAcknowledge: gjson.Parse(`{"acknowledged": true}`),
 			expectedErr:         nil,
 		},
 		{
-			name:                "Render export status returns acknoledged false if no error",
+			name:                "Render export status returns acknowledged false if there is an error",
 			err:                 errors.New("write failed"),
 			expectedAcknowledge: gjson.Parse(`{"acknowledged": false,"error":"write failed"}`),
 			expectedErr:         NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not export entities"),
@@ -126,20 +126,9 @@ func (g *FailingBackupRestore) Import(discoveryPackage.OnConflict, string) (gjso
 	return gjson.Result{}, nil
 }
 
-// changeDirectoryHelper changes the working directory to t.TempDir()
-func changeDirectoryHelper(t *testing.T) string {
-	t.Helper()
-	tmp := t.TempDir()
-	wd, err := os.Getwd()
-	require.NoError(t, err)
-	require.NoError(t, os.Chdir(tmp))
-	t.Cleanup(func() { _ = os.Chdir(wd) })
-	return tmp
-}
-
 // TestWriteExport tests the WriteExport() function
 func TestWriteExport(t *testing.T) {
-	changeDirectoryHelper(t)
+	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
 	tests := []struct {
 		name                string
@@ -196,7 +185,7 @@ func TestWriteExport(t *testing.T) {
 
 // TestExportEntitiesFromClient tests the ExportEntitiesFromClient() function
 func TestExportEntitiesFromClient(t *testing.T) {
-	changeDirectoryHelper(t)
+	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
 	tests := []struct {
 		name           string
