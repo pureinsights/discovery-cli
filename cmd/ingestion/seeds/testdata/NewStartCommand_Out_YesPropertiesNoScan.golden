@@ -1,0 +1,1 @@
+{"creationTimestamp":"2025-09-04T19:29:41.119013Z","id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","properties":{"stagingBucket":"testBucket"},"scanType":"INCREMENTAL","status":"CREATED","triggerType":"MANUAL"}
