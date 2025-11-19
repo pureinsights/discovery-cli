@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -83,12 +84,7 @@ func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error
 		}
 
 		if parsedId, uuidErr := uuid.Parse(id); uuidErr == nil {
-			result, err = client.Get(parsedId)
-			if err != nil {
-				return gjson.Result{}, err
-			}
-
-			return result, nil
+			return client.Get(parsedId)
 		}
 
 		return gjson.Result{}, discoveryErr
@@ -222,4 +218,102 @@ func BuildEntitiesFilter(filters []string) (gjson.Result, error) {
 	}
 
 	return gjson.Parse(filterString), nil
+}
+
+// Creator defines the methods to create and update entities.
+type Creator interface {
+	Create(config gjson.Result) (gjson.Result, error)
+	Update(id uuid.UUID, config gjson.Result) (gjson.Result, error)
+}
+
+// UpsertEntity creates or updates an entity in Discovery with the given configuration.
+func (d discovery) UpsertEntity(client Creator, config gjson.Result) (gjson.Result, error) {
+	if config.Get("id").Exists() {
+		if parsedId, uuidErr := uuid.Parse(config.Get("id").String()); uuidErr == nil {
+			return client.Update(parsedId, config)
+		} else {
+			return gjson.Result{}, uuidErr
+		}
+	} else {
+		return client.Create(config)
+	}
+}
+
+// UpsertEntities creates or updates one or multiple entities based on the array of configurations it receives.
+func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error {
+	configArray := configurations.Array()
+	upsertedEntites := []gjson.Result{}
+
+	var upsertErr error
+	for _, config := range configArray {
+		upsert, err := d.UpsertEntity(client, config)
+		if err != nil {
+			if abortOnError {
+				upsertErr = NewErrorWithCause(ErrorExitCode, err, "Could not store entities")
+				break
+			}
+
+			var discoveryErr discoveryPackage.Error
+			if errors.As(err, &discoveryErr) {
+				upsertedEntites = append(upsertedEntites, discoveryErr.Body)
+			} else {
+				errJson := gjson.Parse(fmt.Sprintf("{\"error\":%q}", err.Error()))
+				upsertedEntites = append(upsertedEntites, errJson)
+			}
+		} else {
+			upsertedEntites = append(upsertedEntites, upsert)
+		}
+	}
+
+	var err error
+	if printer == nil {
+		jsonPrinter := JsonArrayPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), upsertedEntites...)
+	} else {
+		err = printer(*d.IOStreams(), upsertedEntites...)
+	}
+	return errors.Join(err, upsertErr)
+}
+
+// Deleter is the interface that implements the delete method
+type Deleter interface {
+	Delete(uuid.UUID) (gjson.Result, error)
+}
+
+// DeleteEntity deletes an entity with the received ID and prints the result using the given printer.
+func (d discovery) DeleteEntity(client Deleter, id uuid.UUID, printer Printer) error {
+	object, err := client.Delete(id)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not delete entity with id %q", id.String())
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonObjectPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), object)
+	} else {
+		err = printer(*d.IOStreams(), object)
+	}
+
+	return err
+}
+
+// SearchDeleter is the interface that implements the delete method that works with names.
+type SearchDeleter interface {
+	Deleter
+	Searcher
+}
+
+// SearchDeleteEntity searches for the entity with the given name and then deletes it.
+// It then prints out the results using the printer parameter.
+func (d discovery) SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error {
+	result, err := d.searchEntity(client, name)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not search for entity with name %q", name)
+	}
+
+	deleteId, err := uuid.Parse(result.Get("id").String())
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not delete entity with name %q", name)
+	}
+	return d.DeleteEntity(client, deleteId, printer)
 }
