@@ -277,6 +277,47 @@ discovery core export --file "entities/core.zip".
 {"acknowledged":true}
 ```
 
+##### Import
+`import` is the command used to restore Discovery Core's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery core import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and update conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
+{
+  "Credential": [
+    {
+      "id": "3b32e410-2f33-412d-9fb8-17970131921c",
+      "status": 200
+    },
+    {
+      "id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
+      "status": 200
+    },
+    {
+      "id": "46cb4fff-28be-4901-b059-1dd618e74ee4",
+      "status": 200
+    },
+    ...
+```
+
 ##### Label
 `label` is the command used to manage labels in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
@@ -852,6 +893,47 @@ discovery ingestion export --file "entities/ingestion.zip".
 {"acknowledged":true}
 ```
 
+##### Import
+`import` is the command used to restore Discovery Ingestion's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery Ingestion import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and ignore conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict IGNORE
+{
+  "Pipeline": [
+    {
+      "id": "0d3f476d-9003-4fc8-b9a9-8ba6ebf9445b",
+      "status": 204
+    },
+    {
+      "id": "25012a20-fe60-4ad6-a05c-9abcbfc1dfb1",
+      "status": 204
+    },
+    {
+      "id": "36f8ce72-f23d-4768-91e8-58693ff1b272",
+      "status": 204
+    },
+    ...
+```
+
 ##### Processor
 `processor` is the command used to manage processors in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
@@ -1301,6 +1383,51 @@ discovery queryflow export -p cn
 # Export the entities to a specific file
 discovery queryflow export --file "entities/queryflow.zip".
 {"acknowledged":true}
+```
+
+##### Import
+`import` is the command used to restore Discovery QueryFlow's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery queryflow import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and fail conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery queryflow import -p cn --file "entities/queryflow.zip"
+{
+  "Endpoint": [
+    {
+      "errorCode": 2001,
+      "errors": [
+        "Duplicated entity: 2fee5e27-4147-48de-ba1e-d7f32476a4a2"
+      ],
+      "id": "2fee5e27-4147-48de-ba1e-d7f32476a4a2",
+      "status": 409
+    },
+    {
+      "errorCode": 2001,
+      "errors": [
+        "Duplicated entity: 4ef9da31-2ba6-442c-86bb-1c9566dac4c2"
+      ],
+      "id": "4ef9da31-2ba6-442c-86bb-1c9566dac4c2",
+      "status": 409
+    }
+    ...
 ```
 
 #### Staging

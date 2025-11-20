@@ -19,6 +19,7 @@ func NewIngestionCommand(d cli.Discovery) *cobra.Command {
 
 	ingestion.AddCommand(config.NewConfigCommand(d))
 	ingestion.AddCommand(backuprestore.NewExportCommand(d))
+	ingestion.AddCommand(backuprestore.NewImportCommand(d))
 	ingestion.AddCommand(processors.NewProcessorCommand(d))
 	ingestion.AddCommand(pipelines.NewPipelineCommand(d))
 	ingestion.AddCommand(seeds.NewSeedCommand(d))

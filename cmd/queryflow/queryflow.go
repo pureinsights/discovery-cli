@@ -16,6 +16,7 @@ func NewQueryFlowCommand(d cli.Discovery) *cobra.Command {
 
 	queryflow.AddCommand(config.NewConfigCommand(d))
 	queryflow.AddCommand(backuprestore.NewExportCommand(d))
+	queryflow.AddCommand(backuprestore.NewImportCommand(d))
 
 	return queryflow
 }
