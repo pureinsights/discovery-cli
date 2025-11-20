@@ -13,6 +13,7 @@ func NewProcessorCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	processor.AddCommand(NewGetCommand(d))
+	processor.AddCommand(NewStoreCommand(d))
 
 	return processor
 }
