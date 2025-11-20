@@ -293,7 +293,7 @@ Flags:
 (Required, string) The file that contains the configurations of the entities.
 
 `--on-conflict`::
-(Optional, string) Set the configuration profile that will execute the command. The default value is "FAIL"
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
 Examples:
 
@@ -909,7 +909,7 @@ Flags:
 (Required, string) The file that contains the configurations of the entities.
 
 `--on-conflict`::
-(Optional, string) Set the configuration profile that will execute the command. The default value is "FAIL"
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
 Examples:
 
@@ -1401,7 +1401,7 @@ Flags:
 (Required, string) The file that contains the configurations of the entities.
 
 `--on-conflict`::
-(Optional, string) Set the configuration profile that will execute the command. The default value is "FAIL"
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
 Examples:
 
