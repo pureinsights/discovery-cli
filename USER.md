@@ -1458,7 +1458,7 @@ discovery queryflow export --file "entities/queryflow.zip".
 ##### Import
 `import` is the command used to restore Discovery QueryFlow's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
 
-Usage: `discovery QueryFlow import [flags]`
+Usage: `discovery queryflow import [flags]`
 
 Flags:
 `-h, --help`::
