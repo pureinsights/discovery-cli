@@ -50,6 +50,6 @@ func TestNewQueryFlowCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config"}
+	expectedCommands := []string{"config", "export"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
