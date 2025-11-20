@@ -65,7 +65,7 @@ type BackupRestoreClientEntry struct {
 	Client BackupRestore
 }
 
-// WriteExportsIntoZip calls the export endpoints and writes the information into a file.
+// WriteExportsIntoFile calls the export endpoints and writes the information into a file.
 func WriteExportsIntoFile(path string, clients []BackupRestoreClientEntry) (string, error) {
 	zipFile, err := os.OpenFile(
 		path,
@@ -140,7 +140,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 	return printer(*d.iostreams, gjson.Parse(result))
 }
 
-// ImportEntitiesToClient imports the entities to a Discovery proudct by reading them from the given path and using the given conflict resolution strategy.
+// ImportEntitiesToClient imports the entities to a Discovery product by reading them from the given path and using the given conflict resolution strategy.
 // It then prints out the results.
 func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	results, err := client.Import(onConflict, path)
