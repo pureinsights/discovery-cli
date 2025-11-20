@@ -155,6 +155,31 @@ func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onC
 	return printer(*d.iostreams, results)
 }
 
+// copyImportEntitiesToTempFile copies the information of the inner zip file to the temporary file to be used in the import endpoint call.
+func copyImportEntitiesToTempFile(file *zip.File, path string) error {
+	if file.FileInfo().IsDir() {
+		return NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files.")
+	}
+
+	readCloser, err := file.Open()
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not open a file contained within the zip")
+	}
+	defer readCloser.Close()
+
+	out, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, file.Mode())
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not create the temporary export file")
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, readCloser); err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not copy the file's contents")
+	}
+
+	return nil
+}
+
 // readInnerZipFiles reads the inner zip files that contain the entities to be imported.
 // It writes the files into a temporary directory.
 func readInnerZipFiles(tmpDir string, zipReader *zip.Reader) (map[string]string, error) {
@@ -169,24 +194,9 @@ func readInnerZipFiles(tmpDir string, zipReader *zip.Reader) (map[string]string,
 			return nil, NewError(ErrorExitCode, "The sent file contains malicious entries.")
 		}
 
-		if file.FileInfo().IsDir() {
-			return nil, NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files.")
-		}
-
-		readCloser, err := file.Open()
+		err := copyImportEntitiesToTempFile(file, destPath)
 		if err != nil {
-			return nil, NewErrorWithCause(ErrorExitCode, err, "Could not open a file contained within the zip")
-		}
-		defer readCloser.Close()
-
-		out, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, file.Mode())
-		if err != nil {
-			return nil, NewErrorWithCause(ErrorExitCode, err, "Could not create the temporary export file")
-		}
-		defer out.Close()
-
-		if _, err := io.Copy(out, readCloser); err != nil {
-			return nil, NewErrorWithCause(ErrorExitCode, err, "Could not copy the file's contents")
+			return nil, err
 		}
 
 		base := filepath.Base(file.Name)
