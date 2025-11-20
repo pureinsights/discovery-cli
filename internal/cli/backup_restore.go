@@ -62,7 +62,7 @@ type BackupRestoreClientEntry struct {
 	Client BackupRestore
 }
 
-// WriteExportsIntoZip calls the export endpoints and writes the information into a file.
+// WriteExportsIntoFile calls the export endpoints and writes the information into a file.
 func WriteExportsIntoFile(path string, clients []BackupRestoreClientEntry) (string, error) {
 	zipFile, err := os.OpenFile(
 		path,
