@@ -71,7 +71,6 @@ type WorkingCoreBackupRestore struct {
 
 // Get returns zip bytes as if the request worked successfully.
 func (g *WorkingCoreBackupRestore) Export() ([]byte, string, error) {
-
 	return coreBytes, "export-20251110T1455.zip", nil
 }
 
@@ -102,7 +101,6 @@ type WorkingQueryFlowBackupRestore struct {
 
 // Get returns zip bytes as if the request worked successfully.
 func (g *WorkingQueryFlowBackupRestore) Export() ([]byte, string, error) {
-
 	return queryflowBytes, "export-20251110T1455.zip", nil
 }
 
@@ -216,7 +214,7 @@ func TestExportEntitiesFromClient(t *testing.T) {
 			printer:        nil,
 			err:            nil,
 		},
-		// Error caes
+		// Error case
 		{
 			name:   "Export fails",
 			client: new(FailingBackupRestore),
