@@ -65,7 +65,7 @@ type BackupRestoreClientEntry struct {
 	Client BackupRestore
 }
 
-// WriteExportsIntoZip calls the export endpoints and writes the information into a file.
+// WriteExportsIntoFile calls the export endpoints and writes the information into a file.
 func WriteExportsIntoFile(path string, clients []BackupRestoreClientEntry) (string, error) {
 	zipFile, err := os.OpenFile(
 		path,
@@ -140,7 +140,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 	return printer(*d.iostreams, gjson.Parse(result))
 }
 
-// ImportEntitiesToClient imports the entities to a Discovery proudct by reading them from the given path and using the given conflict resolution strategy.
+// ImportEntitiesToClient imports the entities to a Discovery product by reading them from the given path and using the given conflict resolution strategy.
 // It then prints out the results.
 func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	results, err := client.Import(onConflict, path)
@@ -153,6 +153,60 @@ func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onC
 	}
 
 	return printer(*d.iostreams, results)
+}
+
+// copyImportEntitiesToTempFile copies the information of the inner zip file to the temporary file to be used in the import endpoint call.
+func copyImportEntitiesToTempFile(file *zip.File, path string) error {
+	if file.FileInfo().IsDir() {
+		return NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files.")
+	}
+
+	readCloser, err := file.Open()
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not open a file contained within the zip")
+	}
+	defer readCloser.Close()
+
+	out, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, file.Mode())
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not create the temporary export file")
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, readCloser); err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not copy the file's contents")
+	}
+
+	return nil
+}
+
+// readInnerZipFiles reads the inner zip files that contain the entities to be imported.
+// It writes the files into a temporary directory.
+func readInnerZipFiles(tmpDir string, zipReader *zip.Reader) (map[string]string, error) {
+	paths := map[string]string{}
+	expectedPrefixes := []string{"core", "ingestion", "queryflow"}
+
+	for _, file := range zipReader.File {
+		// Validate zip slip vulnerability
+		destPath := filepath.Join(tmpDir, file.Name)
+		if !strings.HasPrefix(filepath.Clean(destPath)+string(os.PathSeparator),
+			filepath.Clean(tmpDir)+string(os.PathSeparator)) {
+			return nil, NewError(ErrorExitCode, "The sent file contains malicious entries.")
+		}
+
+		err := copyImportEntitiesToTempFile(file, destPath)
+		if err != nil {
+			return nil, err
+		}
+
+		base := filepath.Base(file.Name)
+		for _, prefix := range expectedPrefixes {
+			if strings.HasPrefix(base, prefix) {
+				paths[prefix] = destPath
+			}
+		}
+	}
+	return paths, nil
 }
 
 // UnzipExportsToTemp parses the files read from the discovery export file.
@@ -171,50 +225,39 @@ func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 		return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not create temporary directory to import entities")
 	}
 
-	paths := map[string]string{}
-	expectedPrefixes := []string{"core", "ingestion", "queryflow"}
-
-	for _, file := range zipReader.File {
-		// Validate zip slip vulnerability
-		destPath := filepath.Join(tmpDir, file.Name)
-		if !strings.HasPrefix(filepath.Clean(destPath)+string(os.PathSeparator),
-			filepath.Clean(tmpDir)+string(os.PathSeparator)) {
-			return "", nil, NewError(ErrorExitCode, "The sent file contains malicious entries.")
-		}
-
-		if file.FileInfo().IsDir() {
-			return "", nil, NewErrorWithCause(ErrorExitCode, err, "The sent file should only contain the Core, Ingestion, or QueryFlow export files.")
-		}
-
-		readCloser, err := file.Open()
-		if err != nil {
-			return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not open a file contained within the zip")
-		}
-		defer readCloser.Close()
-
-		out, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, file.Mode())
-		if err != nil {
-			return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not create the temporary export file")
-		}
-		defer out.Close()
-
-		if _, err := io.Copy(out, readCloser); err != nil {
-			return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not copy the file's contents")
-		}
-
-		base := filepath.Base(file.Name)
-		for _, prefix := range expectedPrefixes {
-			if strings.HasPrefix(base, prefix) {
-				paths[prefix] = destPath
-			}
-		}
+	paths, err := readInnerZipFiles(tmpDir, zipReader)
+	if err != nil {
+		return "", nil, err
 	}
 
 	return tmpDir, paths, nil
 }
 
+// CallImports calls the import endpoints of the given clients and adds the responses to the results JSON.
+func callImports(clients []BackupRestoreClientEntry, zipPaths map[string]string, onConflict discoveryPackage.OnConflict) (string, error) {
+	results := "{}"
+	for _, client := range clients {
+		if path, ok := zipPaths[client.Name]; ok {
+			importResult, err := client.Client.Import(onConflict, path)
+			if err == nil {
+				results, err = sjson.SetRaw(results, client.Name, importResult.Raw)
+				if err != nil {
+					return "", NewErrorWithCause(ErrorExitCode, err, "Could not write import entities")
+				}
+			} else {
+				results, err = sjson.Set(results, client.Name, err.Error())
+				if err != nil {
+					return "", NewErrorWithCause(ErrorExitCode, err, "Could not write import entities")
+				}
+			}
+		}
+	}
+
+	return results, nil
+}
+
 // ImportEntitiesToClients reads a zip file that contains the zip files of exported entities. The files must have the name of the Discovery product in which the entities are going to be restored.
-// The given zip file does not need to have the export files for Core, Ingestion, and QueryFlow. It can have only some.
+// The given zip file does not need to have the export files for Core, Ingestion, and QueryFlow. It can have some of them.
 // The results of the imports are then printed out in a JSON to the user.
 func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	zipFile, err := os.ReadFile(path)
@@ -228,22 +271,9 @@ func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, p
 	}
 	defer os.RemoveAll(tmpDir)
 
-	results := "{}"
-	for _, client := range clients {
-		if path, ok := zipPaths[client.Name]; ok {
-			importResult, err := client.Client.Import(onConflict, path)
-			if err == nil {
-				results, err = sjson.SetRaw(results, client.Name, importResult.Raw)
-				if err != nil {
-					return NewErrorWithCause(ErrorExitCode, err, "Could not write import entities")
-				}
-			} else {
-				results, err = sjson.Set(results, client.Name, err.Error())
-				if err != nil {
-					return NewErrorWithCause(ErrorExitCode, err, "Could not write import entities")
-				}
-			}
-		}
+	results, err := callImports(clients, zipPaths, onConflict)
+	if err != nil {
+		return err
 	}
 
 	if printer == nil {

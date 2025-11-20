@@ -526,6 +526,167 @@ func createZipSlipPayload(t *testing.T) []byte {
 	return buf.Bytes()
 }
 
+// Test_copyImportEntitiesToTempFile tests the copyImportEntitiesToTempFile() function.
+func Test_copyImportEntitiesToTempFile(t *testing.T) {
+	correctZip, err := os.ReadFile("testdata/discovery.zip")
+	require.NoError(t, err)
+	directoryZip, err := os.ReadFile("testdata/directory.zip")
+	require.NoError(t, err)
+	coreQueryFlowZip, err := os.ReadFile("testdata/OnlyCoreQueryFlow.zip")
+	require.NoError(t, err)
+
+	tests := []struct {
+		name             string
+		zipBytes         []byte
+		dir              string
+		expectedPrefixes []string
+		err              error
+	}{
+		// Working cases
+		{
+			name:     "Receives a directory that does not exist",
+			zipBytes: correctZip,
+			dir:      t.TempDir() + "/doesnotexist",
+			err:      NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not create the temporary export file"),
+		},
+		{
+			name:             "Receives a zip file with Core, QueryFlow, and Ingestion exports",
+			zipBytes:         correctZip,
+			dir:              t.TempDir(),
+			expectedPrefixes: []string{"core", "ingestion", "queryflow"},
+			err:              nil,
+		},
+		{
+			name:             "Receives a file with only Core and QueryFlow exports",
+			zipBytes:         coreQueryFlowZip,
+			dir:              t.TempDir(),
+			expectedPrefixes: []string{"core", "queryflow"},
+			err:              nil,
+		},
+		// Error cases
+		{
+			name:     "Receives a zip file with a directory entry",
+			zipBytes: directoryZip,
+			dir:      t.TempDir(),
+			err:      NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			zipReader, err := zip.NewReader(bytes.NewReader(tc.zipBytes), int64(len(tc.zipBytes)))
+			require.NoError(t, err)
+
+			for _, file := range zipReader.File {
+				destPath := filepath.Join(tc.dir, file.Name)
+				err = copyImportEntitiesToTempFile(file, destPath)
+				if err != nil {
+					break
+				}
+			}
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				cliError, _ := tc.err.(Error)
+				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
+					assert.EqualError(t, err, tc.err.Error())
+				} else {
+					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
+					assert.Equal(t, cliError.Message, errStruct.Message)
+				}
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+// Test_readInnerZipFiles tests the readInnerZipFiles() function.
+func Test_readInnerZipFiles(t *testing.T) {
+	correctZip, err := os.ReadFile("testdata/discovery.zip")
+	require.NoError(t, err)
+	directoryZip, err := os.ReadFile("testdata/directory.zip")
+	require.NoError(t, err)
+	coreQueryFlowZip, err := os.ReadFile("testdata/OnlyCoreQueryFlow.zip")
+	require.NoError(t, err)
+
+	tests := []struct {
+		name             string
+		zipBytes         []byte
+		dir              string
+		expectedPrefixes []string
+		err              error
+	}{
+		// Working cases
+		{
+			name:             "Receives a zip file with Core, QueryFlow, and Ingestion exports",
+			zipBytes:         correctZip,
+			dir:              t.TempDir(),
+			expectedPrefixes: []string{"core", "ingestion", "queryflow"},
+			err:              nil,
+		},
+		{
+			name:             "Receives a file with only Core and QueryFlow exports",
+			zipBytes:         coreQueryFlowZip,
+			dir:              t.TempDir(),
+			expectedPrefixes: []string{"core", "queryflow"},
+			err:              nil,
+		},
+		// Error cases
+		{
+			name:     "Receives a zip file with a directory entry",
+			zipBytes: directoryZip,
+			dir:      t.TempDir(),
+			err:      NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
+		},
+		{
+			name:     "Receives a malicious zip file with a zip slip",
+			zipBytes: createZipSlipPayload(t),
+			dir:      t.TempDir(),
+			err:      NewError(ErrorExitCode, "The sent file contains malicious entries."),
+		},
+		{
+			name:     "Receives a directory that does not exist",
+			zipBytes: correctZip,
+			dir:      t.TempDir() + "/doesnotexist",
+			err:      NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not create the temporary export file"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			zipReader, err := zip.NewReader(bytes.NewReader(tc.zipBytes), int64(len(tc.zipBytes)))
+			require.NoError(t, err)
+			actualPaths, actualErr := readInnerZipFiles(tc.dir, zipReader)
+
+			if tc.err != nil {
+				require.Error(t, actualErr)
+				var errStruct Error
+				require.ErrorAs(t, actualErr, &errStruct)
+				assert.Equal(t, map[string]string(nil), actualPaths)
+				cliError, _ := tc.err.(Error)
+				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
+					assert.EqualError(t, actualErr, tc.err.Error())
+				} else {
+					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
+					assert.Equal(t, cliError.Message, errStruct.Message)
+				}
+			} else {
+				require.NoError(t, actualErr)
+				for _, prefix := range tc.expectedPrefixes {
+					actualPath, ok := actualPaths[prefix]
+					assert.True(t, ok)
+
+					fileInfo, statErr := os.Stat(actualPath)
+					require.NoError(t, statErr)
+					assert.False(t, fileInfo.IsDir())
+				}
+			}
+		})
+	}
+}
+
 // TestUnzipExportsToTemp tests the UnzipExportsToTemp() function.
 func TestUnzipExportsToTemp(t *testing.T) {
 	correctZip, err := os.ReadFile("testdata/discovery.zip")
@@ -570,7 +731,7 @@ func TestUnzipExportsToTemp(t *testing.T) {
 		{
 			name:     "Receives a zip file with a directory entry",
 			zipBytes: directoryZip,
-			err:      NewErrorWithCause(ErrorExitCode, err, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
+			err:      NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
 		},
 		{
 			name:     "Receives a malicious zip file with a zip slip",
@@ -605,7 +766,69 @@ func TestUnzipExportsToTemp(t *testing.T) {
 					assert.False(t, fileInfo.IsDir())
 				}
 			}
+		})
+	}
+}
 
+// Test_callImports tests the callImports() function.
+func Test_callImports(t *testing.T) {
+	tests := []struct {
+		name           string
+		clients        []BackupRestoreClientEntry
+		path           string
+		expectedFields []string
+		notCalled      []string
+		err            error
+	}{
+		{
+			name:           "callImports only adds the results of the imports that are called",
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:           "testdata/OnlyCoreQueryFlow.zip",
+			expectedFields: []string{"core", "queryflow"},
+			notCalled:      []string{"ingestion"},
+			err:            nil,
+		},
+		{
+			name:           "callImports adds the results when all imports succeed",
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:           "testdata/discovery.zip",
+			expectedFields: []string{"core", "ingestion", "queryflow"},
+			err:            nil,
+		},
+		{
+			name:           "callImports adds the results when even when one import fails",
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:           "testdata/discovery.zip",
+			expectedFields: []string{"core", "ingestion", "queryflow"},
+			err:            nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			zipFile, err := os.ReadFile(tc.path)
+			require.NoError(t, err)
+
+			tmpDir, zipPaths, err := UnzipExportsToTemp(zipFile)
+			require.NoError(t, err)
+
+			defer os.RemoveAll(tmpDir)
+
+			results, err := callImports(tc.clients, zipPaths, discoveryPackage.OnConflictUpdate)
+
+			if tc.err != nil {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				for _, field := range tc.expectedFields {
+					assert.True(t, gjson.Parse(results).Get(field).Exists())
+				}
+				for _, field := range tc.notCalled {
+					assert.False(t, gjson.Parse(results).Get(field).Exists())
+				}
+			}
 		})
 	}
 }

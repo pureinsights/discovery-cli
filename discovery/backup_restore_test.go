@@ -260,6 +260,7 @@ func Test_backupRestore_Export(t *testing.T) {
 	}
 }
 
+// Test_backupRestore_Export_RestyReturnsError tests the Export() method when Resty returns an error that is not HTTP.
 func Test_backupRestore_Export_RestyReturnsError(t *testing.T) {
 	srv := httptest.NewServer(http.NotFoundHandler())
 	base := srv.URL
