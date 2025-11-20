@@ -793,6 +793,35 @@ Ingestion URL: "https://discovery.ingestion.cn"
 Ingestion API Key: "discovery.key.ingestion.cn"
 ```
 
+##### Export
+`export` is the command used to backup Discovery Ingestion's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+
+Usage: `discovery ingestion export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery ingestion export -p cn
+{"acknowledged":true}
+```
+
+```bash
+# Export the entities to a specific file
+discovery ingestion export --file "entities/ingestion.zip".
+{"acknowledged":true}
+```
+
 ##### Processor
 `processor` is the command used to manage processors in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
