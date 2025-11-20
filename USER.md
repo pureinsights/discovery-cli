@@ -277,6 +277,47 @@ discovery core export --file "entities/core.zip".
 {"acknowledged":true}
 ```
 
+##### Import
+`import` is the command used to restore Discovery Core's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery core import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and update conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
+{
+  "Credential": [
+    {
+      "id": "3b32e410-2f33-412d-9fb8-17970131921c",
+      "status": 200
+    },
+    {
+      "id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
+      "status": 200
+    },
+    {
+      "id": "46cb4fff-28be-4901-b059-1dd618e74ee4",
+      "status": 200
+    },
+    ...
+```
+
 ##### Label
 `label` is the command used to manage labels in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
