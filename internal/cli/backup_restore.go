@@ -136,3 +136,18 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 
 	return printer(*d.iostreams, gjson.Parse(result))
 }
+
+// ImportEntitiesToClient imports the entities to a Discovery Component by reading them from the given path and using the given conflict resolution strategy.
+// It then prints out the results.
+func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
+	results, err := client.Import(onConflict, path)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not import entities")
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(false)
+	}
+
+	return printer(*d.iostreams, results)
+}
