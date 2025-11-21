@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+// ContentType is a string that contains the content type key
+const ContentType string = "Content-Type"
+
 // HttpHandler returns a handler that performs given assertions and responds
 // with the provided status, content type, and body.
 func HttpHandler(
@@ -18,9 +21,31 @@ func HttpHandler(
 		if assertions != nil {
 			assertions(t, r)
 		}
-		w.Header().Set("Content-Type", contentType)
+		w.Header().Set(ContentType, contentType)
 		w.WriteHeader(statusCode)
 		w.Write([]byte(body))
+	}
+}
+
+func HttpHandlerWithContentDisposition(
+	t *testing.T,
+	statusCode int,
+	contentType string,
+	contentDisposition string,
+	body []byte,
+	assertions func(*testing.T, *http.Request),
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if assertions != nil {
+			assertions(t, r)
+		}
+		w.Header().Set(ContentType, contentType)
+		w.Header().Set(
+			"Content-Disposition",
+			contentDisposition,
+		)
+		w.WriteHeader(statusCode)
+		w.Write(body)
 	}
 }
 
@@ -53,11 +78,11 @@ func HttpMultiResponseHandler(
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		for path, response := range responses {
-			if r.URL.Path == path {
+			if r.Method+":"+r.URL.Path == path {
 				if response.Assertions != nil {
 					response.Assertions(t, r)
 				}
-				w.Header().Set("Content-Type", response.ContentType)
+				w.Header().Set(ContentType, response.ContentType)
 				w.WriteHeader(response.StatusCode)
 				w.Write([]byte(response.Body))
 				return

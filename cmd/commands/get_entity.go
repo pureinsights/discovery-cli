@@ -14,7 +14,7 @@ const (
 
 // GetCommand is the function that executes the get operation for the get commands that do not work with names or filters.
 func GetCommand(args []string, d cli.Discovery, client cli.Getter, config commandConfig) error {
-	err := checkCredentials(d, config.profile, config.componentName, config.url)
+	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}
@@ -25,26 +25,23 @@ func GetCommand(args []string, d cli.Discovery, client cli.Getter, config comman
 			return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not convert given id %q to UUID. This command does not support filters or referencing an entity by name.", args[0])
 		}
 		printer := cli.GetObjectPrinter(config.output)
-		err = d.GetEntity(client, id, printer)
-		return err
+		return d.GetEntity(client, id, printer)
 	} else {
 		printer := cli.GetArrayPrinter(config.output)
-		err = d.GetEntities(client, printer)
-		return err
+		return d.GetEntities(client, printer)
 	}
 }
 
 // SearchCommand is the function that the get command executes when it also allows for searching by name and with filters.
 func SearchCommand(args []string, d cli.Discovery, client cli.Searcher, config commandConfig, filters *[]string) error {
-	err := checkCredentials(d, config.profile, config.componentName, config.url)
+	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}
 
 	if len(args) > 0 {
 		printer := cli.GetObjectPrinter(config.output)
-		err = d.SearchEntity(client, args[0], printer)
-		return err
+		return d.SearchEntity(client, args[0], printer)
 	} else if len(*filters) > 0 {
 		printer := cli.GetArrayPrinter(config.output)
 		filter, err := cli.BuildEntitiesFilter(*filters)
@@ -52,11 +49,9 @@ func SearchCommand(args []string, d cli.Discovery, client cli.Searcher, config c
 			return err
 		}
 
-		err = d.SearchEntities(client, filter, printer)
-		return err
+		return d.SearchEntities(client, filter, printer)
 	} else {
 		printer := cli.GetArrayPrinter(config.output)
-		err = d.GetEntities(client, printer)
-		return err
+		return d.GetEntities(client, printer)
 	}
 }
