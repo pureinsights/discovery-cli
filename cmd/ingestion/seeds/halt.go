@@ -14,7 +14,7 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 	halt := &cobra.Command{
 		Use:   "halt",
 		Short: "The command that halts a seed execution in Discovery Ingestion.",
-		Long:  "halt is the command used to halt a seed execution in Discovery Ingestion. With the execution flag, the user can specify the specific execution that will halted. If there is no execution flag, all of the active executions are halted.",
+		Long:  "halt is the command used to halt a seed execution in Discovery Ingestion. With the execution flag, the user can specify the specific execution that will be halted. If there is no execution flag, all of the active executions are halted.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {

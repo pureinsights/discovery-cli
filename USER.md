@@ -1272,7 +1272,7 @@ discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"
 ```
 
 ###### Halt
-`halt` is the command used to halt a seed execution in Discovery Ingestion. With the execution flag, the user can specify the specific execution that will halted. If there is no execution flag, all of the active executions are halted.
+`halt` is the command used to halt a seed execution in Discovery Ingestion. With the execution flag, the user can specify the specific execution that will be halted. If there is no execution flag, all of the active executions are halted.
 
 Usage: `discovery ingestion seed halt <seed> [flags] `
 
