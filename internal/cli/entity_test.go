@@ -312,21 +312,23 @@ func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 // SearchByName returns an object as if it found correctly the entity.
 func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Parse(`{
-		"source": {
-			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
-			"labels": [],
-			"active": true,
-			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`), nil
 }
 
@@ -334,7 +336,7 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
-		"name": "MongoDB Atlas server clone",
+		"name": "MongoDB Atlas server",
 		"labels": [],
 		"active": true,
 		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
@@ -358,7 +360,7 @@ func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{
 		"type": "mongo",
-		"name": "label test 1 clone 10",
+		"name": "my-credential",
 		"labels": [
 			{
 			"key": "A",
@@ -575,21 +577,23 @@ func Test_searchEntity(t *testing.T) {
 			client: new(WorkingSearcher),
 			id:     "MongoDB Atlas server",
 			expected: gjson.Parse(`{
-		"source": {
-			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
-			"labels": [],
-			"active": true,
-			"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		},
-		"highlight": {
-			"name": [
-				"<em>MongoDB</em> <em>Atlas</em> <em>server</em> clone"
-			]
-		},
-		"score": 0.50769836
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
 	}`),
 			err: nil,
 		},
@@ -661,13 +665,7 @@ func Test_searchEntity(t *testing.T) {
 			expected: gjson.Result{},
 			err: discoveryPackage.Error{
 				Status: http.StatusNotFound,
-				Body: gjson.Parse(`{
-	"status": 404,
-	"code": 1003,
-	"messages": [
-		"Entity not found: entity with name "MongoDB Atlas Server" does not exist"
-	]
-}`),
+				Body:   gjson.Parse("{\n\t\"status\": 404,\n\t\"code\": 1003,\n\t\"messages\": [\n\t\t\"Entity not found: entity with name \"MongoDB Atlas Server\" does not exist\"\n\t]\n}"),
 			},
 		},
 		{
@@ -724,7 +722,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 			client:         new(WorkingSearcher),
 			id:             "MongoDB Atlas Server",
 			printer:        JsonObjectPrinter(true),
-			expectedOutput: "{\n  \"highlight\": {\n    \"name\": [\n      \"\\u003cem\\u003eMongoDB\\u003c/em\\u003e \\u003cem\\u003eAtlas\\u003c/em\\u003e \\u003cem\\u003eserver\\u003c/em\\u003e clone\"\n    ]\n  },\n  \"score\": 0.50769836,\n  \"source\": {\n    \"active\": true,\n    \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n    \"labels\": [],\n    \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n    \"name\": \"MongoDB Atlas server clone\",\n    \"type\": \"mongo\"\n  }\n}\n",
+			expectedOutput: "{\n  \"active\": true,\n  \"config\": {\n    \"connection\": {\n      \"connectTimeout\": \"1m\",\n      \"readTimeout\": \"30s\"\n    },\n    \"credentialId\": \"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\n    \"servers\": [\n      \"mongodb+srv://cluster0.dleud.mongodb.net/\"\n    ]\n  },\n  \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"name\": \"MongoDB Atlas server\",\n  \"type\": \"mongo\"\n}\n",
 			err:            nil,
 		},
 		{
@@ -739,7 +737,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 		// Error case
 		{
 			name:           "Search returns 404 Not Found",
-			client:         new(FailingSearcherWorkingGetter),
+			client:         new(FailingSearcherFailingGetter),
 			id:             "MongoDB Atlas Server",
 			printer:        nil,
 			expectedOutput: "",
@@ -1336,6 +1334,483 @@ func TestBuildEntitiesFilter(t *testing.T) {
 	}
 }
 
+// WorkingCreator mocks when creating and updating entities works.
+type WorkingCreator struct {
+	mock.Mock
+}
+
+// Create returns a JSON as if it worked successfully.
+func (g *WorkingCreator) Create(config gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// Update returns a JSON as if it worked successfully.
+func (g *WorkingCreator) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// FailingCreator mocks when creating and updating entities fails.
+type FailingCreator struct {
+	mock.Mock
+}
+
+// Create returns a JSON as if it worked successfully.
+func (g *FailingCreator) Create(config gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 400,
+  "code": 3002,
+  "messages": [
+    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
+  ],
+  "timestamp": "2025-10-29T14:46:48.055840300Z"
+}`)}
+}
+
+// Update returns a JSON as if it worked successfully.
+func (g *FailingCreator) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+  ],
+  "timestamp": "2025-10-29T14:47:36.290329Z"
+}`)}
+}
+
+// FailingCreator mocks when creating and updating entities fails.
+type FailingCreatorCreateWorksUpdateFails struct {
+	mock.Mock
+}
+
+// Create returns a JSON as if it worked successfully.
+func (g *FailingCreatorCreateWorksUpdateFails) Create(config gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// Update returns an error that is not a Discovery.Error
+func (g *FailingCreatorCreateWorksUpdateFails) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, errors.New(`invalid UUID length: 4`)
+}
+
+// Test_discovery_UpsertEntity tests the discovery.UpsertEntity() function.
+func Test_discovery_UpsertEntity(t *testing.T) {
+	tests := []struct {
+		name     string
+		client   Creator
+		config   gjson.Result
+		expected gjson.Result
+		err      error
+	}{
+		// Working case
+		{
+			name:   "UpsertEntity creates an entity",
+			client: new(WorkingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			expected: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			err: nil,
+		},
+		{
+			name:   "UpsertEntity updates an entity",
+			client: new(WorkingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "OpenAI credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "openai-secret"
+	}`),
+			expected: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			err: nil,
+		},
+
+		// Error case
+		{
+			name:   "UpsertEntity fails to create an entity",
+			client: new(FailingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			expected: gjson.Result{},
+			err: discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 400,
+  "code": 3002,
+  "messages": [
+    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
+  ],
+  "timestamp": "2025-10-29T14:46:48.055840300Z"
+}`)},
+		},
+		{
+			name:   "UpsertEntity fails to update an entity",
+			client: new(FailingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "OpenAI credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "openai-secret"
+	}`),
+			expected: gjson.Result{},
+			err: discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+  ],
+  "timestamp": "2025-10-29T14:47:36.290329Z"
+}`)},
+		},
+		{
+			name:   "UpsertEntity receives an ID that is not a UUID",
+			client: new(WorkingCreator),
+			config: gjson.Parse(`{
+		"type": "mongo",
+		"name": "OpenAI credential",
+		"labels": [],
+		"active": true,
+		"id": "test",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "openai-secret"
+	}`),
+			expected: gjson.Result{},
+			err:      errors.New("invalid UUID length: 4"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: buf,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			response, err := d.UpsertEntity(tc.client, tc.config)
+
+			assert.Equal(t, tc.expected, response)
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+// Test_discovery_UpsertEntities tests the discovery.UpsertEntities() function?
+func Test_discovery_UpsertEntities(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         Creator
+		configurations gjson.Result
+		abortOnError   bool
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:   "Upsert Entities works when it does not receive an array",
+			client: new(WorkingCreator),
+			configurations: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			printer:        JsonArrayPrinter(true),
+			expectedOutput: "[\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:11Z\",\n  \"id\": \"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-14T18:02:11Z\",\n  \"name\": \"MongoDB credential\",\n  \"secret\": \"mongo-secret\",\n  \"type\": \"mongo\"\n}\n]\n",
+			err:            nil,
+		},
+		{
+			name:   "Upsert Entities works when it receives an array",
+			client: new(WorkingCreator),
+			configurations: gjson.Parse(`[{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},{
+		"type": "mongo",
+		"name": "MongoDB credential 2",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},
+	{
+		"type": "mongo",
+		"name": "MongoDB credential 3",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}]`),
+			printer:        nil,
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			err:            nil,
+		},
+		{
+			name:   "Upsert Entities works and does not abort with false",
+			client: new(FailingCreator),
+			configurations: gjson.Parse(`[{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},{
+		"type": "mongo",
+		"name": "MongoDB credential 2",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},
+	{
+		"type": "mongo",
+		"name": "MongoDB credential 3",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}]`),
+			abortOnError:   false,
+			printer:        nil,
+			expectedOutput: "{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n{\"code\":1003,\"messages\":[\"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d\"],\"status\":404,\"timestamp\":\"2025-10-29T14:47:36.290329Z\"}\n{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n",
+			err:            nil,
+		},
+		{
+			name:   "Upsert Entities not abort and receives an error that is not a Discovery.Error",
+			client: new(FailingCreatorCreateWorksUpdateFails),
+			configurations: gjson.Parse(`[{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},{
+		"type": "mongo",
+		"name": "MongoDB credential 2",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},
+	{
+		"type": "mongo",
+		"name": "MongoDB credential 3",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}]`),
+			abortOnError:   false,
+			printer:        nil,
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"error\":\"invalid UUID length: 4\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			err:            nil,
+		},
+		// Error cases
+		{
+			name:   "Upsert Entities does abort with true",
+			client: new(FailingCreatorCreateWorksUpdateFails),
+			configurations: gjson.Parse(`[{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},{
+		"type": "mongo",
+		"name": "MongoDB credential 2",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},
+	{
+		"type": "mongo",
+		"name": "MongoDB credential 3",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}]`),
+			abortOnError:   true,
+			printer:        nil,
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			err:            NewErrorWithCause(ErrorExitCode, errors.New(`invalid UUID length: 4`), "Could not store entities"),
+		},
+		{
+			name:   "Printing fails",
+			client: new(WorkingCreator),
+			configurations: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
+		},
+		{
+			name:   "Upsert fails with abort true and printing fails",
+			client: new(FailingCreatorCreateWorksUpdateFails),
+			configurations: gjson.Parse(`[{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	},{
+		"type": "mongo",
+		"name": "MongoDB credential 2",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}]`),
+			abortOnError: true,
+			printer:      nil,
+			outWriter:    testutils.ErrWriter{Err: errors.New("write failed")},
+			err:          errors.Join(NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"), NewErrorWithCause(ErrorExitCode, errors.New(`invalid UUID length: 4`), "Could not store entities")),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.UpsertEntities(tc.client, tc.configurations, tc.abortOnError, tc.printer)
+
+			assert.Equal(t, tc.expectedOutput, buf.String())
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
 // WorkingDeleter mocks when the deleter interface works correctly.
 type WorkingDeleter struct {
 	mock.Mock
@@ -1487,7 +1962,15 @@ func (g *WorkingSearchDeleter) Search(filter gjson.Result) ([]gjson.Result, erro
 
 // Get implements the searchDeleter interface.
 func (g *WorkingSearchDeleter) Get(id uuid.UUID) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB text processor",
+		"labels": [],
+		"active": true,
+		"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+		"creationTimestamp": "2025-08-14T18:02:38Z",
+		"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+	}`), nil
 }
 
 // GetAll implements the searchDeleter interface.
@@ -1570,7 +2053,15 @@ func (g *FailingSearchDeleterDeleteFails) Search(filter gjson.Result) ([]gjson.R
 
 // Get implements the searchDeleter interface.
 func (g *FailingSearchDeleterDeleteFails) Get(id uuid.UUID) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB text processor",
+		"labels": [],
+		"active": true,
+		"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+		"creationTimestamp": "2025-08-14T18:02:38Z",
+		"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+	}`), nil
 }
 
 // GetAll implements the searchDeleter interface.
@@ -1618,7 +2109,15 @@ func (g *FailingSearchDeleterParsingUUIDFails) Search(filter gjson.Result) ([]gj
 
 // Get implements the searchDeleter interface.
 func (g *FailingSearchDeleterParsingUUIDFails) Get(id uuid.UUID) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB text processor",
+		"labels": [],
+		"active": true,
+		"id": "notuuid",
+		"creationTimestamp": "2025-08-14T18:02:38Z",
+		"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+	}`), nil
 }
 
 // GetAll implements the searchDeleter interface.

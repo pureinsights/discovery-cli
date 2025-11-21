@@ -12,7 +12,8 @@ func NewProcessorCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command to interact with Discovery Ingestion's processors.",
 	}
 
-	processor.AddCommand(NewDeleteCommand(d))
+	processor.AddCommand(NewStoreCommand(d))
+	processor.AddCommand(NewGetCommand(d))
 
 	return processor
 }
