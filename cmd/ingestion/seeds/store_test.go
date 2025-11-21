@@ -186,7 +186,7 @@ func TestNewStoreCommand(t *testing.T) {
 			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFile"),
 			errBytes:     []byte(nil),
 			data:         "",
-			file:         "testdata/StoreCommand_JSONFile.golden",
+			file:         "testdata/StoreCommand_JSONFile.json",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/seed": {
@@ -383,7 +383,7 @@ func TestNewStoreCommand(t *testing.T) {
 			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreEmptyFile"),
 			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreEmptyFile"),
 			data:         "",
-			file:         "testdata/StoreCommand_EmptyFile.golden",
+			file:         "testdata/StoreCommand_EmptyFile.json",
 			abortOnError: false,
 			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
 		},
@@ -602,7 +602,7 @@ func TestNewStoreCommand_NoProfileFlag(t *testing.T) {
 	storeCmd.SetOut(ios.Out)
 	storeCmd.SetErr(ios.Err)
 
-	storeCmd.SetArgs([]string{"--file", "testdata/StoreCommand_JSONFile.golden"})
+	storeCmd.SetArgs([]string{"--file", "testdata/StoreCommand_JSONFile.json"})
 
 	err := storeCmd.Execute()
 	require.Error(t, err)
