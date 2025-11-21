@@ -50,6 +50,17 @@ func CompareBytes(t *testing.T, name string, expected, got []byte) {
 	} else {
 		normalizedExpected := bytes.ReplaceAll(expected, []byte("\r\n"), []byte("\n"))
 		normalizedGot := bytes.ReplaceAll(got, []byte("\r\n"), []byte("\n"))
-		require.Equal(t, normalizedExpected, normalizedGot)
+		require.Equal(t, string(normalizedExpected), string(normalizedGot))
 	}
+}
+
+// ChangeDirectoryHelper changes the working directory to t.TempDir()
+func ChangeDirectoryHelper(t *testing.T) string {
+	t.Helper()
+	tmp := t.TempDir()
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(tmp))
+	t.Cleanup(func() { _ = os.Chdir(wd) })
+	return tmp
 }

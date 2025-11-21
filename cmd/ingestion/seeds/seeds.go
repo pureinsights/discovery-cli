@@ -12,7 +12,11 @@ func NewSeedCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command to interact with Discovery Ingestion's seeds.",
 	}
 
-	seed.AddCommand(NewDeleteCommand(d))
+	seed.AddCommand(NewStoreCommand(d))
+	seed.AddCommand(NewGetCommand(d))
+	seed.AddCommand(NewStartCommand(d))
+    seed.AddCommand(NewDeleteCommand(d))
 
 	return seed
 }
+	

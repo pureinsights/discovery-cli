@@ -1,0 +1,7 @@
+Usage:
+  export [subcommands] [flags]
+
+Flags:
+  -f, --file string   the file that will contain the exported entities
+  -h, --help          help for export
+

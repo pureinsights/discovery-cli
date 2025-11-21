@@ -12,6 +12,8 @@ func NewPipelineCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command to interact with Discovery Ingestion's pipelines.",
 	}
 
+	pipeline.AddCommand(NewStoreCommand(d))
+	pipeline.AddCommand(NewGetCommand(d))
 	pipeline.AddCommand(NewDeleteCommand(d))
 
 	return pipeline
