@@ -1,0 +1,94 @@
+{
+  "Endpoint": [
+    {
+      "id": "2fee5e27-4147-48de-ba1e-d7f32476a4a2",
+      "status": 204
+    },
+    {
+      "id": "4ef9da31-2ba6-442c-86bb-1c9566dac4c2",
+      "status": 204
+    },
+    {
+      "id": "c4ffddc0-9e80-4809-ad4d-f01c4e0dba71",
+      "status": 204
+    },
+    {
+      "id": "cf56470f-0ab4-4754-b05c-f760669315af",
+      "status": 204
+    }
+  ],
+  "Processor": [
+    {
+      "id": "019ecd8e-76c9-41ee-b047-299b8aa14aba",
+      "status": 204
+    },
+    {
+      "id": "0a7caa9b-99aa-4a63-aa6d-a1e40941984d",
+      "status": 204
+    },
+    {
+      "id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+      "status": 204
+    },
+    {
+      "id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+      "status": 204
+    },
+    {
+      "id": "628d4b24-84cc-4070-8eed-c3155cf40fe9",
+      "status": 204
+    },
+    {
+      "id": "746ba681-246a-4dba-aac0-58848ac97725",
+      "status": 204
+    },
+    {
+      "id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+      "status": 204
+    },
+    {
+      "id": "88022257-f5bc-4705-968e-81dae0c486d3",
+      "status": 204
+    },
+    {
+      "id": "8a399b1c-95fc-406c-a220-7d321aaa7b0e",
+      "status": 204
+    },
+    {
+      "id": "8e9ce4af-0f0b-44c7-bff7-c3c4f546e577",
+      "status": 204
+    },
+    {
+      "id": "90b9e14f-1ba2-47cb-be42-77c4081e78a2",
+      "status": 204
+    },
+    {
+      "id": "a5ee116b-bd95-474e-9d50-db7be988b196",
+      "status": 204
+    },
+    {
+      "id": "aa02b328-76aa-4fcb-9eb1-6086d845adbd",
+      "status": 204
+    },
+    {
+      "id": "b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89",
+      "status": 204
+    },
+    {
+      "id": "c80758d7-7989-4c23-8f8f-b92497e3ab90",
+      "status": 204
+    },
+    {
+      "id": "eb9499c3-e134-4f4a-8aaf-288da68e68f0",
+      "status": 204
+    },
+    {
+      "id": "f3d696ca-3c5d-4cdd-a569-b2619f7a1470",
+      "status": 204
+    },
+    {
+      "id": "fd2d5f86-bdf0-44f7-ad70-fdd636c52c4e",
+      "status": 204
+    }
+  ]
+}
