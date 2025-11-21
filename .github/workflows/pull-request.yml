@@ -61,7 +61,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          go get .
+          go get ./cmd/discovery 
           
       - name: Run Go Vet Tool
         run: go vet ./...
