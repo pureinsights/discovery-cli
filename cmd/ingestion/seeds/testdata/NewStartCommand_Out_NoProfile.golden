@@ -1,0 +1,8 @@
+Usage:
+  start [flags]
+
+Flags:
+  -h, --help                help for start
+      --properties string   The execution properties of the seed execution
+      --scan-type string    The scan type of the seed execution (default "FULL")
+
