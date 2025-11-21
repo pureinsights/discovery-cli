@@ -489,6 +489,21 @@ func TestGetObjectPrinter(t *testing.T) {
 			expectedOutput: `{"active":true,"content":{"mechanism":"SCRAM-SHA-1","password":"password","username":"user"},"name":"test-secret"}` + "\n",
 		},
 		{
+			name:            "The switch returns the JSON Pretty Printer",
+			printerName:     "pretty-json",
+			expectedPrinter: JsonObjectPrinter(true),
+			input: gjson.Parse(`[{
+		"name": "test-secret",
+		"active": true,
+		"content": {
+			"mechanism": "SCRAM-SHA-1", 
+			"username": "user",
+			"password": "password"
+		}
+	}]`).Array(),
+			expectedOutput: "{\n  \"active\": true,\n  \"content\": {\n    \"mechanism\": \"SCRAM-SHA-1\",\n    \"password\": \"password\",\n    \"username\": \"user\"\n  },\n  \"name\": \"test-secret\"\n}\n",
+		},
+		{
 			name:            "The switch returns the default case",
 			printerName:     "doesnotexist",
 			expectedPrinter: nil,
@@ -564,6 +579,41 @@ func TestGetArrayPrinter(t *testing.T) {
 {"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","labels":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text processor","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script processor","type":"script"}
 `,
+		},
+		{
+			name:            "The switch returns the JSON Pretty Printer",
+			printerName:     "pretty-json",
+			expectedPrinter: JsonArrayPrinter(true),
+			input: gjson.Parse(`[
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor 4",
+				"labels": [],
+				"active": true,
+				"id": "3393f6d9-94c1-4b70-ba02-5f582727d998",
+				"creationTimestamp": "2025-08-21T17:57:16Z",
+				"lastUpdatedTimestamp": "2025-08-21T17:57:16Z"
+				},
+				{
+				"type": "mongo",
+				"name": "MongoDB text processor",
+				"labels": [],
+				"active": true,
+				"id": "5f125024-1e5e-4591-9fee-365dc20eeeed",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-18T20:55:43Z"
+				},
+				{
+				"type": "script",
+				"name": "Script processor",
+				"labels": [],
+				"active": true,
+				"id": "86e7f920-a4e4-4b64-be84-5437a7673db8",
+				"creationTimestamp": "2025-08-14T18:02:38Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:38Z"
+				}
+			]`).Array(),
+			expectedOutput: "[\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-21T17:57:16Z\",\n  \"id\": \"3393f6d9-94c1-4b70-ba02-5f582727d998\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-21T17:57:16Z\",\n  \"name\": \"MongoDB text processor 4\",\n  \"type\": \"mongo\"\n},\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"5f125024-1e5e-4591-9fee-365dc20eeeed\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-18T20:55:43Z\",\n  \"name\": \"MongoDB text processor\",\n  \"type\": \"mongo\"\n},\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"86e7f920-a4e4-4b64-be84-5437a7673db8\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"name\": \"Script processor\",\n  \"type\": \"script\"\n}\n]\n",
 		},
 		{
 			name:            "The switch returns the default case",
