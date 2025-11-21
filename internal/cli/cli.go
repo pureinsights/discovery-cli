@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/google/uuid"
+	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 	"github.com/pureinsights/pdp-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
@@ -25,9 +26,17 @@ type Discovery interface {
 	PrintStagingConfigToUser(profile string, sensitive bool) error
 	GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	GetEntities(client Getter, printer Printer) error
+	searchEntity(client Searcher, id string) (gjson.Result, error)
 	SearchEntity(client Searcher, id string, printer Printer) error
 	SearchEntities(client Searcher, filter gjson.Result, printer Printer) error
 	UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error
+	DeleteEntity(client Deleter, id uuid.UUID, printer Printer) error
+	SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error
+	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
+	ExportEntitiesFromClient(client BackupRestore, path string, printer Printer) error
+	ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error
+	ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
+	ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
@@ -56,7 +65,7 @@ func NewDiscovery(io *iostreams.IOStreams, config *viper.Viper, configPath strin
 	}
 }
 
-// ConfigPath returns the address that contains Discovery's configuration.
+// ConfigPath returns the path that contains Discovery's configuration.
 func (d discovery) ConfigPath() string {
 	return d.configPath
 }
