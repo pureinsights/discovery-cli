@@ -1299,7 +1299,6 @@ discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"
 {"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
-
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow.
 
