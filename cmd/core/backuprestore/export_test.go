@@ -39,6 +39,7 @@ func TestNewExportCommand(t *testing.T) {
 		contentDisposition string
 		file               string
 		err                error
+		compareOptions     []testutils.CompareBytesOption
 	}{
 		// Working case
 		{
@@ -84,6 +85,7 @@ func TestNewExportCommand(t *testing.T) {
 			contentDisposition: `attachment; filename="export-20251110T1455.zip"; filename*=utf-8''Export-20251110T1460.zip`,
 			file:               filepath.Join("doesnotexist", "core-export.zip"),
 			err:                cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "core-export.zip")), "Could not export entities"),
+			compareOptions:     []testutils.CompareBytesOption{testutils.WithNormalizePaths()},
 		},
 		{
 			name:               "Export fails",
@@ -170,7 +172,7 @@ func TestNewExportCommand(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
-				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes(), tc.compareOptions...)
 			} else {
 				require.NoError(t, err)
 				readBytes, err := os.ReadFile(tc.file)

@@ -22,18 +22,19 @@ import (
 // NewStoreCommand tests the NewStoreCommand function
 func TestNewStoreCommand(t *testing.T) {
 	tests := []struct {
-		name         string
-		url          bool
-		apiKey       string
-		outGolden    string
-		errGolden    string
-		outBytes     []byte
-		errBytes     []byte
-		data         string
-		file         string
-		abortOnError bool
-		responses    map[string]testutils.MockResponse
-		err          error
+		name           string
+		url            bool
+		apiKey         string
+		outGolden      string
+		errGolden      string
+		outBytes       []byte
+		errBytes       []byte
+		data           string
+		file           string
+		abortOnError   bool
+		responses      map[string]testutils.MockResponse
+		err            error
+		compareOptions []testutils.CompareBytesOption
 	}{
 		// Working case
 		{
@@ -493,7 +494,8 @@ func TestNewStoreCommand(t *testing.T) {
 					},
 				},
 			},
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not store entities"),
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not store entities"),
+			compareOptions: []testutils.CompareBytesOption{testutils.WithNormalizePaths()},
 		},
 	}
 
@@ -557,7 +559,7 @@ func TestNewStoreCommand(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
-				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes(), tc.compareOptions...)
 			} else {
 				require.NoError(t, err)
 			}

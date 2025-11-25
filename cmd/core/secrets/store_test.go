@@ -22,18 +22,19 @@ import (
 // NewStoreCommand tests the NewStoreCommand function
 func TestNewStoreCommand(t *testing.T) {
 	tests := []struct {
-		name         string
-		url          bool
-		apiKey       string
-		outGolden    string
-		errGolden    string
-		outBytes     []byte
-		errBytes     []byte
-		data         string
-		file         string
-		abortOnError bool
-		responses    map[string]testutils.MockResponse
-		err          error
+		name           string
+		url            bool
+		apiKey         string
+		outGolden      string
+		errGolden      string
+		outBytes       []byte
+		errBytes       []byte
+		data           string
+		file           string
+		abortOnError   bool
+		responses      map[string]testutils.MockResponse
+		err            error
+		compareOptions []testutils.CompareBytesOption
 	}{
 		// Working case
 		{
@@ -387,17 +388,18 @@ func TestNewStoreCommand(t *testing.T) {
 			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
 		},
 		{
-			name:         "StoreCommand tries to read a file that does not exist",
-			url:          true,
-			apiKey:       "apiKey123",
-			outGolden:    "NewStoreCommand_Out_StoreFileNotExists",
-			errGolden:    "NewStoreCommand_Err_StoreFileNotExists",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFileNotExists"),
-			data:         "",
-			file:         "doesnotexist",
-			abortOnError: false,
-			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreFileNotExists"),
-			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
+			name:           "StoreCommand tries to read a file that does not exist",
+			url:            true,
+			apiKey:         "apiKey123",
+			outGolden:      "NewStoreCommand_Out_StoreFileNotExists",
+			errGolden:      "NewStoreCommand_Err_StoreFileNotExists",
+			outBytes:       testutils.Read(t, "NewStoreCommand_Out_StoreFileNotExists"),
+			data:           "",
+			file:           "doesnotexist",
+			abortOnError:   false,
+			errBytes:       testutils.Read(t, "NewStoreCommand_Err_StoreFileNotExists"),
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
+			compareOptions: []testutils.CompareBytesOption{testutils.WithNormalizePaths()},
 		},
 		{
 			name:         "StoreCommand gets empty data",
@@ -558,7 +560,7 @@ func TestNewStoreCommand(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
-				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes(), tc.compareOptions...)
 			} else {
 				require.NoError(t, err)
 			}

@@ -36,20 +36,21 @@ func TestNewExportCommand(t *testing.T) {
 	ingestionBytes, _ := os.ReadFile("testdata/ingestion-export.zip")
 	queryflowBytes, _ := os.ReadFile("testdata/queryflow-export.zip")
 	tests := []struct {
-		name         string
-		coreUrl      bool
-		ingestionUrl bool
-		queryflowUrl bool
-		apiKey       string
-		outGolden    string
-		errGolden    string
-		outBytes     []byte
-		errBytes     []byte
-		method       string
-		path         string
-		responses    map[string]ExportResponse
-		file         string
-		err          error
+		name           string
+		coreUrl        bool
+		ingestionUrl   bool
+		queryflowUrl   bool
+		apiKey         string
+		outGolden      string
+		errGolden      string
+		outBytes       []byte
+		errBytes       []byte
+		method         string
+		path           string
+		responses      map[string]ExportResponse
+		file           string
+		err            error
+		compareOptions []testutils.CompareBytesOption
 	}{
 		// Working case
 		{
@@ -201,8 +202,9 @@ func TestNewExportCommand(t *testing.T) {
 					ContentDisposition: `attachment; filename="export-20251110T1455.zip"; filename*=utf-8'export-20251110T1455.zip`,
 				},
 			},
-			file: filepath.Join("doesnotexist", "discovery-export.zip"),
-			err:  cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "discovery-export.zip")), "Could not export entities"),
+			file:           filepath.Join("doesnotexist", "discovery-export.zip"),
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "discovery-export.zip")), "Could not export entities"),
+			compareOptions: []testutils.CompareBytesOption{testutils.WithNormalizePaths()},
 		},
 	}
 
@@ -316,7 +318,7 @@ func TestNewExportCommand(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
-				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes(), tc.compareOptions...)
 			} else {
 				require.NoError(t, err)
 				zipFile, err := os.ReadFile(tc.file)

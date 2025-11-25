@@ -42,14 +42,29 @@ func Read(t *testing.T, name string) []byte {
 	return nil
 }
 
+type CompareBytesOption func(*[]byte) error
+
+func WithNormalizePaths() CompareBytesOption {
+	return func(receivedBytes *[]byte) error {
+		*receivedBytes = bytes.ReplaceAll(*receivedBytes, []byte("\\"), []byte("/"))
+		return nil
+	}
+}
+
 // CompareBytes reads the golden file and verifies that its contents and the current response are the same.
-func CompareBytes(t *testing.T, name string, expected, got []byte) {
+func CompareBytes(t *testing.T, name string, expected, got []byte, options ...CompareBytesOption) {
 	t.Helper()
 	if *Update {
 		Write(t, name, got)
 	} else {
 		normalizedExpected := bytes.ReplaceAll(expected, []byte("\r\n"), []byte("\n"))
 		normalizedGot := bytes.ReplaceAll(got, []byte("\r\n"), []byte("\n"))
+		for _, opt := range options {
+			err := opt(&normalizedExpected)
+			require.NoError(t, err)
+			err = opt(&normalizedGot)
+			require.NoError(t, err)
+		}
 		require.Equal(t, string(normalizedExpected), string(normalizedGot))
 	}
 }

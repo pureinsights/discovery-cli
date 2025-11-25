@@ -20,14 +20,15 @@ import (
 // TestNewConfigCommand_ProfileFlag tests the NewConfigCommand() function when there is a profile flag.
 func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 	tests := []struct {
-		name      string
-		config    map[string]string
-		writePath string
-		outGolden string
-		errGolden string
-		outBytes  []byte
-		errBytes  []byte
-		err       error
+		name           string
+		config         map[string]string
+		writePath      string
+		outGolden      string
+		errGolden      string
+		outBytes       []byte
+		errBytes       []byte
+		err            error
+		compareOptions []testutils.CompareBytesOption
 	}{
 		// Working cases
 		{
@@ -117,11 +118,12 @@ func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 				"cn.queryflow_key": "queryflow123",
 				"cn.staging_key":   "staging235",
 			},
-			outGolden: "NewConfigCommand_Out_ConfigError",
-			errGolden: "NewConfigCommand_Err_ConfigError",
-			outBytes:  testutils.Read(t, "NewConfigCommand_Out_ConfigError"),
-			errBytes:  testutils.Read(t, "NewConfigCommand_Err_ConfigError"),
-			err:       cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")), "Failed to save Staging's configuration"),
+			outGolden:      "NewConfigCommand_Out_ConfigError",
+			errGolden:      "NewConfigCommand_Err_ConfigError",
+			outBytes:       testutils.Read(t, "NewConfigCommand_Out_ConfigError"),
+			errBytes:       testutils.Read(t, "NewConfigCommand_Err_ConfigError"),
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")), "Failed to save Staging's configuration"),
+			compareOptions: []testutils.CompareBytesOption{testutils.WithNormalizePaths()},
 		},
 	}
 
@@ -163,7 +165,7 @@ func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
-				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes(), tc.compareOptions...)
 			} else {
 				require.NoError(t, err)
 			}

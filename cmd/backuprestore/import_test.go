@@ -32,20 +32,21 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 	ingestionImport, _ := os.ReadFile("testdata/ingestion-import.json")
 	queryflowImport, _ := os.ReadFile("testdata/queryflow-import.json")
 	tests := []struct {
-		name         string
-		coreUrl      bool
-		ingestionUrl bool
-		queryflowUrl bool
-		apiKey       string
-		outGolden    string
-		errGolden    string
-		outBytes     []byte
-		errBytes     []byte
-		method       string
-		path         string
-		responses    map[string]ImportResponse
-		file         string
-		err          error
+		name           string
+		coreUrl        bool
+		ingestionUrl   bool
+		queryflowUrl   bool
+		apiKey         string
+		outGolden      string
+		errGolden      string
+		outBytes       []byte
+		errBytes       []byte
+		method         string
+		path           string
+		responses      map[string]ImportResponse
+		file           string
+		err            error
+		compareOptions []testutils.CompareBytesOption
 	}{
 		// Working case
 		{
@@ -105,20 +106,21 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 
 		// Error case
 		{
-			name:         "Import Fails because the sent file does not exist",
-			coreUrl:      true,
-			ingestionUrl: true,
-			queryflowUrl: true,
-			apiKey:       "",
-			outGolden:    "NewImportCommand_Out_FileDoesNotExist",
-			errGolden:    "NewImportCommand_Err_FileDoesNotExist",
-			outBytes:     testutils.Read(t, "NewImportCommand_Out_FileDoesNotExist"),
-			errBytes:     testutils.Read(t, "NewImportCommand_Err_FileDoesNotExist"),
-			method:       http.MethodPost,
-			path:         "/v2/import",
-			responses:    map[string]ImportResponse{},
-			file:         filepath.Join("doesnotexist", "discovery-export.zip"),
-			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", filepath.Join("doesnotexist", "discovery-export.zip")), "Could not open the file with the entities"),
+			name:           "Import Fails because the sent file does not exist",
+			coreUrl:        true,
+			ingestionUrl:   true,
+			queryflowUrl:   true,
+			apiKey:         "",
+			outGolden:      "NewImportCommand_Out_FileDoesNotExist",
+			errGolden:      "NewImportCommand_Err_FileDoesNotExist",
+			outBytes:       testutils.Read(t, "NewImportCommand_Out_FileDoesNotExist"),
+			errBytes:       testutils.Read(t, "NewImportCommand_Err_FileDoesNotExist"),
+			method:         http.MethodPost,
+			path:           "/v2/import",
+			responses:      map[string]ImportResponse{},
+			file:           filepath.Join("doesnotexist", "discovery-export.zip"),
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", filepath.Join("doesnotexist", "discovery-export.zip")), "Could not open the file with the entities"),
+			compareOptions: []testutils.CompareBytesOption{testutils.WithNormalizePaths()},
 		},
 		{
 			name:         "Import Fails because the sent file has four entries when it should have at most three.",
@@ -242,7 +244,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
-				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes(), tc.compareOptions...)
 			} else {
 				require.NoError(t, err)
 			}
