@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"io/fs"
 	"net/http"
 	"os"
 	"testing"
@@ -214,7 +213,7 @@ func TestStoreCommand(t *testing.T) {
 			data:           "",
 			file:           "doesnotexist",
 			expectedOutput: "",
-			err:            cli.NewErrorWithCause(cli.ErrorExitCode, fs.ErrNotExist, "Could not read file \"doesnotexist\""),
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("file does not exist: doesnotexist"), "Could not read file \"doesnotexist\""),
 		},
 		{
 			name:          "Printing Array fails",
@@ -263,13 +262,7 @@ func TestStoreCommand(t *testing.T) {
 				require.Error(t, err)
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(cli.Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())

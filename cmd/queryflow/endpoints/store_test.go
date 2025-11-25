@@ -394,11 +394,11 @@ func TestNewStoreCommand(t *testing.T) {
 			outGolden:    "NewStoreCommand_Out_StoreFileNotExists",
 			errGolden:    "NewStoreCommand_Err_StoreFileNotExists",
 			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFileNotExists"),
-			errBytes:     []byte(nil),
 			data:         "",
 			file:         "doesnotexist",
 			abortOnError: false,
-			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fs.ErrNotExist, "Could not read file \"doesnotexist\""),
+			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreFileNotExists"),
+			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
 		},
 		{
 			name:         "StoreCommand gets empty data",
