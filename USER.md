@@ -869,7 +869,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record` flag. Finally, the `get` command can also get seed execution with the `seed-execution` flag and with the `details` flag, the user can obtain more information about the execution.
+`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record` flag. Finally, the `get` command can also get seed execution with the `execution` flag and with the `details` flag, the user can obtain more information about the execution.
 
 Usage: `discovery ingestion seed get [flags] [<arg>]`
 
@@ -892,13 +892,13 @@ Flags:
 `--record`::
 (Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
 
-`--seed-execution`::
+`--execution`::
 (Optional, string) The UUID of the seed execution that will be retrieved.
 
 `--details`::
 (Optional, string) Makes the get operation retrieve more information when getting a seed execution, like the audited changes and record and job summaries.
 
-The `filter`, `seed-execution`, and `record` flags are mutually exclusive. The `details` flag can only be used with the `seed-execution` flag.
+The `filter`, `execution`, and `record` flags are mutually exclusive. The `details` flag can only be used with the `execution` flag.
 
 Examples:
 
@@ -937,7 +937,7 @@ discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTD
 
 ```bash
 # Get a seed execution by id and with details
-discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --seed-execution 0f20f984-1854-4741-81ea-30f8b965b007 --details
+discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --execution 0f20f984-1854-4741-81ea-30f8b965b007 --details
 {
   "audit": [
     {

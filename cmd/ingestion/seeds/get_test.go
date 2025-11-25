@@ -330,7 +330,7 @@ func TestNewGetCommand(t *testing.T) {
 		},
 		{
 			name:      "The user gets a seed execution by its id and with details",
-			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--seed-execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3", "--details"},
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3", "--details"},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewGetCommand_Out_GetExecutionByIdDetails",
@@ -440,7 +440,7 @@ func TestNewGetCommand(t *testing.T) {
 		},
 		{
 			name:      "The user gets a seed execution by its id, but with no details",
-			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--seed-execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3"},
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3"},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewGetCommand_Out_GetExecutionByIdNoDetails",
@@ -753,7 +753,7 @@ func TestNewGetCommand(t *testing.T) {
 		},
 		{
 			name:      "The user tries to get a seed execution by its id, but gets Not Found",
-			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--seed-execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3"},
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3"},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewGetCommand_Out_GetExecutionNotFound",
@@ -823,7 +823,7 @@ func TestNewGetCommand(t *testing.T) {
 		},
 		{
 			name:      "The user sends an invalid execution id",
-			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--seed-execution", "test"},
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "test"},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewGetCommand_Out_GetExecutionInvalidUUID",

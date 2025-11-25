@@ -21,7 +21,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains seeds from Discovery Ingestion.",
-		Long:  fmt.Sprintf(commands.LongGetSearch, "seed", "Ingestion") + "The get command can also get records from the seed with the record flag. Finally, the get command can also get seed execution with the seed-execution flag and with the details flag, the user can obtain more information about the execution.",
+		Long:  fmt.Sprintf(commands.LongGetSearch, "seed", "Ingestion") + "The get command can also get records from the seed with the record flag. Finally, the get command can also get seed execution with the execution flag and with the details flag, the user can obtain more information about the execution.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -31,7 +31,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			if !cmd.Flags().Changed("record") && !cmd.Flags().Changed("seed-execution") {
+			if !cmd.Flags().Changed("record") && !cmd.Flags().Changed("execution") {
 				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 			}
 
@@ -86,10 +86,10 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 - Type: The format is type={type}.`)
 
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
-	get.Flags().StringVar(&executionId, "seed-execution", "", "the id of the seed execution that will be retrieved")
+	get.Flags().StringVar(&executionId, "execution", "", "the id of the seed execution that will be retrieved")
 	get.Flags().BoolVar(&details, "details", false, "gets more information when getting a seed execution, like the audited changes and record and job summaries")
 
-	get.MarkFlagsMutuallyExclusive("filter", "record", "seed-execution")
+	get.MarkFlagsMutuallyExclusive("filter", "record", "execution")
 	get.MarkFlagsMutuallyExclusive("filter", "record", "details")
 	return get
 }
