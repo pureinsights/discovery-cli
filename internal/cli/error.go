@@ -119,7 +119,7 @@ func NormalizeReadFileError(path string, err error) error {
 	}
 }
 
-// NormalizeReadFileError makes the write file errors OS agnostic.
+// NormalizeWriteFileError makes the write file errors OS agnostic.
 func NormalizeWriteFileError(path string, err error) error {
 	if err == nil {
 		return nil
@@ -141,16 +141,16 @@ func NormalizeWriteFileError(path string, err error) error {
 		return fmt.Errorf("cannot write to a directory: %s", path)
 
 	case errors.Is(err, syscall.ENOSPC):
-		return fmt.Errorf("no space left on device while writing: %s", path)
+		return fmt.Errorf("no space left on device while writing file: %s", path)
 
 	case errors.Is(err, syscall.EROFS):
 		return fmt.Errorf("filesystem is read-only: %s", path)
 
 	case errors.Is(err, syscall.EMFILE):
-		return fmt.Errorf("too many open files while writing: %s", path)
+		return fmt.Errorf("too many open files while writing file: %s", path)
 
 	case errors.Is(err, syscall.EIO):
-		return fmt.Errorf("low-level I/O error while writing: %s", path)
+		return fmt.Errorf("low-level I/O error while writing file: %s", path)
 
 	default:
 		return err
