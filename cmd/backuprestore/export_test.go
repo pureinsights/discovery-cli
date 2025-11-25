@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -176,7 +175,7 @@ func TestNewExportCommand(t *testing.T) {
 			outGolden:    "NewExportCommand_Out_ExportFails",
 			errGolden:    "NewExportCommand_Err_ExportFails",
 			outBytes:     testutils.Read(t, "NewExportCommand_Out_ExportFails"),
-			errBytes:     []byte(nil),
+			errBytes:     testutils.Read(t, "NewExportCommand_Err_ExportFails"),
 			method:       http.MethodGet,
 			path:         "/v2/export",
 			responses: map[string]ExportResponse{
@@ -203,7 +202,7 @@ func TestNewExportCommand(t *testing.T) {
 				},
 			},
 			file: filepath.Join("doesnotexist", "discovery-export.zip"),
-			err:  cli.NewErrorWithCause(cli.ErrorExitCode, fs.ErrNotExist, "Could not export entities"),
+			err:  cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "discovery-export.zip")), "Could not export entities"),
 		},
 	}
 
@@ -316,14 +315,8 @@ func TestNewExportCommand(t *testing.T) {
 			if tc.err != nil {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(cli.Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-					testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 				zipFile, err := os.ReadFile(tc.file)

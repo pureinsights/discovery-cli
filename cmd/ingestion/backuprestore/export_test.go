@@ -3,6 +3,7 @@ package backuprestore
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -67,6 +68,22 @@ func TestNewExportCommand(t *testing.T) {
 			url:       false,
 			apiKey:    "apiKey123",
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery ingestion config --profile \"default\""),
+		},
+		{
+			name:               "Export Fails because the sent directory does not exist",
+			url:                true,
+			apiKey:             "",
+			outGolden:          "NewExportCommand_Out_DirectoryDoesNotExist",
+			errGolden:          "NewExportCommand_Err_DirectoryDoesNotExist",
+			outBytes:           testutils.Read(t, "NewExportCommand_Out_DirectoryDoesNotExist"),
+			errBytes:           testutils.Read(t, "NewExportCommand_Err_DirectoryDoesNotExist"),
+			method:             http.MethodGet,
+			path:               "/v2/export",
+			statusCode:         http.StatusOK,
+			response:           zipBytes,
+			contentDisposition: `attachment; filename="export-20251110T1455.zip"; filename*=utf-8''Export-20251110T1460.zip`,
+			file:               filepath.Join("doesnotexist", "ingestion-export.zip"),
+			err:                cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "ingestion-export.zip")), "Could not export entities"),
 		},
 		{
 			name:               "Export fails",

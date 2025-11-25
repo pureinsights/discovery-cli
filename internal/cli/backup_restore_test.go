@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -296,22 +295,17 @@ func TestWriteExportsIntoFile(t *testing.T) {
 			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:           filepath.Join("doesnotexist", "export.zip"),
 			expectedOutput: "",
-			err:            fs.ErrNotExist,
+			err:            fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "export.zip")),
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			acknowledge, err := WriteExportsIntoFile(tc.path, tc.clients)
-
 			assert.Equal(t, tc.expectedOutput, acknowledge)
 			if tc.err != nil {
 				require.Error(t, err)
-				if !errors.Is(tc.err, fs.ErrNotExist) {
-					var errStruct Error
-					require.ErrorAs(t, err, &errStruct)
-					assert.EqualError(t, err, tc.err.Error())
-				}
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				zipFile, err := os.ReadFile(tc.path)
@@ -379,7 +373,7 @@ func TestExportEntitiesFromClients(t *testing.T) {
 			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:           filepath.Join("doesnotexist", "export.zip"),
 			expectedOutput: "",
-			err:            NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not export entities"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "export.zip")), "Could not export entities"),
 		},
 		{
 			name:      "Printing fails",
@@ -412,13 +406,7 @@ func TestExportEntitiesFromClients(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())
@@ -534,6 +522,7 @@ func Test_copyImportEntitiesToTempFile(t *testing.T) {
 	require.NoError(t, err)
 	coreQueryFlowZip, err := os.ReadFile("testdata/OnlyCoreQueryFlow.zip")
 	require.NoError(t, err)
+	doesNotExistDir := filepath.Join(t.TempDir(), "doesnotexist")
 
 	tests := []struct {
 		name             string
@@ -543,12 +532,6 @@ func Test_copyImportEntitiesToTempFile(t *testing.T) {
 		err              error
 	}{
 		// Working cases
-		{
-			name:     "Receives a directory that does not exist",
-			zipBytes: correctZip,
-			dir:      t.TempDir() + "/doesnotexist",
-			err:      NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not create the temporary export file"),
-		},
 		{
 			name:             "Receives a zip file with Core, QueryFlow, and Ingestion exports",
 			zipBytes:         correctZip,
@@ -570,6 +553,13 @@ func Test_copyImportEntitiesToTempFile(t *testing.T) {
 			dir:      t.TempDir(),
 			err:      NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
 		},
+
+		{
+			name:     "Receives a directory that does not exist",
+			zipBytes: correctZip,
+			dir:      doesNotExistDir,
+			err:      NewErrorWithCause(ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join(doesNotExistDir, "core-export.zip")), "Could not create the temporary export file"),
+		},
 	}
 
 	for _, tc := range tests {
@@ -588,13 +578,7 @@ func Test_copyImportEntitiesToTempFile(t *testing.T) {
 				require.Error(t, err)
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 			}
@@ -610,6 +594,7 @@ func Test_readInnerZipFiles(t *testing.T) {
 	require.NoError(t, err)
 	coreQueryFlowZip, err := os.ReadFile("testdata/OnlyCoreQueryFlow.zip")
 	require.NoError(t, err)
+	doesNotExistDir := filepath.Join(t.TempDir(), "doesnotexist")
 
 	tests := []struct {
 		name             string
@@ -649,8 +634,8 @@ func Test_readInnerZipFiles(t *testing.T) {
 		{
 			name:     "Receives a directory that does not exist",
 			zipBytes: correctZip,
-			dir:      t.TempDir() + "/doesnotexist",
-			err:      NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not create the temporary export file"),
+			dir:      doesNotExistDir,
+			err:      NewErrorWithCause(ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join(doesNotExistDir, "core-export.zip")), "Could not create the temporary export file"),
 		},
 	}
 
@@ -665,13 +650,7 @@ func Test_readInnerZipFiles(t *testing.T) {
 				var errStruct Error
 				require.ErrorAs(t, actualErr, &errStruct)
 				assert.Equal(t, map[string]string(nil), actualPaths)
-				cliError, _ := tc.err.(Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, actualErr, tc.err.Error())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, actualErr, tc.err.Error())
 			} else {
 				require.NoError(t, actualErr)
 				for _, prefix := range tc.expectedPrefixes {
@@ -878,7 +857,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 			name:    "The given file does not exist",
 			clients: []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:    filepath.Join("doesnotexist", "export.zip"),
-			err:     NewErrorWithCause(ErrorExitCode, fs.ErrNotExist, "Could not open the file with the entities"),
+			err:     NewErrorWithCause(ErrorExitCode, fmt.Errorf("file does not exist: %s", filepath.Join("doesnotexist", "export.zip")), "Could not open the file with the entities"),
 		},
 		{
 			name:    "UnzipExportsToTemp fails",
@@ -918,13 +897,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				testutils.CompareBytes(t, tc.goldenFile, tc.goldenBytes, buf.Bytes())

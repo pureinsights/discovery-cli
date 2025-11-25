@@ -3,6 +3,7 @@ package backuprestore
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -66,6 +67,20 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			apiKey:    "apiKey123",
 			file:      filepath.Join("testdata", "ingestion-export.zip"),
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery ingestion config --profile \"default\""),
+		},
+		{
+			name:      "Import Fails because the sent file does not exist",
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewImportCommand_Out_FileDoesNotExist",
+			errGolden: "NewImportCommand_Err_FileDoesNotExist",
+			outBytes:  testutils.Read(t, "NewImportCommand_Out_FileDoesNotExist"),
+			errBytes:  testutils.Read(t, "NewImportCommand_Err_FileDoesNotExist"),
+			method:    http.MethodPost,
+			path:      "/v2/import",
+			response:  "",
+			file:      filepath.Join("doesnotexist", "ingestion-export.zip"),
+			err:       cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", filepath.Join("doesnotexist", "ingestion-export.zip")), "Could not import entities"),
 		},
 		{
 			name:       "Import fails",

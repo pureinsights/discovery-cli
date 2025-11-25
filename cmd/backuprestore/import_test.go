@@ -3,7 +3,7 @@ package backuprestore
 import (
 	"bytes"
 	"errors"
-	"io/fs"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -113,12 +113,12 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			outGolden:    "NewImportCommand_Out_FileDoesNotExist",
 			errGolden:    "NewImportCommand_Err_FileDoesNotExist",
 			outBytes:     testutils.Read(t, "NewImportCommand_Out_FileDoesNotExist"),
-			errBytes:     []byte(nil),
+			errBytes:     testutils.Read(t, "NewImportCommand_Err_FileDoesNotExist"),
 			method:       http.MethodPost,
 			path:         "/v2/import",
 			responses:    map[string]ImportResponse{},
 			file:         filepath.Join("doesnotexist", "discovery-export.zip"),
-			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fs.ErrNotExist, "Could not open the file with the entities"),
+			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", filepath.Join("doesnotexist", "discovery-export.zip")), "Could not open the file with the entities"),
 		},
 		{
 			name:         "Import Fails because the sent file has four entries when it should have at most three.",
@@ -241,14 +241,8 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			if tc.err != nil {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(cli.Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-					testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 			}
