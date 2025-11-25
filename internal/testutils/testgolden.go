@@ -42,8 +42,10 @@ func Read(t *testing.T, name string) []byte {
 	return nil
 }
 
+// CompareBytesOption is used to add further modifications to the expected and gotten bytes.
 type CompareBytesOption func(*[]byte) error
 
+// WithNormalizePaths changes the "\" Windows path separator to the standard "/"
 func WithNormalizePaths() CompareBytesOption {
 	return func(receivedBytes *[]byte) error {
 		*receivedBytes = bytes.ReplaceAll(*receivedBytes, []byte("\\"), []byte("/"))
