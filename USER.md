@@ -133,6 +133,106 @@ Staging URL: "http://discovery.staging.cn"
 Staging API Key: "discovery.key.staging.cn"
 ```
 
+#### Export
+`export` is the command used to backup all of Discovery's entities at once. With the file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
+
+Usage: `discovery export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery export -p cn
+{"core":{"acknowledged":true},"ingestion":{"acknowledged":true},"queryflow":{"acknowledged":true}}
+```
+
+```bash
+# Export the entities to a specific file.
+# In this example, the Ingestion export failed.
+discovery export --file "entities/discovery.zip".
+{"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
+```
+#### Import
+`import` is the command used to restore entities to all of Discovery's products at once. With the `file` flag, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files product by the `/export` endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format `productName-*`. For example, the Core can be called `core-export-20251112T1629.zip` and the one for Ingestion can be called `ingestion-export-20251110T1607.zip`. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the files with the exported entities of the Discovery products.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
+{
+  "core": {
+    "Credential": [
+      {
+        "id": "6e2f1c2a-9885-4263-8945-38b0cda4b6d3",
+        "status": 204
+      },
+      {
+        "id": "721997cd-b16f-4acb-93cf-b44a959dbcf2",
+        "status": 204
+      }
+    ],
+    "Server": [
+      {
+        "id": "6817ccf5-b4bc-4f97-82f5-c8016d26f2fb",
+        "status": 204
+      },
+      {
+        "id": "f7a65744-a3b1-4655-b472-c612bb490ff9",
+        "status": 204
+      }
+    ]
+  },
+  "ingestion": {
+    "Pipeline": [
+      {
+        "id": "128b1127-0ea0-4aa5-9a4e-9160285d2f61",
+        "status": 204
+      }
+    ],
+    "Processor": [
+      {
+        "id": "11de1d9b-d037-4d27-8304-37b62e79d044",
+        "status": 204
+      }
+    ],
+    "Seed": [
+      {
+        "id": "bb8d13c6-73b5-47a1-b0fb-06a141e32309",
+        "status": 204
+      }
+    ],
+    "SeedSchedule": []
+  }
+}
+```
+
 #### Core
 `core` is the main command used to interact with Discovery's Core. 
 
@@ -216,6 +316,76 @@ Showing the configuration of profile "cn":
 
 Core URL: "https://discovery.core.cn"
 Core API Key: "discovery.key.core.cn"
+```
+
+##### Export
+`export` is the command used to backup Discovery Core's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+
+Usage: `discovery core export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery core export -p cn
+{"acknowledged":true}
+```
+
+```bash
+# Export the entities to a specific file
+discovery core export --file "entities/core.zip".
+{"acknowledged":true}
+```
+
+##### Import
+`import` is the command used to restore Discovery Core's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery core import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and update conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
+{
+  "Credential": [
+    {
+      "id": "3b32e410-2f33-412d-9fb8-17970131921c",
+      "status": 200
+    },
+    {
+      "id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
+      "status": 200
+    },
+    {
+      "id": "46cb4fff-28be-4901-b059-1dd618e74ee4",
+      "status": 200
+    },
+    ...
 ```
 
 ##### Label
@@ -764,6 +934,76 @@ Ingestion URL: "https://discovery.ingestion.cn"
 Ingestion API Key: "discovery.key.ingestion.cn"
 ```
 
+##### Export
+`export` is the command used to backup Discovery Ingestion's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+
+Usage: `discovery ingestion export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery ingestion export -p cn
+{"acknowledged":true}
+```
+
+```bash
+# Export the entities to a specific file
+discovery ingestion export --file "entities/ingestion.zip".
+{"acknowledged":true}
+```
+
+##### Import
+`import` is the command used to restore Discovery Ingestion's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery Ingestion import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and ignore conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict IGNORE
+{
+  "Pipeline": [
+    {
+      "id": "0d3f476d-9003-4fc8-b9a9-8ba6ebf9445b",
+      "status": 204
+    },
+    {
+      "id": "25012a20-fe60-4ad6-a05c-9abcbfc1dfb1",
+      "status": 204
+    },
+    {
+      "id": "36f8ce72-f23d-4768-91e8-58693ff1b272",
+      "status": 204
+    },
+    ...
+```
+
 ##### Processor
 `processor` is the command used to manage processors in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
@@ -1184,6 +1424,80 @@ Showing the configuration of profile "cn":
 
 QueryFlow URL: "https://discovery.queryflow.cn"
 QueryFlow API Key: "discovery.key.queryflow.cn"
+```
+
+##### Export
+`export` is the command used to backup Discovery QueryFlow's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+
+Usage: `discovery queryflow export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery queryflow export -p cn
+{"acknowledged":true}
+```
+
+```bash
+# Export the entities to a specific file
+discovery queryflow export --file "entities/queryflow.zip".
+{"acknowledged":true}
+```
+
+##### Import
+`import` is the command used to restore Discovery QueryFlow's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery queryflow import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and fail conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery queryflow import -p cn --file "entities/queryflow.zip"
+{
+  "Endpoint": [
+    {
+      "errorCode": 2001,
+      "errors": [
+        "Duplicated entity: 2fee5e27-4147-48de-ba1e-d7f32476a4a2"
+      ],
+      "id": "2fee5e27-4147-48de-ba1e-d7f32476a4a2",
+      "status": 409
+    },
+    {
+      "errorCode": 2001,
+      "errors": [
+        "Duplicated entity: 4ef9da31-2ba6-442c-86bb-1c9566dac4c2"
+      ],
+      "id": "4ef9da31-2ba6-442c-86bb-1c9566dac4c2",
+      "status": 409
+    }
+    ...
 ```
 
 ##### Processor

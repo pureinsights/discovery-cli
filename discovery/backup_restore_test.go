@@ -227,20 +227,21 @@ func Test_backupRestore_Export(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if tc.apiKey != "" {
-					assert.Equal(t, tc.apiKey, r.Header.Get("X-API-KEY"))
-				}
-				assert.Equal(t, tc.method, r.Method)
-				assert.Equal(t, tc.path, r.URL.Path)
-				w.Header().Set("Content-Type", "application/octet-stream")
-				w.Header().Set(
-					"Content-Disposition",
+			srv := httptest.NewServer(http.HandlerFunc(
+				testutils.HttpHandlerWithContentDisposition(
+					t,
+					tc.statusCode,
+					"application/octet-stream",
 					tc.contentDisposition,
-				)
-				w.WriteHeader(tc.statusCode)
-				w.Write(tc.response)
-			}))
+					tc.response,
+					func(t *testing.T, r *http.Request) {
+						if tc.apiKey != "" {
+							assert.Equal(t, tc.apiKey, r.Header.Get("X-API-KEY"))
+						}
+						assert.Equal(t, tc.method, r.Method)
+						assert.Equal(t, tc.path, r.URL.Path)
+					},
+				)))
 			defer srv.Close()
 
 			b := backupRestore{client: newClient(srv.URL, tc.apiKey)}
@@ -259,6 +260,7 @@ func Test_backupRestore_Export(t *testing.T) {
 	}
 }
 
+// Test_backupRestore_Export_RestyReturnsError tests the Export() method when Resty returns an error that is not HTTP.
 func Test_backupRestore_Export_RestyReturnsError(t *testing.T) {
 	srv := httptest.NewServer(http.NotFoundHandler())
 	base := srv.URL
