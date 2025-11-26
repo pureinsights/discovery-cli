@@ -1,6 +1,16 @@
 Usage:
   get [flags]
 
+Examples:
+	# Get a label by id
+	discovery core label get 3d51beef-8b90-40aa-84b5-033241dc6239
+	{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"A","lastUpdatedTimestamp":"2025-08-27T19:22:47Z","value":"B"}
+	
+	# Get all labels using the configuration in profile "cn"
+	discovery core label get -p cn
+	{"creationTimestamp":"2025-10-15T20:28:39Z","id":"5467ab23-7827-4fae-aa78-dfd4800549ee","key":"D","lastUpdatedTimestamp":"2025-10-15T20:28:39Z","value":"F"}
+	{"creationTimestamp":"2025-10-15T20:25:29Z","id":"7d0cb8c9-6555-4592-9b6c-1f4ed7fca9f4","key":"D","lastUpdatedTimestamp":"2025-10-15T20:25:29Z","value":"D"}
+
 Flags:
   -h, --help             help for get
   -p, --profile string   configuration profile to use (default "default")
