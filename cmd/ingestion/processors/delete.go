@@ -27,6 +27,13 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchDeleteCommand(args[0], d, ingestionClient.Processors(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"))
 		},
 		Args: cobra.ExactArgs(1),
+		Example: `	# Delete a processor by id
+	discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
+	{"acknowledged":true}
+
+	# Delete a processor by name
+	discovery ingestion processor delete "MongoDB store processor"
+	{"acknowledged":true}`,
 	}
 	return get
 }
