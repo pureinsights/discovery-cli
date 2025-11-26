@@ -52,7 +52,7 @@ func NewExportCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.NoArgs,
 		Example: `	# Export the entities to a specific file.
-	discovery export --file "entities/discovery.zip".`,
+	discovery export --file "entities/discovery.zip"`,
 	}
 
 	export.Flags().StringVarP(&file, "file", "f", "", "the file in which the information of the entities is going to be saved")
