@@ -54,6 +54,7 @@ func Test_queryFlow_Processors(t *testing.T) {
 	assert.Equal(t, q.ApiKey, qpc.cloner.client.ApiKey)
 	assert.Equal(t, q.Url+"/processor", qpc.cloner.client.client.BaseURL)
 	assert.Equal(t, q.ApiKey, qpc.searcher.client.ApiKey)
+	assert.Equal(t, q.Url+"/processor", qpc.searcher.client.client.BaseURL)
 }
 
 // Test_queryFlow_Endpoints tests the queryFlow.Endpoints() function
