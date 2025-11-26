@@ -168,6 +168,7 @@ discovery export --file "entities/discovery.zip".
 Usage: `discovery import [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
