@@ -31,6 +31,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	discovery core secret get 81ca1ac6-3058-4ecd-a292-e439827a675a
 
 	# Get all secrets using the configuration in profile "cn"
-	discovery core secret get -p cn`}
+	discovery core secret get -p cn`,
+	}
 	return get
 }
