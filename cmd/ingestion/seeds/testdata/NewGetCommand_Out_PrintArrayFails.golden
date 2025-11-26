@@ -2,6 +2,16 @@
 Usage:
   get [flags]
 
+Examples:
+	# Get seed by name
+	discovery ingestion seed get "Search seed"
+
+	# Get seeds using filters
+	discovery ingestion seed get --filter label=A:A -f type=staging
+
+	# Get all seeds using the configuration in profile "cn"
+	discovery ingestion seed get -p cn
+
 Flags:
   -f, --filter stringArray   Apply filters in the format "filter=key:value". The available filters are:
                              - Label: The format is label={key}[:{value}], where the value is optional.

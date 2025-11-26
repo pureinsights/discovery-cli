@@ -30,18 +30,12 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get seed by name
 	discovery ingestion seed get "Search seed"
-	{"active":true,"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","type":"staging"}
 
 	# Get seeds using filters
 	discovery ingestion seed get --filter label=A:A -f type=staging
-	{"active":true,"creationTimestamp":"2025-10-31T22:53:54Z","id":"326a6b94-8931-4d18-b3a6-77adad14f2c0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:53:54Z","name":"Search seed","type":"staging"}
-	{"active":true,"creationTimestamp":"2025-10-31T22:54:04Z","id":"8fbd57cd-9f82-409d-8d85-98e4b9225f3a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:04Z","name":"Staging store seed","type":"staging"}
 
 	# Get all seeds using the configuration in profile "cn"
-	discovery ingestion seed get -p cn
-	{"active":true,"creationTimestamp":"2025-09-05T19:19:30Z","id":"026c6cf3-cba4-4d68-9806-1e534eebb99d","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:19:30Z","name":"Search seed","type":"staging"}
-	{"active":true,"creationTimestamp":"2025-10-31T22:54:05Z","id":"028120a6-1859-47c7-b69a-f417e54b4a4a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:05Z","name":"ChatGPT seed","type":"staging"}
-	{"active":true,"creationTimestamp":"2025-09-05T19:48:00Z","id":"0517a87a-86f7-4a71-bb3f-adfa0c87a269","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:48:00Z","name":"Staging ingestion seed","type":"staging"}`,
+	discovery ingestion seed get -p cn`,
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:

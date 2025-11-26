@@ -28,24 +28,8 @@ func NewExportCommand(d cli.Discovery) *cobra.Command {
 			return commands.ExportCommand(d, ingestionClient.BackupRestore(), file, commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"))
 		},
 		Args: cobra.NoArgs,
-		Example: `	# Import the entities using profile "cn" and ignore conflict resolution strategy.
-	# The rest of the command's output is omitted.
-	discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict IGNORE
-	{
-	"Pipeline": [
-		{
-		"id": "0d3f476d-9003-4fc8-b9a9-8ba6ebf9445b",
-		"status": 204
-		},
-		{
-		"id": "25012a20-fe60-4ad6-a05c-9abcbfc1dfb1",
-		"status": 204
-		},
-		{
-		"id": "36f8ce72-f23d-4768-91e8-58693ff1b272",
-		"status": 204
-		},
-		...`,
+		Example: `	# IExport the entities using profile "cn".
+	discovery ingestion export -p cn`,
 	}
 
 	export.Flags().StringVarP(&file, "file", "f", "", "the file that will contain the exported entities")

@@ -18,11 +18,7 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 			return commands.SaveConfigCommand(cmd, d.IOStreams(), d.SaveIngestionConfigFromUser)
 		},
 		Example: `	# Ask the user for the configuration of profile "cn"
-	discovery ingestion config -p cn
-	Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
-
-	Ingestion URL [http://discovery.ingestion.cn]: https://discovery.ingestion.cn
-	Ingestion API Key [*************.ingestion.cn]: `,
+	discovery ingestion config -p cn: `,
 	}
 
 	config.AddCommand(NewGetCommand(d))

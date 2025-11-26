@@ -18,11 +18,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.PrintConfigCommand(cmd, d.IOStreams(), d.PrintIngestionConfigToUser)
 		},
 		Example: `	# Print the configuration of the "cn" profile with obfuscated API keys.
-	discovery ingestion config get -p cn
-	Showing the configuration of profile "cn":
-
-	Ingestion URL: "https://discovery.ingestion.cn"
-	Ingestion API Key: "*************.ingestion.cn"`,
+	discovery ingestion config get -p cn`,
 	}
 	get.Flags().BoolP("sensitive", "s", true, "this flag obfuscates sensitive values before showing them to the user.")
 	return get
