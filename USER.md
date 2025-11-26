@@ -1277,6 +1277,7 @@ discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"
 Usage: `discovery queryflow [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1289,6 +1290,7 @@ Flags:
 Usage: `discovery queryflow config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1318,6 +1320,7 @@ Editing profile "default". Press Enter to keep the value shown, type a single sp
 Usage: `discovery queryflow config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1362,6 +1365,7 @@ QueryFlow API Key: "discovery.key.queryflow.cn"
 Usage: `discovery queryflow export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1391,6 +1395,7 @@ discovery queryflow export --file "entities/queryflow.zip".
 Usage: `discovery queryflow import [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
