@@ -272,8 +272,8 @@ discovery core export -p cn
 ```
 
 ```bash
-# Export the entities to a specific file
-discovery core export --file "entities/core.zip".
+# Export the entities to a specific file.
+discovery core export --file "entities/core.zip"
 {"acknowledged":true}
 ```
 
@@ -893,7 +893,7 @@ discovery ingestion export -p cn
 
 ```bash
 # Export the entities to a specific file
-discovery ingestion export --file "entities/ingestion.zip".
+discovery ingestion export --file "entities/ingestion.zip"
 {"acknowledged":true}
 ```
 

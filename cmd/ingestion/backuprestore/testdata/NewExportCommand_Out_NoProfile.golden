@@ -2,8 +2,8 @@ Usage:
   export [subcommands] [flags]
 
 Examples:
-	# IExport the entities using profile "cn".
-	discovery ingestion export -p cn
+	# Export the entities to a specific file.
+	discovery ingestion export --file "entities/ingestion.zip"
 
 Flags:
   -f, --file string   the file that will contain the exported entities
