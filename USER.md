@@ -1384,8 +1384,8 @@ discovery queryflow export -p cn
 ```
 
 ```bash
-# Export the entities to a specific file
-discovery queryflow export --file "entities/queryflow.zip".
+# Export the entities to a specific file.
+discovery queryflow export --file "entities/queryflow.zip"
 {"acknowledged":true}
 ```
 
