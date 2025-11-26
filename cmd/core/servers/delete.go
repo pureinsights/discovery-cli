@@ -29,11 +29,9 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		Example: `	# Delete a server by id
 	discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
-	{"acknowledged":true}
 
 	# Delete a server by name
-	discovery core server delete server1
-	{"acknowledged":true}`,
+	discovery core server delete server1`,
 	}
 	return get
 }

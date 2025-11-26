@@ -4,11 +4,7 @@ Usage:
 
 Examples:
 	# Ask the user for the configuration of profile "cn".
-	discovery core config -p cn
-	Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
-
-	Core URL [http://discovery.core.cn]: https://discovery.core.cn
-	Core API Key [*************.core.cn]: 
+	discovery core config -p cn 
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell

@@ -4,7 +4,6 @@ Usage:
 Examples:
 	# Export the entities using profile "cn".
 	discovery core export -p cn
-	{"acknowledged":true}
 
 Flags:
   -f, --file string      the file that will contain the exported entities

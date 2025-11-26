@@ -28,8 +28,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.ExactArgs(1),
 		Example: `	# Delete a label by id
-	discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
-	{"acknowledged":true}`,
+	discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239`,
 	}
 	return get
 }
