@@ -17,6 +17,13 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.PrintConfigCommand(cmd, d.IOStreams(), d.PrintCoreConfigToUser)
 		},
+		Example: `
+	# Print the configuration of the "cn" profile with obfuscated API keys.
+	discovery core config get -p cn
+	Showing the configuration of profile "cn":
+
+	Core URL: "https://discovery.core.cn"
+	Core API Key: "*************.core.cn"`,
 	}
 	get.Flags().BoolP("sensitive", "s", true, "this flag obfuscates sensitive values before showing them to the user.")
 	return get

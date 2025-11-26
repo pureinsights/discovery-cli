@@ -29,6 +29,25 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 			return commands.ImportCommand(d, coreClient.BackupRestore(), file, discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.NoArgs,
+		Example: `
+	# Import the entities using profile "cn" and update conflict resolution strategy.
+	# The rest of the command's output is omitted.
+	discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
+	{
+	"Credential": [
+		{
+		"id": "3b32e410-2f33-412d-9fb8-17970131921c",
+		"status": 200
+		},
+		{
+		"id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
+		"status": 200
+		},
+		{
+		"id": "46cb4fff-28be-4901-b059-1dd618e74ee4",
+		"status": 200
+		},
+		...`,
 	}
 
 	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the entities that will be restored")

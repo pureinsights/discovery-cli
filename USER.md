@@ -17,6 +17,7 @@ TODO
 Usage: `discovery [command]`
 
 Flags:
+ 
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -36,6 +37,7 @@ discovery -h
 Usage: `discovery config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -77,6 +79,7 @@ Editing profile "cn". Press Enter to keep the value shown, type a single space t
 Usage: `discovery config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -139,6 +142,7 @@ Staging API Key: "discovery.key.staging.cn"
 Usage: `discovery export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -169,6 +173,7 @@ discovery export --file "entities/discovery.zip".
 Usage: `discovery core [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -181,6 +186,7 @@ Flags:
 Usage: `discovery core config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -210,6 +216,7 @@ Editing profile "default". Press Enter to keep the value shown, type a single sp
 Usage: `discovery core config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -254,6 +261,7 @@ Core API Key: "discovery.key.core.cn"
 Usage: `discovery core export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -283,6 +291,7 @@ discovery core export --file "entities/core.zip".
 Usage: `discovery core import [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -324,6 +333,7 @@ discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
 Usage: `discovery core label [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -340,6 +350,7 @@ Arguments:
 (Optional, string) The UUID of the label that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -368,6 +379,7 @@ discovery core label get -p cn
 Usage: `discovery core label store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -396,7 +408,7 @@ discovery core label store --file "labeljsonfile.json"
 ```bash
 # Store a label with the JSON configuration in the data flag
 discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
-{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label2","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
+{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
 ```
 
 ###### Delete
@@ -409,6 +421,7 @@ Arguments:
 (Required, string) The UUID of the label that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -429,6 +442,7 @@ discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
 Usage: `discovery core secret [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -445,6 +459,7 @@ Arguments:
 (Optional, string) The UUID of the secret that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -472,6 +487,7 @@ discovery core secret get -p cn
 Usage: `discovery core secret store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -513,6 +529,7 @@ Arguments:
 (Required, string) The UUID of the secret that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -533,6 +550,7 @@ discovery core secret delete 3d51beef-8b90-40aa-84b5-033241dc6239
 Usage: `discovery core credential [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -549,6 +567,7 @@ Arguments:
 (Optional, string) The name or UUID of the credential that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -594,6 +613,7 @@ discovery core credential get -p cn
 Usage: `discovery core credential store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -635,6 +655,7 @@ Arguments:
 (Required, string) The name or UUID of the credential that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -659,6 +680,7 @@ discovery core credential delete credential1
 Usage: `discovery core server [subcommand] [flags]
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -675,6 +697,7 @@ Arguments:
 (Optional, string) The name or UUID of the server that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -720,6 +743,7 @@ discovery core server get -p cn
 Usage: `discovery core server store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -761,6 +785,7 @@ Arguments:
 (Required, string) The name or UUID of the server that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 

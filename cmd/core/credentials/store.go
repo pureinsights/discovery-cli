@@ -30,6 +30,16 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			return commands.StoreCommand(d, coreClient.Credentials(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), abortOnError, data, file))
 		},
 		Args: cobra.NoArgs,
+		Example: `
+	# Store a credential with the JSON configuration in a file
+	discovery core credential store --file "credentialjsonfile.json"
+	{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"mongo-secret","type":"mongo"}
+	{"code":1003,"messages":["Entity not found: 3b32e410-2f33-412d-9fb8-17970131921d"],"status":404,"timestamp":"2025-10-30T16:50:38.250661200Z"}
+	{"active":true,"creationTimestamp":"2025-10-30T16:50:38.262086Z","id":"5b76ae0d-f383-47e5-be6f-90e9046092cd","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-30T16:50:38.262086Z","name":"my-credential-2","secret":"mongo-secret","type":"mongo"}
+
+	# Store a credential with the JSON configuration in the data flag
+	discovery core credential store --data '{"type":"mongo","name":"my-credential-1","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"mongo-secret"}'
+	{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"mongo-secret","type":"mongo"}`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "Aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted")
