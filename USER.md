@@ -984,8 +984,8 @@ discovery ingestion processor get 90675678-fc9f-47ec-8bab-89969dc204f0
 
 ```bash
 # Get processor by name
-discovery ingestion processor get "MongoDB store processor"
-{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor","type":"mongo"}
+discovery ingestion processor get "My HTML processor"
+{"active":true,"config":{"action":"select","charset":"UTF-8","file":"#{data('/file')}","selectors":{"section0":{"mode":"HTML","selector":".sect0"},"section1":{"mode":"HTML","selector":".sect1"}}},"creationTimestamp":"2025-11-17T22:38:26Z","id":"56ace252-4731-4428-84b8-7cd13bf059d3","labels":[],"lastUpdatedTimestamp":"2025-11-17T22:38:26Z","name":"My HTML processor","type":"html"}
 ```
 
 ```bash
@@ -1085,7 +1085,7 @@ discovery ingestion pipeline get 04536687-f083-4353-8ecc-b7348e14b748
 ```bash
 # Get pipeline by name
 discovery ingestion pipeline get "Search pipeline"
-{"active":true,"creationTimestamp":"2025-10-31T22:06:27Z","id":"8d9560b3-631b-490b-994f-4708d9880e3b","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:06:27Z","name":"Search pipeline"}
+{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","initialState":"ingestionState","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 ```
 
 ```bash
@@ -1187,7 +1187,7 @@ discovery ingestion seed get 7251d693-7382-452f-91dc-859add803a43
 ```bash
 # Get seed by name
 discovery ingestion seed get "Search seed"
-{"active":true,"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","type":"staging"}
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
 ```bash
