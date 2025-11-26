@@ -1433,7 +1433,7 @@ discovery queryflow import -p cn --file "entities/queryflow.zip"
 ##### Processor
 `processor` is the command used to manage processors in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
 
-Usage: `discovery queryflow processor [subcommand] [flags]
+Usage: `discovery queryflow processor [subcommand] [flags]`
 
 Flags:
 `-h, --help`::
@@ -1452,6 +1452,7 @@ Arguments:
 (Optional, String) The name or UUID of the processor that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1513,6 +1514,7 @@ Arguments:
 (Optional, String) The name or UUID of the endpoint that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1535,7 +1537,7 @@ discovery queryflow endpoint get cf56470f-0ab4-4754-b05c-f760669315af
 ```bash
 # Get an endpoint by name
 discovery queryflow endpoint get "Wikis endpoint"
-{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"Wikis endpoint","timeout":"PT1H","type":"default","uri":"/wikis-search"
+{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
 ```
 
 ```bash
