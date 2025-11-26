@@ -1452,6 +1452,7 @@ Arguments:
 (Optional, String) The name or UUID of the processor that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
