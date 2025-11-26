@@ -590,7 +590,7 @@ discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
 ```bash
 # Get credential by name
 discovery core credential get "my-credential"
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-11-20T00:08:14Z","id":"9be0e625-a510-46c5-8130-438823f849c2","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:14Z","name":"my-credential","secret":"openai-secret","type":"openai"}
 ```
 
 ```bash
