@@ -785,6 +785,7 @@ discovery core server delete server1
 Usage: `discovery ingestion [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -797,6 +798,7 @@ Flags:
 Usage: `discovery ingestion config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -826,6 +828,7 @@ Editing profile "default". Press Enter to keep the value shown, type a single sp
 Usage: `discovery ingestion config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -870,6 +873,7 @@ Ingestion API Key: "discovery.key.ingestion.cn"
 Usage: `discovery ingestion export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -899,6 +903,7 @@ discovery ingestion export --file "entities/ingestion.zip".
 Usage: `discovery Ingestion import [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -940,6 +945,7 @@ discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict I
 Usage: `discovery ingestion processor [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -956,6 +962,7 @@ Arguments:
 (Optional, string) The name or UUID of the processor that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1001,6 +1008,7 @@ discovery ingestion processor get -p cn
 Usage: `discovery ingestion processor store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1038,6 +1046,7 @@ discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB stor
 Usage: `discovery ingestion pipeline [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1054,6 +1063,7 @@ Arguments:
 (Optional, string) The name or UUID of the pipeline that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1099,6 +1109,7 @@ discovery ingestion pipeline get -p cn
 Usage: `discovery ingestion pipeline store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1136,6 +1147,7 @@ discovery ingestion pipeline store --data '{"name":"Search pipeline","labels":[]
 Usage: `discovery ingestion seed [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1152,6 +1164,7 @@ Arguments:
 (Optional, string) The name or UUID of the seed that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1198,6 +1211,7 @@ discovery ingestion seed get -p cn
 Usage: `discovery ingestion seed store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1239,6 +1253,7 @@ Arguments:
 (Required, string) The name or UUID of the seed that will be executed.
 
 Flags:
+
 `--properties`::
 (Optional, string) Set the properties of the seed execution.
 

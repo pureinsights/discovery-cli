@@ -29,6 +29,9 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 			return commands.ImportCommand(d, ingestionClient.BackupRestore(), file, discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"))
 		},
 		Args: cobra.NoArgs,
+		Example: `	# Export the entities using profile "cn".
+	discovery ingestion export -p cn
+	{"acknowledged":true}`,
 	}
 
 	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the entities that will be restored")
