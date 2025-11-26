@@ -280,8 +280,8 @@ discovery core export -p cn
 ```
 
 ```bash
-# Export the entities to a specific file
-discovery core export --file "entities/core.zip".
+# Export the entities to a specific file.
+discovery core export --file "entities/core.zip"
 {"acknowledged":true}
 ```
 
