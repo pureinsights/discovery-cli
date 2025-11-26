@@ -1536,8 +1536,8 @@ discovery queryflow endpoint get cf56470f-0ab4-4754-b05c-f760669315af
 
 ```bash
 # Get an endpoint by name
-discovery queryflow endpoint get "Wikis endpoint"
-{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
+discovery queryflow endpoint get "Blogs endpoint"
+{"active":true,"creationTimestamp":"2025-11-20T00:08:26Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","initialState":"searchState","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:26Z","name":"Blogs endpoint","states":{"searchState":{"mode":{"type":"group"},"processors":[{"active":true,"continueOnError":false,"id":"5f125024-1e5e-4591-9fee-365dc20eeeed"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/blogs-search"}
 ```
 
 ```bash
