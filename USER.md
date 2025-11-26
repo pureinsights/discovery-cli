@@ -1281,6 +1281,7 @@ Arguments:
 (Required, String) The name or UUID of the seed that will have its executions halted.
 
 Flags:
+
 `--execution`::
 (Optional, string) The UUID of the execution that will be halted.
 
