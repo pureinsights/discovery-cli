@@ -28,8 +28,8 @@ func NewExportCommand(d cli.Discovery) *cobra.Command {
 			return commands.ExportCommand(d, coreClient.BackupRestore(), file, commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.NoArgs,
-		Example: `	# Export the entities using profile "cn".
-	discovery core export -p cn`,
+		Example: `	# Export the entities to a specific file
+discovery core export --file "entities/core.zip`,
 	}
 
 	export.Flags().StringVarP(&file, "file", "f", "", "the file that will contain the exported entities")
