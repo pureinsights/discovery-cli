@@ -30,8 +30,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			return commands.StoreCommand(d, coreClient.Servers(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), abortOnError, data, file))
 		},
 		Args: cobra.NoArgs,
-		Example: `
-	# Store a server with the JSON configuration in a file
+		Example: `	# Store a server with the JSON configuration in a file
 	discovery core server store --file "serverjsonfile.json"
 	{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server","type":"mongo"}       
 	{"code":1003,"messages":["Entity not found: 2b839453-ddad-4ced-8e13-2c7860af60a8"],"status":404,"timestamp":"2025-10-30T17:45:48.176913700Z"}

@@ -17,8 +17,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.PrintConfigCommand(cmd, d.IOStreams(), d.PrintCoreConfigToUser)
 		},
-		Example: `
-	# Print the configuration of the "cn" profile with obfuscated API keys.
+		Example: `	# Print the configuration of the "cn" profile with obfuscated API keys.
 	discovery core config get -p cn
 	Showing the configuration of profile "cn":
 

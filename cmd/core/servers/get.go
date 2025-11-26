@@ -28,8 +28,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchCommand(args, d, coreClient.Servers(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
-		Example: `
-	# Get server by name
+		Example: `	# Get server by name
 	discovery core server get "MongoDB Atlas server"
 	{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
 

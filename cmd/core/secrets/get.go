@@ -27,8 +27,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.GetCommand(args, d, coreClient.Secrets(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.MaximumNArgs(1),
-		Example: `
-	# Get a secret by id
+		Example: `	# Get a secret by id
 	discovery core secret get 81ca1ac6-3058-4ecd-a292-e439827a675a
 	{"active":true,"creationTimestamp":"2025-08-26T21:56:50Z","id":"81ca1ac6-3058-4ecd-a292-e439827a675a","labels":[],"lastUpdatedTimestamp":"2025-08-26T21:56:50Z","name":"openai-secret"}
 

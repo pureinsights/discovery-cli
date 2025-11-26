@@ -28,8 +28,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchCommand(args, d, coreClient.Credentials(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
-		Example: `
-	# Get credential by name
+		Example: `	# Get credential by name
 	discovery core credential get "my-credential"
 	{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","type":"mongo"}
 

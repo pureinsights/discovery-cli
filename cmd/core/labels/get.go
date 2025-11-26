@@ -27,8 +27,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.GetCommand(args, d, coreClient.Labels(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.MaximumNArgs(1),
-		Example: `
-	# Get a label by id
+		Example: `	# Get a label by id
 	discovery core label get 3d51beef-8b90-40aa-84b5-033241dc6239
 	{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"A","lastUpdatedTimestamp":"2025-08-27T19:22:47Z","value":"B"}
 	

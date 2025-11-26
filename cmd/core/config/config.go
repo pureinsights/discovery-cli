@@ -17,8 +17,7 @@ func NewConfigCommand(d cli.Discovery) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.SaveConfigCommand(cmd, d.IOStreams(), d.SaveCoreConfigFromUser)
 		},
-		Example: `
-	# Ask the user for the configuration of profile "cn".
+		Example: `	# Ask the user for the configuration of profile "cn".
 	discovery core config -p cn
 	Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
 
