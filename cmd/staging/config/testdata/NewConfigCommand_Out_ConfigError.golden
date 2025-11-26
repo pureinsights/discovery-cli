@@ -4,6 +4,10 @@ Staging URL [http://localhost:12020]: Staging API key [staging235]: Usage:
   config [subcommands] [flags]
   config [command]
 
+Examples:
+	# Ask the user for the configuration of profile "cn".
+	discovery -p cn config
+
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   get         Print Discovery Staging's configuration

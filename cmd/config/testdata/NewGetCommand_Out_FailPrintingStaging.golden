@@ -9,6 +9,10 @@ QueryFlow API Key: "discovery.key.queryflow.cn"
 Usage:
   get [flags]
 
+Examples:
+	# Print the configuration of the "cn" profile with obfuscated API keys.
+	discovery config get -p cn
+
 Flags:
   -h, --help             help for get
   -p, --profile string   configuration profile to use

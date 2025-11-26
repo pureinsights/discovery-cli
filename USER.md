@@ -17,6 +17,7 @@ TODO
 Usage: `discovery [command]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -36,6 +37,7 @@ discovery -h
 Usage: `discovery config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -77,6 +79,7 @@ Editing profile "cn". Press Enter to keep the value shown, type a single space t
 Usage: `discovery config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -139,6 +142,7 @@ Staging API Key: "discovery.key.staging.cn"
 Usage: `discovery export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
