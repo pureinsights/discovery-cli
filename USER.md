@@ -1433,7 +1433,7 @@ discovery queryflow import -p cn --file "entities/queryflow.zip"
 ##### Processor
 `processor` is the command used to manage processors in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
 
-Usage: `discovery queryflow processor [subcommand] [flags]
+Usage: `discovery queryflow processor [subcommand] [flags]`
 
 Flags:
 `-h, --help`::
