@@ -1443,7 +1443,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery QueryFlow's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery QueryFlow's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
 Usage: `discovery queryflow processor get [flags] [<arg>]`
 
