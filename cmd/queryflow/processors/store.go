@@ -30,6 +30,11 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			return commands.StoreCommand(d, queryflowClient.Processors(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, file))
 		},
 		Args: cobra.NoArgs,
+		Example: `	# Store a processor with the JSON configuration in a file
+	discovery queryflow processor store --file "queryflowprocessorjsonfile.json"
+	
+	# Store a processor with the JSON configuration in the data flag
+	discovery queryflow processor store --data '{"type":"mongo","name":"MongoDB text processor","labels":[],"active":true,"id":"3393f6d9-94c1-4b70-ba02-5f582727d998","creationTimestamp":"2025-11-20T00:08:23Z","lastUpdatedTimestamp":"2025-11-20T00:08:23Z","config":{"action":"aggregate","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}],"database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "Aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted")
