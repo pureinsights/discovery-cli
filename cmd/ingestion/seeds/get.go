@@ -59,6 +59,17 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
 		},
 		Args: cobra.MaximumNArgs(1),
+		Example: `	# Get seed by name
+	discovery ingestion seed get "Search seed"
+
+	# Get seeds using filters
+	discovery ingestion seed get --filter label=A:A -f type=staging
+
+	# Get all seeds using the configuration in profile "cn"
+	discovery ingestion seed get -p cn
+	
+	# Get a seed record by id
+	discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=`,
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:
