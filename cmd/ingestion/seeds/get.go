@@ -10,6 +10,54 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// getRecordOrExecution determines whether to call the AppendSeedRecord() or GetSeedExecution() functions
+func getRecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profile, recordId, executionId string, details bool) error {
+	err := commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url")
+	if err != nil {
+		return err
+	}
+
+	if len(args) <= 0 {
+		return cli.NewError(cli.ErrorExitCode, "Missing the seed")
+	}
+
+	vpr := d.Config()
+	ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
+	seed, err := cli.SearchEntity(d, ingestionClient.Seeds(), args[0])
+	if err != nil {
+		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not search for entity with id %q", args[0])
+	}
+
+	seedId, err := uuid.Parse(seed.Get("id").String())
+	if err != nil {
+		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
+	}
+
+	output := vpr.GetString("output")
+	if output == "json" {
+		output = "pretty-json"
+	}
+	printer := cli.GetObjectPrinter(output)
+
+	if cmd.Flags().Changed("record") {
+		return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
+	}
+
+	seedExecutionId, err := uuid.Parse(executionId)
+	if err != nil {
+		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed execution id")
+	}
+
+	seedExecutionClient := ingestionClient.Seeds().Executions(seedId)
+
+	summarizers := map[string]cli.Summarizer{
+		"records": seedExecutionClient.Records(seedExecutionId),
+		"jobs":    seedExecutionClient.Jobs(seedExecutionId),
+	}
+
+	return d.GetSeedExecution(seedExecutionClient, seedExecutionId, summarizers, details, printer)
+}
+
 // NewGetCommand creates the seed get command
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var (
@@ -30,53 +78,12 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 
 			vpr := d.Config()
 
-			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
 			if !cmd.Flags().Changed("record") && !cmd.Flags().Changed("execution") {
+				ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
 				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 			}
 
-			err = commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url")
-			if err != nil {
-				return err
-			}
-
-			if len(args) <= 0 {
-				return cli.NewError(cli.ErrorExitCode, "Missing the seed")
-			}
-
-			seed, err := cli.SearchEntity(d, ingestionClient.Seeds(), args[0])
-			if err != nil {
-				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not search for entity with id %q", args[0])
-			}
-
-			seedId, err := uuid.Parse(seed.Get("id").String())
-			if err != nil {
-				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
-			}
-
-			output := vpr.GetString("output")
-			if output == "json" {
-				output = "pretty-json"
-			}
-			printer := cli.GetObjectPrinter(output)
-
-			if cmd.Flags().Changed("record") {
-				return d.AppendSeedRecord(seed, ingestionClient.Seeds().Records(seedId), recordId, printer)
-			}
-
-			seedExecutionId, err := uuid.Parse(executionId)
-			if err != nil {
-				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed execution id")
-			}
-
-			seedExecutionClient := ingestionClient.Seeds().Executions(seedId)
-
-			summarizers := map[string]cli.Summarizer{
-				"records": seedExecutionClient.Records(seedExecutionId),
-				"jobs":    seedExecutionClient.Jobs(seedExecutionId),
-			}
-
-			return d.GetSeedExecution(seedExecutionClient, seedExecutionId, summarizers, details, printer)
+			return getRecordOrExecution(cmd, args, d, profile, recordId, executionId, details)
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get seed by name
