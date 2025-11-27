@@ -28,6 +28,14 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchCommand(args, d, queryflowClient.Processors(), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
+		Example: `	# Get processor by name
+	discovery queryflow processor get "MongoDB text processor"
+
+	# Get processors using filters
+	discovery queryflow processor get --filter label=A:A -f type=mongo
+
+	# Get all processors using the configuration in profile "cn"
+	discovery queryflow processor get -p cn`,
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:
