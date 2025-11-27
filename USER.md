@@ -1436,6 +1436,7 @@ discovery queryflow import -p cn --file "entities/queryflow.zip"
 Usage: `discovery queryflow processor [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1527,6 +1528,7 @@ discovery queryflow processor delete processor1
 Usage: `discovery queryflow endpoint [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1593,6 +1595,7 @@ Arguments:
 (Required, String) The name or UUID of the endpoint that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
