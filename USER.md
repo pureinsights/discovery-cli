@@ -1042,6 +1042,7 @@ Arguments:
 (Required, String) The name or UUID of the processor that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
