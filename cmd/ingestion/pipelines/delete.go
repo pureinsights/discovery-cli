@@ -27,6 +27,11 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchDeleteCommand(args[0], d, ingestionClient.Pipelines(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"))
 		},
 		Args: cobra.ExactArgs(1),
+		Example: `	# Delete a pipeline by id
+	discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
+
+	# Delete a pipeline by name
+	discovery ingestion pipeline delete "Search pipeline"`,
 	}
 	return get
 }
