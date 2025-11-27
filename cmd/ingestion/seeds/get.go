@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// getRecordOrExecution determines whether to call the AppendSeedRecord() or GetSeedExecution() functions
-func getRecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profile, recordId, executionId string, details bool) error {
+// RecordOrExecution determines whether to call the AppendSeedRecord() or GetSeedExecution() functions
+func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profile, recordId, executionId string, details bool) error {
 	err := commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url")
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 			}
 
-			return getRecordOrExecution(cmd, args, d, profile, recordId, executionId, details)
+			return RecordOrExecution(cmd, args, d, profile, recordId, executionId, details)
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get seed by name
