@@ -875,9 +875,10 @@ Usage: `discovery ingestion seed get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the seed that will be retrieved.
+(Optional, string) The name or UUID of the seed that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -911,7 +912,7 @@ discovery ingestion seed get 7251d693-7382-452f-91dc-859add803a43
 ```bash
 # Get seed by name
 discovery ingestion seed get "Search seed"
-{"active":true,"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","type":"staging"}
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
 ```bash
