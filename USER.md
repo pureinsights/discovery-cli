@@ -1003,7 +1003,7 @@ discovery ingestion processor get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's processors. With the data flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion processor store [flags]`
 
@@ -1104,7 +1104,7 @@ discovery ingestion pipeline get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's pipelines. With the data flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion pipeline store [flags]`
 
@@ -1206,7 +1206,7 @@ discovery ingestion seed get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's seeds. With the data flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's seeds. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion seed store [flags]`
 
@@ -1244,7 +1244,7 @@ discovery ingestion seed store --data '{"type":"staging","name":"Search seed","l
 ```
 
 ###### Start
-`start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user can set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
+`start` is the command used to start a seed execution in Discovery Ingestion. With the `properties` flag, the user can set the execution properties with which to run the seed. With the `scan-type` flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
 
 Usage: `discovery ingestion seed start <arg> [flags]`
 
