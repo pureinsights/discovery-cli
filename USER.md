@@ -374,7 +374,7 @@ discovery core label get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's labels. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core label store [flags]`
 
@@ -482,7 +482,7 @@ discovery core secret get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's secrets. With the data flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's secrets. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core secret store [flags]`
 
@@ -608,7 +608,7 @@ discovery core credential get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's credentials. With the data flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's credentials. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core credential store [flags]`
 
@@ -738,7 +738,7 @@ discovery core server get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's servers. With the data flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core server store [flags]`
 
