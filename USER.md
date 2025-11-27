@@ -890,6 +890,9 @@ Flags:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
 
+`--record`::
+(Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
+
 Examples:
 
 ```bash
