@@ -1664,11 +1664,12 @@ discovery queryflow endpoint get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery QueryFlow's endpoints. With the data flag, the user can send a single JSON configuration or an array to upsert multiple endpoints. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery QueryFlow's endpoints. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple endpoints. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery queryflow endpoint store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
