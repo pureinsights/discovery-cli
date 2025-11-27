@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_NewSeedCommand tests the NewSeedCommand() function
-func Test_NewSeedCommand(t *testing.T) {
+// TestNewSeedCommand tests the NewSeedCommand() function
+func TestNewSeedCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
