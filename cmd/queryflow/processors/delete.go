@@ -27,6 +27,12 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchDeleteCommand(args[0], d, queryflowClient.Processors(), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"))
 		},
 		Args: cobra.ExactArgs(1),
+		Example: `	# Delete a processor by id
+	discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
+	{"acknowledged":true}
+
+	# Delete a processor by name
+	discovery queryflow processor delete processor1`,
 	}
 	return get
 }

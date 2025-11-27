@@ -1,6 +1,14 @@
 Usage:
   delete [flags]
 
+Examples:
+	# Delete a processor by id
+	discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
+	{"acknowledged":true}
+
+	# Delete a processor by name
+	discovery queryflow processor delete processor1
+
 Flags:
   -h, --help             help for delete
   -p, --profile string   configuration profile to use (default "default")
