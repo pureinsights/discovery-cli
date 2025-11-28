@@ -1592,7 +1592,7 @@ Usage: `discovery queryflow endpoint delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the endpoint that will be deleted.
+(Required, string) The name or UUID of the endpoint that will be deleted.
 
 Flags:
 
