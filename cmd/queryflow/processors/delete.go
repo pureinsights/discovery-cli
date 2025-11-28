@@ -29,7 +29,6 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		Example: `	# Delete a processor by id
 	discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
-	{"acknowledged":true}
 
 	# Delete a processor by name
 	discovery queryflow processor delete processor1`,
