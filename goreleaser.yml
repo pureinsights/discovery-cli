@@ -1,0 +1,4 @@
+builds:
+  - id: pdp-cli
+    main: ./cmd/discovery
+    binary: discovery
