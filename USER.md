@@ -1449,7 +1449,7 @@ Usage: `discovery queryflow processor get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the processor that will be retrieved.
+(Optional, string) The name or UUID of the processor that will be retrieved.
 
 Flags:
 
@@ -1499,7 +1499,7 @@ Usage: `discovery queryflow processor delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the processor that will be deleted.
+(Required, string) The name or UUID of the processor that will be deleted.
 
 Flags:
 
@@ -1540,7 +1540,7 @@ Usage: `discovery queryflow endpoint get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the endpoint that will be retrieved.
+(Optional, string) The name or UUID of the endpoint that will be retrieved.
 
 Flags:
 
