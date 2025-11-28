@@ -70,7 +70,7 @@ func (g *FailingRecordGetter) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// TestAppendSeedRecord tests the AppendSeedRecord function()
+// TestAppendSeedRecord tests the AppendSeedRecord() function
 func TestAppendSeedRecord(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -154,7 +154,7 @@ func TestAppendSeedRecord(t *testing.T) {
 	}
 }
 
-// Test_discovery_AppendSeedRecord tests the discovery.AppendSeedRecord function
+// Test_discovery_AppendSeedRecord tests the discovery.AppendSeedRecord() function
 func Test_discovery_AppendSeedRecord(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -338,7 +338,7 @@ func TestAppendSeedRecords(t *testing.T) {
 	}
 }
 
-// Test_discovery_AppendSeedRecord tests the discovery.AppendSeedRecord function
+// Test_discovery_AppendSeedRecords tests the discovery.AppendSeedRecords() function
 func Test_discovery_AppendSeedRecords(t *testing.T) {
 	tests := []struct {
 		name           string
