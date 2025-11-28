@@ -1,4 +1,35 @@
+version: 2
+
 builds:
   - id: pdp-cli
     main: ./cmd/discovery
     binary: discovery
+
+archives:
+  - id: default
+    builds:
+      - pdp-cli
+    format: tar.gz
+
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  github:
+    owner: diegogranados-pi
+    name: pdp-cli-releases-test
+
+scoops:
+  - name: pdp-cli
+    repository:
+      owner: diegogranados-pi
+      name: scoop-pdp-cli
+      directory: bucket
+    homepage: "https://github.com/diego-granados/pdp-cli-releases-test"
+    description: "YourCLI does X/Y/Z"
+    license: MIT
