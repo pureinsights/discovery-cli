@@ -29,7 +29,8 @@ scoops:
     repository:
       owner: diegogranados-pi
       name: scoop-pdp-cli
-      directory: bucket
+    directory: bucket
     homepage: "https://github.com/diego-granados/pdp-cli-releases-test"
-    description: "YourCLI does X/Y/Z"
+    description: "CLI for Discovery 2.x"
     license: MIT
+    skip_upload: false
