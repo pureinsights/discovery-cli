@@ -34,3 +34,13 @@ scoops:
     description: "CLI for Discovery 2.x"
     license: MIT
     skip_upload: false
+
+homebrew_casks:
+  - name: pdp-cli
+    repository:
+      owner: diegogranados-pi
+      name: homebrew-pdp-cli
+    homepage: "https://github.com/diego-granados/pdp-cli-releases-test"
+    description: "CLI for Discovery 2.x"
+    binaries:
+      - discovery
