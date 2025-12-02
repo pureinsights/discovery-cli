@@ -1039,7 +1039,7 @@ Usage: `discovery ingestion processor delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the processor that will be deleted.
+(Required, string) The name or UUID of the processor that will be deleted.
 
 Flags:
 
@@ -1166,7 +1166,7 @@ Usage: `discovery ingestion pipeline delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the pipeline that will be deleted.
+(Required, string) The name or UUID of the pipeline that will be deleted.
 
 Flags:
 
