@@ -7,9 +7,9 @@ builds:
 
 archives:
   - id: default
-    builds:
+    ids:
       - pdp-cli
-    format: tar.gz
+    formats: tar.gz
 
     format_overrides:
       - goos: windows
@@ -28,7 +28,7 @@ scoops:
   - name: pdp-cli
     repository:
       owner: diegogranados-pi
-      name: scoop-pdp-cli
+      name: pdp-cli-releases-test
     directory: bucket
     homepage: "https://github.com/diego-granados/pdp-cli-releases-test"
     description: "CLI for Discovery 2.x"
@@ -39,7 +39,7 @@ homebrew_casks:
   - name: pdp-cli
     repository:
       owner: diegogranados-pi
-      name: homebrew-pdp-cli
+      name: pdp-cli-releases-test
     homepage: "https://github.com/diego-granados/pdp-cli-releases-test"
     description: "CLI for Discovery 2.x"
     binaries:
