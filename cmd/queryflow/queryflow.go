@@ -3,6 +3,7 @@ package queryflow
 import (
 	"github.com/pureinsights/pdp-cli/cmd/queryflow/backuprestore"
 	"github.com/pureinsights/pdp-cli/cmd/queryflow/config"
+	"github.com/pureinsights/pdp-cli/cmd/queryflow/processors"
 	"github.com/pureinsights/pdp-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
@@ -17,6 +18,7 @@ func NewQueryFlowCommand(d cli.Discovery) *cobra.Command {
 	queryflow.AddCommand(config.NewConfigCommand(d))
 	queryflow.AddCommand(backuprestore.NewExportCommand(d))
 	queryflow.AddCommand(backuprestore.NewImportCommand(d))
+	queryflow.AddCommand(processors.NewProcessorCommand(d))
 
 	return queryflow
 }
