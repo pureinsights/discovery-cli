@@ -33,6 +33,7 @@ type Discovery interface {
 	DeleteEntity(client Deleter, id uuid.UUID, printer Printer) error
 	SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error
 	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
+	HaltSeed(client IngestionSeedController, name string, printer Printer) error
 	ExportEntitiesFromClient(client BackupRestore, path string, printer Printer) error
 	ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error
 	ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
