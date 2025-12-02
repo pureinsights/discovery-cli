@@ -1294,7 +1294,7 @@ Usage: `discovery ingestion seed delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the seed that will be deleted.
+(Required, string) The name or UUID of the seed that will be deleted.
 
 Flags:
 
