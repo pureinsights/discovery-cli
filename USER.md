@@ -1278,7 +1278,7 @@ Usage: `discovery ingestion seed halt <seed> [flags] `
 
 Arguments:
 `seed`::
-(Required, String) The name or UUID of the seed that will have its executions halted.
+(Required, string) The name or UUID of the seed that will have its executions halted.
 
 Flags:
 
