@@ -1271,6 +1271,40 @@ discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"
 {"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
+###### Halt
+`halt` is the command used to halt a seed execution in Discovery Ingestion. With the `execution` flag, the user can specify the specific execution that will be halted. If there is no `execution` flag, all of the active executions are halted.
+
+Usage: `discovery ingestion seed halt <seed> [flags] `
+
+Arguments:
+`seed`::
+(Required, string) The name or UUID of the seed that will have its executions halted.
+
+Flags:
+
+`--execution`::
+(Optional, string) The UUID of the execution that will be halted.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Halt all active seed executions
+discovery ingestion seed halt 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","status":202}
+```
+
+```bash
+# Halt a single seed execution
+discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
+{"acknowledged":true}
+```
+
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow.
 

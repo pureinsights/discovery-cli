@@ -376,3 +376,117 @@ func Test_discovery_HaltSeed(t *testing.T) {
 		})
 	}
 }
+
+// WorkingSeedController simulates a working IngestionSeedController
+type WorkingSeedExecutionController struct {
+	mock.Mock
+	WorkingGetter
+}
+
+// Halt returns the results of halting a seed
+func (c *WorkingSeedExecutionController) Halt(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{"acknowledged":true}`), nil
+}
+
+// FailingSeedControllerStartFails simulates when starting a seed execution fails.
+type FailingSeedExecutionControllerHaltFails struct {
+	mock.Mock
+	WorkingGetter
+}
+
+// Halt returns the results of halting a seed
+func (c *FailingSeedExecutionControllerHaltFails) Halt(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
+			"status": 409,
+			"code": 4001,
+			"messages": [
+				"Action HALT cannot be applied to seed execution cc89b714-d00a-4774-9c45-9497b5d9f8ef because of its current status: HALTING"
+			],
+			"timestamp": "2025-09-03T21:05:21.861757200Z"
+			}`)}
+}
+
+// Test_discovery_HaltSeedExecution tests the discovery.HaltSeedExecution() function.
+func Test_discovery_HaltSeedExecution(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         IngestionSeedExecutionController
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "HaltSeedExecution correctly prints the received object with the sent printer",
+			client:         new(WorkingSeedExecutionController),
+			printer:        JsonObjectPrinter(true),
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
+			err:            nil,
+		},
+		{
+			name:           "StartSeed correctly prints the received object with JSON ugly printer",
+			client:         new(WorkingSeedExecutionController),
+			printer:        nil,
+			expectedOutput: "{\"acknowledged\":true}\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name:           "Halt fails seed not found",
+			client:         new(FailingSeedExecutionControllerHaltFails),
+			printer:        nil,
+			expectedOutput: "",
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
+			"status": 409,
+			"code": 4001,
+			"messages": [
+				"Action HALT cannot be applied to seed execution cc89b714-d00a-4774-9c45-9497b5d9f8ef because of its current status: HALTING"
+			],
+			"timestamp": "2025-09-03T21:05:21.861757200Z"
+			}`)}, "Could not halt the seed execution with id \"cc89b714-d00a-4774-9c45-9497b5d9f8ef\""),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(WorkingSeedExecutionController),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			executionId, err := uuid.Parse("cc89b714-d00a-4774-9c45-9497b5d9f8ef")
+			require.NoError(t, err)
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err = d.HaltSeedExecution(tc.client, executionId, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
