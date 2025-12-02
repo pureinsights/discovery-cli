@@ -1474,8 +1474,8 @@ discovery queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
 
 ```bash
 # Get processor by name
-discovery queryflow processor get "MongoDB text processor"
-{"active":true,"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor","type":"mongo"}
+discovery queryflow processor get "OpenAI Chat Processor"
+{"active":true,"config":{"action":"chat-completion","messages":[{"content":"#{ data(\"/script\") }","role":"user"}],"model":"gpt-4.1"},"creationTimestamp":"2025-11-20T00:10:50Z","id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:10:50Z","name":"OpenAI Chat Processor","server":{"credential":"9be0e625-a510-46c5-8130-438823f849c2","id":"741df47e-208f-47c1-812f-53cc62c726af"},"type":"openai"}
 ```
 
 ```bash
