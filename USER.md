@@ -1254,19 +1254,19 @@ Flags:
 Examples:
 
 ```bash
-# Start a seed seed execution with no flags
+# Start a seed execution with no flags
 discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ```bash
-# Start a seed seed execution with no flags using the seed's name
+# Start a seed execution with no flags using the seed's name
 discovery ingestion seed start "Search seed"
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ```bash
-# Start a seed seed execution with the properties and scan-type flags
+# Start a seed execution with the properties and scan-type flags
 discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
 {"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
@@ -1443,13 +1443,13 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery QueryFlow's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery QueryFlow's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
 Usage: `discovery queryflow processor get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the processor that will be retrieved.
+(Optional, string) The name or UUID of the processor that will be retrieved.
 
 Flags:
 
@@ -1511,7 +1511,7 @@ Usage: `discovery queryflow endpoint get [flags] [<arg>]`
 
 Arguments:
 `arg`::
-(Optional, String) The name or UUID of the endpoint that will be retrieved.
+(Optional, string) The name or UUID of the endpoint that will be retrieved.
 
 Flags:
 
