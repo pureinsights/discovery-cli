@@ -12,6 +12,7 @@ import (
 type IngestionSeedController interface {
 	Searcher
 	Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error)
+	Halt(id uuid.UUID) ([]gjson.Result, error)
 }
 
 // GetSeedId obtains the UUID from the result of a search
@@ -41,6 +42,28 @@ func (d discovery) StartSeed(client IngestionSeedController, name string, scanTy
 		err = jsonPrinter(*d.IOStreams(), startResult)
 	} else {
 		err = printer(*d.IOStreams(), startResult)
+	}
+
+	return err
+}
+
+// HaltSeed stops all the seed executions of a seed
+func (d discovery) HaltSeed(client IngestionSeedController, name string, printer Printer) error {
+	seedId, err := GetSeedId(d, client, name)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to halt execution.")
+	}
+
+	haltResults, err := client.Halt(seedId)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not halt seed execution for seed with id %q", seedId.String())
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonArrayPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), haltResults...)
+	} else {
+		err = printer(*d.IOStreams(), haltResults...)
 	}
 
 	return err

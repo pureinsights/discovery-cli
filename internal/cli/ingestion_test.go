@@ -36,7 +36,7 @@ func (s *SearcherIDNotUUID) Search(gjson.Result) ([]gjson.Result, error) {
 func (s *SearcherIDNotUUID) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Parse(`{
 			"type": "mongo",
-			"name": "MongoDB Atlas server clone",
+			"name": "MongoDB Atlas seed clone",
 			"labels": [],
 			"active": true,
 			"id": "test",
@@ -53,7 +53,7 @@ func (s *SearcherIDNotUUID) Get(id uuid.UUID) (gjson.Result, error) {
 			"status": 404,
 			"code": 1003,
 			"messages": [
-				"Server not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+				"Seed not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
 			],
 			"timestamp": "2025-10-16T00:15:31.888410500Z"
 		}`),
@@ -138,9 +138,14 @@ type WorkingSeedController struct {
 	WorkingSearcher
 }
 
-// Start returns a the result of a new seed execution
+// Start returns the result of a new seed execution
 func (c *WorkingSeedController) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
+}
+
+// Halt returns the results of halting a seed
+func (c *WorkingSeedController) Halt(id uuid.UUID) ([]gjson.Result, error) {
+	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
 // FailingSeedControllerGetSeedIdFails simulates a failing IngestionSeedController when GetSeedId fails.
@@ -152,6 +157,11 @@ type FailingSeedControllerGetSeedIdFails struct {
 // Start implements the interface.
 func (c *FailingSeedControllerGetSeedIdFails) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
+}
+
+// Halt implements the interface
+func (c *FailingSeedControllerGetSeedIdFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
+	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
 // FailingSeedControllerStartFails simulates when starting a seed execution fails.
@@ -170,6 +180,21 @@ func (c *FailingSeedControllerStartFails) Start(id uuid.UUID, scan discoveryPack
 			],
 			"timestamp": "2025-09-04T20:17:00.116546400Z"
 			}`)}
+}
+
+// Halt implements the IngestionSeedController interface
+func (c *FailingSeedControllerStartFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
+	return []gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+			],
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`),
+	}
 }
 
 // Test_discovery_StartSeed tests the discovery.StartSeed() function.
@@ -247,6 +272,97 @@ func Test_discovery_StartSeed(t *testing.T) {
 
 			d := NewDiscovery(&ios, viper.New(), "")
 			err := d.StartSeed(tc.client, "", discoveryPackage.ScanFull, gjson.Result{}, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_HaltSeed tests the discovery.HaltSeed() function.
+func Test_discovery_HaltSeed(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         IngestionSeedController
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "HaltSeed correctly prints the stopped executions with the sent printer",
+			client:         new(WorkingSeedController),
+			printer:        JsonArrayPrinter(true),
+			expectedOutput: "[\n{\n  \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n  \"status\": 202\n},\n{\n  \"id\": \"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b\",\n  \"status\": 202\n}\n]\n",
+			err:            nil,
+		},
+		{
+			name:           "HaltSeed prints the halted executions with the ugly printer",
+			client:         new(WorkingSeedController),
+			printer:        nil,
+			expectedOutput: "{\"id\":\"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\"status\":202}\n{\"id\":\"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b\",\"status\":202}\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name:           "GetByIdFails",
+			client:         new(FailingSeedControllerGetSeedIdFails),
+			printer:        nil,
+			expectedOutput: "",
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not get seed ID to halt execution."),
+		},
+		{
+			name:           "Halt fails seed not found",
+			client:         new(FailingSeedControllerStartFails),
+			printer:        nil,
+			expectedOutput: "",
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+			],
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`)}, "Could not halt seed execution for seed with id \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\""),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(WorkingSeedController),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.HaltSeed(tc.client, "", tc.printer)
 
 			if tc.err != nil {
 				require.Error(t, err)
