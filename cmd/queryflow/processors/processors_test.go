@@ -1,4 +1,4 @@
-package seeds
+package processors
 
 import (
 	"bytes"
@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_NewSeedCommand tests the NewSeedCommand() function
-func Test_NewSeedCommand(t *testing.T) {
+// Test_NewProcessorCommand tests the NewProcessorCommand() function
+func Test_NewProcessorCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -27,7 +27,7 @@ func Test_NewSeedCommand(t *testing.T) {
 	vpr := viper.New()
 	vpr.SetDefault("profile", "default")
 	d := cli.NewDiscovery(&ios, vpr, dir)
-	coreCmd := NewSeedCommand(d)
+	coreCmd := NewProcessorCommand(d)
 
 	coreCmd.SetIn(ios.In)
 	coreCmd.SetOut(ios.Out)
@@ -47,6 +47,6 @@ func Test_NewSeedCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"get", "halt", "start", "store"}
+	expectedCommands := []string{"get"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
