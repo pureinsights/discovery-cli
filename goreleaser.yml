@@ -16,6 +16,11 @@ archives:
         formats: [zip]
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
+    files:
+    - src: ./USER.md
+      dst: USER.md
+
+
 checksum:
   name_template: "checksums.txt"
 
@@ -44,3 +49,25 @@ homebrew_casks:
     description: "CLI for Discovery 2.x"
     binaries:
       - discovery
+  
+chocolateys:
+  - name: pdp-cli-test
+    ids:
+      - default
+
+    owners: "Pureinsights"
+    title: "PDP CLI"
+    authors: "Diego Granados"
+
+    project_url: "https://github.com/diegogranados-pi/pdp-cli-releases-test"
+    require_license_acceptance: false
+
+    tags: "cli discovery"
+
+    summary: "CLI for Discovery 2.x"
+    description: |
+      {{ .ProjectName }} Chocolatey package.
+      Command-line interface for managing Discovery 2.x
+
+    api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
+    source_repo: "https://push.chocolatey.org/"
