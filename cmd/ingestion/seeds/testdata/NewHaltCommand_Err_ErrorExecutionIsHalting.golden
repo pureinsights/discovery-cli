@@ -1,0 +1,4 @@
+Error: Could not halt the seed execution with id "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36"
+status: 409, body: {"status":409,"code":4001,"messages":["Action HALT cannot be applied to seed execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36 because of its current status: HALTING"],"timestamp":"2025-11-05T21:22:43.927371900Z"}
+
+
