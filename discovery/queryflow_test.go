@@ -24,6 +24,8 @@ func Test_newQueryFlowProcessorsClient(t *testing.T) {
 	assert.Equal(t, url+"/processor", qpc.crud.client.client.BaseURL)
 	assert.Equal(t, apiKey, qpc.cloner.client.ApiKey)
 	assert.Equal(t, url+"/processor", qpc.cloner.client.client.BaseURL)
+	assert.Equal(t, apiKey, qpc.searcher.client.ApiKey)
+	assert.Equal(t, url+"/processor", qpc.searcher.client.client.BaseURL)
 }
 
 // Test_newEndpointsClient tests the constructor of endpointsClients.
@@ -38,6 +40,8 @@ func Test_newEndpointsClient(t *testing.T) {
 	assert.Equal(t, url+"/endpoint", qec.cloner.client.client.BaseURL)
 	assert.Equal(t, apiKey, qec.enabler.client.ApiKey)
 	assert.Equal(t, url+"/endpoint", qec.enabler.client.client.BaseURL)
+	assert.Equal(t, apiKey, qec.searcher.client.ApiKey)
+	assert.Equal(t, url+"/endpoint", qec.searcher.client.client.BaseURL)
 }
 
 // Test_queryFlow_Processors tests the queryFlow.Processors() function
@@ -49,6 +53,8 @@ func Test_queryFlow_Processors(t *testing.T) {
 	assert.Equal(t, q.Url+"/processor", qpc.crud.client.client.BaseURL)
 	assert.Equal(t, q.ApiKey, qpc.cloner.client.ApiKey)
 	assert.Equal(t, q.Url+"/processor", qpc.cloner.client.client.BaseURL)
+	assert.Equal(t, q.ApiKey, qpc.searcher.client.ApiKey)
+	assert.Equal(t, q.Url+"/processor", qpc.searcher.client.client.BaseURL)
 }
 
 // Test_queryFlow_Endpoints tests the queryFlow.Endpoints() function
@@ -62,6 +68,8 @@ func Test_queryFlow_Endpoints(t *testing.T) {
 	assert.Equal(t, q.Url+"/endpoint", qec.cloner.client.client.BaseURL)
 	assert.Equal(t, q.ApiKey, qec.enabler.client.ApiKey)
 	assert.Equal(t, q.Url+"/endpoint", qec.enabler.client.client.BaseURL)
+	assert.Equal(t, q.ApiKey, qec.searcher.client.ApiKey)
+	assert.Equal(t, q.Url+"/endpoint", qec.searcher.client.client.BaseURL)
 }
 
 // Test_queryFlow_BackupRestore tests the queryFlow.BackupRestore() function

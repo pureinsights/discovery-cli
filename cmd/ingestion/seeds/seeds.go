@@ -15,6 +15,7 @@ func NewSeedCommand(d cli.Discovery) *cobra.Command {
 	seed.AddCommand(NewStoreCommand(d))
 	seed.AddCommand(NewGetCommand(d))
 	seed.AddCommand(NewStartCommand(d))
+	seed.AddCommand(NewHaltCommand(d))
     seed.AddCommand(NewDeleteCommand(d))
 
 	return seed
