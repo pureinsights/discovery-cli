@@ -2,7 +2,17 @@
 
 ## Installation
 
-TODO
+### With Go (Easiest)
+The easiest way to install the Discovery CLI is using [Go](https://go.dev/doc/install). Then, we can simply run:
+
+```bash
+go install github.com/pureinsights/discovery-cli/cmd/discovery@$latest
+```
+
+#### Troubleshooting
+If the installation does not work, make sure you have the the `%GOPATH%/bin`added to the `PATH` environment variable. See this [wiki](https://go.dev/wiki/SettingGOPATH) to set the `GOPATH` variable.
+
+### Setting Environment Variables (Advanced)
 
 ## Getting started
 
