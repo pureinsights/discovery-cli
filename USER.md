@@ -1032,6 +1032,35 @@ discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB stor
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's processors. The user must send a name or UUID to delete a specific processor.
+
+Usage: `discovery ingestion processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, String) The name or UUID of the processor that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery ingestion processor delete "MongoDB store processor"
+{"acknowledged":true}
+```
+
 ##### Pipeline
 `pipeline` is the command used to manage pipelines in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
