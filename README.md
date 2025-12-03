@@ -1,6 +1,7 @@
 # Pureinsights Discovery Platform: Command Line Interface Documentation
 
 ## Installation
+There are two methods to install the Discovery CLI:
 
 ### With Go (Easiest)
 The easiest way to install the Discovery CLI is using [Go](https://go.dev/doc/install). Then, we can simply run:
