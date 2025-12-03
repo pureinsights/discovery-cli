@@ -219,7 +219,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
-			err:       cli.NewError(cli.ErrorExitCode, "The Discovery QueryFlow URL is missing for profile \"default\".\nTo set the URL for the Discovery QueryFlow API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery queryflow config --profile \"default\""),
+			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery ingestion config --profile \"default\""),
 		},
 		{
 			name:      "sent name does not exist",
@@ -450,10 +450,10 @@ func TestNewDeleteCommand(t *testing.T) {
 			vpr.Set("profile", "default")
 			vpr.Set("output", "json")
 			if tc.url {
-				vpr.Set("default.queryflow_url", srv.URL)
+				vpr.Set("default.ingestion_url", srv.URL)
 			}
 			if tc.apiKey != "" {
-				vpr.Set("default.queryflow_key", tc.apiKey)
+				vpr.Set("default.ingestion_key", tc.apiKey)
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, t.TempDir())
@@ -504,8 +504,8 @@ func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
 	vpr.Set("profile", "default")
 	vpr.Set("output", "json")
 
-	vpr.Set("default.queryflow_url", "test")
-	vpr.Set("default.queryflow_key", "test")
+	vpr.Set("default.ingestion_url", "test")
+	vpr.Set("default.ingestion_key", "test")
 
 	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
 
@@ -541,8 +541,8 @@ func TestNewDeleteCommand_NotExactly1Arg(t *testing.T) {
 	vpr.Set("profile", "default")
 	vpr.Set("output", "json")
 
-	vpr.Set("default.queryflow_url", "test")
-	vpr.Set("default.queryflow_key", "test")
+	vpr.Set("default.ingestion_url", "test")
+	vpr.Set("default.ingestion_key", "test")
 
 	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
 

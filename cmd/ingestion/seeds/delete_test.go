@@ -1,4 +1,4 @@
-package processors
+package seeds
 
 import (
 	"bytes"
@@ -35,7 +35,7 @@ func TestNewDeleteCommand(t *testing.T) {
 		// Working case
 		{
 			name:      "Delete by ID returns an acknowledged true",
-			args:      []string{"my-processor"},
+			args:      []string{"my-seed"},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
@@ -43,14 +43,14 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/processor/search": {
+				"POST:/v2/seed/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
 				{
 				"source": {
 					"type": "mongo",
-					"name": "my-processor",
+					"name": "my-seed",
 					"labels": [
 					{
 						"key": "A",
@@ -80,14 +80,14 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/processor/search", r.URL.Path)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
 					},
 				},
-				"GET:/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
-					"name": "my-processor",
+					"name": "my-seed",
 					"labels": [
 					{
 						"key": "A",
@@ -102,10 +102,10 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
-				"DELETE:/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 				"acknowledged": true
@@ -114,7 +114,7 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
 			},
@@ -122,7 +122,7 @@ func TestNewDeleteCommand(t *testing.T) {
 		},
 		{
 			name:      "Delete by name returns an acknowledged true",
-			args:      []string{"my-processor"},
+			args:      []string{"my-seed"},
 			url:       true,
 			apiKey:    "apiKey123",
 			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
@@ -130,7 +130,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/processor/search": {
+				"POST:/v2/seed/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -138,7 +138,7 @@ func TestNewDeleteCommand(t *testing.T) {
 				{
 				"source": {
 					"type": "mongo",
-					"name": "my-processor",
+					"name": "my-seed",
 					"labels": [
 					{
 						"key": "A",
@@ -167,15 +167,15 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/processor/search", r.URL.Path)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"GET:/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
-					"name": "my-processor",
+					"name": "my-seed",
 					"labels": [
 					{
 						"key": "A",
@@ -190,10 +190,10 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
-				"DELETE:/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -201,7 +201,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -212,14 +212,14 @@ func TestNewDeleteCommand(t *testing.T) {
 		// Error case
 		{
 			name:      "No URL",
-			args:      []string{"my-processor"},
+			args:      []string{"my-seed"},
 			outGolden: "NewDeleteCommand_Out_NoURL",
 			errGolden: "NewDeleteCommand_Err_NoURL",
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NoURL"),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
-			err:       cli.NewError(cli.ErrorExitCode, "The Discovery QueryFlow URL is missing for profile \"default\".\nTo set the URL for the Discovery QueryFlow API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery queryflow config --profile \"default\""),
+			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery ingestion config --profile \"default\""),
 		},
 		{
 			name:      "sent name does not exist",
@@ -231,13 +231,13 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NameDoesNotExist"),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/processor/search": {
+				"POST:/v2/seed/search": {
 					StatusCode:  http.StatusNoContent,
 					Body:        ``,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/processor/search", r.URL.Path)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -255,7 +255,7 @@ func TestNewDeleteCommand(t *testing.T) {
 		},
 		{
 			name:      "Printing JSON object fails",
-			args:      []string{"my-processor"},
+			args:      []string{"my-seed"},
 			outGolden: "NewDeleteCommand_Out_PrintJSONFails",
 			errGolden: "NewDeleteCommand_Err_PrintJSONFails",
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_PrintJSONFails"),
@@ -263,7 +263,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/processor/search": {
+				"POST:/v2/seed/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -271,7 +271,7 @@ func TestNewDeleteCommand(t *testing.T) {
 				{
 				"source": {
 					"type": "mongo",
-					"name": "my-processor",
+					"name": "my-seed",
 					"labels": [
 					{
 						"key": "A",
@@ -300,15 +300,15 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/processor/search", r.URL.Path)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"GET:/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
-					"name": "my-processor",
+					"name": "my-seed",
 					"labels": [
 					{
 						"key": "A",
@@ -323,10 +323,10 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
-				"DELETE:/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -334,7 +334,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -351,7 +351,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/processor/search": {
+				"POST:/v2/seed/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -388,11 +388,11 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/processor/search", r.URL.Path)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"GET:/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -411,17 +411,17 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
-				"DELETE:/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 				"acknowledged": true
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/processor/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/seed/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -450,10 +450,10 @@ func TestNewDeleteCommand(t *testing.T) {
 			vpr.Set("profile", "default")
 			vpr.Set("output", "json")
 			if tc.url {
-				vpr.Set("default.queryflow_url", srv.URL)
+				vpr.Set("default.ingestion_url", srv.URL)
 			}
 			if tc.apiKey != "" {
-				vpr.Set("default.queryflow_key", tc.apiKey)
+				vpr.Set("default.ingestion_key", tc.apiKey)
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, t.TempDir())
@@ -504,8 +504,8 @@ func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
 	vpr.Set("profile", "default")
 	vpr.Set("output", "json")
 
-	vpr.Set("default.queryflow_url", "test")
-	vpr.Set("default.queryflow_key", "test")
+	vpr.Set("default.ingestion_url", "test")
+	vpr.Set("default.ingestion_key", "test")
 
 	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
 
@@ -515,7 +515,7 @@ func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
 	deleteCmd.SetOut(ios.Out)
 	deleteCmd.SetErr(ios.Err)
 
-	deleteCmd.SetArgs([]string{"my-processor"})
+	deleteCmd.SetArgs([]string{"my-seed"})
 
 	err := deleteCmd.Execute()
 	require.Error(t, err)
@@ -541,8 +541,8 @@ func TestNewDeleteCommand_NotExactly1Arg(t *testing.T) {
 	vpr.Set("profile", "default")
 	vpr.Set("output", "json")
 
-	vpr.Set("default.queryflow_url", "test")
-	vpr.Set("default.queryflow_key", "test")
+	vpr.Set("default.ingestion_url", "test")
+	vpr.Set("default.ingestion_key", "test")
 
 	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
 
