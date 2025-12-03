@@ -36,6 +36,7 @@ type endpointsClient struct {
 	crud
 	cloner
 	enabler
+	searcher
 }
 
 // NewEndpointsClient is the constructor of a newEndpointsClient
@@ -51,6 +52,9 @@ func newEndpointsClient(url, apiKey string) endpointsClient {
 			client: client,
 		},
 		enabler: enabler{
+			client: client,
+		},
+		searcher: searcher{
 			client: client,
 		},
 	}
