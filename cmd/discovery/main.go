@@ -6,8 +6,8 @@ import (
 	"os"
 	"slices"
 
-	"github.com/pureinsights/pdp-cli/cmd"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 )
 
 func main() {

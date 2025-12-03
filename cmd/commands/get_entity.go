@@ -2,7 +2,7 @@ package commands
 
 import (
 	"github.com/google/uuid"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 )
 
 const (
