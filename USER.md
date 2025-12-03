@@ -1815,6 +1815,34 @@ discovery queryflow endpoint get -p cn
 {"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","labels":[],"lastUpdatedTimestamp":"2025-08-25T16:47:24Z","name":"Blogs endpoint","timeout":"PT1H","type":"default","uri":"/blogs-search"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's endpoints. The user must send a name or UUID to delete a specific endpoint.
+
+Usage: `discovery queryflow endpoint delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the endpoint that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+`-p, --profile`::
+
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a endpoint by id
+discovery queryflow endpoint delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
+{"acknowledged":true}
+
+```
+```bash
+# Delete a endpoint by name
+discovery queryflow endpoint delete endpoint1
+{"acknowledged":true}
+```
 
 #### Staging
 `staging` is the main command used to interact with Discovery's Staging. 
