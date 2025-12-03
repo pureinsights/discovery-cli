@@ -3,7 +3,7 @@ package commands
 import (
 	"os"
 
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/tidwall/gjson"
 )
 
