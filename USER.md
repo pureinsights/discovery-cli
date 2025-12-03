@@ -1039,7 +1039,7 @@ Usage: `discovery ingestion processor delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the processor that will be deleted.
+(Required, string) The name or UUID of the processor that will be deleted.
 
 Flags:
 
@@ -1157,6 +1157,35 @@ discovery ingestion pipeline store --file pipelines.json
 # Store a pipeline with the JSON configuration in the data flag
 discovery ingestion pipeline store --data '{"name":"Search pipeline","labels":[],"active":true,"id":"36f8ce72-f23d-4768-91e8-58693ff1b272","creationTimestamp":"2025-10-31T19:41:13Z","lastUpdatedTimestamp":"2025-10-31T19:41:13Z","initialState":"ingestionState","states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header","active":true},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"recordPolicy":{"idPolicy":{},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"errorPolicy":"FAIL","outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
 {"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's pipelines. The user must send a name or UUID to delete a specific pipeline.
+
+Usage: `discovery ingestion pipeline delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the pipeline that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a pipeline by id
+discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a pipeline by name
+discovery ingestion pipeline delete "Search pipeline"
+{"acknowledged":true}
 ```
 
 ##### Seed
