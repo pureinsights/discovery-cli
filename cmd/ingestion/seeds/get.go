@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// RecordOrExecution determines whether to call the AppendSeedRecord() or GetSeedExecution() functions
+// RecordOrExecution determines whether to call the AppendSeedRecord() or SeedExecution() functions
 func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profile, recordId, executionId string, details bool) error {
 	err := commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url")
 	if err != nil {
@@ -55,7 +55,7 @@ func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profi
 		"jobs":    seedExecutionClient.Jobs(seedExecutionId),
 	}
 
-	return d.GetSeedExecution(seedExecutionClient, seedExecutionId, summarizers, details, printer)
+	return d.SeedExecution(seedExecutionClient, seedExecutionId, summarizers, details, printer)
 }
 
 // NewGetCommand creates the seed get command

@@ -211,8 +211,8 @@ func AppendSeedExecutionDetails(seedExecution gjson.Result, seedExecutionId uuid
 	return gjson.Parse(raw), nil
 }
 
-// GetSeedExecution gets a seed execution, appends details if needed, and prints out the result.
-func (d discovery) GetSeedExecution(client SeedExecutionGetter, seedExecutionId uuid.UUID, summarizers map[string]Summarizer, details bool, printer Printer) error {
+// SeedExecution gets a seed execution, appends details if needed, and prints out the result.
+func (d discovery) SeedExecution(client SeedExecutionGetter, seedExecutionId uuid.UUID, summarizers map[string]Summarizer, details bool, printer Printer) error {
 	execution, err := client.Get(seedExecutionId)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed execution with id %q", seedExecutionId.String())
