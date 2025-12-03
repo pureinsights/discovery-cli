@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pureinsights/pdp-cli/cmd"
+	"github.com/pureinsights/discovery-cli/cmd"
 )
 
 func main() {
