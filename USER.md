@@ -1103,6 +1103,35 @@ discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB stor
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's processors. The user must send a name or UUID to delete a specific processor.
+
+Usage: `discovery ingestion processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the processor that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery ingestion processor delete "MongoDB store processor"
+{"acknowledged":true}
+```
+
 ##### Pipeline
 `pipeline` is the command used to manage pipelines in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
@@ -1199,6 +1228,35 @@ discovery ingestion pipeline store --file pipelines.json
 # Store a pipeline with the JSON configuration in the data flag
 discovery ingestion pipeline store --data '{"name":"Search pipeline","labels":[],"active":true,"id":"36f8ce72-f23d-4768-91e8-58693ff1b272","creationTimestamp":"2025-10-31T19:41:13Z","lastUpdatedTimestamp":"2025-10-31T19:41:13Z","initialState":"ingestionState","states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header","active":true},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"recordPolicy":{"idPolicy":{},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"errorPolicy":"FAIL","outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
 {"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's pipelines. The user must send a name or UUID to delete a specific pipeline.
+
+Usage: `discovery ingestion pipeline delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the pipeline that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a pipeline by id
+discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a pipeline by name
+discovery ingestion pipeline delete "Search pipeline"
+{"acknowledged":true}
 ```
 
 ##### Seed
@@ -1300,6 +1358,36 @@ discovery ingestion seed store --data '{"type":"staging","name":"Search seed","l
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's seeds. The user must send a name or UUID to delete a specific seed.
+
+Usage: `discovery ingestion seed delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the seed that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a seed by id
+discovery ingestion seed delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a seed by name
+discovery ingestion seed delete "Search seed"
+{"acknowledged":true}
+```
+
+
 ###### Start
 `start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user can set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
 
@@ -1325,22 +1413,57 @@ Flags:
 Examples:
 
 ```bash
-# Start a seed seed execution with no flags
+# Start a seed execution with no flags
 discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ```bash
-# Start a seed seed execution with no flags using the seed's name
+# Start a seed execution with no flags using the seed's name
 discovery ingestion seed start "Search seed"
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ```bash
-# Start a seed seed execution with the properties and scan-type flags
+# Start a seed execution with the properties and scan-type flags
 discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
 {"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
+
+###### Halt
+`halt` is the command used to halt a seed execution in Discovery Ingestion. With the `execution` flag, the user can specify the specific execution that will be halted. If there is no `execution` flag, all of the active executions are halted.
+
+Usage: `discovery ingestion seed halt <seed> [flags] `
+
+Arguments:
+`seed`::
+(Required, string) The name or UUID of the seed that will have its executions halted.
+
+Flags:
+
+`--execution`::
+(Optional, string) The UUID of the execution that will be halted.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Halt all active seed executions
+discovery ingestion seed halt 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","status":202}
+```
+
+```bash
+# Halt a single seed execution
+discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
+{"acknowledged":true}
+```
+
 
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow.
@@ -1514,7 +1637,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery QueryFlow's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery QueryFlow's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
 Usage: `discovery queryflow processor get [flags] [<arg>]`
 
@@ -1545,8 +1668,8 @@ discovery queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
 
 ```bash
 # Get processor by name
-discovery queryflow processor get "MongoDB text processor"
-{"active":true,"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor","type":"mongo"}
+discovery queryflow processor get "OpenAI Chat Processor"
+{"active":true,"config":{"action":"chat-completion","messages":[{"content":"#{ data(\"/script\") }","role":"user"}],"model":"gpt-4.1"},"creationTimestamp":"2025-11-20T00:10:50Z","id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:10:50Z","name":"OpenAI Chat Processor","server":{"credential":"9be0e625-a510-46c5-8130-438823f849c2","id":"741df47e-208f-47c1-812f-53cc62c726af"},"type":"openai"}
 ```
 
 ```bash
@@ -1601,6 +1724,35 @@ discovery queryflow processor store --data '{"type":"mongo","name":"MongoDB text
 {"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:08:23Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:23Z","name":"MongoDB text processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's processors. The user must send a name or UUID to delete a specific processor.
+
+Usage: `discovery queryflow processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the processor that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery queryflow processor delete processor1
+{"acknowledged":true}
+```
+
 ##### Endpoint
 `endpoint` is the command used to manage endpoints in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
 
@@ -1614,7 +1766,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery QueryFlow's endpoints. The user can send a name or UUID to get a specific endpoint. If no argument is given, then the command retrieves every endpoint. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery QueryFlow's endpoints. The user can send a name or UUID to get a specific endpoint. If no argument is given, then the command retrieves every endpoint. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
 Usage: `discovery queryflow endpoint get [flags] [<arg>]`
 
@@ -1662,6 +1814,7 @@ discovery queryflow endpoint get -p cn
 {"active":true,"creationTimestamp":"2025-11-06T16:24:54Z","httpMethod":"GET","id":"2fee5e27-4147-48de-ba1e-d7f32476a4a2","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:54Z","name":"Wikis endpoint","timeout":"PT1H","type":"default","uri":"/wikis-search"}
 {"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","labels":[],"lastUpdatedTimestamp":"2025-08-25T16:47:24Z","name":"Blogs endpoint","timeout":"PT1H","type":"default","uri":"/blogs-search"}
 ```
+
 
 #### Staging
 `staging` is the main command used to interact with Discovery's Staging. 
