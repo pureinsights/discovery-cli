@@ -12,7 +12,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
 // BackupRestore defines methods to backup and restore entities in Discovery.
