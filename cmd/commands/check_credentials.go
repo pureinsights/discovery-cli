@@ -3,7 +3,7 @@ package commands
 import (
 	"strings"
 
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 )
 
 // CommandConfig is a struct that contains fields necessary to check the credentials.

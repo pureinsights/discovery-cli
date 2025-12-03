@@ -3,9 +3,9 @@ package processors
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -32,8 +32,8 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.NoArgs,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "Aborts the operation if there is an error")
-	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted.")
-	store.Flags().StringVarP(&file, "file", "f", "", "The address of the file that contains the JSON data")
+	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted")
+	store.Flags().StringVarP(&file, "file", "f", "", "The path of the file that contains the JSON data")
 
 	store.MarkFlagsOneRequired("data", "file")
 	store.MarkFlagsMutuallyExclusive("data", "file")

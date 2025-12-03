@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,7 +44,7 @@ func TestCheckCredentials(t *testing.T) {
 			url:           "core_url",
 			componentName: "Core",
 			config: map[string]string{
-				"default.core_url": "http://localhost:12010/v2",
+				"default.core_url": "http://localhost:12010",
 				"default.core_key": "http://discovery.core.cn",
 			},
 			err: nil,

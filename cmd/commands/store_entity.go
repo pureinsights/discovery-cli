@@ -3,13 +3,13 @@ package commands
 import (
 	"os"
 
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/tidwall/gjson"
 )
 
 const (
 	// LongStore is the message used in the Long field of the Store commands.
-	LongStore string = "store is the command used to create and update Discovery %[2]s's %[1]ss. With the data flag, the user can send a single JSON configuration or an array to upsert multiple %[1]ss. With the file flag, the user can also send the address of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive."
+	LongStore string = "store is the command used to create and update Discovery %[2]s's %[1]ss. With the data flag, the user can send a single JSON configuration or an array to upsert multiple %[1]s. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive."
 )
 
 // StoreCommandConfig contains the parameters sent to the StoreCommand function.

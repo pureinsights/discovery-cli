@@ -2,7 +2,8 @@ package cli
 
 import (
 	"github.com/google/uuid"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 )
@@ -29,9 +30,18 @@ type Discovery interface {
 	SearchEntity(client Searcher, id string, printer Printer) error
 	SearchEntities(client Searcher, filter gjson.Result, printer Printer) error
 	UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error
+	DeleteEntity(client Deleter, id uuid.UUID, printer Printer) error
+	SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error
+	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
+	HaltSeed(client IngestionSeedController, name string, printer Printer) error
+	HaltSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error
 	AppendSeedRecord(seed gjson.Result, client RecordGetter, id string, printer Printer) error
 	AppendSeedRecords(seed gjson.Result, client RecordGetter, printer Printer) error
 	GetSeedExecution(client SeedExecutionGetter, seedExecutionId uuid.UUID, summarizers map[string]Summarizer, details bool, printer Printer) error
+	ExportEntitiesFromClient(client BackupRestore, path string, printer Printer) error
+	ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error
+	ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
+	ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
@@ -60,7 +70,7 @@ func NewDiscovery(io *iostreams.IOStreams, config *viper.Viper, configPath strin
 	}
 }
 
-// ConfigPath returns the address that contains Discovery's configuration.
+// ConfigPath returns the path that contains Discovery's configuration.
 func (d discovery) ConfigPath() string {
 	return d.configPath
 }

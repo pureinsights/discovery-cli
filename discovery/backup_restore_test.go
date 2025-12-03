@@ -1,13 +1,14 @@
 package discovery
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
-	"github.com/pureinsights/pdp-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -131,23 +132,62 @@ func Test_backupRestore_Export(t *testing.T) {
 	require.NoError(t, err)
 
 	tests := []struct {
-		name          string
-		method        string
-		path          string
-		statusCode    int
-		response      []byte
-		expectedTexts []string
-		err           error
+		name               string
+		method             string
+		path               string
+		apiKey             string
+		statusCode         int
+		response           []byte
+		contentDisposition string
+		expectedFileName   string
+		expectedTexts      []string
+		err                error
 	}{
 		// Working case
 		{
-			name:          "Backup exports the entities.",
-			method:        http.MethodGet,
-			path:          "/export",
-			statusCode:    http.StatusOK,
-			response:      bytes,
-			expectedTexts: []string{"Processor.ndjson", "Pipeline.ndjson", "Seed.ndjson"},
-			err:           nil,
+			name:               "Backup exports the entities with a working content disposition.",
+			method:             http.MethodGet,
+			path:               "/export",
+			apiKey:             "apiKey123",
+			statusCode:         http.StatusOK,
+			response:           bytes,
+			contentDisposition: `attachment; filename="export-20251110T1455.zip"; filename*=utf-8''%C3%A9xport-20251110T1460.zip`,
+			expectedFileName:   "éxport-20251110T1460.zip",
+			expectedTexts:      []string{"Processor.ndjson", "Pipeline.ndjson", "Seed.ndjson"},
+			err:                nil,
+		},
+		{
+			name:               "Backup exports the entities with an empty content disposition.",
+			method:             http.MethodGet,
+			path:               "/export",
+			statusCode:         http.StatusOK,
+			response:           bytes,
+			contentDisposition: "",
+			expectedFileName:   "discovery.zip",
+			expectedTexts:      []string{"Processor.ndjson", "Pipeline.ndjson", "Seed.ndjson"},
+			err:                nil,
+		},
+		{
+			name:               "Backup exports the entities with content disposition that has no filenames.",
+			method:             http.MethodGet,
+			path:               "/export",
+			statusCode:         http.StatusOK,
+			response:           bytes,
+			contentDisposition: `attachment; file="110T1460.zip"`,
+			expectedFileName:   "discovery.zip",
+			expectedTexts:      []string{"Processor.ndjson", "Pipeline.ndjson", "Seed.ndjson"},
+			err:                nil,
+		},
+		{
+			name:               "Backup exports the entities with the ASCII filename field.",
+			method:             http.MethodGet,
+			path:               "/export",
+			statusCode:         http.StatusOK,
+			response:           bytes,
+			contentDisposition: `attachment; filename="export-20251110T1455.zip";`,
+			expectedFileName:   "export-20251110T1455.zip",
+			expectedTexts:      []string{"Processor.ndjson", "Pipeline.ndjson", "Seed.ndjson"},
+			err:                nil,
 		},
 
 		// Error case
@@ -173,19 +213,40 @@ func Test_backupRestore_Export(t *testing.T) {
 				"timestamp": "2025-08-25T20:25:49.609245Z"
 			}`)},
 		},
+		{
+			name:               "Backup receives a failing content disposition",
+			method:             http.MethodGet,
+			path:               "/export",
+			statusCode:         http.StatusOK,
+			response:           bytes,
+			contentDisposition: `failing content`,
+			expectedFileName:   "discovery.zip",
+			err:                errors.New("mime: expected slash after first token"),
+		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			srv := httptest.NewServer(
-				testutils.HttpHandler(t, tc.statusCode, "application/octet-stream", string(tc.response), func(t *testing.T, r *http.Request) {
-					assert.Equal(t, tc.method, r.Method)
-					assert.Equal(t, tc.path, r.URL.Path)
-				}))
+			srv := httptest.NewServer(http.HandlerFunc(
+				testutils.HttpHandlerWithContentDisposition(
+					t,
+					tc.statusCode,
+					"application/octet-stream",
+					tc.contentDisposition,
+					tc.response,
+					func(t *testing.T, r *http.Request) {
+						if tc.apiKey != "" {
+							assert.Equal(t, tc.apiKey, r.Header.Get("X-API-KEY"))
+						}
+						assert.Equal(t, tc.method, r.Method)
+						assert.Equal(t, tc.path, r.URL.Path)
+					},
+				)))
 			defer srv.Close()
 
-			b := backupRestore{client: newClient(srv.URL, "")}
-			response, err := b.Export()
+			b := backupRestore{client: newClient(srv.URL, tc.apiKey)}
+			response, filename, err := b.Export()
+			assert.Equal(t, tc.expectedFileName, filename)
 			if tc.err == nil {
 				require.NoError(t, err)
 				assert.Equal(t, bytes, response)
@@ -193,10 +254,22 @@ func Test_backupRestore_Export(t *testing.T) {
 					assert.Contains(t, string(response), text)
 				}
 			} else {
-				var errStruct Error
-				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
 			}
 		})
 	}
+}
+
+// Test_backupRestore_Export_RestyReturnsError tests the Export() method when Resty returns an error that is not HTTP.
+func Test_backupRestore_Export_RestyReturnsError(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	base := srv.URL
+	srv.Close()
+
+	b := backupRestore{client: newClient(srv.URL, "")}
+	response, filename, err := b.Export()
+	require.Error(t, err)
+	assert.Nil(t, response)
+	assert.Empty(t, filename)
+	assert.Contains(t, err.Error(), base+"/export")
 }

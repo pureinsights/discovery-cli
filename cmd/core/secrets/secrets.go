@@ -1,7 +1,7 @@
 package secrets
 
 import (
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +14,7 @@ func NewSecretCommand(d cli.Discovery) *cobra.Command {
 
 	secret.AddCommand(NewGetCommand(d))
 	secret.AddCommand(NewStoreCommand(d))
+	secret.AddCommand(NewDeleteCommand(d))
 
 	return secret
 }
