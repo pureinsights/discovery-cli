@@ -1252,8 +1252,8 @@ func TestAppendSeedExecutionDetails(t *testing.T) {
 	}
 }
 
-// TestGetSeedExecution tests the GetSeedExecution() function.
-func TestGetSeedExecution(t *testing.T) {
+// TestSeedExecution tests the SeedExecution() function.
+func TestSeedExecution(t *testing.T) {
 	tests := []struct {
 		name           string
 		client         SeedExecutionGetter
@@ -1266,7 +1266,7 @@ func TestGetSeedExecution(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:   "GetSeedExecution returns a working seed execution, appends the details, and correctly prints the result with the given printer",
+			name:   "SeedExecution returns a working seed execution, appends the details, and correctly prints the result with the given printer",
 			client: new(WorkingSeedExecutionGetter),
 			summarizers: map[string]Summarizer{
 				"records": new(WorkingRecordSummarizer),
@@ -1278,7 +1278,7 @@ func TestGetSeedExecution(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:   "GetSeedExecution prints a seed execution with no details with the pretty printer",
+			name:   "SeedExecution prints a seed execution with no details with the pretty printer",
 			client: new(WorkingSeedExecutionGetter),
 			summarizers: map[string]Summarizer{
 				"records": new(WorkingRecordSummarizer),
@@ -1352,7 +1352,7 @@ func TestGetSeedExecution(t *testing.T) {
 			executionId, err := uuid.Parse("f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3")
 			require.NoError(t, err)
 
-			err = d.GetSeedExecution(tc.client, executionId, tc.summarizers, tc.details, tc.printer)
+			err = d.SeedExecution(tc.client, executionId, tc.summarizers, tc.details, tc.printer)
 
 			if tc.err != nil {
 				require.Error(t, err)
