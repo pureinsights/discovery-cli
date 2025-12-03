@@ -1110,7 +1110,7 @@ Usage: `discovery ingestion processor delete [flags] <arg>`
 
 Arguments:
 `arg`::
-(Required, String) The name or UUID of the processor that will be deleted.
+(Required, string) The name or UUID of the processor that will be deleted.
 
 Flags:
 
@@ -1230,6 +1230,35 @@ discovery ingestion pipeline store --data '{"name":"Search pipeline","labels":[]
 {"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's pipelines. The user must send a name or UUID to delete a specific pipeline.
+
+Usage: `discovery ingestion pipeline delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the pipeline that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a pipeline by id
+discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a pipeline by name
+discovery ingestion pipeline delete "Search pipeline"
+{"acknowledged":true}
+```
+
 ##### Seed
 `seed` is the command used to manage seeds in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
@@ -1329,6 +1358,36 @@ discovery ingestion seed store --data '{"type":"staging","name":"Search seed","l
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's seeds. The user must send a name or UUID to delete a specific seed.
+
+Usage: `discovery ingestion seed delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the seed that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a seed by id
+discovery ingestion seed delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a seed by name
+discovery ingestion seed delete "Search seed"
+{"acknowledged":true}
+```
+
+
 ###### Start
 `start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user can set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
 
@@ -1404,6 +1463,7 @@ discovery ingestion seed halt 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
 discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
 {"acknowledged":true}
 ```
+
 
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow.
@@ -1624,6 +1684,35 @@ discovery queryflow processor get --filter label=A:A -f type=mongo
 discovery queryflow processor get -p cn
 {"active":true,"creationTimestamp":"2025-11-06T14:52:16Z","id":"019ecd8e-76c9-41ee-b047-299b8aa14aba","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:16Z","name":"MongoDB text processor","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-11-06T14:52:17Z","id":"0a7caa9b-99aa-4a63-aa6d-a1e40941984d","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:17Z","name":"MongoDB store processor","type":"mongo"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's processors. The user must send a name or UUID to delete a specific processor.
+
+Usage: `discovery queryflow processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the processor that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery queryflow processor delete processor1
+{"acknowledged":true}
 ```
 
 ##### Endpoint

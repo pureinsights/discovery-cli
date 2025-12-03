@@ -47,6 +47,6 @@ func Test_NewProcessorCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"get"}
+	expectedCommands := []string{"delete", "get"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
