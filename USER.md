@@ -12,8 +12,8 @@ go install github.com/pureinsights/discovery-cli/cmd/discovery@$latest
 #### Troubleshooting
 If the installation does not work, make sure you have the the `%GOPATH%/bin`added to the `PATH` environment variable. See this [wiki](https://go.dev/wiki/SettingGOPATH) to set the `GOPATH` variable.
 
-### Setting Environment Variables (Advanced)
-This method requires downloading the binaries of the Discovery CLI and adding them to the environment variables to make it available from a terminal or command prompt.
+### Making the Binary Global (Advanced)
+This method requires downloading the binary of the Discovery CLI and making it available globally from a terminal or command prompt.
 
 #### Choosing the Correct Binary
 Go to the [Releases](https://github.com/pureinsights/discovery-cli/releases) section of the GitHub repository. Each downloadable file indicates the **operating system** and **CPU architecture** it was compiled for. Choose the one that matches your device.
@@ -43,7 +43,7 @@ On the next menu, select "Advanced" and click "Environment Variables..."
 
 ![](docs/windows-images/environment-variables.png)
 
-Select the `Path` variable on the "User Variables" and choose Edit:
+Select the `Path` variable on the "User Variables" and choose "Edit":
 
 ![](docs/windows-images/edit-environment.png)
 
@@ -97,6 +97,7 @@ TODO
 Usage: `discovery [command]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
