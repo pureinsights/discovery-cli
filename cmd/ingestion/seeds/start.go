@@ -1,9 +1,9 @@
 package seeds
 
 import (
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )

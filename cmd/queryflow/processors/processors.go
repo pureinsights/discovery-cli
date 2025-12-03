@@ -1,7 +1,7 @@
 package processors
 
 import (
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -14,9 +14,7 @@ func NewProcessorCommand(d cli.Discovery) *cobra.Command {
 
 	processor.AddCommand(NewGetCommand(d))
 	processor.AddCommand(NewStoreCommand(d))
-    processor.AddCommand(NewDeleteCommand(d))
+	processor.AddCommand(NewDeleteCommand(d))
 
 	return processor
 }
-
-	

@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
-	"github.com/pureinsights/pdp-cli/internal/testutils"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -185,7 +185,7 @@ func TestNewStoreCommand(t *testing.T) {
 			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFile"),
 			errBytes:     []byte(nil),
 			data:         "",
-			file:         "testdata/StoreCommand_JSONFile.golden",
+			file:         "testdata/StoreCommand_JSONFile.json",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/seed": {
@@ -382,7 +382,7 @@ func TestNewStoreCommand(t *testing.T) {
 			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreEmptyFile"),
 			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreEmptyFile"),
 			data:         "",
-			file:         "testdata/StoreCommand_EmptyFile.golden",
+			file:         "testdata/StoreCommand_EmptyFile.json",
 			abortOnError: false,
 			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
 		},
@@ -595,7 +595,7 @@ func TestNewStoreCommand_NoProfileFlag(t *testing.T) {
 	storeCmd.SetOut(ios.Out)
 	storeCmd.SetErr(ios.Err)
 
-	storeCmd.SetArgs([]string{"--file", "testdata/StoreCommand_JSONFile.golden"})
+	storeCmd.SetArgs([]string{"--file", "testdata/StoreCommand_JSONFile.json"})
 
 	err := storeCmd.Execute()
 	require.Error(t, err)
