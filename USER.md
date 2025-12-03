@@ -31,23 +31,6 @@ Go to the [Releases](https://github.com/pureinsights/discovery-cli/releases) sec
 
 Extract the archives into your preferred location. The downloaded file contains the binary of the Discovery CLI and the user documentation.
 
-#### Move the Binary to a System Location
-After extracting the file, you'll have a single executable (e.g., `discovery` or `discovery.exe` on Windows). Move it to a directory commonly used for command-line tools:
-
-- **Windows:**  
-  `C:\Program Files\mycli\` (create this folder)
-- **macOS:**  
-  `/usr/local/bin/` (Intel)  
-  `/opt/homebrew/bin/` (Apple Silicon)
-- **Linux:**  
-  `/usr/local/bin/`
-
-On macOS and Linux, ensure the file is executable:
-
-```sh
-chmod +x mycli
-```
-
 #### Add the Executable to the PATH
 To run the CLI from any folder, the directory containing the executable must be included in your PATH environment variable.
 
@@ -73,6 +56,33 @@ Press "OK" to save and close all windows.
 Test the installation:
 
 ![](docs/windows-images/test-discovery-windows.png)
+
+##### macOS and Linux
+On Intel-based Macs and Linux, move the binary to the location `usr/local/bin`. On Macs with Apple Silicon, move the binary to `/opt/homebrew/bin`. On macOS, these folders might be hidden at first using Finder. Use the shortcut `Command + Shift + .` to show them.
+
+Ensure that the `discovery` file has execution permissions with this command:
+
+```bash
+chmod +x discovery
+```
+
+An alternative option is using the following command:
+
+**macOS Catalina (10.15) or later**
+
+```bash
+echo 'export PATH="/path/to/discovery:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Linux / macOS Mojave (10.14) or earlier**
+
+```bash
+echo 'export PATH="/path/to/discovery:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+macOS and Linux work in a very similar way. However, on macOS, due to Apple's security measures, the `discovery` executable will be blocked from running. This can be solved in "Security and Privacy Settings" and allowing the `discovery` file.
 
 ## Getting started
 
