@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"mime"
 	"net/http"
 
 	"github.com/tidwall/gjson"
@@ -22,9 +23,41 @@ const (
 )
 
 // Export obtains the bytes with the information of the exported entities.
-// This data can later be written to a ZIP file.
-func (backup backupRestore) Export() ([]byte, error) {
-	return backup.execute(http.MethodGet, "/export")
+// This data can later be written to a ZIP file with the filename received in the Content Disposition header.
+func (backup backupRestore) Export() ([]byte, string, error) {
+	c := backup.client
+	request := c.client.R()
+
+	if c.ApiKey != "" {
+		request.SetHeader("X-API-Key", c.ApiKey)
+	}
+
+	response, err := request.Execute(http.MethodGet, c.client.BaseURL+"/export")
+	if err != nil {
+		return nil, "", err
+	}
+
+	if response.IsError() {
+		return nil, "", Error{
+			Status: response.StatusCode(),
+			Body:   gjson.ParseBytes(response.Body()),
+		}
+	}
+
+	contentDisposition := response.Header().Get("Content-Disposition")
+	filename := "discovery.zip"
+
+	if contentDisposition != "" {
+		if _, params, err := mime.ParseMediaType(contentDisposition); err == nil {
+			if value := params["filename"]; value != "" {
+				filename = value
+			}
+		} else {
+			return nil, filename, err
+		}
+	}
+
+	return response.Body(), filename, nil
 }
 
 // Import reads the given file containing the entities to be imported, and then calls the endpoint to do so.

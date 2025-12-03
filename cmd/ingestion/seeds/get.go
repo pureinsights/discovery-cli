@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +17,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains seeds from Discovery Ingestion.",
-		Long:  fmt.Sprintf(commands.LongGetSearch, "seed", "Ingestion"),
+		Long:  fmt.Sprintf(commands.LongGetSearch, "seed", "Ingestion") + " The get command can also get records from the seed with the --record flag.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {

@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
-	"github.com/pureinsights/pdp-cli/internal/testutils"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -146,7 +146,7 @@ func TestStoreCommand(t *testing.T) {
 			client:         new(WorkingCreator),
 			abortOnError:   false,
 			data:           "",
-			file:           "testdata/StoreCommand_JSONFile.golden",
+			file:           "testdata/StoreCommand_JSONFile.json",
 			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
 			err:            nil,
 		},
@@ -188,7 +188,7 @@ func TestStoreCommand(t *testing.T) {
 			client:         new(WorkingCreator),
 			abortOnError:   false,
 			data:           "",
-			file:           "testdata/StoreCommand_EmptyFile.golden",
+			file:           "testdata/StoreCommand_EmptyFile.json",
 			expectedOutput: "",
 			err:            cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
 		},
