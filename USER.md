@@ -13,6 +13,66 @@ go install github.com/pureinsights/discovery-cli/cmd/discovery@$latest
 If the installation does not work, make sure you have the the `%GOPATH%/bin`added to the `PATH` environment variable. See this [wiki](https://go.dev/wiki/SettingGOPATH) to set the `GOPATH` variable.
 
 ### Setting Environment Variables (Advanced)
+This method requires downloading the binaries of the Discovery CLI and adding them to the environment variables to make it available from a terminal or command prompt.
+
+#### Choosing the Correct Binary
+Go to the [Releases](https://github.com/pureinsights/discovery-cli/releases) section of the GitHub repository. Each downloadable file indicates the **operating system** and **CPU architecture** it was compiled for. Choose the one that matches your device.
+
+| Operating System | Architecture | Example Devices | Which File to Download |
+|------------------|--------------|----------------|-------------------------|
+| **Windows** | `amd64` | Intel/AMD x86 64-bit CPUs | `discovery-cli_{VERSION}_windows_amd64.zip` |
+| **Windows** | `arm64` | ARM-based Windows laptops/tablets (e.g., Surface Laptops) | `discovery-cli_{VERSION}_windows_arm64.zip` |
+| **Windows** | `386` | Intel/AMD 32-bit CPUs | `discovery-cli_{VERSION}_windows_386.zip` |
+| **macOS** | `arm64` | Apple Silicon Macs (M1, M2, M3) | `discovery-cli_{VERSION}_darwin_arm64.tar.gz` |
+| **macOS** | `amd64` | Older Intel-based Macs | `discovery-cli_{VERSION}_darwin_amd64.tar.gz` |
+| **Linux** | `amd64` (amd64) | Most Linux servers/desktops (Intel/AMD 64-bit) | `discovery-cli_{VERSION}_linux_amd64.tar.gz` |
+| **Linux** | `arm64` | ARM servers, AWS Graviton | `discovery-cli_{VERSION}_linux_arm64.tar.gz` |
+| **Linux** | `amd64` (amd64) | 32-bit Linux Computers | `discovery-cli_{VERSION}_linux_386.tar.gz` |
+
+Extract the archives into your preferred location. The downloaded file contains the binary of the Discovery CLI and the user documentation.
+
+#### Move the Binary to a System Location
+After extracting the file, you'll have a single executable (e.g., `discovery` or `discovery.exe` on Windows). Move it to a directory commonly used for command-line tools:
+
+- **Windows:**  
+  `C:\Program Files\mycli\` (create this folder)
+- **macOS:**  
+  `/usr/local/bin/` (Intel)  
+  `/opt/homebrew/bin/` (Apple Silicon)
+- **Linux:**  
+  `/usr/local/bin/`
+
+On macOS and Linux, ensure the file is executable:
+
+```sh
+chmod +x mycli
+```
+
+#### Add the Executable to the PATH
+To run the CLI from any folder, the directory containing the executable must be included in your PATH environment variable.
+
+##### Windows
+Open Start Menu and search for "Edit the system environment variables"
+
+![](docs/windows-images/search-environment.png)
+
+On the next menu, select "Advanced" and click "Environment Variables..."
+
+![](docs/windows-images/environment-variables.png)
+
+Select the `Path` variable on the "User Variables" and choose Edit:
+
+![](docs/windows-images/edit-environment.png)
+
+Add the folder where you placed the executable by pressing "New" to add the entry:
+
+![](docs/windows-images/add-path-windows.png)
+
+Press "OK" to save and close all windows.
+
+Test the installation:
+
+![](docs/windows-images/test-discovery-windows.png)
 
 ## Getting started
 
