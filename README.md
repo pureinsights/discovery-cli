@@ -1,4 +1,5 @@
 # Pureinsights Discovery Platform: Command Line Interface Documentation
+The Discovery CLI is a command line interface that allows users to automate processes in Discovery. It can interact with every Discovery product and connect to various Discovery environments. 
 
 ## Installation
 There are two methods to install the Discovery CLI:
