@@ -1,7 +1,7 @@
 package labels
 
 import (
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +14,7 @@ func NewLabelCommand(d cli.Discovery) *cobra.Command {
 
 	label.AddCommand(NewGetCommand(d))
 	label.AddCommand(NewStoreCommand(d))
+	label.AddCommand(NewDeleteCommand(d))
 
 	return label
 }

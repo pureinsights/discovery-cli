@@ -1,2 +1,0 @@
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-pipeline","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-10-17T22:38:12Z","id":"5c09589e-b643-41aa-a766-3b7fc3660473","labels":[],"lastUpdatedTimestamp":"2025-10-17T22:38:12Z","name":"OpenAI pipeline","type":"openai"}

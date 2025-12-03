@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -56,7 +56,7 @@ func Test_newRootCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "core", "ingestion", "queryflow", "staging"}
+	expectedCommands := []string{"config", "core", "export", "ingestion", "queryflow", "staging"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
 

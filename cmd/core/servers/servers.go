@@ -1,7 +1,7 @@
 package servers
 
 import (
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +14,7 @@ func NewServerCommand(d cli.Discovery) *cobra.Command {
 
 	server.AddCommand(NewGetCommand(d))
 	server.AddCommand(NewStoreCommand(d))
+	server.AddCommand(NewDeleteCommand(d))
 
 	return server
 }

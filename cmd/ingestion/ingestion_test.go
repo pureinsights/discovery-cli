@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
@@ -50,6 +50,6 @@ func TestNewIngestionCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "pipeline", "processor", "seed"}
+	expectedCommands := []string{"config", "export", "import", "pipeline", "processor", "seed"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
