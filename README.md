@@ -1,228 +1,1597 @@
-# Pureinsights Discovery Platform: Command Line Interface
+# Pureinsights Discovery Platform: Command Line Interface Documentation
 
-## Development guidelines
+## Installation
 
-This project uses the [cobra](https://github.com/spf13/cobra) library to build the Discovery CLI.
-This section contains guidelines and best practices to contribute to the project and fix or extend its functionality.
+### With Go (Easiest)
+The easiest way to install the Discovery CLI is using [Go](https://go.dev/doc/install). Then, we can simply run:
 
-### Usage and help messages
-
-Cobra provides a feature to generate automatically help and usage messages for commands.
-Which allows users to use the flag `--help` to show the generated message and get the command documentation.
-
-However, we as developers have the responsibility to provide the information and documentation for each command to cobra.
-We can leverage the fields provided by the `cobra.Command` struct as follows:
-
-```go
-cobra.Command{
-    Use:   "command [options] [flags]", // Follow the recommended syntax by cobra: https://pkg.go.dev/github.com/spf13/cobra#Command
-    Short: "A short description for the command, shown in the 'help' output.",
-    Long: `A more detailed and long description, shown in the 'help' of the specific command.
-    Can be multiple lines.`,
-    Example: `
-      # Execute the command
-      > discovery command option -flag
-    `
-}
+```bash
+go install github.com/pureinsights/discovery-cli/cmd/discovery@$latest
 ```
 
+#### Troubleshooting
+If the installation does not work, make sure you have the the `%GOPATH%/bin`added to the `PATH` environment variable. See this [wiki](https://go.dev/wiki/SettingGOPATH) to set the `GOPATH` variable.
 
-### Flags 
+### Making the Binary Global (Advanced)
+This method requires downloading the binary of the Discovery CLI and making it available globally from a terminal or command prompt.
 
-Names should use `kebab` case, so those names with two or more words must be separated by `-`, e.g `--my-flag`. 
+#### Choosing the Correct Binary
+Go to the [Releases](https://github.com/pureinsights/discovery-cli/releases) section of the GitHub repository. Each downloadable file indicates the **operating system** and **CPU architecture** it was compiled for. Choose the one that matches your device.
 
-Whenever possible, flags should have a short form, e.g., `--flag` and `-f`.
+| Operating System | Architecture | Example Devices | Which File to Download |
+|------------------|--------------|----------------|-------------------------|
+| **Windows** | `amd64` | Intel/AMD x86 64-bit CPUs | `discovery-cli_{VERSION}_windows_amd64.zip` |
+| **Windows** | `arm64` | ARM-based Windows laptops/tablets (e.g., Surface Laptops) | `discovery-cli_{VERSION}_windows_arm64.zip` |
+| **Windows** | `386` | Intel/AMD 32-bit CPUs | `discovery-cli_{VERSION}_windows_386.zip` |
+| **macOS** | `arm64` | Apple Silicon Macs (M1, M2, M3) | `discovery-cli_{VERSION}_darwin_arm64.tar.gz` |
+| **macOS** | `amd64` | Older Intel-based Macs | `discovery-cli_{VERSION}_darwin_amd64.tar.gz` |
+| **Linux** | `amd64` (amd64) | Most Linux servers/desktops (Intel/AMD 64-bit) | `discovery-cli_{VERSION}_linux_amd64.tar.gz` |
+| **Linux** | `arm64` | ARM servers, AWS Graviton | `discovery-cli_{VERSION}_linux_arm64.tar.gz` |
+| **Linux** | `amd64` (amd64) | 32-bit Linux Computers | `discovery-cli_{VERSION}_linux_386.tar.gz` |
 
-Always use the same short flag for the same flag, across all the commands. That means, if you used `-f` as short flag of `--flag`, you 
-shouldn't use `-f` as short flag of any other flag that is not `--flag` in any command.
+Extract the archives into your preferred location. The downloaded file contains the binary of the Discovery CLI and the user documentation.
 
-Try to use meaningful short flags. A good approach could be to use the first letter of the flag name, as long as the short flag doesn't conflict with other short flags for other flags.
+#### Add the Executable to the PATH
+To run the CLI from any folder, the directory containing the executable must be included in your PATH environment variable.
 
+##### Windows
+Open Start Menu and search for "Edit the system environment variables"
 
-### User documentation 
+![](docs/windows-images/search-environment.png)
 
-Documentation for each command should be added into the `USER.md` file.
+On the next menu, select "Advanced" and click "Environment Variables..."
 
-Each command must have its own section or sub-section, depending on if it is a sub-command.
+![](docs/windows-images/environment-variables.png)
 
-````markdown
-<!-- The nesting of the title depends on the parent command -->
-# Command Name
+Select the `Path` variable on the "User Variables" and choose "Edit":
 
-A description of the command, what it does, which positional arguments it expects.
-Add any detail that the user using the command should now, or be aware of.
+![](docs/windows-images/edit-environment.png)
 
-Usage: `discovery command <arg1> <arg2> [<optionalArg1> [<optionalArg2>]] (-r | --required-flag) [flags]`
+Add the folder where you placed the executable by pressing "New" to add the entry:
 
-Arguments:
+![](docs/windows-images/add-path-windows.png)
 
-`arg1`:: 
-(Required, String) The description of the argument.
+Press "OK" to save and close all windows.
 
-`arg2`:: 
-(Required, Int) The description of the argument.
+Test the installation:
 
-`optionalArg1`:: 
-(Optional, String) The description of the argument. 
+![](docs/windows-images/test-discovery-windows.png)
 
-`optionalArg2`:: 
-(Optional, String) The description of the argument.
+##### macOS and Linux
+On Intel-based Macs and Linux, move the binary to the location `usr/local/bin`. On Macs with Apple Silicon, move the binary to `/opt/homebrew/bin`. On macOS, these folders might be hidden at first using Finder. Use the shortcut `Command + Shift + .` to show them.
 
+Ensure that the `discovery` file has execution permissions with this command:
+
+```bash
+chmod +x discovery
+```
+
+An alternative option is using the following command:
+
+**macOS Catalina (10.15) or later**
+
+```bash
+echo 'export PATH="/path/to/discovery:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Linux / macOS Mojave (10.14) or earlier**
+
+```bash
+echo 'export PATH="/path/to/discovery:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+macOS and Linux work in a very similar way. However, on macOS, due to Apple's security measures, the `discovery` executable will be blocked from running. This can be solved in "Security and Privacy Settings" and allowing the `discovery` file.
+
+## Getting started
+
+TODO
+
+## Documentation
+
+### Discovery
+
+`discovery` is the Discovery CLI's root command. This is the command used to run the CLI. It contains all of the other subcommands.
+
+Usage: `discovery [command]`
 
 Flags:
 
-`-r, --required-flag`:: 
-(Required, bool) The description of the required flag.
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
 
-`-f, --flag`:: 
-(Optional, float) The description of the flag.
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
 
 ```bash
-# Example description
-discovery command "example string" 3 -r
+# Print Discovery's help
+discovery -h
+```
+
+#### Config
+`config` is the main command used to interact with Discovery's configuration for a profile. This command by itself asks the user to save Discovery's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press "Enter" without any text, and to set the value as empty, a sole whitespace must be inputted. 
+
+Usage: `discovery config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn".
+discovery -p cn config
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+Core URL [http://discovery.core.cn]: https://discovery.core.cn
+Core API Key [*************.core.cn]: 
+Ingestion URL [http://discovery.ingestion.cn]:      
+Ingestion API Key [****************gestion.cn]: ingestion123
+QueryFlow URL [http://discovery.queryflow.cn]: http://localhost:12040 
+QueryFlow API Key [****************eryflow.cn]: queryflow213
+Staging URL [http://discovery.staging.cn]: 
+Staging API Key [***************taging.cn]: 
 ```
 
 ```bash
-# Example description with optionals
-discovery command "example string" 3 example strings --required-flag -f 3.4
-```
-````
-
-
-
-## Getting Started
-
-### Build the CLI
-
-To build the project and generate a binary file run the following command:
-
-```bash
-go build -o build/discovery
-```
-
-### Run the CLI
-
-To run the project you can run the binary file directly.
-
-```bash
-cd ./build
-./discovery
-```
-
-or you can run the project without building it.
-
-```bash
-go run main.go
-```
-
-### Install dependencies
-
-To install dependencies declared in the `go.mod` file run:
-
-```bash
-go mod tidy
-```
-
-To install a package and add it to the `go.mod` file run:
-
-```bash
-# go get <package>
-go get github.com/spf13/cobra
-```
-
-
-## Testing
-
-### Unit Tests
-
-To create unit tests, you create a `*_test.go` file in the same package with functions with the form `func Test*(t *testing.T)` so Go can now that those functions are tests.
-
-Example:
-
-```go
-// ./example/add.go
-package example
-func Add(n1, n2 int) int { return n1 + n2 } 
-```
-
-```go
-// ./example/add_test.go
-package example
-func TestAdd(t *testing.T) {
-  // The body of the test
-}
-```
-
-#### Run tests
-
-To run the tests of a specific package you can run the following command:
-
-```bash
-# go test <path/to/package> 
-go test ./
-```
-
-To run the tests of a package and its subdirectories run:
-
-```bash
-# go test <path/to/package>/...
-go test ./...
-```
-
-#### Coverage
-
-To run the tests with coverage reporting run the following commands:
-
-```bash
-# Run the tests and generate the coverage profile
-go test ./... -coverprofile=coverage.out
+# Config works without setting the profile. The rest of the command's output is omitted.
+discovery config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
 ```
 
 ```bash
-# Generates a HTML report based on the coverage profile
-go tool cover -html=coverage.out
+# The profile flag can be set after the command. The rest of the command's output is omitted.
+discovery config --profile cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
 ```
 
+##### Get
+`get` is the command used to obtain Discovery's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
 
-#### Naming convention
+Usage: `discovery config get [flags]`
 
-As mentioned before, the name of the file and the test function must follow a specific form so that Go can detect them as tests, but to make test names more readable, we are
-going to follow the next naming conventions:
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
 
-##### Testing functions
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
 
-The name convention for normal functions is `func Test<name>[_ScenarioDescription](t *testing.T)`, for example:
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
 
-```go
-package example
-func TestFunctionExample(t *testing.T) {} 
-func TestFunctionExample_WithADescription(t *testing.T) {} 
+Examples:
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery config get -p cn
+Showing the configuration of profile "cn":
+
+Core URL: "https://discovery.core.cn"
+Core API Key: "*************.core.cn"
+Ingestion URL: "http://discovery.ingestion.cn"
+Ingestion API Key: "********n123"
+QueryFlow URL: "http://localhost:12040"
+QueryFlow API Key: "********w213"
+Staging URL: "http://discovery.staging.cn"
+Staging API Key: "***************taging.cn"
 ```
 
-##### Testing struct methods
+```bash
+# Print the configuration of the "default" profile.
+discovery config get -s
+Showing the configuration of profile "default":
 
-The name convention for struct methods is `func Test<struct>_<method>[_ScenarioDescription](t *testing.T)`, for example:
-
-```go
-package example
-func TestStructA_ExampleMethod(t *testing.T) {} 
-func TestStructA_ExampleMethod_WithADescription(t *testing.T) {} 
+Core URL: "http://localhost:12010"
+Core API Key: ""
+Ingestion URL: "http://localhost:12030"
+Ingestion API Key: ""
+QueryFlow URL: "http://localhost:12040"
+QueryFlow API Key: ""
+Staging URL: "http://localhost:12020"
+Staging API Key: ""
 ```
 
-##### Avoid naming collisions
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
 
-To avoid name collisions, prepend those unexported `structs`, `methods` or `functions` with `_`.
-
-```go
-// Testing a unexported function
-func Test_exampleFunction(t *testing.T) {}
-func Test_exampleFunction_WithDescription(t *testing.T) {}
+Core URL: "https://discovery.core.cn"
+Core API Key: "discovery.key.core.cn"
+Ingestion URL: "http://discovery.ingestion.cn"
+Ingestion API Key: "ingestion123"
+QueryFlow URL: "http://localhost:12040"
+QueryFlow API Key: "queryflow213"
+Staging URL: "http://discovery.staging.cn"
+Staging API Key: "discovery.key.staging.cn"
 ```
 
-```go
-// Testing a unexported struct with an unexported method
-func Test_structA_exampleMethod(t *testing.T) {}
-func Test_structA_exampleMethod_WithDescription(t *testing.T) {}
+#### Export
+`export` is the command used to backup all of Discovery's entities at once. With the file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
+
+Usage: `discovery export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery export -p cn
+{"core":{"acknowledged":true},"ingestion":{"acknowledged":true},"queryflow":{"acknowledged":true}}
+```
+
+```bash
+# Export the entities to a specific file.
+# In this example, the Ingestion export failed.
+discovery export --file "entities/discovery.zip".
+{"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
+```
+
+#### Core
+`core` is the main command used to interact with Discovery's Core. 
+
+Usage: `discovery core [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+##### Config
+`config` is the command used to interact with Discovery Core's configuration for a profile. This command by itself asks the user to save Discovery Core's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery core config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery core config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+Core URL [http://discovery.core.cn]: https://discovery.core.cn
+Core API Key [*************.core.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery core config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
+
+###### Get
+`get` is the command used to obtain Discovery Core's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery core config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery core config get -p cn
+Showing the configuration of profile "cn":
+
+Core URL: "https://discovery.core.cn"
+Core API Key: "*************.core.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery core config get -s
+Showing the configuration of profile "default":
+
+Core URL: "http://localhost:12010"
+Core API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery core config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+Core URL: "https://discovery.core.cn"
+Core API Key: "discovery.key.core.cn"
+```
+
+##### Export
+`export` is the command used to backup Discovery Core's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+
+Usage: `discovery core export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery core export -p cn
+{"acknowledged":true}
+```
+
+```bash
+# Export the entities to a specific file
+discovery core export --file "entities/core.zip".
+{"acknowledged":true}
+```
+
+##### Import
+`import` is the command used to restore Discovery Core's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery core import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and update conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
+{
+  "Credential": [
+    {
+      "id": "3b32e410-2f33-412d-9fb8-17970131921c",
+      "status": 200
+    },
+    {
+      "id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
+      "status": 200
+    },
+    {
+      "id": "46cb4fff-28be-4901-b059-1dd618e74ee4",
+      "status": 200
+    },
+    ...
+```
+
+##### Label
+`label` is the command used to manage labels in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery core label [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Core's labels. The user can send a UUID to get a specific label. If no UUID is given, then the command retrieves every label. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
+
+Usage: `discovery core label get [flags] [<uuid>]`
+
+Arguments:
+`uuid`::
+(Optional, string) The UUID of the label that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get a label by id
+discovery core label get 3d51beef-8b90-40aa-84b5-033241dc6239
+{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"A","lastUpdatedTimestamp":"2025-08-27T19:22:47Z","value":"B"}
+```
+
+```bash
+# Get all labels using the configuration in profile "cn"
+discovery core label get -p cn
+{"creationTimestamp":"2025-10-15T20:28:39Z","id":"5467ab23-7827-4fae-aa78-dfd4800549ee","key":"D","lastUpdatedTimestamp":"2025-10-15T20:28:39Z","value":"F"}
+{"creationTimestamp":"2025-10-15T20:25:29Z","id":"7d0cb8c9-6555-4592-9b6c-1f4ed7fca9f4","key":"D","lastUpdatedTimestamp":"2025-10-15T20:25:29Z","value":"D"}
+{"creationTimestamp":"2025-09-29T17:00:47Z","id":"a77fed6a-021e-440b-bb32-91e22ea31598","key":"A","lastUpdatedTimestamp":"2025-09-29T17:00:47Z","value":"A"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery core label store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a label with the JSON configuration in a file
+discovery core label store --file "labeljsonfile.json"
+{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"label1","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"value1"}
+{"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"status":404,"timestamp":"2025-10-30T00:05:35.995533500Z"}
+{"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"label3","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"value3"}
+```
+
+```bash
+# Store a label with the JSON configuration in the data flag
+discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
+{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label2","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Core's labels. The user must send a UUID to delete a specific label. If no UUID is given, then an error is returned. This command does not support referencing an entity by name.
+
+Usage: `discovery core label delete [flags] <uuid>`
+
+Arguments:
+`uuid`::
+(Required, string) The UUID of the label that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a label by id
+discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+##### Secret
+`secret` is the command used to manage secrets in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery core secret [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Core's secrets. The user can send a UUID to get a specific secret. If no UUID is given, then the command retrieves every secret. The optional argument must be a UUID. This command does not support filters or referencing an entity by name.
+
+Usage: `discovery core secret get [flags] [<uuid>]`
+
+Arguments:
+`uuid`::
+(Optional, string) The UUID of the secret that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get a secret by id
+discovery core secret get 81ca1ac6-3058-4ecd-a292-e439827a675a
+{"active":true,"creationTimestamp":"2025-08-26T21:56:50Z","id":"81ca1ac6-3058-4ecd-a292-e439827a675a","labels":[],"lastUpdatedTimestamp":"2025-08-26T21:56:50Z","name":"openai-secret"}
+```
+
+```bash
+# Get all secrets using the configuration in profile "cn"
+discovery core secret get -p cn
+{"active":true,"creationTimestamp":"2025-08-26T21:56:50Z","id":"81ca1ac6-3058-4ecd-a292-e439827a675a","labels":[],"lastUpdatedTimestamp":"2025-08-26T21:56:50Z","name":"openai-secret"}
+{"active":true,"creationTimestamp":"2025-08-14T18:01:59Z","id":"cfa0ef51-1fd9-47e2-8fdb-262ac9712781","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:01:59Z","name":"mongo-secret"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Core's secrets. With the data flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery core secret store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a secret with the JSON configuration in a file
+discovery core secret store --file "secretjsonfile.json"
+{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:15:22.738365Z","name":"openai-secret"}
+{"code":1003,"messages":["Entity not found: b8bd5ec3-8f60-4502-b25e-8f6d36c98415"],"status":404,"timestamp":"2025-10-30T15:15:22.778371Z"}
+{"active":true,"creationTimestamp":"2025-10-30T15:15:22.801771Z","id":"c9731417-38c9-4a65-8bbc-78c5f59b9cbb","lastUpdatedTimestamp":"2025-10-30T15:15:22.801771Z","name":"mongo-user"}
+```
+
+```bash
+# Store a secret with the JSON configuration in the data flag
+discovery core secret store --data  '{"name":"openai-secret-test","active":true,"id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","content":{"apiKey":"apiKey"}}'
+{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:43:52.496829Z","name":"openai-secret"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Core's secrets. The user must send a UUID to delete a specific secret. If no UUID is given, then an error is returned. This command does not support referencing an entity by name.
+
+Usage: `discovery core secret delete [flags] <uuid>`
+
+Arguments:
+`uuid`::
+(Required, string) The UUID of the secret that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a secret by id
+discovery core secret delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+##### Credential
+`credential` is the command used to manage credentials in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery core credential [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Core's credentials. The user can send a name or UUID to get a specific credential. If no argument is given, then the command retrieves every credential. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery core credential get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, string) The name or UUID of the credential that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, Array of strings) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+Examples:
+
+```bash
+# Get a credential by id
+discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","secret":"mongo-secret","type":"mongo"}
+```
+
+```bash
+# Get credential by name
+discovery core credential get "my-credential"
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","type":"mongo"}
+```
+
+```bash
+# Get credentials using filters
+discovery core credential get --filter label=A:A --filter type=mongo
+{"active":true,"creationTimestamp":"2025-10-17T15:33:58Z","id":"8c243a1d-9384-421d-8f99-4ef28d4e0ab0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T15:33:58Z","name":"my-credential","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"mongo-credential-2","type":"mongo"}
+```
+
+```bash
+# Get all credentials using the configuration in profile "cn"
+discovery core credential get -p cn
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"openai-credential","type":"openai"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Core's credentials. With the data flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery core credential store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a credential with the JSON configuration in a file
+discovery core credential store --file "credentialjsonfile.json"
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"mongo-secret","type":"mongo"}
+{"code":1003,"messages":["Entity not found: 3b32e410-2f33-412d-9fb8-17970131921d"],"status":404,"timestamp":"2025-10-30T16:50:38.250661200Z"}
+{"active":true,"creationTimestamp":"2025-10-30T16:50:38.262086Z","id":"5b76ae0d-f383-47e5-be6f-90e9046092cd","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-30T16:50:38.262086Z","name":"my-credential-2","secret":"mongo-secret","type":"mongo"}
+```
+
+```bash
+# Store a credential with the JSON configuration in the data flag
+discovery core credential store --data '{"type":"mongo","name":"my-credential-1","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"mongo-secret"}'
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"mongo-secret","type":"mongo"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Core's credentials. The user must send a name or UUID to delete a specific credential.
+
+Usage: `discovery core credential delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the credential that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a credential by id
+discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Delete a credential by name
+discovery core credential delete credential1
+{"acknowledged":true}
+```
+
+##### Server
+`server` is the command used to manage servers in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery core server [subcommand] [flags]
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Core's servers. The user can send a name or UUID to get a specific server. If no argument is given, then the command retrieves every server. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery core server get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, string) The name or UUID of the server that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, Array of strings) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+Examples:
+
+```bash
+# Get a server by id
+discovery core server get 21029da3-041c-43b5-a67e-870251f2f6a6
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
+```
+
+```bash
+# Get server by name
+discovery core server get "MongoDB Atlas server"
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
+```
+
+```bash
+# Get servers using filters
+discovery core server get --filter label=A:A -f type=mongo
+{"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-09-29T15:50:21Z","id":"a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:21Z","name":"MongoDB Atlas server 2","type":"mongo"}
+```
+
+```bash
+# Get all servers using the configuration in profile "cn"
+discovery core server get -p cn
+{"active":true,"creationTimestamp":"2025-09-29T15:50:37Z","id":"025347a7-e2bd-4ba1-880f-db3e51319abb","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:37Z","name":"MongoDB Atlas server","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-15T20:26:27Z","id":"192c3793-600a-4366-9778-7d80a0df07ce","labels":[{"key":"E","value":"G"},{"key":"H","value":"F"},{"key":"D","value":"D"}],"lastUpdatedTimestamp":"2025-10-15T20:26:27Z","name":"OpenAI Server","type":"openai"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Core's servers. With the data flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery core server store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a server with the JSON configuration in a file
+discovery core server store --file "serverjsonfile.json"
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server","type":"mongo"}       
+{"code":1003,"messages":["Entity not found: 2b839453-ddad-4ced-8e13-2c7860af60a8"],"status":404,"timestamp":"2025-10-30T17:45:48.176913700Z"}
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-10-30T17:45:48.184774Z","id":"152e1175-e54d-4de6-90b9-388d45f8256e","labels":[],"lastUpdatedTimestamp":"2025-10-30T17:45:48.184774Z","name":"MongoDB Atlas server 2","type":"mongo"}
+```
+
+```bash
+# Store a server with the JSON configuration in the data flag
+discovery core server store --data '{"type":"mongo","name":"MongoDB Atlas server","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.dleud.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server","type":"mongo"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Core's servers. The user must send a name or UUID to delete a specific server.
+
+Usage: `discovery core server delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the server that will be deleted.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a server by id
+discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
+{"acknowledged":true}
+```
+
+```bash
+# Delete a server by name
+discovery core server delete server1
+{"acknowledged":true}
+```
+
+#### Ingestion
+`ingestion` is the main command used to interact with Discovery's Ingestion. 
+
+Usage: `discovery ingestion [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+##### Config
+`config` is the command used to interact with Discovery Ingestion's configuration for a profile. This command by itself asks the user to save Discovery Ingestion's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery ingestion config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery ingestion config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+Ingestion URL [http://discovery.ingestion.cn]: https://discovery.ingestion.cn
+Ingestion API Key [*************.ingestion.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery ingestion config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
+
+###### Get
+`get` is the command used to obtain Discovery Ingestion's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery ingestion config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery ingestion config get -p cn
+Showing the configuration of profile "cn":
+
+Ingestion URL: "https://discovery.ingestion.cn"
+Ingestion API Key: "*************.ingestion.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery ingestion config get -s
+Showing the configuration of profile "default":
+
+Ingestion URL: "http://localhost:12010"
+Ingestion API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery ingestion config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+Ingestion URL: "https://discovery.ingestion.cn"
+Ingestion API Key: "discovery.key.ingestion.cn"
+```
+
+##### Export
+`export` is the command used to backup Discovery Ingestion's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+
+Usage: `discovery ingestion export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery ingestion export -p cn
+{"acknowledged":true}
+```
+
+```bash
+# Export the entities to a specific file
+discovery ingestion export --file "entities/ingestion.zip".
+{"acknowledged":true}
+```
+
+##### Import
+`import` is the command used to restore Discovery Ingestion's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery Ingestion import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and ignore conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict IGNORE
+{
+  "Pipeline": [
+    {
+      "id": "0d3f476d-9003-4fc8-b9a9-8ba6ebf9445b",
+      "status": 204
+    },
+    {
+      "id": "25012a20-fe60-4ad6-a05c-9abcbfc1dfb1",
+      "status": 204
+    },
+    {
+      "id": "36f8ce72-f23d-4768-91e8-58693ff1b272",
+      "status": 204
+    },
+    ...
+```
+
+##### Processor
+`processor` is the command used to manage processors in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery ingestion processor [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Ingestion's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery ingestion processor get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, string) The name or UUID of the processor that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, Array of strings) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+- 
+Examples:
+
+```bash
+# Get a processor by id
+discovery ingestion processor get 90675678-fc9f-47ec-8bab-89969dc204f0
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+```bash
+# Get processor by name
+discovery ingestion processor get "MongoDB store processor"
+{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor","type":"mongo"}
+```
+
+```bash
+# Get processors using filters
+discovery ingestion processor get --filter label=A:A -f type=mongo
+{"active":true,"creationTimestamp":"2025-10-31T21:50:54Z","id":"89103d32-6007-489a-8e25-dc9a6001f8e8","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T21:50:54Z","name":"MongoDB processor","type":"mongo"}
+```
+
+```bash
+# Get all processors using the configuration in profile "cn"
+discovery ingestion processor get -p cn
+{"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"516d4a8a-e8ae-488c-9e37-d5746a907454","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"Template processor","type":"template"}
+{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"7569f1a5-521e-4d8c-94d1-9f53ad065320","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"7b192ea1-ac43-439b-9396-5e022f81f2cb","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"OpenAI processor","type":"openai"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Ingestion's processors. With the data flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery ingestion processor store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a processor with the JSON configuration in a file
+discovery ingestion processor store --file "ingestionprocessorjsonfile.json"
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:44Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"status":404,"timestamp":"2025-10-30T20:09:29.314467Z"}
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:09:29.346792Z","id":"aef648d8-171d-479a-a6fd-14ec9b235dc7","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:09:29.346792Z","name":"MongoDB store processor 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+```bash
+# Store a processor with the JSON configuration in the data flag
+discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB store processor","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+##### Pipeline
+`pipeline` is the command used to manage pipelines in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery ingestion pipeline [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Ingestion's pipelines. The user can send a name or UUID to get a specific pipeline. If no argument is given, then the command retrieves every pipeline. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery ingestion pipeline get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, string) The name or UUID of the pipeline that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, Array of strings) Add a filter to the search. The available filter is the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+
+Examples:
+
+```bash
+# Get a pipeline by id
+discovery ingestion pipeline get 04536687-f083-4353-8ecc-b7348e14b748
+{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","initialState":"ingestionState","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+```
+
+```bash
+# Get pipeline by name
+discovery ingestion pipeline get "Search pipeline"
+{"active":true,"creationTimestamp":"2025-10-31T22:06:27Z","id":"8d9560b3-631b-490b-994f-4708d9880e3b","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:06:27Z","name":"Search pipeline"}
+```
+
+```bash
+# Get pipelines using filters
+discovery ingestion pipeline get --filter label=A:A
+{"active":true,"creationTimestamp":"2025-10-31T22:06:27Z","id":"8d9560b3-631b-490b-994f-4708d9880e3b","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:06:27Z","name":"Search pipeline"}
+{"active":true,"creationTimestamp":"2025-10-31T22:07:00Z","id":"e15ca96b-3d42-4ab9-be16-3c6d6713b04e","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:00Z","name":"Search pipeline 2"}
+```
+
+```bash
+# Get all pipelines using the configuration in profile "cn"
+discovery ingestion pipeline get -p cn
+{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"Search pipeline"}
+{"active":true,"creationTimestamp":"2025-10-31T19:41:16Z","id":"0d3f476d-9003-4fc8-b9a9-8ba6ebf9445b","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:41:16Z","name":"Mongo Ingestion pipeline"}
+{"active":true,"creationTimestamp":"2025-10-31T22:07:00Z","id":"22b1f0fe-d7c1-476f-a609-1a12ee97655f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:00Z","name":"Generate embedddings pipeline"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Ingestion's pipelines. With the data flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery ingestion pipeline store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a pipeline with the JSON configuration in a file
+discovery ingestion pipeline store --file pipelines.json
+{"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+{"code":1003,"messages":["Entity not found: 5888b852-d7d4-4761-9058-738b2ad1b5c9"],"status":404,"timestamp":"2025-10-31T19:55:34.723693100Z"}
+{"active":true,"creationTimestamp":"2025-10-31T19:55:34.758757Z","id":"bfb882a7-59e6-4cd6-afe4-7732163637f1","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:55:34.758757Z","name":"Search pipeline 2","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+```
+
+```bash
+# Store a pipeline with the JSON configuration in the data flag
+discovery ingestion pipeline store --data '{"name":"Search pipeline","labels":[],"active":true,"id":"36f8ce72-f23d-4768-91e8-58693ff1b272","creationTimestamp":"2025-10-31T19:41:13Z","lastUpdatedTimestamp":"2025-10-31T19:41:13Z","initialState":"ingestionState","states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header","active":true},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"recordPolicy":{"idPolicy":{},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"errorPolicy":"FAIL","outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
+{"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+```
+
+##### Seed
+`seed` is the command used to manage seeds in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery ingestion seed [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery ingestion seed get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, string) The name or UUID of the seed that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, Array of strings) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+Examples:
+
+```bash
+# Get a seed by id
+discovery ingestion seed get 7251d693-7382-452f-91dc-859add803a43
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+```
+
+```bash
+# Get seed by name
+discovery ingestion seed get "Search seed"
+{"active":true,"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","type":"staging"}
+```
+
+```bash
+# Get seeds using filters
+discovery ingestion seed get --filter label=A:A -f type=staging
+{"active":true,"creationTimestamp":"2025-10-31T22:53:54Z","id":"326a6b94-8931-4d18-b3a6-77adad14f2c0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:53:54Z","name":"Search seed","type":"staging"}
+{"active":true,"creationTimestamp":"2025-10-31T22:54:04Z","id":"8fbd57cd-9f82-409d-8d85-98e4b9225f3a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:04Z","name":"Staging store seed","type":"staging"}
+```
+
+```bash
+# Get all seeds using the configuration in profile "cn"
+discovery ingestion seed get -p cn
+{"active":true,"creationTimestamp":"2025-09-05T19:19:30Z","id":"026c6cf3-cba4-4d68-9806-1e534eebb99d","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:19:30Z","name":"Search seed","type":"staging"}
+{"active":true,"creationTimestamp":"2025-10-31T22:54:05Z","id":"028120a6-1859-47c7-b69a-f417e54b4a4a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:05Z","name":"ChatGPT seed","type":"staging"}
+{"active":true,"creationTimestamp":"2025-09-05T19:48:00Z","id":"0517a87a-86f7-4a71-bb3f-adfa0c87a269","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:48:00Z","name":"Staging ingestion seed","type":"staging"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery Ingestion's seeds. With the data flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+
+Usage: `discovery ingestion seed store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a seed with the JSON configuration in a file
+discovery ingestion seed store --file seeds.json
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+{"code":1003,"messages":["Entity not found: 1d81d3d5-58a2-44a5-9acf-3fc8358afe00"],"status":404,"timestamp":"2025-10-31T20:32:39.832877700Z"}
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T20:32:39.855952Z","id":"d818d852-18ac-4059-8f17-37a1b649bbfd","labels":[],"lastUpdatedTimestamp":"2025-10-31T20:32:39.855952Z","name":"Search seed 2","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+```
+
+```bash
+# Store a seed with the JSON configuration in the data flag
+discovery ingestion seed store --data '{"type":"staging","name":"Search seed","labels":[],"active":true,"id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","creationTimestamp":"2025-09-04T15:50:08Z","lastUpdatedTimestamp":"2025-09-04T15:50:08Z","config":{"action":"scroll","bucket":"blogs"},"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+```
+
+###### Start
+`start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user can set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
+
+Usage: `discovery ingestion seed start <arg> [flags]`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the seed that will be executed.
+
+Flags:
+`--properties`::
+(Optional, string) Set the properties of the seed execution.
+
+`--scan-type`::
+(Optional, string) Sets the scan type of the seed execution. It can be `FULL` or `INCREMENTAL`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Start a seed seed execution with no flags
+discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
+{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
+```bash
+# Start a seed seed execution with no flags using the seed's name
+discovery ingestion seed start "Search seed"
+{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
+```bash
+# Start a seed seed execution with the properties and scan-type flags
+discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
+#### QueryFlow
+`queryflow` is the main command used to interact with Discovery's QueryFlow.
+
+Usage: `discovery queryflow [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+##### Config
+`config` is the command used to interact with Discovery QueryFlow's configuration for a profile. This command by itself asks the user to save Discovery QueryFlow's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery queryflow config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery queryflow config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+QueryFlow URL [http://discovery.queryflow.cn]: https://discovery.queryflow.cn
+QueryFlow API Key [*************.queryflow.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery queryflow config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery queryflow config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery queryflow config get -p cn
+Showing the configuration of profile "cn":
+
+QueryFlow URL: "https://discovery.queryflow.cn"
+QueryFlow API Key: "*************.queryflow.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery queryflow config get -s
+Showing the configuration of profile "default":
+
+QueryFlow URL: "http://localhost:12010"
+QueryFlow API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery queryflow config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+QueryFlow URL: "https://discovery.queryflow.cn"
+QueryFlow API Key: "discovery.key.queryflow.cn"
+```
+
+##### Export
+`export` is the command used to backup Discovery QueryFlow's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+
+Usage: `discovery queryflow export [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Optional, string) The file that will contain the exported entities.
+
+Examples:
+
+```bash
+# Export the entities using profile "cn".
+discovery queryflow export -p cn
+{"acknowledged":true}
+```
+
+```bash
+# Export the entities to a specific file
+discovery queryflow export --file "entities/queryflow.zip".
+{"acknowledged":true}
+```
+
+##### Import
+`import` is the command used to restore Discovery QueryFlow's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery queryflow import [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the configurations of the entities.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities using profile "cn" and fail conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery queryflow import -p cn --file "entities/queryflow.zip"
+{
+  "Endpoint": [
+    {
+      "errorCode": 2001,
+      "errors": [
+        "Duplicated entity: 2fee5e27-4147-48de-ba1e-d7f32476a4a2"
+      ],
+      "id": "2fee5e27-4147-48de-ba1e-d7f32476a4a2",
+      "status": 409
+    },
+    {
+      "errorCode": 2001,
+      "errors": [
+        "Duplicated entity: 4ef9da31-2ba6-442c-86bb-1c9566dac4c2"
+      ],
+      "id": "4ef9da31-2ba6-442c-86bb-1c9566dac4c2",
+      "status": 409
+    }
+    ...
+```
+
+#### Staging
+`staging` is the main command used to interact with Discovery's Staging. 
+
+Usage: `discovery staging [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+##### Config
+`config` is the command used to interact with Discovery Staging's configuration for a profile. This command by itself asks the user to save Discovery Staging's configuration for the given profile. The command prints the property to be modified along with its current value. If the property currently being shown is sensitive, its value is obfuscated. To keep the current value, the user must press \"Enter\" without any text, and to set the value as empty, a sole whitespace must be inputted.
+
+Usage: `discovery staging config [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Ask the user for the configuration of profile "cn"
+discovery staging config -p cn
+Editing profile "cn". Press Enter to keep the value shown, type a single space to set empty.
+
+Staging URL [http://discovery.staging.cn]: https://discovery.staging.cn
+Staging API Key [*************.staging.cn]: 
+```
+
+```bash
+# Config works without the profile. The rest of the command's output is omitted.
+discovery staging config
+Editing profile "default". Press Enter to keep the value shown, type a single space to set empty.
+```
+
+###### Get
+`get` is the command used to obtain Discovery Staging's configuration for a given profile. If the API keys are sensitive, the `sensitive` flag can be set to true in order to obfuscate them before printing them out. If a configuration property was not set, it is not displayed.
+
+Usage: `discovery staging config get [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-s, --sensitive`::
+(Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
+
+Examples: 
+
+```bash
+# Print the configuration of the "cn" profile with obfuscated API keys.
+discovery staging config get -p cn
+Showing the configuration of profile "cn":
+
+Staging URL: "https://discovery.staging.cn"
+Staging API Key: "*************.staging.cn"
+```
+
+```bash
+# Print the configuration of the "default" profile.
+discovery staging config get -s
+Showing the configuration of profile "default":
+
+Staging URL: "http://localhost:12010"
+Staging API Key: ""
+```
+
+```bash
+# Print the configuration of the "cn" profile with unobfuscated API keys.
+discovery staging config get -p cn --sensitive=false
+Showing the configuration of profile "cn":
+
+Staging URL: "https://discovery.staging.cn"
+Staging API Key: "discovery.key.staging.cn"
 ```
