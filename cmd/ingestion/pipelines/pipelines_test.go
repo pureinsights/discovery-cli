@@ -47,6 +47,6 @@ func Test_NewPipelineCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"get", "store"}
+	expectedCommands := []string{"delete", "get", "store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

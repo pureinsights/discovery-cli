@@ -14,6 +14,9 @@ func NewProcessorCommand(d cli.Discovery) *cobra.Command {
 
 	processor.AddCommand(NewGetCommand(d))
 	processor.AddCommand(NewStoreCommand(d))
+    processor.AddCommand(NewDeleteCommand(d))
 
 	return processor
 }
+
+	
