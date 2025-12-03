@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/google/uuid"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 )
