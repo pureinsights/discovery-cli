@@ -8,7 +8,7 @@ import (
 	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
 )
 
-// IngestionSeedController defines the methods to start a seed.
+// IngestionSeedController defines the methods to start and halt a seed.
 type IngestionSeedController interface {
 	Searcher
 	Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error)
@@ -64,6 +64,29 @@ func (d discovery) HaltSeed(client IngestionSeedController, name string, printer
 		err = jsonPrinter(*d.IOStreams(), haltResults...)
 	} else {
 		err = printer(*d.IOStreams(), haltResults...)
+	}
+
+	return err
+}
+
+// IngestionSeedExecutionController defines all of the methods to manage seed executions from commands
+type IngestionSeedExecutionController interface {
+	Getter
+	Halt(id uuid.UUID) (gjson.Result, error)
+}
+
+// HaltSeedExecution stops a single seed execution with its UUID
+func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error {
+	haltResult, err := client.Halt(execution)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not halt the seed execution with id %q", execution.String())
+	}
+
+	if printer == nil {
+		jsonPrinter := JsonObjectPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), haltResult)
+	} else {
+		err = printer(*d.IOStreams(), haltResult)
 	}
 
 	return err
