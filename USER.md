@@ -1615,6 +1615,35 @@ discovery queryflow processor get -p cn
 {"active":true,"creationTimestamp":"2025-11-06T14:52:17Z","id":"0a7caa9b-99aa-4a63-aa6d-a1e40941984d","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:17Z","name":"MongoDB store processor","type":"mongo"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's processors. The user must send a name or UUID to delete a specific processor.
+
+Usage: `discovery queryflow processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the processor that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery queryflow processor delete processor1
+{"acknowledged":true}
+```
+
 ##### Endpoint
 `endpoint` is the command used to manage endpoints in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
 
