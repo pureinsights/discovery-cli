@@ -35,6 +35,8 @@ type Discovery interface {
 	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
 	HaltSeed(client IngestionSeedController, name string, printer Printer) error
 	HaltSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error
+	AppendSeedRecord(seed gjson.Result, client RecordGetter, id string, printer Printer) error
+	AppendSeedRecords(seed gjson.Result, client RecordGetter, printer Printer) error
 	ExportEntitiesFromClient(client BackupRestore, path string, printer Printer) error
 	ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error
 	ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
