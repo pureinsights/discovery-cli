@@ -168,7 +168,7 @@ func SetDiscoveryDir() (string, error) {
 
 	configPath := filepath.Join(home, ".discovery")
 
-	if err := os.MkdirAll(configPath, 0o644); err != nil {
+	if err := os.MkdirAll(configPath, 0o755); err != nil {
 		return "", NewErrorWithCause(ErrorExitCode, err, "Could not create the /.discovery directory")
 	}
 
