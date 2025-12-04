@@ -161,13 +161,13 @@ func saveConfig(v *viper.Viper, path string) error {
 
 	err := config.WriteConfigAs(filepath.Join(path, "config.toml"))
 	if err != nil {
-		err = NormalizeWriteFileError(filepath.Join(d.ConfigPath(), "config.toml"), err)
+		err = NormalizeWriteFileError(filepath.Join(path, "config.toml"), err)
 		return err
 	}
 
-	err = credentials.WriteConfigAs(filepath.Join(d.ConfigPath(), "credentials.toml"))
+	err = credentials.WriteConfigAs(filepath.Join(path, "credentials.toml"))
 	if err != nil {
-		err = NormalizeWriteFileError(filepath.Join(d.ConfigPath(), "credentials.toml"), err)
+		err = NormalizeWriteFileError(filepath.Join(path, "credentials.toml"), err)
 		return err
 	}
 	return nil

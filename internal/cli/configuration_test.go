@@ -171,7 +171,8 @@ core_key="discovery.key.core.cn"
 				"default.core_key": "APIKey",
 				"cn.core_key":      "discovery.key.core.cn",
 			},
-			err: nil,
+			err:  nil,
+			args: []string{"discovery", "config"},
 		},
 		{
 			name: "There is only a config file",
@@ -239,7 +240,7 @@ core_key="discovery.key.core.cn"
 			dir:            "doesnotexist",
 			credentials:    ``,
 			expectedConfig: nil,
-			err:            NewErrorWithCause(ErrorExitCode, errors.New(""), "Failed to save the default configuration"),
+			err:            NewErrorWithCause(ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")), "Failed to save the default configuration"),
 		},
 		{
 			name: "Reading the config file fails",
@@ -622,7 +623,7 @@ func Test_saveConfig(t *testing.T) {
 				"cn.queryflow_key": "queryflow123",
 				"cn.staging_key":   "staging235",
 			},
-			err: fmt.Errorf("cannot find the path specified"),
+			err: fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")),
 		},
 	}
 
@@ -633,18 +634,10 @@ func Test_saveConfig(t *testing.T) {
 				vpr.Set(k, v)
 			}
 
-			ios := iostreams.IOStreams{
-				In:  os.Stdin,
-				Out: os.Stdout,
-				Err: os.Stderr,
-			}
-
-			d := NewDiscovery(&ios, vpr, tc.writePath)
-
-			err := saveConfig(d.Config(), d.ConfigPath())
+			err := saveConfig(vpr, tc.writePath)
 			if tc.err != nil {
 				require.Error(t, err)
-				assert.EqualError(t, err, fmt.Sprintf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")))
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				configVpr := viper.New()
