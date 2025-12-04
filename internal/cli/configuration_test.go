@@ -669,7 +669,7 @@ func TestSetDiscoveryDir_MkDirAllFails(t *testing.T) {
 
 	target := filepath.Join(tmp, ".discovery")
 
-	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o644))
+	require.NoError(t, os.WriteFile(target, []byte("MkDirAll will fail"), 0o755))
 
 	_, err := SetDiscoveryDir()
 	require.Error(t, err)
@@ -716,7 +716,7 @@ func TestSetDiscoveryDir_DiscoveryDirExists(t *testing.T) {
 
 	target := filepath.Join(tmp, ".discovery")
 
-	require.NoError(t, os.Mkdir(target, 0o644))
+	require.NoError(t, os.Mkdir(target, 0o755))
 
 	configPath, err := SetDiscoveryDir()
 	require.NoError(t, err)
