@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"syscall"
 	"testing"
@@ -29,18 +30,19 @@ func Test_readConfigFile(t *testing.T) {
 		expectedConfig         map[string]string
 		expectedFileExistsBool bool
 		err                    error
+		args                   []string
 	}{
 		// Working cases
 		{
 			name:     "Config file can be read",
 			baseName: "config",
 			config: `
-[default]
-core_url="http://localhost:12010"
+		[default]
+		core_url="http://localhost:12010"
 
-[cn]
-core_url="http://discovery.core.cn"	
-`,
+		[cn]
+		core_url="http://discovery.core.cn"
+		`,
 			expectedConfig: map[string]string{
 				"default.core_url": "http://localhost:12010",
 				"cn.core_url":      "http://discovery.core.cn",
@@ -49,12 +51,22 @@ core_url="http://discovery.core.cn"
 			err:                    nil,
 		},
 		{
-			name:                   "File does not exist",
+			name:                   "File does not exist and os.Args contains config",
 			baseName:               "fail",
 			config:                 ``,
 			expectedConfig:         map[string]string{},
 			expectedFileExistsBool: false,
 			err:                    nil,
+			args:                   []string{"discovery", "config"},
+		},
+		{
+			name:                   "File does not exist and os.Args does not contain config",
+			baseName:               "fail",
+			config:                 ``,
+			expectedConfig:         map[string]string{},
+			expectedFileExistsBool: false,
+			err:                    nil,
+			args:                   []string{"discovery", "core", "secret", "get"},
 		},
 		{
 			name:     "Cannot Merge configuration",
@@ -94,6 +106,9 @@ core_url="http://discovery.core.cn"
 			}
 
 			viper := viper.New()
+
+			os.Args = tc.args
+
 			exists, err := readConfigFile(tc.baseName, dir, viper, &ios)
 			assert.Equal(t, tc.expectedFileExistsBool, exists)
 			if tc.err != nil {
@@ -106,10 +121,15 @@ core_url="http://discovery.core.cn"
 					}
 				} else {
 					got := errStream.String()
-					assert.Contains(t, got,
-						fmt.Sprintf("Configuration file %q not found under %q; using default values.\n",
-							tc.baseName, filepath.Clean(dir)),
-					)
+					if slices.Contains(tc.args, "config") {
+						assert.NotContains(t, got,
+							fmt.Sprintf("Configuration file %q not found under %q\n",
+								tc.baseName, filepath.Clean(dir)))
+					} else {
+						assert.Contains(t, got,
+							fmt.Sprintf("Configuration file %q not found under %q\n",
+								tc.baseName, filepath.Clean(dir)))
+					}
 				}
 			}
 		})
@@ -122,12 +142,15 @@ func TestInitializeConfig(t *testing.T) {
 		name           string
 		config         string
 		credentials    string
+		dir            string
 		expectedConfig map[string]string
 		err            error
+		args           []string
 	}{
 		// Working cases
 		{
 			name: "There are config and credentials files",
+			dir:  t.TempDir(),
 			config: `
 [default]
 core_url="http://localhost:3000"
@@ -152,6 +175,7 @@ core_key="discovery.key.core.cn"
 		},
 		{
 			name: "There is only a config file",
+			dir:  t.TempDir(),
 			config: `
 [default]
 core_url="http://localhost:8083"
@@ -169,6 +193,7 @@ core_url="http://discovery.core.cn"
 		},
 		{
 			name:   "There is only a credentials file",
+			dir:    t.TempDir(),
 			config: ``,
 			credentials: `
 [default]
@@ -185,14 +210,36 @@ core_key="discovery.key.core.cn"
 			err: nil,
 		},
 		{
-			name:        "There are no config files",
+			name:        "There are no config files and os.Args contain config",
 			config:      ``,
+			dir:         t.TempDir(),
 			credentials: ``,
 			expectedConfig: map[string]string{
 				"default.core_url": "http://localhost:12010",
 				"default.core_key": "",
 			},
-			err: nil,
+			err:  nil,
+			args: []string{"discovery", "config"},
+		},
+		{
+			name:        "There are no config files and the os.Args do not contain config",
+			config:      ``,
+			dir:         t.TempDir(),
+			credentials: ``,
+			expectedConfig: map[string]string{
+				"default.core_url": "http://localhost:12010",
+				"default.core_key": "",
+			},
+			err:  nil,
+			args: []string{"discovery", "core", "secret", "get"},
+		},
+		{
+			name:           "There are no config files and writing the default values fails",
+			config:         ``,
+			dir:            "doesnotexist",
+			credentials:    ``,
+			expectedConfig: nil,
+			err:            NewErrorWithCause(ErrorExitCode, errors.New(""), "Failed to save the default configuration"),
 		},
 		{
 			name: "Reading the config file fails",
@@ -207,6 +254,7 @@ core_key="discovery.key.core.cn"
 }
 `,
 			credentials: ``,
+			dir:         t.TempDir(),
 			expectedConfig: map[string]string{
 				"default.core_url": "http://localhost:12010",
 				"cn.core_url":      "http://discovery.core.cn",
@@ -216,6 +264,7 @@ core_key="discovery.key.core.cn"
 		},
 		{
 			name:   "Reading the credentials file fails",
+			dir:    t.TempDir(),
 			config: ``,
 			credentials: `
 {
@@ -238,13 +287,14 @@ core_key="discovery.key.core.cn"
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			out := &bytes.Buffer{}
 			ios := iostreams.IOStreams{
 				In:  os.Stdin,
-				Out: os.Stdout,
+				Out: out,
 				Err: os.Stderr,
 			}
 
-			dir := t.TempDir()
+			dir := tc.dir
 			if tc.config != "" {
 				_, err := fileutils.CreateTemporaryFile(dir, "config.toml", tc.config)
 				require.NoError(t, err)
@@ -255,6 +305,7 @@ core_key="discovery.key.core.cn"
 				require.NoError(t, err)
 			}
 
+			os.Args = tc.args
 			viper, err := InitializeConfig(ios, dir)
 			if tc.err != nil {
 				var errStruct Error
@@ -264,6 +315,11 @@ core_key="discovery.key.core.cn"
 				require.NoError(t, err)
 				for k, v := range tc.expectedConfig {
 					assert.Equal(t, v, viper.GetString(k))
+				}
+				if slices.Contains(tc.args, "config") {
+					assert.NotContains(t, out.String(), "Discovery configuration files created using default values.\n")
+				} else {
+					assert.Contains(t, out.String(), "Discovery configuration files created using default values.\n")
 				}
 			}
 		})
@@ -437,8 +493,8 @@ func Test_discovery_askUserConfig(t *testing.T) {
 	}
 }
 
-// Test_discovery_saveConfig tests the discovery.saveConfig() function.
-func Test_discovery_saveConfig(t *testing.T) {
+// Test_saveConfig tests the saveConfig() function.
+func Test_saveConfig(t *testing.T) {
 	tests := []struct {
 		name                string
 		config              map[string]string
@@ -585,7 +641,7 @@ func Test_discovery_saveConfig(t *testing.T) {
 
 			d := NewDiscovery(&ios, vpr, tc.writePath)
 
-			err := d.saveConfig()
+			err := saveConfig(d.Config(), d.ConfigPath())
 			if tc.err != nil {
 				require.Error(t, err)
 				assert.True(t, errors.Is(err, fs.ErrNotExist))
