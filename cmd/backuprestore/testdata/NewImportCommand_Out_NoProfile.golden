@@ -1,0 +1,12 @@
+Usage:
+  import [subcommands] [flags]
+
+Examples:
+	# Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
+	discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
+
+Flags:
+  -f, --file string          the file that contains the files with the exported entities of the Discovery products.
+  -h, --help                 help for import
+      --on-conflict string   the conflict resolution strategy that will be used (default "FAIL")
+

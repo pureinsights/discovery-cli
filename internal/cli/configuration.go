@@ -161,10 +161,16 @@ func saveConfig(v *viper.Viper, path string) error {
 
 	err := config.WriteConfigAs(filepath.Join(path, "config.toml"))
 	if err != nil {
+		err = NormalizeWriteFileError(filepath.Join(d.ConfigPath(), "config.toml"), err)
 		return err
 	}
 
-	return credentials.WriteConfigAs(filepath.Join(path, "credentials.toml"))
+	err = credentials.WriteConfigAs(filepath.Join(d.ConfigPath(), "credentials.toml"))
+	if err != nil {
+		err = NormalizeWriteFileError(filepath.Join(d.ConfigPath(), "credentials.toml"), err)
+		return err
+	}
+	return nil
 }
 
 // SetDiscoveryDir creates the Discovery directory if it does not exist and returns its path if an error did not occur.

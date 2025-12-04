@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -110,4 +111,77 @@ func TestCompareBytes_NoUpdateMatchesPasses(t *testing.T) {
 	t.Cleanup(func() { *Update = old })
 
 	CompareBytes(t, "test", Read(t, "test"), []byte("this is a test\n"))
+}
+
+// TestCompareBytes_FilesWithDifferentSeparatorsPass tests if files that match, but have different path separators pass the test.
+func TestCompareBytes_FilesWithDifferentSeparatorsPass(t *testing.T) {
+	ChangeDirectoryHelper(t)
+
+	require.NoError(t, os.MkdirAll("testdata", 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join("testdata", "test.golden"), []byte("Could not write to file discovery\\export.zip\n"), 0o644))
+
+	old := *Update
+	*Update = false
+	t.Cleanup(func() { *Update = old })
+
+	CompareBytes(t, "test", Read(t, "test"), []byte("Could not write to file discovery/export.zip\n"), WithNormalizePaths())
+}
+
+// TestWithNormalizePaths tests the WithNormalizePaths() function
+func TestWithNormalizePaths(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected []byte
+	}{
+		{
+			name:     "no backslashes",
+			input:    []byte("path/with/slash/separators"),
+			expected: []byte("path/with/slash/separators"),
+		},
+		{
+			name:     "only backslashes",
+			input:    []byte(`path\with\windows\separators`),
+			expected: []byte("path/with/windows/separators"),
+		},
+		{
+			name:     "mixed slashes",
+			input:    []byte(`C:\path\to\file/with/mixed\separators`),
+			expected: []byte("C:/path/to/file/with/mixed/separators"),
+		},
+		{
+			name:     "empty slice",
+			input:    []byte(""),
+			expected: []byte(nil),
+		},
+		{
+			name:     "no slashes",
+			input:    []byte("hasnoslash"),
+			expected: []byte("hasnoslash"),
+		},
+		{
+			name:     "nil slice",
+			input:    nil,
+			expected: nil,
+		},
+	}
+
+	option := WithNormalizePaths()
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var actual []byte
+			if tc.input != nil {
+				actual = make([]byte, len(tc.input))
+				copy(actual, tc.input)
+			} else {
+				actual = nil
+			}
+
+			err := option(&actual)
+			require.NoError(t, err)
+
+			assert.Equal(t, tc.expected, actual)
+		})
+	}
 }

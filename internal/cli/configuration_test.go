@@ -644,7 +644,7 @@ func Test_saveConfig(t *testing.T) {
 			err := saveConfig(d.Config(), d.ConfigPath())
 			if tc.err != nil {
 				require.Error(t, err)
-				assert.True(t, errors.Is(err, fs.ErrNotExist))
+				assert.EqualError(t, err, fmt.Sprintf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")))
 			} else {
 				require.NoError(t, err)
 				configVpr := viper.New()
@@ -821,7 +821,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			name:      "Invalid write location",
 			input:     strings.Repeat("\n", 8),
 			writePath: "doesnotexist",
-			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Core's configuration"),
+			err:       NewErrorWithCause(ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")), "Failed to save Core's configuration"),
 		},
 	}
 
@@ -853,17 +853,7 @@ func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				if cliError, ok := err.(*Error); ok {
-					cause := cliError.Cause
-					if !errors.Is(cause, fs.ErrNotExist) {
-						assert.EqualError(t, err, tc.err.Error())
-					} else {
-						tcError, _ := err.(*Error)
-						assert.Equal(t, tcError.Message, cliError.Message)
-						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
-					}
-				}
-
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -924,6 +914,7 @@ func Test_discovery_SaveConfigFromUser_NotAllConfigPresent(t *testing.T) {
 	assert.False(t, got.IsSet("cn.staging_key"))
 }
 
+// Test_discovery_saveUrlAndAPIKey tests the discovery_saveUrlAndAPIKey() function.
 func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 	const profile = "cn"
 
@@ -1046,7 +1037,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			name:          "Invalid write location",
 			input:         strings.Repeat("\n", 8),
 			writePath:     "doesnotexist",
-			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("open doesnotexist\\config.toml: The system cannot find the path specified."), "Failed to save Core's configuration"),
+			err:           NewErrorWithCause(ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")), "Failed to save Core's configuration"),
 			component:     "core",
 			componentName: "Core",
 		},
@@ -1080,16 +1071,7 @@ func Test_discovery_saveUrlAndAPIKey(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				if cliError, ok := err.(*Error); ok {
-					cause := cliError.Cause
-					if !errors.Is(cause, fs.ErrNotExist) {
-						assert.EqualError(t, err, tc.err.Error())
-					} else {
-						tcError, _ := err.(*Error)
-						assert.Equal(t, tcError.Message, cliError.Message)
-						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
-					}
-				}
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				vpr, err := InitializeConfig(ios, tc.writePath)
@@ -1627,16 +1609,7 @@ func Test_discovery_printURLAndAPIKey(t *testing.T) {
 			if tc.err != nil {
 				var errStruct Error
 				require.ErrorAs(t, err, &errStruct)
-				if cliError, ok := err.(*Error); ok {
-					cause := cliError.Cause
-					if !errors.Is(cause, fs.ErrNotExist) {
-						assert.EqualError(t, err, tc.err.Error())
-					} else {
-						tcError, _ := err.(*Error)
-						assert.Equal(t, tcError.Message, cliError.Message)
-						assert.Equal(t, tcError.ExitCode, cliError.ExitCode)
-					}
-				}
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())
