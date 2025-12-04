@@ -512,7 +512,8 @@ func TestConvertJSONArrayToString(t *testing.T) {
 			array: gjson.Result{}.Array(),
 			expected: `[
 ]`,
-		}, {
+		}, 
+		{
 			name:  "Array with one element.",
 			array: gjson.Parse(`[{"id": 1}]`).Array(),
 			expected: `[
