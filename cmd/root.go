@@ -3,14 +3,14 @@ package cmd
 import (
 	"os"
 
-	"github.com/pureinsights/pdp-cli/cmd/backuprestore"
-	"github.com/pureinsights/pdp-cli/cmd/config"
-	"github.com/pureinsights/pdp-cli/cmd/core"
-	"github.com/pureinsights/pdp-cli/cmd/ingestion"
-	"github.com/pureinsights/pdp-cli/cmd/queryflow"
-	"github.com/pureinsights/pdp-cli/cmd/staging"
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/cmd/backuprestore"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/config"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/core"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/ingestion"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/queryflow"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/staging"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/cli"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/iostreams"
 	"github.com/spf13/cobra"
 )
 

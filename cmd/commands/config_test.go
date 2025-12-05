@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
-	"github.com/pureinsights/pdp-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/testutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"

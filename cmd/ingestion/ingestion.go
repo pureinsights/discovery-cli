@@ -1,12 +1,12 @@
 package ingestion
 
 import (
-	"github.com/pureinsights/pdp-cli/cmd/ingestion/backuprestore"
-	"github.com/pureinsights/pdp-cli/cmd/ingestion/config"
-	"github.com/pureinsights/pdp-cli/cmd/ingestion/pipelines"
-	"github.com/pureinsights/pdp-cli/cmd/ingestion/processors"
-	"github.com/pureinsights/pdp-cli/cmd/ingestion/seeds"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/ingestion/backuprestore"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/ingestion/config"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/ingestion/pipelines"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/ingestion/processors"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/ingestion/seeds"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 

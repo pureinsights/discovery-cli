@@ -1,8 +1,8 @@
 package staging
 
 import (
-	"github.com/pureinsights/pdp-cli/cmd/staging/config"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/staging/config"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 

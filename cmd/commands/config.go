@@ -3,8 +3,8 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/iostreams"
 	"github.com/spf13/cobra"
 )
 

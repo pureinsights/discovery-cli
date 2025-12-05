@@ -3,9 +3,9 @@ package secrets
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cliry-cliry-cli/discovery"
+	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
