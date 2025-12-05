@@ -3,6 +3,8 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"io/fs"
+	"syscall"
 )
 
 // ExitCode is a type definition that is used to define the possible execution exit codes.
@@ -68,4 +70,89 @@ func FromError(err error) *Error {
 	}
 
 	return nil
+}
+
+// NormalizeReadFileError makes the read file errors OS agnostic.
+func NormalizeReadFileError(path string, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	var pathErr *fs.PathError
+	if errors.As(err, &pathErr) {
+		err = pathErr.Err
+	}
+
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return fmt.Errorf("file does not exist: %s", path)
+
+	case errors.Is(err, fs.ErrPermission):
+		return fmt.Errorf("permission denied while reading file: %s", path)
+
+	case errors.Is(err, fs.ErrInvalid):
+		return fmt.Errorf("invalid file path: %s", path)
+
+	case errors.Is(err, fs.ErrClosed):
+		return fmt.Errorf("file was closed unexpectedly: %s", path)
+
+	case errors.Is(err, fs.ErrExist):
+		return fmt.Errorf("file already exists: %s", path)
+
+	case errors.Is(err, syscall.EISDIR):
+		return fmt.Errorf("path is a directory, not a file: %s", path)
+
+	case errors.Is(err, syscall.EMFILE):
+		return fmt.Errorf("too many open files while reading: %s", path)
+
+	case errors.Is(err, syscall.ENOMEM):
+		return fmt.Errorf("out of memory while reading file: %s", path)
+
+	case errors.Is(err, syscall.EINVAL):
+		return fmt.Errorf("invalid argument while reading file: %s", path)
+
+	case errors.Is(err, syscall.EIO):
+		return fmt.Errorf("low-level I/O error while reading file: %s", path)
+
+	default:
+		return err
+	}
+}
+
+// NormalizeWriteFileError makes the write file errors OS agnostic.
+func NormalizeWriteFileError(path string, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	var pathErr *fs.PathError
+	if errors.As(err, &pathErr) {
+		err = pathErr.Err
+	}
+
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return fmt.Errorf("the given path does not exist: %s", path)
+
+	case errors.Is(err, fs.ErrPermission):
+		return fmt.Errorf("permission denied while writing file: %s", path)
+
+	case errors.Is(err, syscall.EISDIR):
+		return fmt.Errorf("cannot write to a directory: %s", path)
+
+	case errors.Is(err, syscall.ENOSPC):
+		return fmt.Errorf("no space left on device while writing file: %s", path)
+
+	case errors.Is(err, syscall.EROFS):
+		return fmt.Errorf("filesystem is read-only: %s", path)
+
+	case errors.Is(err, syscall.EMFILE):
+		return fmt.Errorf("too many open files while writing file: %s", path)
+
+	case errors.Is(err, syscall.EIO):
+		return fmt.Errorf("low-level I/O error while writing file: %s", path)
+
+	default:
+		return err
+	}
 }

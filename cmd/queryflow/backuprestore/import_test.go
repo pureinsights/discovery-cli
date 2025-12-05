@@ -3,6 +3,7 @@ package backuprestore
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -24,19 +25,20 @@ import (
 func TestNewImportCommand_ProfileFlag(t *testing.T) {
 	importJson, _ := os.ReadFile("testdata/queryflow-import.json")
 	tests := []struct {
-		name       string
-		url        bool
-		apiKey     string
-		outGolden  string
-		errGolden  string
-		outBytes   []byte
-		errBytes   []byte
-		method     string
-		path       string
-		statusCode int
-		response   string
-		file       string
-		err        error
+		name           string
+		url            bool
+		apiKey         string
+		outGolden      string
+		errGolden      string
+		outBytes       []byte
+		errBytes       []byte
+		method         string
+		path           string
+		statusCode     int
+		response       string
+		file           string
+		err            error
+		compareOptions []testutils.CompareBytesOption
 	}{
 		// Working case
 		{
@@ -66,6 +68,21 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			apiKey:    "apiKey123",
 			file:      filepath.Join("testdata", "queryflow-export.zip"),
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery QueryFlow URL is missing for profile \"default\".\nTo set the URL for the Discovery QueryFlow API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery queryflow config --profile \"default\""),
+		},
+		{
+			name:           "Import Fails because the sent file does not exist",
+			url:            true,
+			apiKey:         "",
+			outGolden:      "NewImportCommand_Out_FileDoesNotExist",
+			errGolden:      "NewImportCommand_Err_FileDoesNotExist",
+			outBytes:       testutils.Read(t, "NewImportCommand_Out_FileDoesNotExist"),
+			errBytes:       testutils.Read(t, "NewImportCommand_Err_FileDoesNotExist"),
+			method:         http.MethodPost,
+			path:           "/v2/import",
+			response:       "",
+			file:           filepath.Join("doesnotexist", "queryflow-export.zip"),
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", filepath.Join("doesnotexist", "queryflow-export.zip")), "Could not import entities"),
+			compareOptions: []testutils.CompareBytesOption{testutils.WithNormalizePaths()},
 		},
 		{
 			name:       "Import fails",
@@ -143,7 +160,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
-				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes(), tc.compareOptions...)
 			} else {
 				require.NoError(t, err)
 			}
