@@ -2,9 +2,12 @@ package cli
 
 import (
 	"errors"
+	"io/fs"
+	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestError_Error tests the Error.Error() function that outputs a string.
@@ -199,6 +202,198 @@ func TestFromError(t *testing.T) {
 				}
 			} else {
 				assert.Nil(t, got)
+			}
+		})
+	}
+}
+
+// TestNormalizeReadFileError tests the NormalizeReadFileError
+func TestNormalizeReadFileError(t *testing.T) {
+	tests := []struct {
+		name        string
+		path        string
+		err         error
+		expectedErr error
+	}{
+		{
+			name:        "file does not exist (direct)",
+			path:        "entities.json",
+			err:         fs.ErrNotExist,
+			expectedErr: errors.New("file does not exist: entities.json"),
+		},
+		{
+			name: "file does not exist wrapped in PathError",
+			path: "entities.json",
+			err: &fs.PathError{
+				Op:   "open",
+				Path: "entities.json",
+				Err:  fs.ErrNotExist,
+			},
+			expectedErr: errors.New("file does not exist: entities.json"),
+		},
+		{
+			name:        "permission denied",
+			path:        "secrets.json",
+			err:         fs.ErrPermission,
+			expectedErr: errors.New("permission denied while reading file: secrets.json"),
+		},
+		{
+			name:        "invalid file path",
+			path:        "asdfjk;l///kasdfkasdf",
+			err:         fs.ErrInvalid,
+			expectedErr: errors.New("invalid file path: asdfjk;l///kasdfkasdf"),
+		},
+		{
+			name:        "file closed unexpectedly",
+			path:        "entities.json",
+			err:         fs.ErrClosed,
+			expectedErr: errors.New("file was closed unexpectedly: entities.json"),
+		},
+		{
+			name:        "file already exists",
+			path:        "config.toml",
+			err:         fs.ErrExist,
+			expectedErr: errors.New("file already exists: config.toml"),
+		},
+		{
+			name:        "path is a directory",
+			path:        "/dir",
+			err:         syscall.EISDIR,
+			expectedErr: errors.New("path is a directory, not a file: /dir"),
+		},
+		{
+			name:        "too many open files",
+			path:        "entities.json",
+			err:         syscall.EMFILE,
+			expectedErr: errors.New("too many open files while reading: entities.json"),
+		},
+		{
+			name:        "out of memory",
+			path:        "large-file.txt",
+			err:         syscall.ENOMEM,
+			expectedErr: errors.New("out of memory while reading file: large-file.txt"),
+		},
+		{
+			name:        "invalid argument",
+			path:        "invalid",
+			err:         syscall.EINVAL,
+			expectedErr: errors.New("invalid argument while reading file: invalid"),
+		},
+		{
+			name:        "low-level IO error",
+			path:        "io.txt",
+			err:         syscall.EIO,
+			expectedErr: errors.New("low-level I/O error while reading file: io.txt"),
+		},
+		{
+			name:        "nil error",
+			path:        "directory",
+			err:         nil,
+			expectedErr: nil,
+		},
+		{
+			name:        "not a file error error",
+			path:        "directory",
+			err:         errors.New("this is not a file error"),
+			expectedErr: errors.New("this is not a file error"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := NormalizeReadFileError(tc.path, tc.err)
+			if tc.expectedErr != nil {
+				require.Error(t, actual)
+				assert.EqualError(t, actual, tc.expectedErr.Error())
+			} else {
+				assert.Nil(t, actual)
+			}
+		})
+	}
+}
+
+// TestNormalizeWriteFileError tests the NormalizeWriteFileError() function
+func TestNormalizeWriteFileError(t *testing.T) {
+	tests := []struct {
+		name        string
+		path        string
+		err         error
+		expectedErr error
+	}{
+		{
+			name:        "file does not exist (direct)",
+			path:        "doesnotexist/entities.json",
+			err:         fs.ErrNotExist,
+			expectedErr: errors.New("the given path does not exist: doesnotexist/entities.json"),
+		},
+		{
+			name: "file does not exist wrapped in PathError",
+			path: "entities.json",
+			err: &fs.PathError{
+				Op:   "open",
+				Path: "entities.json",
+				Err:  fs.ErrNotExist,
+			},
+			expectedErr: errors.New("the given path does not exist: entities.json"),
+		},
+		{
+			name:        "permission denied",
+			path:        "secrets.json",
+			err:         fs.ErrPermission,
+			expectedErr: errors.New("permission denied while writing file: secrets.json"),
+		},
+		{
+			name:        "write to directory",
+			path:        "/directory",
+			err:         syscall.EISDIR,
+			expectedErr: errors.New("cannot write to a directory: /directory"),
+		},
+		{
+			name:        "file closed unexpectedly",
+			path:        "entities.json",
+			err:         syscall.ENOSPC,
+			expectedErr: errors.New("no space left on device while writing file: entities.json"),
+		},
+		{
+			name:        "file system is read only exists",
+			path:        "config.toml",
+			err:         syscall.EROFS,
+			expectedErr: errors.New("filesystem is read-only: config.toml"),
+		},
+		{
+			name:        "too many open files",
+			path:        "entities.json",
+			err:         syscall.EMFILE,
+			expectedErr: errors.New("too many open files while writing file: entities.json"),
+		},
+		{
+			name:        "low-level IO error",
+			path:        "io.txt",
+			err:         syscall.EIO,
+			expectedErr: errors.New("low-level I/O error while writing file: io.txt"),
+		},
+		{
+			name:        "nil error",
+			path:        "directory",
+			err:         nil,
+			expectedErr: nil,
+		},
+		{
+			name:        "not a file error error",
+			path:        "directory",
+			err:         errors.New("this is not a file error"),
+			expectedErr: errors.New("this is not a file error"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := NormalizeWriteFileError(tc.path, tc.err)
+			if tc.expectedErr != nil {
+				require.Error(t, actual)
+				assert.EqualError(t, actual, tc.expectedErr.Error())
+			} else {
+				assert.Nil(t, actual)
 			}
 		})
 	}
