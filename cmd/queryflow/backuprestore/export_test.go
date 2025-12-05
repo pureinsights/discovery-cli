@@ -23,7 +23,8 @@ import (
 
 // TestNewExportCommand_ProfileFlag tests the NewExportCommand() function when there is a profile flag.
 func TestNewExportCommand(t *testing.T) {
-	zipBytes, _ := os.ReadFile("testdata/queryflow-export.zip")
+	zipBytes, err := os.ReadFile("testdata/queryflow-export.zip")
+	require.NoError(t, err)
 	tests := []struct {
 		name               string
 		url                bool
