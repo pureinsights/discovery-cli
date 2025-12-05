@@ -23,7 +23,8 @@ import (
 
 // TestNewImportCommand_ProfileFlag tests the TestNewImportCommand() function when there is a profile flag.
 func TestNewImportCommand_ProfileFlag(t *testing.T) {
-	importJson, _ := os.ReadFile("testdata/core-import.json")
+	importJson, err := os.ReadFile("testdata/core-import.json")
+	require.NoError(t, err)
 	tests := []struct {
 		name           string
 		url            bool

@@ -566,7 +566,7 @@ func Test_discovery_saveConfig(t *testing.T) {
 				"cn.queryflow_key": "queryflow123",
 				"cn.staging_key":   "staging235",
 			},
-			err: fmt.Errorf("cannot find the path specified"),
+			err: fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")),
 		},
 	}
 
@@ -588,7 +588,7 @@ func Test_discovery_saveConfig(t *testing.T) {
 			err := d.saveConfig()
 			if tc.err != nil {
 				require.Error(t, err)
-				assert.EqualError(t, err, fmt.Sprintf("the given path does not exist: %s", filepath.Join("doesnotexist", "config.toml")))
+				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
 				configVpr := viper.New()
