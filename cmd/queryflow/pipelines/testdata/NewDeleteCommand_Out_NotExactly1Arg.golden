@@ -1,0 +1,13 @@
+Usage:
+  delete [flags]
+
+Examples:
+	# Delete a pipeline by id
+	discovery queryflow pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
+
+	# Delete a pipeline by name
+	discovery queryflow pipeline delete "Search pipeline"
+
+Flags:
+  -h, --help   help for delete
+
