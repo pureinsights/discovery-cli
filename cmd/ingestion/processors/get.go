@@ -39,7 +39,7 @@ applyapply
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
-- Label: The format is label={key}[:{value}], where the value is optional.
-- Type: The format is type={type}.`)
+- Label: The format is label={key}[:{value}], where the value is optional
+- Type: The format is type={type}`)
 	return get
 }

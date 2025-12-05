@@ -40,8 +40,8 @@ func NewStartCommand(d cli.Discovery) *cobra.Command {
 	discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3`,
 	}
 
-	start.Flags().StringVar(&scanType, "scan-type", string(discoveryPackage.ScanFull), "The scan type of the seed execution")
-	start.Flags().StringVar(&executionProperties, "properties", "", "The execution properties of the seed execution")
+	start.Flags().StringVar(&scanType, "scan-type", string(discoveryPackage.ScanFull), "the scan type of the seed execution")
+	start.Flags().StringVar(&executionProperties, "properties", "", "the execution properties of the seed execution")
 
 	return start
 }

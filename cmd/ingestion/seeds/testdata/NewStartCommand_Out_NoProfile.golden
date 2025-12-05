@@ -7,6 +7,6 @@ Examples:
 
 Flags:
   -h, --help                help for start
-      --properties string   The execution properties of the seed execution
-      --scan-type string    The scan type of the seed execution (default "FULL")
+      --properties string   the execution properties of the seed execution
+      --scan-type string    the scan type of the seed execution (default "FULL")
 

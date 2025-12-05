@@ -36,9 +36,9 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	# Store a server with the JSON configuration in the data flag
 	discovery core server store --data '{"type":"mongo","name":"MongoDB Atlas server","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.dleud.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'`,
 	}
-	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "Aborts the operation if there is an error")
-	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted")
-	store.Flags().StringVarP(&file, "file", "f", "", "The path of the file that contains the JSON data")
+	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")
+	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")
+	store.Flags().StringVarP(&file, "file", "f", "", "the path of the file that contains the JSON data")
 
 	store.MarkFlagsOneRequired("data", "file")
 	store.MarkFlagsMutuallyExclusive("data", "file")

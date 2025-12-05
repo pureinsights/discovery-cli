@@ -36,9 +36,9 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	# Store a label with the JSON configuration in the data flag
 	discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'`,
 	}
-	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "Aborts the operation if there is an error")
-	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted")
-	store.Flags().StringVarP(&file, "file", "f", "", "The path of the file that contains the JSON data")
+	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")
+	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")
+	store.Flags().StringVarP(&file, "file", "f", "", "the path of the file that contains the JSON data")
 
 	store.MarkFlagsOneRequired("data", "file")
 	store.MarkFlagsMutuallyExclusive("data", "file")

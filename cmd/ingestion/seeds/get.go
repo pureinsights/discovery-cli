@@ -73,8 +73,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
-- Label: The format is label={key}[:{value}], where the value is optional.
-- Type: The format is type={type}.`)
+- Label: The format is label={key}[:{value}], where the value is optional
+- Type: The format is type={type}`)
 
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
 

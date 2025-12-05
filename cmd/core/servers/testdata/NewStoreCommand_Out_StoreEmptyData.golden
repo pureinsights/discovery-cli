@@ -9,9 +9,9 @@ Examples:
 	discovery core server store --data '{"type":"mongo","name":"MongoDB Atlas server","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.dleud.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
 
 Flags:
-      --abort-on-error   Aborts the operation if there is an error
-  -d, --data string      The JSON with the configurations that will be upserted
-  -f, --file string      The path of the file that contains the JSON data
+      --abort-on-error   aborts the operation if there is an error
+  -d, --data string      the JSON with the configurations that will be upserted
+  -f, --file string      the path of the file that contains the JSON data
   -h, --help             help for store
   -p, --profile string   configuration profile to use (default "default")
 

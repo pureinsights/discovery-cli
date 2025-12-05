@@ -44,7 +44,7 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 	discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE`,
 	}
 
-	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the files with the exported entities of the Discovery products.")
+	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the files with the exported entities of the Discovery products")
 	importCmd.Flags().StringVar(&onConflict, "on-conflict", string(discoveryPackage.OnConflictFail), "the conflict resolution strategy that will be used")
 
 	importCmd.MarkFlagRequired("file")
