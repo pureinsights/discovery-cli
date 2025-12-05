@@ -3,6 +3,7 @@ package backuprestore
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -22,7 +23,8 @@ import (
 
 // TestNewExportCommand_ProfileFlag tests the NewExportCommand() function when there is a profile flag.
 func TestNewExportCommand(t *testing.T) {
-	zipBytes, _ := os.ReadFile("testdata/queryflow-export.zip")
+	zipBytes, err := os.ReadFile("testdata/queryflow-export.zip")
+	require.NoError(t, err)
 	tests := []struct {
 		name               string
 		url                bool
@@ -38,6 +40,7 @@ func TestNewExportCommand(t *testing.T) {
 		contentDisposition string
 		file               string
 		err                error
+		compareOptions     []testutils.CompareBytesOption
 	}{
 		// Working case
 		{
@@ -67,6 +70,23 @@ func TestNewExportCommand(t *testing.T) {
 			url:       false,
 			apiKey:    "apiKey123",
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery QueryFlow URL is missing for profile \"default\".\nTo set the URL for the Discovery QueryFlow API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery queryflow config --profile \"default\""),
+		},
+		{
+			name:               "Export Fails because the sent directory does not exist",
+			url:                true,
+			apiKey:             "",
+			outGolden:          "NewExportCommand_Out_DirectoryDoesNotExist",
+			errGolden:          "NewExportCommand_Err_DirectoryDoesNotExist",
+			outBytes:           testutils.Read(t, "NewExportCommand_Out_DirectoryDoesNotExist"),
+			errBytes:           testutils.Read(t, "NewExportCommand_Err_DirectoryDoesNotExist"),
+			method:             http.MethodGet,
+			path:               "/v2/export",
+			statusCode:         http.StatusOK,
+			response:           zipBytes,
+			contentDisposition: `attachment; filename="export-20251110T1455.zip"; filename*=utf-8''Export-20251110T1460.zip`,
+			file:               filepath.Join("doesnotexist", "queryflow-export.zip"),
+			err:                cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "queryflow-export.zip")), "Could not export entities"),
+			compareOptions:     []testutils.CompareBytesOption{testutils.WithNormalizePaths()},
 		},
 		{
 			name:               "Export fails",
@@ -153,7 +173,7 @@ func TestNewExportCommand(t *testing.T) {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
 				assert.EqualError(t, err, tc.err.Error())
-				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes(), tc.compareOptions...)
 			} else {
 				require.NoError(t, err)
 				readBytes, err := os.ReadFile(tc.file)

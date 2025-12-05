@@ -40,6 +40,7 @@ func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig
 	if config.file != "" {
 		jsonBytes, err := os.ReadFile(config.file)
 		if err != nil {
+			err = cli.NormalizeReadFileError(config.file, err)
 			return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not read file %q", config.file)
 		}
 

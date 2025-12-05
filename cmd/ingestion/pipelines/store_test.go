@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -186,7 +185,7 @@ func TestNewStoreCommand(t *testing.T) {
 			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFile"),
 			errBytes:     []byte(nil),
 			data:         "",
-			file:         "testdata/StoreCommand_JSONFile.golden",
+			file:         "testdata/StoreCommand_JSONFile.json",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/pipeline": {
@@ -383,7 +382,7 @@ func TestNewStoreCommand(t *testing.T) {
 			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreEmptyFile"),
 			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreEmptyFile"),
 			data:         "",
-			file:         "testdata/StoreCommand_EmptyFile.golden",
+			file:         "testdata/StoreCommand_EmptyFile.json",
 			abortOnError: false,
 			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
 		},
@@ -394,11 +393,11 @@ func TestNewStoreCommand(t *testing.T) {
 			outGolden:    "NewStoreCommand_Out_StoreFileNotExists",
 			errGolden:    "NewStoreCommand_Err_StoreFileNotExists",
 			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFileNotExists"),
-			errBytes:     []byte(nil),
 			data:         "",
 			file:         "doesnotexist",
 			abortOnError: false,
-			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fs.ErrNotExist, "Could not read file \"doesnotexist\""),
+			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreFileNotExists"),
+			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
 		},
 		{
 			name:         "StoreCommand gets empty data",
@@ -558,14 +557,8 @@ func TestNewStoreCommand(t *testing.T) {
 			if tc.err != nil {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(cli.Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-					testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 			}
@@ -602,7 +595,7 @@ func TestNewStoreCommand_NoProfileFlag(t *testing.T) {
 	storeCmd.SetOut(ios.Out)
 	storeCmd.SetErr(ios.Err)
 
-	storeCmd.SetArgs([]string{"--file", "testdata/StoreCommand_JSONFile.golden"})
+	storeCmd.SetArgs([]string{"--file", "testdata/StoreCommand_JSONFile.json"})
 
 	err := storeCmd.Execute()
 	require.Error(t, err)
