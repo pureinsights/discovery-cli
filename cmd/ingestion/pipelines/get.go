@@ -3,9 +3,9 @@ package pipelines
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +28,17 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchCommand(args, d, ingestionClient.Pipelines(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
+		Example: `	# Get pipeline by name
+	discovery ingestion pipeline get "Search pipeline"
+
+	# Get pipelines using filters
+	discovery ingestion pipeline get --filter label=A:A
+
+	# Get all pipelines using the configuration in profile "cn"
+	discovery ingestion pipeline get -p cn`,
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filter is:
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filter is:
 - Label: The format is label={key}[:{value}], where the value is optional.`)
 	return get
 }

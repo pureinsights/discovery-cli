@@ -17,6 +17,7 @@ TODO
 Usage: `discovery [command]`
 
 Flags:
+ 
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -36,6 +37,7 @@ discovery -h
 Usage: `discovery config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -77,6 +79,7 @@ Editing profile "cn". Press Enter to keep the value shown, type a single space t
 Usage: `discovery config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -134,11 +137,12 @@ Staging API Key: "discovery.key.staging.cn"
 ```
 
 #### Export
-`export` is the command used to backup all of Discovery's entities at once. With the file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
+`export` is the command used to backup all of Discovery's entities at once. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
 
 Usage: `discovery export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -162,6 +166,77 @@ discovery export -p cn
 discovery export --file "entities/discovery.zip".
 {"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
 ```
+#### Import
+`import` is the command used to restore entities to all of Discovery's products at once. With the `file` flag, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files product by the `/export` endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format `productName-*`. For example, the Core can be called `core-export-20251112T1629.zip` and the one for Ingestion can be called `ingestion-export-20251110T1607.zip`. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery import [flags]`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the files with the exported entities of the Discovery products.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
+{
+  "core": {
+    "Credential": [
+      {
+        "id": "6e2f1c2a-9885-4263-8945-38b0cda4b6d3",
+        "status": 204
+      },
+      {
+        "id": "721997cd-b16f-4acb-93cf-b44a959dbcf2",
+        "status": 204
+      }
+    ],
+    "Server": [
+      {
+        "id": "6817ccf5-b4bc-4f97-82f5-c8016d26f2fb",
+        "status": 204
+      },
+      {
+        "id": "f7a65744-a3b1-4655-b472-c612bb490ff9",
+        "status": 204
+      }
+    ]
+  },
+  "ingestion": {
+    "Pipeline": [
+      {
+        "id": "128b1127-0ea0-4aa5-9a4e-9160285d2f61",
+        "status": 204
+      }
+    ],
+    "Processor": [
+      {
+        "id": "11de1d9b-d037-4d27-8304-37b62e79d044",
+        "status": 204
+      }
+    ],
+    "Seed": [
+      {
+        "id": "bb8d13c6-73b5-47a1-b0fb-06a141e32309",
+        "status": 204
+      }
+    ],
+    "SeedSchedule": []
+  }
+}
+```
 
 #### Core
 `core` is the main command used to interact with Discovery's Core. 
@@ -169,6 +244,7 @@ discovery export --file "entities/discovery.zip".
 Usage: `discovery core [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -181,6 +257,7 @@ Flags:
 Usage: `discovery core config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -210,6 +287,7 @@ Editing profile "default". Press Enter to keep the value shown, type a single sp
 Usage: `discovery core config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -254,6 +332,7 @@ Core API Key: "discovery.key.core.cn"
 Usage: `discovery core export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -272,8 +351,8 @@ discovery core export -p cn
 ```
 
 ```bash
-# Export the entities to a specific file
-discovery core export --file "entities/core.zip".
+# Export the entities to a specific file.
+discovery core export --file "entities/core.zip"
 {"acknowledged":true}
 ```
 
@@ -283,6 +362,7 @@ discovery core export --file "entities/core.zip".
 Usage: `discovery core import [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -324,6 +404,7 @@ discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
 Usage: `discovery core label [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -340,6 +421,7 @@ Arguments:
 (Optional, string) The UUID of the label that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -363,11 +445,12 @@ discovery core label get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's labels. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core label store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -396,7 +479,7 @@ discovery core label store --file "labeljsonfile.json"
 ```bash
 # Store a label with the JSON configuration in the data flag
 discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
-{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label2","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
+{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
 ```
 
 ###### Delete
@@ -409,6 +492,7 @@ Arguments:
 (Required, string) The UUID of the label that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -429,6 +513,7 @@ discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
 Usage: `discovery core secret [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -445,6 +530,7 @@ Arguments:
 (Optional, string) The UUID of the secret that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -467,11 +553,12 @@ discovery core secret get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's secrets. With the data flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's secrets. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core secret store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -513,6 +600,7 @@ Arguments:
 (Required, string) The UUID of the secret that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -533,6 +621,7 @@ discovery core secret delete 3d51beef-8b90-40aa-84b5-033241dc6239
 Usage: `discovery core credential [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -549,6 +638,7 @@ Arguments:
 (Optional, string) The name or UUID of the credential that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -571,7 +661,7 @@ discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
 ```bash
 # Get credential by name
 discovery core credential get "my-credential"
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-11-20T00:08:14Z","id":"9be0e625-a510-46c5-8130-438823f849c2","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:14Z","name":"my-credential","secret":"openai-secret","type":"openai"}
 ```
 
 ```bash
@@ -589,11 +679,12 @@ discovery core credential get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's credentials. With the data flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's credentials. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core credential store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -635,6 +726,7 @@ Arguments:
 (Required, string) The name or UUID of the credential that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -659,6 +751,7 @@ discovery core credential delete credential1
 Usage: `discovery core server [subcommand] [flags]
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -675,6 +768,7 @@ Arguments:
 (Optional, string) The name or UUID of the server that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -715,11 +809,12 @@ discovery core server get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's servers. With the data flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core server store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -761,6 +856,7 @@ Arguments:
 (Required, string) The name or UUID of the server that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -785,6 +881,7 @@ discovery core server delete server1
 Usage: `discovery ingestion [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -797,6 +894,7 @@ Flags:
 Usage: `discovery ingestion config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -826,6 +924,7 @@ Editing profile "default". Press Enter to keep the value shown, type a single sp
 Usage: `discovery ingestion config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -870,6 +969,7 @@ Ingestion API Key: "discovery.key.ingestion.cn"
 Usage: `discovery ingestion export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -889,7 +989,7 @@ discovery ingestion export -p cn
 
 ```bash
 # Export the entities to a specific file
-discovery ingestion export --file "entities/ingestion.zip".
+discovery ingestion export --file "entities/ingestion.zip"
 {"acknowledged":true}
 ```
 
@@ -899,6 +999,7 @@ discovery ingestion export --file "entities/ingestion.zip".
 Usage: `discovery Ingestion import [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -940,6 +1041,7 @@ discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict I
 Usage: `discovery ingestion processor [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -956,6 +1058,7 @@ Arguments:
 (Optional, string) The name or UUID of the processor that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -977,8 +1080,8 @@ discovery ingestion processor get 90675678-fc9f-47ec-8bab-89969dc204f0
 
 ```bash
 # Get processor by name
-discovery ingestion processor get "MongoDB store processor"
-{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor","type":"mongo"}
+discovery ingestion processor get "My HTML processor"
+{"active":true,"config":{"action":"select","charset":"UTF-8","file":"#{data('/file')}","selectors":{"section0":{"mode":"HTML","selector":".sect0"},"section1":{"mode":"HTML","selector":".sect1"}}},"creationTimestamp":"2025-11-17T22:38:26Z","id":"56ace252-4731-4428-84b8-7cd13bf059d3","labels":[],"lastUpdatedTimestamp":"2025-11-17T22:38:26Z","name":"My HTML processor","type":"html"}
 ```
 
 ```bash
@@ -996,11 +1099,12 @@ discovery ingestion processor get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's processors. With the data flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion processor store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1032,12 +1136,42 @@ discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB stor
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's processors. The user must send a name or UUID to delete a specific processor.
+
+Usage: `discovery ingestion processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the processor that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery ingestion processor delete "MongoDB store processor"
+{"acknowledged":true}
+```
+
 ##### Pipeline
 `pipeline` is the command used to manage pipelines in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
 Usage: `discovery ingestion pipeline [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1054,6 +1188,7 @@ Arguments:
 (Optional, string) The name or UUID of the pipeline that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1075,7 +1210,7 @@ discovery ingestion pipeline get 04536687-f083-4353-8ecc-b7348e14b748
 ```bash
 # Get pipeline by name
 discovery ingestion pipeline get "Search pipeline"
-{"active":true,"creationTimestamp":"2025-10-31T22:06:27Z","id":"8d9560b3-631b-490b-994f-4708d9880e3b","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:06:27Z","name":"Search pipeline"}
+{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","initialState":"ingestionState","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 ```
 
 ```bash
@@ -1094,11 +1229,12 @@ discovery ingestion pipeline get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's pipelines. With the data flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion pipeline store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1130,12 +1266,42 @@ discovery ingestion pipeline store --data '{"name":"Search pipeline","labels":[]
 {"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's pipelines. The user must send a name or UUID to delete a specific pipeline.
+
+Usage: `discovery ingestion pipeline delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the pipeline that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a pipeline by id
+discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a pipeline by name
+discovery ingestion pipeline delete "Search pipeline"
+{"acknowledged":true}
+```
+
 ##### Seed
 `seed` is the command used to manage seeds in Discovery Ingestion. This command contains various subcommands used to create, read, update, and delete.
 
 Usage: `discovery ingestion seed [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1143,7 +1309,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The get command can also get records from the seed with the `record` flag.
 
 Usage: `discovery ingestion seed get [flags] [<arg>]`
 
@@ -1152,6 +1318,7 @@ Arguments:
 (Optional, string) The name or UUID of the seed that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1162,6 +1329,9 @@ Flags:
 (Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
+
+`--record`::
+(Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
 
 Examples:
 
@@ -1174,7 +1344,7 @@ discovery ingestion seed get 7251d693-7382-452f-91dc-859add803a43
 ```bash
 # Get seed by name
 discovery ingestion seed get "Search seed"
-{"active":true,"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","type":"staging"}
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
 ```bash
@@ -1192,12 +1362,19 @@ discovery ingestion seed get -p cn
 {"active":true,"creationTimestamp":"2025-09-05T19:48:00Z","id":"0517a87a-86f7-4a71-bb3f-adfa0c87a269","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:48:00Z","name":"Staging ingestion seed","type":"staging"}
 ```
 
+```bash
+# Get a seed record by id
+discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","record":{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},"recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+```
+
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's seeds. With the data flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's seeds. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion seed store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1229,8 +1406,38 @@ discovery ingestion seed store --data '{"type":"staging","name":"Search seed","l
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's seeds. The user must send a name or UUID to delete a specific seed.
+
+Usage: `discovery ingestion seed delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the seed that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a seed by id
+discovery ingestion seed delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a seed by name
+discovery ingestion seed delete "Search seed"
+{"acknowledged":true}
+```
+
+
 ###### Start
-`start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user can set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
+`start` is the command used to start a seed execution in Discovery Ingestion. With the `properties` flag, the user can set the execution properties with which to run the seed. With the `scan-type` flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
 
 Usage: `discovery ingestion seed start <arg> [flags]`
 
@@ -1239,6 +1446,7 @@ Arguments:
 (Required, string) The name or UUID of the seed that will be executed.
 
 Flags:
+
 `--properties`::
 (Optional, string) Set the properties of the seed execution.
 
@@ -1254,22 +1462,59 @@ Flags:
 Examples:
 
 ```bash
-# Start a seed seed execution with no flags
+# Start a seed execution with no flags
 discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ```bash
-# Start a seed seed execution with no flags using the seed's name
+# Start a seed execution with no flags using the seed's name
 discovery ingestion seed start "Search seed"
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ```bash
-# Start a seed seed execution with the properties and scan-type flags
+# Start a seed execution with the properties and scan-type flags
 discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
 {"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
+
+###### Halt
+`halt` is the command used to halt a seed execution in Discovery Ingestion. With the `execution` flag, the user can specify the specific execution that will be halted. If there is no `execution` flag, all of the active executions are halted.
+
+Usage: `discovery ingestion seed halt <seed> [flags] `
+
+Arguments:
+`seed`::
+(Required, string) The name or UUID of the seed that will have its executions halted.
+
+Flags:
+
+`--execution`::
+(Optional, string) The UUID of the execution that will be halted.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Halt all active seed executions
+discovery ingestion seed halt 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","status":202}
+```
+
+```bash
+# Halt a single seed execution
+discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
+{"acknowledged":true}
+```
+
+
+
 
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow.
@@ -1433,6 +1678,188 @@ discovery queryflow import -p cn --file "entities/queryflow.zip"
       "status": 409
     }
     ...
+```
+
+##### Processor
+`processor` is the command used to manage processors in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery queryflow processor [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery queryflow processor get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, string) The name or UUID of the processor that will be retrieved.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+Examples:
+
+```bash
+# Get a processor by id
+discovery queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB text processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+```bash
+# Get processor by name
+discovery queryflow processor get "OpenAI Chat Processor"
+{"active":true,"config":{"action":"chat-completion","messages":[{"content":"#{ data(\"/script\") }","role":"user"}],"model":"gpt-4.1"},"creationTimestamp":"2025-11-20T00:10:50Z","id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:10:50Z","name":"OpenAI Chat Processor","server":{"credential":"9be0e625-a510-46c5-8130-438823f849c2","id":"741df47e-208f-47c1-812f-53cc62c726af"},"type":"openai"}
+```
+
+```bash
+# Get processors using filters
+discovery queryflow processor get --filter label=A:A -f type=mongo
+{"active":true,"creationTimestamp":"2025-11-06T14:52:01Z","id":"628d4b24-84cc-4070-8eed-c3155cf40fe9","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:01Z","name":"MongoDB text processor","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"MongoDB store processor","type":"mongo"}
+```
+
+```bash
+# Get all processors using the configuration in profile "cn"
+discovery queryflow processor get -p cn
+{"active":true,"creationTimestamp":"2025-11-06T14:52:16Z","id":"019ecd8e-76c9-41ee-b047-299b8aa14aba","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:16Z","name":"MongoDB text processor","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-11-06T14:52:17Z","id":"0a7caa9b-99aa-4a63-aa6d-a1e40941984d","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:17Z","name":"MongoDB store processor","type":"mongo"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's processors. The user must send a name or UUID to delete a specific processor.
+
+Usage: `discovery queryflow processor delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the processor that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a processor by id
+discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
+{"acknowledged":true}
+```
+
+```bash
+# Delete a processor by name
+discovery queryflow processor delete processor1
+{"acknowledged":true}
+```
+
+##### Endpoint
+`endpoint` is the command used to manage endpoints in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery queryflow endpoint [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's endpoints. The user can send a name or UUID to get a specific endpoint. If no argument is given, then the command retrieves every endpoint. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery queryflow endpoint get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, string) The name or UUID of the endpoint that will be retrieved.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+- Type: The format is `type={type}`.
+
+Examples:
+
+```bash
+# Get an endpoint by id
+discovery queryflow endpoint get cf56470f-0ab4-4754-b05c-f760669315af
+{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
+```
+
+```bash
+# Get an endpoint by name
+discovery queryflow endpoint get "Blogs endpoint"
+{"active":true,"creationTimestamp":"2025-11-20T00:08:26Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","initialState":"searchState","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:26Z","name":"Blogs endpoint","states":{"searchState":{"mode":{"type":"group"},"processors":[{"active":true,"continueOnError":false,"id":"5f125024-1e5e-4591-9fee-365dc20eeeed"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/blogs-search"}
+```
+
+```bash
+# Get endpoints using filters
+discovery queryflow endpoint get --filter label=A:B
+{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"Wikis endpoint","timeout":"PT1H","type":"default","uri":"/wikis-search"}
+{"active":true,"creationTimestamp":"2025-11-06T16:24:54Z","httpMethod":"GET","id":"2fee5e27-4147-48de-ba1e-d7f32476a4a2","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:54Z","name":"Blogs search endpoint","timeout":"PT1H","type":"default","uri":"/blogs-search"}
+```
+
+```bash
+# Get all endpoints using the configuration in profile "cn"
+discovery queryflow endpoint get -p cn
+{"active":true,"creationTimestamp":"2025-11-06T16:24:54Z","httpMethod":"GET","id":"2fee5e27-4147-48de-ba1e-d7f32476a4a2","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:54Z","name":"Wikis endpoint","timeout":"PT1H","type":"default","uri":"/wikis-search"}
+{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","labels":[],"lastUpdatedTimestamp":"2025-08-25T16:47:24Z","name":"Blogs endpoint","timeout":"PT1H","type":"default","uri":"/blogs-search"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's endpoints. The user must send a name or UUID to delete a specific endpoint.
+
+Usage: `discovery queryflow endpoint delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the endpoint that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+`-p, --profile`::
+
+(Optional, string) Set the configuration profile that will execute the command.
+
+```bash
+# Delete a endpoint by id
+discovery queryflow endpoint delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
+{"acknowledged":true}
+
+```
+```bash
+# Delete a endpoint by name
+discovery queryflow endpoint delete endpoint1
+{"acknowledged":true}
 ```
 
 #### Staging

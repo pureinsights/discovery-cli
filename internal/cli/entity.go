@@ -10,7 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
 const (
@@ -91,6 +91,11 @@ func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error
 	}
 
 	return result, nil
+}
+
+// SearchEntity is an exported auxiliary function that calls the discovery.searchEntity() function.
+func SearchEntity(d Discovery, client Searcher, id string) (gjson.Result, error) {
+	return d.searchEntity(client, id)
 }
 
 // SearchEntity searches for the entity and prints it into the Out IOStream.
