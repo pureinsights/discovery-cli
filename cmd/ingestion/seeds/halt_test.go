@@ -500,7 +500,6 @@ func TestNewHaltCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
 			if tc.url {
 				vpr.Set("default.ingestion_url", srv.URL)
 			}
