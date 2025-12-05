@@ -147,17 +147,17 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 	}
 }
 
-// PipelinesClient is the struct that performs the CRUD and cloning of pipelines.
-type pipelinesClient struct {
+// ingestionPipelinesClient is the struct that performs the CRUD and cloning of pipelines.
+type ingestionPipelinesClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// NewPipelinesClient is the constructor of a pipelinesClient
-func newPipelinesClient(url, apiKey string) pipelinesClient {
+// newIngestionPipelinesClient is the constructor of an ingestionPipelinesClient
+func newIngestionPipelinesClient(url, apiKey string) ingestionPipelinesClient {
 	client := newClient(url+"/pipeline", apiKey)
-	return pipelinesClient{
+	return ingestionPipelinesClient{
 		crud: crud{
 			getter{
 				client: client,
@@ -255,9 +255,9 @@ func (i ingestion) Processors() ingestionProcessorsClient {
 	return newIngestionProcessorsClient(i.Url, i.ApiKey)
 }
 
-// Pipelines is used to create a pipelinesClient
-func (i ingestion) Pipelines() pipelinesClient {
-	return newPipelinesClient(i.Url, i.ApiKey)
+// Pipelines is used to create a ingestionPipelinesClient
+func (i ingestion) Pipelines() ingestionPipelinesClient {
+	return newIngestionPipelinesClient(i.Url, i.ApiKey)
 }
 
 // Seeds is used to create a seedsClient
