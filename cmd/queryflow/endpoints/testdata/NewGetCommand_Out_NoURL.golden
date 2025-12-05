@@ -12,7 +12,7 @@ Examples:
 	discovery queryflow endpoint get -p cn
 
 Flags:
-  -f, --filter stringArray   Apply filters in the format "filter=key:value". The available filters are:
+  -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
                              - Label: The format is label={key}[:{value}], where the value is optional.
                              - Type: The format is type={type}.
   -h, --help                 help for get
