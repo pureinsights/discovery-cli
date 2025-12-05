@@ -3,7 +3,7 @@ Usage:
   get [flags]
 
 Examples:
-	# Get processor by name
+	# Get processor by nameapplyapply
 	discovery ingestion processor get "MongoDB store processor"
 
 	# Get processors using filters
@@ -13,7 +13,7 @@ Examples:
 	discovery ingestion processor get -p cn
 
 Flags:
-  -f, --filter stringArray   Apply filters in the format "filter=key:value". The available filters are:
+  -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
                              - Label: The format is label={key}[:{value}], where the value is optional.
                              - Type: The format is type={type}.
   -h, --help                 help for get

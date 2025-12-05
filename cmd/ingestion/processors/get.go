@@ -30,7 +30,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get processor by name
 	discovery ingestion processor get "MongoDB store processor"
-
+applyapply
 	# Get processors using filters
 	discovery ingestion processor get --filter label=A:A -f type=mongo
 
@@ -38,7 +38,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	discovery ingestion processor get -p cn`,
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
 - Label: The format is label={key}[:{value}], where the value is optional.
 - Type: The format is type={type}.`)
 	return get

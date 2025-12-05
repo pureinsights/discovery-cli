@@ -38,7 +38,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	discovery ingestion pipeline get -p cn`,
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filter is:
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filter is:
 - Label: The format is label={key}[:{value}], where the value is optional.`)
 	return get
 }
