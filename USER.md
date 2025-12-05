@@ -134,7 +134,7 @@ Staging API Key: "discovery.key.staging.cn"
 ```
 
 #### Export
-`export` is the command used to backup all of Discovery's entities at once. With the file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
+`export` is the command used to backup all of Discovery's entities at once. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
 
 Usage: `discovery export [flags]`
 
@@ -161,6 +161,77 @@ discovery export -p cn
 # In this example, the Ingestion export failed.
 discovery export --file "entities/discovery.zip".
 {"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
+```
+#### Import
+`import` is the command used to restore entities to all of Discovery's products at once. With the `file` flag, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files product by the `/export` endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format `productName-*`. For example, the Core can be called `core-export-20251112T1629.zip` and the one for Ingestion can be called `ingestion-export-20251110T1607.zip`. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+
+Usage: `discovery import [flags]`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --file`::
+(Required, string) The file that contains the files with the exported entities of the Discovery products.
+
+`--on-conflict`::
+(Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
+
+Examples:
+
+```bash
+# Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
+# The rest of the command's output is omitted.
+discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
+{
+  "core": {
+    "Credential": [
+      {
+        "id": "6e2f1c2a-9885-4263-8945-38b0cda4b6d3",
+        "status": 204
+      },
+      {
+        "id": "721997cd-b16f-4acb-93cf-b44a959dbcf2",
+        "status": 204
+      }
+    ],
+    "Server": [
+      {
+        "id": "6817ccf5-b4bc-4f97-82f5-c8016d26f2fb",
+        "status": 204
+      },
+      {
+        "id": "f7a65744-a3b1-4655-b472-c612bb490ff9",
+        "status": 204
+      }
+    ]
+  },
+  "ingestion": {
+    "Pipeline": [
+      {
+        "id": "128b1127-0ea0-4aa5-9a4e-9160285d2f61",
+        "status": 204
+      }
+    ],
+    "Processor": [
+      {
+        "id": "11de1d9b-d037-4d27-8304-37b62e79d044",
+        "status": 204
+      }
+    ],
+    "Seed": [
+      {
+        "id": "bb8d13c6-73b5-47a1-b0fb-06a141e32309",
+        "status": 204
+      }
+    ],
+    "SeedSchedule": []
+  }
+}
 ```
 
 #### Core

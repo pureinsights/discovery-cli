@@ -42,6 +42,9 @@ func WriteExport(client BackupRestore, path string) (gjson.Result, error) {
 	}
 
 	err = os.WriteFile(path, zipBytes, 0o644)
+	if err != nil {
+		err = NormalizeWriteFileError(path, err)
+	}
 	return RenderExportStatus(err)
 }
 
@@ -73,6 +76,7 @@ func WriteExportsIntoFile(path string, clients []BackupRestoreClientEntry) (stri
 		0o644,
 	)
 	if err != nil {
+		err = NormalizeWriteFileError(path, err)
 		return "", err
 	}
 	defer zipFile.Close()
@@ -145,6 +149,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	results, err := client.Import(onConflict, path)
 	if err != nil {
+		err = NormalizeReadFileError(path, err)
 		return NewErrorWithCause(ErrorExitCode, err, "Could not import entities")
 	}
 
@@ -169,11 +174,13 @@ func copyImportEntitiesToTempFile(file *zip.File, path string) error {
 
 	out, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, file.Mode())
 	if err != nil {
+		err = NormalizeWriteFileError(path, err)
 		return NewErrorWithCause(ErrorExitCode, err, "Could not create the temporary export file")
 	}
 	defer out.Close()
 
 	if _, err := io.Copy(out, readCloser); err != nil {
+		err = NormalizeWriteFileError(path, err)
 		return NewErrorWithCause(ErrorExitCode, err, "Could not copy the file's contents")
 	}
 
@@ -245,6 +252,7 @@ func callImports(clients []BackupRestoreClientEntry, zipPaths map[string]string,
 					return "", NewErrorWithCause(ErrorExitCode, err, "Could not write import entities")
 				}
 			} else {
+				err = NormalizeReadFileError(path, err)
 				results, err = sjson.Set(results, client.Name, err.Error())
 				if err != nil {
 					return "", NewErrorWithCause(ErrorExitCode, err, "Could not write import entities")
@@ -262,6 +270,7 @@ func callImports(clients []BackupRestoreClientEntry, zipPaths map[string]string,
 func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	zipFile, err := os.ReadFile(path)
 	if err != nil {
+		err = NormalizeReadFileError(path, err)
 		return NewErrorWithCause(ErrorExitCode, err, "Could not open the file with the entities")
 	}
 

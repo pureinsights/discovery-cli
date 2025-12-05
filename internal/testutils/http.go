@@ -27,6 +27,7 @@ func HttpHandler(
 	}
 }
 
+// HttpHandlerWithContentDisposition returns a handler that adds the content disposition header.
 func HttpHandlerWithContentDisposition(
 	t *testing.T,
 	statusCode int,
