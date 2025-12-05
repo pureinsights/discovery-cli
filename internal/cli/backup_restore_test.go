@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 // TestRenderExportStatus tests the RenderExportStatus() function
@@ -130,6 +131,8 @@ func (g *FailingBackupRestore) Import(discoveryPackage.OnConflict, string) (gjso
 func TestWriteExport(t *testing.T) {
 	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
+	doesnotexist, err := sjson.Set(`{"acknowledged": false}`, "error", fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "export.zip")).Error())
+	require.NoError(t, err)
 	tests := []struct {
 		name                string
 		client              BackupRestore
@@ -156,11 +159,18 @@ func TestWriteExport(t *testing.T) {
 			err:                 nil,
 		},
 		{
-			name:                "Export fails",
+			name:                "WriteExport fails because export fails",
 			client:              new(FailingBackupRestore),
 			path:                filepath.Join(t.TempDir(), "export.zip"),
 			expectedAcknowledge: gjson.Parse("{\"acknowledged\": false,\"error\":\"status: 401, body: {\\\"error\\\":\\\"unauthorized\\\"}\\n\"}"),
 			err:                 NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not export entities"),
+		},
+		{
+			name:                "WriteExport fails because path does not exist",
+			client:              new(WorkingIngestionBackupRestore),
+			path:                filepath.Join("doesnotexist", "export.zip"),
+			expectedAcknowledge: gjson.Parse(doesnotexist),
+			err:                 NewErrorWithCause(ErrorExitCode, fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "export.zip")), "Could not export entities"),
 		},
 	}
 

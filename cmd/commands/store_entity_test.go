@@ -247,7 +247,7 @@ func TestStoreCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
+			vpr.Set("output", "pretty-json")
 			if tc.url != "" {
 				vpr.Set("default.core_url", tc.url)
 			}
