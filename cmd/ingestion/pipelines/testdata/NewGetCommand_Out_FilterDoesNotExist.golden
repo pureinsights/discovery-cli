@@ -2,7 +2,7 @@ Usage:
   get [flags]
 
 Examples:
-	# Get pipeline by nameapply
+	# Get pipeline by name
 	discovery ingestion pipeline get "Search pipeline"
 
 	# Get pipelines using filters

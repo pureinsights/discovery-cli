@@ -2,9 +2,9 @@ Usage:
   get [flags]
 
 Examples:
-	# Get processor by nameapply
+	# Get processor by name
 	discovery ingestion processor get "MongoDB store processor"
-
+applyapply
 	# Get processors using filters
 	discovery ingestion processor get --filter label=A:A -f type=mongo
 
