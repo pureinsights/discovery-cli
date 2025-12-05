@@ -38,7 +38,7 @@ func (d discovery) StartSeed(client IngestionSeedController, name string, scanTy
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), startResult)
 	} else {
 		err = printer(*d.IOStreams(), startResult)
@@ -83,7 +83,7 @@ func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, ex
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), haltResult)
 	} else {
 		err = printer(*d.IOStreams(), haltResult)
@@ -117,7 +117,7 @@ func (d discovery) AppendSeedRecord(seed gjson.Result, client RecordGetter, id s
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), seedWithRecord)
 	} else {
 		err = printer(*d.IOStreams(), seedWithRecord)
@@ -153,7 +153,7 @@ func (d discovery) AppendSeedRecords(seed gjson.Result, client RecordGetter, pri
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), seedWithRecords)
 	} else {
 		err = printer(*d.IOStreams(), seedWithRecords)

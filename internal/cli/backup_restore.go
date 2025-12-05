@@ -53,7 +53,7 @@ func (d discovery) ExportEntitiesFromClient(client BackupRestore, path string, p
 	}
 
 	if printer == nil {
-		printer = JsonObjectPrinter(false)
+		printer = JsonObjectPrinter(true)
 	}
 
 	return printer(*d.iostreams, result)
@@ -134,7 +134,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 	}
 
 	if printer == nil {
-		printer = JsonObjectPrinter(false)
+		printer = JsonObjectPrinter(true)
 	}
 
 	return printer(*d.iostreams, gjson.Parse(result))
@@ -149,7 +149,7 @@ func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onC
 	}
 
 	if printer == nil {
-		printer = JsonObjectPrinter(false)
+		printer = JsonObjectPrinter(true)
 	}
 
 	return printer(*d.iostreams, results)
@@ -277,7 +277,7 @@ func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, p
 	}
 
 	if printer == nil {
-		printer = JsonObjectPrinter(false)
+		printer = JsonObjectPrinter(true)
 	}
 
 	return printer(*d.iostreams, gjson.Parse(results))

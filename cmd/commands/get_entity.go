@@ -27,7 +27,11 @@ func GetCommand(args []string, d cli.Discovery, client cli.Getter, config comman
 		printer := cli.GetObjectPrinter(config.output)
 		return d.GetEntity(client, id, printer)
 	} else {
-		printer := cli.GetArrayPrinter(config.output)
+		output := d.Config().GetString("output")
+		if output == "pretty-json" {
+			output = "json"
+		}
+		printer := cli.GetArrayPrinter(output)
 		return d.GetEntities(client, printer)
 	}
 }
@@ -43,7 +47,11 @@ func SearchCommand(args []string, d cli.Discovery, client cli.Searcher, config c
 		printer := cli.GetObjectPrinter(config.output)
 		return d.SearchEntity(client, args[0], printer)
 	} else if len(*filters) > 0 {
-		printer := cli.GetArrayPrinter(config.output)
+		output := config.output
+		if output == "pretty-json" {
+			output = "json"
+		}
+		printer := cli.GetArrayPrinter(output)
 		filter, err := cli.BuildEntitiesFilter(*filters)
 		if err != nil {
 			return err
@@ -51,7 +59,11 @@ func SearchCommand(args []string, d cli.Discovery, client cli.Searcher, config c
 
 		return d.SearchEntities(client, filter, printer)
 	} else {
-		printer := cli.GetArrayPrinter(config.output)
+		output := config.output
+		if output == "pretty-json" {
+			output = "json"
+		}
+		printer := cli.GetArrayPrinter(output)
 		return d.GetEntities(client, printer)
 	}
 }
