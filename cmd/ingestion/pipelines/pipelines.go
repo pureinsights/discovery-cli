@@ -1,7 +1,7 @@
 package pipelines
 
 import (
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +14,7 @@ func NewPipelineCommand(d cli.Discovery) *cobra.Command {
 
 	pipeline.AddCommand(NewStoreCommand(d))
 	pipeline.AddCommand(NewGetCommand(d))
+	pipeline.AddCommand(NewDeleteCommand(d))
 
 	return pipeline
 }

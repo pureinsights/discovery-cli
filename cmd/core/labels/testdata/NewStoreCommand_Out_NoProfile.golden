@@ -1,6 +1,13 @@
 Usage:
   store [flags]
 
+Examples:
+	# Store a label with the JSON configuration in a file
+	discovery core label store --file "labeljsonfile.json"
+	
+	# Store a label with the JSON configuration in the data flag
+	discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
+
 Flags:
       --abort-on-error   Aborts the operation if there is an error
   -d, --data string      The JSON with the configurations that will be upserted

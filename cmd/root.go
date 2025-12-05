@@ -3,14 +3,14 @@ package cmd
 import (
 	"os"
 
-	"github.com/pureinsights/pdp-cli/cmd/backuprestore"
-	"github.com/pureinsights/pdp-cli/cmd/config"
-	"github.com/pureinsights/pdp-cli/cmd/core"
-	"github.com/pureinsights/pdp-cli/cmd/ingestion"
-	"github.com/pureinsights/pdp-cli/cmd/queryflow"
-	"github.com/pureinsights/pdp-cli/cmd/staging"
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/cmd/backuprestore"
+	"github.com/pureinsights/discovery-cli/cmd/config"
+	"github.com/pureinsights/discovery-cli/cmd/core"
+	"github.com/pureinsights/discovery-cli/cmd/ingestion"
+	"github.com/pureinsights/discovery-cli/cmd/queryflow"
+	"github.com/pureinsights/discovery-cli/cmd/staging"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +39,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 
 	discovery.AddCommand(config.NewConfigCommand(d))
 	discovery.AddCommand(backuprestore.NewExportCommand(d))
+	discovery.AddCommand(backuprestore.NewImportCommand(d))
 	discovery.AddCommand(core.NewCoreCommand(d))
 	discovery.AddCommand(ingestion.NewIngestionCommand(d))
 	discovery.AddCommand(queryflow.NewQueryFlowCommand(d))

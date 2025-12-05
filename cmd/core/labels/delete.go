@@ -3,9 +3,9 @@ package labels
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +27,8 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 			return commands.DeleteCommand(args[0], d, coreClient.Labels(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.ExactArgs(1),
+		Example: `	# Delete a label by id
+	discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239`,
 	}
 	return get
 }
