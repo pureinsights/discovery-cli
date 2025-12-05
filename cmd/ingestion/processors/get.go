@@ -3,9 +3,9 @@ package processors
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +28,17 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchCommand(args, d, ingestionClient.Processors(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
+		Example: `	# Get processor by name
+	discovery ingestion processor get "MongoDB store processor"
+applyapply
+	# Get processors using filters
+	discovery ingestion processor get --filter label=A:A -f type=mongo
+
+	# Get all processors using the configuration in profile "cn"
+	discovery ingestion processor get -p cn`,
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
 - Label: The format is label={key}[:{value}], where the value is optional.
 - Type: The format is type={type}.`)
 	return get

@@ -3,8 +3,8 @@ package config
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 

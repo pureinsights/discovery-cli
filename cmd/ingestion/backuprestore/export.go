@@ -3,9 +3,9 @@ package backuprestore
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -28,6 +28,8 @@ func NewExportCommand(d cli.Discovery) *cobra.Command {
 			return commands.ExportCommand(d, ingestionClient.BackupRestore(), file, commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"))
 		},
 		Args: cobra.NoArgs,
+		Example: `	# Export the entities to a specific file.
+	discovery ingestion export --file "entities/ingestion.zip"`,
 	}
 
 	export.Flags().StringVarP(&file, "file", "f", "", "the file that will contain the exported entities")

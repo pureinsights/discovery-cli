@@ -3,9 +3,9 @@ package processors
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -30,6 +30,11 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			return commands.StoreCommand(d, ingestionClient.Processors(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), abortOnError, data, file))
 		},
 		Args: cobra.NoArgs,
+		Example: `	# Store a processor with the JSON configuration in a file
+	discovery ingestion processor store --file "ingestionprocessorjsonfile.json"
+
+	# Store a processor with the JSON configuration in the data flag
+	discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB store processor","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "Aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted")

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/tidwall/gjson"
 )
 

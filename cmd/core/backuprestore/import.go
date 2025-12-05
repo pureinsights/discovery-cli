@@ -3,9 +3,9 @@ package backuprestore
 import (
 	"fmt"
 
-	"github.com/pureinsights/pdp-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +29,8 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 			return commands.ImportCommand(d, coreClient.BackupRestore(), file, discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.NoArgs,
+		Example: `	# Import the entities using profile "cn" and update conflict resolution strategy.
+	discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE`,
 	}
 
 	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the entities that will be restored")
