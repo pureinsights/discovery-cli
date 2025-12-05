@@ -19,7 +19,7 @@ func ExportCommand(d cli.Discovery, client cli.BackupRestore, file string, confi
 		return err
 	}
 
-	printer := cli.GetObjectPrinter(d.Config().GetString("output"))
+	printer := cli.GetObjectPrinter(config.output)
 
 	return d.ExportEntitiesFromClient(client, file, printer)
 }
@@ -31,7 +31,7 @@ func ImportCommand(d cli.Discovery, client cli.BackupRestore, file string, onCon
 		return err
 	}
 
-	printer := cli.GetObjectPrinter(d.Config().GetString("output"))
+	printer := cli.GetObjectPrinter(config.output)
 
 	return d.ImportEntitiesToClient(client, file, onConflict, printer)
 }

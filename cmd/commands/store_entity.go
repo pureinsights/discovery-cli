@@ -52,10 +52,10 @@ func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig
 
 	}
 
-	output := d.Config().GetString("output")
+	output := config.output
 	if output == "pretty-json" {
 		output = "json"
 	}
-	printer := cli.GetArrayPrinter(config.output)
+	printer := cli.GetArrayPrinter(output)
 	return d.UpsertEntities(client, gjson.Parse(config.data), config.abortOnError, printer)
 }
