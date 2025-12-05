@@ -8,10 +8,16 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func FormatJSON(pretty bool, object gjson.Result) ([]byte, error) {
+// Printer is the type that prints gjson.Result objects to the Out IOStream using different formats.
+type Printer func(iostreams.IOStreams, ...gjson.Result) error
+
+// PrintJsonObject prints the given JSON object to the Out IOStream.
+// If the pretty boolean is true, it prints the object with spacing and indentation
+// If not, it prints it in a compact format.
+func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result) error {
 	var v any
 	if err := json.Unmarshal([]byte(object.Raw), &v); err != nil {
-		return nil, err
+		return err
 	}
 
 	var b []byte
@@ -22,23 +28,9 @@ func FormatJSON(pretty bool, object gjson.Result) ([]byte, error) {
 		b, err = json.Marshal(v)
 	}
 	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
-}
-
-// Printer is the type that prints gjson.Result objects to the Out IOStream using different formats.
-type Printer func(iostreams.IOStreams, ...gjson.Result) error
-
-// PrintJsonObject prints the given JSON object to the Out IOStream.
-// If the pretty boolean is true, it prints the object with spacing and indentation
-// If not, it prints it in a compact format.
-func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result) error {
-	b, err := FormatJSON(pretty, object)
-	if err != nil {
 		return err
 	}
+
 	_, err = fmt.Fprint(ios.Out, string(b))
 	return err
 }
