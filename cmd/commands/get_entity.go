@@ -10,6 +10,8 @@ const (
 	LongGetNoNames string = "get is the command used to obtain Discovery %[2]s's %[1]ss. The user can send a UUID to get a specific %[1]s. If no UUID is given, then the command retrieves every %[1]s. The optional argument must be a UUID. This command does not support filters or referencing an entity by name."
 	// LongGetSearch is the message used in the Long field of the Get commands that do support getting by name or using filters.
 	LongGetSearch string = "get is the command used to obtain Discovery %[2]s's %[1]ss. The user can send a name or UUID to get a specific %[1]s. If no argument is given, then the command retrieves every %[1]s. The command also supports filters with the flag --filter followed by the filter in the format filter=key:value."
+	// PrettyJson is used to avoid writing the "pretty-json" literal in the functions.
+	prettyJson string = "pretty-json"
 )
 
 // GetCommand is the function that executes the get operation for the get commands that do not work with names or filters.
@@ -28,7 +30,7 @@ func GetCommand(args []string, d cli.Discovery, client cli.Getter, config comman
 		return d.GetEntity(client, id, printer)
 	} else {
 		output := d.Config().GetString("output")
-		if output == "pretty-json" {
+		if output == prettyJson {
 			output = "json"
 		}
 		printer := cli.GetArrayPrinter(output)
@@ -48,7 +50,7 @@ func SearchCommand(args []string, d cli.Discovery, client cli.Searcher, config c
 		return d.SearchEntity(client, args[0], printer)
 	} else if len(*filters) > 0 {
 		output := config.output
-		if output == "pretty-json" {
+		if output == prettyJson {
 			output = "json"
 		}
 		printer := cli.GetArrayPrinter(output)
@@ -60,7 +62,7 @@ func SearchCommand(args []string, d cli.Discovery, client cli.Searcher, config c
 		return d.SearchEntities(client, filter, printer)
 	} else {
 		output := config.output
-		if output == "pretty-json" {
+		if output == prettyJson {
 			output = "json"
 		}
 		printer := cli.GetArrayPrinter(output)
