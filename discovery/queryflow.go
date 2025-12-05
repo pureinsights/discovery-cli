@@ -10,6 +10,7 @@ import (
 type queryFlowProcessorsClient struct {
 	crud
 	cloner
+	searcher
 }
 
 // NewQueryFlowProcessorsClient is the constructor of a queryFlowProcessorsClient
@@ -24,6 +25,9 @@ func newQueryFlowProcessorsClient(url, apiKey string) queryFlowProcessorsClient 
 		cloner: cloner{
 			client: client,
 		},
+		searcher: searcher{
+			client: client,
+		},
 	}
 }
 
@@ -32,6 +36,7 @@ type endpointsClient struct {
 	crud
 	cloner
 	enabler
+	searcher
 }
 
 // NewEndpointsClient is the constructor of a newEndpointsClient
@@ -47,6 +52,9 @@ func newEndpointsClient(url, apiKey string) endpointsClient {
 			client: client,
 		},
 		enabler: enabler{
+			client: client,
+		},
+		searcher: searcher{
 			client: client,
 		},
 	}

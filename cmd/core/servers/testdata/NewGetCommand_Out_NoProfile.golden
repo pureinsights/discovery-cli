@@ -1,8 +1,18 @@
 Usage:
   get [flags]
 
+Examples:
+	# Get server by name
+	discovery core server get "MongoDB Atlas server"
+
+	# Get servers using filters
+	discovery core server get --filter label=A:A -f type=mongo
+
+	# Get all servers using the configuration in profile "cn"
+	discovery core server get -p cn
+
 Flags:
-  -f, --filter stringArray   Apply filters in the format "filter=key:value". The available filters are:
+  -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
                              - Label: The format is label={key}[:{value}], where the value is optional.
                              - Type: The format is type={type}.
   -h, --help                 help for get

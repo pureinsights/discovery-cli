@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
-	"github.com/pureinsights/pdp-cli/internal/testutils"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -695,6 +695,91 @@ func Test_searchEntity(t *testing.T) {
 
 			d := NewDiscovery(&ios, viper.New(), "")
 			result, err := d.searchEntity(tc.client, tc.id)
+			assert.Equal(t, tc.expected, result)
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+// TestSearchEntity tests the cli.SearchEntity() function.
+func TestSearchEntity(t *testing.T) {
+	tests := []struct {
+		name      string
+		client    Searcher
+		id        string
+		expected  gjson.Result
+		outWriter io.Writer
+		err       error
+	}{
+		{
+			name:   "Search by name works for name",
+			client: new(WorkingSearcher),
+			id:     "MongoDB Atlas server",
+			expected: gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB Atlas server",
+		"labels": [],
+		"active": true,
+		"id": "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+		"creationTimestamp": "2025-09-29T15:50:17Z",
+		"lastUpdatedTimestamp": "2025-09-29T15:50:17Z",
+		"config": {
+			"servers": [
+			"mongodb+srv://cluster0.dleud.mongodb.net/"
+			],
+			"connection": {
+			"readTimeout": "30s",
+			"connectTimeout": "1m"
+			},
+			"credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c"
+		}
+	}`),
+			err: nil,
+		},
+
+		// Error cases
+		{
+			name:     "Search by name fails with error Not Found, and Get fails with 404 Not found",
+			client:   new(FailingSearcherFailingGetter),
+			id:       "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
+			expected: gjson.Result{},
+			err: discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Server not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
+			],
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`),
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			result, err := SearchEntity(d, tc.client, tc.id)
 			assert.Equal(t, tc.expected, result)
 			if tc.err != nil {
 				require.Error(t, err)

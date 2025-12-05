@@ -1,0 +1,20 @@
+Usage:
+  get [flags]
+
+Examples:
+	# Get processor by name
+	discovery queryflow processor get "MongoDB text processor"
+
+	# Get processors using filters
+	discovery queryflow processor get --filter label=A:A -f type=mongo
+
+	# Get all processors using the configuration in profile "cn"
+	discovery queryflow processor get -p cn
+
+Flags:
+  -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
+                             - Label: The format is label={key}[:{value}], where the value is optional.
+                             - Type: The format is type={type}.
+  -h, --help                 help for get
+  -p, --profile string       configuration profile to use (default "default")
+

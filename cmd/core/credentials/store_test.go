@@ -4,16 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	discoveryPackage "github.com/pureinsights/pdp-cli/discovery"
-	"github.com/pureinsights/pdp-cli/internal/cli"
-	"github.com/pureinsights/pdp-cli/internal/iostreams"
-	"github.com/pureinsights/pdp-cli/internal/testutils"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -388,17 +387,16 @@ func TestNewStoreCommand(t *testing.T) {
 			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
 		},
 		{
-			name:         "StoreCommand tries to read a file that does not exist",
-			url:          true,
-			apiKey:       "apiKey123",
-			outGolden:    "NewStoreCommand_Out_StoreFileNotExists",
-			errGolden:    "NewStoreCommand_Err_StoreFileNotExists",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFileNotExists"),
-			errBytes:     []byte(nil),
-			data:         "",
-			file:         "doesnotexist",
-			abortOnError: false,
-			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fs.ErrNotExist, "Could not read file \"doesnotexist\""),
+			name:      "StoreCommand tries to read a file that does not exist",
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewStoreCommand_Out_StoreFileNotExists",
+			errGolden: "NewStoreCommand_Err_StoreFileNotExists",
+			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreFileNotExists"),
+			data:      "",
+			file:      "doesnotexist",
+			errBytes:  testutils.Read(t, "NewStoreCommand_Err_StoreFileNotExists"),
+			err:       cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
 		},
 		{
 			name:         "StoreCommand gets empty data",
@@ -558,14 +556,8 @@ func TestNewStoreCommand(t *testing.T) {
 			if tc.err != nil {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(cli.Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-					testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 			}
