@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pureinsights/discovery-cli/cmd/commands"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 

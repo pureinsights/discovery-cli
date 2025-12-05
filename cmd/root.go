@@ -4,13 +4,13 @@ import (
 	"os"
 
 	"github.com/pureinsights/discovery-cli/cmd/backuprestore"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/config"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/core"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/ingestion"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/queryflow"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/cmd/staging"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/cli"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/cmd/config"
+	"github.com/pureinsights/discovery-cli/cmd/core"
+	"github.com/pureinsights/discovery-cli/cmd/ingestion"
+	"github.com/pureinsights/discovery-cli/cmd/queryflow"
+	"github.com/pureinsights/discovery-cli/cmd/staging"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/cobra"
 )
 

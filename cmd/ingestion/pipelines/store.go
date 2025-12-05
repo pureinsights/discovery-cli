@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/pureinsights/discovery-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/discovery-cliry-cliry-cli/discovery"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/cli"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
 

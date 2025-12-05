@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pureinsights/discovery-cli/internal/fileutils"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"

@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/cli"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/iostreams"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"

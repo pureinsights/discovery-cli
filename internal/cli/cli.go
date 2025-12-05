@@ -3,7 +3,7 @@ package cli
 import (
 	"github.com/google/uuid"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
-	"github.com/pureinsights/discovery-cliry-cliry-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 )
