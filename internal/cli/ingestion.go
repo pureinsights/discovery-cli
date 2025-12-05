@@ -139,7 +139,7 @@ func (d discovery) AppendSeedRecord(seed gjson.Result, client RecordGetter, id s
 	return err
 }
 
-// AppendSeedRecords adds a "records" field to the seed, which contains all of the records obtained from the seed
+// AppendSeedRecords adds a "records" field to the seed, which contains all of the records obtained from the seed.
 func AppendSeedRecords(seed gjson.Result, client RecordGetter) (gjson.Result, error) {
 	records, err := client.GetAll()
 	if err != nil {
