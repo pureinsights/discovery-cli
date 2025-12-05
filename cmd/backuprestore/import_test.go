@@ -28,9 +28,12 @@ type ImportResponse struct {
 
 // TestNewImportCommand_ProfileFlag tests the NewImportCommand() function when there is a profile flag.
 func TestNewImportCommand_ProfileFlag(t *testing.T) {
-	coreImport, _ := os.ReadFile("testdata/core-import.json")
-	ingestionImport, _ := os.ReadFile("testdata/ingestion-import.json")
+	coreImport, err := os.ReadFile("testdata/core-import.json")
+	require.NoError(t, err)
+	ingestionImport, err := os.ReadFile("testdata/ingestion-import.json")
+	require.NoError(t, err)
 	queryflowImport, _ := os.ReadFile("testdata/queryflow-import.json")
+	require.NoError(t, err)
 	tests := []struct {
 		name           string
 		coreUrl        bool
