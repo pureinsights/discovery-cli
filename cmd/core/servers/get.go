@@ -29,7 +29,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get server by name
-	discovery core server get "MongoDB Atlas server"
+	discovery core server get "my-server"
 
 	# Get servers using filters
 	discovery core server get --filter label=A:A -f type=mongo

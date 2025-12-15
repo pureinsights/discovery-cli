@@ -34,7 +34,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	discovery core secret store --file "secretjsonfile.json"
 
 	# Store a secret with the JSON configuration in the data flag
-	discovery core secret store --data  '{"name":"openai-secret-test","active":true,"id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","content":{"apiKey":"apiKey"}}'`,
+	discovery core secret store --data  '{"name":"my-secret","active":true,"id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","content":{"apiKey":"apiKey"}}'`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")
