@@ -1036,6 +1036,7 @@ discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict I
 Usage: `discovery ingestion processor [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1297,7 +1298,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The get command can also get records from the seed with the `record` flag.
+`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record` flag. Finally, the get command can retrieve a seed execution using the `execution` flag. When combined with the `details` flag, it provides more detailed information about the execution.
 
 Usage: `discovery ingestion seed get [flags] [<arg>]`
 
@@ -1320,6 +1321,14 @@ Flags:
 
 `--record`::
 (Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
+
+`--execution`::
+(Optional, string) The UUID of the seed execution that will be retrieved.
+
+`--details`::
+(Optional, string) Makes the get operation retrieve more information when getting a seed execution, like the audited changes and record and job summaries.
+
+The `filter`, `execution`, and `record` flags are mutually exclusive. The `details` flag can only be used with the `execution` flag.
 
 Examples:
 
@@ -1354,6 +1363,50 @@ discovery ingestion seed get -p cn
 # Get a seed record by id
 discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","record":{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},"recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+```
+
+```bash
+# Get a seed execution by id and with details
+discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --execution 0f20f984-1854-4741-81ea-30f8b965b007 --details
+{
+  "audit": [
+    {
+      "stages": [],
+      "status": "CREATED",
+      "timestamp": "2025-11-18T16:22:23.865Z"
+    },
+    {
+      "stages": [],
+      "status": "RUNNING",
+      "timestamp": "2025-11-18T16:22:34.655Z"
+    },
+    {
+      "stages": [
+        "BEFORE_HOOKS"
+      ],
+      "status": "RUNNING",
+      "timestamp": "2025-11-18T16:23:13.120Z"
+    }
+  ],
+  "creationTimestamp": "2025-11-18T16:22:24Z",
+  "id": "0f20f984-1854-4741-81ea-30f8b965b007",
+  "jobs": {
+    "DONE": 3,
+    "RUNNING": 1
+  },
+  "lastUpdatedTimestamp": "2025-11-18T16:23:13Z",
+  "records": {
+    "CREATE": {
+      "PROCESSING": 2
+    }
+  },
+  "scanType": "FULL",
+  "stages": [
+    "BEFORE_HOOKS"
+  ],
+  "status": "RUNNING",
+  "triggerType": "MANUAL"
+}
 ```
 
 ###### Store
@@ -1723,6 +1776,44 @@ discovery queryflow processor get -p cn
 {"active":true,"creationTimestamp":"2025-11-06T14:52:17Z","id":"0a7caa9b-99aa-4a63-aa6d-a1e40941984d","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:17Z","name":"MongoDB store processor","type":"mongo"}
 ```
 
+###### Store
+`store` is the command used to create and update Discovery QueryFlow's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+
+Usage: `discovery queryflow processor store [flags]`
+
+Flags:
+
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a processor with the JSON configuration in a file
+discovery queryflow processor store --file "queryflowprocessorjsonfile.json"
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:08:23Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:23Z","name":"MongoDB text processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"code":1003,"messages":["Entity not found: 0a7caa9b-99aa-4a63-aa6d-a1e40941984e"],"status":404,"timestamp":"2025-11-20T00:16:10.216366100Z"}
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:16:10.253229Z","id":"74f4cffb-1a4f-4470-8485-f759cdc203bd","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:16:10.253229Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+```bash
+# Store a processor with the JSON configuration in the data flag
+discovery queryflow processor store --data '{"type":"mongo","name":"MongoDB text processor","labels":[],"active":true,"id":"3393f6d9-94c1-4b70-ba02-5f582727d998","creationTimestamp":"2025-11-20T00:08:23Z","lastUpdatedTimestamp":"2025-11-20T00:08:23Z","config":{"action":"aggregate","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}],"database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:08:23Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:23Z","name":"MongoDB text processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
 ###### Delete
 `delete` is the command used to delete Discovery QueryFlow's processors. The user must send a name or UUID to delete a specific processor.
 
@@ -1812,6 +1903,44 @@ discovery queryflow endpoint get --filter label=A:B
 discovery queryflow endpoint get -p cn
 {"active":true,"creationTimestamp":"2025-11-06T16:24:54Z","httpMethod":"GET","id":"2fee5e27-4147-48de-ba1e-d7f32476a4a2","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:54Z","name":"Wikis endpoint","timeout":"PT1H","type":"default","uri":"/wikis-search"}
 {"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","labels":[],"lastUpdatedTimestamp":"2025-08-25T16:47:24Z","name":"Blogs endpoint","timeout":"PT1H","type":"default","uri":"/blogs-search"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery QueryFlow's endpoints. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple endpoints. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+
+Usage: `discovery queryflow endpoint store [flags]`
+
+Flags:
+
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store an endpoint with the JSON configuration in a file
+discovery queryflow endpoint store --file endpointjsonfile.json
+{"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
+{"code":1003,"messages":["Entity not found: 2fee5e27-4147-48de-ba1e-d7f32476a4a3"],"status":404,"timestamp":"2025-11-20T00:37:02.827065700Z"}
+{"active":true,"creationTimestamp":"2025-11-20T00:37:02.857266Z","httpMethod":"GET","id":"7324b140-3240-4e67-90cb-9ffe5e7f574b","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:37:02.857266Z","name":"Blogs search endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/blog-search"}
+```
+
+```bash
+# Store an endpoint with the JSON configuration in the data flag
+discovery queryflow endpoint store --data '{"type":"default","name":"Wikis endpoint","labels":[{"key":"A","value":"B"}],"active":true,"id":"cf56470f-0ab4-4754-b05c-f760669315af","creationTimestamp":"2025-11-20T00:10:53Z","lastUpdatedTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","uri":"/wikis-search","timeout":"PT1H","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89","continueOnError":false,"active":true},{"id":"a5ee116b-bd95-474e-9d50-db7be988b196","continueOnError":false,"active":true},{"id":"86e7f920-a4e4-4b64-be84-5437a7673db8","continueOnError":false,"active":true},{"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer","continueOnError":false,"active":true}],"mode":{"type":"group"},"next":"responseState"},"responseState":{"type":"response","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'
+{"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
 ```
 
 ###### Delete
