@@ -34,7 +34,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	discovery core credential store --file "credentialjsonfile.json"
 
 	# Store a credential with the JSON configuration in the data flag
-	discovery core credential store --data '{"type":"mongo","name":"my-credential-1","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"mongo-secret"}'`,
+	discovery core credential store --data '{"type":"mongo","name":"my-credential","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"my-secret"}'`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "Aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "The JSON with the configurations that will be upserted")
