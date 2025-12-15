@@ -1,0 +1,18 @@
+{"active":true,"creationTimestamp":"2025-08-14T18:02:11Z","id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"MongoDB processor","secret":"mongo-secret","type":"mongo"}
+Usage:
+  store [flags]
+
+Examples:
+	# Store a processor with the JSON configuration in a file
+	discovery queryflow processor store --file "queryflowprocessorjsonfile.json"
+	
+	# Store a processor with the JSON configuration in the data flag
+	discovery queryflow processor store --data '{"type":"mongo","name":"MongoDB text processor","labels":[],"active":true,"id":"3393f6d9-94c1-4b70-ba02-5f582727d998","creationTimestamp":"2025-11-20T00:08:23Z","lastUpdatedTimestamp":"2025-11-20T00:08:23Z","config":{"action":"aggregate","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}],"database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+
+Flags:
+      --abort-on-error   Aborts the operation if there is an error
+  -d, --data string      The JSON with the configurations that will be upserted
+  -f, --file string      The path of the file that contains the JSON data
+  -h, --help             help for store
+  -p, --profile string   configuration profile to use (default "default")
+
