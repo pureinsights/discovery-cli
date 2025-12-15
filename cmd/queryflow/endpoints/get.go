@@ -29,7 +29,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get an endpoint by name
-	discovery queryflow endpoint get "Wikis endpoint"
+	discovery queryflow endpoint get "my-endpoint"
 	
 	# Get endpoints using filters
 	discovery queryflow endpoint get --filter label=A:B

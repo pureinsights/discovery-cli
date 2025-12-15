@@ -3,7 +3,7 @@ Usage:
 
 Examples:
 	# Get an endpoint by name
-	discovery queryflow endpoint get "Wikis endpoint"
+	discovery queryflow endpoint get "my-endpoint"
 	
 	# Get endpoints using filters
 	discovery queryflow endpoint get --filter label=A:B
