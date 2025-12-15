@@ -29,8 +29,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get processor by name
-	discovery ingestion processor get "MongoDB store processor"
-applyapply
+	discovery ingestion processor get "my-processor"
+
 	# Get processors using filters
 	discovery ingestion processor get --filter label=A:A -f type=mongo
 

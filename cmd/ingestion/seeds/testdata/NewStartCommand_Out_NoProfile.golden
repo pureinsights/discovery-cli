@@ -2,11 +2,11 @@ Usage:
   start [flags]
 
 Examples:
-# Start a seed seed execution with the properties and scan-type flags
-	discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+# Start a seed execution with the properties and scan-type flags
+	discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"my-bucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
 
 Flags:
   -h, --help                help for start
-      --properties string   The execution properties of the seed execution
-      --scan-type string    The scan type of the seed execution (default "FULL")
+      --properties string   the execution properties of the seed execution
+      --scan-type string    the scan type of the seed execution (default "FULL")
 
