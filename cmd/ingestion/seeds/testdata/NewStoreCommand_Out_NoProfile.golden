@@ -9,8 +9,8 @@ Examples:
 	discovery ingestion seed store --data '{"type":"staging","name":"Search seed","labels":[],"active":true,"id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","creationTimestamp":"2025-09-04T15:50:08Z","lastUpdatedTimestamp":"2025-09-04T15:50:08Z","config":{"action":"scroll","bucket":"blogs"},"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
 
 Flags:
-      --abort-on-error   Aborts the operation if there is an error
-  -d, --data string      The JSON with the configurations that will be upserted
-  -f, --file string      The path of the file that contains the JSON data
+      --abort-on-error   aborts the operation if there is an error
+  -d, --data string      the JSON with the configurations that will be upserted
+  -f, --file string      the path of the file that contains the JSON data
   -h, --help             help for store
 
