@@ -1853,7 +1853,7 @@ Flags:
 Examples:
 
 ```bash
-# Store a endpoint with the JSON configuration in a file
+# Store an endpoint with the JSON configuration in a file
 discovery queryflow endpoint store --file endpointjsonfile.json
 {"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
 {"code":1003,"messages":["Entity not found: 2fee5e27-4147-48de-ba1e-d7f32476a4a3"],"status":404,"timestamp":"2025-11-20T00:37:02.827065700Z"}
@@ -1861,7 +1861,7 @@ discovery queryflow endpoint store --file endpointjsonfile.json
 ```
 
 ```bash
-# Store a endpoint with the JSON configuration in the data flag
+# Store an endpoint with the JSON configuration in the data flag
 discovery queryflow endpoint store --data '{"type":"default","name":"Wikis endpoint","labels":[{"key":"A","value":"B"}],"active":true,"id":"cf56470f-0ab4-4754-b05c-f760669315af","creationTimestamp":"2025-11-20T00:10:53Z","lastUpdatedTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","uri":"/wikis-search","timeout":"PT1H","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89","continueOnError":false,"active":true},{"id":"a5ee116b-bd95-474e-9d50-db7be988b196","continueOnError":false,"active":true},{"id":"86e7f920-a4e4-4b64-be84-5437a7673db8","continueOnError":false,"active":true},{"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer","continueOnError":false,"active":true}],"mode":{"type":"group"},"next":"responseState"},"responseState":{"type":"response","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'
 {"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
 ```
