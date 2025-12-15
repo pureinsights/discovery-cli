@@ -1011,6 +1011,7 @@ discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict I
 Usage: `discovery ingestion processor [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1748,6 +1749,44 @@ discovery queryflow processor get --filter label=A:A -f type=mongo
 discovery queryflow processor get -p cn
 {"active":true,"creationTimestamp":"2025-11-06T14:52:16Z","id":"019ecd8e-76c9-41ee-b047-299b8aa14aba","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:16Z","name":"MongoDB text processor","type":"mongo"}
 {"active":true,"creationTimestamp":"2025-11-06T14:52:17Z","id":"0a7caa9b-99aa-4a63-aa6d-a1e40941984d","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:17Z","name":"MongoDB store processor","type":"mongo"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery QueryFlow's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+
+Usage: `discovery queryflow processor store [flags]`
+
+Flags:
+
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a processor with the JSON configuration in a file
+discovery queryflow processor store --file "queryflowprocessorjsonfile.json"
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:08:23Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:23Z","name":"MongoDB text processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"code":1003,"messages":["Entity not found: 0a7caa9b-99aa-4a63-aa6d-a1e40941984e"],"status":404,"timestamp":"2025-11-20T00:16:10.216366100Z"}
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:16:10.253229Z","id":"74f4cffb-1a4f-4470-8485-f759cdc203bd","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:16:10.253229Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+```
+
+```bash
+# Store a processor with the JSON configuration in the data flag
+discovery queryflow processor store --data '{"type":"mongo","name":"MongoDB text processor","labels":[],"active":true,"id":"3393f6d9-94c1-4b70-ba02-5f582727d998","creationTimestamp":"2025-11-20T00:08:23Z","lastUpdatedTimestamp":"2025-11-20T00:08:23Z","config":{"action":"aggregate","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}],"database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:08:23Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:23Z","name":"MongoDB text processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
 ###### Delete
