@@ -132,7 +132,7 @@ func (d discovery) SearchEntities(client Searcher, filter gjson.Result, printer 
 	return err
 }
 
-// ParseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery
+// parseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery.
 func parseFilter(filter string) (string, []string, error) {
 	filterType, keyValue, found := strings.Cut(filter, "=")
 	if !found {
@@ -168,7 +168,7 @@ func parseFilter(filter string) (string, []string, error) {
 // getAndFilterString returns the filter string for the given filters.
 // If there are multiple filters, they are joined with an "and" filter.
 // If there is only one filter, it is returned.
-// If there are no filters, an empty filter is returend.
+// If there are no filters, an empty filter is returned.
 func getAndFilterString(filters []string) (string, error) {
 	if len(filters) > 1 {
 		return sjson.SetRaw("{}", "and", "["+strings.Join(filters, ",")+"]")
@@ -280,7 +280,7 @@ func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, a
 	return errors.Join(err, upsertErr)
 }
 
-// Deleter is the interface that implements the delete method
+// Deleter is the interface that implements the delete method.
 type Deleter interface {
 	Delete(uuid.UUID) (gjson.Result, error)
 }

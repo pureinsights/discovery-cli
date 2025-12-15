@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// RecordOrExecution determines whether to call the AppendSeedRecord() or SeedExecution() functions
+// RecordOrExecution determines whether to call the AppendSeedRecord() or SeedExecution() functions.
 func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profile, recordId, executionId string, details bool) error {
 	err := commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url")
 	if err != nil {

@@ -6,14 +6,14 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// QueryFlowProcessorsClient is a struct that performs the CRUD of processors.
+// queryFlowProcessorsClient is a struct that performs the CRUD of processors.
 type queryFlowProcessorsClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// NewQueryFlowProcessorsClient is the constructor of a queryFlowProcessorsClient
+// newQueryFlowProcessorsClient is the constructor of a queryFlowProcessorsClient.
 func newQueryFlowProcessorsClient(url, apiKey string) queryFlowProcessorsClient {
 	client := newClient(url+"/processor", apiKey)
 	return queryFlowProcessorsClient{
@@ -31,7 +31,7 @@ func newQueryFlowProcessorsClient(url, apiKey string) queryFlowProcessorsClient 
 	}
 }
 
-// EndpointsClient is a struct that performs the CRUD of endpoints.
+// endpointsClient is a struct that performs the CRUD of endpoints.
 type endpointsClient struct {
 	crud
 	cloner
@@ -39,7 +39,7 @@ type endpointsClient struct {
 	searcher
 }
 
-// NewEndpointsClient is the constructor of a newEndpointsClient
+// newEndpointsClient is the constructor of a newEndpointsClient.
 func newEndpointsClient(url, apiKey string) endpointsClient {
 	client := newClient(url+"/endpoint", apiKey)
 	return endpointsClient{
@@ -60,22 +60,22 @@ func newEndpointsClient(url, apiKey string) endpointsClient {
 	}
 }
 
-// QueryFlow is the struct for the client that can carry out every QueryFlow operation.
+// queryFlow is the struct for the client that can carry out every QueryFlow operation.
 type queryFlow struct {
 	Url, ApiKey string
 }
 
-// Processors creates a queryFlowProcessorsClient with QueryFlow's URL and API Key
+// Processors creates a queryFlowProcessorsClient with QueryFlow's URL and API Key.
 func (q queryFlow) Processors() queryFlowProcessorsClient {
 	return newQueryFlowProcessorsClient(q.Url, q.ApiKey)
 }
 
-// Endpoints creates a endpointsClient with QueryFlow's URL and API Key
+// Endpoints creates a endpointsClient with QueryFlow's URL and API Key.
 func (q queryFlow) Endpoints() endpointsClient {
 	return newEndpointsClient(q.Url, q.ApiKey)
 }
 
-// BackupRestore creates a backupRestore with QueryFlow's URL and API Key
+// BackupRestore creates a backupRestore with QueryFlow's URL and API Key.
 func (q queryFlow) BackupRestore() backupRestore {
 	return backupRestore{
 		client: newClient(q.Url, q.ApiKey),

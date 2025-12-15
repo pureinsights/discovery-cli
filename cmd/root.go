@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewRootCommand creates and sets up the root command of the Discovery CLI
+// NewRootCommand creates and sets up the root command of the Discovery CLI.
 func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery := &cobra.Command{
 		Use:   "discovery [subcommand]",
@@ -48,7 +48,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	return discovery
 }
 
-// Run executes the Root command
+// Run executes the Root command.
 func Run() (cli.ExitCode, error) {
 	ios := iostreams.IOStreams{
 		In:  os.Stdin,

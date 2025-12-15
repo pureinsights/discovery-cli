@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestNewHaltCommand tests the NewHaltCommand() function
+// TestNewHaltCommand tests the NewHaltCommand() function.
 func TestNewHaltCommand(t *testing.T) {
 	tests := []struct {
 		name      string

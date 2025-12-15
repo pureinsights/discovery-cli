@@ -7,7 +7,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Enabler is a struct that adds the path to enable or disable Discovery's entities.
+// enabler is a struct that adds the path to enable or disable Discovery's entities.
 type enabler struct {
 	client
 }

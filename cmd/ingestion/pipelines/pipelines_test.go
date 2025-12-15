@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_NewPipelineCommand tests the NewPipelineCommand() function
+// Test_NewPipelineCommand tests the NewPipelineCommand() function.
 func Test_NewPipelineCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}

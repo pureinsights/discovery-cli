@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewImportCommand creates the discovery ingestion import command that imports entities to Discovery Ingestion
+// NewImportCommand creates the discovery ingestion import command that imports entities to Discovery Ingestion.
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
 	var file string

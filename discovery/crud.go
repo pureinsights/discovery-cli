@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Getter is a struct that does the request to get entities.
+// getter is a struct that does the request to get entities.
 type getter struct {
 	client
 }
@@ -25,7 +25,7 @@ func (getter getter) GetAll() ([]gjson.Result, error) {
 	return executeWithPagination(getter.client, http.MethodGet, "")
 }
 
-// Crud is a struct that has creates, reads, updates, and deletes entities.
+// crud is a struct that has creates, reads, updates, and deletes entities.
 type crud struct {
 	getter
 }

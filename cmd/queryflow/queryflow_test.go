@@ -15,7 +15,7 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// TestNewQueryFlowCommand tests the NewQueryFlowCommand() function
+// TestNewQueryFlowCommand tests the NewQueryFlowCommand() function.
 func TestNewQueryFlowCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}

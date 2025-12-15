@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Defines the update flag in the package
+// Defines the update flag in the package.
 var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Path creates the testdata directory when update is true.
@@ -23,7 +23,7 @@ func Path(t *testing.T, name string) string {
 	return p
 }
 
-// Write writes bytes to the golden file (only when -update is set).
+// Write writes bytes to the golden file only when -update is set.
 func Write(t *testing.T, name string, got []byte) {
 	t.Helper()
 	require.True(t, *Update)

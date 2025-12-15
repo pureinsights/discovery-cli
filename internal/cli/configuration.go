@@ -23,7 +23,7 @@ const (
 	DefaultQueryFlowURL string = "http://localhost:12040"
 )
 
-// ReadConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
+// readConfigFile is an auxiliary function that is used to read the configuration values in the file located at the given path.
 // When the file could not be found, an error is logged to the error stream of the IOStreams parameter.
 // If the configuration file exists, the functions returns true and false if it does not.
 func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStreams) (bool, error) {
@@ -76,7 +76,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 	return vpr, nil
 }
 
-// Obfuscate modifies a string so that at least 60% of its characters are replaced by '*' characters.
+// obfuscate modifies a string so that at least 60% of its characters are replaced by '*' characters.
 func obfuscate(s string) string {
 	if s == "" {
 		return ""
@@ -94,7 +94,7 @@ func obfuscate(s string) string {
 	return string(r)
 }
 
-// AskUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
+// askUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
 // If the user inputs an empty string, the value is not changed.
 // If the user inputs a space, the value is set to an empty string.
 // If the user inputs a new value, the property is updated.
@@ -125,7 +125,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	return nil
 }
 
-// SaveConfig separates de API Keys from Discovery's Viper configuration and writes the config and credentials into their own files.
+// saveConfig separates the API Keys from Discovery's Viper configuration and writes the config and credentials into their own files.
 func (d discovery) saveConfig() error {
 	v := d.Config()
 	apiKeys := []string{"core_key", "ingestion_key", "queryflow_key", "staging_key"}
@@ -175,7 +175,7 @@ func SetDiscoveryDir() (string, error) {
 	return configPath, nil
 }
 
-// SaveUrlAndAPIKey asks the user for the URL and API key of a Discovery component and saves them.
+// saveUrlAndAPIKey asks the user for the URL and API key of a Discovery component and saves them.
 func (d discovery) saveUrlAndAPIKey(profile, component, componentName string) error {
 	err := d.askUserConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
 	if err != nil {
@@ -237,7 +237,7 @@ func (d discovery) SaveConfigFromUser(profile string) error {
 	return d.SaveStagingConfigFromUser(profile)
 }
 
-// PrintConfig is the auxiliary function to print a property's value to the user.
+// printConfig is the auxiliary function to print a property's value to the user.
 // It prints the property with the given profile and name.
 // If the value of the property is sensitive, it is obfuscated.
 func (d discovery) printConfig(profile, propertyName, property string, sensitive bool) error {
@@ -255,7 +255,7 @@ func (d discovery) printConfig(profile, propertyName, property string, sensitive
 	return nil
 }
 
-// PrintURLAndAPIKey prints the URL and API key of a Discovery component to the Out IOStream.
+// printURLAndAPIKey prints the URL and API key of a Discovery component to the Out IOStream.
 func (d discovery) printURLAndAPIKey(profile, component, componentName string, sensitive bool) error {
 	err := d.printConfig(profile, fmt.Sprintf("%s URL", componentName), fmt.Sprintf("%s_url", component), false)
 	if err != nil {

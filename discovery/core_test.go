@@ -16,7 +16,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_newLabelsClient tests the constructor of newLabelsClient
+// Test_newLabelsClient tests the constructor of newLabelsClient.
 func Test_newLabelsClient(t *testing.T) {
 	c := newClient("http://localhost:12010/v2", "Api Key")
 	lc := newLabelsClient(c.client.BaseURL, c.ApiKey)
@@ -25,7 +25,7 @@ func Test_newLabelsClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/label", lc.client.client.BaseURL)
 }
 
-// Test_newSecretsClient tests the constructor of newSecretsClient
+// Test_newSecretsClient tests the constructor of newSecretsClient.
 func Test_newSecretsClient(t *testing.T) {
 	c := newClient("http://localhost:12010/v2", "Api Key")
 	sc := newSecretsClient(c.client.BaseURL, c.ApiKey)
@@ -34,7 +34,7 @@ func Test_newSecretsClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/secret", sc.client.client.BaseURL)
 }
 
-// Test_newCredentialsClient tests the constructor of newCredentialsClient
+// Test_newCredentialsClient tests the constructor of newCredentialsClient.
 func Test_newCredentialsClient(t *testing.T) {
 	c := newClient("http://localhost:12010/v2", "Api Key")
 	cc := newCredentialsClient(c.client.BaseURL, c.ApiKey)
@@ -47,7 +47,7 @@ func Test_newCredentialsClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/credential", cc.searcher.client.client.BaseURL)
 }
 
-// Test_newServersClient tests the constructor of newServersClient
+// Test_newServersClient tests the constructor of newServersClient.
 func Test_newServersClient(t *testing.T) {
 	c := newClient("http://localhost:12010/v2", "Api Key")
 	sc := newServersClient(c.client.BaseURL, c.ApiKey)
@@ -60,7 +60,7 @@ func Test_newServersClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/server", sc.searcher.client.client.BaseURL)
 }
 
-// Test_newFilesClient tests the constructor of newFilesClient
+// Test_newFilesClient tests the constructor of newFilesClient.
 func Test_newFilesClient(t *testing.T) {
 	c := newClient("http://localhost:12010/v2", "Api Key")
 	fc := newFilesClient(c.client.BaseURL, c.ApiKey)
@@ -69,7 +69,7 @@ func Test_newFilesClient(t *testing.T) {
 	assert.Equal(t, c.client.BaseURL+"/file", fc.client.client.BaseURL)
 }
 
-// Test_newMaintenanceClient tests the constructor of newMaintenanceClient
+// Test_newMaintenanceClient tests the constructor of newMaintenanceClient.
 func Test_newMaintenanceClient(t *testing.T) {
 	c := newClient("http://localhost:12010/v2", "Api Key")
 	mc := newMaintenanceClient(c.client.BaseURL, c.ApiKey)
@@ -296,7 +296,7 @@ func Test_filesClient_Upload(t *testing.T) {
 	}
 }
 
-// Test_filesClient_Retrieve tests the filesClient.Retrieve() function
+// Test_filesClient_Retrieve tests the filesClient.Retrieve() function.
 func Test_filesClient_Retrieve(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -360,7 +360,7 @@ func Test_filesClient_Retrieve(t *testing.T) {
 	}
 }
 
-// Test_filesClient_List tests the filesClient.List() function
+// Test_filesClient_List tests the filesClient.List() function.
 func Test_filesClient_List(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -477,7 +477,7 @@ func Test_filesClient_List(t *testing.T) {
 	}
 }
 
-// Test_filesClient_Delete tests de filesClient.Delete() function
+// Test_filesClient_Delete tests de filesClient.Delete() function.
 func Test_filesClient_Delete(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -550,7 +550,7 @@ func Test_filesClient_Delete(t *testing.T) {
 	}
 }
 
-// Test_maintenanceClient_Log tests the Log method
+// Test_maintenanceClient_Log tests the Log method.
 func Test_maintenanceClient_Log(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -660,7 +660,7 @@ func Test_maintenanceClient_Log(t *testing.T) {
 	}
 }
 
-// Test_core_Labels tests the core.Labels() function
+// Test_core_Labels tests the core.Labels() function.
 func Test_core_Labels(t *testing.T) {
 	c := NewCore("http://localhost:12010", "Api Key")
 	lc := c.Labels()
@@ -669,7 +669,7 @@ func Test_core_Labels(t *testing.T) {
 	assert.Equal(t, c.Url+"/label", lc.client.client.BaseURL)
 }
 
-// Test_core_Secrets tests the core.Secrets() function
+// Test_core_Secrets tests the core.Secrets() function.
 func Test_core_Secrets(t *testing.T) {
 	c := NewCore("http://localhost:12010", "Api Key")
 	sc := c.Secrets()
@@ -678,7 +678,7 @@ func Test_core_Secrets(t *testing.T) {
 	assert.Equal(t, c.Url+"/secret", sc.client.client.BaseURL)
 }
 
-// Test_core_Credentials tests the core.Credentials() function
+// Test_core_Credentials tests the core.Credentials() function.
 func Test_core_Credentials(t *testing.T) {
 	c := NewCore("http://localhost:12010", "Api Key")
 	cc := c.Credentials()
@@ -691,7 +691,7 @@ func Test_core_Credentials(t *testing.T) {
 	assert.Equal(t, c.Url+"/credential", cc.searcher.client.client.BaseURL)
 }
 
-// Test_core_Servers tests the core.Servers() function
+// Test_core_Servers tests the core.Servers() function.
 func Test_core_Servers(t *testing.T) {
 	c := NewCore("http://localhost:12010", "Api Key")
 	sc := c.Servers()
@@ -704,7 +704,7 @@ func Test_core_Servers(t *testing.T) {
 	assert.Equal(t, c.Url+"/server", sc.searcher.client.client.BaseURL)
 }
 
-// Test_core_Files tests the core.Files() function
+// Test_core_Files tests the core.Files() function.
 func Test_core_Files(t *testing.T) {
 	c := NewCore("http://localhost:12010", "Api Key")
 	fc := c.Files()
@@ -713,7 +713,7 @@ func Test_core_Files(t *testing.T) {
 	assert.Equal(t, c.Url+"/file", fc.client.client.BaseURL)
 }
 
-// Test_core_Maintenance tests the core.Maintenance() function
+// Test_core_Maintenance tests the core.Maintenance() function.
 func Test_core_Maintenance(t *testing.T) {
 	c := NewCore("http://localhost:12010", "Api Key")
 	mc := c.Maintenance()
@@ -722,7 +722,7 @@ func Test_core_Maintenance(t *testing.T) {
 	assert.Equal(t, c.Url+"/maintenance", mc.client.client.BaseURL)
 }
 
-// Test_core_BackupRestore tests the core.BackupRestore() function
+// Test_core_BackupRestore tests the core.BackupRestore() function.
 func Test_core_BackupRestore(t *testing.T) {
 	c := NewCore("http://localhost:12010", "Api Key")
 	bc := c.BackupRestore()

@@ -7,7 +7,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Cloner is a struct that has methods to clone entities.
+// cloner is a struct that has methods to clone entities.
 type cloner struct {
 	client
 }

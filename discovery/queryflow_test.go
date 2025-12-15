@@ -14,7 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_newQueryFlowProcessorsClient test the queryFlowProcessorsClient's constructor
+// Test_newQueryFlowProcessorsClient test the queryFlowProcessorsClient's constructor.
 func Test_newQueryFlowProcessorsClient(t *testing.T) {
 	url := "http://localhost:12040"
 	apiKey := "Api Key"
@@ -44,7 +44,7 @@ func Test_newEndpointsClient(t *testing.T) {
 	assert.Equal(t, url+"/endpoint", qec.searcher.client.client.BaseURL)
 }
 
-// Test_queryFlow_Processors tests the queryFlow.Processors() function
+// Test_queryFlow_Processors tests the queryFlow.Processors() function.
 func Test_queryFlow_Processors(t *testing.T) {
 	q := NewQueryFlow("http://localhost:12040", "Api Key")
 	qpc := q.Processors()
@@ -57,7 +57,7 @@ func Test_queryFlow_Processors(t *testing.T) {
 	assert.Equal(t, q.Url+"/processor", qpc.searcher.client.client.BaseURL)
 }
 
-// Test_queryFlow_Endpoints tests the queryFlow.Endpoints() function
+// Test_queryFlow_Endpoints tests the queryFlow.Endpoints() function.
 func Test_queryFlow_Endpoints(t *testing.T) {
 	q := NewQueryFlow("http://localhost:12040", "Api Key")
 	qec := q.Endpoints()
@@ -72,7 +72,7 @@ func Test_queryFlow_Endpoints(t *testing.T) {
 	assert.Equal(t, q.Url+"/endpoint", qec.searcher.client.client.BaseURL)
 }
 
-// Test_queryFlow_BackupRestore tests the queryFlow.BackupRestore() function
+// Test_queryFlow_BackupRestore tests the queryFlow.BackupRestore() function.
 func Test_queryFlow_BackupRestore(t *testing.T) {
 	q := NewQueryFlow("http://localhost:12040", "Api Key")
 	bc := q.BackupRestore()

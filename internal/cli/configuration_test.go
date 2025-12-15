@@ -116,7 +116,7 @@ core_url="http://discovery.core.cn"
 	}
 }
 
-// TestInitializeConfig tests the InitializeConfig() function
+// TestInitializeConfig tests the InitializeConfig() function.
 func TestInitializeConfig(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -323,7 +323,7 @@ func Test_obfuscate(t *testing.T) {
 	}
 }
 
-// Test_discovery_AskUserConfig tests the discovery.AskUser() function
+// Test_discovery_AskUserConfig tests the discovery.AskUser() function.
 func Test_discovery_askUserConfig(t *testing.T) {
 	const profile = "cn"
 	const prop = "core_url"
@@ -611,7 +611,7 @@ func Test_discovery_saveConfig(t *testing.T) {
 	}
 }
 
-// TestSetDiscoveryDir_MkDirAllFails tests the SetDiscoveryDir() function when the ~/.discovery directory could not be made
+// TestSetDiscoveryDir_MkDirAllFails tests the SetDiscoveryDir() function when the ~/.discovery directory could not be made.
 func TestSetDiscoveryDir_MkDirAllFails(t *testing.T) {
 	tmp := t.TempDir()
 
@@ -646,7 +646,7 @@ func TestSetDiscoveryDir_osUserHomeDirFails(t *testing.T) {
 	assert.Contains(t, err.Error(), "is not defined")
 }
 
-// TestSetDiscoveryDir_DiscoveryDirCreated tests the SetDiscoveryDir() function when the ~/.discovery directory could be created successfully
+// TestSetDiscoveryDir_DiscoveryDirCreated tests the SetDiscoveryDir() function when the ~/.discovery directory could be created successfully.
 func TestSetDiscoveryDir_DiscoveryDirCreated(t *testing.T) {
 	tmp := t.TempDir()
 
@@ -658,7 +658,7 @@ func TestSetDiscoveryDir_DiscoveryDirCreated(t *testing.T) {
 	assert.Equal(t, filepath.Join(tmp, ".discovery"), configPath)
 }
 
-// TestSetDiscoveryDir_DiscoveryDirExists tests the SetDiscoveryDir() function when the ~/.discovery directory already exists
+// TestSetDiscoveryDir_DiscoveryDirExists tests the SetDiscoveryDir() function when the ~/.discovery directory already exists.
 func TestSetDiscoveryDir_DiscoveryDirExists(t *testing.T) {
 	tmp := t.TempDir()
 
@@ -674,7 +674,7 @@ func TestSetDiscoveryDir_DiscoveryDirExists(t *testing.T) {
 	assert.Equal(t, target, configPath)
 }
 
-// Test_discovery_SaveConfigFromUser_AllConfigPresent tests the discovery.SaveConfigFromUser() when there is a configuration for every possible URL and API Key
+// Test_discovery_SaveConfigFromUser_AllConfigPresent tests the discovery.SaveConfigFromUser() when there is a configuration for every possible URL and API Key.
 func Test_discovery_SaveConfigFromUser_AllConfigPresent(t *testing.T) {
 	const profile = "cn"
 	config := map[string]string{

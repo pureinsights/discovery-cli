@@ -542,7 +542,7 @@ func Test_executeWithPagination_RestyReturnsError(t *testing.T) {
 }
 
 // Test_executeWithPagination_ContentInSecondPage tests that the executeWithPagination() function
-// can successfully get all content when there are two pages with content in them
+// can successfully get all content when there are two pages with content in them.
 func Test_executeWithPagination_ContentInSecondPage(t *testing.T) {
 	body := `{
 	"equals": {
@@ -659,7 +659,7 @@ func Test_executeWithPagination_ContentInSecondPage(t *testing.T) {
 	assert.Len(t, response, 6)
 }
 
-// Test_executeWithPagination_NoContentInSecondPage tests what happens if one of the later pages returns No Content
+// Test_executeWithPagination_NoContentInSecondPage tests what happens if one of the later pages returns No Content.
 func Test_executeWithPagination_NoContentInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)

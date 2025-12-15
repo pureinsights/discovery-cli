@@ -15,7 +15,7 @@ type IOStreams struct {
 	reader *bufio.Reader
 }
 
-// LineReader is used to set up the IOStream reader field.
+// lineReader is used to set up the IOStream reader field.
 // This field is used to be able to use the same reader when reading an input string that has the configuration for all of the Discovery Components.
 // For example: "http://discovery.core.cn\n\nhttp://discovery.ingestion.cn\n\nhttp://discovery.queryflow.cn\n\n\n\n".
 // The previous example changes the Core URL, Ingestion URL, and QueryFlow URL.

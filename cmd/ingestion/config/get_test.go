@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestNewGetCommand_WithProfileAndSensitiveFlags tests the NewGetCommand() function when there are profile and sensitive flags
+// TestNewGetCommand_WithProfileAndSensitiveFlags tests the NewGetCommand() function when there are profile and sensitive flags.
 func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -173,7 +173,7 @@ func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 	}
 }
 
-// TestNewGetCommand_NoProfileFlag test the NewGetCommand() function when there is no profile flag
+// TestNewGetCommand_NoProfileFlag test the NewGetCommand() function when there is no profile flag.
 func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 	in := strings.NewReader("")
 	out := &bytes.Buffer{}

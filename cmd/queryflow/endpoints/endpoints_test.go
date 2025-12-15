@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestNewEndpointCommand tests the NewEndpointCommand() function
+// TestNewEndpointCommand tests the NewEndpointCommand() function.
 func TestNewEndpointCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}

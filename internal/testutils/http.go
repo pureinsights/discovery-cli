@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// ContentType is a string that contains the content type key
+// ContentType is a string that contains the content type key.
 const ContentType string = "Content-Type"
 
 // HttpHandler returns a handler that performs given assertions and responds
@@ -64,7 +64,7 @@ func HttpNoContentHandler(
 	}
 }
 
-// MockResponse mocks an HTTP response from Discovery
+// MockResponse mocks an HTTP response from Discovery.
 type MockResponse struct {
 	StatusCode  int
 	ContentType string
@@ -72,7 +72,7 @@ type MockResponse struct {
 	Assertions  func(*testing.T, *http.Request)
 }
 
-// HttpMultiResponseHandler returns different HTTP responses depending on the received path
+// HttpMultiResponseHandler returns different HTTP responses depending on the received path.
 func HttpMultiResponseHandler(
 	t *testing.T,
 	responses map[string]MockResponse,

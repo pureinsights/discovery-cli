@@ -7,12 +7,12 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// SeedExecutionRecordsClient is the struct that can get the summary of records from a seed execution.
+// seedExecutionRecordsClient is the struct that can get the summary of records from a seed execution.
 type seedExecutionRecordsClient struct {
 	summarizer
 }
 
-// NewSeedExecutionRecordsClient is the constructor of seedExecutionRecordsClient.
+// newSeedExecutionRecordsClient is the constructor of seedExecutionRecordsClient.
 func newSeedExecutionRecordsClient(c seedExecutionsClient, executionId uuid.UUID) seedExecutionRecordsClient {
 	return seedExecutionRecordsClient{
 		summarizer: summarizer{
@@ -21,12 +21,12 @@ func newSeedExecutionRecordsClient(c seedExecutionsClient, executionId uuid.UUID
 	}
 }
 
-// SeedExecutionJobsClient is the struct that can get the summary of jobs from a seed execution.
+// seedExecutionJobsClient is the struct that can get the summary of jobs from a seed execution.
 type seedExecutionJobsClient struct {
 	summarizer
 }
 
-// NewSeedExecutionJobsClient is the constructor of seedExecutionJobsClient.
+// newSeedExecutionJobsClient is the constructor of seedExecutionJobsClient.
 func newSeedExecutionJobsClient(c seedExecutionsClient, executionId uuid.UUID) seedExecutionJobsClient {
 	return seedExecutionJobsClient{
 		summarizer: summarizer{
@@ -35,12 +35,12 @@ func newSeedExecutionJobsClient(c seedExecutionsClient, executionId uuid.UUID) s
 	}
 }
 
-// SeedRecordsClient is the struct that can get records and the summary of records from a seed.
+// seedRecordsClient is the struct that can get records and the summary of records from a seed.
 type seedRecordsClient struct {
 	summarizer
 }
 
-// NewSeedRecordsClient is the constructor of seedRecordsClient
+// newSeedRecordsClient is the constructor of seedRecordsClient.
 func newSeedRecordsClient(sc seedsClient, seedId uuid.UUID) seedRecordsClient {
 	client := newSubClient(sc.crud.client, "/"+seedId.String()+"/record")
 	return seedRecordsClient{
@@ -67,7 +67,7 @@ type seedExecutionsClient struct {
 	getter
 }
 
-// NewSeedExecutionsClient is the constructor of a seedExecutionClient.
+// newSeedExecutionsClient is the constructor of a seedExecutionClient.
 func newSeedExecutionsClient(sc seedsClient, seedId uuid.UUID) seedExecutionsClient {
 	return seedExecutionsClient{
 		getter: getter{
@@ -92,7 +92,7 @@ func (c seedExecutionsClient) Seed(executionId uuid.UUID) (gjson.Result, error) 
 	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/config/seed")
 }
 
-// Pipeline gets the pipeline's configuration
+// Pipeline gets the pipeline's configuration.
 func (c seedExecutionsClient) Pipeline(executionId uuid.UUID, pipelineId uuid.UUID) (gjson.Result, error) {
 	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/config/pipeline/"+pipelineId.String())
 }
@@ -122,14 +122,14 @@ func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClien
 	return newSeedExecutionJobsClient(c, executionId)
 }
 
-// IngestionProcessorsClient is the struct performs the CRUD and cloning of processors.
+// ingestionProcessorsClient is the struct performs the CRUD and cloning of processors.
 type ingestionProcessorsClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// NewIngestionProcessorsClient is the constructor of a ingestionProcessorsClient
+// newIngestionProcessorsClient is the constructor of a ingestionProcessorsClient.
 func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient {
 	client := newClient(url+"/processor", apiKey)
 	return ingestionProcessorsClient{
@@ -147,14 +147,14 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 	}
 }
 
-// PipelinesClient is the struct that performs the CRUD and cloning of pipelines.
+// pipelinesClient is the struct that performs the CRUD and cloning of pipelines.
 type pipelinesClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// NewPipelinesClient is the constructor of a pipelinesClient
+// newPipelinesClient is the constructor of a pipelinesClient
 func newPipelinesClient(url, apiKey string) pipelinesClient {
 	client := newClient(url+"/pipeline", apiKey)
 	return pipelinesClient{
@@ -172,14 +172,14 @@ func newPipelinesClient(url, apiKey string) pipelinesClient {
 	}
 }
 
-// SeedsClient is the struct that performs the CRUD and cloning of seeds.
+// seedsClient is the struct that performs the CRUD and cloning of seeds.
 type seedsClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// NewSeedsClient is the constructor of seedsClient.
+// newSeedsClient is the constructor of seedsClient.
 func newSeedsClient(url, apiKey string) seedsClient {
 	client := newClient(url+"/seed", apiKey)
 	return seedsClient{
@@ -245,22 +245,22 @@ func (sc seedsClient) Executions(seedId uuid.UUID) seedExecutionsClient {
 	return newSeedExecutionsClient(sc, seedId)
 }
 
-// Ingestion is the struct that is used to interact with the Ingestion Component
+// ingestion is the struct that is used to interact with the Ingestion Component.
 type ingestion struct {
 	Url, ApiKey string
 }
 
-// Procesors is used to create an ingestionProcessorsClient
+// Procesors is used to create an ingestionProcessorsClient.
 func (i ingestion) Processors() ingestionProcessorsClient {
 	return newIngestionProcessorsClient(i.Url, i.ApiKey)
 }
 
-// Pipelines is used to create a pipelinesClient
+// Pipelines is used to create a pipelinesClient.
 func (i ingestion) Pipelines() pipelinesClient {
 	return newPipelinesClient(i.Url, i.ApiKey)
 }
 
-// Seeds is used to create a seedsClient
+// Seeds is used to create a seedsClient.
 func (i ingestion) Seeds() seedsClient {
 	return newSeedsClient(i.Url, i.ApiKey)
 }

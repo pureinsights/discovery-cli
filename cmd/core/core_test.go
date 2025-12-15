@@ -15,7 +15,7 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// TestNewCoreCommand tests the NewCoreCommand() function
+// TestNewCoreCommand tests the NewCoreCommand() function.
 func TestNewCoreCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}

@@ -20,7 +20,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// WorkingGetter mocks the discovery.Getter struct to always answer a working result
+// WorkingGetter mocks the discovery.Getter struct to always answer a working result.
 type WorkingGetter struct {
 	mock.Mock
 }
@@ -38,7 +38,7 @@ func (g *WorkingGetter) Get(id uuid.UUID) (gjson.Result, error) {
 	}`), nil
 }
 
-// GetAll returns a list of processors
+// GetAll returns a list of processors.
 func (g *WorkingGetter) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{
@@ -76,7 +76,7 @@ type FailingGetter struct {
 	mock.Mock
 }
 
-// Get returns a 404 Not Found
+// Get returns a 404 Not Found.
 func (g *FailingGetter) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -91,7 +91,7 @@ func (g *FailingGetter) Get(id uuid.UUID) (gjson.Result, error) {
 	}
 }
 
-// GetAll returns 401 unauthorized
+// GetAll returns 401 unauthorized.
 func (g *FailingGetter) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
@@ -355,7 +355,7 @@ func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 	}`), nil
 }
 
-// GetAll returns
+// GetAll returns the result of a search.
 func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{
@@ -389,7 +389,7 @@ type FailingSearcher struct {
 	mock.Mock
 }
 
-// Search implements the searcher interface
+// Search implements the searcher interface.
 func (s *FailingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -397,7 +397,7 @@ func (s *FailingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 	}
 }
 
-// SearchByName returns 404 so that the searchEntity function enters the err != nil code branch
+// SearchByName returns 404 so that the searchEntity function enters the err != nil code branch.
 func (s *FailingSearcher) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusBadRequest,
@@ -427,17 +427,17 @@ func (s *FailingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
 	}
 }
 
-// GetAll implements the searcher interface
+// GetAll implements the searcher interface.
 func (s *FailingSearcher) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// FailingSearcherWorkingGetter mocks the discovery.searcher struct when the search by name fails, but the get does succeed
+// FailingSearcherWorkingGetter mocks the discovery.searcher struct when the search by name fails, but the get does succeed.
 type FailingSearcherWorkingGetter struct {
 	mock.Mock
 }
 
-// Search implements the searcher interface
+// Search implements the searcher interface.
 func (s *FailingSearcherWorkingGetter) Search(gjson.Result) ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -445,7 +445,7 @@ func (s *FailingSearcherWorkingGetter) Search(gjson.Result) ([]gjson.Result, err
 	}
 }
 
-// SearchByName returns 404 not found to make the test go through the err != nil code branch
+// SearchByName returns 404 not found to make the test go through the err != nil code branch.
 func (s *FailingSearcherWorkingGetter) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -487,17 +487,17 @@ func (s *FailingSearcherWorkingGetter) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[]`).Array(), nil
 }
 
-// FailingSearcherFailingGetter mocks the discovery.searcher struct when both the searchByName and Get function fails
+// FailingSearcherFailingGetter mocks the discovery.searcher struct when both the searchByName and Get function fails.
 type FailingSearcherFailingGetter struct {
 	mock.Mock
 }
 
-// Search returns an error
+// Search returns an error.
 func (s *FailingSearcherFailingGetter) Search(gjson.Result) ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// SearchByName returns a 404 Not Found error to make the test go through the err != nil branch
+// SearchByName returns a 404 Not Found error to make the test go through the err != nil branch.
 func (s *FailingSearcherFailingGetter) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -531,12 +531,12 @@ func (s *FailingSearcherFailingGetter) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// SearcherReturnsOtherError is a struct that mocks discovery.searcher when the search functions do not return a discovery.Error
+// SearcherReturnsOtherError is a struct that mocks discovery.searcher when the search functions do not return a discovery.Error.
 type SearcherReturnsOtherError struct {
 	mock.Mock
 }
 
-// Search implements the searcher interface
+// Search implements the searcher interface.
 func (s *SearcherReturnsOtherError) Search(gjson.Result) ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -544,7 +544,7 @@ func (s *SearcherReturnsOtherError) Search(gjson.Result) ([]gjson.Result, error)
 	}
 }
 
-// SearchByName does not return a discovery.Error
+// SearchByName does not return a discovery.Error.
 func (s *SearcherReturnsOtherError) SearchByName(name string) (gjson.Result, error) {
 	return gjson.Result{}, errors.New("not discovery error")
 }
@@ -557,7 +557,7 @@ func (s *SearcherReturnsOtherError) Get(id uuid.UUID) (gjson.Result, error) {
 	}
 }
 
-// GetAll implements the searcher interface
+// GetAll implements the searcher interface.
 func (s *SearcherReturnsOtherError) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(``)}
 }
@@ -1053,7 +1053,7 @@ func Test_parseFilter(t *testing.T) {
 	}
 }
 
-// Test_getAndFilterString tests the getAndFilterString() function
+// Test_getAndFilterString tests the getAndFilterString() function.
 func Test_getAndFilterString(t *testing.T) {
 	tests := []struct {
 		name                 string
@@ -1653,7 +1653,7 @@ func Test_discovery_UpsertEntity(t *testing.T) {
 	}
 }
 
-// Test_discovery_UpsertEntities tests the discovery.UpsertEntities() function?
+// Test_discovery_UpsertEntities tests the discovery.UpsertEntities() function.
 func Test_discovery_UpsertEntities(t *testing.T) {
 	tests := []struct {
 		name           string

@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewImportCommand creates the discovery queryflow import command that imports entities to Discovery QueryFlow
+// NewImportCommand creates the discovery queryflow import command that imports entities to Discovery QueryFlow.
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
 	var file string
