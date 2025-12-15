@@ -32,7 +32,11 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 				{Name: "queryflow", Client: queryflowClient},
 			}
 
-			printer := cli.GetObjectPrinter(d.Config().GetString("output"))
+			output := d.Config().GetString("output")
+			if output == "json" {
+				output = "pretty-json"
+			}
+			printer := cli.GetObjectPrinter(output)
 			return d.ImportEntitiesToClients(clients, file, discoveryPackage.OnConflict(onConflict), printer)
 		},
 		Args: cobra.NoArgs,

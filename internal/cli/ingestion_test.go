@@ -491,6 +491,45 @@ func Test_discovery_HaltSeedExecution(t *testing.T) {
 	}
 }
 
+// TestConvertJSONArrayToString tests the ConvertJSONArrayToString() function.
+func TestConvertJSONArrayToString(t *testing.T) {
+	tests := []struct {
+		name     string
+		array    []gjson.Result
+		expected string
+	}{
+		{
+			name:  "Array with some elements.",
+			array: gjson.Parse(`[{"id": 1},{"id": 2},{"id": 3}]`).Array(),
+			expected: `[
+{"id": 1},
+{"id": 2},
+{"id": 3}
+]`,
+		},
+		{
+			name:  "Array with no elements.",
+			array: gjson.Result{}.Array(),
+			expected: `[
+]`,
+		}, 
+		{
+			name:  "Array with one element.",
+			array: gjson.Parse(`[{"id": 1}]`).Array(),
+			expected: `[
+{"id": 1}
+]`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := ConvertJSONArrayToString(tc.array)
+			assert.Equal(t, tc.expected, actual)
+		})
+	}
+}
+
 // WorkingGetter mocks the RecordGetter interface to always answer a working result
 type WorkingRecordGetter struct {
 	mock.Mock
@@ -955,6 +994,368 @@ func Test_discovery_AppendSeedRecords(t *testing.T) {
 
 			d := NewDiscovery(&ios, viper.New(), "")
 			err := d.AppendSeedRecords(seed, tc.client, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// WorkingSeedExecutionGetter mocks a working seed execution getter.
+type WorkingSeedExecutionGetter struct {
+	mock.Mock
+}
+
+// Get returns a seed execution.
+func (g *WorkingSeedExecutionGetter) Get(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
+  "creationTimestamp": "2025-10-10T19:48:31Z",
+  "lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+  "triggerType": "MANUAL",
+  "status": "RUNNING",
+  "scanType": "FULL",
+  "properties": {
+    "stagingBucket": "testBucket"
+  },
+  "stages": ["BEFORE_HOOKS","INGEST"]
+}`), nil
+}
+
+// GetAll implements the interface.
+func (g *WorkingSeedExecutionGetter) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+// Audit returns real audited changes.
+func (g *WorkingSeedExecutionGetter) Audit(id uuid.UUID) ([]gjson.Result, error) {
+	return gjson.Parse(`[
+	{"timestamp":"2025-09-05T20:09:22.543Z","status":"CREATED","stages":[]},
+	{"timestamp":"2025-09-05T20:09:26.621Z","status":"RUNNING","stages":[]},
+	{"timestamp":"2025-09-05T20:09:37.592Z","status":"RUNNING","stages":["BEFORE_HOOKS"]},
+	{"timestamp":"2025-09-05T20:13:26.602Z","status":"RUNNING","stages":["BEFORE_HOOKS","INGEST"]}
+]`).Array(), nil
+}
+
+// FailingSeedExecutionGetterGetExecutionFails mocks when getting a seed execution fails.
+type FailingSeedExecutionGetterGetExecutionFails struct {
+	mock.Mock
+}
+
+// Get returns seed execution not found.
+func (g *FailingSeedExecutionGetterGetExecutionFails) Get(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f2"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)}
+}
+
+// GetAll implements the interface.
+func (g *FailingSeedExecutionGetterGetExecutionFails) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+// Audit implements the interface.
+func (g *FailingSeedExecutionGetterGetExecutionFails) Audit(id uuid.UUID) ([]gjson.Result, error) {
+	return []gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// FFailingSeedExecutionGetterAuditFails mocks when getting the audit fails.
+type FailingSeedExecutionGetterAuditFails struct {
+	mock.Mock
+}
+
+// Get returns a seed execution.
+func (g *FailingSeedExecutionGetterAuditFails) Get(id uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
+  "creationTimestamp": "2025-10-10T19:48:31Z",
+  "lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+  "triggerType": "MANUAL",
+  "status": "RUNNING",
+  "scanType": "FULL",
+  "properties": {
+    "stagingBucket": "testBucket"
+  },
+  "stages": ["BEFORE_HOOKS","INGEST"]
+}`), nil
+}
+
+// GetAll implements the interface.
+func (g *FailingSeedExecutionGetterAuditFails) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+// Audit returns an error.
+func (g *FailingSeedExecutionGetterAuditFails) Audit(id uuid.UUID) ([]gjson.Result, error) {
+	return []gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// WorkingRecordSummarizer mocks when getting the record summary works.
+type WorkingRecordSummarizer struct {
+	mock.Mock
+}
+
+// Summarize returns a real result.
+func (s *WorkingRecordSummarizer) Summarize() (gjson.Result, error) {
+	return gjson.Parse(`{"PROCESSING":4,"DONE": 4}`), nil
+}
+
+// NoContentRecordSummarizer mocks when the summarize does not return anything.
+type NoContentRecordSummarizer struct {
+	mock.Mock
+}
+
+// NoContentRecordSummarizer returns an empty JSON.
+func (s *NoContentRecordSummarizer) Summarize() (gjson.Result, error) {
+	return gjson.Parse(``), nil
+}
+
+// WorkingJobSummarizer mocks when getting the job summary works.
+type WorkingJobSummarizer struct {
+	mock.Mock
+}
+
+// Summarizer returns real results.
+func (s *WorkingJobSummarizer) Summarize() (gjson.Result, error) {
+	return gjson.Parse(`{"DONE":5,"RUNNING":3}`), nil
+}
+
+// FailingJobSummarizer mocks when getting the job summary fails.
+type FailingJobSummarizer struct {
+	mock.Mock
+}
+
+// Summarize returns an error.
+func (s *FailingJobSummarizer) Summarize() (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f2"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)}
+}
+
+// TestAppendSeedExecutionDetails tests the AppendSeedExecutionDetails() function.
+func TestAppendSeedExecutionDetails(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         SeedExecutionGetter
+		summarizers    map[string]Summarizer
+		expectedFields map[string]string
+		err            error
+	}{
+		// Working case
+		{
+			name:   "Auditing works and summarizers return results",
+			client: new(WorkingSeedExecutionGetter),
+			summarizers: map[string]Summarizer{
+				"records": new(WorkingRecordSummarizer),
+				"jobs":    new(WorkingJobSummarizer),
+			},
+			expectedFields: map[string]string{
+				"audit": `[
+{"timestamp":"2025-09-05T20:09:22.543Z","status":"CREATED","stages":[]},
+{"timestamp":"2025-09-05T20:09:26.621Z","status":"RUNNING","stages":[]},
+{"timestamp":"2025-09-05T20:09:37.592Z","status":"RUNNING","stages":["BEFORE_HOOKS"]},
+{"timestamp":"2025-09-05T20:13:26.602Z","status":"RUNNING","stages":["BEFORE_HOOKS","INGEST"]}
+]`,
+				"records": `{"PROCESSING":4,"DONE": 4}`,
+				"jobs":    `{"DONE":5,"RUNNING":3}`,
+			},
+			err: nil,
+		},
+		{
+			name:   "Auditing works and one summarizer returns no content",
+			client: new(WorkingSeedExecutionGetter),
+			summarizers: map[string]Summarizer{
+				"records": new(NoContentRecordSummarizer),
+				"jobs":    new(WorkingJobSummarizer),
+			},
+			expectedFields: map[string]string{
+				"audit": `[
+{"timestamp":"2025-09-05T20:09:22.543Z","status":"CREATED","stages":[]},
+{"timestamp":"2025-09-05T20:09:26.621Z","status":"RUNNING","stages":[]},
+{"timestamp":"2025-09-05T20:09:37.592Z","status":"RUNNING","stages":["BEFORE_HOOKS"]},
+{"timestamp":"2025-09-05T20:13:26.602Z","status":"RUNNING","stages":["BEFORE_HOOKS","INGEST"]}
+]`,
+				"records": `{}`,
+				"jobs":    `{"DONE":5,"RUNNING":3}`,
+			},
+			err: nil,
+		},
+		// Error case
+		{
+			name:   "Getting the audit fails",
+			client: new(FailingSeedExecutionGetterAuditFails),
+			summarizers: map[string]Summarizer{
+				"records": new(NoContentRecordSummarizer),
+				"jobs":    new(WorkingJobSummarizer),
+			},
+			err: discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
+		},
+		{
+			name:   "Auditing works but a summarizer fails",
+			client: new(WorkingSeedExecutionGetter),
+			summarizers: map[string]Summarizer{
+				"records": new(WorkingRecordSummarizer),
+				"jobs":    new(FailingJobSummarizer),
+			},
+			err: discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f2"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			seedExecution := gjson.Parse(`{
+  "id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
+  "creationTimestamp": "2025-10-10T19:48:31Z",
+  "lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+  "triggerType": "MANUAL",
+  "status": "RUNNING",
+  "scanType": "FULL",
+  "properties": {
+    "stagingBucket": "testBucket"
+  },
+  "stages": ["BEFORE_HOOKS","INGEST"]
+}`)
+			executionId, err := uuid.Parse("f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3")
+			require.NoError(t, err)
+			result, err := AppendSeedExecutionDetails(seedExecution, executionId, tc.client, tc.summarizers)
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				for field, expectedValue := range tc.expectedFields {
+					assert.Equal(t, expectedValue, result.Get(field).Raw)
+				}
+			}
+		})
+	}
+}
+
+// TestSeedExecution tests the SeedExecution() function.
+func TestSeedExecution(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         SeedExecutionGetter
+		summarizers    map[string]Summarizer
+		details        bool
+		expectedOutput string
+		printer        Printer
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:   "SeedExecution returns a working seed execution, appends the details, and correctly prints the result with the given printer",
+			client: new(WorkingSeedExecutionGetter),
+			summarizers: map[string]Summarizer{
+				"records": new(WorkingRecordSummarizer),
+				"jobs":    new(WorkingJobSummarizer),
+			},
+			details:        true,
+			expectedOutput: "{\"audit\":[{\"stages\":[],\"status\":\"CREATED\",\"timestamp\":\"2025-09-05T20:09:22.543Z\"},{\"stages\":[],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:09:26.621Z\"},{\"stages\":[\"BEFORE_HOOKS\"],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:09:37.592Z\"},{\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:13:26.602Z\"}],\"creationTimestamp\":\"2025-10-10T19:48:31Z\",\"id\":\"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\",\"jobs\":{\"DONE\":5,\"RUNNING\":3},\"lastUpdatedTimestamp\":\"2025-10-10T19:48:31Z\",\"properties\":{\"stagingBucket\":\"testBucket\"},\"records\":{\"DONE\":4,\"PROCESSING\":4},\"scanType\":\"FULL\",\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"],\"status\":\"RUNNING\",\"triggerType\":\"MANUAL\"}\n",
+			printer:        JsonObjectPrinter(false),
+			err:            nil,
+		},
+		{
+			name:   "SeedExecution prints a seed execution with no details with the pretty printer",
+			client: new(WorkingSeedExecutionGetter),
+			summarizers: map[string]Summarizer{
+				"records": new(WorkingRecordSummarizer),
+				"jobs":    new(WorkingJobSummarizer),
+			},
+			details:        false,
+			expectedOutput: "{\n  \"creationTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"id\": \"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\",\n  \"lastUpdatedTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"scanType\": \"FULL\",\n  \"stages\": [\n    \"BEFORE_HOOKS\",\n    \"INGEST\"\n  ],\n  \"status\": \"RUNNING\",\n  \"triggerType\": \"MANUAL\"\n}\n",
+			printer:        nil,
+			err:            nil,
+		},
+		// Error case
+		{
+			name:   "Getting the seed execution fails",
+			client: new(FailingSeedExecutionGetterGetExecutionFails),
+			summarizers: map[string]Summarizer{
+				"records": new(WorkingRecordSummarizer),
+				"jobs":    new(WorkingJobSummarizer),
+			},
+			details: true,
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f2"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)}, "Could not get seed execution with id \"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\""),
+		},
+		{
+			name:   "Getting the seed execution audited changes fails",
+			client: new(FailingSeedExecutionGetterAuditFails),
+			summarizers: map[string]Summarizer{
+				"records": new(WorkingRecordSummarizer),
+				"jobs":    new(WorkingJobSummarizer),
+			},
+			details: true,
+			err:     NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not get details for seed execution with id \"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\""),
+		},
+		{
+			name:   "Printing fails",
+			client: new(WorkingSeedExecutionGetter),
+			summarizers: map[string]Summarizer{
+				"records": new(WorkingRecordSummarizer),
+				"jobs":    new(WorkingJobSummarizer),
+			},
+			details:        true,
+			expectedOutput: "{\n  \"id\": \"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\",\n  \"creationTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"lastUpdatedTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"triggerType\": \"MANUAL\",\n  \"status\": \"RUNNING\",\n  \"scanType\": \"FULL\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"stages\": [\"BEFORE_HOOKS\",\"INGEST\"]\n,\"audit\":[\n{\"timestamp\":\"2025-09-05T20:09:22.543Z\",\"status\":\"CREATED\",\"stages\":[]},\n{\"timestamp\":\"2025-09-05T20:09:26.621Z\",\"status\":\"RUNNING\",\"stages\":[]},\n{\"timestamp\":\"2025-09-05T20:09:37.592Z\",\"status\":\"RUNNING\",\"stages\":[\"BEFORE_HOOKS\"]},\n{\"timestamp\":\"2025-09-05T20:13:26.602Z\",\"status\":\"RUNNING\",\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"]}\n],\"records\":{\"PROCESSING\":4,\"DONE\": 4},\"jobs\":{\"DONE\":5,\"RUNNING\":3}}",
+			printer:        JsonObjectPrinter(false),
+			outWriter:      testutils.ErrWriter{Err: errors.New("write failed")},
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			executionId, err := uuid.Parse("f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3")
+			require.NoError(t, err)
+
+			err = d.SeedExecution(tc.client, executionId, tc.summarizers, tc.details, tc.printer)
 
 			if tc.err != nil {
 				require.Error(t, err)

@@ -191,7 +191,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "pretty-json")
+			vpr.Set("output", "json")
 			if tc.coreUrl {
 				url := "http://localhost:12010"
 				if coreServer != nil {
@@ -271,7 +271,7 @@ func TestNewImportCommand_NoProfileFlag(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "pretty-json")
+	vpr.Set("output", "json")
 
 	vpr.Set("default.ingestion_url", "test")
 	vpr.Set("default.ingestion_key", "test")
