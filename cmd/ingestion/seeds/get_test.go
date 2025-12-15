@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// NewGetCommand creates the seed get command
+// TestNewGetCommand tests the NewGetCommand() function
 func TestNewGetCommand(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -328,6 +328,180 @@ func TestNewGetCommand(t *testing.T) {
 			},
 			err: nil,
 		},
+		{
+			name:      "The user gets a seed execution by its id and with details",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3", "--details"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewGetCommand_Out_GetExecutionByIdDetails",
+			errGolden: "NewGetCommand_Err_GetExecutionByIdDetails",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_GetExecutionByIdDetails"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-seed",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
+					"creationTimestamp": "2025-10-10T19:48:31Z",
+					"lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+					"triggerType": "MANUAL",
+					"status": "RUNNING",
+					"scanType": "FULL",
+					"properties": {
+						"stagingBucket": "testBucket"
+					},
+					"stages": ["BEFORE_HOOKS","INGEST"]
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/audit": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{"timestamp":"2025-09-05T20:09:22.543Z","status":"CREATED","stages":[]},
+				{"timestamp":"2025-09-05T20:09:26.621Z","status":"RUNNING","stages":[]},
+				{"timestamp":"2025-09-05T20:09:37.592Z","status":"RUNNING","stages":["BEFORE_HOOKS"]},
+				{"timestamp":"2025-09-05T20:13:26.602Z","status":"RUNNING","stages":["BEFORE_HOOKS","INGEST"]}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 4,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 4,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/audit", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/record/summary": {
+					StatusCode:  http.StatusOK,
+					Body:        `{"PROCESSING":4,"DONE": 4}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/record/summary", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/job/summary": {
+					StatusCode:  http.StatusOK,
+					Body:        `{"DONE":5,"RUNNING":3}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/job/summary", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			name:      "The user gets a seed execution by its id, but with no details",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewGetCommand_Out_GetExecutionByIdNoDetails",
+			errGolden: "NewGetCommand_Err_GetExecutionByIdNoDetails",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_GetExecutionByIdNoDetails"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-seed",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
+					"creationTimestamp": "2025-10-10T19:48:31Z",
+					"lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+					"triggerType": "MANUAL",
+					"status": "RUNNING",
+					"scanType": "FULL",
+					"properties": {
+						"stagingBucket": "testBucket"
+					},
+					"stages": ["BEFORE_HOOKS","INGEST"]
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
 
 		// Error case
 		{
@@ -576,6 +750,120 @@ func TestNewGetCommand(t *testing.T) {
   "timestamp": "2025-11-10T17:01:44.254941300Z"
 }`),
 			}, "Could not get record with id \"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=\""),
+		},
+		{
+			name:      "The user tries to get a seed execution by its id, but gets Not Found",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewGetCommand_Out_GetExecutionNotFound",
+			errGolden: "NewGetCommand_Err_GetExecutionNotFound",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_GetExecutionNotFound"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_GetExecutionNotFound"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-seed",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3": {
+					StatusCode: http.StatusNotFound,
+					Body: `{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3"
+  ],
+  "timestamp": "2025-11-18T01:26:12.946825800Z"
+}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3", r.URL.Path)
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3"
+  ],
+  "timestamp": "2025-11-18T01:26:12.946825800Z"
+}`),
+			}, "Could not get seed execution with id \"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\""),
+		},
+		{
+			name:      "The user sends an invalid execution id",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "test"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewGetCommand_Out_GetExecutionInvalidUUID",
+			errGolden: "NewGetCommand_Err_GetExecutionInvalidUUID",
+			outBytes:  testutils.Read(t, "NewGetCommand_Out_GetExecutionInvalidUUID"),
+			errBytes:  testutils.Read(t, "NewGetCommand_Err_GetExecutionInvalidUUID"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-seed",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not get seed execution id"),
 		},
 		{
 			name:      "The seed has an invalid UUID",

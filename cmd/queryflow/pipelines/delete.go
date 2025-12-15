@@ -31,7 +31,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	discovery queryflow pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
 
 	# Delete a pipeline by name
-	discovery queryflow pipeline delete "Search pipeline"`,
+	discovery queryflow pipeline delete "my-pipeline"`,
 	}
 	return get
 }
