@@ -47,6 +47,7 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 }
 
 // InitializeConfig reads the config and credentials configuration files found in the given path and sets up the Viper instance with their values.
+// If the configuration files do not exist, it creates them with default values.
 func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error) {
 	vpr := viper.New()
 
@@ -109,7 +110,7 @@ func obfuscate(s string) string {
 	return string(r)
 }
 
-// AskUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
+// askUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
 // If the user inputs an empty string, the value is not changed.
 // If the user inputs a space, the value is set to an empty string.
 // If the user inputs a new value, the property is updated.
@@ -140,7 +141,7 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	return nil
 }
 
-// SaveConfig separates de API Keys from Discovery's Viper configuration and writes the config and credentials into their own files.
+// saveConfig separates the API Keys from Discovery's Viper configuration and writes the config and credentials into their own files.
 func saveConfig(v *viper.Viper, path string) error {
 	apiKeys := []string{"core_key", "ingestion_key", "queryflow_key", "staging_key"}
 	temporaryProperties := []string{"profile"}
