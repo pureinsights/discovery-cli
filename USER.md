@@ -1272,7 +1272,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The get command can also get records from the seed with the `record` flag.
+`get` is the command used to obtain Discovery Ingestion's seeds. The user can send a name or UUID to get a specific seed. If no argument is given, then the command retrieves every seed. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The `get` command can also get records from the seed with the `record` flag. Finally, the get command can retrieve a seed execution using the `execution` flag. When combined with the `details` flag, it provides more detailed information about the execution.
 
 Usage: `discovery ingestion seed get [flags] [<arg>]`
 
@@ -1295,6 +1295,14 @@ Flags:
 
 `--record`::
 (Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
+
+`--execution`::
+(Optional, string) The UUID of the seed execution that will be retrieved.
+
+`--details`::
+(Optional, string) Makes the get operation retrieve more information when getting a seed execution, like the audited changes and record and job summaries.
+
+The `filter`, `execution`, and `record` flags are mutually exclusive. The `details` flag can only be used with the `execution` flag.
 
 Examples:
 
@@ -1329,6 +1337,50 @@ discovery ingestion seed get -p cn
 # Get a seed record by id
 discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","record":{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},"recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+```
+
+```bash
+# Get a seed execution by id and with details
+discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --execution 0f20f984-1854-4741-81ea-30f8b965b007 --details
+{
+  "audit": [
+    {
+      "stages": [],
+      "status": "CREATED",
+      "timestamp": "2025-11-18T16:22:23.865Z"
+    },
+    {
+      "stages": [],
+      "status": "RUNNING",
+      "timestamp": "2025-11-18T16:22:34.655Z"
+    },
+    {
+      "stages": [
+        "BEFORE_HOOKS"
+      ],
+      "status": "RUNNING",
+      "timestamp": "2025-11-18T16:23:13.120Z"
+    }
+  ],
+  "creationTimestamp": "2025-11-18T16:22:24Z",
+  "id": "0f20f984-1854-4741-81ea-30f8b965b007",
+  "jobs": {
+    "DONE": 3,
+    "RUNNING": 1
+  },
+  "lastUpdatedTimestamp": "2025-11-18T16:23:13Z",
+  "records": {
+    "CREATE": {
+      "PROCESSING": 2
+    }
+  },
+  "scanType": "FULL",
+  "stages": [
+    "BEFORE_HOOKS"
+  ],
+  "status": "RUNNING",
+  "triggerType": "MANUAL"
+}
 ```
 
 ###### Store
