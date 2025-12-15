@@ -163,7 +163,7 @@ discovery export -p cn
 ```bash
 # Export the entities to a specific file.
 # In this example, the Ingestion export failed.
-discovery export --file "entities/discovery.zip"
+discovery export -p cn --file "entities/discovery.zip"
 {"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
 ```
 #### Import
