@@ -1880,6 +1880,44 @@ discovery queryflow endpoint get -p cn
 {"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","labels":[],"lastUpdatedTimestamp":"2025-08-25T16:47:24Z","name":"Blogs endpoint","timeout":"PT1H","type":"default","uri":"/blogs-search"}
 ```
 
+###### Store
+`store` is the command used to create and update Discovery QueryFlow's endpoints. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple endpoints. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+
+Usage: `discovery queryflow endpoint store [flags]`
+
+Flags:
+
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store an endpoint with the JSON configuration in a file
+discovery queryflow endpoint store --file endpointjsonfile.json
+{"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
+{"code":1003,"messages":["Entity not found: 2fee5e27-4147-48de-ba1e-d7f32476a4a3"],"status":404,"timestamp":"2025-11-20T00:37:02.827065700Z"}
+{"active":true,"creationTimestamp":"2025-11-20T00:37:02.857266Z","httpMethod":"GET","id":"7324b140-3240-4e67-90cb-9ffe5e7f574b","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:37:02.857266Z","name":"Blogs search endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/blog-search"}
+```
+
+```bash
+# Store an endpoint with the JSON configuration in the data flag
+discovery queryflow endpoint store --data '{"type":"default","name":"Wikis endpoint","labels":[{"key":"A","value":"B"}],"active":true,"id":"cf56470f-0ab4-4754-b05c-f760669315af","creationTimestamp":"2025-11-20T00:10:53Z","lastUpdatedTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","uri":"/wikis-search","timeout":"PT1H","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89","continueOnError":false,"active":true},{"id":"a5ee116b-bd95-474e-9d50-db7be988b196","continueOnError":false,"active":true},{"id":"86e7f920-a4e4-4b64-be84-5437a7673db8","continueOnError":false,"active":true},{"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer","continueOnError":false,"active":true}],"mode":{"type":"group"},"next":"responseState"},"responseState":{"type":"response","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'
+{"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"Wikis endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
+```
+
 ###### Delete
 `delete` is the command used to delete Discovery QueryFlow's endpoints. The user must send a name or UUID to delete a specific endpoint.
 

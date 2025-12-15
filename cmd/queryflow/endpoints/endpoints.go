@@ -13,6 +13,7 @@ func NewEndpointCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	endpoint.AddCommand(NewGetCommand(d))
+	endpoint.AddCommand(NewStoreCommand(d))
 	endpoint.AddCommand(NewDeleteCommand(d))
 
 	return endpoint
