@@ -31,7 +31,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
 
 	# Delete a credential by name
-	discovery core credential delete credential1`,
+	discovery core credential delete my-credential`,
 	}
 	return get
 }

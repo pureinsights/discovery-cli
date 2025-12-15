@@ -29,7 +29,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get pipeline by name
-	discovery ingestion pipeline get "Search pipeline"
+	discovery ingestion pipeline get "my-pipeline"
 
 	# Get pipelines using filters
 	discovery ingestion pipeline get --filter label=A:A
