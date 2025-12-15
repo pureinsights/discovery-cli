@@ -40,7 +40,7 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 			return d.ImportEntitiesToClients(clients, file, discoveryPackage.OnConflict(onConflict), printer)
 		},
 		Args: cobra.NoArgs,
-		Example: `	# Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
+		Example: `	# Import the entities to the Discovery products using profile "cn" and ignore conflict resolution strategy.
 	discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE`,
 	}
 
