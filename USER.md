@@ -1818,6 +1818,64 @@ discovery queryflow processor delete processor1
 {"acknowledged":true}
 ```
 
+##### Pipeline
+`pipeline` is the command used to manage pipelines in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery queryflow pipeline [subcommand] [flags]`
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's pipelines. The user can send a name or UUID to get a specific pipeline. If no argument is given, then the command retrieves every pipeline. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery queryflow pipeline get [flags] [<arg>]`
+
+Arguments:
+`arg`::
+(Optional, string) The name or UUID of the pipeline that will be retrieved.
+
+Flags:
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, Array of strings) Add a filter to the search. The available filter is the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+
+Examples:
+
+```bash
+# Get a pipeline by id
+discovery queryflow pipeline get 04536687-f083-4353-8ecc-b7348e14b748
+MISSING
+```
+
+```bash
+# Get pipeline by name
+discovery queryflow pipeline get "my-pipeline"
+MISSING
+```
+
+```bash
+# Get pipelines using filters
+discovery queryflow pipeline get --filter label=A:A
+MISSING
+```
+
+```bash
+# Get all pipelines using the configuration in profile "cn"
+discovery queryflow pipeline get -p cn
+MISSING
+```
+
 ##### Endpoint
 `endpoint` is the command used to manage endpoints in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
 
