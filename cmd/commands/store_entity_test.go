@@ -247,7 +247,6 @@ func TestStoreCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
 			if tc.url != "" {
 				vpr.Set("default.core_url", tc.url)
 			}
@@ -256,7 +255,7 @@ func TestStoreCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := StoreCommand(d, tc.client, StoreCommandConfig(GetCommandConfig("default", "json", tc.componentName, "core_url"), tc.abortOnError, tc.data, tc.file))
+			err := StoreCommand(d, tc.client, StoreCommandConfig(GetCommandConfig("default", "pretty-json", tc.componentName, "core_url"), tc.abortOnError, tc.data, tc.file))
 
 			if tc.err != nil {
 				require.Error(t, err)
