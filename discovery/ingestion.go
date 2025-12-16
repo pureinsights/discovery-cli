@@ -274,6 +274,12 @@ func (i ingestion) BackupRestore() backupRestore {
 	}
 }
 
+func (c ingestion) StatusChecker() statusChecker {
+	return statusChecker{
+		client: newClient(c.Url[:len(c.Url)-3], c.ApiKey),
+	}
+}
+
 // NewIngestion is the constructor of the ingestion struct.
 // It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewIngestion(url, apiKey string) ingestion {

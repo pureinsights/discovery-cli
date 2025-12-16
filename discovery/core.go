@@ -225,8 +225,8 @@ func (c core) BackupRestore() backupRestore {
 	}
 }
 
-func (c core) HealthChecker() healthChecker {
-	return healthChecker{
+func (c core) StatusChecker() statusChecker {
+	return statusChecker{
 		client: newClient(c.Url[:len(c.Url)-3], c.ApiKey),
 	}
 }

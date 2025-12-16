@@ -6,11 +6,11 @@ import (
 
 const (
 	// LongExport is the message used in the Long field of the Export commands.
-	LongHealthCheck string = "status is the command used to check of Discovery %s. If it is healthy, it should return a JSON with an \"UP\" status field"
+	LongStatusCheck string = "status is the command used to check of Discovery %s. If it is Statusy, it should return a JSON with an \"UP\" status field"
 )
 
 // ExportCommand is the function that executes the export operation.
-func HealthCheckCommand(d cli.Discovery, client cli.HealthChecker, product string, config commandConfig) error {
+func StatusCheckCommand(d cli.Discovery, client cli.StatusChecker, product string, config commandConfig) error {
 	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
@@ -18,5 +18,5 @@ func HealthCheckCommand(d cli.Discovery, client cli.HealthChecker, product strin
 
 	printer := cli.GetObjectPrinter(config.output)
 
-	return d.HealthCheck(client, product, printer)
+	return d.StatusCheck(client, product, printer)
 }

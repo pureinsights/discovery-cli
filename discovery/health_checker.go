@@ -7,11 +7,11 @@ import (
 )
 
 // cloner is a struct that has methods to clone entities.
-type healthChecker struct {
+type statusChecker struct {
 	client
 }
 
 // Clone makes a copy of the entity with the given ID.
-func (c healthChecker) HealthCheck() (gjson.Result, error) {
+func (c statusChecker) StatusCheck() (gjson.Result, error) {
 	return execute(c.client, http.MethodGet, "/health")
 }

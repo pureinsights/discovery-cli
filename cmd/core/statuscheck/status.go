@@ -1,4 +1,4 @@
-package healthcheck
+package statuscheck
 
 import (
 	"fmt"
@@ -12,9 +12,9 @@ import (
 // NewExportCommand creates the discovery core export command that exports Discovery Core's entities.
 func NewStatusCommand(d cli.Discovery) *cobra.Command {
 	export := &cobra.Command{
-		Use:   "status [subcommands]",
+		Use:   "status",
 		Short: "Check if Discovery Core is online",
-		Long:  fmt.Sprintf(commands.LongHealthCheck, "Core"),
+		Long:  fmt.Sprintf(commands.LongStatusCheck, "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -24,7 +24,7 @@ func NewStatusCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return commands.HealthCheckCommand(d, coreClient.HealthChecker(), "Core", commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
+			return commands.StatusCheckCommand(d, coreClient.StatusChecker(), "Core", commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.NoArgs,
 		Example: `	# Check the status of Discovery Core
