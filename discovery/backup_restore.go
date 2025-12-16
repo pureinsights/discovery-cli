@@ -17,8 +17,11 @@ type OnConflict string
 
 // The constants represent the options to ignore the new duplicated entities, fail if there are duplicated entities, and update the duplicated entities with the new values.
 const (
+	// OnConflictIgnore ignores the conflicting entities.
 	OnConflictIgnore OnConflict = "IGNORE"
-	OnConflictFail   OnConflict = "FAIL"
+	// OnConflictFail returns an error when there are conflicting entities.
+	OnConflictFail OnConflict = "FAIL"
+	// OnConflictUpdate modifies the conflicting entities to the new configuration.
 	OnConflictUpdate OnConflict = "UPDATE"
 )
 

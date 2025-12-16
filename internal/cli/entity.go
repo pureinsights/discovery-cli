@@ -70,7 +70,7 @@ type Searcher interface {
 	SearchByName(name string) (gjson.Result, error)
 }
 
-// SearchEntity tries to search an entity by name, and if it fails, it tries to get the entity by its id.
+// searchEntity tries to search an entity by name, and if it fails, it tries to get the entity by its id.
 func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error) {
 	result, err := client.SearchByName(id)
 	if err != nil {

@@ -150,10 +150,15 @@ type LogLevel string
 
 // The constants represent the respective log level.
 const (
+	// LevelError is used to change the log level to "ERROR"
 	LevelError LogLevel = "ERROR"
-	LevelWarn  LogLevel = "WARN"
-	LevelInfo  LogLevel = "INFO"
+	// LevelWarn is used to change the log level to "WARN"
+	LevelWarn LogLevel = "WARN"
+	// LevelInfo is used to change the log level to "INFO"
+	LevelInfo LogLevel = "INFO"
+	// LevelDebug is used to change the log level to "DEBUG"
 	LevelDebug LogLevel = "DEBUG"
+	// LevelTrace is used to change the log level to "TRACE"
 	LevelTrace LogLevel = "TRACE"
 )
 

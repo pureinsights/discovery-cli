@@ -202,7 +202,9 @@ type ScanType string
 
 // The constants represent the respective scan type.
 const (
-	ScanFull        ScanType = "FULL"
+	// ScanFull starts a complete ingestion.
+	ScanFull ScanType = "FULL"
+	// ScanIncremental starts an incremental ingestion.
 	ScanIncremental ScanType = "INCREMENETAL"
 )
 
