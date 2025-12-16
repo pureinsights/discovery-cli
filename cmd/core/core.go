@@ -4,6 +4,7 @@ import (
 	"github.com/pureinsights/discovery-cli/cmd/core/backuprestore"
 	"github.com/pureinsights/discovery-cli/cmd/core/config"
 	"github.com/pureinsights/discovery-cli/cmd/core/credentials"
+	"github.com/pureinsights/discovery-cli/cmd/core/healthcheck"
 	"github.com/pureinsights/discovery-cli/cmd/core/labels"
 	"github.com/pureinsights/discovery-cli/cmd/core/secrets"
 	"github.com/pureinsights/discovery-cli/cmd/core/servers"
@@ -25,6 +26,7 @@ func NewCoreCommand(d cli.Discovery) *cobra.Command {
 	core.AddCommand(servers.NewServerCommand(d))
 	core.AddCommand(backuprestore.NewExportCommand(d))
 	core.AddCommand(backuprestore.NewImportCommand(d))
+	core.AddCommand(healthcheck.NewStatusCommand(d))
 
 	return core
 }

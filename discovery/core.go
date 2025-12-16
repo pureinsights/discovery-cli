@@ -225,6 +225,12 @@ func (c core) BackupRestore() backupRestore {
 	}
 }
 
+func (c core) HealthChecker() healthChecker {
+	return healthChecker{
+		client: newClient(c.Url[:len(c.Url)-3], c.ApiKey),
+	}
+}
+
 // NewCore is the constructor for the core struct.
 // It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewCore(url, apiKey string) core {
