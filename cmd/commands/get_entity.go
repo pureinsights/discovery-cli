@@ -29,7 +29,7 @@ func GetCommand(args []string, d cli.Discovery, client cli.Getter, config comman
 		printer := cli.GetObjectPrinter(config.output)
 		return d.GetEntity(client, id, printer)
 	} else {
-		output := d.Config().GetString("output")
+		output := config.output
 		if output == prettyJson {
 			output = "json"
 		}
