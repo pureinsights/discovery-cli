@@ -1,1 +1,14 @@
-{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"3b32e410-2F33-412D-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"my-seed","type":"mongo"}
+{
+  "active": true,
+  "creationTimestamp": "2025-10-17T22:37:53Z",
+  "id": "3b32e410-2F33-412D-9fb8-17970131921c",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-10-17T22:37:53Z",
+  "name": "my-seed",
+  "type": "mongo"
+}
