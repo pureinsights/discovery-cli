@@ -881,6 +881,7 @@ discovery core server delete my-server
 Usage: `discovery ingestion [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -893,6 +894,7 @@ Flags:
 Usage: `discovery ingestion config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -922,6 +924,7 @@ Editing profile "default". Press Enter to keep the value shown, type a single sp
 Usage: `discovery ingestion config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -966,6 +969,7 @@ Ingestion API Key: "discovery.key.ingestion.cn"
 Usage: `discovery ingestion export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -985,7 +989,7 @@ discovery ingestion export -p cn
 
 ```bash
 # Export the entities to a specific file
-discovery ingestion export --file "entities/ingestion.zip".
+discovery ingestion export --file "entities/ingestion.zip"
 {"acknowledged":true}
 ```
 
@@ -995,6 +999,7 @@ discovery ingestion export --file "entities/ingestion.zip".
 Usage: `discovery Ingestion import [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1053,6 +1058,7 @@ Arguments:
 (Optional, string) The name or UUID of the processor that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1069,35 +1075,36 @@ Examples:
 ```bash
 # Get a processor by id
 discovery ingestion processor get 90675678-fc9f-47ec-8bab-89969dc204f0
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
 ```bash
 # Get processor by name
-discovery ingestion processor get "MongoDB store processor"
-{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor","type":"mongo"}
+discovery ingestion processor get "my-processor"
+{"active":true,"config":{"action":"select","charset":"UTF-8","file":"#{data('/file')}","selectors":{"section0":{"mode":"HTML","selector":".sect0"},"section1":{"mode":"HTML","selector":".sect1"}}},"creationTimestamp":"2025-11-17T22:38:26Z","id":"56ace252-4731-4428-84b8-7cd13bf059d3","labels":[],"lastUpdatedTimestamp":"2025-11-17T22:38:26Z","name":"my-processor","type":"html"}
 ```
 
 ```bash
 # Get processors using filters
 discovery ingestion processor get --filter label=A:A -f type=mongo
-{"active":true,"creationTimestamp":"2025-10-31T21:50:54Z","id":"89103d32-6007-489a-8e25-dc9a6001f8e8","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T21:50:54Z","name":"MongoDB processor","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-31T21:50:54Z","id":"89103d32-6007-489a-8e25-dc9a6001f8e8","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T21:50:54Z","name":"my-processor","type":"mongo"}
 ```
 
 ```bash
 # Get all processors using the configuration in profile "cn"
 discovery ingestion processor get -p cn
-{"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"516d4a8a-e8ae-488c-9e37-d5746a907454","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"Template processor","type":"template"}
-{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"7569f1a5-521e-4d8c-94d1-9f53ad065320","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"MongoDB store processor","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"7b192ea1-ac43-439b-9396-5e022f81f2cb","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"OpenAI processor","type":"openai"}
+{"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"516d4a8a-e8ae-488c-9e37-d5746a907454","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"my-processor","type":"template"}
+{"active":true,"creationTimestamp":"2025-10-30T20:07:43Z","id":"7569f1a5-521e-4d8c-94d1-9f53ad065320","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"my-processor-2","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-08-21T21:52:02Z","id":"7b192ea1-ac43-439b-9396-5e022f81f2cb","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:02Z","name":"my-processor-3","type":"openai"}
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's processors. With the data flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion processor store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1118,15 +1125,15 @@ Examples:
 ```bash
 # Store a processor with the JSON configuration in a file
 discovery ingestion processor store --file "ingestionprocessorjsonfile.json"
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:44Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:44Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 {"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"status":404,"timestamp":"2025-10-30T20:09:29.314467Z"}
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:09:29.346792Z","id":"aef648d8-171d-479a-a6fd-14ec9b235dc7","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:09:29.346792Z","name":"MongoDB store processor 2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:09:29.346792Z","id":"aef648d8-171d-479a-a6fd-14ec9b235dc7","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:09:29.346792Z","name":"my-processor-2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
 ```bash
 # Store a processor with the JSON configuration in the data flag
-discovery ingestion processor store --data '{"type":"mongo","name":"MongoDB store processor","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"MongoDB store processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+discovery ingestion processor store --data '{"type":"mongo","name":"my-processor","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
 ###### Delete
@@ -1154,7 +1161,7 @@ discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
 
 ```bash
 # Delete a processor by name
-discovery ingestion processor delete "MongoDB store processor"
+discovery ingestion processor delete "my-processor"
 {"acknowledged":true}
 ```
 
@@ -1164,6 +1171,7 @@ discovery ingestion processor delete "MongoDB store processor"
 Usage: `discovery ingestion pipeline [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1180,6 +1188,7 @@ Arguments:
 (Optional, string) The name or UUID of the pipeline that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1195,36 +1204,37 @@ Examples:
 ```bash
 # Get a pipeline by id
 discovery ingestion pipeline get 04536687-f083-4353-8ecc-b7348e14b748
-{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","initialState":"ingestionState","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","initialState":"ingestionState","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"my-pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 ```
 
 ```bash
 # Get pipeline by name
-discovery ingestion pipeline get "Search pipeline"
-{"active":true,"creationTimestamp":"2025-10-31T22:06:27Z","id":"8d9560b3-631b-490b-994f-4708d9880e3b","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:06:27Z","name":"Search pipeline"}
+discovery ingestion pipeline get "my-pipeline"
+{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","initialState":"ingestionState","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"my-pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 ```
 
 ```bash
 # Get pipelines using filters
 discovery ingestion pipeline get --filter label=A:A
-{"active":true,"creationTimestamp":"2025-10-31T22:06:27Z","id":"8d9560b3-631b-490b-994f-4708d9880e3b","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:06:27Z","name":"Search pipeline"}
-{"active":true,"creationTimestamp":"2025-10-31T22:07:00Z","id":"e15ca96b-3d42-4ab9-be16-3c6d6713b04e","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:00Z","name":"Search pipeline 2"}
+{"active":true,"creationTimestamp":"2025-10-31T22:06:27Z","id":"8d9560b3-631b-490b-994f-4708d9880e3b","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:06:27Z","name":"my-pipeline"}
+{"active":true,"creationTimestamp":"2025-10-31T22:07:00Z","id":"e15ca96b-3d42-4ab9-be16-3c6d6713b04e","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:00Z","name":"my-pipeline-2"}
 ```
 
 ```bash
 # Get all pipelines using the configuration in profile "cn"
 discovery ingestion pipeline get -p cn
-{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"Search pipeline"}
-{"active":true,"creationTimestamp":"2025-10-31T19:41:16Z","id":"0d3f476d-9003-4fc8-b9a9-8ba6ebf9445b","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:41:16Z","name":"Mongo Ingestion pipeline"}
-{"active":true,"creationTimestamp":"2025-10-31T22:07:00Z","id":"22b1f0fe-d7c1-476f-a609-1a12ee97655f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:00Z","name":"Generate embedddings pipeline"}
+{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"my-pipeline"}
+{"active":true,"creationTimestamp":"2025-10-31T19:41:16Z","id":"0d3f476d-9003-4fc8-b9a9-8ba6ebf9445b","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:41:16Z","name":"my-pipeline-2"}
+{"active":true,"creationTimestamp":"2025-10-31T22:07:00Z","id":"22b1f0fe-d7c1-476f-a609-1a12ee97655f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:00Z","name":"my-pipeline-3"}
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's pipelines. With the data flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion pipeline store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1245,15 +1255,15 @@ Examples:
 ```bash
 # Store a pipeline with the JSON configuration in a file
 discovery ingestion pipeline store --file pipelines.json
-{"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+{"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"my-pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 {"code":1003,"messages":["Entity not found: 5888b852-d7d4-4761-9058-738b2ad1b5c9"],"status":404,"timestamp":"2025-10-31T19:55:34.723693100Z"}
-{"active":true,"creationTimestamp":"2025-10-31T19:55:34.758757Z","id":"bfb882a7-59e6-4cd6-afe4-7732163637f1","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:55:34.758757Z","name":"Search pipeline 2","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+{"active":true,"creationTimestamp":"2025-10-31T19:55:34.758757Z","id":"bfb882a7-59e6-4cd6-afe4-7732163637f1","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:55:34.758757Z","name":"my-pipeline-3","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 ```
 
 ```bash
 # Store a pipeline with the JSON configuration in the data flag
-discovery ingestion pipeline store --data '{"name":"Search pipeline","labels":[],"active":true,"id":"36f8ce72-f23d-4768-91e8-58693ff1b272","creationTimestamp":"2025-10-31T19:41:13Z","lastUpdatedTimestamp":"2025-10-31T19:41:13Z","initialState":"ingestionState","states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header","active":true},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"recordPolicy":{"idPolicy":{},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"errorPolicy":"FAIL","outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
-{"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"Search pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+discovery ingestion pipeline store --data '{"name":"my-pipeline","labels":[],"active":true,"id":"36f8ce72-f23d-4768-91e8-58693ff1b272","creationTimestamp":"2025-10-31T19:41:13Z","lastUpdatedTimestamp":"2025-10-31T19:41:13Z","initialState":"ingestionState","states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header","active":true},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"recordPolicy":{"idPolicy":{},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"errorPolicy":"FAIL","outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
+{"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"my-pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 ```
 
 ###### Delete
@@ -1281,7 +1291,7 @@ discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
 
 ```bash
 # Delete a pipeline by name
-discovery ingestion pipeline delete "Search pipeline"
+discovery ingestion pipeline delete "my-pipeline"
 {"acknowledged":true}
 ```
 
@@ -1291,6 +1301,7 @@ discovery ingestion pipeline delete "Search pipeline"
 Usage: `discovery ingestion seed [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1335,34 +1346,34 @@ Examples:
 ```bash
 # Get a seed by id
 discovery ingestion seed get 7251d693-7382-452f-91dc-859add803a43
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
 ```bash
 # Get seed by name
-discovery ingestion seed get "Search seed"
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+discovery ingestion seed get "my-seed"
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
 ```bash
 # Get seeds using filters
 discovery ingestion seed get --filter label=A:A -f type=staging
-{"active":true,"creationTimestamp":"2025-10-31T22:53:54Z","id":"326a6b94-8931-4d18-b3a6-77adad14f2c0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:53:54Z","name":"Search seed","type":"staging"}
-{"active":true,"creationTimestamp":"2025-10-31T22:54:04Z","id":"8fbd57cd-9f82-409d-8d85-98e4b9225f3a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:04Z","name":"Staging store seed","type":"staging"}
+{"active":true,"creationTimestamp":"2025-10-31T22:53:54Z","id":"326a6b94-8931-4d18-b3a6-77adad14f2c0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:53:54Z","name":"my-seed","type":"staging"}
+{"active":true,"creationTimestamp":"2025-10-31T22:54:04Z","id":"8fbd57cd-9f82-409d-8d85-98e4b9225f3a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:04Z","name":"my-seed-2","type":"staging"}
 ```
 
 ```bash
 # Get all seeds using the configuration in profile "cn"
 discovery ingestion seed get -p cn
-{"active":true,"creationTimestamp":"2025-09-05T19:19:30Z","id":"026c6cf3-cba4-4d68-9806-1e534eebb99d","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:19:30Z","name":"Search seed","type":"staging"}
-{"active":true,"creationTimestamp":"2025-10-31T22:54:05Z","id":"028120a6-1859-47c7-b69a-f417e54b4a4a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:05Z","name":"ChatGPT seed","type":"staging"}
-{"active":true,"creationTimestamp":"2025-09-05T19:48:00Z","id":"0517a87a-86f7-4a71-bb3f-adfa0c87a269","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:48:00Z","name":"Staging ingestion seed","type":"staging"}
+{"active":true,"creationTimestamp":"2025-09-05T19:19:30Z","id":"026c6cf3-cba4-4d68-9806-1e534eebb99d","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:19:30Z","name":"my-seed","type":"staging"}
+{"active":true,"creationTimestamp":"2025-10-31T22:54:05Z","id":"028120a6-1859-47c7-b69a-f417e54b4a4a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:05Z","name":"my-seed-2","type":"staging"}
+{"active":true,"creationTimestamp":"2025-09-05T19:48:00Z","id":"0517a87a-86f7-4a71-bb3f-adfa0c87a269","labels":[],"lastUpdatedTimestamp":"2025-09-05T19:48:00Z","name":"my-seed-3","type":"staging"}
 ```
 
 ```bash
 # Get a seed record by id
 discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","record":{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},"recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","record":{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},"recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
 ```bash
@@ -1410,11 +1421,12 @@ discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --execution 0f
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's seeds. With the data flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's seeds. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery ingestion seed store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -1435,15 +1447,15 @@ Examples:
 ```bash
 # Store a seed with the JSON configuration in a file
 discovery ingestion seed store --file seeds.json
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 {"code":1003,"messages":["Entity not found: 1d81d3d5-58a2-44a5-9acf-3fc8358afe00"],"status":404,"timestamp":"2025-10-31T20:32:39.832877700Z"}
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T20:32:39.855952Z","id":"d818d852-18ac-4059-8f17-37a1b649bbfd","labels":[],"lastUpdatedTimestamp":"2025-10-31T20:32:39.855952Z","name":"Search seed 2","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T20:32:39.855952Z","id":"d818d852-18ac-4059-8f17-37a1b649bbfd","labels":[],"lastUpdatedTimestamp":"2025-10-31T20:32:39.855952Z","name":"my-seed-3","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
 ```bash
 # Store a seed with the JSON configuration in the data flag
-discovery ingestion seed store --data '{"type":"staging","name":"Search seed","labels":[],"active":true,"id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","creationTimestamp":"2025-09-04T15:50:08Z","lastUpdatedTimestamp":"2025-09-04T15:50:08Z","config":{"action":"scroll","bucket":"blogs"},"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"Search seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+discovery ingestion seed store --data '{"type":"staging","name":"my-seed","labels":[],"active":true,"id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","creationTimestamp":"2025-09-04T15:50:08Z","lastUpdatedTimestamp":"2025-09-04T15:50:08Z","config":{"action":"scroll","bucket":"blogs"},"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'
+{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 ```
 
 ###### Delete
@@ -1471,13 +1483,12 @@ discovery ingestion seed delete 04536687-f083-4353-8ecc-b7348e14b748
 
 ```bash
 # Delete a seed by name
-discovery ingestion seed delete "Search seed"
+discovery ingestion seed delete "my-seed"
 {"acknowledged":true}
 ```
 
-
 ###### Start
-`start` is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user can set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
+`start` is the command used to start a seed execution in Discovery Ingestion. With the `properties` flag, the user can set the execution properties with which to run the seed. With the `scan-type` flag, the user can set the scan type of the execution: `FULL` or `INCREMENTAL`.
 
 Usage: `discovery ingestion seed start <arg> [flags]`
 
@@ -1486,6 +1497,7 @@ Arguments:
 (Required, string) The name or UUID of the seed that will be executed.
 
 Flags:
+
 `--properties`::
 (Optional, string) Set the properties of the seed execution.
 
@@ -1508,14 +1520,14 @@ discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
 
 ```bash
 # Start a seed execution with no flags using the seed's name
-discovery ingestion seed start "Search seed"
+discovery ingestion seed start "my-seed"
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ```bash
 # Start a seed execution with the properties and scan-type flags
-discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"testBucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
-{"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"testBucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"my-bucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"my-bucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ###### Halt
@@ -1551,9 +1563,6 @@ discovery ingestion seed halt 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
 discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
 {"acknowledged":true}
 ```
-
-
-
 
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow.
