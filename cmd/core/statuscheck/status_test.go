@@ -18,8 +18,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestNewStatusCommand_ProfileFlagAndUpProduct tests the NewStatusCommand() function when the profile flag is there and the Discovery product returns an "UP" status.
-func TestNewStatusCommand_ProfileFlagAndUpProduct(t *testing.T) {
+// TestNewStatusCommand tests the NewStatusCommand() function.
+func TestNewStatusCommand(t *testing.T) {
 	tests := []struct {
 		name       string
 		response   string
