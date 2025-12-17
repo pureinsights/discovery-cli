@@ -8,7 +8,7 @@ import (
 
 // NewStatusCommand creates the discovery status command that gets the status of every Discovery product.
 func NewStatusCommand(d cli.Discovery) *cobra.Command {
-	export := &cobra.Command{
+	status := &cobra.Command{
 		Use:   "status",
 		Short: "Check if all of Discovery's products are online",
 		Long:  "status is the command used to check the status of every Discovery product. If a product is healthy, it should return a JSON with an \"UP\" status field, which is added to a results JSON that matches the product to the received status response.",
@@ -40,5 +40,5 @@ func NewStatusCommand(d cli.Discovery) *cobra.Command {
 	discovery status`,
 	}
 
-	return export
+	return status
 }
