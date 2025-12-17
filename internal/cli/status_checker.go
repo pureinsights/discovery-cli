@@ -14,7 +14,7 @@ type StatusChecker interface {
 func (d discovery) StatusCheck(client StatusChecker, product string, printer Printer) error {
 	result, err := client.StatusCheck()
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Discovery %s is not online.", product)
+		return NewErrorWithCause(ErrorExitCode, err, "Could not check the status of Discovery %s.", product)
 	}
 
 	if printer == nil {
