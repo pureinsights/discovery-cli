@@ -1928,6 +1928,8 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
+Examples:
+
 ```bash
 # Delete a pipeline by id
 discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
