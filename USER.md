@@ -17,6 +17,7 @@ TODO
 Usage: `discovery [command]`
 
 Flags:
+ 
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -36,6 +37,7 @@ discovery -h
 Usage: `discovery config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -77,6 +79,7 @@ Editing profile "cn". Press Enter to keep the value shown, type a single space t
 Usage: `discovery config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -139,6 +142,7 @@ Staging API Key: "discovery.key.staging.cn"
 Usage: `discovery export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -240,6 +244,7 @@ discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
 Usage: `discovery core [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -252,6 +257,7 @@ Flags:
 Usage: `discovery core config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -281,6 +287,7 @@ Editing profile "default". Press Enter to keep the value shown, type a single sp
 Usage: `discovery core config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -325,6 +332,7 @@ Core API Key: "discovery.key.core.cn"
 Usage: `discovery core export [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -343,8 +351,8 @@ discovery core export -p cn
 ```
 
 ```bash
-# Export the entities to a specific file
-discovery core export --file "entities/core.zip".
+# Export the entities to a specific file.
+discovery core export -p cn --file "entities/core.zip"
 {"acknowledged":true}
 ```
 
@@ -354,6 +362,7 @@ discovery core export --file "entities/core.zip".
 Usage: `discovery core import [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -395,6 +404,7 @@ discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
 Usage: `discovery core label [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -411,6 +421,7 @@ Arguments:
 (Optional, string) The UUID of the label that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -434,11 +445,12 @@ discovery core label get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's labels. With the data flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's labels. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core label store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -467,7 +479,7 @@ discovery core label store --file "labeljsonfile.json"
 ```bash
 # Store a label with the JSON configuration in the data flag
 discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'
-{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label2","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
+{"creationTimestamp":"2025-10-30T00:07:07.244729Z","id":"e7870373-da6d-41af-b5ec-91cfd087ee91","key":"label","lastUpdatedTimestamp":"2025-10-30T00:07:07.244729Z","value":"labelvalue"}
 ```
 
 ###### Delete
@@ -480,6 +492,7 @@ Arguments:
 (Required, string) The UUID of the label that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -500,6 +513,7 @@ discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
 Usage: `discovery core secret [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -516,6 +530,7 @@ Arguments:
 (Optional, string) The UUID of the secret that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -538,11 +553,12 @@ discovery core secret get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's secrets. With the data flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's secrets. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core secret store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -570,8 +586,8 @@ discovery core secret store --file "secretjsonfile.json"
 
 ```bash
 # Store a secret with the JSON configuration in the data flag
-discovery core secret store --data  '{"name":"openai-secret-test","active":true,"id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","content":{"apiKey":"apiKey"}}'
-{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:43:52.496829Z","name":"openai-secret"}
+discovery core secret store --data  '{"name":"my-secret","active":true,"id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","content":{"apiKey":"apiKey"}}'
+{"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:43:52.496829Z","name":"my-secret"}
 ```
 
 ###### Delete
@@ -584,6 +600,7 @@ Arguments:
 (Required, string) The UUID of the secret that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -604,6 +621,7 @@ discovery core secret delete 3d51beef-8b90-40aa-84b5-033241dc6239
 Usage: `discovery core credential [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -620,6 +638,7 @@ Arguments:
 (Optional, string) The name or UUID of the credential that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -642,14 +661,14 @@ discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
 ```bash
 # Get credential by name
 discovery core credential get "my-credential"
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-11-20T00:08:14Z","id":"9be0e625-a510-46c5-8130-438823f849c2","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:14Z","name":"my-credential","secret":"my-secret","type":"openai"}
 ```
 
 ```bash
 # Get credentials using filters
 discovery core credential get --filter label=A:A --filter type=mongo
 {"active":true,"creationTimestamp":"2025-10-17T15:33:58Z","id":"8c243a1d-9384-421d-8f99-4ef28d4e0ab0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T15:33:58Z","name":"my-credential","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"mongo-credential-2","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"my-credential-2","type":"mongo"}
 ```
 
 ```bash
@@ -660,11 +679,12 @@ discovery core credential get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's credentials. With the data flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's credentials. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core credential store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -685,15 +705,15 @@ Examples:
 ```bash
 # Store a credential with the JSON configuration in a file
 discovery core credential store --file "credentialjsonfile.json"
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"mongo-secret","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"my-secret","type":"mongo"}
 {"code":1003,"messages":["Entity not found: 3b32e410-2f33-412d-9fb8-17970131921d"],"status":404,"timestamp":"2025-10-30T16:50:38.250661200Z"}
-{"active":true,"creationTimestamp":"2025-10-30T16:50:38.262086Z","id":"5b76ae0d-f383-47e5-be6f-90e9046092cd","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-30T16:50:38.262086Z","name":"my-credential-2","secret":"mongo-secret","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-10-30T16:50:38.262086Z","id":"5b76ae0d-f383-47e5-be6f-90e9046092cd","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-30T16:50:38.262086Z","name":"my-credential-2","secret":"my-secret","type":"mongo"}
 ```
 
 ```bash
 # Store a credential with the JSON configuration in the data flag
-discovery core credential store --data '{"type":"mongo","name":"my-credential-1","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"mongo-secret"}'
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"mongo-secret","type":"mongo"}
+discovery core credential store --data '{"type":"mongo","name":"my-credential","labels":[{"key":"A","value":"A"}],"active":true,"id":"3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp":"2025-10-17T22:37:57Z","lastUpdatedTimestamp":"2025-10-17T22:37:57Z","secret":"my-secret"}'
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","secret":"my-secret","type":"mongo"}
 ```
 
 ###### Delete
@@ -706,6 +726,7 @@ Arguments:
 (Required, string) The name or UUID of the credential that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -720,7 +741,7 @@ discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
 
 ```bash
 # Delete a credential by name
-discovery core credential delete credential1
+discovery core credential delete my-credential
 {"acknowledged":true}
 ```
 
@@ -730,6 +751,7 @@ discovery core credential delete credential1
 Usage: `discovery core server [subcommand] [flags]
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -746,6 +768,7 @@ Arguments:
 (Optional, string) The name or UUID of the server that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -762,20 +785,20 @@ Examples:
 ```bash
 # Get a server by id
 discovery core server get 21029da3-041c-43b5-a67e-870251f2f6a6
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"my-server","type":"mongo"}
 ```
 
 ```bash
 # Get server by name
-discovery core server get "MongoDB Atlas server"
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
+discovery core server get "my-server"
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"my-server","type":"mongo"}
 ```
 
 ```bash
 # Get servers using filters
 discovery core server get --filter label=A:A -f type=mongo
-{"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"MongoDB Atlas server","type":"mongo"}
-{"active":true,"creationTimestamp":"2025-09-29T15:50:21Z","id":"a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:21Z","name":"MongoDB Atlas server 2","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"my-server","type":"mongo"}
+{"active":true,"creationTimestamp":"2025-09-29T15:50:21Z","id":"a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:21Z","name":"my-server-2","type":"mongo"}
 ```
 
 ```bash
@@ -786,11 +809,12 @@ discovery core server get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's servers. With the data flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
 
 Usage: `discovery core server store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -811,15 +835,15 @@ Examples:
 ```bash
 # Store a server with the JSON configuration in a file
 discovery core server store --file "serverjsonfile.json"
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server","type":"mongo"}       
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"my-server","type":"mongo"}       
 {"code":1003,"messages":["Entity not found: 2b839453-ddad-4ced-8e13-2c7860af60a8"],"status":404,"timestamp":"2025-10-30T17:45:48.176913700Z"}
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-10-30T17:45:48.184774Z","id":"152e1175-e54d-4de6-90b9-388d45f8256e","labels":[],"lastUpdatedTimestamp":"2025-10-30T17:45:48.184774Z","name":"MongoDB Atlas server 2","type":"mongo"}
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-10-30T17:45:48.184774Z","id":"152e1175-e54d-4de6-90b9-388d45f8256e","labels":[],"lastUpdatedTimestamp":"2025-10-30T17:45:48.184774Z","name":"my-server-2","type":"mongo"}
 ```
 
 ```bash
 # Store a server with the JSON configuration in the data flag
-discovery core server store --data '{"type":"mongo","name":"MongoDB Atlas server","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.dleud.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"MongoDB Atlas server","type":"mongo"}
+discovery core server store --data '{"type":"mongo","name":"my-server","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.dleud.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"my-server","type":"mongo"}
 ```
 
 ###### Delete
@@ -832,6 +856,7 @@ Arguments:
 (Required, string) The name or UUID of the server that will be deleted.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -846,7 +871,7 @@ discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
 
 ```bash
 # Delete a server by name
-discovery core server delete server1
+discovery core server delete my-server
 {"acknowledged":true}
 ```
 
