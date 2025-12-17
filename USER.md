@@ -1591,6 +1591,29 @@ discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f
 {"acknowledged":true}
 ```
 
+##### Status
+`status` is the command used to check the status of Discovery Ingestion. If it is healthy, it should return a JSON with an "UP" status field.
+
+Usage: `discovery ingestion status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of Discovery Ingestion using the profile "cn"
+discovery ingestion status -p cn
+{
+  "status": "UP"
+}
+```
+
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow.
 

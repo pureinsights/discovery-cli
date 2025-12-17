@@ -1679,6 +1679,15 @@ func Test_ingestion_BackupRestore(t *testing.T) {
 	assert.Equal(t, i.Url, bc.client.client.BaseURL)
 }
 
+// Test_ingestion_StatusChecker tests the ingestion.StatusChecker() function.
+func Test_ingestion_StatusChecker(t *testing.T) {
+	i := NewIngestion("http://localhost:12030", "Api Key")
+	bc := i.StatusChecker()
+
+	assert.Equal(t, i.ApiKey, bc.ApiKey)
+	assert.Equal(t, "http://localhost:12030", bc.client.client.BaseURL)
+}
+
 // Test_NewIngestion tests the ingestion constructor.
 func Test_NewIngestion(t *testing.T) {
 	i := NewIngestion("http://localhost:12030", "Api Key")
