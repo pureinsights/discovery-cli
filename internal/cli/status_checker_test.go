@@ -126,27 +126,34 @@ func Test_discovery_StatusCheckOfClients(t *testing.T) {
 		err            error
 	}{
 		// Working cases
-		// {
-		// 	name:           "StatusCheckOfClients correctly prints with the pretty printer when one of the status checks fails",
-		// 	clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
-		// 	printer:        nil,
-		// 	expectedOutput: "",
-		// 	err:            nil,
-		// },
-		// {
-		// 	name:           "StatusCheckOfClients correctly prints the results with the ugly printer when one of the status checks fails",
-		// 	clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(WorkingStatusChecker)}, {Name: "queryflow", Client: new(FailingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
-		// 	printer:        JsonObjectPrinter(false),
-		// 	expectedOutput: "",
-		// 	err:            nil,
-		// },
-		// Error cases
 		{
-			name:           "A working status has an invalid field name.",
-			clients:        []StatusCheckClientEntry{{Name: "core.test.field", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
+			name:           "StatusCheckOfClients correctly prints with the pretty printer when one of the status checks fails",
+			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
 			printer:        nil,
 			expectedOutput: "",
 			err:            nil,
+		},
+		{
+			name:           "StatusCheckOfClients correctly prints the results with the ugly printer when one of the status checks fails",
+			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(WorkingStatusChecker)}, {Name: "queryflow", Client: new(FailingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "",
+			err:            nil,
+		},
+		// Error cases
+		{
+			name:           "A working status has an invalid field name.",
+			clients:        []StatusCheckClientEntry{{Name: "", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
+			printer:        nil,
+			expectedOutput: "",
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("path cannot be empty"), "Could not get the status of the Discovery products"),
+		},
+		{
+			name:           "A failing status has an invalid field name.",
+			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
+			printer:        nil,
+			expectedOutput: "",
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("path cannot be empty"), "Could not get the status of the Discovery products"),
 		},
 		{
 			name:      "Printing fails",
