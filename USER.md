@@ -876,13 +876,9 @@ discovery core server delete my-server
 ```
 
 ##### Status
-`status` is the command used to check the status of Discovery Core. If it is healthy, it should return a JSON with an \"UP\" status field.
+`status` is the command used to check the status of Discovery Core. If it is healthy, it should return a JSON with an "UP" status field.
 
-Usage: `discovery core server delete [flags] <arg>`
-
-Arguments:
-`arg`::
-(Required, string) The name or UUID of the server that will be deleted.
+Usage: `discovery core status`
 
 Flags:
 
