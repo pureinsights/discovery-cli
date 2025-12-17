@@ -114,3 +114,75 @@ func Test_discovery_StatusCheck(t *testing.T) {
 		})
 	}
 }
+
+// Test_discovery_StatusCheckOfClients tests the discoveryStatusCheckOfClients() function.
+func Test_discovery_StatusCheckOfClients(t *testing.T) {
+	tests := []struct {
+		name           string
+		clients        []StatusCheckClientEntry
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working cases
+		// {
+		// 	name:           "StatusCheckOfClients correctly prints with the pretty printer when one of the status checks fails",
+		// 	clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
+		// 	printer:        nil,
+		// 	expectedOutput: "",
+		// 	err:            nil,
+		// },
+		// {
+		// 	name:           "StatusCheckOfClients correctly prints the results with the ugly printer when one of the status checks fails",
+		// 	clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(WorkingStatusChecker)}, {Name: "queryflow", Client: new(FailingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
+		// 	printer:        JsonObjectPrinter(false),
+		// 	expectedOutput: "",
+		// 	err:            nil,
+		// },
+		// Error cases
+		{
+			name:           "A working status has an invalid field name.",
+			clients:        []StatusCheckClientEntry{{Name: "core.test.field", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
+			printer:        nil,
+			expectedOutput: "",
+			err:            nil,
+		},
+		{
+			name:      "Printing fails",
+			clients:   []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.StatusCheckOfClients(tc.clients, tc.printer)
+
+			if tc.err != nil {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
