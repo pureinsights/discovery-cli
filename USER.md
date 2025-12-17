@@ -1992,6 +1992,7 @@ discovery queryflow endpoint delete endpoint1
 Usage: `discovery staging [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -2004,6 +2005,7 @@ Flags:
 Usage: `discovery staging config [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -2033,6 +2035,7 @@ Editing profile "default". Press Enter to keep the value shown, type a single sp
 Usage: `discovery staging config get [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
