@@ -875,6 +875,33 @@ discovery core server delete my-server
 {"acknowledged":true}
 ```
 
+##### Status
+`status` is the command used to check the status of Discovery Core. If it is healthy, it should return a JSON with an \"UP\" status field.
+
+Usage: `discovery core server delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the server that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of Discovery Core using the profile "cn"
+discovery core status -p cn
+{
+  "status": "UP"
+}
+```
+
 #### Ingestion
 `ingestion` is the main command used to interact with Discovery's Ingestion. 
 
