@@ -476,6 +476,15 @@ func Test_queryFlow_Debug(t *testing.T) {
 	}
 }
 
+// Test_queryFlow_StatusChecker tests the queryFlow.StatusChecker() function.
+func Test_queryFlow_StatusChecker(t *testing.T) {
+	q := NewQueryFlow("http://localhost:12040", "Api Key")
+	bc := q.StatusChecker()
+
+	assert.Equal(t, q.ApiKey, bc.ApiKey)
+	assert.Equal(t, "http://localhost:12040", bc.client.client.BaseURL)
+}
+
 // Test_NewQueryFlow tests the QueryFlow constructor.
 func Test_NewQueryFlow(t *testing.T) {
 	i := NewQueryFlow("http://localhost:12040", "Api Key")
