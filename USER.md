@@ -2142,3 +2142,26 @@ Showing the configuration of profile "cn":
 Staging URL: "https://discovery.staging.cn"
 Staging API Key: "discovery.key.staging.cn"
 ```
+
+##### Status
+`status` is the command used to check the status of Discovery Staging. If it is healthy, it should return a JSON with an "UP" status field.
+
+Usage: `discovery staging status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of Discovery Staging using the profile "cn"
+discovery staging status -p cn
+{
+  "status": "UP"
+}
+```
