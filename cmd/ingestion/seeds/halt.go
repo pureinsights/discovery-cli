@@ -34,9 +34,11 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 				return d.HaltSeed(ingestionClient.Seeds(), args[0], printer)
 			}
 
-			if executionId, err := uuid.Parse(execution); err == nil {
+			executionId, err := uuid.Parse(execution)
+			if err == nil {
 				seedsClient := ingestionClient.Seeds()
-				if seedId, err := cli.GetSeedId(d, seedsClient, args[0]); err == nil {
+				seedId, err := cli.GetSeedId(d, seedsClient, args[0])
+				if err == nil {
 					return d.HaltSeedExecution(seedsClient.Executions(seedId), executionId, printer)
 				}
 			}

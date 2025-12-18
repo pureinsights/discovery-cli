@@ -1,1 +1,12 @@
-{"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"status: 401, body: {\"error\":\"unauthorized\"}\n"},"queryflow":{"acknowledged":true}}
+{
+  "core": {
+    "acknowledged": true
+  },
+  "ingestion": {
+    "acknowledged": false,
+    "error": "status: 401, body: {\"error\":\"unauthorized\"}\n"
+  },
+  "queryflow": {
+    "acknowledged": true
+  }
+}
