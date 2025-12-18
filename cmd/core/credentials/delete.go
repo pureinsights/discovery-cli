@@ -27,6 +27,11 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchDeleteCommand(args[0], d, coreClient.Credentials(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.ExactArgs(1),
+		Example: `	# Delete a credential by id
+	discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
+
+	# Delete a credential by name
+	discovery core credential delete my-credential`,
 	}
 	return get
 }
