@@ -896,7 +896,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-Examples:
+Example:
 
 ```bash
 # Ping a server by name
