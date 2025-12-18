@@ -9,7 +9,7 @@ Examples:
 	discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
 
 Flags:
-  -e, --execution string   The UUID of the execution that will be halted.
+  -e, --execution string   the UUID of the execution that will be halted
   -h, --help               help for halt
   -p, --profile string     configuration profile to use (default "default")
 

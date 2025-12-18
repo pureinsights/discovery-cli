@@ -1,8 +1,18 @@
 Usage:
   get [flags]
 
+Examples:
+	# Get pipeline by name
+	discovery ingestion pipeline get "my-pipeline"
+
+	# Get pipelines using filters
+	discovery ingestion pipeline get --filter label=A:A
+
+	# Get all pipelines using the configuration in profile "cn"
+	discovery ingestion pipeline get -p cn
+
 Flags:
-  -f, --filter stringArray   Apply filters in the format "filter=key:value". The available filter is:
+  -f, --filter stringArray   apply filters in the format "filter=key:value". The available filter is:
                              - Label: The format is label={key}[:{value}], where the value is optional.
   -h, --help                 help for get
   -p, --profile string       configuration profile to use (default "default")

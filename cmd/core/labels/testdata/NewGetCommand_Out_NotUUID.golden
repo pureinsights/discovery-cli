@@ -1,6 +1,13 @@
 Usage:
   get [flags]
 
+Examples:
+	# Get a label by id
+	discovery core label get 3d51beef-8b90-40aa-84b5-033241dc6239
+	
+	# Get all labels using the configuration in profile "cn"
+	discovery core label get -p cn
+
 Flags:
   -h, --help             help for get
   -p, --profile string   configuration profile to use (default "default")

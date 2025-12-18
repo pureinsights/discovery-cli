@@ -31,7 +31,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	discovery ingestion seed delete 04536687-f083-4353-8ecc-b7348e14b748
 
 	# Delete a seed by name
-	discovery ingestion seed delete "Search seed"`,
+	discovery ingestion seed delete "my-seed"`,
 	}
 	return get
 }

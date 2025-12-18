@@ -53,7 +53,7 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 	discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36`,
 	}
 
-	halt.Flags().StringVarP(&execution, "execution", "e", "", "The UUID of the execution that will be halted.")
+	halt.Flags().StringVarP(&execution, "execution", "e", "", "the UUID of the execution that will be halted")
 
 	return halt
 }
