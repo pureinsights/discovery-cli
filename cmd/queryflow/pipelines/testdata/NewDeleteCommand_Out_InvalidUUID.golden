@@ -1,5 +1,5 @@
 Usage:
-  delete [flags]
+  delete <pipeline> [flags]
 
 Examples:
 	# Delete a pipeline by id
