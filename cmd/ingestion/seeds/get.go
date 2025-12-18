@@ -67,7 +67,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		details     bool
 	)
 	get := &cobra.Command{
-		Use:   "get",
+		Use:   "get [seed]",
 		Short: "The command that obtains seeds from Discovery Ingestion.",
 		Long:  fmt.Sprintf(commands.LongGetSearch, "seed", "Ingestion") + " The get command can also get records from the seed with the --record flag. Finally, the get command can retrieve a seed execution using the --execution flag. When combined with the --details flag, it provides more detailed information about the execution.",
 		RunE: func(cmd *cobra.Command, args []string) error {

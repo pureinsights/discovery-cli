@@ -1,5 +1,5 @@
 Usage:
-  delete [flags]
+  delete <endpoint> [flags]
 
 Examples:
 	# Delete a endpoint by id

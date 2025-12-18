@@ -1,5 +1,5 @@
 Usage:
-  halt [flags]
+  halt <seed> [flags]
 
 Examples:
 	# Halt all active seed executions

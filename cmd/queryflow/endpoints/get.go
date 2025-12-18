@@ -13,7 +13,7 @@ import (
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var filters []string
 	get := &cobra.Command{
-		Use:   "get",
+		Use:   "get [endpoint]",
 		Short: "The command that obtains endpoints from Discovery QueryFlow.",
 		Long:  fmt.Sprintf(commands.LongGetSearch, "endpoint", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {

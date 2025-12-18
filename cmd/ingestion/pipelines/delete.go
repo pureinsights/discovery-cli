@@ -12,7 +12,7 @@ import (
 // NewDeleteCommand creates the pipeline delete command.
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete <pipeline>",
 		Short: "The command that deletes pipelines from Discovery Ingestion.",
 		Long:  fmt.Sprintf(commands.LongDeleteNoNames, "pipeline", "Ingestion"),
 		RunE: func(cmd *cobra.Command, args []string) error {
