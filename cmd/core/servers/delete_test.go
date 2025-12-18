@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestNewDeleteCommand tests the NewDeleteCommand function.
+// TestNewDeleteCommand tests the NewDeleteCommand() function.
 func TestNewDeleteCommand(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -35,7 +35,7 @@ func TestNewDeleteCommand(t *testing.T) {
 		// Working case
 		{
 			name:      "Delete by ID returns an acknowledged true",
-			args:      []string{"my-server"},
+			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
@@ -44,26 +44,9 @@ func TestNewDeleteCommand(t *testing.T) {
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/server/search": {
-					StatusCode: http.StatusOK,
+					StatusCode: http.StatusNoContent,
 					Body: `{
-			"content": [
-				{
-				"source": {
-					"type": "mongo",
-					"name": "my-server",
-					"labels": [
-					{
-						"key": "A",
-						"value": "A"
-					}
-					],
-					"active": true,
-					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
-					"creationTimestamp": "2025-10-17T22:37:57Z",
-					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
-				},
-				"highlight": {}
-			],
+			"content": [],
 			"pageable": {
 				"page": 0,
 				"size": 25,
@@ -125,9 +108,9 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:      []string{"my-server"},
 			url:       true,
 			apiKey:    "apiKey123",
-			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
-			errGolden: "NewDeleteCommand_Err_DeleteByIdReturnsObject",
-			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
+			outGolden: "NewDeleteCommand_Out_DeleteByNameReturnsObject",
+			errGolden: "NewDeleteCommand_Err_DeleteByNameReturnsObject",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByNameReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/server/search": {
