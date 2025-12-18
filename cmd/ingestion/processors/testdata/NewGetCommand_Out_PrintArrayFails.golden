@@ -14,13 +14,8 @@ Examples:
 
 Flags:
   -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
-<<<<<<< HEAD
                              - Label: The format is label={key}[:{value}], where the value is optional
                              - Type: The format is type={type}
-=======
-                             - Label: The format is label={key}[:{value}], where the value is optional.
-                             - Type: The format is type={type}.
->>>>>>> origin/feature/PDP-3415
   -h, --help                 help for get
   -p, --profile string       configuration profile to use (default "default")
 
