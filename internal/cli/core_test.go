@@ -19,7 +19,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// WorkingServerPinger simulates when a server was correctly pinged.
+// WorkingServerPinger simulates when a ping to a server worked.
 type WorkingServerPinger struct {
 	mock.Mock
 }
@@ -225,7 +225,7 @@ func Test_discovery_PingServer(t *testing.T) {
 			name:           "StartSeed correctly prints the received object with the pretty printer",
 			client:         new(WorkingServerPinger),
 			printer:        nil,
-			expectedOutput: "{\n  \"creationTimestamp\": \"2025-09-04T19:29:41.119013Z\",\n  \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n  \"lastUpdatedTimestamp\": \"2025-09-04T19:29:41.119013Z\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"scanType\": \"INCREMENTAL\",\n  \"status\": \"CREATED\",\n  \"triggerType\": \"MANUAL\"\n}\n",
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
 			err:            nil,
 		},
 		{
@@ -242,21 +242,31 @@ func Test_discovery_PingServer(t *testing.T) {
 			client:         new(FailingServerPingerServerNotFound),
 			printer:        nil,
 			expectedOutput: "",
-			err:            NewErrorWithCause(ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not get seed ID to start execution."),
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Server not found: 21029da3-041c-43b5-a67e-870251f2f6a6"
+			],
+			"timestamp": "2025-10-16T00:15:31.888410500Z"
+		}`),
+			}, "Could not get server ID."),
 		},
 		{
-			name:           "Start fails because of conflict",
+			name:           "Ping fails",
 			client:         new(FailingServerPingerPingFailed),
 			printer:        nil,
 			expectedOutput: "",
-			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
-			"status": 409,
-			"code": 4001,
-			"messages": [
-				"The seed has 1 executions: 0c309dbb-0402-4710-8659-2c75f5d649b6"
-			],
-			"timestamp": "2025-09-04T20:17:00.116546400Z"
-			}`)}, "Could not start seed execution for seed with id \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\""),
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnprocessableEntity, Body: gjson.Parse(`{
+	"status": 422,
+	"code": 4001,
+	"messages": [
+		"Client of type openai cannot be validated."
+	],
+	"timestamp": "2025-10-23T22:35:38.345647200Z"
+	}`)}, "Could not ping server with id \"21029da3-041c-43b5-a67e-870251f2f6a6\""),
 		},
 		{
 			name:      "Printing fails",

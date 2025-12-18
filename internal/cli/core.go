@@ -24,11 +24,8 @@ func (d discovery) PingServer(client ServerPinger, server string, printer Printe
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), pingResult)
-	} else {
-		err = printer(*d.IOStreams(), pingResult)
+		printer = JsonObjectPrinter(true)
 	}
 
-	return err
+	return printer(*d.IOStreams(), pingResult)
 }

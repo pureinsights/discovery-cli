@@ -435,7 +435,6 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
 			if tc.url {
 				vpr.Set("default.ingestion_url", srv.URL)
 			}
@@ -500,7 +499,7 @@ func TestNewStartCommand_NoProfileFlag(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "json")
+	vpr.Set("output", "pretty-json")
 
 	vpr.Set("default.ingestion_url", "test")
 	vpr.Set("default.ingestion_key", "test")
