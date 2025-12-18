@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestNewDeleteCommand tests the NewDeleteCommand function.
+// TestNewDeleteCommand tests the NewDeleteCommand() function.
 func TestNewDeleteCommand(t *testing.T) {
 	tests := []struct {
 		name      string
