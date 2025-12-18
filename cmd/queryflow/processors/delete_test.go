@@ -44,7 +44,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/processor/search": {
-					StatusCode: http.StatusOK,
+					StatusCode: http.StatusNoContent,
 					Body: `{
 			"content": [],
 			"pageable": {
