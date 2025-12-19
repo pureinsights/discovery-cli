@@ -3,7 +3,6 @@ package discovery
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/tidwall/gjson"
 )
@@ -137,14 +136,14 @@ func (b bucketsClient) Purge(bucket string) (gjson.Result, error) {
 }
 
 // CreateIndex adds an index with the given name and configuration to a bucket.
-func (b bucketsClient) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
-	var parts []string
-	for _, r := range config {
-		parts = append(parts, r.Raw)
-	}
-	jsonArray := "[" + strings.Join(parts, ",") + "]"
+func (b bucketsClient) CreateIndex(bucket, index string, config gjson.Result) (gjson.Result, error) {
+	// var parts []string
+	// for _, r := range config {
+	// 	parts = append(parts, r.Raw)
+	// }
+	// jsonArray := "[" + strings.Join(parts, ",") + "]"
 
-	return execute(b.client, http.MethodPut, "/"+bucket+"/index/"+index, WithJSONBody(jsonArray))
+	return execute(b.client, http.MethodPut, "/"+bucket+"/index/"+index, WithJSONBody(config.Raw))
 }
 
 // DeleteIndex removes the index of a bucket.
