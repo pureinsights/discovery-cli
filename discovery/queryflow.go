@@ -95,7 +95,7 @@ func (q queryFlow) Processors() queryFlowProcessorsClient {
 	return newQueryFlowProcessorsClient(q.Url, q.ApiKey)
 }
 
-// Pipelines is used to create a queryFlowPipelinesClient
+// Pipelines is used to create a queryFlowPipelinesClient.
 func (q queryFlow) Pipelines() queryFlowPipelinesClient {
 	return newQueryFlowPipelinesClient(q.Url, q.ApiKey)
 }

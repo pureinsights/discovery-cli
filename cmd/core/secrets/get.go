@@ -27,6 +27,11 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.GetCommand(args, d, coreClient.Secrets(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
 		Args: cobra.MaximumNArgs(1),
+		Example: `	# Get a secret by id
+	discovery core secret get 81ca1ac6-3058-4ecd-a292-e439827a675a
+
+	# Get all secrets using the configuration in profile "cn"
+	discovery core secret get -p cn`,
 	}
 	return get
 }
