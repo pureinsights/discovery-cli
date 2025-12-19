@@ -1,6 +1,7 @@
 package staging
 
 import (
+	"github.com/pureinsights/discovery-cli/cmd/staging/buckets"
 	"github.com/pureinsights/discovery-cli/cmd/staging/config"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
@@ -14,6 +15,7 @@ func NewStagingCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	staging.AddCommand(config.NewConfigCommand(d))
+	staging.AddCommand(buckets.NewBucketCommand(d))
 
 	return staging
 }

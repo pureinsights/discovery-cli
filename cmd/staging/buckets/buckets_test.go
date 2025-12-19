@@ -1,8 +1,7 @@
-package staging
+package buckets
 
 import (
 	"bytes"
-	"flag"
 	"slices"
 	"strings"
 	"testing"
@@ -13,10 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var Update = flag.Bool("update", false, "rewrite golden files")
-
-// TestNewStagingCommand tests the NewStagingCommand() function.
-func TestNewStagingCommand(t *testing.T) {
+// TestNewBucketCommand tests the NewBucketCommand() function.
+func TestNewBucketCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -30,13 +27,13 @@ func TestNewStagingCommand(t *testing.T) {
 	vpr := viper.New()
 	vpr.SetDefault("profile", "default")
 	d := cli.NewDiscovery(&ios, vpr, dir)
-	stagingCmd := NewStagingCommand(d)
+	coreCmd := NewBucketCommand(d)
 
-	stagingCmd.SetIn(ios.In)
-	stagingCmd.SetOut(ios.Out)
-	stagingCmd.SetErr(ios.Err)
+	coreCmd.SetIn(ios.In)
+	coreCmd.SetOut(ios.Out)
+	coreCmd.SetErr(ios.Err)
 
-	stagingCmd.PersistentFlags().StringP(
+	coreCmd.PersistentFlags().StringP(
 		"profile",
 		"p",
 		d.Config().GetString("profile"),
@@ -44,12 +41,12 @@ func TestNewStagingCommand(t *testing.T) {
 	)
 
 	var commandNames []string
-	for _, c := range stagingCmd.Commands() {
+	for _, c := range coreCmd.Commands() {
 		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
 			commandNames = append(commandNames, c.Name())
 		}
 	}
 
-	expectedCommands := []string{"bucket", "config"}
+	expectedCommands := []string{"store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
