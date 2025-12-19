@@ -11,9 +11,27 @@ import (
 // StagingBucketController defines the methods to interact with buckets.
 type StagingBucketController interface {
 	Create(bucket string, options gjson.Result) (gjson.Result, error)
-	Get(bucket string) (gjson.Result, error)
-	Delete(bucket string) (gjson.Result, error)
 	CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error)
+}
+
+// updateIndices updates the indices a bucket that already has been created with the new configuration.
+// It returns a JSON with an "indices" field that has the acknowledgements of the index updates.
+func updateIndices(client StagingBucketController, bucketName string, indices []gjson.Result) (gjson.Result, error) {
+	indexResults := "{}"
+	for _, index := range indices {
+		indexName := index.Get("name").String()
+
+		indexAck, err := client.CreateIndex(bucketName, indexName, index.Get("fields").Array())
+		if err != nil {
+			indexResults, err = sjson.Set(indexResults, "indices."+indexName, err.Error())
+		} else {
+			indexResults, err = sjson.SetRaw(indexResults, "indices."+indexName, indexAck.Raw)
+		}
+		if err != nil {
+			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
+		}
+	}
+	return gjson.Parse(indexResults), nil
 }
 
 // StoreBucket creates or updates a bucket if it exists. It receives an options parameter that contains the configuration of the bucket.
@@ -29,29 +47,16 @@ func (d discovery) StoreBucket(client StagingBucketController, bucketName string
 			return NewErrorWithCause(ErrorExitCode, err, "Could not create bucket with name %q.", bucketName)
 		}
 
-		indexResults := "{}"
-		indices := options.Get("indices").Array()
-		for _, index := range indices {
-			indexName := index.Get("name").String()
-			indexConfig := []gjson.Result{}
-			for _, field := range index.Get("fields").Array() {
-				fieldJson, err := sjson.Set("{}", field.Get("key").String(), field.Get("value").String())
-				if err != nil {
-					return NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
-				}
-				indexConfig = append(indexConfig, gjson.Parse(fieldJson))
-			}
-			indexAck, err := client.CreateIndex(bucketName, indexName, indexConfig)
+		if options.Get("indices").Exists() {
+			indices := options.Get("indices").Array()
+			indexResults, err := updateIndices(client, bucketName, indices)
 			if err != nil {
-				return NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
+				return err
 			}
-			indexResults, err = sjson.SetRaw(indexResults, indexName, indexAck.Raw)
-			if err != nil {
-				return NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
-			}
+			result = indexResults
+		} else {
+			return NewErrorWithCause(ErrorExitCode, err, "Could not create bucket with name %q.", bucketName)
 		}
-
-		result = gjson.Parse(indexResults)
 	}
 
 	if printer == nil {
