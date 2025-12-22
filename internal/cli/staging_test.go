@@ -28,6 +28,33 @@ func (s *WorkingStagingBucketControllerNoConflict) Create(string, gjson.Result) 
 }`), nil
 }
 
+func (s *WorkingStagingBucketControllerNoConflict) Get(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "name": "test",
+  "documentCount": {},
+  "indices": [
+    {
+      "name": "index",
+      "fields": [
+        {
+          "fieldName": "DESC"
+        }
+      ],
+      "unique": false
+    },
+    {
+      "name": "index2",
+      "fields": [
+        {
+          "my-field": "DESC"
+        }
+      ],
+      "unique": false
+    }
+  ]
+}`), nil
+}
+
 func (s *WorkingStagingBucketControllerNoConflict) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
@@ -46,6 +73,33 @@ func (s *WorkingStagingBucketControllerNameConflict) Create(string, gjson.Result
 }`), discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
   "acknowledged": false
 }`)}
+}
+
+func (s *WorkingStagingBucketControllerNameConflict) Get(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "name": "test",
+  "documentCount": {},
+  "indices": [
+    {
+      "name": "index",
+      "fields": [
+        {
+          "fieldName": "DESC"
+        }
+      ],
+      "unique": false
+    },
+    {
+      "name": "index2",
+      "fields": [
+        {
+          "my-field": "DESC"
+        }
+      ],
+      "unique": false
+    }
+  ]
+}`), nil
 }
 
 func (s *WorkingStagingBucketControllerNameConflict) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
@@ -70,6 +124,33 @@ func (s *FailingStagingBucketControllerNotDiscoveryError) Create(string, gjson.R
 }`), errors.New("different error")
 }
 
+func (s *FailingStagingBucketControllerNotDiscoveryError) Get(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "name": "test",
+  "documentCount": {},
+  "indices": [
+    {
+      "name": "index",
+      "fields": [
+        {
+          "fieldName": "DESC"
+        }
+      ],
+      "unique": false
+    },
+    {
+      "name": "index2",
+      "fields": [
+        {
+          "my-field": "DESC"
+        }
+      ],
+      "unique": false
+    }
+  ]
+}`), nil
+}
+
 func (s *FailingStagingBucketControllerNotDiscoveryError) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
@@ -92,6 +173,33 @@ func (s *FailingStagingBucketControllerNotFoundError) Create(string, gjson.Resul
 }`)}
 }
 
+func (s *FailingStagingBucketControllerNotFoundError) Get(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "name": "test",
+  "documentCount": {},
+  "indices": [
+    {
+      "name": "index",
+      "fields": [
+        {
+          "fieldName": "DESC"
+        }
+      ],
+      "unique": false
+    },
+    {
+      "name": "index2",
+      "fields": [
+        {
+          "my-field": "DESC"
+        }
+      ],
+      "unique": false
+    }
+  ]
+}`), nil
+}
+
 func (s *FailingStagingBucketControllerNotFoundError) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
@@ -112,6 +220,33 @@ func (s *FailingStagingBucketControllerIndexCreationFails) Create(string, gjson.
 }`), discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
   "acknowledged": false
 }`)}
+}
+
+func (s *FailingStagingBucketControllerIndexCreationFails) Get(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "name": "test",
+  "documentCount": {},
+  "indices": [
+    {
+      "name": "index",
+      "fields": [
+        {
+          "fieldName": "DESC"
+        }
+      ],
+      "unique": false
+    },
+    {
+      "name": "index2",
+      "fields": [
+        {
+          "my-field": "DESC"
+        }
+      ],
+      "unique": false
+    }
+  ]
+}`), nil
 }
 
 func (s *FailingStagingBucketControllerIndexCreationFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
