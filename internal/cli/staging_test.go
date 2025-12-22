@@ -32,6 +32,10 @@ func (s *WorkingStagingBucketControllerNoConflict) CreateIndex(bucket, index str
 	return gjson.Result{}, nil
 }
 
+func (s *WorkingStagingBucketControllerNoConflict) DeleteIndex(bucket, index string) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
 type WorkingStagingBucketControllerNameConflict struct {
 	mock.Mock
 }
@@ -45,6 +49,12 @@ func (s *WorkingStagingBucketControllerNameConflict) Create(string, gjson.Result
 }
 
 func (s *WorkingStagingBucketControllerNameConflict) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
+}
+
+func (s *WorkingStagingBucketControllerNameConflict) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
@@ -66,6 +76,10 @@ func (s *FailingStagingBucketControllerNotDiscoveryError) CreateIndex(bucket, in
 }`), nil
 }
 
+func (s *FailingStagingBucketControllerNotDiscoveryError) DeleteIndex(bucket, index string) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
 type FailingStagingBucketControllerNotFoundError struct {
 	mock.Mock
 }
@@ -82,6 +96,10 @@ func (s *FailingStagingBucketControllerNotFoundError) CreateIndex(bucket, index 
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
+}
+
+func (s *FailingStagingBucketControllerNotFoundError) DeleteIndex(bucket, index string) (gjson.Result, error) {
+	return gjson.Result{}, nil
 }
 
 type FailingStagingBucketControllerIndexCreationFails struct {
@@ -102,6 +120,12 @@ func (s *FailingStagingBucketControllerIndexCreationFails) CreateIndex(bucket, i
 }`), discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
   "acknowledged": false
 }`)}
+}
+
+func (s *FailingStagingBucketControllerIndexCreationFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
 }
 
 // Test_updateIndices tests the updateIndices() function.
