@@ -41,32 +41,42 @@ func updateIndices(client StagingBucketController, bucketName string, oldIndices
 	return nil
 }
 
+// callUpdateIndices is an auxiliary function to reduce the complexity of StoreBucket().
+func callUpdateIndices(client StagingBucketController, bucketName string, options gjson.Result) error {
+	bucketInfo, err := client.Get(bucketName)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get bucket with name %q to update it.", bucketName)
+	}
+	oldIndices := bucketInfo.Get("indices").Array()
+	newIndices := options.Get("indices")
+	err = updateIndices(client, bucketName, oldIndices, newIndices)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // StoreBucket creates or updates a bucket if it exists. It receives an options parameter that contains the configuration of the bucket.
 func (d discovery) StoreBucket(client StagingBucketController, bucketName string, options gjson.Result, printer Printer) error {
+	const bucketError string = "Could not create bucket with name %q."
 	result, err := client.Create(bucketName, options)
 	if err != nil {
 		discoveryErr, ok := err.(discoveryPackage.Error)
 		if !ok {
-			return NewErrorWithCause(ErrorExitCode, err, "Could not create bucket with name %q.", bucketName)
+			return NewErrorWithCause(ErrorExitCode, err, bucketError, bucketName)
 		}
 
 		if discoveryErr.Status != http.StatusConflict {
-			return NewErrorWithCause(ErrorExitCode, err, "Could not create bucket with name %q.", bucketName)
+			return NewErrorWithCause(ErrorExitCode, err, bucketError, bucketName)
 		}
 
 		if options.Get("indices").Exists() {
-			bucketInfo, err := client.Get(bucketName)
-			if err != nil {
-				return NewErrorWithCause(ErrorExitCode, err, "Could not get bucket with name %q to update it.", bucketName)
-			}
-			oldIndices := bucketInfo.Get("indices").Array()
-			newIndices := options.Get("indices")
-			err = updateIndices(client, bucketName, oldIndices, newIndices)
+			err = callUpdateIndices(client, bucketName, options)
 			if err != nil {
 				return err
 			}
 		} else {
-			return NewErrorWithCause(ErrorExitCode, err, "Could not create bucket with name %q.", bucketName)
+			return NewErrorWithCause(ErrorExitCode, err, bucketError, bucketName)
 		}
 	}
 
