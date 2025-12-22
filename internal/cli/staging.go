@@ -1,37 +1,44 @@
 package cli
 
 import (
+	"fmt"
 	"net/http"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 )
 
 // StagingBucketController defines the methods to interact with buckets.
 type StagingBucketController interface {
 	Create(bucket string, options gjson.Result) (gjson.Result, error)
+	Get(bucket string) (gjson.Result, error)
 	CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error)
+	DeleteIndex(bucket, index string) (gjson.Result, error)
 }
 
-// updateIndices updates the indices a bucket that already has been created with the new configuration.
-// It returns a JSON with an "indices" field that has the acknowledgements of the index updates.
-func updateIndices(client StagingBucketController, bucketName string, indices []gjson.Result) (gjson.Result, error) {
-	indexResults := "{}"
-	for _, index := range indices {
+// updateIndices updates the indices in a bucket with the new configuration.
+// If any update fails, the function returns an error.
+func updateIndices(client StagingBucketController, bucketName string, oldIndices []gjson.Result, newIndices gjson.Result) error {
+	for _, index := range newIndices.Array() {
 		indexName := index.Get("name").String()
 
 		indexAck, err := client.CreateIndex(bucketName, indexName, index.Get("fields").Array())
-		if err != nil {
-			indexResults, err = sjson.Set(indexResults, "indices."+indexName, err.Error())
-		} else {
-			indexResults, err = sjson.SetRaw(indexResults, "indices."+indexName, indexAck.Raw)
-		}
-		if err != nil {
-			return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
+		if err != nil || !(indexAck.Get("acknowledged").Bool()) {
+			return NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
 		}
 	}
-	return gjson.Parse(indexResults), nil
+	for _, index := range oldIndices {
+		indexName := index.Get("name").String()
+
+		oldIndexExists := newIndices.Get(fmt.Sprintf("#(name==%q)", indexName)).Exists()
+		if !oldIndexExists {
+			indexAck, err := client.DeleteIndex(bucketName, indexName)
+			if err != nil || !(indexAck.Get("acknowledged").Bool()) {
+				return NewErrorWithCause(ErrorExitCode, err, "Could not delete index with name %q of bucket %q.", indexName, bucketName)
+			}
+		}
+	}
+	return nil
 }
 
 // StoreBucket creates or updates a bucket if it exists. It receives an options parameter that contains the configuration of the bucket.
@@ -48,17 +55,25 @@ func (d discovery) StoreBucket(client StagingBucketController, bucketName string
 		}
 
 		if options.Get("indices").Exists() {
-			indices := options.Get("indices").Array()
-			indexResults, err := updateIndices(client, bucketName, indices)
+			bucketInfo, err := client.Get(bucketName)
+			if err != nil {
+				return NewErrorWithCause(ErrorExitCode, err, "Could not get bucket with name %q to update it.", bucketName)
+			}
+			oldIndices := bucketInfo.Get("indices").Array()
+			newIndices := options.Get("indices")
+			err = updateIndices(client, bucketName, oldIndices, newIndices)
 			if err != nil {
 				return err
 			}
-			result = indexResults
 		} else {
 			return NewErrorWithCause(ErrorExitCode, err, "Could not create bucket with name %q.", bucketName)
 		}
 	}
 
+	result, err = client.Get(bucketName)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get the information of bucket with name %q.", bucketName)
+	}
 	if printer == nil {
 		printer = JsonObjectPrinter(true)
 	}
