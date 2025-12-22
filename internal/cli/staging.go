@@ -19,14 +19,6 @@ type StagingBucketController interface {
 // updateIndices updates the indices in a bucket with the new configuration.
 // If any update fails, the function returns an error.
 func updateIndices(client StagingBucketController, bucketName string, oldIndices []gjson.Result, newIndices gjson.Result) error {
-	for _, index := range newIndices.Array() {
-		indexName := index.Get("name").String()
-
-		indexAck, err := client.CreateIndex(bucketName, indexName, index.Get("fields").Array())
-		if err != nil || !(indexAck.Get("acknowledged").Bool()) {
-			return NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
-		}
-	}
 	for _, index := range oldIndices {
 		indexName := index.Get("name").String()
 
@@ -38,6 +30,15 @@ func updateIndices(client StagingBucketController, bucketName string, oldIndices
 			}
 		}
 	}
+	for _, index := range newIndices.Array() {
+		indexName := index.Get("name").String()
+
+		indexAck, err := client.CreateIndex(bucketName, indexName, index.Get("fields").Array())
+		if err != nil || !(indexAck.Get("acknowledged").Bool()) {
+			return NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
+		}
+	}
+
 	return nil
 }
 
