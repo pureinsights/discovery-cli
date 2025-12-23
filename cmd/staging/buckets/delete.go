@@ -12,7 +12,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "delete",
 		Short: "The command that deletes buckets from Discovery Staging.",
-		Long:  "delete is the command used to delete Discovery Staging's buckets. The user must send the bucket's name.",
+		Long:  "delete is the command used to delete Discovery Staging's buckets. The user must send the bucket's name as a required argument.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
