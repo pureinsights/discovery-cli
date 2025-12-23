@@ -163,7 +163,7 @@ discovery export -p cn
 ```bash
 # Export the entities to a specific file.
 # In this example, the Ingestion export failed.
-discovery export --file "entities/discovery.zip".
+discovery export -p cn --file "entities/discovery.zip"
 {"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
 ```
 #### Import
@@ -629,7 +629,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Core's credentials. The user can send a name or UUID to get a specific credential. If no argument is given, then the command retrieves every credential. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery Core's credentials. The user can send a name or UUID to get a specific credential. If no argument is given, then the command retrieves every credential. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
 Usage: `discovery core credential get [flags] [<arg>]`
 
@@ -759,7 +759,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Core's servers. The user can send a name or UUID to get a specific server. If no argument is given, then the command retrieves every server. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery Core's servers. The user can send a name or UUID to get a specific server. If no argument is given, then the command retrieves every server. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
 Usage: `discovery core server get [flags] [<arg>]`
 
@@ -1049,7 +1049,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery Ingestion's processors. The user can send a name or UUID to get a specific processor. If no argument is given, then the command retrieves every processor. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
 Usage: `discovery ingestion processor get [flags] [<arg>]`
 
@@ -1179,7 +1179,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain Discovery Ingestion's pipelines. The user can send a name or UUID to get a specific pipeline. If no argument is given, then the command retrieves every pipeline. The command also supports filters with the flag `--filter` followed by the filter in the format `filter=key:value`.
+`get` is the command used to obtain Discovery Ingestion's pipelines. The user can send a name or UUID to get a specific pipeline. If no argument is given, then the command retrieves every pipeline. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
 Usage: `discovery ingestion pipeline get [flags] [<arg>]`
 

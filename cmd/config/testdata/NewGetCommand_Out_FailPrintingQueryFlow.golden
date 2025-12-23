@@ -7,8 +7,12 @@ Ingestion API Key: "discovery.key.ingestion.cn"
 Usage:
   get [flags]
 
+Examples:
+	# Print the configuration of the "cn" profile with obfuscated API keys.
+	discovery config get -p cn
+
 Flags:
   -h, --help             help for get
   -p, --profile string   configuration profile to use
-  -s, --sensitive        this flag obfuscates sensitive values before showing them to the user. (default true)
+  -s, --sensitive        this flag obfuscates sensitive values before showing them to the user (default true)
 

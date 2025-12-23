@@ -14,7 +14,7 @@ Examples:
 
 Flags:
   -f, --filter stringArray   apply filters in the format "filter=key:value". The available filter is:
-                             - Label: The format is label={key}[:{value}], where the value is optional.
+                             - Label: The format is label={key}[:{value}], where the value is optional
   -h, --help                 help for get
   -p, --profile string       configuration profile to use (default "default")
 

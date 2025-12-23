@@ -6,7 +6,7 @@ Examples:
 	discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
 
 Flags:
-  -f, --file string          the file that contains the files with the exported entities of the Discovery products.
+  -f, --file string          the file that contains the files with the exported entities of the Discovery products
   -h, --help                 help for import
       --on-conflict string   the conflict resolution strategy that will be used (default "FAIL")
   -p, --profile string       configuration profile to use (default "default")
