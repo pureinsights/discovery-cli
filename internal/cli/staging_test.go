@@ -28,6 +28,12 @@ func (s *WorkingStagingBucketControllerNoConflict) Create(string, gjson.Result) 
 }`), nil
 }
 
+func (s *WorkingStagingBucketControllerNoConflict) Delete(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
+}
+
 func (s *WorkingStagingBucketControllerNoConflict) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "name": "my-bucket",
@@ -74,6 +80,12 @@ func (s *WorkingStagingBucketControllerNameConflict) Create(string, gjson.Result
 }`), discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
   "acknowledged": false
 }`)}
+}
+
+func (s *WorkingStagingBucketControllerNameConflict) Delete(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
 }
 
 func (s *WorkingStagingBucketControllerNameConflict) Get(string) (gjson.Result, error) {
@@ -152,6 +164,12 @@ func (s *FailingStagingBucketControllerNotDiscoveryError) Create(string, gjson.R
 }`), errors.New("different error")
 }
 
+func (s *FailingStagingBucketControllerNotDiscoveryError) Delete(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
+}
+
 func (s *FailingStagingBucketControllerNotDiscoveryError) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "name": "test",
@@ -198,6 +216,17 @@ func (s *FailingStagingBucketControllerNotFoundError) Create(string, gjson.Resul
   "acknowledged": false
 }`), discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
   "acknowledged": false
+}`)}
+}
+
+func (s *FailingStagingBucketControllerNotFoundError) Delete(string) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1002,
+  "messages": [
+    "The bucket 'my-bucket' was not found."
+  ],
+  "timestamp": "2025-12-23T14:53:32.321524600Z"
 }`)}
 }
 
@@ -248,6 +277,12 @@ func (s *FailingStagingBucketControllerIndexCreationFails) Create(string, gjson.
 }`), discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
   "acknowledged": false
 }`)}
+}
+
+func (s *FailingStagingBucketControllerIndexCreationFails) Delete(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
 }
 
 func (s *FailingStagingBucketControllerIndexCreationFails) Get(string) (gjson.Result, error) {
@@ -303,6 +338,12 @@ func (s *FailingStagingBucketControllerIndexDeletionFails) Create(string, gjson.
 }`)}
 }
 
+func (s *FailingStagingBucketControllerIndexDeletionFails) Delete(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
+}
+
 func (s *FailingStagingBucketControllerIndexDeletionFails) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "name": "test",
@@ -354,6 +395,12 @@ func (s *FailingStagingBucketControllerLastGetFails) Create(string, gjson.Result
 }`), nil
 }
 
+func (s *FailingStagingBucketControllerLastGetFails) Delete(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
+}
+
 func (s *FailingStagingBucketControllerLastGetFails) Get(string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
   "status": 404,
@@ -383,6 +430,12 @@ func (s *FailingStagingBucketControllerFirstGetFails) Create(string, gjson.Resul
 }`), discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
   "acknowledged": false
 }`)}
+}
+
+func (s *FailingStagingBucketControllerFirstGetFails) Delete(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
 }
 
 func (s *FailingStagingBucketControllerFirstGetFails) Get(string) (gjson.Result, error) {
@@ -804,6 +857,91 @@ func Test_discovery_StoreBucket(t *testing.T) {
 
 			d := NewDiscovery(&ios, viper.New(), "")
 			err := d.StoreBucket(tc.client, tc.bucketName, tc.config, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// Test_discovery_DeleteBucket tests the discovery.DeleteBucket() function.
+func Test_discovery_DeleteBucket(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         StagingBucketController
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "DeleteBucket correctly prints the deletion confirmation with the pretty printer",
+			client:         new(WorkingStagingBucketControllerNoConflict),
+			printer:        nil,
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
+			err:            nil,
+		},
+		{
+			name:           "DeleteBucket correctly prints an object with JSON ugly printer",
+			client:         new(WorkingStagingBucketControllerNoConflict),
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"acknowledged\":true}\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name:           "Delete returns 404 Bad Request",
+			client:         new(FailingStagingBucketControllerNotFoundError),
+			printer:        nil,
+			expectedOutput: "",
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1002,
+  "messages": [
+    "The bucket 'my-bucket' was not found."
+  ],
+  "timestamp": "2025-12-23T14:53:32.321524600Z"
+}`),
+			}, "Could not delete the bucket with name \"my-bucket\"."),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(WorkingStagingBucketControllerNoConflict),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.DeleteBucket(tc.client, "my-bucket", tc.printer)
 
 			if tc.err != nil {
 				require.Error(t, err)
