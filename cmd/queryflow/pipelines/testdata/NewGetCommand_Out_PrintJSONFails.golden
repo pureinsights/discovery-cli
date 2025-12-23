@@ -1,0 +1,10 @@
+Usage:
+  get [flags]
+
+Flags:
+  -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
+                             - Label: The format is label={key}[:{value}], where the value is optional
+                             - Type: The format is type={type}
+  -h, --help                 help for get
+  -p, --profile string       configuration profile to use (default "default")
+
