@@ -3,9 +3,11 @@ package discovery
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 // stagingGetContentOption is a type definition used for the functional options pattern.
@@ -64,6 +66,36 @@ func (c contentClient) Get(contentId string, options ...stagingGetContentOption)
 		opt(&queryParams)
 	}
 	return execute(c.client, http.MethodGet, "/"+contentId, WithQueryParameters(queryParams))
+}
+
+// Scroll iterates through all the records from a bucket based on the given filters and projections.
+func (c contentClient) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
+	body := "{}"
+	var err error
+	if filters.Exists() {
+		body, err = sjson.SetRaw(body, "filters", filters.Raw)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if projections.Exists() {
+		body, err = sjson.SetRaw(body, "fields", projections.Raw)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	options := []RequestOption{}
+	if size != nil {
+		options = append(options, WithQueryParameters(map[string][]string{"size": {strconv.Itoa(*size)}}))
+	}
+
+	if body != "{}" {
+		options = append(options, WithJSONBody(body))
+	}
+
+	return executeWithPagination(c.client, http.MethodPost, "/scroll", options...)
 }
 
 // Delete deletes the document with the given contentId in the bucket.
