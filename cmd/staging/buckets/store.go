@@ -14,9 +14,9 @@ import (
 func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var data string
 	store := &cobra.Command{
-		Use:   "store <bucket> [configFile]",
+		Use:   "store <bucketName> [configFile]",
 		Short: "The command that stores buckets to Discovery Staging.",
-		Long:  "",
+		Long:  "store is the command used to create and update buckets in the Discovery Staging Repository. The bucket's name is sent as the mandatory first argument. The creation options, like the indices and bucket configuration, can be sent either through the optional second argument, which contains the name of the file with the information, or through the --data flag as a JSON string. The --data flag and the file name argument are mutually exclusive. When the bucket already exists, the command will try to modify its indices by updating them and deleting the ones no longer needed.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -52,10 +52,10 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.RangeArgs(1, 2),
 		Example: `	# Store a bucket with the JSON configuration in a file
-	discovery staging bucket store --file buckets.json
+	discovery staging bucket store my-bucket configFile.json
 
 	# Store a bucket with the JSON configuration in the data flag
-	discovery staging bucket store --data '{"type":"staging","name":"Search bucket","labels":[],"active":true,"id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","creationTimestamp":"2025-09-04T15:50:08Z","lastUpdatedTimestamp":"2025-09-04T15:50:08Z","config":{"action":"scroll","bucket":"blogs"},"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'`,
+	discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}`,
 	}
 
 	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configuration of the bucket")
