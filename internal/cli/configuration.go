@@ -33,10 +33,12 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 
 	if err := v.MergeInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Fprintf(ios.Err,
-				"Configuration file %q not found under %q; using default values.\n",
-				baseName, filepath.Clean(path),
-			)
+			if !slices.Contains(os.Args, "config") {
+				fmt.Fprintf(ios.Err,
+					"Configuration file %q not found under %q\n",
+					baseName, filepath.Clean(path),
+				)
+			}
 			return false, nil
 		}
 		return true, err
@@ -45,12 +47,15 @@ func readConfigFile(baseName, path string, v *viper.Viper, ios *iostreams.IOStre
 }
 
 // InitializeConfig reads the config and credentials configuration files found in the given path and sets up the Viper instance with their values.
+// If the configuration files do not exist, it creates them with default values.
 func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error) {
 	vpr := viper.New()
 
 	defaultProfile := "default"
 	vpr.SetDefault("profile", defaultProfile)
-	vpr.SetDefault("output", "json")
+	vpr.SetDefault("output", "pretty-json")
+
+	defaultValues := false
 
 	if exists, err := readConfigFile("config", path, vpr, &ios); err != nil {
 		return nil, NewErrorWithCause(ErrorExitCode, err, "Could not read the configuration file")
@@ -60,6 +65,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 			vpr.SetDefault(fmt.Sprintf("%s.ingestion_url", defaultProfile), DefaultIngestionURL)
 			vpr.SetDefault(fmt.Sprintf("%s.queryflow_url", defaultProfile), DefaultQueryFlowURL)
 			vpr.SetDefault(fmt.Sprintf("%s.staging_url", defaultProfile), DefaultStagingURL)
+			defaultValues = true
 		}
 	}
 	if exists, err := readConfigFile("credentials", path, vpr, &ios); err != nil {
@@ -70,9 +76,19 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 			vpr.SetDefault(fmt.Sprintf("%s.ingestion_key", defaultProfile), "")
 			vpr.SetDefault(fmt.Sprintf("%s.queryflow_key", defaultProfile), "")
 			vpr.SetDefault(fmt.Sprintf("%s.staging_key", defaultProfile), "")
+			defaultValues = true
 		}
 	}
 
+	if defaultValues {
+		err := saveConfig(vpr, path)
+		if err != nil {
+			return nil, NewErrorWithCause(ErrorExitCode, err, "Failed to save the default configuration")
+		}
+		if !slices.Contains(os.Args, "config") {
+			fmt.Fprint(ios.Out, "Discovery configuration files created using default values.\n")
+		}
+	}
 	return vpr, nil
 }
 
@@ -94,7 +110,7 @@ func obfuscate(s string) string {
 	return string(r)
 }
 
-// AskUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
+// askUserConfig is an auxiliary function asks the user for the value they want to assign to a configuration property in the given profile.
 // If the user inputs an empty string, the value is not changed.
 // If the user inputs a space, the value is set to an empty string.
 // If the user inputs a new value, the property is updated.
@@ -125,9 +141,8 @@ func (d discovery) askUserConfig(profile, propertyName, property string, sensiti
 	return nil
 }
 
-// SaveConfig separates de API Keys from Discovery's Viper configuration and writes the config and credentials into their own files.
-func (d discovery) saveConfig() error {
-	v := d.Config()
+// saveConfig separates the API Keys from Discovery's Viper configuration and writes the config and credentials into their own files.
+func saveConfig(v *viper.Viper, path string) error {
 	apiKeys := []string{"core_key", "ingestion_key", "queryflow_key", "staging_key"}
 	temporaryProperties := []string{"profile"}
 
@@ -145,15 +160,15 @@ func (d discovery) saveConfig() error {
 		}
 	}
 
-	err := config.WriteConfigAs(filepath.Join(d.ConfigPath(), "config.toml"))
+	err := config.WriteConfigAs(filepath.Join(path, "config.toml"))
 	if err != nil {
-		err = NormalizeWriteFileError(filepath.Join(d.ConfigPath(), "config.toml"), err)
+		err = NormalizeWriteFileError(filepath.Join(path, "config.toml"), err)
 		return err
 	}
 
-	err = credentials.WriteConfigAs(filepath.Join(d.ConfigPath(), "credentials.toml"))
+	err = credentials.WriteConfigAs(filepath.Join(path, "credentials.toml"))
 	if err != nil {
-		err = NormalizeWriteFileError(filepath.Join(d.ConfigPath(), "credentials.toml"), err)
+		err = NormalizeWriteFileError(filepath.Join(path, "credentials.toml"), err)
 		return err
 	}
 	return nil
@@ -168,7 +183,7 @@ func SetDiscoveryDir() (string, error) {
 
 	configPath := filepath.Join(home, ".discovery")
 
-	if err := os.MkdirAll(configPath, 0o644); err != nil {
+	if err := os.MkdirAll(configPath, 0o755); err != nil {
 		return "", NewErrorWithCause(ErrorExitCode, err, "Could not create the /.discovery directory")
 	}
 
@@ -187,7 +202,7 @@ func (d discovery) saveUrlAndAPIKey(profile, component, componentName string) er
 		return NewErrorWithCause(ErrorExitCode, err, "Failed to get %s's API key", componentName)
 	}
 
-	err = d.saveConfig()
+	err = saveConfig(d.Config(), d.ConfigPath())
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Failed to save %s's configuration", componentName)
 	}

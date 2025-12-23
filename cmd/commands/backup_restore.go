@@ -7,9 +7,9 @@ import (
 
 const (
 	// LongExport is the message used in the Long field of the Export commands.
-	LongExport string = "export is the command used to backup Discovery %s's entities. With the file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory."
+	LongExport string = "export is the command used to backup Discovery %s's entities. With the --file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory."
 	// LongImport is the message used in the Long field of the Import commands.
-	LongImport string = "import is the command used to restore Discovery %s's entities. With the file flag, the user must send the specific file that has the entities' configuration. With the on-conflict flag, the user can send the conflict resolution strategy in case there are duplicate entities."
+	LongImport string = "import is the command used to restore Discovery %s's entities. With the --file flag, the user must send the specific file that has the entities' configuration. With the --on-conflict flag, the user can send the conflict resolution strategy in case there are duplicate entities."
 )
 
 // ExportCommand is the function that executes the export operation
@@ -19,7 +19,7 @@ func ExportCommand(d cli.Discovery, client cli.BackupRestore, file string, confi
 		return err
 	}
 
-	printer := cli.GetObjectPrinter(d.Config().GetString("output"))
+	printer := cli.GetObjectPrinter(config.output)
 
 	return d.ExportEntitiesFromClient(client, file, printer)
 }
@@ -31,11 +31,7 @@ func ImportCommand(d cli.Discovery, client cli.BackupRestore, file string, onCon
 		return err
 	}
 
-	output := d.Config().GetString("output")
-	if output == "json" {
-		output = "pretty-json"
-	}
-	printer := cli.GetObjectPrinter(output)
+	printer := cli.GetObjectPrinter(config.output)
 
 	return d.ImportEntitiesToClient(client, file, onConflict, printer)
 }

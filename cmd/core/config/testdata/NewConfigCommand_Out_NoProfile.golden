@@ -2,6 +2,10 @@ Usage:
   config [subcommands] [flags]
   config [command]
 
+Examples:
+	# Ask the user for the configuration of profile "cn".
+	discovery core config -p cn 
+
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   get         Print Discovery Core's configuration

@@ -276,7 +276,7 @@ func TestNewExportCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
+			vpr.Set("output", "pretty-json")
 			if tc.coreUrl {
 				vpr.Set("default.core_url", coreServer.URL)
 			}
@@ -362,7 +362,7 @@ func TestNewExportCommand_NoProfileFlag(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "json")
+	vpr.Set("output", "pretty-json")
 
 	vpr.Set("default.ingestion_url", "test")
 	vpr.Set("default.ingestion_key", "test")

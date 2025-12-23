@@ -4,6 +4,10 @@ Ingestion URL [http://localhost:12030]: Ingestion API key [ingestion432]: Usage:
   config [subcommands] [flags]
   config [command]
 
+Examples:
+	# Ask the user for the configuration of profile "cn"
+	discovery ingestion config -p cn: 
+
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   get         Print Discovery Ingestion's configuration

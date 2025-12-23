@@ -29,6 +29,8 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 			return commands.ImportCommand(d, queryflowClient.BackupRestore(), file, discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"))
 		},
 		Args: cobra.NoArgs,
+		Example: `	# Import the entities using profile "cn" and fail conflict resolution strategy.
+	discovery queryflow import -p cn --file "entities/queryflow.zip"`,
 	}
 
 	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the entities that will be restored")
