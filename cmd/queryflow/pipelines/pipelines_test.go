@@ -1,8 +1,7 @@
-package queryflow
+package pipelines
 
 import (
 	"bytes"
-	"flag"
 	"slices"
 	"strings"
 	"testing"
@@ -13,10 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var Update = flag.Bool("update", false, "rewrite golden files")
-
-// TestNewQueryFlowCommand tests the NewQueryFlowCommand() function.
-func TestNewQueryFlowCommand(t *testing.T) {
+// Test_NewPipelineCommand tests the NewPipelineCommand() function
+func Test_NewPipelineCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
@@ -30,13 +27,13 @@ func TestNewQueryFlowCommand(t *testing.T) {
 	vpr := viper.New()
 	vpr.SetDefault("profile", "default")
 	d := cli.NewDiscovery(&ios, vpr, dir)
-	queryflowCmd := NewQueryFlowCommand(d)
+	coreCmd := NewPipelineCommand(d)
 
-	queryflowCmd.SetIn(ios.In)
-	queryflowCmd.SetOut(ios.Out)
-	queryflowCmd.SetErr(ios.Err)
+	coreCmd.SetIn(ios.In)
+	coreCmd.SetOut(ios.Out)
+	coreCmd.SetErr(ios.Err)
 
-	queryflowCmd.PersistentFlags().StringP(
+	coreCmd.PersistentFlags().StringP(
 		"profile",
 		"p",
 		d.Config().GetString("profile"),
@@ -44,12 +41,12 @@ func TestNewQueryFlowCommand(t *testing.T) {
 	)
 
 	var commandNames []string
-	for _, c := range queryflowCmd.Commands() {
+	for _, c := range coreCmd.Commands() {
 		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
 			commandNames = append(commandNames, c.Name())
 		}
 	}
 
-	expectedCommands := []string{"config", "endpoint", "export", "import", "pipeline", "processor"}
+	expectedCommands := []string{"get"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
