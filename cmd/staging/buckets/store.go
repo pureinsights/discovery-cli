@@ -58,7 +58,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	discovery staging bucket store --data '{"type":"staging","name":"Search bucket","labels":[],"active":true,"id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","creationTimestamp":"2025-09-04T15:50:08Z","lastUpdatedTimestamp":"2025-09-04T15:50:08Z","config":{"action":"scroll","bucket":"blogs"},"pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","timeoutPolicy":{"slice":"PT1H"},"outboundPolicy":{"idPolicy":{},"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'`,
 	}
 
-	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")
+	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configuration of the bucket")
 
 	return store
 }

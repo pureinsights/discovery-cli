@@ -23,225 +23,150 @@ import (
 // TestNewStoreCommand tests the NewStoreCommand() function.
 func TestNewStoreCommand(t *testing.T) {
 	tests := []struct {
-		name         string
-		url          bool
-		apiKey       string
-		outGolden    string
-		errGolden    string
-		outBytes     []byte
-		errBytes     []byte
-		data         string
-		file         string
-		abortOnError bool
-		responses    map[string]testutils.MockResponse
-		err          error
+		name      string
+		url       bool
+		apiKey    string
+		outGolden string
+		errGolden string
+		outBytes  []byte
+		errBytes  []byte
+		data      string
+		file      string
+		responses map[string]testutils.MockResponse
+		err       error
 	}{
 		// Working case
 		{
-			name:      "Store receives a single JSON",
+			name:      "Store receives the bucket config through data flag",
 			url:       true,
 			apiKey:    "",
-			outGolden: "NewStoreCommand_Out_StoreSingleJSON",
-			errGolden: "NewStoreCommand_Err_StoreSingleJSON",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreSingleJSON"),
+			outGolden: "NewStoreCommand_Out_StoreDataFlag",
+			errGolden: "NewStoreCommand_Err_StoreDataFlag",
+			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreDataFlag"),
 			errBytes:  []byte(nil),
 			data: `{
-			"type": "mongo",
-			"name": "MongoDB bucket",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-			}`,
-			file:         "",
-			abortOnError: false,
+	"indices": [
+		{
+			"name": "myIndexA",
+			"fields": [
+				{
+				"fieldName": "ASC"
+				}
+			],
+			"unique": false
+			},
+			{
+			"name": "myIndexB",
+			"fields": [
+				{
+				"fieldName2": "DESC"
+				}
+			],
+			"unique": false
+		}
+	],
+	"config": {}
+}`,
+			file: "",
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/bucket/my-bucket": {
 					StatusCode: http.StatusOK,
 					Body: `{
-					"type": "mongo",
-					"name": "MongoDB bucket",
-					"labels": [],
-					"active": true,
-					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-					"creationTimestamp": "2025-08-14T18:02:11Z",
-					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"secret": "mongo-secret"
-					}`,
+  "acknowledged": true
+}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
 					},
 				},
-			},
-			err: nil,
-		},
-		{
-			name:      "Store receives a JSON array of configs with creates, failures, and updates with abort on error false",
-			url:       true,
-			apiKey:    "apiKey123",
-			outGolden: "NewStoreCommand_Out_StoreArrayNoAbort",
-			errGolden: "NewStoreCommand_Err_StoreArrayNoAbort",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreArrayNoAbort"),
-			errBytes:  []byte(nil),
-			data: `[{
-			"type": "mongo",
-			"name": "MongoDB bucket",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-			},
+				"GET:/v2/bucket/my-bucket": {
+					StatusCode: http.StatusOK,
+					Body: `{
+  "name": "my-bucket",
+  "documentCount": {},
+  "indices": [
+    {
+		"name": "myIndexA",
+		"fields": [
 			{
-			"type": "mongo",
-			"name": "MongoDB bucket 2",
-			"labels": [],
-			"active": true,
-			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4d",
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret-2"
-			},
-			{
-			"type": "openai",
-			"name": "OpenAI bucket 3",
-			"labels": [],
-			"active": true,
-			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "openai-secret"
+			"fieldName": "ASC"
 			}
-			]`,
-			file:         "",
-			abortOnError: false,
-			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket": {
-					StatusCode: http.StatusOK,
-					Body: `{
-					"type": "mongo",
-					"name": "MongoDB bucket",
-					"labels": [],
-					"active": true,
-					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-					"creationTimestamp": "2025-08-14T18:02:11Z",
-					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"secret": "mongo-secret"
-					}`,
+		],
+		"unique": false
+	},
+	{
+		"name": "myIndexB",
+		"fields": [
+			{
+			"fieldName2": "DESC"
+			}
+		],
+		"unique": false
+	}
+  ]
+}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
-					},
-				},
-				"PUT:/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
-					StatusCode: http.StatusNotFound,
-					Body: `{
-					"status": 404,
-					"code": 1003,
-					"messages": [
-						"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
-					],
-					"timestamp": "2025-10-29T23:12:08.002244700Z"
-					}`,
-					ContentType: "application/json",
-					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
-					},
-				},
-				"PUT:/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
-					StatusCode: http.StatusOK,
-					Body: `{
-					"type": "openai",
-					"name": "OpenAI bucket",
-					"labels": [],
-					"active": true,
-					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
-					"creationTimestamp": "2025-08-14T18:02:11Z",
-					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"secret": "openai-secret"
-					}`,
-					ContentType: "application/json",
-					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
 					},
 				},
 			},
 			err: nil,
 		},
 		{
-			name:         "Store receives a file with a valid JSON array",
-			url:          true,
-			apiKey:       "apiKey123",
-			outGolden:    "NewStoreCommand_Out_StoreFile",
-			errGolden:    "NewStoreCommand_Err_StoreFile",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFile"),
-			errBytes:     []byte(nil),
-			data:         "",
-			file:         "testdata/StoreCommand_JSONFile.golden",
-			abortOnError: false,
+			name:      "Store receives the bucket config through the argument",
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStoreCommand_Out_StoreFileArg",
+			errGolden: "NewStoreCommand_Err_StoreFileArg",
+			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreFileArg"),
+			errBytes:  []byte(nil),
+			data:      ``,
+			file:      "testdata/StoreCommand_BucketConfig.json",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket": {
+				"POST:/v2/bucket/my-bucket": {
 					StatusCode: http.StatusOK,
 					Body: `{
-					"type": "mongo",
-					"name": "MongoDB bucket",
-					"labels": [],
-					"active": true,
-					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-					"creationTimestamp": "2025-08-14T18:02:11Z",
-					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"secret": "mongo-secret"
-					}`,
+  "acknowledged": true
+}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
 					},
 				},
-				"PUT:/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
-					StatusCode: http.StatusNotFound,
-					Body: `{
-					"status": 404,
-					"code": 1003,
-					"messages": [
-						"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
-					],
-					"timestamp": "2025-10-29T23:12:08.002244700Z"
-					}`,
-					ContentType: "application/json",
-					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
-					},
-				},
-				"PUT:/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"GET:/v2/bucket/my-bucket": {
 					StatusCode: http.StatusOK,
 					Body: `{
-					"type": "openai",
-					"name": "OpenAI bucket",
-					"labels": [],
-					"active": true,
-					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
-					"creationTimestamp": "2025-08-14T18:02:11Z",
-					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"secret": "openai-secret"
-					}`,
+  "name": "my-bucket",
+  "documentCount": {},
+  "indices": [
+    {
+		"name": "myIndexA",
+		"fields": [
+			{
+			"fieldName": "ASC"
+			}
+		],
+		"unique": false
+	},
+	{
+		"name": "myIndexB",
+		"fields": [
+			{
+			"fieldName2": "DESC"
+			}
+		],
+		"unique": false
+	}
+  ]
+}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
 					},
 				},
 			},
@@ -258,244 +183,163 @@ func TestNewStoreCommand(t *testing.T) {
 			url:       false,
 			apiKey:    "apiKey123",
 			data: `{
-			"type": "mongo",
-			"name": "MongoDB bucket",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-			}`,
-			file:         "",
-			abortOnError: false,
-			err:          cli.NewError(cli.ErrorExitCode, "The Discovery QueryFlow URL is missing for profile \"default\".\nTo set the URL for the Discovery QueryFlow API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery queryflow config --profile \"default\""),
+	"indices": [
+		{
+			"name": "myIndexA",
+			"fields": [
+				{
+				"fieldName": "ASC"
+				}
+			],
+			"unique": false
+			},
+			{
+			"name": "myIndexB",
+			"fields": [
+				{
+				"fieldName2": "DESC"
+				}
+			],
+			"unique": false
+		}
+	],
+	"config": {}
+}`,
+			file: "",
+			err:  cli.NewError(cli.ErrorExitCode, "The Discovery Staging URL is missing for profile \"default\".\nTo set the URL for the Discovery Staging API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery staging config --profile \"default\""),
 		},
 		{
-			name:      "Store receives a JSON array of configs with creates, failures, and updates with abort on error true",
+			name:      "Store receives the data flag and bucket config file",
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStoreCommand_Out_DataFlagAndFile",
+			errGolden: "NewStoreCommand_Err_DataFlagAndFile",
+			outBytes:  testutils.Read(t, "NewStoreCommand_Out_DataFlagAndFile"),
+			errBytes:  testutils.Read(t, "NewStoreCommand_Err_DataFlagAndFile"),
+			data: `{
+	"indices": [
+		{
+			"name": "myIndexA",
+			"fields": [
+				{
+				"fieldName": "ASC"
+				}
+			],
+			"unique": false
+			},
+			{
+			"name": "myIndexB",
+			"fields": [
+				{
+				"fieldName2": "DESC"
+				}
+			],
+			"unique": false
+		}
+	],
+	"config": {}
+}`,
+			file:      "testdata/StoreCommand_BucketConfig.json",
+			responses: map[string]testutils.MockResponse{},
+			err:       cli.NewError(cli.ErrorExitCode, "The data flag can only have the bucket name argument."),
+		},
+		{
+			name:      "The bucket already exists",
 			url:       true,
 			apiKey:    "apiKey123",
-			outGolden: "NewStoreCommand_Out_StoreArrayAbort",
-			errGolden: "NewStoreCommand_Err_StoreArrayAbort",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreArrayAbort"),
-			errBytes:  testutils.Read(t, "NewStoreCommand_Err_StoreArrayAbort"),
-			data: `[{
-			"type": "mongo",
-			"name": "MongoDB bucket",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-			},
-			{
-			"type": "mongo",
-			"name": "MongoDB bucket 2",
-			"labels": [],
-			"active": true,
-			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4d",
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret-2"
-			},
-			{
-			"type": "openai",
-			"name": "OpenAI bucket 3",
-			"labels": [],
-			"active": true,
-			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "openai-secret"
-			}
-			]`,
-			file:         "",
-			abortOnError: true,
+			outGolden: "NewStoreCommand_Out_BucketExists",
+			errGolden: "NewStoreCommand_Err_BucketExists",
+			outBytes:  testutils.Read(t, "NewStoreCommand_Out_BucketExists"),
+			errBytes:  testutils.Read(t, "NewStoreCommand_Err_BucketExists"),
+			data: `{
+	"config": {}
+}`,
+			file: "",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket": {
-					StatusCode: http.StatusOK,
+				"POST:/v2/bucket/my-bucket": {
+					StatusCode: http.StatusConflict,
 					Body: `{
-					"type": "mongo",
-					"name": "MongoDB bucket",
-					"labels": [],
-					"active": true,
-					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-					"creationTimestamp": "2025-08-14T18:02:11Z",
-					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"secret": "mongo-secret"
-					}`,
+  "acknowledged": false
+}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
-					},
-				},
-				"PUT:/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
-					StatusCode: http.StatusNotFound,
-					Body: `{
-					"status": 404,
-					"code": 1003,
-					"messages": [
-						"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
-					]
-					}`,
-					ContentType: "application/json",
-					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
-					},
-				},
-				"PUT:/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
-					StatusCode: http.StatusOK,
-					Body: `{
-					"type": "openai",
-					"name": "OpenAI bucket",
-					"labels": [],
-					"active": true,
-					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
-					"creationTimestamp": "2025-08-14T18:02:11Z",
-					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"secret": "openai-secret"
-					}`,
-					ContentType: "application/json",
-					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/bucket/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
 					},
 				},
 			},
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
-					"status": 404,
-					"code": 1003,
-					"messages": [
-						"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
-					]
-					}`)}, "Could not store entities"),
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
+  "acknowledged": false
+}`)}, "Could not create bucket with name \"my-bucket\"."),
 		},
 		{
-			name:         "StoreCommand reads an empty file",
-			url:          true,
-			apiKey:       "apiKey123",
-			outGolden:    "NewStoreCommand_Out_StoreEmptyFile",
-			errGolden:    "NewStoreCommand_Err_StoreEmptyFile",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreEmptyFile"),
-			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreEmptyFile"),
-			data:         "",
-			file:         "testdata/StoreCommand_EmptyFile.golden",
-			abortOnError: false,
-			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
+			name:      "StoreCommand tries to read a file that does not exist",
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewStoreCommand_Out_FileNotExists",
+			errGolden: "NewStoreCommand_Err_FileNotExists",
+			outBytes:  testutils.Read(t, "NewStoreCommand_Out_FileNotExists"),
+			data:      "",
+			file:      "doesnotexist",
+			errBytes:  testutils.Read(t, "NewStoreCommand_Err_FileNotExists"),
+			err:       cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
 		},
 		{
-			name:         "StoreCommand tries to read a file that does not exist",
-			url:          true,
-			apiKey:       "apiKey123",
-			outGolden:    "NewStoreCommand_Out_StoreFileNotExists",
-			errGolden:    "NewStoreCommand_Err_StoreFileNotExists",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFileNotExists"),
-			data:         "",
-			file:         "doesnotexist",
-			abortOnError: false,
-			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreFileNotExists"),
-			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
-		},
-		{
-			name:         "StoreCommand gets empty data",
-			url:          true,
-			apiKey:       "apiKey123",
-			outGolden:    "NewStoreCommand_Out_StoreEmptyData",
-			errGolden:    "NewStoreCommand_Err_StoreEmptyData",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreEmptyData"),
-			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreEmptyData"),
-			data:         "",
-			file:         "",
-			abortOnError: false,
-			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
-		},
-		{
-			name:      "Printing JSON Array fails",
+			name:      "Printing JSON Object fails",
 			outGolden: "NewStoreCommand_Out_PrintJSONFails",
 			errGolden: "NewStoreCommand_Err_PrintJSONFails",
 			outBytes:  testutils.Read(t, "NewStoreCommand_Out_PrintJSONFails"),
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_PrintJSONFails"),
 			url:       true,
 			apiKey:    "apiKey123",
-			data: `{
-			"type": "mongo",
-			"name": "MongoDB bucket",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-			}`,
-			file:         "",
-			abortOnError: false,
+			data:      ``,
+			file:      "testdata/StoreCommand_BucketConfig.json",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket": {
-					StatusCode:  http.StatusOK,
-					ContentType: "application/json",
+				"POST:/v2/bucket/my-bucket": {
+					StatusCode: http.StatusOK,
 					Body: `{
-			"type": "mongo",
-			"name": "MongoDB bucket",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret
-			}`,
+  "acknowledged": true
+}`,
+					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+					},
+				},
+				"GET:/v2/bucket/my-bucket": {
+					StatusCode: http.StatusOK,
+					Body: `{
+  "name": "my-bucket",
+  "documentCount": {},
+  "indices": [
+    {
+		"name": "myIndexA",
+		"fields": [
+			{
+			"fieldName": "ASC
+			}
+		],
+		"unique": false
+	},
+	{
+		"name": "myIndexB",
+		"fields": [
+			{
+			"fieldName2": "DESC"
+			}
+		],
+		"unique": false
+	}
+  ]
+}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
 					},
 				},
 			},
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '\\n' in string literal"), "Could not print JSON Array"),
-		},
-		{
-			name:      "user sends invalid UUID error",
-			outGolden: "NewStoreCommand_Out_InvalidUUID",
-			errGolden: "NewStoreCommand_Err_InvalidUUID",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_InvalidUUID"),
-			errBytes:  testutils.Read(t, "NewStoreCommand_Err_InvalidUUID"),
-			url:       true,
-			apiKey:    "apiKey123",
-			data: `{
-			"type": "mongo",
-			"name": "MongoDB bucket",
-			"labels": [],
-			"active": true,
-			"id": "test",
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-			}`,
-			file:         "",
-			abortOnError: true,
-			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket": {
-					StatusCode:  http.StatusOK,
-					ContentType: "application/json",
-					Body: `{
-			"type": "mongo",
-			"name": "MongoDB bucket",
-			"labels": [],
-			"active": true,
-			"id": "test",
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret
-			}`,
-					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket", r.URL.Path)
-						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
-					},
-				},
-			},
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not store entities"),
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '\\n' in string literal"), "Could not print JSON object"),
 		},
 	}
 
@@ -517,12 +361,12 @@ func TestNewStoreCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
+			vpr.Set("output", "pretty-json")
 			if tc.url {
-				vpr.Set("default.queryflow_url", srv.URL)
+				vpr.Set("default.staging_url", srv.URL)
 			}
 			if tc.apiKey != "" {
-				vpr.Set("default.queryflow_key", tc.apiKey)
+				vpr.Set("default.staging_key", tc.apiKey)
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, t.TempDir())
@@ -540,18 +384,16 @@ func TestNewStoreCommand(t *testing.T) {
 				"configuration profile to use",
 			)
 
-			args := []string{}
+			args := []string{"my-bucket"}
 			if tc.data != "" || tc.file == "" {
 				args = append(args, "--data")
 				args = append(args, tc.data)
 			}
 
 			if tc.file != "" {
-				args = append(args, "--file")
 				args = append(args, tc.file)
 			}
 
-			args = append(args, fmt.Sprintf("--abort-on-error=%t", tc.abortOnError))
 			storeCmd.SetArgs(args)
 
 			err := storeCmd.Execute()
@@ -591,8 +433,8 @@ func TestNewStoreCommand_NoProfileFlag(t *testing.T) {
 	vpr.Set("profile", "default")
 	vpr.Set("output", "json")
 
-	vpr.Set("default.queryflow_url", "test")
-	vpr.Set("default.queryflow_key", "test")
+	vpr.Set("default.staging_url", "test")
+	vpr.Set("default.staging_key", "test")
 
 	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
 
@@ -602,7 +444,7 @@ func TestNewStoreCommand_NoProfileFlag(t *testing.T) {
 	storeCmd.SetOut(ios.Out)
 	storeCmd.SetErr(ios.Err)
 
-	storeCmd.SetArgs([]string{"--file", "testdata/StoreCommand_JSONFile.golden"})
+	storeCmd.SetArgs([]string{"my-bucket", "testdata/StoreCommand_BucketConfig.json"})
 
 	err := storeCmd.Execute()
 	require.Error(t, err)
