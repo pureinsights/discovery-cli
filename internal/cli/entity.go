@@ -37,7 +37,7 @@ func (d discovery) GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), object)
 	} else {
 		err = printer(*d.IOStreams(), object)
@@ -106,7 +106,7 @@ func (d discovery) SearchEntity(client Searcher, id string, printer Printer) err
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), result)
 	} else {
 		err = printer(*d.IOStreams(), result)
@@ -293,7 +293,7 @@ func (d discovery) DeleteEntity(client Deleter, id uuid.UUID, printer Printer) e
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), object)
 	} else {
 		err = printer(*d.IOStreams(), object)
