@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Defines the update flag in the package
+// Defines the update flag in the package.
 var Update = flag.Bool("update", false, "rewrite golden files")
 
 // TestCreateTemporaryFile_Success tests when creating and writing to the temporary file was successful.
@@ -59,6 +59,7 @@ func TestCreateTemporaryFile_InvalidDir(t *testing.T) {
 	require.Empty(t, path)
 }
 
+// TestCreateTemporaryFile_EmptyFile tests that the CreateTemporaryFile fails when sent an empty file name.
 func TestCreateTemporaryFile_EmptyFile(t *testing.T) {
 	invalidDir := os.TempDir()
 	filename := ""

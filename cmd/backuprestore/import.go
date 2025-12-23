@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewImportCommand creates the discovery import command that imports entitites to Discovery Core, Ingestion, and QueryFlow
+// NewImportCommand creates the discovery import command that imports entitites to Discovery Core, Ingestion, and QueryFlow.
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
 	var file string

@@ -733,6 +733,8 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
+Examples:
+
 ```bash
 # Delete a credential by id
 discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
@@ -862,6 +864,8 @@ Flags:
 
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
 
 ```bash
 # Delete a server by id
@@ -1153,6 +1157,8 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
+Examples:
+
 ```bash
 # Delete a processor by id
 discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
@@ -1282,6 +1288,8 @@ Flags:
 
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
 
 ```bash
 # Delete a pipeline by id
@@ -1474,6 +1482,8 @@ Flags:
 
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
 
 ```bash
 # Delete a seed by id
@@ -1845,6 +1855,8 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
+Examples:
+
 ```bash
 # Delete a processor by id
 discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
@@ -2097,6 +2109,8 @@ Flags:
 `-p, --profile`::
 
 (Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
 
 ```bash
 # Delete a endpoint by id

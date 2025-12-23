@@ -33,12 +33,12 @@ func WithExcludeProjections(exclude []string) stagingGetContentOption {
 	}
 }
 
-// ContentClient is the struct that manages the content inside the Staging Repository's buckets.
+// contentClient is the struct that manages the content inside the Staging Repository's buckets.
 type contentClient struct {
 	client
 }
 
-// NewContentClient is the constructor of the contentClient struct.
+// newContentClient is the constructor of the contentClient struct.
 func newContentClient(url, apiKey, bucketName string) contentClient {
 	return contentClient{
 		client: newClient(url+"/content/"+bucketName, apiKey),
@@ -92,7 +92,7 @@ type bucketsClient struct {
 	client
 }
 
-// NewBuckets is the constructor of the bucketsClient struct.
+// newBuckets is the constructor of the bucketsClient struct.
 func newBucketsClient(url, apiKey string) bucketsClient {
 	return bucketsClient{
 		client: newClient(url+"/bucket", apiKey),
@@ -152,7 +152,7 @@ func (b bucketsClient) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return execute(b.client, http.MethodDelete, "/"+bucket+"/index/"+index)
 }
 
-// Staging is the struct for the client that can carry out every Staging operation.
+// staging is the struct for the client that can carry out every Staging operation.
 type staging struct {
 	Url, ApiKey string
 }

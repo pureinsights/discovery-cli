@@ -14,7 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_printJsonObject tests the printJsonObject() function
+// Test_printJsonObject tests the printJsonObject() function.
 func Test_printJsonObject(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -374,7 +374,7 @@ func TestJsonObjectPrinter(t *testing.T) {
 	}
 }
 
-// TestJsonArrayPrinter tests the JsonArrayPrinter() function
+// TestJsonArrayPrinter tests the JsonArrayPrinter() function.
 func TestJsonArrayPrinter(t *testing.T) {
 	tests := []struct {
 		name          string

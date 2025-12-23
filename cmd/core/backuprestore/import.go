@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewImportCommand creates the discovery core import command that imports entities to Discovery Core
+// NewImportCommand creates the discovery core import command that imports entities to Discovery Core.
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
 	var file string

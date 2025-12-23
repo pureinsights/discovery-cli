@@ -8,8 +8,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestError_ErrorString_StringBody tests how Error() behaves with multiple types of string bodies.
-func TestError_ErrorString_StringBody(t *testing.T) {
+// TestError_Error_StringBody tests how Error() behaves with multiple types of string bodies.
+func TestError_Error_StringBody(t *testing.T) {
 	tests := []struct {
 		name   string
 		status int

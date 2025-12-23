@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test_NewProcessorCommand tests the NewProcessorCommand() function
+// Test_NewProcessorCommand tests the NewProcessorCommand() function.
 func Test_NewProcessorCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}

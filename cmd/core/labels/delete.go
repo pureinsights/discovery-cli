@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewDeleteCommand creates the label delete command
+// NewDeleteCommand creates the label delete command.
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "delete",

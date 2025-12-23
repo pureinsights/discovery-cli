@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestPath_CreatesTestdataDirWhenUpdate tests the Path() function when the Update flag is true
+// TestPath_CreatesTestdataDirWhenUpdate tests the Path() function when the Update flag is true.
 func TestPath_CreatesTestdataDirWhenUpdate(t *testing.T) {
 	ChangeDirectoryHelper(t)
 
@@ -25,7 +25,7 @@ func TestPath_CreatesTestdataDirWhenUpdate(t *testing.T) {
 	require.True(t, info.IsDir())
 }
 
-// TestPath_DoesNotCreateTestdataDirWhenNotUpdate tests the Path() function when update is false
+// TestPath_DoesNotCreateTestdataDirWhenNotUpdate tests the Path() function when update is false.
 func TestPath_DoesNotCreateTestdataDirWhenNotUpdate(t *testing.T) {
 	ChangeDirectoryHelper(t)
 
@@ -71,7 +71,7 @@ func TestRead_SucceedsWhenFileExists(t *testing.T) {
 	require.Equal(t, []byte("this is a test\n"), got)
 }
 
-// TestRead_ReturnsNilWhenUpdateTrue tests the Read function when the update flag is true
+// TestRead_ReturnsNilWhenUpdateTrue tests the Read function when the update flag is true.
 func TestRead_ReturnsNilWhenUpdateTrue(t *testing.T) {
 	ChangeDirectoryHelper(t)
 
@@ -99,7 +99,7 @@ func TestCompareBytes_UpdateWritesNewGolden(t *testing.T) {
 	require.Equal(t, []byte("test data\n"), b)
 }
 
-// TestCompareBytes_NoUpdateMatchesPasses tests the CompareBytes() function when the golden file is the same as the result
+// TestCompareBytes_NoUpdateMatchesPasses tests the CompareBytes() function when the golden file is the same as the result.
 func TestCompareBytes_NoUpdateMatchesPasses(t *testing.T) {
 	ChangeDirectoryHelper(t)
 
@@ -127,7 +127,7 @@ func TestCompareBytes_FilesWithDifferentSeparatorsPass(t *testing.T) {
 	CompareBytes(t, "test", Read(t, "test"), []byte("Could not write to file discovery/export.zip\n"), WithNormalizePaths())
 }
 
-// TestWithNormalizePaths tests the WithNormalizePaths() function
+// TestWithNormalizePaths tests the WithNormalizePaths() function.
 func TestWithNormalizePaths(t *testing.T) {
 	tests := []struct {
 		name     string

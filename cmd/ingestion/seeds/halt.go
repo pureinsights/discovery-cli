@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewHaltCommand creates the seed halt command to halt a seed execution
+// NewHaltCommand creates the seed halt command to halt a seed execution.
 func NewHaltCommand(d cli.Discovery) *cobra.Command {
 	var execution string
 	halt := &cobra.Command{

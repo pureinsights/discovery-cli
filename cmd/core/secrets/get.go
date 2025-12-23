@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewGetCommand creates the secret get command
+// NewGetCommand creates the secret get command.
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",

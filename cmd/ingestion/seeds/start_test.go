@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestNewStartCommand_WithProfileFlag tests the NewStartCommand function
+// TestNewStartCommand_WithProfileFlag tests the NewStartCommand function.
 func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 	tests := []struct {
 		name                string

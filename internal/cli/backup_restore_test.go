@@ -22,7 +22,7 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-// TestRenderExportStatus tests the RenderExportStatus() function
+// TestRenderExportStatus tests the RenderExportStatus() function.
 func TestRenderExportStatus(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -67,7 +67,7 @@ var coreImport, _ = os.ReadFile("testdata/core-import.json")
 var ingestionImport, _ = os.ReadFile("testdata/ingestion-import.json")
 var queryflowImport, _ = os.ReadFile("testdata/queryflow-import.json")
 
-// WorkingCoreBackupRestore mocks a working backup restore
+// WorkingCoreBackupRestore mocks a working backup restore.
 type WorkingCoreBackupRestore struct {
 	mock.Mock
 }
@@ -77,12 +77,12 @@ func (g *WorkingCoreBackupRestore) Export() ([]byte, string, error) {
 	return coreBytes, "export-20251110T1455.zip", nil
 }
 
-// Import implements the interface
+// Import implements the interface.
 func (g *WorkingCoreBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.ParseBytes(coreImport), nil
 }
 
-// WorkingIngestionBackupRestore mocks a working backup restore
+// WorkingIngestionBackupRestore mocks a working backup restore.
 type WorkingIngestionBackupRestore struct {
 	mock.Mock
 }
@@ -92,12 +92,12 @@ func (g *WorkingIngestionBackupRestore) Export() ([]byte, string, error) {
 	return ingestionBytes, "export-20251110T1455.zip", nil
 }
 
-// Import implements the interface
+// Import implements the interface.
 func (g *WorkingIngestionBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.ParseBytes(ingestionImport), nil
 }
 
-// WorkingQueryFlowBackupRestore mocks a working backup restore
+// WorkingQueryFlowBackupRestore mocks a working backup restore.
 type WorkingQueryFlowBackupRestore struct {
 	mock.Mock
 }
@@ -107,12 +107,12 @@ func (g *WorkingQueryFlowBackupRestore) Export() ([]byte, string, error) {
 	return queryflowBytes, "export-20251110T1455.zip", nil
 }
 
-// Import implements the interface
+// Import implements the interface.
 func (g *WorkingQueryFlowBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.ParseBytes(queryflowImport), nil
 }
 
-// FailingBackupRestore mocks a failing backup restore
+// FailingBackupRestore mocks a failing backup restore.
 type FailingBackupRestore struct {
 	mock.Mock
 }
@@ -122,12 +122,12 @@ func (g *FailingBackupRestore) Export() ([]byte, string, error) {
 	return []byte(nil), "discovery.zip", discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// Import implements the interface
+// Import implements the interface.
 func (g *FailingBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// TestWriteExport tests the WriteExport() function
+// TestWriteExport tests the WriteExport() function.
 func TestWriteExport(t *testing.T) {
 	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
@@ -194,7 +194,7 @@ func TestWriteExport(t *testing.T) {
 	}
 }
 
-// TestExportEntitiesFromClient tests the ExportEntitiesFromClient() function
+// TestExportEntitiesFromClient tests the ExportEntitiesFromClient() function.
 func TestExportEntitiesFromClient(t *testing.T) {
 	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
@@ -425,7 +425,7 @@ func TestExportEntitiesFromClients(t *testing.T) {
 	}
 }
 
-// TestImportEntitiesFromClient tests the ImportEntitiesFromClient() function
+// TestImportEntitiesFromClient tests the ImportEntitiesFromClient() function.
 func TestImportEntitiesFromClient(t *testing.T) {
 	tests := []struct {
 		name           string

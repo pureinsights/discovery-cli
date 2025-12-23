@@ -19,7 +19,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestNewStoreCommand tests the NewStoreCommand function
+// TestNewStoreCommand tests the NewStoreCommand function.
 func TestNewStoreCommand(t *testing.T) {
 	tests := []struct {
 		name         string

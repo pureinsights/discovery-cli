@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestNewServerCommand tests the NewCoreCommand() function
+// TestNewServerCommand tests the NewCoreCommand() function.
 func TestNewServerCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}

@@ -7,7 +7,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Searcher is a struct that adds the path to a request to search for entities with filters.
+// searcher is a struct that adds the path to a request to search for entities with filters.
 type searcher struct {
 	client
 }

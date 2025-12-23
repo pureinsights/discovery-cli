@@ -24,7 +24,7 @@ type SearcherIDNotUUID struct {
 	mock.Mock
 }
 
-// Search implements the searcher interface
+// Search implements the searcher interface.
 func (s *SearcherIDNotUUID) Search(gjson.Result) ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -45,7 +45,7 @@ func (s *SearcherIDNotUUID) SearchByName(name string) (gjson.Result, error) {
 		}`), nil
 }
 
-// Get implements the Searcher interface
+// Get implements the Searcher interface.
 func (s *SearcherIDNotUUID) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -60,7 +60,7 @@ func (s *SearcherIDNotUUID) Get(id uuid.UUID) (gjson.Result, error) {
 	}
 }
 
-// GetAll implements the searcher interface
+// GetAll implements the searcher interface.
 func (s *SearcherIDNotUUID) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
@@ -132,18 +132,18 @@ func TestGetSeedId(t *testing.T) {
 	}
 }
 
-// WorkingSeedController simulates a working IngestionSeedController
+// WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedController struct {
 	mock.Mock
 	WorkingSearcher
 }
 
-// Start returns the result of a new seed execution
+// Start returns the result of a new seed execution.
 func (c *WorkingSeedController) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
 }
 
-// Halt returns the results of halting a seed
+// Halt returns the results of halting a seed.
 func (c *WorkingSeedController) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
@@ -159,7 +159,7 @@ func (c *FailingSeedControllerGetSeedIdFails) Start(id uuid.UUID, scan discovery
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
 }
 
-// Halt implements the interface
+// Halt implements the interface.
 func (c *FailingSeedControllerGetSeedIdFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
@@ -182,7 +182,7 @@ func (c *FailingSeedControllerStartFails) Start(id uuid.UUID, scan discoveryPack
 			}`)}
 }
 
-// Halt implements the IngestionSeedController interface
+// Halt implements the IngestionSeedController interface.
 func (c *FailingSeedControllerStartFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -377,13 +377,13 @@ func Test_discovery_HaltSeed(t *testing.T) {
 	}
 }
 
-// WorkingSeedController simulates a working IngestionSeedController
+// WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedExecutionController struct {
 	mock.Mock
 	WorkingGetter
 }
 
-// Halt returns the results of halting a seed
+// Halt returns the results of halting a seed.
 func (c *WorkingSeedExecutionController) Halt(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{"acknowledged":true}`), nil
 }
@@ -394,7 +394,7 @@ type FailingSeedExecutionControllerHaltFails struct {
 	WorkingGetter
 }
 
-// Halt returns the results of halting a seed
+// Halt returns the results of halting a seed.
 func (c *FailingSeedExecutionControllerHaltFails) Halt(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
 			"status": 409,
@@ -512,7 +512,7 @@ func TestConvertJSONArrayToString(t *testing.T) {
 			array: gjson.Result{}.Array(),
 			expected: `[
 ]`,
-		}, 
+		},
 		{
 			name:  "Array with one element.",
 			array: gjson.Parse(`[{"id": 1}]`).Array(),
@@ -530,7 +530,7 @@ func TestConvertJSONArrayToString(t *testing.T) {
 	}
 }
 
-// WorkingGetter mocks the RecordGetter interface to always answer a working result
+// WorkingGetter mocks the RecordGetter interface to always answer a working result.
 type WorkingRecordGetter struct {
 	mock.Mock
 }
@@ -548,7 +548,7 @@ func (g *WorkingRecordGetter) Get(id string) (gjson.Result, error) {
 }`), nil
 }
 
-// GetAll returns a list of records
+// GetAll returns a list of records.
 func (g *WorkingRecordGetter) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{"id":{"plain":"4e7c8a47efd829ef7f710d64da661786","hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="},"creationTimestamp":"2025-09-05T20:13:47Z","lastUpdatedTimestamp":"2025-09-05T20:13:47Z","status":"SUCCESS"},
@@ -562,7 +562,7 @@ type FailingRecordGetter struct {
 	mock.Mock
 }
 
-// Get returns a 404 Not Found
+// Get returns a 404 Not Found.
 func (g *FailingRecordGetter) Get(id string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -577,12 +577,12 @@ func (g *FailingRecordGetter) Get(id string) (gjson.Result, error) {
 	}
 }
 
-// GetAll returns 401 unauthorized
+// GetAll returns 401 unauthorized.
 func (g *FailingRecordGetter) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// TestAppendSeedRecord tests the AppendSeedRecord function()
+// TestAppendSeedRecord tests the AppendSeedRecord function().
 func TestAppendSeedRecord(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -666,7 +666,7 @@ func TestAppendSeedRecord(t *testing.T) {
 	}
 }
 
-// Test_discovery_AppendSeedRecord tests the discovery.AppendSeedRecord function
+// Test_discovery_AppendSeedRecord tests the discovery.AppendSeedRecord function.
 func Test_discovery_AppendSeedRecord(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -851,7 +851,7 @@ func TestAppendSeedRecords(t *testing.T) {
 	}
 }
 
-// Test_discovery_AppendSeedRecords tests the discovery.AppendSeedRecords() function
+// Test_discovery_AppendSeedRecords tests the discovery.AppendSeedRecords() function.
 func Test_discovery_AppendSeedRecords(t *testing.T) {
 	tests := []struct {
 		name           string

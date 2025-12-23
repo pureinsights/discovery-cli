@@ -44,7 +44,7 @@ func TestError_Error(t *testing.T) {
 	}
 }
 
-// TestNewErrorWithCause tests the NewErrorWithCause constructor function
+// TestNewErrorWithCause tests the NewErrorWithCause constructor function.
 func TestNewErrorWithCause(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -207,7 +207,7 @@ func TestFromError(t *testing.T) {
 	}
 }
 
-// TestNormalizeReadFileError tests the NormalizeReadFileError
+// TestNormalizeReadFileError tests the NormalizeReadFileError.
 func TestNormalizeReadFileError(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -312,7 +312,7 @@ func TestNormalizeReadFileError(t *testing.T) {
 	}
 }
 
-// TestNormalizeWriteFileError tests the NormalizeWriteFileError() function
+// TestNormalizeWriteFileError tests the NormalizeWriteFileError() function.
 func TestNormalizeWriteFileError(t *testing.T) {
 	tests := []struct {
 		name        string

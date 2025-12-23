@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewExportCommand creates the discovery export command that exports all Discovery's entities
+// NewExportCommand creates the discovery export command that exports all Discovery's entities.
 func NewExportCommand(d cli.Discovery) *cobra.Command {
 	var file string
 	export := &cobra.Command{
