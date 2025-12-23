@@ -14,7 +14,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "delete",
 		Short: "The command that deletes credentials from Discovery Core.",
-		Long:  fmt.Sprintf(commands.LongDeleteNoNames, "credential", "Core"),
+		Long:  fmt.Sprintf(commands.LongDeleteSearch, "credential", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
