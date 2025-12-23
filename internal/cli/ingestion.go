@@ -15,16 +15,6 @@ type IngestionSeedController interface {
 	Halt(id uuid.UUID) ([]gjson.Result, error)
 }
 
-// GetEntityId obtains the UUID from the result of a search.
-func GetEntityId(d Discovery, client Searcher, name string) (uuid.UUID, error) {
-	entity, err := d.searchEntity(client, name)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return uuid.Parse(entity.Get("id").String())
-}
-
 // StartSeed initiates the execution of a seed with the given scanType and execution properties.
 func (d discovery) StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error {
 	seedId, err := GetEntityId(d, client, name)
