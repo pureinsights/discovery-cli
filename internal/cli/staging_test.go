@@ -18,22 +18,26 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// WorkingStagingBucketControllerNoConflict simulates when the StagingBucketController works.
 type WorkingStagingBucketControllerNoConflict struct {
 	mock.Mock
 }
 
+// Create returns a working result.
 func (s *WorkingStagingBucketControllerNoConflict) Create(string, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Delete implements the interface.
 func (s *WorkingStagingBucketControllerNoConflict) Delete(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Get returns a bucket.
 func (s *WorkingStagingBucketControllerNoConflict) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "name": "my-bucket",
@@ -61,19 +65,23 @@ func (s *WorkingStagingBucketControllerNoConflict) Get(string) (gjson.Result, er
 }`), nil
 }
 
+// CreateIndex implements the interface.
 func (s *WorkingStagingBucketControllerNoConflict) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
+// DeleteIndex implements the interface.
 func (s *WorkingStagingBucketControllerNoConflict) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
+// WorkingStagingBucketControllerNameConflict simulates when the bucket already exists, but the updates succeed.
 type WorkingStagingBucketControllerNameConflict struct {
 	mock.Mock
 	call int
 }
 
+// Create returns a conflict error.
 func (s *WorkingStagingBucketControllerNameConflict) Create(string, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
@@ -82,12 +90,14 @@ func (s *WorkingStagingBucketControllerNameConflict) Create(string, gjson.Result
 }`)}
 }
 
+// Delete implements the interface.
 func (s *WorkingStagingBucketControllerNameConflict) Delete(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Get returns different results based on the number of calls to simulate that the update of the indices worked.
 func (s *WorkingStagingBucketControllerNameConflict) Get(string) (gjson.Result, error) {
 	s.call++
 
@@ -142,34 +152,40 @@ func (s *WorkingStagingBucketControllerNameConflict) Get(string) (gjson.Result, 
 }`), nil
 }
 
+// CreateIndex simulates a working Index update.
 func (s *WorkingStagingBucketControllerNameConflict) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// DeleteIndex simulates a working Index deletion.
 func (s *WorkingStagingBucketControllerNameConflict) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// FailingStagingBucketControllerNotDiscoveryError mocks when the create request does not return a Discovery error.
 type FailingStagingBucketControllerNotDiscoveryError struct {
 	mock.Mock
 }
 
+// Create returns a different error.
 func (s *FailingStagingBucketControllerNotDiscoveryError) Create(string, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
 }`), errors.New("different error")
 }
 
+// Delete implements the interface.
 func (s *FailingStagingBucketControllerNotDiscoveryError) Delete(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Get returns a bucket.
 func (s *FailingStagingBucketControllerNotDiscoveryError) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "name": "test",
@@ -197,20 +213,24 @@ func (s *FailingStagingBucketControllerNotDiscoveryError) Get(string) (gjson.Res
 }`), nil
 }
 
+// CreateIndex implements the interface.
 func (s *FailingStagingBucketControllerNotDiscoveryError) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// DeleteIndex implements the interface.
 func (s *FailingStagingBucketControllerNotDiscoveryError) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
+// FailingStagingBucketControllerNotFoundError mocks when the function receives a Discovery error that is not a conflict.
 type FailingStagingBucketControllerNotFoundError struct {
 	mock.Mock
 }
 
+// Create returns not found error.
 func (s *FailingStagingBucketControllerNotFoundError) Create(string, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
@@ -219,6 +239,7 @@ func (s *FailingStagingBucketControllerNotFoundError) Create(string, gjson.Resul
 }`)}
 }
 
+// Delete implements the interface.
 func (s *FailingStagingBucketControllerNotFoundError) Delete(string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
   "status": 404,
@@ -230,6 +251,7 @@ func (s *FailingStagingBucketControllerNotFoundError) Delete(string) (gjson.Resu
 }`)}
 }
 
+// Get returns a bucket.
 func (s *FailingStagingBucketControllerNotFoundError) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "name": "test",
@@ -257,20 +279,24 @@ func (s *FailingStagingBucketControllerNotFoundError) Get(string) (gjson.Result,
 }`), nil
 }
 
+// CreateIndex implements the interface.
 func (s *FailingStagingBucketControllerNotFoundError) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// DeleteIndex implements the interface.
 func (s *FailingStagingBucketControllerNotFoundError) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
+// FailingStagingBucketControllerIndexCreationFails mocks a failing index creation.
 type FailingStagingBucketControllerIndexCreationFails struct {
 	mock.Mock
 }
 
+// Create returns a conflict to make the function go through that path.
 func (s *FailingStagingBucketControllerIndexCreationFails) Create(string, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
@@ -279,12 +305,14 @@ func (s *FailingStagingBucketControllerIndexCreationFails) Create(string, gjson.
 }`)}
 }
 
+// Delete implements the interface.
 func (s *FailingStagingBucketControllerIndexCreationFails) Delete(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Get returns a bucket.
 func (s *FailingStagingBucketControllerIndexCreationFails) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "name": "test",
@@ -312,6 +340,7 @@ func (s *FailingStagingBucketControllerIndexCreationFails) Get(string) (gjson.Re
 }`), nil
 }
 
+// CreateIndex returns an error.
 func (s *FailingStagingBucketControllerIndexCreationFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
@@ -320,16 +349,19 @@ func (s *FailingStagingBucketControllerIndexCreationFails) CreateIndex(bucket, i
 }`)}
 }
 
+// DeleteIndex implements the interface.
 func (s *FailingStagingBucketControllerIndexCreationFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// FailingStagingBucketControllerIndexDeletionFails simulates when deleting an index fails.
 type FailingStagingBucketControllerIndexDeletionFails struct {
 	mock.Mock
 }
 
+// Create returns a conflict error.
 func (s *FailingStagingBucketControllerIndexDeletionFails) Create(string, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
@@ -338,12 +370,14 @@ func (s *FailingStagingBucketControllerIndexDeletionFails) Create(string, gjson.
 }`)}
 }
 
+// Delete implements the interface.
 func (s *FailingStagingBucketControllerIndexDeletionFails) Delete(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Get returns a bucket.
 func (s *FailingStagingBucketControllerIndexDeletionFails) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "name": "test",
@@ -371,12 +405,14 @@ func (s *FailingStagingBucketControllerIndexDeletionFails) Get(string) (gjson.Re
 }`), nil
 }
 
+// CreateIndex implements the interface.
 func (s *FailingStagingBucketControllerIndexDeletionFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// DeleteIndex returns an error.
 func (s *FailingStagingBucketControllerIndexDeletionFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
@@ -385,22 +421,26 @@ func (s *FailingStagingBucketControllerIndexDeletionFails) DeleteIndex(bucket, i
 }`)}
 }
 
+// FailingStagingBucketControllerLastGetFails simulates when the last get of the bucket fails.
 type FailingStagingBucketControllerLastGetFails struct {
 	mock.Mock
 }
 
+// Create implements the interface.
 func (s *FailingStagingBucketControllerLastGetFails) Create(string, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Delete implements the interface.
 func (s *FailingStagingBucketControllerLastGetFails) Delete(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Get implements the interface.
 func (s *FailingStagingBucketControllerLastGetFails) Get(string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
   "status": 404,
@@ -412,18 +452,22 @@ func (s *FailingStagingBucketControllerLastGetFails) Get(string) (gjson.Result, 
 }`)}
 }
 
+// CreateIndex implements the interface.
 func (s *FailingStagingBucketControllerLastGetFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
+// DeleteIndex implements the interface.
 func (s *FailingStagingBucketControllerLastGetFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
+// FailingStagingBucketControllerFirstGetFails mocks when the first get fails.
 type FailingStagingBucketControllerFirstGetFails struct {
 	mock.Mock
 }
 
+// Create returns a conflict.
 func (s *FailingStagingBucketControllerFirstGetFails) Create(string, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
@@ -432,12 +476,14 @@ func (s *FailingStagingBucketControllerFirstGetFails) Create(string, gjson.Resul
 }`)}
 }
 
+// Delete implements the interface.
 func (s *FailingStagingBucketControllerFirstGetFails) Delete(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// Get returns an error.
 func (s *FailingStagingBucketControllerFirstGetFails) Get(string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
   "status": 404,
@@ -449,12 +495,14 @@ func (s *FailingStagingBucketControllerFirstGetFails) Get(string) (gjson.Result,
 }`)}
 }
 
+// CreateIndex implements the interface.
 func (s *FailingStagingBucketControllerFirstGetFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
+// DeleteIndex implements the interface.
 func (s *FailingStagingBucketControllerFirstGetFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
