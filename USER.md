@@ -1989,13 +1989,13 @@ Flags:
 Examples:
 
 ```bash
-# Delete a endpoint by id
+# Delete an endpoint by id
 discovery queryflow endpoint delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
 {"acknowledged":true}
 
 ```
 ```bash
-# Delete a endpoint by name
+# Delete an endpoint by name
 discovery queryflow endpoint delete endpoint1
 {"acknowledged":true}
 ```

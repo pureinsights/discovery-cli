@@ -8,6 +8,8 @@ import (
 const (
 	// LongDeleteNoNames is the message used in the Long field of the Delete commands that do not support deleting by name.
 	LongDeleteNoNames string = "delete is the command used to delete Discovery %[2]s's %[1]ss. The user must send a UUID to delete a specific %[1]s. If no UUID is given, then an error is returned. This command does not support referencing an entity by name."
+	// LongDeleteNoNames is the message used in the Long field of the Delete commands that support deleting by name and ID.
+	LongDeleteSearch string = "delete is the command used to delete Discovery %[2]s's %[1]ss. The user must send a name or UUID to delete a specific %[1]s."
 )
 
 // DeleteCommand is the function that executes the delete operation for the delete commands that do not work with names.
