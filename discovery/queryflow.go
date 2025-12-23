@@ -38,7 +38,7 @@ type queryFlowPipelinesClient struct {
 	searcher
 }
 
-// NewQueryFlowPipelinesClient is the constructor of a queryFlowPipelinesClient
+// NewQueryFlowPipelinesClient is the constructor of a queryFlowPipelinesClient.
 func newQueryFlowPipelinesClient(url, apiKey string) queryFlowPipelinesClient {
 	client := newClient(url+"/pipeline", apiKey)
 	return queryFlowPipelinesClient{
@@ -56,7 +56,7 @@ func newQueryFlowPipelinesClient(url, apiKey string) queryFlowPipelinesClient {
 	}
 }
 
-// endpointsClient is a struct that performs the CRUD of endpoints.
+// EndpointsClient is a struct that performs the CRUD of endpoints.
 type endpointsClient struct {
 	crud
 	cloner
@@ -95,12 +95,12 @@ func (q queryFlow) Processors() queryFlowProcessorsClient {
 	return newQueryFlowProcessorsClient(q.Url, q.ApiKey)
 }
 
-// Pipelines is used to create a queryFlowPipelinesClient
+// Pipelines is used to create a queryFlowPipelinesClient.
 func (q queryFlow) Pipelines() queryFlowPipelinesClient {
 	return newQueryFlowPipelinesClient(q.Url, q.ApiKey)
 }
 
-// Endpoints creates a endpointsClient with QueryFlow's URL and API Key
+// Endpoints creates a endpointsClient with QueryFlow's URL and API Key.
 func (q queryFlow) Endpoints() endpointsClient {
 	return newEndpointsClient(q.Url, q.ApiKey)
 }

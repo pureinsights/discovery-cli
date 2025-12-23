@@ -154,7 +154,7 @@ type ingestionPipelinesClient struct {
 	searcher
 }
 
-// newIngestionPipelinesClient is the constructor of an ingestionPipelinesClient
+// newIngestionPipelinesClient is the constructor of an ingestionPipelinesClient.
 func newIngestionPipelinesClient(url, apiKey string) ingestionPipelinesClient {
 	client := newClient(url+"/pipeline", apiKey)
 	return ingestionPipelinesClient{
@@ -257,7 +257,7 @@ func (i ingestion) Processors() ingestionProcessorsClient {
 	return newIngestionProcessorsClient(i.Url, i.ApiKey)
 }
 
-// Pipelines is used to create a ingestionPipelinesClient
+// Pipelines is used to create an ingestionPipelinesClient.
 func (i ingestion) Pipelines() ingestionPipelinesClient {
 	return newIngestionPipelinesClient(i.Url, i.ApiKey)
 }
