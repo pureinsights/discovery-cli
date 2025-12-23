@@ -44,6 +44,7 @@ type Discovery interface {
 	ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
 	StatusCheck(client StatusChecker, product string, printer Printer) error
 	StoreBucket(client StagingBucketController, name string, options gjson.Result, printer Printer) error
+	DeleteBucket(client StagingBucketController, bucketName string, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
