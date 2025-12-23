@@ -124,7 +124,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
+			vpr.Set("output", "pretty-json")
 			if tc.url {
 				vpr.Set("default.core_url", srv.URL)
 			}
@@ -185,7 +185,7 @@ func TestNewImportCommand_NoProfileFlag(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "json")
+	vpr.Set("output", "pretty-json")
 
 	vpr.Set("default.core_url", "test")
 	vpr.Set("default.core_key", "test")

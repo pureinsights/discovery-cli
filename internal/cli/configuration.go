@@ -53,7 +53,7 @@ func InitializeConfig(ios iostreams.IOStreams, path string) (*viper.Viper, error
 
 	defaultProfile := "default"
 	vpr.SetDefault("profile", defaultProfile)
-	vpr.SetDefault("output", "json")
+	vpr.SetDefault("output", "pretty-json")
 
 	defaultValues := false
 
