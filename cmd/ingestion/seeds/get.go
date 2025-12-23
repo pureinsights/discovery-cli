@@ -34,9 +34,6 @@ func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profi
 	}
 
 	output := vpr.GetString("output")
-	if output == "json" {
-		output = "pretty-json"
-	}
 	printer := cli.GetObjectPrinter(output)
 
 	if cmd.Flags().Changed("record") {

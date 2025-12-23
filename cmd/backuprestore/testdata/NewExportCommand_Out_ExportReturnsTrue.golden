@@ -1,1 +1,11 @@
-{"core":{"acknowledged":true},"ingestion":{"acknowledged":true},"queryflow":{"acknowledged":true}}
+{
+  "core": {
+    "acknowledged": true
+  },
+  "ingestion": {
+    "acknowledged": true
+  },
+  "queryflow": {
+    "acknowledged": true
+  }
+}
