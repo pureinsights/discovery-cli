@@ -1,6 +1,10 @@
 Usage:
   import [subcommands] [flags]
 
+Examples:
+	# Import the entities using profile "cn" and fail conflict resolution strategy.
+	discovery queryflow import -p cn --file "entities/queryflow.zip"
+
 Flags:
   -f, --file string          the file that contains the entities that will be restored
   -h, --help                 help for import
