@@ -71,7 +71,7 @@ func TestExportCommand(t *testing.T) {
 			componentName:  "Core",
 			file:           filepath.Join(t.TempDir(), "export.zip"),
 			client:         new(WorkingBackupRestore),
-			expectedOutput: "{\"acknowledged\":true}\n",
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
 			err:            nil,
 		},
 
@@ -116,7 +116,6 @@ func TestExportCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
 			if tc.url != "" {
 				vpr.Set("default.core_url", tc.url)
 			}
@@ -125,7 +124,7 @@ func TestExportCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := ExportCommand(d, tc.client, tc.file, GetCommandConfig("default", "json", tc.componentName, "core_url"))
+			err := ExportCommand(d, tc.client, tc.file, GetCommandConfig("default", "pretty-json", tc.componentName, "core_url"))
 
 			if tc.err != nil {
 				require.Error(t, err)
@@ -206,7 +205,6 @@ func TestImportCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
 			if tc.url != "" {
 				vpr.Set("default.core_url", tc.url)
 			}
@@ -215,7 +213,7 @@ func TestImportCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := ImportCommand(d, tc.client, tc.file, discoveryPackage.OnConflictUpdate, GetCommandConfig("default", "json", tc.componentName, "core_url"))
+			err := ImportCommand(d, tc.client, tc.file, discoveryPackage.OnConflictUpdate, GetCommandConfig("default", "pretty-json", tc.componentName, "core_url"))
 
 			if tc.err != nil {
 				require.Error(t, err)
