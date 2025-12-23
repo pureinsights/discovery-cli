@@ -28,6 +28,8 @@ func NewExportCommand(d cli.Discovery) *cobra.Command {
 			return commands.ExportCommand(d, queryflowClient.BackupRestore(), file, commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"))
 		},
 		Args: cobra.NoArgs,
+		Example: `	# Export the entities to a specific file.
+	discovery queryflow export -p cn --file "entities/queryflow.zip"`,
 	}
 
 	export.Flags().StringVarP(&file, "file", "f", "", "the file that will contain the exported entities")

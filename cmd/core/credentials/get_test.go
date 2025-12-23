@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// NewGetCommand creates the credential get command
+// TestNewGetCommand tests the NewGetCommand() function
 func TestNewGetCommand(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -572,7 +572,7 @@ func TestNewGetCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
+
 			if tc.url {
 				vpr.Set("default.core_url", srv.URL)
 			}

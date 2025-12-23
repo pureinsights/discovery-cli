@@ -1,6 +1,10 @@
 Usage:
   export [subcommands] [flags]
 
+Examples:
+	# Export the entities to a specific file.
+	discovery ingestion export -p cn --file "entities/ingestion.zip"
+
 Flags:
   -f, --file string      the file that will contain the exported entities
   -h, --help             help for export

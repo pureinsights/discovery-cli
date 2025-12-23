@@ -32,7 +32,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	{"acknowledged":true}
 
 	# Delete a processor by name
-	discovery ingestion processor delete "MongoDB store processor"
+	discovery ingestion processor delete my-processor"
 	{"acknowledged":true}`,
 	}
 	return get

@@ -34,9 +34,6 @@ func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profi
 	}
 
 	output := vpr.GetString("output")
-	if output == "json" {
-		output = "pretty-json"
-	}
 	printer := cli.GetObjectPrinter(output)
 
 	if cmd.Flags().Changed("record") {
@@ -87,7 +84,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get seed by name
-	discovery ingestion seed get "Search seed"
+	discovery ingestion seed get "my-seed"
 
 	# Get seeds using filters
 	discovery ingestion seed get --filter label=A:A -f type=staging

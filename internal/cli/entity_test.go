@@ -108,16 +108,16 @@ func Test_discovery_GetEntity(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:           "GetEntity correctly prints an object with the sent printer",
+			name:           "GetEntity correctly prints an object with the pretty printer",
 			client:         new(WorkingGetter),
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			expectedOutput: "{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"5f125024-1e5e-4591-9fee-365dc20eeeed\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-18T20:55:43Z\",\n  \"name\": \"MongoDB text processor\",\n  \"type\": \"mongo\"\n}\n",
 			err:            nil,
 		},
 		{
 			name:           "GetEntity correctly prints an object with JSON ugly printer",
 			client:         new(WorkingGetter),
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:38Z\",\"id\":\"5f125024-1e5e-4591-9fee-365dc20eeeed\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-18T20:55:43Z\",\"name\":\"MongoDB text processor\",\"type\":\"mongo\"}\n",
 			err:            nil,
 		},
@@ -195,7 +195,7 @@ func Test_discovery_GetEntities(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:           "GetEntities correctly prints an array with the sent printer",
+			name:           "GetEntities correctly prints an array with the pretty printer",
 			client:         new(WorkingGetter),
 			printer:        JsonArrayPrinter(true),
 			expectedOutput: "[\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-21T17:57:16Z\",\n  \"id\": \"3393f6d9-94c1-4b70-ba02-5f582727d998\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-21T17:57:16Z\",\n  \"name\": \"MongoDB text processor 4\",\n  \"type\": \"mongo\"\n},\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"5f125024-1e5e-4591-9fee-365dc20eeeed\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-18T20:55:43Z\",\n  \"name\": \"MongoDB text processor\",\n  \"type\": \"mongo\"\n},\n{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"86e7f920-a4e4-4b64-be84-5437a7673db8\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"name\": \"Script processor\",\n  \"type\": \"script\"\n}\n]\n",
@@ -803,10 +803,10 @@ func Test_discovery_SearchEntity(t *testing.T) {
 		err            error
 	}{
 		{
-			name:           "SearchEntity correctly prints an object with the sent printer",
+			name:           "SearchEntity correctly prints an object with the pretty printer",
 			client:         new(WorkingSearcher),
 			id:             "MongoDB Atlas Server",
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			expectedOutput: "{\n  \"active\": true,\n  \"config\": {\n    \"connection\": {\n      \"connectTimeout\": \"1m\",\n      \"readTimeout\": \"30s\"\n    },\n    \"credentialId\": \"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\n    \"servers\": [\n      \"mongodb+srv://cluster0.dleud.mongodb.net/\"\n    ]\n  },\n  \"creationTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-09-29T15:50:17Z\",\n  \"name\": \"MongoDB Atlas server\",\n  \"type\": \"mongo\"\n}\n",
 			err:            nil,
 		},
@@ -814,7 +814,7 @@ func Test_discovery_SearchEntity(t *testing.T) {
 			name:           "SearchEntity correctly prints an object with JSON ugly printer",
 			client:         new(FailingSearcherWorkingGetter),
 			id:             "986ce864-af76-4fcb-8b4f-f4e4c6ab0951",
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			expectedOutput: "{\"active\":true,\"config\":{\"connection\":{\"connectTimeout\":\"1m\",\"readTimeout\":\"30s\"},\"credentialId\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"servers\":[\"mongodb+srv://cluster0.dleud.mongodb.net/\"]},\"creationTimestamp\":\"2025-09-29T15:50:17Z\",\"id\":\"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-09-29T15:50:17Z\",\"name\":\"MongoDB Atlas server clone\",\"type\":\"mongo\"}\n",
 			err:            nil,
 		},
@@ -1940,16 +1940,16 @@ func Test_discovery_DeleteEntity(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:           "DeleteEntity correctly prints the deletion confirmation with the sent printer",
+			name:           "DeleteEntity correctly prints the deletion confirmation with the pretty printer",
 			client:         new(WorkingDeleter),
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
 			err:            nil,
 		},
 		{
 			name:           "DeleteEntity correctly prints an object with JSON ugly printer",
 			client:         new(WorkingDeleter),
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			expectedOutput: "{\"acknowledged\":true}\n",
 			err:            nil,
 		},
@@ -2227,16 +2227,16 @@ func Test_discovery_SearchDeleteEntity(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:           "SearchDeleteEntity correctly prints the deletion confirmation with the sent printer",
+			name:           "SearchDeleteEntity correctly prints the deletion confirmation with the pretty printer",
 			client:         new(WorkingSearchDeleter),
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
 			err:            nil,
 		},
 		{
 			name:           "SearchDeleteEntity correctly prints an object with JSON ugly printer",
 			client:         new(WorkingSearchDeleter),
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			expectedOutput: "{\"acknowledged\":true}\n",
 			err:            nil,
 		},
