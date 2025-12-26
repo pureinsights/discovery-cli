@@ -84,6 +84,18 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 }`),
 			}, "Could not scroll the bucket with name \"my-bucket\"."),
 		},
+		{
+			name:      "Sent max flag is < 1",
+			args:      []string{"my-bucket", "--max", "-1"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDumpCommand_Out_InvalidMax",
+			errGolden: "NewDumpCommand_Err_InvalidMax",
+			outBytes:  testutils.Read(t, "NewDumpCommand_Out_InvalidMax"),
+			errBytes:  testutils.Read(t, "NewDumpCommand_Err_InvalidMax"),
+			responses: map[string]testutils.MockResponse{},
+			err:       cli.NewError(cli.ErrorExitCode, "The size flag can only be greater than or equal to 1."),
+		},
 	}
 
 	for _, tc := range tests {

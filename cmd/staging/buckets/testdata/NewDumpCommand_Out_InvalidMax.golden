@@ -1,0 +1,14 @@
+Usage:
+  dump <bucketName> [flags]
+
+Examples:
+	# Dump a bucket with filters, include projections, and a max page size of 5
+	discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --max 5
+
+Flags:
+  -f, --filter string       the DSL containing the filters that will be applied to the scroll
+  -h, --help                help for dump
+      --max int             the size of the pages that will be used when retrieving the records (default -1)
+  -p, --profile string      configuration profile to use (default "default")
+      --projection string   the DSL containing the fields that will be included and excluded in the records that will be retrieved from the bucket
+
