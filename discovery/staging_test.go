@@ -1546,7 +1546,7 @@ func Test_scrollWithPagination_ContentInSecondPage(t *testing.T) {
 	assert.Len(t, response, 6)
 }
 
-// Test_contentClient_Scroll Scroll() function.
+// Test_contentClient_Scroll tests the contentClient.Scroll() function.
 func Test_contentClient_Scroll(t *testing.T) {
 	body := `{"filters":{
 	"equals": {
