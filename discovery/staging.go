@@ -68,6 +68,9 @@ func (c contentClient) Get(contentId string, options ...stagingGetContentOption)
 	return execute(c.client, http.MethodGet, "/"+contentId, WithQueryParameters(queryParams))
 }
 
+// scrollWithPagination calls the scroll endpoint with the token parameter to get all of the results based on the filters and projections.
+// The size query parameter and filters and projections JSON body should be within the request options received if they were set by the user.
+// The scroll endpoint is continuously called until the received response is empty.
 func scrollWithPagination(client client, method, path string, options ...RequestOption) ([]gjson.Result, error) {
 	response, err := execute(client, method, path, options...)
 	if err != nil {
@@ -90,10 +93,13 @@ func scrollWithPagination(client client, method, path string, options ...Request
 		}
 
 		pageElements := response.Get("content").Array()
-		elements = append(elements, pageElements...)
-
-		token = response.Get("token").String()
-		empty = response.Get("empty").Bool()
+		if len(pageElements) > 0 {
+			elements = append(elements, pageElements...)
+			token = response.Get("token").String()
+			empty = response.Get("empty").Bool()
+		} else {
+			break
+		}
 	}
 	return elements, nil
 }
