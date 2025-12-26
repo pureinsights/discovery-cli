@@ -45,6 +45,7 @@ type Discovery interface {
 	StatusCheck(client StatusChecker, product string, printer Printer) error
 	StoreBucket(client StagingBucketController, name string, options gjson.Result, printer Printer) error
 	DeleteBucket(client StagingBucketController, bucketName string, printer Printer) error
+	DumpBucket(client StagingContentController, bucketName string, filters, projections gjson.Result, size *int, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
