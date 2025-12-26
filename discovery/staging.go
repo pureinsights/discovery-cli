@@ -68,6 +68,36 @@ func (c contentClient) Get(contentId string, options ...stagingGetContentOption)
 	return execute(c.client, http.MethodGet, "/"+contentId, WithQueryParameters(queryParams))
 }
 
+func scrollWithPagination(client client, method, path string, options ...RequestOption) ([]gjson.Result, error) {
+	response, err := execute(client, method, path, options...)
+	if err != nil {
+		return []gjson.Result(nil), err
+	}
+
+	if !(response.Get("content").Exists()) {
+		return []gjson.Result{}, nil
+	}
+
+	token := response.Get("token").String()
+	empty := response.Get("empty").Bool()
+	elements := response.Get("content").Array()
+	var requestOptions []RequestOption
+	for !empty {
+		requestOptions = append(options, WithQueryParameters(map[string][]string{"token": {token}}))
+		response, err = execute(client, method, path, requestOptions...)
+		if err != nil {
+			return []gjson.Result(nil), err
+		}
+
+		pageElements := response.Get("content").Array()
+		elements = append(elements, pageElements...)
+
+		token = response.Get("token").String()
+		empty = response.Get("empty").Bool()
+	}
+	return elements, nil
+}
+
 // Scroll iterates through all the records from a bucket based on the given filters and projections.
 func (c contentClient) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
 	body := "{}"
@@ -95,7 +125,7 @@ func (c contentClient) Scroll(filters, projections gjson.Result, size *int) ([]g
 		options = append(options, WithJSONBody(body))
 	}
 
-	return executeWithPagination(c.client, http.MethodPost, "/scroll", options...)
+	return scrollWithPagination(c.client, http.MethodPost, "/scroll", options...)
 }
 
 // Delete deletes the document with the given contentId in the bucket.
