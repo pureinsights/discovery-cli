@@ -1286,7 +1286,7 @@ func Test_scrollWithPagination_HTTPResponseCases(t *testing.T) {
 		// Working cases
 		{
 			name:        "scrollWithPagination returns no content",
-			method:      http.MethodGet,
+			method:      http.MethodPost,
 			path:        "/",
 			statusCode:  http.StatusNoContent,
 			response:    `{"content": []}`,
@@ -1295,7 +1295,7 @@ func Test_scrollWithPagination_HTTPResponseCases(t *testing.T) {
 		},
 		{
 			name:        "scrollWithPagination has no content field",
-			method:      http.MethodGet,
+			method:      http.MethodPost,
 			path:        "/",
 			statusCode:  http.StatusNoContent,
 			response:    ``,
@@ -1306,7 +1306,7 @@ func Test_scrollWithPagination_HTTPResponseCases(t *testing.T) {
 		// Error cases
 		{
 			name:       "scrollWithPagination returns a 401 Unauthorized",
-			method:     http.MethodGet,
+			method:     http.MethodPost,
 			path:       "/",
 			statusCode: http.StatusUnauthorized,
 			response:   `{"error":"unauthorized"}`,
@@ -1342,7 +1342,7 @@ func Test_scrollWithPagination_HTTPResponseCases(t *testing.T) {
 func Test_scrollWithPagination_ErrorInSecondPage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, http.MethodGet, r.Method)
+			assert.Equal(t, http.MethodPost, r.Method)
 			assert.Equal(t, "/content/my-bucket/scroll", r.URL.Path)
 			token := r.URL.Query().Get("token")
 			w.Header().Set("Content-Type", "application/json")
@@ -1404,7 +1404,7 @@ func Test_scrollWithPagination_ErrorInSecondPage(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	c := newClient(srv.URL, "")
-	response, err := scrollWithPagination(c, http.MethodGet, "/content/my-bucket/scroll")
+	response, err := scrollWithPagination(c, http.MethodPost, "/content/my-bucket/scroll")
 	assert.Equal(t, []gjson.Result(nil), response)
 	var errStruct Error
 	require.ErrorAs(t, err, &errStruct)
@@ -1418,7 +1418,7 @@ func Test_scrollWithPagination_RestyReturnsError(t *testing.T) {
 	srv.Close()
 
 	c := newClient(base, "")
-	response, err := scrollWithPagination(c, http.MethodGet, "/down")
+	response, err := scrollWithPagination(c, http.MethodPost, "/down")
 	require.Error(t, err)
 	assert.Equal(t, response, []gjson.Result(nil))
 	assert.Contains(t, err.Error(), base+"/down")
