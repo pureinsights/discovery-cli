@@ -113,8 +113,8 @@ func (d discovery) DeleteBucket(client StagingBucketController, bucketName strin
 }
 
 // DumpBucket scrolls the contents of a bucket based on the given filters, projections and maximum page size.
-func (d discovery) DumpBucket(client StagingContentController, bucketName string, filters, projections gjson.Result, size int, printer Printer) error {
-	records, err := client.Scroll(filters, projections, &size)
+func (d discovery) DumpBucket(client StagingContentController, bucketName string, filters, projections gjson.Result, size *int, printer Printer) error {
+	records, err := client.Scroll(filters, projections, size)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not scroll the bucket with name %q.", bucketName)
 	}

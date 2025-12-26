@@ -1163,7 +1163,8 @@ func Test_discovery_DumpBucket(t *testing.T) {
 			}
 
 			d := NewDiscovery(&ios, viper.New(), "")
-			err := d.DumpBucket(tc.client, "my-bucket", gjson.Parse(filters), gjson.Parse(projections), 3, tc.printer)
+			max := 3
+			err := d.DumpBucket(tc.client, "my-bucket", gjson.Parse(filters), gjson.Parse(projections), &max, tc.printer)
 
 			if tc.err != nil {
 				require.Error(t, err)
