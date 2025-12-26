@@ -2179,11 +2179,11 @@ Flags:
 
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
-`-p, --profile`::
 
+`-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-Examples:
+Example:
 
 ```bash
 # Delete a bucket by name
