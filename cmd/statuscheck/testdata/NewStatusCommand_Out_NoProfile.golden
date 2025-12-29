@@ -1,0 +1,10 @@
+Usage:
+  status [flags]
+
+Examples:
+	# Check the status of Discovery
+	discovery status
+
+Flags:
+  -h, --help   help for status
+

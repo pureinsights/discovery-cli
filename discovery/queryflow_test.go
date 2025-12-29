@@ -28,6 +28,20 @@ func Test_newQueryFlowProcessorsClient(t *testing.T) {
 	assert.Equal(t, url+"/processor", qpc.searcher.client.client.BaseURL)
 }
 
+// Test_newQueryFlowPipelinesClient test the queryFlowPipelinesClient's constructor
+func Test_newQueryFlowPipelinesClient(t *testing.T) {
+	url := "http://localhost:12040"
+	apiKey := "Api Key"
+	qpc := newQueryFlowPipelinesClient(url, apiKey)
+
+	assert.Equal(t, apiKey, qpc.crud.client.ApiKey)
+	assert.Equal(t, url+"/pipeline", qpc.crud.client.client.BaseURL)
+	assert.Equal(t, apiKey, qpc.cloner.client.ApiKey)
+	assert.Equal(t, url+"/pipeline", qpc.cloner.client.client.BaseURL)
+	assert.Equal(t, apiKey, qpc.searcher.client.ApiKey)
+	assert.Equal(t, url+"/pipeline", qpc.searcher.client.client.BaseURL)
+}
+
 // Test_newEndpointsClient tests the constructor of endpointsClients.
 func Test_newEndpointsClient(t *testing.T) {
 	url := "http://localhost:12040"
@@ -55,6 +69,19 @@ func Test_queryFlow_Processors(t *testing.T) {
 	assert.Equal(t, q.Url+"/processor", qpc.cloner.client.client.BaseURL)
 	assert.Equal(t, q.ApiKey, qpc.searcher.client.ApiKey)
 	assert.Equal(t, q.Url+"/processor", qpc.searcher.client.client.BaseURL)
+}
+
+// Test_queryFlow_Pipelines tests the queryFlow.Pipelines() function.
+func Test_queryFlow_Pipelines(t *testing.T) {
+	q := NewQueryFlow("http://localhost:12040", "Api Key")
+	qpc := q.Pipelines()
+
+	assert.Equal(t, q.ApiKey, qpc.crud.client.ApiKey)
+	assert.Equal(t, q.Url+"/pipeline", qpc.crud.client.client.BaseURL)
+	assert.Equal(t, q.ApiKey, qpc.cloner.client.ApiKey)
+	assert.Equal(t, q.Url+"/pipeline", qpc.cloner.client.client.BaseURL)
+	assert.Equal(t, q.ApiKey, qpc.searcher.client.ApiKey)
+	assert.Equal(t, q.Url+"/pipeline", qpc.searcher.client.client.BaseURL)
 }
 
 // Test_queryFlow_Endpoints tests the queryFlow.Endpoints() function.
@@ -474,6 +501,15 @@ func Test_queryFlow_Debug(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Test_queryFlow_StatusChecker tests the queryFlow.StatusChecker() function.
+func Test_queryFlow_StatusChecker(t *testing.T) {
+	q := NewQueryFlow("http://localhost:12040", "Api Key")
+	bc := q.StatusChecker()
+
+	assert.Equal(t, q.ApiKey, bc.ApiKey)
+	assert.Equal(t, "http://localhost:12040", bc.client.client.BaseURL)
 }
 
 // Test_NewQueryFlow tests the QueryFlow constructor.
