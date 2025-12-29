@@ -1950,6 +1950,72 @@ discovery queryflow pipeline get -p cn
 MISSING
 ```
 
+###### Store
+`store` is the command used to create and update Discovery QueryFlow's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+
+Usage: `discovery queryflow pipeline store [flags]`
+
+Flags:
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
+
+`-f, --file`::
+(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a pipeline with the JSON configuration in a file
+discovery queryflow pipeline store --file pipelines.json
+MISSING
+```
+
+```bash
+# Store a pipeline with the JSON configuration in the data flag
+discovery queryflow pipeline store --data 'MISSING'
+MISSING
+```
+
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's pipelines. The user must send a name or UUID to delete a specific pipeline.
+
+Usage: `discovery queryflow pipeline delete [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the pipeline that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a pipeline by id
+discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
+{"acknowledged":true}
+```
+
+```bash
+# Delete a pipeline by name
+discovery ingestion pipeline delete "my-pipeline"
+{"acknowledged":true}
+```
+
 ##### Endpoint
 `endpoint` is the command used to manage endpoints in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
 
