@@ -235,6 +235,13 @@ func (s staging) Content(bucket string) contentClient {
 	return newContentClient(s.Url, s.ApiKey, bucket)
 }
 
+// StatusChecker creates a statusChecker with Staging's URL and API Key.
+func (s staging) StatusChecker() statusChecker {
+	return statusChecker{
+		client: newClient(s.Url[:len(s.Url)-3], s.ApiKey),
+	}
+}
+
 // NewStaging is the constructor for the staging struct.
 // It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewStaging(url, apiKey string) staging {
