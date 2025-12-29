@@ -238,6 +238,40 @@ discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
 }
 ```
 
+#### Status
+`status` is the command used to check the status of every Discovery product. If a product is healthy, it should return a JSON with an "UP" status field, which is added to a results JSON that matches the product to the received status response.
+
+Usage: `discovery staging status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of every Discovery product using the profile "cn"
+discovery status -p cn
+{
+  "core": {
+    "status": "UP"
+  },
+  "ingestion": {
+    "status": "UP"
+  },
+  "queryflow": {
+    "status": "UP"
+  },
+  "staging": {
+    "status": "UP"
+  }
+}
+```
+
 #### Core
 `core` is the main command used to interact with Discovery's Core. 
 
@@ -877,6 +911,29 @@ discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
 # Delete a server by name
 discovery core server delete my-server
 {"acknowledged":true}
+```
+
+##### Status
+`status` is the command used to check the status of Discovery Core. If it is healthy, it should return a JSON with an "UP" status field.
+
+Usage: `discovery core status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of Discovery Core using the profile "cn"
+discovery core status -p cn
+{
+  "status": "UP"
+}
 ```
 
 #### Ingestion
@@ -1574,6 +1631,29 @@ discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f
 {"acknowledged":true}
 ```
 
+##### Status
+`status` is the command used to check the status of Discovery Ingestion. If it is healthy, it should return a JSON with an "UP" status field.
+
+Usage: `discovery ingestion status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of Discovery Ingestion using the profile "cn"
+discovery ingestion status -p cn
+{
+  "status": "UP"
+}
+```
+
 #### QueryFlow
 `queryflow` is the main command used to interact with Discovery's QueryFlow.
 
@@ -2124,6 +2204,29 @@ discovery queryflow endpoint delete endpoint1
 {"acknowledged":true}
 ```
 
+##### Status
+`status` is the command used to check the status of Discovery QueryFlow. If it is healthy, it should return a JSON with an "UP" status field.
+
+Usage: `discovery queryflow status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of Discovery QueryFlow using the profile "cn"
+discovery queryflow status -p cn
+{
+  "status": "UP"
+}
+```
+
 #### Staging
 `staging` is the main command used to interact with Discovery's Staging. 
 
@@ -2210,4 +2313,27 @@ Showing the configuration of profile "cn":
 
 Staging URL: "https://discovery.staging.cn"
 Staging API Key: "discovery.key.staging.cn"
+```
+
+##### Status
+`status` is the command used to check the status of Discovery Staging. If it is healthy, it should return a JSON with an "UP" status field.
+
+Usage: `discovery staging status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of Discovery Staging using the profile "cn"
+discovery staging status -p cn
+{
+  "status": "UP"
+}
 ```
