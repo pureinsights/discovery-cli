@@ -1,0 +1,12 @@
+{
+  "core": {
+    "status": "UP"
+  },
+  "ingestion": {
+    "status": "UP"
+  },
+  "queryflow": "status: 503, body: {\n    \"status\": \"DOWN\"\n}\n",
+  "staging": {
+    "status": "UP"
+  }
+}
