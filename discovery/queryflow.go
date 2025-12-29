@@ -128,6 +128,13 @@ func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Re
 	return execute(client, method, newUri, options...)
 }
 
+// StatusChecker creates a statusChecker with QueryFlow's URL and API Key.
+func (q queryFlow) StatusChecker() statusChecker {
+	return statusChecker{
+		client: newClient(q.Url[:len(q.Url)-3], q.ApiKey),
+	}
+}
+
 // NewQueryFlow is the constructor for the QueryFlow struct.
 // It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewQueryFlow(url, apiKey string) queryFlow {

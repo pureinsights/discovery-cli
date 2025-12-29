@@ -50,6 +50,6 @@ func TestNewIngestionCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "export", "import", "pipeline", "processor", "seed"}
+	expectedCommands := []string{"config", "export", "import", "pipeline", "processor", "seed", "status"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
