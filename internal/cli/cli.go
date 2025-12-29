@@ -42,6 +42,7 @@ type Discovery interface {
 	ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error
 	ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
 	ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
+	StatusCheck(client StatusChecker, product string, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.
