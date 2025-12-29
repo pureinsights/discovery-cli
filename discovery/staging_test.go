@@ -1343,6 +1343,15 @@ func Test_staging_Content(t *testing.T) {
 	assert.Equal(t, url+"/v2/content/"+bucketName, c.client.client.BaseURL)
 }
 
+// Test_staging_StatusChecker tests the staging.StatusChecker() function.
+func Test_staging_StatusChecker(t *testing.T) {
+	s := NewStaging("http://localhost:12020", "Api Key")
+	bc := s.StatusChecker()
+
+	assert.Equal(t, s.ApiKey, bc.ApiKey)
+	assert.Equal(t, "http://localhost:12020", bc.client.client.BaseURL)
+}
+
 // TestNewStaging tests the staging client constructor.
 func TestNewStaging(t *testing.T) {
 	url := "http://localhost:12020/v2"

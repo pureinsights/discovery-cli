@@ -1,0 +1,11 @@
+Usage:
+  status [flags]
+
+Examples:
+	# Check the status of Discovery Ingestion
+	discovery ingestion status
+
+Flags:
+  -h, --help             help for status
+  -p, --profile string   configuration profile to use (default "default")
+

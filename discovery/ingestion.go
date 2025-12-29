@@ -147,17 +147,17 @@ func newIngestionProcessorsClient(url, apiKey string) ingestionProcessorsClient 
 	}
 }
 
-// pipelinesClient is the struct that performs the CRUD and cloning of pipelines.
-type pipelinesClient struct {
+// ingestionPipelinesClient is the struct that performs the CRUD and cloning of pipelines.
+type ingestionPipelinesClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// newPipelinesClient is the constructor of a pipelinesClient
-func newPipelinesClient(url, apiKey string) pipelinesClient {
+// newIngestionPipelinesClient is the constructor of an ingestionPipelinesClient.
+func newIngestionPipelinesClient(url, apiKey string) ingestionPipelinesClient {
 	client := newClient(url+"/pipeline", apiKey)
-	return pipelinesClient{
+	return ingestionPipelinesClient{
 		crud: crud{
 			getter{
 				client: client,
@@ -257,9 +257,9 @@ func (i ingestion) Processors() ingestionProcessorsClient {
 	return newIngestionProcessorsClient(i.Url, i.ApiKey)
 }
 
-// Pipelines is used to create a pipelinesClient.
-func (i ingestion) Pipelines() pipelinesClient {
-	return newPipelinesClient(i.Url, i.ApiKey)
+// Pipelines is used to create an ingestionPipelinesClient.
+func (i ingestion) Pipelines() ingestionPipelinesClient {
+	return newIngestionPipelinesClient(i.Url, i.ApiKey)
 }
 
 // Seeds is used to create a seedsClient.
@@ -271,6 +271,13 @@ func (i ingestion) Seeds() seedsClient {
 func (i ingestion) BackupRestore() backupRestore {
 	return backupRestore{
 		client: newClient(i.Url, i.ApiKey),
+	}
+}
+
+// StatusChecker creates a statusChecker with the Ingestion's URL and API Key.
+func (i ingestion) StatusChecker() statusChecker {
+	return statusChecker{
+		client: newClient(i.Url[:len(i.Url)-3], i.ApiKey),
 	}
 }
 
