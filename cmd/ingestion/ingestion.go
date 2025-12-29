@@ -6,6 +6,7 @@ import (
 	"github.com/pureinsights/discovery-cli/cmd/ingestion/pipelines"
 	"github.com/pureinsights/discovery-cli/cmd/ingestion/processors"
 	"github.com/pureinsights/discovery-cli/cmd/ingestion/seeds"
+	"github.com/pureinsights/discovery-cli/cmd/ingestion/statuscheck"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
@@ -23,6 +24,7 @@ func NewIngestionCommand(d cli.Discovery) *cobra.Command {
 	ingestion.AddCommand(processors.NewProcessorCommand(d))
 	ingestion.AddCommand(pipelines.NewPipelineCommand(d))
 	ingestion.AddCommand(seeds.NewSeedCommand(d))
+	ingestion.AddCommand(statuscheck.NewStatusCommand(d))
 
 	return ingestion
 }
