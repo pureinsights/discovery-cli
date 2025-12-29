@@ -72,7 +72,7 @@ func Test_discovery_StatusCheck(t *testing.T) {
 			printer:        nil,
 			expectedOutput: "",
 			product:        "Core",
-			err:            NewErrorWithCause(ErrorExitCode, errors.New("Get \"http://localhost:12030/health\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."), "Discovery Core is not online."),
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("Get \"http://localhost:12030/health\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."), "Could not check the status of Discovery Core."),
 		},
 		{
 			name:      "Printing fails",
