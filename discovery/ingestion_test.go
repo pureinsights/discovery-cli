@@ -88,11 +88,11 @@ func Test_newIngestionProcessorsClient(t *testing.T) {
 	assert.Equal(t, url+"/processor", processorsClient.searcher.client.client.BaseURL)
 }
 
-// Test_newPipelinesClient tests the constructor of pipelinesClient.
-func Test_newPipelinesClient(t *testing.T) {
+// Test_newIngestionPipelinesClient tests the constructor of ingestionPipelinesClient.
+func Test_newIngestionPipelinesClient(t *testing.T) {
 	url := "http://localhost:12030"
 	apiKey := "Api Key"
-	pipelineClient := newPipelinesClient(url, apiKey)
+	pipelineClient := newIngestionPipelinesClient(url, apiKey)
 
 	assert.Equal(t, apiKey, pipelineClient.crud.getter.client.ApiKey)
 	assert.Equal(t, url+"/pipeline", pipelineClient.crud.getter.client.client.BaseURL)

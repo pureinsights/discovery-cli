@@ -4,6 +4,7 @@ import (
 	"github.com/pureinsights/discovery-cli/cmd/queryflow/backuprestore"
 	"github.com/pureinsights/discovery-cli/cmd/queryflow/config"
 	"github.com/pureinsights/discovery-cli/cmd/queryflow/endpoints"
+	"github.com/pureinsights/discovery-cli/cmd/queryflow/pipelines"
 	"github.com/pureinsights/discovery-cli/cmd/queryflow/processors"
 	"github.com/pureinsights/discovery-cli/cmd/queryflow/statuscheck"
 	"github.com/pureinsights/discovery-cli/internal/cli"
@@ -21,6 +22,7 @@ func NewQueryFlowCommand(d cli.Discovery) *cobra.Command {
 	queryflow.AddCommand(backuprestore.NewExportCommand(d))
 	queryflow.AddCommand(backuprestore.NewImportCommand(d))
 	queryflow.AddCommand(processors.NewProcessorCommand(d))
+	queryflow.AddCommand(pipelines.NewPipelineCommand(d))
 	queryflow.AddCommand(endpoints.NewEndpointCommand(d))
 	queryflow.AddCommand(statuscheck.NewStatusCommand(d))
 

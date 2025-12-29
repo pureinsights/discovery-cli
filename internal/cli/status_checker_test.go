@@ -130,14 +130,14 @@ func Test_discovery_StatusCheckOfClients(t *testing.T) {
 			name:           "StatusCheckOfClients correctly prints with the pretty printer when one of the status checks fails",
 			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(FailingStatusChecker)}, {Name: "queryflow", Client: new(WorkingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
 			printer:        nil,
-			expectedOutput: "",
+			expectedOutput: "{\n  \"core\": {\n    \"status\": \"UP\"\n  },\n  \"ingestion\": \"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\n  \"queryflow\": {\n    \"status\": \"UP\"\n  },\n  \"staging\": {\n    \"status\": \"UP\"\n  }\n}\n",
 			err:            nil,
 		},
 		{
 			name:           "StatusCheckOfClients correctly prints the results with the ugly printer when one of the status checks fails",
 			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(WorkingStatusChecker)}, {Name: "ingestion", Client: new(WorkingStatusChecker)}, {Name: "queryflow", Client: new(FailingStatusChecker)}, {Name: "staging", Client: new(WorkingStatusChecker)}},
 			printer:        JsonObjectPrinter(false),
-			expectedOutput: "",
+			expectedOutput: "{\"core\":{\"status\":\"UP\"},\"ingestion\":{\"status\":\"UP\"},\"queryflow\":\"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\"staging\":{\"status\":\"UP\"}}\n",
 			err:            nil,
 		},
 		// Error cases
@@ -189,6 +189,7 @@ func Test_discovery_StatusCheckOfClients(t *testing.T) {
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
 			}
 		})
 	}
