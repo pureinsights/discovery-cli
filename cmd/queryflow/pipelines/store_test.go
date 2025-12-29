@@ -1,10 +1,9 @@
-package endpoints
+package pipelines
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -20,7 +19,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// NewStoreCommand tests the NewStoreCommand function.
+// NewStoreCommand tests the NewStoreCommand function
 func TestNewStoreCommand(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -47,7 +46,7 @@ func TestNewStoreCommand(t *testing.T) {
 			errBytes:  []byte(nil),
 			data: `{
 			"type": "mongo",
-			"name": "MongoDB endpoint",
+			"name": "MongoDB pipeline",
 			"labels": [],
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
@@ -57,11 +56,11 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/pipeline": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
-					"name": "MongoDB endpoint",
+					"name": "MongoDB pipeline",
 					"labels": [],
 					"active": true,
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
@@ -72,7 +71,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline", r.URL.Path)
 					},
 				},
 			},
@@ -88,7 +87,7 @@ func TestNewStoreCommand(t *testing.T) {
 			errBytes:  []byte(nil),
 			data: `[{
 			"type": "mongo",
-			"name": "MongoDB endpoint",
+			"name": "MongoDB pipeline",
 			"labels": [],
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
@@ -97,7 +96,7 @@ func TestNewStoreCommand(t *testing.T) {
 			},
 			{
 			"type": "mongo",
-			"name": "MongoDB endpoint 2",
+			"name": "MongoDB pipeline 2",
 			"labels": [],
 			"active": true,
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4d",
@@ -107,7 +106,7 @@ func TestNewStoreCommand(t *testing.T) {
 			},
 			{
 			"type": "openai",
-			"name": "OpenAI endpoint 3",
+			"name": "OpenAI pipeline 3",
 			"labels": [],
 			"active": true,
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
@@ -119,11 +118,11 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/pipeline": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
-					"name": "MongoDB endpoint",
+					"name": "MongoDB pipeline",
 					"labels": [],
 					"active": true,
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
@@ -134,11 +133,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -151,15 +150,15 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
-					"name": "OpenAI endpoint",
+					"name": "OpenAI pipeline",
 					"labels": [],
 					"active": true,
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
@@ -170,7 +169,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -189,11 +188,11 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "testdata/StoreCommand_JSONFile.json",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/pipeline": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
-					"name": "MongoDB endpoint",
+					"name": "MongoDB pipeline",
 					"labels": [],
 					"active": true,
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
@@ -204,11 +203,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -221,15 +220,15 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
-					"name": "OpenAI endpoint",
+					"name": "OpenAI pipeline",
 					"labels": [],
 					"active": true,
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
@@ -240,7 +239,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -259,7 +258,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			data: `{
 			"type": "mongo",
-			"name": "MongoDB endpoint",
+			"name": "MongoDB pipeline",
 			"labels": [],
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
@@ -280,7 +279,7 @@ func TestNewStoreCommand(t *testing.T) {
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_StoreArrayAbort"),
 			data: `[{
 			"type": "mongo",
-			"name": "MongoDB endpoint",
+			"name": "MongoDB pipeline",
 			"labels": [],
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
@@ -289,7 +288,7 @@ func TestNewStoreCommand(t *testing.T) {
 			},
 			{
 			"type": "mongo",
-			"name": "MongoDB endpoint 2",
+			"name": "MongoDB pipeline 2",
 			"labels": [],
 			"active": true,
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4d",
@@ -299,7 +298,7 @@ func TestNewStoreCommand(t *testing.T) {
 			},
 			{
 			"type": "openai",
-			"name": "OpenAI endpoint 3",
+			"name": "OpenAI pipeline 3",
 			"labels": [],
 			"active": true,
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
@@ -311,11 +310,11 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/pipeline": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
-					"name": "MongoDB endpoint",
+					"name": "MongoDB pipeline",
 					"labels": [],
 					"active": true,
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
@@ -326,11 +325,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -342,15 +341,15 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
-					"name": "OpenAI endpoint",
+					"name": "OpenAI pipeline",
 					"labels": [],
 					"active": true,
 					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
@@ -361,7 +360,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -423,7 +422,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			data: `{
 			"type": "mongo",
-			"name": "MongoDB endpoint",
+			"name": "MongoDB pipeline",
 			"labels": [],
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
@@ -433,12 +432,12 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/pipeline": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
 			"type": "mongo",
-			"name": "MongoDB endpoint",
+			"name": "MongoDB pipeline",
 			"labels": [],
 			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
@@ -447,7 +446,7 @@ func TestNewStoreCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -464,7 +463,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			data: `{
 			"type": "mongo",
-			"name": "MongoDB endpoint",
+			"name": "MongoDB pipeline",
 			"labels": [],
 			"active": true,
 			"id": "test",
@@ -475,12 +474,12 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/pipeline": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
 			"type": "mongo",
-			"name": "MongoDB endpoint",
+			"name": "MongoDB pipeline",
 			"labels": [],
 			"active": true,
 			"id": "test",
@@ -490,7 +489,7 @@ func TestNewStoreCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/pipeline", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -558,14 +557,8 @@ func TestNewStoreCommand(t *testing.T) {
 			if tc.err != nil {
 				var errStruct cli.Error
 				require.ErrorAs(t, err, &errStruct)
-				cliError, _ := tc.err.(cli.Error)
-				if !errors.Is(cliError.Cause, fs.ErrNotExist) {
-					assert.EqualError(t, err, tc.err.Error())
-					testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
-				} else {
-					assert.Equal(t, cliError.ExitCode, errStruct.ExitCode)
-					assert.Equal(t, cliError.Message, errStruct.Message)
-				}
+				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
 			} else {
 				require.NoError(t, err)
 			}
