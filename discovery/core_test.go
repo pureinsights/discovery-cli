@@ -731,6 +731,15 @@ func Test_core_BackupRestore(t *testing.T) {
 	assert.Equal(t, c.Url, bc.client.client.BaseURL)
 }
 
+// Test_core_StatusChecker tests the core.StatusChecker() function.
+func Test_core_StatusChecker(t *testing.T) {
+	c := NewCore("http://localhost:12010", "Api Key")
+	bc := c.StatusChecker()
+
+	assert.Equal(t, c.ApiKey, bc.ApiKey)
+	assert.Equal(t, "http://localhost:12010", bc.client.client.BaseURL)
+}
+
 // Test_NewCore_UrlAndAPIKey tests the function to create a new core client.
 // It verifies that the API Key and base URL correctly match.
 func Test_NewCore_UrlAndAPIKey(t *testing.T) {

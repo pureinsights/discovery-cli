@@ -1,0 +1,4 @@
+Error: Could not check the status of Discovery Ingestion.
+status: 500, body: {"error": "Internal server error"}
+
+

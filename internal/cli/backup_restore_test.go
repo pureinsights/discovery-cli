@@ -72,7 +72,7 @@ type WorkingCoreBackupRestore struct {
 	mock.Mock
 }
 
-// Get returns zip bytes as if the request worked successfully.
+// Export returns zip bytes as if the request worked successfully.
 func (g *WorkingCoreBackupRestore) Export() ([]byte, string, error) {
 	return coreBytes, "export-20251110T1455.zip", nil
 }
@@ -87,7 +87,7 @@ type WorkingIngestionBackupRestore struct {
 	mock.Mock
 }
 
-// Get returns zip bytes as if the request worked successfully.
+// Export returns zip bytes as if the request worked successfully.
 func (g *WorkingIngestionBackupRestore) Export() ([]byte, string, error) {
 	return ingestionBytes, "export-20251110T1455.zip", nil
 }
@@ -102,7 +102,7 @@ type WorkingQueryFlowBackupRestore struct {
 	mock.Mock
 }
 
-// Get returns zip bytes as if the request worked successfully.
+// Export returns zip bytes as if the request worked successfully.
 func (g *WorkingQueryFlowBackupRestore) Export() ([]byte, string, error) {
 	return queryflowBytes, "export-20251110T1455.zip", nil
 }
@@ -117,7 +117,7 @@ type FailingBackupRestore struct {
 	mock.Mock
 }
 
-// Get returns an error as if the request failed.
+// Export returns an error as if the request failed.
 func (g *FailingBackupRestore) Export() ([]byte, string, error) {
 	return []byte(nil), "discovery.zip", discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
@@ -306,6 +306,20 @@ func TestWriteExportsIntoFile(t *testing.T) {
 			path:           filepath.Join("doesnotexist", "export.zip"),
 			expectedOutput: "",
 			err:            fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "export.zip")),
+		},
+		{
+			name:           "WriteExportsIntoFile receives an invalid product name with a working backup.",
+			clients:        []BackupRestoreClientEntry{{Name: "", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:           filepath.Join(t.TempDir(), "export.zip"),
+			expectedOutput: "",
+			err:            errors.New("path cannot be empty"),
+		},
+		{
+			name:           "WriteExportsIntoFile receives an invalid product name with a failing backup.",
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:           filepath.Join(t.TempDir(), "export.zip"),
+			expectedOutput: "",
+			err:            errors.New("path cannot be empty"),
 		},
 	}
 
