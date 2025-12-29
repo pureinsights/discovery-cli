@@ -2170,6 +2170,29 @@ discovery queryflow endpoint delete my-endpoint
 {"acknowledged":true}
 ```
 
+##### Status
+`status` is the command used to check the status of Discovery QueryFlow. If it is healthy, it should return a JSON with an "UP" status field.
+
+Usage: `discovery queryflow status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of Discovery QueryFlow using the profile "cn"
+discovery queryflow status -p cn
+{
+  "status": "UP"
+}
+```
+
 #### Staging
 `staging` is the main command used to interact with Discovery's Staging. 
 
