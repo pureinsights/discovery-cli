@@ -238,6 +238,40 @@ discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
 }
 ```
 
+#### Status
+`status` is the command used to check the status of every Discovery product. If a product is healthy, it should return a JSON with an "UP" status field, which is added to a results JSON that matches the product to the received status response.
+
+Usage: `discovery staging status`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Check the status of every Discovery product using the profile "cn"
+discovery status -p cn
+{
+  "core": {
+    "status": "UP"
+  },
+  "ingestion": {
+    "status": "UP"
+  },
+  "queryflow": {
+    "status": "UP"
+  },
+  "staging": {
+    "status": "UP"
+  }
+}
+```
+
 #### Core
 `core` is the main command used to interact with Discovery's Core. 
 

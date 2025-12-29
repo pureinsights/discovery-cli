@@ -9,6 +9,7 @@ import (
 	"github.com/pureinsights/discovery-cli/cmd/ingestion"
 	"github.com/pureinsights/discovery-cli/cmd/queryflow"
 	"github.com/pureinsights/discovery-cli/cmd/staging"
+	"github.com/pureinsights/discovery-cli/cmd/statuscheck"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/cobra"
@@ -44,6 +45,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery.AddCommand(ingestion.NewIngestionCommand(d))
 	discovery.AddCommand(queryflow.NewQueryFlowCommand(d))
 	discovery.AddCommand(staging.NewStagingCommand(d))
+	discovery.AddCommand(statuscheck.NewStatusCommand(d))
 
 	return discovery
 }
