@@ -566,8 +566,6 @@ discovery core label get -p cn
 Usage: `discovery core label store [flags]`
 
 Flags:
-`-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
@@ -1667,41 +1665,6 @@ Examples:
 # Start a seed execution with no flags
 discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
-```
-
-###### Store
-`store` is the command used to create and update Discovery Core's servers. With the data flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the file flag, the user can also send the path of a file that contains the JSON configurations. The data and file flags are required, but mutually exclusive.
-
-Usage: `discovery core server store [flags]`
-
-Flags:
-`-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
-
-`--abort-on-error`::
-(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
-
-`-h, --help`::
-(Optional, bool) Prints the usage of the command.
-
-`-p, --profile`::
-(Optional, string) Set the configuration profile that will execute the command.
-
-Examples:
-
-```bash
-# Start a seed execution with no flags using the seed's name
-discovery ingestion seed start "my-seed"
-{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
-```
-
-```bash
-# Start a seed execution with the properties and scan-type flags
-discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"my-bucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
-{"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"my-bucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
 ###### Halt
