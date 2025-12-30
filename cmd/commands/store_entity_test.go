@@ -161,7 +161,7 @@ func TestStoreCommand(t *testing.T) {
 			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
-			name:           "UpsertEntities returns 404 Not Found",
+			name:           "UpsertEntities returns 404 Not Found when using --data",
 			client:         new(FailingCreator),
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
@@ -177,6 +177,25 @@ func TestStoreCommand(t *testing.T) {
     "Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
   ],
   "timestamp": "2025-10-29T14:47:36.290329Z"
+}`)}, "Could not store entities"),
+		},
+		{
+			name:           "UpsertEntities returns 404 Not Found when using file arguments",
+			client:         new(FailingCreator),
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			abortOnError:   true,
+			data:           "",
+			files:          []string{"testdata/StoreCommand_JSONFile.json"},
+			expectedOutput: "",
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 400,
+  "code": 3002,
+  "messages": [
+    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
+  ],
+  "timestamp": "2025-10-29T14:46:48.055840300Z"
 }`)}, "Could not store entities"),
 		},
 		{
