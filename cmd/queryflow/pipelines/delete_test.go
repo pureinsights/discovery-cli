@@ -508,7 +508,7 @@ func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
 	testutils.CompareBytes(t, "NewDeleteCommand_Err_NoProfile", testutils.Read(t, "NewDeleteCommand_Err_NoProfile"), errBuf.Bytes())
 }
 
-// TestNewDeleteCommand_NotExactly1Arg tests the NewDeleteCommand function when it does not receive exactly one argument.
+// TestNewDeleteCommand_NotExactly1Arg tests the NewDeleteCommand() function when it does not receive exactly one argument.
 func TestNewDeleteCommand_NotExactly1Arg(t *testing.T) {
 	in := strings.NewReader("")
 	out := &bytes.Buffer{}

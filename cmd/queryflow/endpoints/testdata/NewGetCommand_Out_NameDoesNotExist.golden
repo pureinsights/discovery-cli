@@ -1,5 +1,5 @@
 Usage:
-  get [endpoint] [flags]
+  get [<endpoint>] [flags]
 
 Examples:
 	# Get an endpoint by name

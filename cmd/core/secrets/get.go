@@ -12,7 +12,7 @@ import (
 // NewGetCommand creates the secret get command.
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "get [secretId]",
+		Use:   "get [<secretId>]",
 		Short: "The command that obtains secrets from Discovery Core.",
 		Long:  fmt.Sprintf(commands.LongGetNoNames, "secret", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {

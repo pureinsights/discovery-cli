@@ -1,5 +1,5 @@
 Usage:
-  get [pipeline] [flags]
+  get [<pipeline>] [flags]
 
 Examples:
 	# Get pipeline by name
