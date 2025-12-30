@@ -118,7 +118,7 @@ func TestGetCommand(t *testing.T) {
 			componentName:  "Core",
 			args:           []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			client:         new(WorkingGetter),
-			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:38Z\",\"id\":\"5f125024-1e5e-4591-9fee-365dc20eeeed\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-18T20:55:43Z\",\"name\":\"MongoDB text processor\",\"type\":\"mongo\"}\n",
+			expectedOutput: "{\n  \"active\": true,\n  \"creationTimestamp\": \"2025-08-14T18:02:38Z\",\n  \"id\": \"5f125024-1e5e-4591-9fee-365dc20eeeed\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-18T20:55:43Z\",\n  \"name\": \"MongoDB text processor\",\n  \"type\": \"mongo\"\n}\n",
 			err:            nil,
 		},
 		{
@@ -232,7 +232,7 @@ func TestGetCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := GetCommand(tc.args, d, tc.client, GetCommandConfig("default", "json", tc.componentName, "core_url"))
+			err := GetCommand(tc.args, d, tc.client, GetCommandConfig("default", "pretty-json", tc.componentName, "core_url"))
 
 			if tc.err != nil {
 				require.Error(t, err)
