@@ -25,7 +25,7 @@ Go to the [Releases](https://github.com/pureinsights/discovery-cli/releases) sec
 | **Windows** | `amd64` | Intel/AMD x86 64-bit CPUs | `discovery-cli_{VERSION}_windows_amd64.zip` |
 | **Windows** | `arm64` | ARM-based Windows laptops/tablets (e.g., Surface Laptops) | `discovery-cli_{VERSION}_windows_arm64.zip` |
 | **Windows** | `386` | Intel/AMD 32-bit CPUs | `discovery-cli_{VERSION}_windows_386.zip` |
-| **macOS** | `arm64` | Apple Silicon Macs (M1, M2, M3) | `discovery-cli_{VERSION}_darwin_arm64.tar.gz` |
+| **macOS** | `arm64` | Apple Silicon Macs (M1 - M5) | `discovery-cli_{VERSION}_darwin_arm64.tar.gz` |
 | **macOS** | `amd64` | Older Intel-based Macs | `discovery-cli_{VERSION}_darwin_amd64.tar.gz` |
 | **Linux** | `amd64` | Most Linux servers/desktops (Intel/AMD 64-bit) | `discovery-cli_{VERSION}_linux_amd64.tar.gz` |
 | **Linux** | `arm64` | ARM servers, AWS Graviton | `discovery-cli_{VERSION}_linux_arm64.tar.gz` |
