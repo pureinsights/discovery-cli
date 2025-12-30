@@ -14,7 +14,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
 	store := &cobra.Command{
-		Use:   "store",
+		Use:   "store [configFiles]",
 		Short: "The command that stores labels to Discovery Core.",
 		Long:  fmt.Sprintf(commands.LongStore, "label", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -28,7 +28,6 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
 			return commands.StoreCommand(d, coreClient.Labels(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), abortOnError, data, args))
 		},
-		Args: cobra.NoArgs,
 		Example: `	# Store a label with the JSON configuration in a file
 	discovery core label store "labeljsonfile.json"
 	

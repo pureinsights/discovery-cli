@@ -14,7 +14,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
 	store := &cobra.Command{
-		Use:   "store",
+		Use:   "store [configFiles]",
 		Short: "The command that stores seeds to Discovery Ingestion.",
 		Long:  fmt.Sprintf(commands.LongStore, "seed", "Ingestion"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -28,7 +28,6 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
 			return commands.StoreCommand(d, ingestionClient.Seeds(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), abortOnError, data, args))
 		},
-		Args: cobra.NoArgs,
 		Example: `	# Store a seed with the JSON configuration in a file
 	discovery ingestion seed store seeds.json
 

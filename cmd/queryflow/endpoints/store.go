@@ -14,7 +14,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
 	store := &cobra.Command{
-		Use:   "store",
+		Use:   "store [configFiles]",
 		Short: "The command that stores endpoints to Discovery QueryFlow.",
 		Long:  fmt.Sprintf(commands.LongStore, "endpoint", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -28,7 +28,6 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			queryflowClient := discoveryPackage.NewQueryFlow(vpr.GetString(profile+".queryflow_url"), vpr.GetString(profile+".queryflow_key"))
 			return commands.StoreCommand(d, queryflowClient.Endpoints(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, args))
 		},
-		Args: cobra.NoArgs,
 		Example: `	# Store an endpoint with the JSON configuration in a file
 	discovery queryflow endpoint store endpointjsonfile.json
 
