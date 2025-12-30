@@ -17,16 +17,16 @@ type storeCommandConfig struct {
 	commandConfig
 	abortOnError bool
 	data         string
-	file         string
+	files        []string
 }
 
 // StoreCommandConfig creates a storeCommandConfig with the required parameters.
-func StoreCommandConfig(baseConfig commandConfig, abortOnError bool, data, file string) storeCommandConfig {
+func StoreCommandConfig(baseConfig commandConfig, abortOnError bool, data string, files []string) storeCommandConfig {
 	return storeCommandConfig{
 		commandConfig: baseConfig,
 		abortOnError:  abortOnError,
 		data:          data,
-		file:          file,
+		files:         files,
 	}
 }
 
@@ -37,25 +37,39 @@ func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig
 		return err
 	}
 
-	if config.file != "" {
-		jsonBytes, err := os.ReadFile(config.file)
-		if err != nil {
-			err = cli.NormalizeReadFileError(config.file, err)
-			return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not read file %q", config.file)
-		}
-
-		config.data = string(jsonBytes)
-	}
-
-	if config.data == "" {
-		return cli.NewError(cli.ErrorExitCode, "Data cannot be empty")
-
-	}
-
 	output := config.output
 	if output == "pretty-json" {
 		output = "json"
 	}
 	printer := cli.GetArrayPrinter(output)
-	return d.UpsertEntities(client, gjson.Parse(config.data), config.abortOnError, printer)
+
+	if len(config.files) != 0 {
+		if config.data != "" {
+			return cli.NewError(cli.ErrorExitCode, "There cannot be both a file argument and the data flag")
+		}
+		for _, file := range config.files {
+			jsonBytes, err := os.ReadFile(file)
+			if err != nil {
+				err = cli.NormalizeReadFileError(file, err)
+				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not read file %q", file)
+			}
+
+			if len(jsonBytes) == 0 || string(jsonBytes) == "" {
+				return cli.NewError(cli.ErrorExitCode, "Data cannot be empty")
+			}
+
+			err = d.UpsertEntities(client, gjson.ParseBytes(jsonBytes), config.abortOnError, printer)
+			if err != nil {
+				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not upsert entities in file %q", file)
+			}
+		}
+
+		return nil
+	} else {
+		if config.data == "" {
+			return cli.NewError(cli.ErrorExitCode, "Data cannot be empty")
+		}
+
+		return d.UpsertEntities(client, gjson.Parse(config.data), config.abortOnError, printer)
+	}
 }
