@@ -1667,6 +1667,18 @@ discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
 {"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
 ```
 
+```bash
+# Start a seed execution with no flags using the seed's name
+discovery ingestion seed start "my-seed"
+{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
+```bash
+# Start a seed execution with the properties and scan-type flags
+discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"my-bucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
+{"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"my-bucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+```
+
 ###### Halt
 `halt` is the command used to halt a seed execution in Discovery Ingestion. With the `execution` flag, the user can specify the specific execution that will be halted. If there is no `execution` flag, all of the active executions are halted.
 
