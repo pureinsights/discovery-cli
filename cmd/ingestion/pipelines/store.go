@@ -13,7 +13,6 @@ import (
 func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
-	var file string
 	store := &cobra.Command{
 		Use:   "store",
 		Short: "The command that stores pipelines to Discovery Ingestion.",
@@ -27,20 +26,17 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			return commands.StoreCommand(d, ingestionClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), abortOnError, data, file))
+			return commands.StoreCommand(d, ingestionClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), abortOnError, data, args))
 		},
 		Args: cobra.NoArgs,
 		Example: `	# Store a pipeline with the JSON configuration in a file
-	discovery ingestion pipeline store --file pipelines.json
+	discovery ingestion pipeline store pipelines.json
 
 	# Store a pipeline with the JSON configuration in the data flag
 	discovery ingestion pipeline store --data '{"name":"my-pipeline","labels":[],"active":true,"id":"36f8ce72-f23d-4768-91e8-58693ff1b272","creationTimestamp":"2025-10-31T19:41:13Z","lastUpdatedTimestamp":"2025-10-31T19:41:13Z","initialState":"ingestionState","states":{"ingestionState":{"type":"processor","processors":[{"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header","active":true},{"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8","active":true}]}},"recordPolicy":{"idPolicy":{},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"},"errorPolicy":"FAIL","outboundPolicy":{"batchPolicy":{"maxCount":25,"flushAfter":"PT1M"}}}}'`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")
-	store.Flags().StringVarP(&file, "file", "f", "", "the path the file that contains the JSON data")
 
-	store.MarkFlagsOneRequired("data", "file")
-	store.MarkFlagsMutuallyExclusive("data", "file")
 	return store
 }

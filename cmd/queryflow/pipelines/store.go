@@ -13,7 +13,6 @@ import (
 func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
-	var file string
 	store := &cobra.Command{
 		Use:   "store",
 		Short: "The command that stores pipelines to Discovery QueryFlow.",
@@ -27,15 +26,12 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			queryflowClient := discoveryPackage.NewQueryFlow(vpr.GetString(profile+".queryflow_url"), vpr.GetString(profile+".queryflow_key"))
-			return commands.StoreCommand(d, queryflowClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, file))
+			return commands.StoreCommand(d, queryflowClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, args))
 		},
 		Args: cobra.NoArgs,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")
-	store.Flags().StringVarP(&file, "file", "f", "", "the path the file that contains the JSON data")
 
-	store.MarkFlagsOneRequired("data", "file")
-	store.MarkFlagsMutuallyExclusive("data", "file")
 	return store
 }
