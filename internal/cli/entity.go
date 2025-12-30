@@ -37,7 +37,7 @@ func (d discovery) GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), object)
 	} else {
 		err = printer(*d.IOStreams(), object)
@@ -70,7 +70,7 @@ type Searcher interface {
 	SearchByName(name string) (gjson.Result, error)
 }
 
-// SearchEntity tries to search an entity by name, and if it fails, it tries to get the entity by its id.
+// searchEntity tries to search an entity by name, and if it fails, it tries to get the entity by its id.
 func (d discovery) searchEntity(client Searcher, id string) (gjson.Result, error) {
 	result, err := client.SearchByName(id)
 	if err != nil {
@@ -106,7 +106,7 @@ func (d discovery) SearchEntity(client Searcher, id string, printer Printer) err
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), result)
 	} else {
 		err = printer(*d.IOStreams(), result)
@@ -132,7 +132,7 @@ func (d discovery) SearchEntities(client Searcher, filter gjson.Result, printer 
 	return err
 }
 
-// ParseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery
+// parseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery.
 func parseFilter(filter string) (string, []string, error) {
 	filterType, keyValue, found := strings.Cut(filter, "=")
 	if !found {
@@ -168,7 +168,7 @@ func parseFilter(filter string) (string, []string, error) {
 // getAndFilterString returns the filter string for the given filters.
 // If there are multiple filters, they are joined with an "and" filter.
 // If there is only one filter, it is returned.
-// If there are no filters, an empty filter is returend.
+// If there are no filters, an empty filter is returned.
 func getAndFilterString(filters []string) (string, error) {
 	if len(filters) > 1 {
 		return sjson.SetRaw("{}", "and", "["+strings.Join(filters, ",")+"]")
@@ -280,7 +280,7 @@ func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, a
 	return errors.Join(err, upsertErr)
 }
 
-// Deleter is the interface that implements the delete method
+// Deleter is the interface that implements the delete method.
 type Deleter interface {
 	Delete(uuid.UUID) (gjson.Result, error)
 }
@@ -293,7 +293,7 @@ func (d discovery) DeleteEntity(client Deleter, id uuid.UUID, printer Printer) e
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), object)
 	} else {
 		err = printer(*d.IOStreams(), object)

@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestNewSeedCommand tests the NewSeedCommand() function
+// TestNewSeedCommand tests the NewSeedCommand() function.
 func TestNewSeedCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}

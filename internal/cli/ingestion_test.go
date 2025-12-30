@@ -24,7 +24,7 @@ type SearcherIDNotUUID struct {
 	mock.Mock
 }
 
-// Search implements the searcher interface
+// Search implements the searcher interface.
 func (s *SearcherIDNotUUID) Search(gjson.Result) ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -45,7 +45,7 @@ func (s *SearcherIDNotUUID) SearchByName(name string) (gjson.Result, error) {
 		}`), nil
 }
 
-// Get implements the Searcher interface
+// Get implements the Searcher interface.
 func (s *SearcherIDNotUUID) Get(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -60,7 +60,7 @@ func (s *SearcherIDNotUUID) Get(id uuid.UUID) (gjson.Result, error) {
 	}
 }
 
-// GetAll implements the searcher interface
+// GetAll implements the searcher interface.
 func (s *SearcherIDNotUUID) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
@@ -132,18 +132,18 @@ func TestGetSeedId(t *testing.T) {
 	}
 }
 
-// WorkingSeedController simulates a working IngestionSeedController
+// WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedController struct {
 	mock.Mock
 	WorkingSearcher
 }
 
-// Start returns the result of a new seed execution
+// Start returns the result of a new seed execution.
 func (c *WorkingSeedController) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
 }
 
-// Halt returns the results of halting a seed
+// Halt returns the results of halting a seed.
 func (c *WorkingSeedController) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
@@ -159,7 +159,7 @@ func (c *FailingSeedControllerGetSeedIdFails) Start(id uuid.UUID, scan discovery
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
 }
 
-// Halt implements the interface
+// Halt implements the interface.
 func (c *FailingSeedControllerGetSeedIdFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
@@ -182,7 +182,7 @@ func (c *FailingSeedControllerStartFails) Start(id uuid.UUID, scan discoveryPack
 			}`)}
 }
 
-// Halt implements the IngestionSeedController interface
+// Halt implements the IngestionSeedController interface.
 func (c *FailingSeedControllerStartFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -209,16 +209,16 @@ func Test_discovery_StartSeed(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:           "StartSeed correctly prints the received object with the sent printer",
+			name:           "StartSeed correctly prints the received object with the pretty printer",
 			client:         new(WorkingSeedController),
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			expectedOutput: "{\n  \"creationTimestamp\": \"2025-09-04T19:29:41.119013Z\",\n  \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n  \"lastUpdatedTimestamp\": \"2025-09-04T19:29:41.119013Z\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"scanType\": \"INCREMENTAL\",\n  \"status\": \"CREATED\",\n  \"triggerType\": \"MANUAL\"\n}\n",
 			err:            nil,
 		},
 		{
 			name:           "StartSeed correctly prints the received object with JSON ugly printer",
 			client:         new(WorkingSeedController),
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			expectedOutput: "{\"creationTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"id\":\"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\"lastUpdatedTimestamp\":\"2025-09-04T19:29:41.119013Z\",\"properties\":{\"stagingBucket\":\"testBucket\"},\"scanType\":\"INCREMENTAL\",\"status\":\"CREATED\",\"triggerType\":\"MANUAL\"}\n",
 			err:            nil,
 		},
@@ -298,7 +298,7 @@ func Test_discovery_HaltSeed(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:           "HaltSeed correctly prints the stopped executions with the sent printer",
+			name:           "HaltSeed correctly prints the stopped executions with the pretty printer",
 			client:         new(WorkingSeedController),
 			printer:        JsonArrayPrinter(true),
 			expectedOutput: "[\n{\n  \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n  \"status\": 202\n},\n{\n  \"id\": \"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b\",\n  \"status\": 202\n}\n]\n",
@@ -377,13 +377,13 @@ func Test_discovery_HaltSeed(t *testing.T) {
 	}
 }
 
-// WorkingSeedController simulates a working IngestionSeedController
+// WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedExecutionController struct {
 	mock.Mock
 	WorkingGetter
 }
 
-// Halt returns the results of halting a seed
+// Halt returns the results of halting a seed.
 func (c *WorkingSeedExecutionController) Halt(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{"acknowledged":true}`), nil
 }
@@ -394,7 +394,7 @@ type FailingSeedExecutionControllerHaltFails struct {
 	WorkingGetter
 }
 
-// Halt returns the results of halting a seed
+// Halt returns the results of halting a seed.
 func (c *FailingSeedExecutionControllerHaltFails) Halt(id uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
 			"status": 409,
@@ -418,16 +418,16 @@ func Test_discovery_HaltSeedExecution(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:           "HaltSeedExecution correctly prints the received object with the sent printer",
+			name:           "HaltSeedExecution correctly prints the received object with the pretty printer",
 			client:         new(WorkingSeedExecutionController),
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
 			err:            nil,
 		},
 		{
 			name:           "StartSeed correctly prints the received object with JSON ugly printer",
 			client:         new(WorkingSeedExecutionController),
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			expectedOutput: "{\"acknowledged\":true}\n",
 			err:            nil,
 		},
@@ -512,7 +512,7 @@ func TestConvertJSONArrayToString(t *testing.T) {
 			array: gjson.Result{}.Array(),
 			expected: `[
 ]`,
-		}, 
+		},
 		{
 			name:  "Array with one element.",
 			array: gjson.Parse(`[{"id": 1}]`).Array(),
@@ -530,7 +530,7 @@ func TestConvertJSONArrayToString(t *testing.T) {
 	}
 }
 
-// WorkingGetter mocks the RecordGetter interface to always answer a working result
+// WorkingGetter mocks the RecordGetter interface to always answer a working result.
 type WorkingRecordGetter struct {
 	mock.Mock
 }
@@ -548,7 +548,7 @@ func (g *WorkingRecordGetter) Get(id string) (gjson.Result, error) {
 }`), nil
 }
 
-// GetAll returns a list of records
+// GetAll returns a list of records.
 func (g *WorkingRecordGetter) GetAll() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		{"id":{"plain":"4e7c8a47efd829ef7f710d64da661786","hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="},"creationTimestamp":"2025-09-05T20:13:47Z","lastUpdatedTimestamp":"2025-09-05T20:13:47Z","status":"SUCCESS"},
@@ -562,7 +562,7 @@ type FailingRecordGetter struct {
 	mock.Mock
 }
 
-// Get returns a 404 Not Found
+// Get returns a 404 Not Found.
 func (g *FailingRecordGetter) Get(id string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -577,12 +577,12 @@ func (g *FailingRecordGetter) Get(id string) (gjson.Result, error) {
 	}
 }
 
-// GetAll returns 401 unauthorized
+// GetAll returns 401 unauthorized.
 func (g *FailingRecordGetter) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// TestAppendSeedRecord tests the AppendSeedRecord function()
+// TestAppendSeedRecord tests the AppendSeedRecord function().
 func TestAppendSeedRecord(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -666,7 +666,7 @@ func TestAppendSeedRecord(t *testing.T) {
 	}
 }
 
-// Test_discovery_AppendSeedRecord tests the discovery.AppendSeedRecord function
+// Test_discovery_AppendSeedRecord tests the discovery.AppendSeedRecord function.
 func Test_discovery_AppendSeedRecord(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -681,7 +681,7 @@ func Test_discovery_AppendSeedRecord(t *testing.T) {
 		{
 			name:           "Getting the ID and printing the result with pretty printer works",
 			client:         new(WorkingRecordGetter),
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			id:             "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=",
 			expectedOutput: "{\n  \"active\": true,\n  \"config\": {\n    \"action\": \"scroll\",\n    \"bucket\": \"blogs\"\n  },\n  \"creationTimestamp\": \"2025-08-21T21:52:03Z\",\n  \"id\": \"2acd0a61-852c-4f38-af2b-9c84e152873e\",\n  \"labels\": [],\n  \"lastUpdatedTimestamp\": \"2025-08-21T21:52:03Z\",\n  \"name\": \"Search seed\",\n  \"pipeline\": \"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe\",\n  \"record\": {\n    \"creationTimestamp\": \"2025-09-03T21:02:54Z\",\n    \"id\": {\n      \"hash\": \"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=\",\n      \"plain\": \"4e7c8a47efd829ef7f710d64da661786\"\n    },\n    \"lastUpdatedTimestamp\": \"2025-09-03T21:02:54Z\",\n    \"status\": \"SUCCESS\"\n  },\n  \"recordPolicy\": {\n    \"errorPolicy\": \"FATAL\",\n    \"outboundPolicy\": {\n      \"batchPolicy\": {\n        \"flushAfter\": \"PT1M\",\n        \"maxCount\": 25\n      },\n      \"idPolicy\": {}\n    },\n    \"timeoutPolicy\": {\n      \"slice\": \"PT1H\"\n    }\n  },\n  \"type\": \"staging\"\n}\n",
 			err:            nil,
@@ -689,6 +689,7 @@ func Test_discovery_AppendSeedRecord(t *testing.T) {
 		{
 			name:           "Getting the ID and printing the result with ugly printer works",
 			client:         new(WorkingRecordGetter),
+			printer:        JsonObjectPrinter(false),
 			id:             "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=",
 			expectedOutput: "{\"active\":true,\"config\":{\"action\":\"scroll\",\"bucket\":\"blogs\"},\"creationTimestamp\":\"2025-08-21T21:52:03Z\",\"id\":\"2acd0a61-852c-4f38-af2b-9c84e152873e\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-21T21:52:03Z\",\"name\":\"Search seed\",\"pipeline\":\"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe\",\"record\":{\"creationTimestamp\":\"2025-09-03T21:02:54Z\",\"id\":{\"hash\":\"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=\",\"plain\":\"4e7c8a47efd829ef7f710d64da661786\"},\"lastUpdatedTimestamp\":\"2025-09-03T21:02:54Z\",\"status\":\"SUCCESS\"},\"recordPolicy\":{\"errorPolicy\":\"FATAL\",\"outboundPolicy\":{\"batchPolicy\":{\"flushAfter\":\"PT1M\",\"maxCount\":25},\"idPolicy\":{}},\"timeoutPolicy\":{\"slice\":\"PT1H\"}},\"type\":\"staging\"}\n",
 			err:            nil,
@@ -850,7 +851,7 @@ func TestAppendSeedRecords(t *testing.T) {
 	}
 }
 
-// Test_discovery_AppendSeedRecords tests the discovery.AppendSeedRecords() function
+// Test_discovery_AppendSeedRecords tests the discovery.AppendSeedRecords() function.
 func Test_discovery_AppendSeedRecords(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -926,6 +927,7 @@ func Test_discovery_AppendSeedRecords(t *testing.T) {
 		},
 		{
 			name:           "Getting the records and printing the result with ugly printer works",
+			printer:        JsonObjectPrinter(false),
 			client:         new(WorkingRecordGetter),
 			expectedOutput: "{\"active\":true,\"config\":{\"action\":\"scroll\",\"bucket\":\"blogs\"},\"creationTimestamp\":\"2025-08-21T21:52:03Z\",\"id\":\"2acd0a61-852c-4f38-af2b-9c84e152873e\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-21T21:52:03Z\",\"name\":\"Search seed\",\"pipeline\":\"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe\",\"recordPolicy\":{\"errorPolicy\":\"FATAL\",\"outboundPolicy\":{\"batchPolicy\":{\"flushAfter\":\"PT1M\",\"maxCount\":25},\"idPolicy\":{}},\"timeoutPolicy\":{\"slice\":\"PT1H\"}},\"records\":[{\"creationTimestamp\":\"2025-09-05T20:13:47Z\",\"id\":{\"hash\":\"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=\",\"plain\":\"4e7c8a47efd829ef7f710d64da661786\"},\"lastUpdatedTimestamp\":\"2025-09-05T20:13:47Z\",\"status\":\"SUCCESS\"},{\"creationTimestamp\":\"2025-09-05T20:13:47Z\",\"id\":{\"hash\":\"IJeF-losyj33EAuqjgGW2G7sT-eE7poejQ5HokerZio=\",\"plain\":\"8148e6a7b952a3b2964f706ced8c6885\"},\"lastUpdatedTimestamp\":\"2025-09-05T20:13:47Z\",\"status\":\"SUCCESS\"},{\"creationTimestamp\":\"2025-09-05T20:13:47Z\",\"id\":{\"hash\":\"N2lubqCWTqEEaymQVntpdP5dqKDP-LYk81C_PCr6btQ=\",\"plain\":\"b1e3e4f42c0818b1580e306eb776d4a1\"},\"lastUpdatedTimestamp\":\"2025-09-05T20:13:47Z\",\"status\":\"SUCCESS\"}],\"type\":\"staging\"}\n",
 			err:            nil,

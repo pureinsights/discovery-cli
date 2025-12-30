@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// RecordOrExecution determines whether to call the AppendSeedRecord() or SeedExecution() functions
+// RecordOrExecution determines whether to call the AppendSeedRecord() or SeedExecution() functions.
 func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profile, recordId, executionId string, details bool) error {
 	err := commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url")
 	if err != nil {
@@ -34,9 +34,6 @@ func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profi
 	}
 
 	output := vpr.GetString("output")
-	if output == "json" {
-		output = "pretty-json"
-	}
 	printer := cli.GetObjectPrinter(output)
 
 	if cmd.Flags().Changed("record") {
@@ -103,8 +100,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
-- Label: The format is label={key}[:{value}], where the value is optional.
-- Type: The format is type={type}.`)
+- Label: The format is label={key}[:{value}], where the value is optional
+- Type: The format is type={type}`)
 
 	get.Flags().StringVar(&recordId, "record", "", "the id of the record that will be retrieved")
 	get.Flags().StringVar(&executionId, "execution", "", "the id of the seed execution that will be retrieved")

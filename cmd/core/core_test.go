@@ -15,7 +15,7 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// TestNewCoreCommand tests the NewCoreCommand() function
+// TestNewCoreCommand tests the NewCoreCommand() function.
 func TestNewCoreCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
@@ -50,6 +50,6 @@ func TestNewCoreCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "credential", "export", "import", "label", "secret", "server"}
+	expectedCommands := []string{"config", "credential", "export", "import", "label", "secret", "server", "status"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

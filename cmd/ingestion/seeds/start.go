@@ -8,7 +8,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// NewStartCommand creates the seed start command to start a seed execution
+// NewStartCommand creates the seed start command to start a seed execution.
 func NewStartCommand(d cli.Discovery) *cobra.Command {
 	var scanType string
 	var executionProperties string

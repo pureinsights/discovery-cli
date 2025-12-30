@@ -14,7 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_newSeedExecutionsClient test the constructor of seedExecutionsClient
+// Test_newSeedExecutionsClient test the constructor of seedExecutionsClient.
 func Test_newSeedExecutionsClient(t *testing.T) {
 	url := "http://localhost:12030"
 	apiKey := "Api Key"
@@ -40,7 +40,7 @@ func Test_newSeedRecordsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.summarizer.client.client.BaseURL)
 }
 
-// Test_newSeedExecutionRecordsClient tests the constructor of seedExecutionRecordsClient
+// Test_newSeedExecutionRecordsClient tests the constructor of seedExecutionRecordsClient.
 func Test_newSeedExecutionRecordsClient(t *testing.T) {
 	url := "http://localhost:12030"
 	apiKey := "Api Key"
@@ -116,7 +116,7 @@ func Test_newSeedsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed", seedClient.searcher.client.client.BaseURL)
 }
 
-// Test_seedExecutionsClient_Seed tests the seedExecutionsClient.Seed() function
+// Test_seedExecutionsClient_Seed tests the seedExecutionsClient.Seed() function.
 func Test_seedExecutionsClient_Seed(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -217,7 +217,7 @@ func Test_seedExecutionsClient_Seed(t *testing.T) {
 	}
 }
 
-// Test_seedExecutionsClient_Pipeline tests the seedExecutionsClient.Pipeline() function
+// Test_seedExecutionsClient_Pipeline tests the seedExecutionsClient.Pipeline() function.
 func Test_seedExecutionsClient_Pipeline(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -1076,7 +1076,7 @@ func Test_seedRecordsClient_Get(t *testing.T) {
 	}
 }
 
-// Test_seedRecordsClient_GetAll tests the seedRecords.GetAll() function
+// Test_seedRecordsClient_GetAll tests the seedRecords.GetAll() function.
 func Test_seedRecordsClient_GetAll(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -1215,7 +1215,7 @@ func Test_seedRecordsClient_GetAll(t *testing.T) {
 	}
 }
 
-// Test_seedsClient_Start tests the seedsClient.Start() function
+// Test_seedsClient_Start tests the seedsClient.Start() function.
 func Test_seedsClient_Start(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -1371,7 +1371,7 @@ func Test_seedsClient_Start(t *testing.T) {
 	}
 }
 
-// Test_seedsClient_Halt tests the seedsClient.Halt() function
+// Test_seedsClient_Halt tests the seedsClient.Halt() function.
 func Test_seedsClient_Halt(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -1485,7 +1485,7 @@ func Test_seedsClient_Halt(t *testing.T) {
 	}
 }
 
-// Test_seedsClient_Reset tests the seedsClient.Reset() function
+// Test_seedsClient_Reset tests the seedsClient.Reset() function.
 func Test_seedsClient_Reset(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -1618,7 +1618,7 @@ func Test_seedsClient_Records(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.summarizer.client.client.BaseURL)
 }
 
-// Test_newSeedsClient tests the seedClient.Executions() function
+// Test_newSeedsClient tests the seedClient.Executions() function.
 func Test_seedsClient_Executions(t *testing.T) {
 	url := "http://localhost:12030"
 	apiKey := "Api Key"
@@ -1631,7 +1631,7 @@ func Test_seedsClient_Executions(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution", ingestionSeedExecutionsClient.getter.client.client.BaseURL)
 }
 
-// Test_ingestion_Processors tests the ingestion.Processors() function
+// Test_ingestion_Processors tests the ingestion.Processors() function.
 func Test_ingestion_Processors(t *testing.T) {
 	i := NewIngestion("http://localhost:12030", "Api Key")
 	ipc := i.Processors()
@@ -1644,7 +1644,7 @@ func Test_ingestion_Processors(t *testing.T) {
 	assert.Equal(t, i.Url+"/processor", ipc.searcher.client.client.BaseURL)
 }
 
-// Test_ingestion_Pipelines tests the ingestion.Pipelines() function
+// Test_ingestion_Pipelines tests the ingestion.Pipelines() function.
 func Test_ingestion_Pipelines(t *testing.T) {
 	i := NewIngestion("http://localhost:12030", "Api Key")
 	ipc := i.Pipelines()
@@ -1670,7 +1670,7 @@ func Test_ingestion_Seeds(t *testing.T) {
 	assert.Equal(t, i.Url+"/seed", ipc.searcher.client.client.BaseURL)
 }
 
-// Test_ingestion_BackupRestore tests the ingestion.BackupRestore() function
+// Test_ingestion_BackupRestore tests the ingestion.BackupRestore() function.
 func Test_ingestion_BackupRestore(t *testing.T) {
 	i := NewIngestion("http://localhost:12030", "Api Key")
 	bc := i.BackupRestore()
@@ -1679,7 +1679,16 @@ func Test_ingestion_BackupRestore(t *testing.T) {
 	assert.Equal(t, i.Url, bc.client.client.BaseURL)
 }
 
-// Test_NewIngestion tests the ingestion constructor
+// Test_ingestion_StatusChecker tests the ingestion.StatusChecker() function.
+func Test_ingestion_StatusChecker(t *testing.T) {
+	i := NewIngestion("http://localhost:12030", "Api Key")
+	bc := i.StatusChecker()
+
+	assert.Equal(t, i.ApiKey, bc.ApiKey)
+	assert.Equal(t, "http://localhost:12030", bc.client.client.BaseURL)
+}
+
+// Test_NewIngestion tests the ingestion constructor.
 func Test_NewIngestion(t *testing.T) {
 	i := NewIngestion("http://localhost:12030", "Api Key")
 

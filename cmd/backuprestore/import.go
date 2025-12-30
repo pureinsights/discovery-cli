@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewImportCommand creates the discovery import command that imports entitites to Discovery Core, Ingestion, and QueryFlow
+// NewImportCommand creates the discovery import command that imports entitites to Discovery Core, Ingestion, and QueryFlow.
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
 	var file string
@@ -32,11 +32,7 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 				{Name: "queryflow", Client: queryflowClient},
 			}
 
-			output := d.Config().GetString("output")
-			if output == "json" {
-				output = "pretty-json"
-			}
-			printer := cli.GetObjectPrinter(output)
+			printer := cli.GetObjectPrinter(d.Config().GetString("output"))
 			return d.ImportEntitiesToClients(clients, file, discoveryPackage.OnConflict(onConflict), printer)
 		},
 		Args: cobra.NoArgs,
@@ -44,7 +40,7 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 	discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE`,
 	}
 
-	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the files with the exported entities of the Discovery products.")
+	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the files with the exported entities of the Discovery products")
 	importCmd.Flags().StringVar(&onConflict, "on-conflict", string(discoveryPackage.OnConflictFail), "the conflict resolution strategy that will be used")
 
 	importCmd.MarkFlagRequired("file")

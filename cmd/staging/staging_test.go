@@ -15,7 +15,7 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// TestNewStagingCommand tests the NewStagingCommand() function
+// TestNewStagingCommand tests the NewStagingCommand() function.
 func TestNewStagingCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
@@ -50,6 +50,6 @@ func TestNewStagingCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config"}
+	expectedCommands := []string{"config", "status"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

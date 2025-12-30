@@ -11,7 +11,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestSummarizer has table-driven tests to test the summarizer.Summarize() method.
+// Test_summarizer_Summarize has table-driven tests to test the summarizer.Summarize() method.
 func Test_summarizer_Summarize(t *testing.T) {
 	tests := []struct {
 		name             string

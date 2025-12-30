@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestNewLabelCommand tests the NewLabelCommand() function
+// TestNewLabelCommand tests the NewLabelCommand() function.
 func TestNewLabelCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}

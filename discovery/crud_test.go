@@ -13,7 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_getter_Get tests the getter.Get() function
+// Test_getter_Get tests the getter.Get() function.
 func Test_getter_Get(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -319,7 +319,7 @@ func Test_crud_Update(t *testing.T) {
 	}
 }
 
-// Test_crud_Delete tests the crud.Delete() function
+// Test_crud_Delete tests the crud.Delete() function.
 func Test_crud_Delete(t *testing.T) {
 	tests := []struct {
 		name             string

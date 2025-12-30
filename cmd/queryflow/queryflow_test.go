@@ -15,7 +15,7 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// TestNewQueryFlowCommand tests the NewQueryFlowCommand() function
+// TestNewQueryFlowCommand tests the NewQueryFlowCommand() function.
 func TestNewQueryFlowCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
@@ -50,6 +50,6 @@ func TestNewQueryFlowCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "endpoint", "export", "import", "processor"}
+	expectedCommands := []string{"config", "endpoint", "export", "import", "pipeline", "processor", "status"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewExportCommand creates the discovery export command that exports all Discovery's entities
+// NewExportCommand creates the discovery export command that exports all Discovery's entities.
 func NewExportCommand(d cli.Discovery) *cobra.Command {
 	var file string
 	export := &cobra.Command{
@@ -51,6 +51,8 @@ func NewExportCommand(d cli.Discovery) *cobra.Command {
 			return d.ExportEntitiesFromClients(clients, file, printer)
 		},
 		Args: cobra.NoArgs,
+		Example: `	# Export the entities to a specific file.
+	discovery export -p cn --file "entities/discovery.zip"`,
 	}
 
 	export.Flags().StringVarP(&file, "file", "f", "", "the file in which the information of the entities is going to be saved")

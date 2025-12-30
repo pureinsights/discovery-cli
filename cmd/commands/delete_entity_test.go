@@ -149,7 +149,6 @@ func TestDeleteCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
 			if tc.url != "" {
 				vpr.Set("default.core_url", tc.url)
 			}
@@ -349,7 +348,7 @@ func (g *FailingSearchDeleterParsingUUIDFails) Delete(id uuid.UUID) (gjson.Resul
 	return gjson.Result{}, nil
 }
 
-// TestSearchDeleteCommand tests the SearchDeleteCommand() function
+// TestSearchDeleteCommand tests the SearchDeleteCommand() function.
 func TestSearchDeleteCommand(t *testing.T) {
 	tests := []struct {
 		name           string

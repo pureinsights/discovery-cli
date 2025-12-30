@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewDeleteCommand creates the endpoint delete command
+// NewDeleteCommand creates the endpoint delete command.
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "delete",
@@ -31,7 +31,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	discovery queryflow endpoint delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
 
 	# Delete a endpoint by name
-	discovery queryflow endpoint delete endpoint1`,
+	discovery queryflow endpoint delete my-endpoint`,
 	}
 	return get
 }

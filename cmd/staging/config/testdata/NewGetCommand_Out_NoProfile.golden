@@ -1,7 +1,11 @@
 Usage:
   get [flags]
 
+Examples:
+	# Print the configuration of the "cn" profile with obfuscated API keys.
+	discovery staging config get -p cn
+
 Flags:
   -h, --help        help for get
-  -s, --sensitive   this flag obfuscates sensitive values before showing them to the user. (default true)
+  -s, --sensitive   this flag obfuscates sensitive values before showing them to the user (default true)
 

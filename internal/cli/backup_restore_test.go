@@ -22,7 +22,7 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-// TestRenderExportStatus tests the RenderExportStatus() function
+// TestRenderExportStatus tests the RenderExportStatus() function.
 func TestRenderExportStatus(t *testing.T) {
 	tests := []struct {
 		name                string
@@ -67,67 +67,67 @@ var coreImport, _ = os.ReadFile("testdata/core-import.json")
 var ingestionImport, _ = os.ReadFile("testdata/ingestion-import.json")
 var queryflowImport, _ = os.ReadFile("testdata/queryflow-import.json")
 
-// WorkingCoreBackupRestore mocks a working backup restore
+// WorkingCoreBackupRestore mocks a working backup restore.
 type WorkingCoreBackupRestore struct {
 	mock.Mock
 }
 
-// Get returns zip bytes as if the request worked successfully.
+// Export returns zip bytes as if the request worked successfully.
 func (g *WorkingCoreBackupRestore) Export() ([]byte, string, error) {
 	return coreBytes, "export-20251110T1455.zip", nil
 }
 
-// Import implements the interface
+// Import implements the interface.
 func (g *WorkingCoreBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.ParseBytes(coreImport), nil
 }
 
-// WorkingIngestionBackupRestore mocks a working backup restore
+// WorkingIngestionBackupRestore mocks a working backup restore.
 type WorkingIngestionBackupRestore struct {
 	mock.Mock
 }
 
-// Get returns zip bytes as if the request worked successfully.
+// Export returns zip bytes as if the request worked successfully.
 func (g *WorkingIngestionBackupRestore) Export() ([]byte, string, error) {
 	return ingestionBytes, "export-20251110T1455.zip", nil
 }
 
-// Import implements the interface
+// Import implements the interface.
 func (g *WorkingIngestionBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.ParseBytes(ingestionImport), nil
 }
 
-// WorkingQueryFlowBackupRestore mocks a working backup restore
+// WorkingQueryFlowBackupRestore mocks a working backup restore.
 type WorkingQueryFlowBackupRestore struct {
 	mock.Mock
 }
 
-// Get returns zip bytes as if the request worked successfully.
+// Export returns zip bytes as if the request worked successfully.
 func (g *WorkingQueryFlowBackupRestore) Export() ([]byte, string, error) {
 	return queryflowBytes, "export-20251110T1455.zip", nil
 }
 
-// Import implements the interface
+// Import implements the interface.
 func (g *WorkingQueryFlowBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.ParseBytes(queryflowImport), nil
 }
 
-// FailingBackupRestore mocks a failing backup restore
+// FailingBackupRestore mocks a failing backup restore.
 type FailingBackupRestore struct {
 	mock.Mock
 }
 
-// Get returns an error as if the request failed.
+// Export returns an error as if the request failed.
 func (g *FailingBackupRestore) Export() ([]byte, string, error) {
 	return []byte(nil), "discovery.zip", discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// Import implements the interface
+// Import implements the interface.
 func (g *FailingBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// TestWriteExport tests the WriteExport() function
+// TestWriteExport tests the WriteExport() function.
 func TestWriteExport(t *testing.T) {
 	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
@@ -194,7 +194,7 @@ func TestWriteExport(t *testing.T) {
 	}
 }
 
-// TestExportEntitiesFromClient tests the ExportEntitiesFromClient() function
+// TestExportEntitiesFromClient tests the ExportEntitiesFromClient() function.
 func TestExportEntitiesFromClient(t *testing.T) {
 	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
@@ -215,7 +215,7 @@ func TestExportEntitiesFromClient(t *testing.T) {
 			path:           filepath.Join(dir1, "export.zip"),
 			expectedPath:   filepath.Join(dir1, "export.zip"),
 			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			err:            nil,
 		},
 		{
@@ -224,7 +224,7 @@ func TestExportEntitiesFromClient(t *testing.T) {
 			path:           "",
 			expectedPath:   filepath.Join(".", "export-20251110T1455.zip"),
 			expectedOutput: "{\"acknowledged\":true}\n",
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			err:            nil,
 		},
 		// Error case
@@ -307,6 +307,20 @@ func TestWriteExportsIntoFile(t *testing.T) {
 			expectedOutput: "",
 			err:            fmt.Errorf("the given path does not exist: %s", filepath.Join("doesnotexist", "export.zip")),
 		},
+		{
+			name:           "WriteExportsIntoFile receives an invalid product name with a working backup.",
+			clients:        []BackupRestoreClientEntry{{Name: "", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:           filepath.Join(t.TempDir(), "export.zip"),
+			expectedOutput: "",
+			err:            errors.New("path cannot be empty"),
+		},
+		{
+			name:           "WriteExportsIntoFile receives an invalid product name with a failing backup.",
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:           filepath.Join(t.TempDir(), "export.zip"),
+			expectedOutput: "",
+			err:            errors.New("path cannot be empty"),
+		},
 	}
 
 	for _, tc := range tests {
@@ -364,7 +378,7 @@ func TestExportEntitiesFromClients(t *testing.T) {
 			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:           filepath.Join(dir1, "export.zip"),
 			expectedPath:   filepath.Join(dir1, "export.zip"),
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			expectedOutput: "{\"core\":{\"acknowledged\":true},\"ingestion\":{\"acknowledged\":true},\"queryflow\":{\"acknowledged\":true}}\n",
 			err:            nil,
 		},
@@ -373,7 +387,7 @@ func TestExportEntitiesFromClients(t *testing.T) {
 			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:           "",
 			expectedPath:   filepath.Join(".", "discovery.zip"),
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			expectedOutput: "{\n  \"core\": {\n    \"acknowledged\": true\n  },\n  \"ingestion\": {\n    \"acknowledged\": false,\n    \"error\": \"status: 401, body: {\\\"error\\\":\\\"unauthorized\\\"}\\n\"\n  },\n  \"queryflow\": {\n    \"acknowledged\": true\n  }\n}\n",
 			err:            nil,
 		},
@@ -425,7 +439,7 @@ func TestExportEntitiesFromClients(t *testing.T) {
 	}
 }
 
-// TestImportEntitiesFromClient tests the ImportEntitiesFromClient() function
+// TestImportEntitiesFromClient tests the ImportEntitiesFromClient() function.
 func TestImportEntitiesFromClient(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -444,7 +458,7 @@ func TestImportEntitiesFromClient(t *testing.T) {
 			path:           filepath.Join("testdata", "core-export.zip"),
 			onConfict:      discoveryPackage.OnConflictUpdate,
 			expectedOutput: "{\n  \"Credential\": [\n    {\n      \"id\": \"3b32e410-2f33-412d-9fb8-17970131921c\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"458d245a-6ed2-4c2b-a73f-5540d550a479\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"46cb4fff-28be-4901-b059-1dd618e74ee4\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"4957145b-6192-4862-a5da-e97853974e9f\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"5c09589e-b643-41aa-a766-3b7fc3660473\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"6dd2177f-0196-42d8-9468-0053a5c1127a\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"822b2d33-20a2-4df4-aebf-a1cee5acdce7\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"837196a6-1ac5-4b0c-a24a-4b9d092e6260\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"84f66cd4-a28b-4e66-94e1-a3dc9f083bbd\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"8c243a1d-9384-421d-8f99-4ef28d4e0ab0\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"9be0e625-a510-46c5-8130-438823f849c2\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"9d438628-5981-49c5-9426-0d328fd16370\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"b4d9ee85-9775-49fa-8dfb-b3e5ce2f619e\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"f643fe55-18db-48e4-9d3f-335d0f5f5348\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"f64a5451-3716-45c4-8158-350f30e1cbdb\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"f6c4585b-4e65-4359-9aee-e995ba09f69e\",\n      \"status\": 200\n    }\n  ],\n  \"Server\": [\n    {\n      \"id\": \"21029da3-041c-43b5-a67e-870251f2f6a6\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"226e8a0b-5016-4ebe-9963-1461edd39d0a\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"2b839453-ddad-4ced-8e13-2c7860af60a7\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"3ab2e3c0-5459-4f19-9e89-f8282d111eba\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"3edc9c72-a875-49d7-8929-af09f3e9c01c\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"6f2ddfd5-154a-4534-8f29-b1569ac23b8a\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"6ffc7784-481e-4da8-8ee3-6817d15a757c\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"74160a12-bcf6-4778-8944-4a4b2a7c4be1\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"741df47e-208f-47c1-812f-53cc62c726af\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"7cd191c0-d8ab-44f7-923f-2e32d044ced2\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"8f14c11c-bb66-49d3-aa2a-dedff4608c17\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"986ce864-af76-4fcb-8b4f-f4e4c6ab0951\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"a798cd5b-aa7a-4fc5-9292-1de6fe8e8b7f\",\n      \"status\": 200\n    },\n    {\n      \"id\": \"f6950327-3175-4a98-a570-658df852424a\",\n      \"status\": 200\n    }\n  ]\n}\n",
-			printer:        JsonObjectPrinter(true),
+			printer:        nil,
 			err:            nil,
 		},
 		{
@@ -453,7 +467,7 @@ func TestImportEntitiesFromClient(t *testing.T) {
 			path:           filepath.Join("testdata", "queryflow-export.zip"),
 			onConfict:      discoveryPackage.OnConflictFail,
 			expectedOutput: "{\"Endpoint\":[{\"id\":\"2fee5e27-4147-48de-ba1e-d7f32476a4a2\",\"status\":204},{\"id\":\"4ef9da31-2ba6-442c-86bb-1c9566dac4c2\",\"status\":204},{\"id\":\"c4ffddc0-9e80-4809-ad4d-f01c4e0dba71\",\"status\":204},{\"id\":\"cf56470f-0ab4-4754-b05c-f760669315af\",\"status\":204}],\"Processor\":[{\"id\":\"019ecd8e-76c9-41ee-b047-299b8aa14aba\",\"status\":204},{\"id\":\"0a7caa9b-99aa-4a63-aa6d-a1e40941984d\",\"status\":204},{\"id\":\"3393f6d9-94c1-4b70-ba02-5f582727d998\",\"status\":204},{\"id\":\"5f125024-1e5e-4591-9fee-365dc20eeeed\",\"status\":204},{\"id\":\"628d4b24-84cc-4070-8eed-c3155cf40fe9\",\"status\":204},{\"id\":\"746ba681-246a-4dba-aac0-58848ac97725\",\"status\":204},{\"id\":\"86e7f920-a4e4-4b64-be84-5437a7673db8\",\"status\":204},{\"id\":\"88022257-f5bc-4705-968e-81dae0c486d3\",\"status\":204},{\"id\":\"8a399b1c-95fc-406c-a220-7d321aaa7b0e\",\"status\":204},{\"id\":\"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577\",\"status\":204},{\"id\":\"90b9e14f-1ba2-47cb-be42-77c4081e78a2\",\"status\":204},{\"id\":\"a5ee116b-bd95-474e-9d50-db7be988b196\",\"status\":204},{\"id\":\"aa02b328-76aa-4fcb-9eb1-6086d845adbd\",\"status\":204},{\"id\":\"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89\",\"status\":204},{\"id\":\"c80758d7-7989-4c23-8f8f-b92497e3ab90\",\"status\":204},{\"id\":\"eb9499c3-e134-4f4a-8aaf-288da68e68f0\",\"status\":204},{\"id\":\"f3d696ca-3c5d-4cdd-a569-b2619f7a1470\",\"status\":204},{\"id\":\"fd2d5f86-bdf0-44f7-ad70-fdd636c52c4e\",\"status\":204}]}\n",
-			printer:        nil,
+			printer:        JsonObjectPrinter(false),
 			err:            nil,
 		},
 		// Error case
@@ -839,7 +853,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 			name:        "ImportEntitiesFromClients correctly prints with pretty printer when one of the imports fails",
 			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:        "testdata/discovery.zip",
-			printer:     JsonObjectPrinter(false),
+			printer:     nil,
 			goldenFile:  "FailingIngestionImport",
 			goldenBytes: testutils.Read(t, "FailingIngestionImport"),
 			err:         nil,
@@ -848,7 +862,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 			name:        "ImportEntitiesFromClients correctly prints the results with ugly printer when the imports succeed",
 			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:        "testdata/discovery.zip",
-			printer:     nil,
+			printer:     JsonObjectPrinter(false),
 			goldenFile:  "UglyImport",
 			goldenBytes: testutils.Read(t, "UglyImport"),
 			err:         nil,

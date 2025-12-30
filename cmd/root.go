@@ -9,12 +9,13 @@ import (
 	"github.com/pureinsights/discovery-cli/cmd/ingestion"
 	"github.com/pureinsights/discovery-cli/cmd/queryflow"
 	"github.com/pureinsights/discovery-cli/cmd/staging"
+	"github.com/pureinsights/discovery-cli/cmd/statuscheck"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/cobra"
 )
 
-// NewRootCommand creates and sets up the root command of the Discovery CLI
+// NewRootCommand creates and sets up the root command of the Discovery CLI.
 func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery := &cobra.Command{
 		Use:   "discovery [subcommand]",
@@ -44,11 +45,12 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery.AddCommand(ingestion.NewIngestionCommand(d))
 	discovery.AddCommand(queryflow.NewQueryFlowCommand(d))
 	discovery.AddCommand(staging.NewStagingCommand(d))
+	discovery.AddCommand(statuscheck.NewStatusCommand(d))
 
 	return discovery
 }
 
-// Run executes the Root command
+// Run executes the Root command.
 func Run() (cli.ExitCode, error) {
 	ios := iostreams.IOStreams{
 		In:  os.Stdin,

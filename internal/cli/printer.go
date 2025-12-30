@@ -11,7 +11,7 @@ import (
 // Printer is the type that prints gjson.Result objects to the Out IOStream using different formats.
 type Printer func(iostreams.IOStreams, ...gjson.Result) error
 
-// PrintJsonObject prints the given JSON object to the Out IOStream.
+// printJsonObject prints the given JSON object to the Out IOStream.
 // If the pretty boolean is true, it prints the object with spacing and indentation
 // If not, it prints it in a compact format.
 func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result) error {
@@ -35,7 +35,7 @@ func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result) 
 	return err
 }
 
-// PrintJsonArray prints the given JSON array to the Out IOStream.
+// printJsonArray prints the given JSON array to the Out IOStream.
 // If the pretty boolean is true, it prints the objects in the array with spacing and indentation and adds brackets at each end.
 // If not, it prints the objects in a compact format.
 func printArrayObject(ios iostreams.IOStreams, pretty bool, array ...gjson.Result) error {

@@ -12,30 +12,26 @@ const (
 	LongImport string = "import is the command used to restore Discovery %s's entities. With the --file flag, the user must send the specific file that has the entities' configuration. With the --on-conflict flag, the user can send the conflict resolution strategy in case there are duplicate entities."
 )
 
-// ExportCommand is the function that executes the export operation
+// ExportCommand is the function that executes the export operation.
 func ExportCommand(d cli.Discovery, client cli.BackupRestore, file string, config commandConfig) error {
 	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}
 
-	printer := cli.GetObjectPrinter(d.Config().GetString("output"))
+	printer := cli.GetObjectPrinter(config.output)
 
 	return d.ExportEntitiesFromClient(client, file, printer)
 }
 
-// ImportCommand is the function that executes the import operation
+// ImportCommand is the function that executes the import operation.
 func ImportCommand(d cli.Discovery, client cli.BackupRestore, file string, onConflict discoveryPackage.OnConflict, config commandConfig) error {
 	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
 		return err
 	}
 
-	output := d.Config().GetString("output")
-	if output == "json" {
-		output = "pretty-json"
-	}
-	printer := cli.GetObjectPrinter(output)
+	printer := cli.GetObjectPrinter(config.output)
 
 	return d.ImportEntitiesToClient(client, file, onConflict, printer)
 }

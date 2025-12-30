@@ -6,14 +6,14 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// QueryFlowProcessorsClient is a struct that performs the CRUD of processors.
+// queryFlowProcessorsClient is a struct that performs the CRUD of processors.
 type queryFlowProcessorsClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// NewQueryFlowProcessorsClient is the constructor of a queryFlowProcessorsClient
+// newQueryFlowProcessorsClient is the constructor of a queryFlowProcessorsClient.
 func newQueryFlowProcessorsClient(url, apiKey string) queryFlowProcessorsClient {
 	client := newClient(url+"/processor", apiKey)
 	return queryFlowProcessorsClient{
@@ -38,7 +38,7 @@ type queryFlowPipelinesClient struct {
 	searcher
 }
 
-// NewQueryFlowPipelinesClient is the constructor of a queryFlowPipelinesClient
+// NewQueryFlowPipelinesClient is the constructor of a queryFlowPipelinesClient.
 func newQueryFlowPipelinesClient(url, apiKey string) queryFlowPipelinesClient {
 	client := newClient(url+"/pipeline", apiKey)
 	return queryFlowPipelinesClient{
@@ -64,7 +64,7 @@ type endpointsClient struct {
 	searcher
 }
 
-// NewEndpointsClient is the constructor of a newEndpointsClient
+// newEndpointsClient is the constructor of a newEndpointsClient.
 func newEndpointsClient(url, apiKey string) endpointsClient {
 	client := newClient(url+"/endpoint", apiKey)
 	return endpointsClient{
@@ -85,27 +85,27 @@ func newEndpointsClient(url, apiKey string) endpointsClient {
 	}
 }
 
-// QueryFlow is the struct for the client that can carry out every QueryFlow operation.
+// queryFlow is the struct for the client that can carry out every QueryFlow operation.
 type queryFlow struct {
 	Url, ApiKey string
 }
 
-// Processors creates a queryFlowProcessorsClient with QueryFlow's URL and API Key
+// Processors creates a queryFlowProcessorsClient with QueryFlow's URL and API Key.
 func (q queryFlow) Processors() queryFlowProcessorsClient {
 	return newQueryFlowProcessorsClient(q.Url, q.ApiKey)
 }
 
-// Pipelines is used to create a queryFlowPipelinesClient
+// Pipelines is used to create a queryFlowPipelinesClient.
 func (q queryFlow) Pipelines() queryFlowPipelinesClient {
 	return newQueryFlowPipelinesClient(q.Url, q.ApiKey)
 }
 
-// Endpoints creates a endpointsClient with QueryFlow's URL and API Key
+// Endpoints creates a endpointsClient with QueryFlow's URL and API Key.
 func (q queryFlow) Endpoints() endpointsClient {
 	return newEndpointsClient(q.Url, q.ApiKey)
 }
 
-// BackupRestore creates a backupRestore with QueryFlow's URL and API Key
+// BackupRestore creates a backupRestore with QueryFlow's URL and API Key.
 func (q queryFlow) BackupRestore() backupRestore {
 	return backupRestore{
 		client: newClient(q.Url, q.ApiKey),
@@ -126,6 +126,13 @@ func (q queryFlow) Debug(method, uri string, options ...RequestOption) (gjson.Re
 	newUri := "/debug/" + strings.TrimPrefix(uri, "/")
 	client := newClient(q.Url, q.ApiKey)
 	return execute(client, method, newUri, options...)
+}
+
+// StatusChecker creates a statusChecker with QueryFlow's URL and API Key.
+func (q queryFlow) StatusChecker() statusChecker {
+	return statusChecker{
+		client: newClient(q.Url[:len(q.Url)-3], q.ApiKey),
+	}
 }
 
 // NewQueryFlow is the constructor for the QueryFlow struct.

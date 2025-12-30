@@ -13,7 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_newBucketsClient tests the bucketsClient constructor
+// Test_newBucketsClient tests the bucketsClient constructor.
 func Test_newBucketsClient(t *testing.T) {
 	url := "http://localhost:12020"
 	apiKey := "Api Key"
@@ -23,7 +23,7 @@ func Test_newBucketsClient(t *testing.T) {
 	assert.Equal(t, url+"/bucket", c.client.client.BaseURL)
 }
 
-// Test_bucketsClient_Create tests the bucketsClient.Create() function
+// Test_bucketsClient_Create tests the bucketsClient.Create() function.
 func Test_bucketsClient_Create(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -446,7 +446,7 @@ func Test_bucketsClient_Purge(t *testing.T) {
 	}
 }
 
-// Test_bucketsClient_CreateIndex tests the bucketsClient.CreateIndex()
+// Test_bucketsClient_CreateIndex tests the bucketsClient.CreateIndex().
 func Test_bucketsClient_CreateIndex(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -1341,6 +1341,15 @@ func Test_staging_Content(t *testing.T) {
 
 	assert.Equal(t, apiKey, c.client.ApiKey)
 	assert.Equal(t, url+"/v2/content/"+bucketName, c.client.client.BaseURL)
+}
+
+// Test_staging_StatusChecker tests the staging.StatusChecker() function.
+func Test_staging_StatusChecker(t *testing.T) {
+	s := NewStaging("http://localhost:12020", "Api Key")
+	bc := s.StatusChecker()
+
+	assert.Equal(t, s.ApiKey, bc.ApiKey)
+	assert.Equal(t, "http://localhost:12020", bc.client.client.BaseURL)
 }
 
 // TestNewStaging tests the staging client constructor.

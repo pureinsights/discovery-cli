@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewStoreCommand creates the server store command
+// NewStoreCommand creates the server store command.
 func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string

@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Defines the update flag in the package
+// Defines the update flag in the package.
 var Update = flag.Bool("update", false, "rewrite golden files")
 
 // Test_newRootCommand tests the newRootCommand() function.
@@ -56,7 +56,7 @@ func Test_newRootCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "core", "export", "import", "ingestion", "queryflow", "staging"}
+	expectedCommands := []string{"config", "core", "export", "import", "ingestion", "queryflow", "staging", "status"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
 
@@ -114,7 +114,7 @@ func TestRun_InitializeConfigFails(t *testing.T) {
 	assert.EqualError(t, cliError, errorStruct.Error())
 }
 
-// TestRun_ExecuteFails tests when the execution of the CLI results in an error
+// TestRun_ExecuteFails tests when the execution of the CLI results in an error.
 func TestRun_ExecuteFails(t *testing.T) {
 	tmp := t.TempDir()
 
@@ -131,7 +131,7 @@ func TestRun_ExecuteFails(t *testing.T) {
 	assert.EqualError(t, cliError.Cause, "unknown flag: --profiles")
 }
 
-// TestRun_Success tests when the Run function works
+// TestRun_Success tests when the Run function works.
 func TestRun_Success(t *testing.T) {
 	tmp := t.TempDir()
 

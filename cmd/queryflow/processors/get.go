@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewGetCommand creates the processor get command
+// NewGetCommand creates the processor get command.
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var filters []string
 	get := &cobra.Command{
@@ -29,7 +29,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get processor by name
-	discovery queryflow processor get "MongoDB text processor"
+	discovery queryflow processor get "my-processor"
 
 	# Get processors using filters
 	discovery queryflow processor get --filter label=A:A -f type=mongo
@@ -38,8 +38,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	discovery queryflow processor get -p cn`,
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:
-- Label: The format is label={key}[:{value}], where the value is optional.
-- Type: The format is type={type}.`)
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
+- Label: The format is label={key}[:{value}], where the value is optional
+- Type: The format is type={type}`)
 	return get
 }

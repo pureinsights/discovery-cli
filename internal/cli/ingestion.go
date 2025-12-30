@@ -15,7 +15,7 @@ type IngestionSeedController interface {
 	Halt(id uuid.UUID) ([]gjson.Result, error)
 }
 
-// GetSeedId obtains the UUID from the result of a search
+// GetSeedId obtains the UUID from the result of a search.
 func GetSeedId(d Discovery, client Searcher, name string) (uuid.UUID, error) {
 	seed, err := d.searchEntity(client, name)
 	if err != nil {
@@ -38,7 +38,7 @@ func (d discovery) StartSeed(client IngestionSeedController, name string, scanTy
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), startResult)
 	} else {
 		err = printer(*d.IOStreams(), startResult)
@@ -47,7 +47,7 @@ func (d discovery) StartSeed(client IngestionSeedController, name string, scanTy
 	return err
 }
 
-// HaltSeed stops all the seed executions of a seed
+// HaltSeed stops all the seed executions of a seed.
 func (d discovery) HaltSeed(client IngestionSeedController, name string, printer Printer) error {
 	seedId, err := GetSeedId(d, client, name)
 	if err != nil {
@@ -69,13 +69,13 @@ func (d discovery) HaltSeed(client IngestionSeedController, name string, printer
 	return err
 }
 
-// IngestionSeedExecutionController defines all of the methods to manage seed executions from commands
+// IngestionSeedExecutionController defines all of the methods to manage seed executions from commands.
 type IngestionSeedExecutionController interface {
 	Getter
 	Halt(id uuid.UUID) (gjson.Result, error)
 }
 
-// HaltSeedExecution stops a single seed execution with its UUID
+// HaltSeedExecution stops a single seed execution with its UUID.
 func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error {
 	haltResult, err := client.Halt(execution)
 	if err != nil {
@@ -83,7 +83,7 @@ func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, ex
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), haltResult)
 	} else {
 		err = printer(*d.IOStreams(), haltResult)
@@ -92,7 +92,7 @@ func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, ex
 	return err
 }
 
-// ConvertJSONArrayToString transforms a []gjson.Result into a valid JSON array string
+// ConvertJSONArrayToString transforms a []gjson.Result into a valid JSON array string.
 func ConvertJSONArrayToString(array []gjson.Result) string {
 	arrayString := "[\n"
 	for index, record := range array {
@@ -130,7 +130,7 @@ func (d discovery) AppendSeedRecord(seed gjson.Result, client RecordGetter, id s
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), seedWithRecord)
 	} else {
 		err = printer(*d.IOStreams(), seedWithRecord)
@@ -159,7 +159,7 @@ func (d discovery) AppendSeedRecords(seed gjson.Result, client RecordGetter, pri
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(false)
+		jsonPrinter := JsonObjectPrinter(true)
 		err = jsonPrinter(*d.IOStreams(), seedWithRecords)
 	} else {
 		err = printer(*d.IOStreams(), seedWithRecords)

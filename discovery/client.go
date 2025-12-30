@@ -40,13 +40,13 @@ func WithJSONBody(body string) RequestOption {
 	}
 }
 
-// Client is a struct that contains the API Key to connect to Discovery and the Resty Client to execute the requests.
+// client is a struct that contains the API Key to connect to Discovery and the Resty Client to execute the requests.
 type client struct {
 	ApiKey string
 	client *resty.Client
 }
 
-// NewClient returns an instance of a [client] struct.
+// newClient returns an instance of a [client] struct.
 // The url parameter is the url to which the request is sent.
 // For example, http://localhost:12010/v2
 func newClient(url, apiKey string) client {
@@ -55,7 +55,7 @@ func newClient(url, apiKey string) client {
 	return client{apiKey, restyClient}
 }
 
-// NewSubClient returns an instance of a [client] struct whose base URL is the parent client’s base URL with an added path.
+// newSubClient returns an instance of a [client] struct whose base URL is the parent client’s base URL with an added path.
 // For example, http://localhost:12010/v2/seed
 func newSubClient(c client, path string) client {
 	newUrl := strings.TrimRight(c.client.BaseURL, "/") + "/" + strings.TrimLeft(path, "/")
@@ -64,7 +64,7 @@ func newSubClient(c client, path string) client {
 	return client{c.ApiKey, subClient}
 }
 
-// Execute runs an HTTP request with the client.
+// execute runs an HTTP request with the client.
 // The method parameter is the HTTP verb to be executed.
 // The path is added to the client's base URL.
 // The request is modified with the specified request options.
@@ -98,7 +98,7 @@ func (c client) execute(method, path string, options ...RequestOption) ([]byte, 
 	return response.Body(), nil
 }
 
-// Execute runs the client.execute(function), but returns a parsed gjson.Result object instead of a byte array.
+// execute runs the client.execute(function), but returns a parsed gjson.Result object instead of a byte array.
 // This function is only recommended if the response is known to return a JSON object or array.
 func execute(client client, method, path string, options ...RequestOption) (gjson.Result, error) {
 	response, err := client.execute(method, path, options...)
@@ -109,7 +109,7 @@ func execute(client client, method, path string, options ...RequestOption) (gjso
 	return resultJson, nil
 }
 
-// ExecuteWithPagination obtains all of the content when the endpoint returns its results in pages.
+// executeWithPagination obtains all of the content when the endpoint returns its results in pages.
 // It requests the data in every page and returns an array with all of the JSON results.
 func executeWithPagination(client client, method, path string, options ...RequestOption) ([]gjson.Result, error) {
 	response, err := execute(client, method, path, options...)

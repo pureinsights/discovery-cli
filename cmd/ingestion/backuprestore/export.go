@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewExportCommand creates the discovery ingestion export command that exports Discovery Ingestion's entities
+// NewExportCommand creates the discovery ingestion export command that exports Discovery Ingestion's entities.
 func NewExportCommand(d cli.Discovery) *cobra.Command {
 	var file string
 	export := &cobra.Command{

@@ -48,7 +48,7 @@ func WriteExport(client BackupRestore, path string) (gjson.Result, error) {
 	return RenderExportStatus(err)
 }
 
-// ExportEntitiesFromClient exports the entities from a single Discovery product and prints the acknowledgement message
+// ExportEntitiesFromClient exports the entities from a single Discovery product and prints the acknowledgement message.
 func (d discovery) ExportEntitiesFromClient(client BackupRestore, path string, printer Printer) error {
 	result, err := WriteExport(client, path)
 	if err != nil {
@@ -56,7 +56,7 @@ func (d discovery) ExportEntitiesFromClient(client BackupRestore, path string, p
 	}
 
 	if printer == nil {
-		printer = JsonObjectPrinter(false)
+		printer = JsonObjectPrinter(true)
 	}
 
 	return printer(*d.iostreams, result)
@@ -138,7 +138,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 	}
 
 	if printer == nil {
-		printer = JsonObjectPrinter(false)
+		printer = JsonObjectPrinter(true)
 	}
 
 	return printer(*d.iostreams, gjson.Parse(result))
@@ -154,7 +154,7 @@ func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onC
 	}
 
 	if printer == nil {
-		printer = JsonObjectPrinter(false)
+		printer = JsonObjectPrinter(true)
 	}
 
 	return printer(*d.iostreams, results)
@@ -240,7 +240,7 @@ func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 	return tmpDir, paths, nil
 }
 
-// CallImports calls the import endpoints of the given clients and adds the responses to the results JSON.
+// callImports calls the import endpoints of the given clients and adds the responses to the results JSON.
 func callImports(clients []BackupRestoreClientEntry, zipPaths map[string]string, onConflict discoveryPackage.OnConflict) (string, error) {
 	results := "{}"
 	for _, client := range clients {
@@ -286,7 +286,7 @@ func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, p
 	}
 
 	if printer == nil {
-		printer = JsonObjectPrinter(false)
+		printer = JsonObjectPrinter(true)
 	}
 
 	return printer(*d.iostreams, gjson.Parse(results))

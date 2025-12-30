@@ -3,7 +3,7 @@ Usage:
 
 Examples:
 	# Get processor by name
-	discovery queryflow processor get "MongoDB text processor"
+	discovery queryflow processor get "my-processor"
 
 	# Get processors using filters
 	discovery queryflow processor get --filter label=A:A -f type=mongo
@@ -12,8 +12,8 @@ Examples:
 	discovery queryflow processor get -p cn
 
 Flags:
-  -f, --filter stringArray   Apply filters in the format "filter=key:value". The available filters are:
-                             - Label: The format is label={key}[:{value}], where the value is optional.
-                             - Type: The format is type={type}.
+  -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
+                             - Label: The format is label={key}[:{value}], where the value is optional
+                             - Type: The format is type={type}
   -h, --help                 help for get
 

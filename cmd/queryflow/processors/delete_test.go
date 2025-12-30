@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TestNewDeleteCommand tests the NewDeleteCommand function
+// TestNewDeleteCommand tests the NewDeleteCommand function.
 func TestNewDeleteCommand(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -448,7 +448,7 @@ func TestNewDeleteCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
+			vpr.Set("output", "pretty-json")
 			if tc.url {
 				vpr.Set("default.queryflow_url", srv.URL)
 			}
@@ -502,7 +502,7 @@ func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "json")
+	vpr.Set("output", "pretty-json")
 
 	vpr.Set("default.queryflow_url", "test")
 	vpr.Set("default.queryflow_key", "test")
@@ -539,7 +539,7 @@ func TestNewDeleteCommand_NotExactly1Arg(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "json")
+	vpr.Set("output", "pretty-json")
 
 	vpr.Set("default.queryflow_url", "test")
 	vpr.Set("default.queryflow_key", "test")

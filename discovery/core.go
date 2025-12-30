@@ -8,12 +8,12 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// LabelsClient is the struct that performs the CRUD of labels
+// labelsClient is the struct that performs the CRUD of labels.
 type labelsClient struct {
 	crud
 }
 
-// NewLabelsClient is the constructor of a labelsClient
+// newLabelsClient is the constructor of a labelsClient.
 func newLabelsClient(url, apiKey string) labelsClient {
 	return labelsClient{
 		crud{
@@ -24,12 +24,12 @@ func newLabelsClient(url, apiKey string) labelsClient {
 	}
 }
 
-// SecretsClient is the struct that performs the CRUD of secrets
+// secretsClient is the struct that performs the CRUD of secrets.
 type secretsClient struct {
 	crud
 }
 
-// NewSecretsClient creates a new secretsClient
+// newSecretsClient creates a new secretsClient.
 func newSecretsClient(url, apiKey string) secretsClient {
 	return secretsClient{
 		crud{
@@ -40,14 +40,14 @@ func newSecretsClient(url, apiKey string) secretsClient {
 	}
 }
 
-// CredentialsClient is the struct that performs the CRUD of credentials
+// credentialsClient is the struct that performs the CRUD of credentials.
 type credentialsClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// NewCredentialsClient creates a new credentialsClient.
+// newCredentialsClient creates a new credentialsClient.
 func newCredentialsClient(url, apiKey string) credentialsClient {
 	client := newClient(url+"/credential", apiKey)
 	return credentialsClient{
@@ -65,14 +65,14 @@ func newCredentialsClient(url, apiKey string) credentialsClient {
 	}
 }
 
-// ServersClient is the struct that performs the CRUD of servers
+// serversClient is the struct that performs the CRUD of servers.
 type serversClient struct {
 	crud
 	cloner
 	searcher
 }
 
-// NewServersClient creates a new serversClient
+// newServersClient creates a new serversClient.
 func newServersClient(url, apiKey string) serversClient {
 	client := newClient(url+"/server", apiKey)
 	return serversClient{
@@ -96,12 +96,12 @@ func (sc serversClient) Ping(id uuid.UUID) (gjson.Result, error) {
 	return execute(sc.crud.client, http.MethodGet, "/"+id.String()+"/ping")
 }
 
-// FilesClient is the struct that performs the CRUD of files
+// filesClient is the struct that performs the CRUD of files.
 type filesClient struct {
 	client
 }
 
-// NewFilesClient is the constructor of the filesClient struct
+// newFilesClient is the constructor of the filesClient struct.
 func newFilesClient(url, apiKey string) filesClient {
 	client := newClient(url+"/file", apiKey)
 	return filesClient{
@@ -150,14 +150,19 @@ type LogLevel string
 
 // The constants represent the respective log level.
 const (
+	// LevelError is used to change the log level to "ERROR"
 	LevelError LogLevel = "ERROR"
-	LevelWarn  LogLevel = "WARN"
-	LevelInfo  LogLevel = "INFO"
+	// LevelWarn is used to change the log level to "WARN"
+	LevelWarn LogLevel = "WARN"
+	// LevelInfo is used to change the log level to "INFO"
+	LevelInfo LogLevel = "INFO"
+	// LevelDebug is used to change the log level to "DEBUG"
 	LevelDebug LogLevel = "DEBUG"
+	// LevelTrace is used to change the log level to "TRACE"
 	LevelTrace LogLevel = "TRACE"
 )
 
-// MaintenanceClient is the struct that the Core's maintenance operations.
+// maintenanceClient is the struct that the Core's maintenance operations.
 type maintenanceClient struct {
 	client
 }
@@ -178,45 +183,52 @@ func (mc maintenanceClient) Log(componentName string, level LogLevel, loggerName
 	return execute(mc.client, http.MethodPost, "/log", WithQueryParameters(map[string][]string{"componentName": {componentName}, "level": {string(level)}, "loggerName": {loggerName}}))
 }
 
-// Core is the struct for the client that can execute every Core operation.
+// core is the struct for the client that can execute every Core operation.
 type core struct {
 	Url, ApiKey string
 }
 
-// Servers creates a serversClient with the core's URL and API Key
+// Servers creates a serversClient with the core's URL and API Key.
 func (c core) Servers() serversClient {
 	return newServersClient(c.Url, c.ApiKey)
 }
 
-// Credentials creates a credentialsClient with the core's URL and API Key
+// Credentials creates a credentialsClient with the core's URL and API Key.
 func (c core) Credentials() credentialsClient {
 	return newCredentialsClient(c.Url, c.ApiKey)
 }
 
-// Secrets creates a secretsClient with the core's URL and API Key
+// Secrets creates a secretsClient with the core's URL and API Key.
 func (c core) Secrets() secretsClient {
 	return newSecretsClient(c.Url, c.ApiKey)
 }
 
-// Labels creates a labelsClient with the core's URL and API Key
+// Labels creates a labelsClient with the core's URL and API Key.
 func (c core) Labels() labelsClient {
 	return newLabelsClient(c.Url, c.ApiKey)
 }
 
-// Files creates a filesClient with the core's URL and API Key
+// Files creates a filesClient with the core's URL and API Key.
 func (c core) Files() filesClient {
 	return newFilesClient(c.Url, c.ApiKey)
 }
 
-// Maintenance creates a maintenanceClient with the core's URL and API Key
+// Maintenance creates a maintenanceClient with the core's URL and API Key.
 func (c core) Maintenance() maintenanceClient {
 	return newMaintenanceClient(c.Url, c.ApiKey)
 }
 
-// BackupRestore creates a backupRestore with the core's URL and API Key
+// BackupRestore creates a backupRestore with the core's URL and API Key.
 func (c core) BackupRestore() backupRestore {
 	return backupRestore{
 		client: newClient(c.Url, c.ApiKey),
+	}
+}
+
+// StatusChecker creates a statusChecker with the Core's URL and API Key.
+func (c core) StatusChecker() statusChecker {
+	return statusChecker{
+		client: newClient(c.Url[:len(c.Url)-3], c.ApiKey),
 	}
 }
 

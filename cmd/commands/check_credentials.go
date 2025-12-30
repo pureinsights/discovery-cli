@@ -15,7 +15,7 @@ type commandConfig struct {
 	componentName string
 }
 
-// GetCommandConfig is the constructor of the commandConfig struct
+// GetCommandConfig is the constructor of the commandConfig struct.
 func GetCommandConfig(profile, output, componentName, url string) commandConfig {
 	return commandConfig{
 		profile:       profile,

@@ -15,7 +15,7 @@ import (
 
 var Update = flag.Bool("update", false, "rewrite golden files")
 
-// TestNewIngestionCommand tests the NewIngestionCommand() function
+// TestNewIngestionCommand tests the NewIngestionCommand() function.
 func TestNewIngestionCommand(t *testing.T) {
 	in := strings.NewReader("In Reader")
 	out := &bytes.Buffer{}
@@ -50,6 +50,6 @@ func TestNewIngestionCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "export", "import", "pipeline", "processor", "seed"}
+	expectedCommands := []string{"config", "export", "import", "pipeline", "processor", "seed", "status"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

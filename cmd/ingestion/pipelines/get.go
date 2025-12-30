@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewGetCommand creates the pipeline get command
+// NewGetCommand creates the pipeline get command.
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var filters []string
 	get := &cobra.Command{
@@ -39,6 +39,6 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filter is:
-- Label: The format is label={key}[:{value}], where the value is optional.`)
+- Label: The format is label={key}[:{value}], where the value is optional`)
 	return get
 }

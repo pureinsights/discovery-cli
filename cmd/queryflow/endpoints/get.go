@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewGetCommand creates the endpoint get command
+// NewGetCommand creates the endpoint get command.
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var filters []string
 	get := &cobra.Command{
@@ -29,7 +29,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Get an endpoint by name
-	discovery queryflow endpoint get "Wikis endpoint"
+	discovery queryflow endpoint get "my-endpoint"
 	
 	# Get endpoints using filters
 	discovery queryflow endpoint get --filter label=A:B
@@ -38,8 +38,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	discovery queryflow endpoint get -p cn`,
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `Apply filters in the format "filter=key:value". The available filters are:
-- Label: The format is label={key}[:{value}], where the value is optional.
-- Type: The format is type={type}.`)
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
+- Label: The format is label={key}[:{value}], where the value is optional
+- Type: The format is type={type}`)
 	return get
 }
