@@ -1,5 +1,5 @@
 Usage:
-  store [configFiles] [flags]
+  store [files] [flags]
 
 Flags:
       --abort-on-error   aborts the operation if there is an error

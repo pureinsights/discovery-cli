@@ -1,5 +1,5 @@
 Usage:
-  store [configFiles] [flags]
+  store [files] [flags]
 
 Examples:
 	# Store a processor with the JSON configuration in a file
