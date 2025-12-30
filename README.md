@@ -28,7 +28,7 @@ Go to the [Releases](https://github.com/pureinsights/discovery-cli/releases) sec
 | **macOS** | `arm64` | Apple Silicon Macs (M1 - M5) | `discovery-cli_{VERSION}_darwin_arm64.tar.gz` |
 | **macOS** | `amd64` | Older Intel-based Macs | `discovery-cli_{VERSION}_darwin_amd64.tar.gz` |
 | **Linux** | `amd64` | Most Linux servers/desktops (Intel/AMD 64-bit) | `discovery-cli_{VERSION}_linux_amd64.tar.gz` |
-| **Linux** | `arm64` | ARM servers, AWS Graviton | `discovery-cli_{VERSION}_linux_arm64.tar.gz` |
+| **Linux** | `arm64` | ARM servers | `discovery-cli_{VERSION}_linux_arm64.tar.gz` |
 | **Linux** | `amd64` | 32-bit Linux Computers | `discovery-cli_{VERSION}_linux_386.tar.gz` |
 
 Extract the archives into your preferred location. The downloaded file contains the binary of the Discovery CLI and the user documentation.
