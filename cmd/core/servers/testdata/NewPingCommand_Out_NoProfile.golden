@@ -1,0 +1,13 @@
+Usage:
+  ping <server> [flags]
+
+Examples:
+	# Ping server by name
+	discovery core server ping "my-server"
+
+	# Ping server by id
+	discovery core server ping 21029da3-041c-43b5-a67e-870251f2f6a6
+
+Flags:
+  -h, --help   help for ping
+

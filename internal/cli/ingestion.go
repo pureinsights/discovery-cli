@@ -15,19 +15,9 @@ type IngestionSeedController interface {
 	Halt(id uuid.UUID) ([]gjson.Result, error)
 }
 
-// GetSeedId obtains the UUID from the result of a search.
-func GetSeedId(d Discovery, client Searcher, name string) (uuid.UUID, error) {
-	seed, err := d.searchEntity(client, name)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return uuid.Parse(seed.Get("id").String())
-}
-
 // StartSeed initiates the execution of a seed with the given scanType and execution properties.
 func (d discovery) StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error {
-	seedId, err := GetSeedId(d, client, name)
+	seedId, err := GetEntityId(d, client, name)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to start execution.")
 	}
@@ -46,7 +36,7 @@ func (d discovery) StartSeed(client IngestionSeedController, name string, scanTy
 
 // HaltSeed stops all the seed executions of a seed.
 func (d discovery) HaltSeed(client IngestionSeedController, name string, printer Printer) error {
-	seedId, err := GetSeedId(d, client, name)
+	seedId, err := GetEntityId(d, client, name)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to halt execution.")
 	}
