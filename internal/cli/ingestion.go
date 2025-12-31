@@ -28,13 +28,10 @@ func (d discovery) StartSeed(client IngestionSeedController, name string, scanTy
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), startResult)
-	} else {
-		err = printer(*d.IOStreams(), startResult)
+		printer = JsonObjectPrinter(true)
 	}
 
-	return err
+	return printer(*d.IOStreams(), startResult)
 }
 
 // HaltSeed stops all the seed executions of a seed.
@@ -50,13 +47,10 @@ func (d discovery) HaltSeed(client IngestionSeedController, name string, printer
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonArrayPrinter(false)
-		err = jsonPrinter(*d.IOStreams(), haltResults...)
-	} else {
-		err = printer(*d.IOStreams(), haltResults...)
+		printer = JsonArrayPrinter(false)
 	}
 
-	return err
+	return printer(*d.IOStreams(), haltResults...)
 }
 
 // IngestionSeedExecutionController defines all of the methods to manage seed executions from commands.
@@ -73,13 +67,10 @@ func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, ex
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), haltResult)
-	} else {
-		err = printer(*d.IOStreams(), haltResult)
+		printer = JsonObjectPrinter(true)
 	}
 
-	return err
+	return printer(*d.IOStreams(), haltResult)
 }
 
 // ConvertJSONArrayToString transforms a []gjson.Result into a valid JSON array string.
@@ -120,13 +111,10 @@ func (d discovery) AppendSeedRecord(seed gjson.Result, client RecordGetter, id s
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), seedWithRecord)
-	} else {
-		err = printer(*d.IOStreams(), seedWithRecord)
+		printer = JsonObjectPrinter(true)
 	}
 
-	return err
+	return printer(*d.IOStreams(), seedWithRecord)
 }
 
 // AppendSeedRecords adds a "records" field to the seed, which contains all of the records obtained from the seed.
@@ -149,13 +137,10 @@ func (d discovery) AppendSeedRecords(seed gjson.Result, client RecordGetter, pri
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), seedWithRecords)
-	} else {
-		err = printer(*d.IOStreams(), seedWithRecords)
+		printer = JsonObjectPrinter(true)
 	}
 
-	return err
+	return printer(*d.IOStreams(), seedWithRecords)
 }
 
 // Summarizer defines the Summarize() method.
@@ -216,10 +201,8 @@ func (d discovery) SeedExecution(client SeedExecutionGetter, seedExecutionId uui
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), execution)
-	} else {
-		err = printer(*d.IOStreams(), execution)
+		printer = JsonObjectPrinter(true)
 	}
-	return err
+
+	return printer(*d.IOStreams(), execution)
 }

@@ -47,13 +47,10 @@ func (d discovery) GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), object)
-	} else {
-		err = printer(*d.IOStreams(), object)
+		printer = JsonObjectPrinter(true)
 	}
 
-	return err
+	return printer(*d.IOStreams(), object)
 }
 
 // GetEntities obtains all the entities using the given client and then prints out the result using the received printer or the JSON array printer.
@@ -64,13 +61,10 @@ func (d discovery) GetEntities(client Getter, printer Printer) error {
 	}
 
 	if printer == nil {
-		arrayPrinter := JsonArrayPrinter(false)
-		err = arrayPrinter(*d.IOStreams(), objects...)
-	} else {
-		err = printer(*d.IOStreams(), objects...)
+		printer = JsonArrayPrinter(false)
 	}
 
-	return err
+	return printer(*d.IOStreams(), objects...)
 }
 
 // Searcher is the interface that implements searching methods.
@@ -116,13 +110,10 @@ func (d discovery) SearchEntity(client Searcher, id string, printer Printer) err
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), result)
-	} else {
-		err = printer(*d.IOStreams(), result)
+		printer = JsonObjectPrinter(true)
 	}
 
-	return err
+	return printer(*d.IOStreams(), result)
 }
 
 // SearchEntities searches for entities and prints the results into the Out IOStream.
@@ -133,13 +124,10 @@ func (d discovery) SearchEntities(client Searcher, filter gjson.Result, printer 
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonArrayPrinter(false)
-		err = jsonPrinter(*d.IOStreams(), results...)
-	} else {
-		err = printer(*d.IOStreams(), results...)
+		printer = JsonArrayPrinter(false)
 	}
 
-	return err
+	return printer(*d.IOStreams(), results...)
 }
 
 // parseFilter converts a filter in the format type=key:value to the JSON DSL Filter in Discovery.
@@ -303,13 +291,10 @@ func (d discovery) DeleteEntity(client Deleter, id uuid.UUID, printer Printer) e
 	}
 
 	if printer == nil {
-		jsonPrinter := JsonObjectPrinter(true)
-		err = jsonPrinter(*d.IOStreams(), object)
-	} else {
-		err = printer(*d.IOStreams(), object)
+		printer = JsonObjectPrinter(true)
 	}
 
-	return err
+	return printer(*d.IOStreams(), object)
 }
 
 // SearchDeleter is the interface that implements the delete method that works with names.
