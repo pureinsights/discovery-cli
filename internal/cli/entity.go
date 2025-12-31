@@ -23,6 +23,16 @@ const (
 	}`
 )
 
+// GetEntityId obtains the UUID from the result of a search.
+func GetEntityId(d Discovery, client Searcher, name string) (uuid.UUID, error) {
+	entity, err := d.searchEntity(client, name)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return uuid.Parse(entity.Get("id").String())
+}
+
 // Getter defines the Get and GetAll methods.
 type Getter interface {
 	Get(uuid.UUID) (gjson.Result, error)
