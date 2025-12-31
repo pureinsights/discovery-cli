@@ -913,6 +913,31 @@ discovery core server delete my-server
 {"acknowledged":true}
 ```
 
+###### Ping
+`ping` is the command used to check if a server in Discovery Core is reachable. If it is, it should return an acknowledgement message. Some type of servers cannot be pinged, like OpenAI servers. Consult the Discovery documentation for more information.
+
+Usage: `discovery core server ping [flags] <arg>`
+
+Arguments:
+`arg`::
+(Required, string) The name or UUID of the server that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Ping a server by name
+discovery core server ping "Elasticsearch Server"
+{"acknowledged":true}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery Core. If it is healthy, it should return a JSON with an "UP" status field.
 
