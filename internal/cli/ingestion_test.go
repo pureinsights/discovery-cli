@@ -65,73 +65,6 @@ func (s *SearcherIDNotUUID) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// TestGetSeedId tests the GetSeedId() function.
-func TestGetSeedId(t *testing.T) {
-	successId, successErr := uuid.Parse("986ce864-af76-4fcb-8b4f-f4e4c6ab0951")
-	errorId, errorErr := uuid.Parse("test")
-	tests := []struct {
-		name     string
-		client   Searcher
-		expected uuid.UUID
-		err      error
-	}{
-		// Working case
-		{
-			name:     "GetSeedId works",
-			client:   new(WorkingSearcher),
-			expected: successId,
-			err:      successErr,
-		},
-
-		// Error case
-		{
-			name:     "Cannot convert to UUID fails",
-			client:   new(SearcherIDNotUUID),
-			expected: errorId,
-			err:      errorErr,
-		},
-		{
-			name:     "Search fails",
-			client:   new(FailingSearcher),
-			expected: uuid.Nil,
-			err: discoveryPackage.Error{
-				Status: http.StatusBadRequest,
-				Body: gjson.Parse(`{
-	"status": 400,
-	"code": 3002,
-	"messages": [
-		"Invalid JSON: Unexpected end-of-input:"
-	],
-	"timestamp": "2025-10-17T17:43:52.817308100Z"
-	}`),
-			},
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-
-			ios := iostreams.IOStreams{
-				In:  os.Stdin,
-				Out: buf,
-				Err: os.Stderr,
-			}
-
-			d := NewDiscovery(&ios, viper.New(), "")
-			seedId, err := GetSeedId(d, tc.client, "seed")
-
-			if tc.err != nil {
-				require.Error(t, err)
-				assert.EqualError(t, err, tc.err.Error())
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, tc.expected, seedId)
-			}
-		})
-	}
-}
-
 // WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedController struct {
 	mock.Mock
@@ -148,19 +81,19 @@ func (c *WorkingSeedController) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
-// FailingSeedControllerGetSeedIdFails simulates a failing IngestionSeedController when GetSeedId fails.
-type FailingSeedControllerGetSeedIdFails struct {
+// FailingSeedControllerGetEntityIdFails simulates a failing IngestionSeedController when GetEntityId fails.
+type FailingSeedControllerGetEntityIdFails struct {
 	mock.Mock
 	SearcherIDNotUUID
 }
 
 // Start implements the interface.
-func (c *FailingSeedControllerGetSeedIdFails) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
+func (c *FailingSeedControllerGetEntityIdFails) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
 }
 
 // Halt implements the interface.
-func (c *FailingSeedControllerGetSeedIdFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
+func (c *FailingSeedControllerGetEntityIdFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
@@ -226,7 +159,7 @@ func Test_discovery_StartSeed(t *testing.T) {
 		// Error case
 		{
 			name:           "GetByIdFails",
-			client:         new(FailingSeedControllerGetSeedIdFails),
+			client:         new(FailingSeedControllerGetEntityIdFails),
 			printer:        nil,
 			expectedOutput: "",
 			err:            NewErrorWithCause(ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not get seed ID to start execution."),
@@ -315,7 +248,7 @@ func Test_discovery_HaltSeed(t *testing.T) {
 		// Error case
 		{
 			name:           "GetByIdFails",
-			client:         new(FailingSeedControllerGetSeedIdFails),
+			client:         new(FailingSeedControllerGetEntityIdFails),
 			printer:        nil,
 			expectedOutput: "",
 			err:            NewErrorWithCause(ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not get seed ID to halt execution."),
