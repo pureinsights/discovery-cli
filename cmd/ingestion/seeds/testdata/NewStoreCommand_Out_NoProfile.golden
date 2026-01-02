@@ -1,5 +1,5 @@
 Usage:
-  store [files] [flags]
+  store [<files>...] [flags]
 
 Examples:
 	# Store a seed with the JSON configuration in a file
