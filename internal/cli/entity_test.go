@@ -20,6 +20,73 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// TestGetEntityId tests the GetEntityId() function.
+func TestGetEntityId(t *testing.T) {
+	successId, successErr := uuid.Parse("986ce864-af76-4fcb-8b4f-f4e4c6ab0951")
+	errorId, errorErr := uuid.Parse("test")
+	tests := []struct {
+		name     string
+		client   Searcher
+		expected uuid.UUID
+		err      error
+	}{
+		// Working case
+		{
+			name:     "GetEntityId works",
+			client:   new(WorkingSearcher),
+			expected: successId,
+			err:      successErr,
+		},
+
+		// Error case
+		{
+			name:     "Cannot convert to UUID fails",
+			client:   new(SearcherIDNotUUID),
+			expected: errorId,
+			err:      errorErr,
+		},
+		{
+			name:     "Search fails",
+			client:   new(FailingSearcher),
+			expected: uuid.Nil,
+			err: discoveryPackage.Error{
+				Status: http.StatusBadRequest,
+				Body: gjson.Parse(`{
+	"status": 400,
+	"code": 3002,
+	"messages": [
+		"Invalid JSON: Unexpected end-of-input:"
+	],
+	"timestamp": "2025-10-17T17:43:52.817308100Z"
+	}`),
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: buf,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			seedId, err := GetEntityId(d, tc.client, "seed")
+
+			if tc.err != nil {
+				require.Error(t, err)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expected, seedId)
+			}
+		})
+	}
+}
+
 // WorkingGetter mocks the discovery.Getter struct to always answer a working result.
 type WorkingGetter struct {
 	mock.Mock
