@@ -2428,6 +2428,7 @@ Staging API Key: "discovery.key.staging.cn"
 Usage: `discovery staging bucket [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -2440,6 +2441,7 @@ Flags:
 Usage: `discovery staging bucket store <bucketName> [configFile] [flags]`
 
 Arguments:
+
 `bucketName`::
 (Required, string) The name of bucket that will be created or updated.
 
