@@ -1,0 +1,10 @@
+Error: Could not get server ID.
+status: 404, body: {
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "test" does not exist"
+	]
+}
+
+
