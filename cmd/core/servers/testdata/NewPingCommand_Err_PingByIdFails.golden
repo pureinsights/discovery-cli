@@ -1,0 +1,11 @@
+Error: Could not ping server with id "3d51beef-8b90-40aa-84b5-033241dc6239"
+status: 502, body: {
+  "status": 502,
+  "code": 8002,
+  "messages": [
+    "An error occurred while pinging the Mongo client."
+  ],
+  "timestamp": "2025-12-18T17:03:39.578033300Z"
+}
+
+
