@@ -1,0 +1,6 @@
+Error: Could not create bucket with name "my-bucket".
+status: 409, body: {
+  "acknowledged": false
+}
+
+
