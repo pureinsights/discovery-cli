@@ -14,7 +14,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
 	store := &cobra.Command{
-		Use:   "store [files]",
+		Use:   "store [<files>...]",
 		Short: "The command that stores pipelines to Discovery QueryFlow.",
 		Long:  fmt.Sprintf(commands.LongStore, "pipeline", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {

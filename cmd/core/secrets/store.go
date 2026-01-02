@@ -14,7 +14,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
 	store := &cobra.Command{
-		Use:   "store [files]",
+		Use:   "store [<files>...]",
 		Short: "The command that stores secrets to Discovery Core.",
 		Long:  fmt.Sprintf(commands.LongStore, "secret", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
