@@ -59,7 +59,7 @@ func (d discovery) ExportEntitiesFromClient(client BackupRestore, path string, p
 		printer = JsonObjectPrinter(true)
 	}
 
-	return printer(*d.iostreams, result)
+	return printer(*d.IOStreams(), result)
 }
 
 // BackupRestoreClientEntry is used to easily store the different backup and restore structs of the Discovery products.
@@ -141,7 +141,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 		printer = JsonObjectPrinter(true)
 	}
 
-	return printer(*d.iostreams, gjson.Parse(result))
+	return printer(*d.IOStreams(), gjson.Parse(result))
 }
 
 // ImportEntitiesToClient imports the entities to a Discovery product by reading them from the given path and using the given conflict resolution strategy.
@@ -157,7 +157,7 @@ func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onC
 		printer = JsonObjectPrinter(true)
 	}
 
-	return printer(*d.iostreams, results)
+	return printer(*d.IOStreams(), results)
 }
 
 // copyImportEntitiesToTempFile copies the information of the inner zip file to the temporary file to be used in the import endpoint call.
@@ -289,5 +289,5 @@ func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, p
 		printer = JsonObjectPrinter(true)
 	}
 
-	return printer(*d.iostreams, gjson.Parse(results))
+	return printer(*d.IOStreams(), gjson.Parse(results))
 }
