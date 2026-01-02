@@ -15,6 +15,7 @@ func NewServerCommand(d cli.Discovery) *cobra.Command {
 	server.AddCommand(NewGetCommand(d))
 	server.AddCommand(NewStoreCommand(d))
 	server.AddCommand(NewDeleteCommand(d))
+	server.AddCommand(NewPingCommand(d))
 
 	return server
 }
