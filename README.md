@@ -2502,6 +2502,62 @@ discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA",
 }
 ```
 
+###### Dump
+`dump` is the command used to scroll a bucket's content in the Discovery Staging Repository. The bucket's name is sent as the mandatory argument. The user can send filters with the `filter` flag, which is a single JSON string that contains all of the filters. With the `projection` flag, the user can send the fields that will be included or excluded from the results. With the `max` flag, the user can send the maximum number of elements that will be retrieved with every page.
+
+Usage: `discovery staging bucket dump [flags] <arg>`
+
+Arguments:
+
+`arg`::
+(Required, string) The name of the bucket that will be scrolled.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) The DSL containing the filters that will be applied to the scroll. For example:
+
+```json
+{
+	"equals": {
+		"field": "author",
+		"value": "John Doe",
+		"normalize": true
+	}
+}
+```
+
+`--projection`::
+(Optional, string) The DSL containing the fields that will be included and excluded in the records that will be retrieved from the bucket. See [Discovery's documentation](https://discovery.pureinsights.live/latest/reference/index.html#dsl-projections) for more details. For example:
+
+```json
+{
+    "includes": [
+		"author",
+		"header"
+	]
+}
+```
+
+`--max`::
+(Optional, string) The size of the pages that will be used when retrieving the records.
+
+
+Examples:
+
+```bash
+# Dump a bucket with filters and projection
+discovery staging bucket dump my-bucket -f '{"equals":{"field":"author","value":"John Doe"}}' --projection '{"includes":["header"]}'
+{"action":"STORE","checksum":"58b3d1b06729f1491373b97fd8287ae1","content":{"header":"Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."},"creationTimestamp":"2025-12-26T16:28:38Z","id":"1","lastUpdatedTimestamp":"2025-12-26T16:28:38Z","transaction":"694eb7b678aedc7a163da8ff"}
+{"action":"STORE","checksum":"855609b26c318a627760fd36d2d6fe8f","content":{"header":"KMWorld 2024: Key Takeaways from the Exhibit Hall - Pureinsights: Key insights from KMWorld 2024: AI's impact on knowledge management, standout vendors, and challenges for traditional players adapting to AI."},"creationTimestamp":"2025-12-26T16:28:59Z","id":"4","lastUpdatedTimestamp":"2025-12-26T16:28:59Z","transaction":"694eb7cb78aedc7a163da902"}
+```
+
 ###### Delete
 `delete` is the command used to delete Discovery Staging's buckets. The user must send the bucket's name as a required argument.
 
