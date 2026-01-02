@@ -2422,6 +2422,86 @@ Staging URL: "https://discovery.staging.cn"
 Staging API Key: "discovery.key.staging.cn"
 ```
 
+##### Bucket
+`bucket` is the command used to manage buckets in Discovery Staging. This command contains various subcommands used to create, scroll, update, and delete.
+
+Usage: `discovery staging bucket [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Store
+`store` is the command used to create and update buckets in the Discovery Staging Repository. The bucket's name is sent as the mandatory first argument. The creation options, like the indices and bucket configuration, can be sent either through the optional second argument, which contains the name of the file with the information, or through the `data` flag as a JSON string. The `data` flag and the file name argument are mutually exclusive. When the bucket already exists, the command will try to modify its indices by updating them and deleting the ones no longer needed.
+
+Usage: `discovery staging bucket store <bucketName> [configFile] [flags]`
+
+Arguments:
+
+`bucketName`::
+(Required, string) The name of bucket that will be created or updated.
+
+`configFile`::
+(Optional, string) The path of the file that contains the bucket's configuration.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-d, --data`::
+(Optional, string) The JSON with the configuration of the bucket.
+
+Examples:
+
+```bash
+# Store a bucket with the configuration file argument.
+discovery staging bucket store my-bucket bucketConfig.json
+{
+  "documentCount": {},
+  "indices": [
+    {
+      "fields": [
+        {
+          "fieldName": "ASC"
+        }
+      ],
+      "name": "myIndexA",
+      "unique": false
+    },
+    {
+      "fields": [
+        {
+          "fieldName2": "DESC"
+        }
+      ],
+      "name": "myIndexB",
+      "unique": false
+    }
+  ],
+  "name": "my-bucket"
+}
+```
+
+```bash
+# Store a bucket with the data flag. The indices are omitted in the output.
+discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}'
+{
+  "documentCount": {},
+  "indices": [
+    ...
+  ],
+  "name": "my-bucket"
+}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery Staging. If it is healthy, it should return a JSON with an "UP" status field.
 
