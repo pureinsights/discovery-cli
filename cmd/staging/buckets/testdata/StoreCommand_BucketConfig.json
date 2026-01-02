@@ -1,0 +1,23 @@
+{
+  "indices": [
+    {
+      "name": "myIndexA",
+      "fields": [
+        {
+          "fieldName": "ASC"
+        }
+      ],
+      "unique": false
+    },
+    {
+      "name": "myIndexB",
+      "fields": [
+        {
+          "fieldName2": "DESC"
+        }
+      ],
+      "unique": false
+    }
+  ],
+  "config": {}
+}

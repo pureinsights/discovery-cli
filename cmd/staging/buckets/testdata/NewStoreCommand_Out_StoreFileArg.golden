@@ -1,0 +1,24 @@
+{
+  "documentCount": {},
+  "indices": [
+    {
+      "fields": [
+        {
+          "fieldName": "ASC"
+        }
+      ],
+      "name": "myIndexA",
+      "unique": false
+    },
+    {
+      "fields": [
+        {
+          "fieldName2": "DESC"
+        }
+      ],
+      "name": "myIndexB",
+      "unique": false
+    }
+  ],
+  "name": "my-bucket"
+}
