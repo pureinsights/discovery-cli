@@ -1,5 +1,5 @@
 Usage:
-  delete [flags]
+  delete <server> [flags]
 
 Examples:
 	# Delete a server by id
