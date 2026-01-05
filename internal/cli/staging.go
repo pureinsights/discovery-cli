@@ -14,6 +14,7 @@ type StagingBucketController interface {
 	Get(bucket string) (gjson.Result, error)
 	CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error)
 	DeleteIndex(bucket, index string) (gjson.Result, error)
+	Delete(bucket string) (gjson.Result, error)
 }
 
 // updateIndices updates the indices in a bucket with the new configuration.
@@ -85,6 +86,20 @@ func (d discovery) StoreBucket(client StagingBucketController, bucketName string
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get the information of bucket with name %q.", bucketName)
 	}
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), result)
+}
+
+// DeleteBucket deletes the bucket with the given name.
+func (d discovery) DeleteBucket(client StagingBucketController, bucketName string, printer Printer) error {
+	result, err := client.Delete(bucketName)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not delete the bucket with name %q.", bucketName)
+	}
+
 	if printer == nil {
 		printer = JsonObjectPrinter(true)
 	}
