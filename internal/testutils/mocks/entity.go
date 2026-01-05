@@ -18,7 +18,7 @@ type WorkingGetter struct {
 }
 
 // Get returns a working processor as if the request worked successfully.
-func (g *WorkingGetter) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *WorkingGetter) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB text processor",
