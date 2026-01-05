@@ -2,65 +2,12 @@ package mocks
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/tidwall/gjson"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
-
-var coreBytes, _ = os.ReadFile("testdata/core-export.zip")
-var ingestionBytes, _ = os.ReadFile("testdata/ingestion-export.zip")
-var queryflowBytes, _ = os.ReadFile("testdata/queryflow-export.zip")
-var coreImport, _ = os.ReadFile("testdata/core-import.json")
-var ingestionImport, _ = os.ReadFile("testdata/ingestion-import.json")
-var queryflowImport, _ = os.ReadFile("testdata/queryflow-import.json")
-
-// WorkingCoreBackupRestore mocks a working backup restore.
-type WorkingCoreBackupRestore struct {
-	mock.Mock
-}
-
-// Export returns zip bytes as if the request worked successfully.
-func (g *WorkingCoreBackupRestore) Export() ([]byte, string, error) {
-	return coreBytes, "export-20251110T1455.zip", nil
-}
-
-// Import implements the interface.
-func (g *WorkingCoreBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
-	return gjson.ParseBytes(coreImport), nil
-}
-
-// WorkingIngestionBackupRestore mocks a working backup restore.
-type WorkingIngestionBackupRestore struct {
-	mock.Mock
-}
-
-// Export returns zip bytes as if the request worked successfully.
-func (g *WorkingIngestionBackupRestore) Export() ([]byte, string, error) {
-	return ingestionBytes, "export-20251110T1455.zip", nil
-}
-
-// Import implements the interface.
-func (g *WorkingIngestionBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
-	return gjson.ParseBytes(ingestionImport), nil
-}
-
-// WorkingQueryFlowBackupRestore mocks a working backup restore.
-type WorkingQueryFlowBackupRestore struct {
-	mock.Mock
-}
-
-// Export returns zip bytes as if the request worked successfully.
-func (g *WorkingQueryFlowBackupRestore) Export() ([]byte, string, error) {
-	return queryflowBytes, "export-20251110T1455.zip", nil
-}
-
-// Import implements the interface.
-func (g *WorkingQueryFlowBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
-	return gjson.ParseBytes(queryflowImport), nil
-}
 
 // WorkingBackupRestore mocks a working backup restore.
 type WorkingBackupRestore struct {
