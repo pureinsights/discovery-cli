@@ -2502,6 +2502,32 @@ discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA",
 }
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Staging's buckets. The user must send the bucket's name as a required argument.
+
+Usage: `discovery staging bucket delete [flags] <arg>`
+
+Arguments:
+
+`arg`::
+(Required, string) The name of the bucket that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Delete a bucket by name
+discovery staging bucket delete my-bucket
+{"acknowledged":true}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery Staging. If it is healthy, it should return a JSON with an "UP" status field.
 
