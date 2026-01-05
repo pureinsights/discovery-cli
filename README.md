@@ -533,6 +533,7 @@ Flags:
 Usage: `discovery core label get [flags] [<uuid>]`
 
 Arguments:
+
 `uuid`::
 (Optional, string) The UUID of the label that will be retrieved.
 
@@ -604,6 +605,7 @@ discovery core label store --data  '[{"key":"my-label","value":"my-value"}]'
 Usage: `discovery core label delete [flags] <uuid>`
 
 Arguments:
+
 `uuid`::
 (Required, string) The UUID of the label that will be deleted.
 
@@ -642,6 +644,7 @@ Flags:
 Usage: `discovery core secret get [flags] [<uuid>]`
 
 Arguments:
+
 `uuid`::
 (Optional, string) The UUID of the secret that will be retrieved.
 
@@ -712,6 +715,7 @@ discovery core secret store --data  '{"name":"my-secret","active":true,"id":"b8b
 Usage: `discovery core secret delete [flags] <uuid>`
 
 Arguments:
+
 `uuid`::
 (Required, string) The UUID of the secret that will be deleted.
 
@@ -750,6 +754,7 @@ Flags:
 Usage: `discovery core credential get [flags] [<arg>]`
 
 Arguments:
+
 `arg`::
 (Optional, string) The name or UUID of the credential that will be retrieved.
 
@@ -838,6 +843,7 @@ discovery core credential store --data '{"type":"mongo","name":"my-credential","
 Usage: `discovery core credential delete [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the credential that will be deleted.
 
@@ -882,6 +888,7 @@ Flags:
 Usage: `discovery core server get [flags] [<arg>]`
 
 Arguments:
+
 `arg`::
 (Optional, string) The name or UUID of the server that will be retrieved.
 
@@ -970,6 +977,7 @@ discovery core server store --data '{"type":"mongo","name":"my-server","labels":
 Usage: `discovery core server delete [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the server that will be deleted.
 
@@ -1001,6 +1009,7 @@ discovery core server delete my-server
 Usage: `discovery core server ping [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the server that will be deleted.
 
@@ -1222,6 +1231,7 @@ Flags:
 Usage: `discovery ingestion processor get [flags] [<arg>]`
 
 Arguments:
+
 `arg`::
 (Optional, string) The name or UUID of the processor that will be retrieved.
 
@@ -1310,6 +1320,7 @@ discovery ingestion processor store --data '{"type":"mongo","name":"my-processor
 Usage: `discovery ingestion processor delete [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the processor that will be deleted.
 
@@ -1354,6 +1365,7 @@ Flags:
 Usage: `discovery ingestion pipeline get [flags] [<arg>]`
 
 Arguments:
+
 `arg`::
 (Optional, string) The name or UUID of the pipeline that will be retrieved.
 
@@ -1442,6 +1454,7 @@ discovery ingestion pipeline store --data '{"name":"my-pipeline","labels":[],"ac
 Usage: `discovery ingestion pipeline delete [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the pipeline that will be deleted.
 
@@ -1486,6 +1499,7 @@ Flags:
 Usage: `discovery ingestion seed get [flags] [<arg>]`
 
 Arguments:
+
 `arg`::
 (Optional, string) The name or UUID of the seed that will be retrieved.
 
@@ -1636,6 +1650,7 @@ discovery ingestion seed store --data '{"type":"staging","name":"my-seed","label
 Usage: `discovery ingestion seed delete [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the seed that will be deleted.
 
@@ -1667,6 +1682,7 @@ discovery ingestion seed delete "my-seed"
 Usage: `discovery ingestion seed start <arg> [flags]`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the seed that will be executed.
 
@@ -1710,6 +1726,7 @@ discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"
 Usage: `discovery ingestion seed halt <seed> [flags] `
 
 Arguments:
+
 `seed`::
 (Required, string) The name or UUID of the seed that will have its executions halted.
 
@@ -1931,6 +1948,7 @@ discovery queryflow import -p cn --file "entities/queryflow.zip"
 Usage: `discovery queryflow processor [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -1943,6 +1961,7 @@ Flags:
 Usage: `discovery queryflow processor get [flags] [<arg>]`
 
 Arguments:
+
 `arg`::
 (Optional, string) The name or UUID of the processor that will be retrieved.
 
@@ -2031,6 +2050,7 @@ discovery queryflow processor store --data '{"type":"mongo","name":"my-processor
 Usage: `discovery queryflow processor delete [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the processor that will be deleted.
 
@@ -2062,6 +2082,7 @@ discovery queryflow processor delete my-processor
 Usage: `discovery queryflow pipeline [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -2074,10 +2095,12 @@ Flags:
 Usage: `discovery queryflow pipeline get [flags] [<arg>]`
 
 Arguments:
+
 `arg`::
 (Optional, string) The name or UUID of the pipeline that will be retrieved.
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -2120,6 +2143,7 @@ MISSING
 Usage: `discovery queryflow pipeline store [flags]`
 
 Flags:
+
 `-d, --data`::
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
 
@@ -2155,6 +2179,7 @@ MISSING
 Usage: `discovery queryflow pipeline delete [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the pipeline that will be deleted.
 
@@ -2186,6 +2211,7 @@ discovery ingestion pipeline delete "my-pipeline"
 Usage: `discovery queryflow endpoint [subcommand] [flags]`
 
 Flags:
+
 `-h, --help`::
 (Optional, bool) Prints the usage of the command.
 
@@ -2198,6 +2224,7 @@ Flags:
 Usage: `discovery queryflow endpoint get [flags] [<arg>]`
 
 Arguments:
+
 `arg`::
 (Optional, string) The name or UUID of the endpoint that will be retrieved.
 
@@ -2286,6 +2313,7 @@ discovery queryflow endpoint store --data '{"type":"default","name":"my-endpoint
 Usage: `discovery queryflow endpoint delete [flags] <arg>`
 
 Arguments:
+
 `arg`::
 (Required, string) The name or UUID of the endpoint that will be deleted.
 

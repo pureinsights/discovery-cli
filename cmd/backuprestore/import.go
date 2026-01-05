@@ -11,7 +11,7 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
 	var file string
 	importCmd := &cobra.Command{
-		Use:   "import [subcommands]",
+		Use:   "import",
 		Short: "import entities to all of Discovery's products",
 		Long:  "import is the command used to restore entities to all of Discovery's products at once. With the --file flag, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files product by the /export endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format productName-*. For example, the Core can be called core-export-20251112T1629.zip and the one for Ingestion can be called ingestion-export-20251110T1607.zip. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the on-conflict flag, the user can send the conflict resolution strategy in case there are duplicate entities.",
 		RunE: func(cmd *cobra.Command, args []string) error {
