@@ -380,7 +380,7 @@ func (s *SearcherReturnsOtherError) SearchByName(string) (gjson.Result, error) {
 }
 
 // Get implements the searcher interface.
-func (s *SearcherReturnsOtherError) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *SearcherReturnsOtherError) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body:   gjson.Parse(``),
@@ -444,7 +444,7 @@ type WorkingCreator struct {
 }
 
 // Create returns a JSON as if it worked successfully.
-func (g *WorkingCreator) Create(config gjson.Result) (gjson.Result, error) {
+func (g *WorkingCreator) Create(gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB credential",
@@ -640,7 +640,7 @@ func (g *FailingSearchDeleterSearchFails) GetAll() ([]gjson.Result, error) {
 }
 
 // Get returns a working processor as if the request worked successfully.
-func (g *FailingSearchDeleterSearchFails) Delete(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSearchDeleterSearchFails) Delete(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusBadRequest,
 		Body: gjson.Parse(`{
