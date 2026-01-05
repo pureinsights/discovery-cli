@@ -18,7 +18,7 @@ type WorkingGetter struct {
 }
 
 // Get returns a working processor as if the request worked successfully.
-func (g *WorkingGetter) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *WorkingGetter) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB text processor",
@@ -69,7 +69,7 @@ type FailingGetter struct {
 }
 
 // Get returns a 404 Not Found.
-func (g *FailingGetter) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingGetter) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -140,7 +140,7 @@ func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 }
 
 // SearchByName returns an object as if it found correctly the entity.
-func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
+func (s *WorkingSearcher) SearchByName(string) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB Atlas server",
@@ -163,7 +163,7 @@ func (s *WorkingSearcher) SearchByName(name string) (gjson.Result, error) {
 }
 
 // Get returns a JSON object as if the searcher found the entity by its ID.
-func (s *WorkingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *WorkingSearcher) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB Atlas server",
@@ -228,7 +228,7 @@ func (s *FailingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
 }
 
 // SearchByName returns 404 so that the searchEntity function enters the err != nil code branch.
-func (s *FailingSearcher) SearchByName(name string) (gjson.Result, error) {
+func (s *FailingSearcher) SearchByName(string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusBadRequest,
 		Body: gjson.Parse(`{
@@ -243,7 +243,7 @@ func (s *FailingSearcher) SearchByName(name string) (gjson.Result, error) {
 }
 
 // Get returns an error so mock when the user searches for an entity that does not exist.
-func (s *FailingSearcher) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *FailingSearcher) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -290,7 +290,7 @@ func (s *FailingSearcherWorkingGetter) SearchByName(name string) (gjson.Result, 
 }
 
 // Get returns a JSON object to mock that the SearchByName failed, but the Get succeeded.
-func (s *FailingSearcherWorkingGetter) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *FailingSearcherWorkingGetter) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB Atlas server clone",
@@ -342,7 +342,7 @@ func (s *FailingSearcherFailingGetter) SearchByName(name string) (gjson.Result, 
 }
 
 // Get Returns error to mock that it also failed to find the entity.
-func (s *FailingSearcherFailingGetter) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *FailingSearcherFailingGetter) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -375,12 +375,12 @@ func (s *SearcherReturnsOtherError) Search(gjson.Result) ([]gjson.Result, error)
 }
 
 // SearchByName does not return a discovery.Error.
-func (s *SearcherReturnsOtherError) SearchByName(name string) (gjson.Result, error) {
+func (s *SearcherReturnsOtherError) SearchByName(string) (gjson.Result, error) {
 	return gjson.Result{}, errors.New("not discovery error")
 }
 
 // Get implements the searcher interface.
-func (s *SearcherReturnsOtherError) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *SearcherReturnsOtherError) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body:   gjson.Parse(``),
@@ -406,7 +406,7 @@ func (s *SearcherIDNotUUID) Search(gjson.Result) ([]gjson.Result, error) {
 }
 
 // SearchByName returns a result with an ID that is not a UUID so that the conversion can fail.
-func (s *SearcherIDNotUUID) SearchByName(name string) (gjson.Result, error) {
+func (s *SearcherIDNotUUID) SearchByName(string) (gjson.Result, error) {
 	return gjson.Parse(`{
 			"type": "mongo",
 			"name": "MongoDB Atlas seed clone",
@@ -419,7 +419,7 @@ func (s *SearcherIDNotUUID) SearchByName(name string) (gjson.Result, error) {
 }
 
 // Get implements the Searcher interface.
-func (s *SearcherIDNotUUID) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *SearcherIDNotUUID) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -444,7 +444,7 @@ type WorkingCreator struct {
 }
 
 // Create returns a JSON as if it worked successfully.
-func (g *WorkingCreator) Create(config gjson.Result) (gjson.Result, error) {
+func (g *WorkingCreator) Create(gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB credential",
@@ -458,7 +458,7 @@ func (g *WorkingCreator) Create(config gjson.Result) (gjson.Result, error) {
 }
 
 // Update returns a JSON as if it worked successfully.
-func (g *WorkingCreator) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
+func (g *WorkingCreator) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB credential",
@@ -477,7 +477,7 @@ type FailingCreator struct {
 }
 
 // Create returns a JSON as if it worked successfully.
-func (g *FailingCreator) Create(config gjson.Result) (gjson.Result, error) {
+func (g *FailingCreator) Create(gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
   "status": 400,
   "code": 3002,
@@ -489,7 +489,7 @@ func (g *FailingCreator) Create(config gjson.Result) (gjson.Result, error) {
 }
 
 // Update returns a JSON as if it worked successfully.
-func (g *FailingCreator) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
+func (g *FailingCreator) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
   "status": 404,
   "code": 1003,
@@ -506,7 +506,7 @@ type FailingCreatorCreateWorksUpdateFails struct {
 }
 
 // Create returns a JSON as if it worked successfully.
-func (g *FailingCreatorCreateWorksUpdateFails) Create(config gjson.Result) (gjson.Result, error) {
+func (g *FailingCreatorCreateWorksUpdateFails) Create(gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB credential",
@@ -520,7 +520,7 @@ func (g *FailingCreatorCreateWorksUpdateFails) Create(config gjson.Result) (gjso
 }
 
 // Update returns an error that is not a Discovery.Error
-func (g *FailingCreatorCreateWorksUpdateFails) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
+func (g *FailingCreatorCreateWorksUpdateFails) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, errors.New(`invalid UUID length: 4`)
 }
 
@@ -530,7 +530,7 @@ type WorkingDeleter struct {
 }
 
 // Get returns a working processor as if the request worked successfully.
-func (g *WorkingDeleter) Delete(id uuid.UUID) (gjson.Result, error) {
+func (g *WorkingDeleter) Delete(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"acknowledged": true
 	}`), nil
@@ -542,7 +542,7 @@ type FailingDeleter struct {
 }
 
 // Get returns a working processor as if the request worked successfully.
-func (g *FailingDeleter) Delete(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingDeleter) Delete(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusBadRequest,
 		Body: gjson.Parse(`{
@@ -562,14 +562,14 @@ type WorkingSearchDeleter struct {
 }
 
 // Get returns a working processor as if the request worked successfully.
-func (g *WorkingSearchDeleter) Delete(id uuid.UUID) (gjson.Result, error) {
+func (g *WorkingSearchDeleter) Delete(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"acknowledged": true
 	}`), nil
 }
 
 // SearchByName returns a valid JSON.
-func (g *WorkingSearchDeleter) SearchByName(name string) (gjson.Result, error) {
+func (g *WorkingSearchDeleter) SearchByName(string) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB text processor",
@@ -582,12 +582,12 @@ func (g *WorkingSearchDeleter) SearchByName(name string) (gjson.Result, error) {
 }
 
 // Search implements the searchDeleter interface.
-func (g *WorkingSearchDeleter) Search(filter gjson.Result) ([]gjson.Result, error) {
+func (g *WorkingSearchDeleter) Search(gjson.Result) ([]gjson.Result, error) {
 	return gjson.Parse(`[]`).Array(), nil
 }
 
 // Get implements the searchDeleter interface.
-func (g *WorkingSearchDeleter) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *WorkingSearchDeleter) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB text processor",
@@ -625,12 +625,12 @@ func (g *FailingSearchDeleterSearchFails) SearchByName(name string) (gjson.Resul
 }
 
 // Search implements the searchDeleter interface.
-func (g *FailingSearchDeleterSearchFails) Search(filter gjson.Result) ([]gjson.Result, error) {
+func (g *FailingSearchDeleterSearchFails) Search(gjson.Result) ([]gjson.Result, error) {
 	return gjson.Parse(`[]`).Array(), nil
 }
 
 // Get implements the searchDeleter interface.
-func (g *FailingSearchDeleterSearchFails) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSearchDeleterSearchFails) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
@@ -640,7 +640,7 @@ func (g *FailingSearchDeleterSearchFails) GetAll() ([]gjson.Result, error) {
 }
 
 // Get returns a working processor as if the request worked successfully.
-func (g *FailingSearchDeleterSearchFails) Delete(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSearchDeleterSearchFails) Delete(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusBadRequest,
 		Body: gjson.Parse(`{
@@ -660,7 +660,7 @@ type FailingSearchDeleterDeleteFails struct {
 }
 
 // SearchByName returns a valid JSON.
-func (g *FailingSearchDeleterDeleteFails) SearchByName(name string) (gjson.Result, error) {
+func (g *FailingSearchDeleterDeleteFails) SearchByName(string) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB text processor",
@@ -673,12 +673,12 @@ func (g *FailingSearchDeleterDeleteFails) SearchByName(name string) (gjson.Resul
 }
 
 // Search implements the searchDeleter interface.
-func (g *FailingSearchDeleterDeleteFails) Search(filter gjson.Result) ([]gjson.Result, error) {
+func (g *FailingSearchDeleterDeleteFails) Search(gjson.Result) ([]gjson.Result, error) {
 	return gjson.Parse(`[]`).Array(), nil
 }
 
 // Get implements the searchDeleter interface.
-func (g *FailingSearchDeleterDeleteFails) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSearchDeleterDeleteFails) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB text processor",
@@ -696,7 +696,7 @@ func (g *FailingSearchDeleterDeleteFails) GetAll() ([]gjson.Result, error) {
 }
 
 // Delete fails due to bad request.
-func (g *FailingSearchDeleterDeleteFails) Delete(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSearchDeleterDeleteFails) Delete(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusBadRequest,
 		Body: gjson.Parse(`{
@@ -716,7 +716,7 @@ type FailingSearchDeleterParsingUUIDFails struct {
 }
 
 // SearchByName returns a valid JSON.
-func (g *FailingSearchDeleterParsingUUIDFails) SearchByName(name string) (gjson.Result, error) {
+func (g *FailingSearchDeleterParsingUUIDFails) SearchByName(string) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB text processor",
@@ -729,12 +729,12 @@ func (g *FailingSearchDeleterParsingUUIDFails) SearchByName(name string) (gjson.
 }
 
 // Search implements the searchDeleter interface.
-func (g *FailingSearchDeleterParsingUUIDFails) Search(filter gjson.Result) ([]gjson.Result, error) {
+func (g *FailingSearchDeleterParsingUUIDFails) Search(gjson.Result) ([]gjson.Result, error) {
 	return gjson.Parse(`[]`).Array(), nil
 }
 
 // Get implements the searchDeleter interface.
-func (g *FailingSearchDeleterParsingUUIDFails) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSearchDeleterParsingUUIDFails) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
 		"type": "mongo",
 		"name": "MongoDB text processor",
@@ -752,6 +752,6 @@ func (g *FailingSearchDeleterParsingUUIDFails) GetAll() ([]gjson.Result, error) 
 }
 
 // Delete implements the searchDeleter interface.
-func (g *FailingSearchDeleterParsingUUIDFails) Delete(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSearchDeleterParsingUUIDFails) Delete(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }

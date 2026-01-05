@@ -23,7 +23,7 @@ func (s *WorkingServerPinger) Ping(uuid.UUID) (gjson.Result, error) {
 }
 
 // SearchByName returns a server result.
-func (s *WorkingServerPinger) SearchByName(name string) (gjson.Result, error) {
+func (s *WorkingServerPinger) SearchByName(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "type": "mongo",
   "name": "MongoDB Atlas server",
@@ -54,7 +54,7 @@ func (s *WorkingServerPinger) Search(gjson.Result) ([]gjson.Result, error) {
 }
 
 // Get implements the Searcher interface.
-func (s *WorkingServerPinger) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *WorkingServerPinger) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -91,7 +91,7 @@ func (s *FailingServerPingerServerNotFound) Ping(uuid.UUID) (gjson.Result, error
 }
 
 // SearchByName returns a not found error.
-func (s *FailingServerPingerServerNotFound) SearchByName(name string) (gjson.Result, error) {
+func (s *FailingServerPingerServerNotFound) SearchByName(string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -114,7 +114,7 @@ func (s *FailingServerPingerServerNotFound) Search(gjson.Result) ([]gjson.Result
 }
 
 // Get implements the Searcher interface.
-func (s *FailingServerPingerServerNotFound) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *FailingServerPingerServerNotFound) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -151,7 +151,7 @@ func (s *FailingServerPingerPingFailed) Ping(uuid.UUID) (gjson.Result, error) {
 }
 
 // SearchByName returns a result of a server.
-func (s *FailingServerPingerPingFailed) SearchByName(name string) (gjson.Result, error) {
+func (s *FailingServerPingerPingFailed) SearchByName(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "type": "mongo",
   "name": "MongoDB Atlas server",
@@ -182,7 +182,7 @@ func (s *FailingServerPingerPingFailed) Search(gjson.Result) ([]gjson.Result, er
 }
 
 // Get implements the Searcher interface.
-func (s *FailingServerPingerPingFailed) Get(id uuid.UUID) (gjson.Result, error) {
+func (s *FailingServerPingerPingFailed) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
