@@ -1,6 +1,6 @@
 {"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","processors":[],"type":"mongo"}}
 Usage:
-  get [flags]
+  get <processor> [flags]
 
 Examples:
 	# Get processor by name

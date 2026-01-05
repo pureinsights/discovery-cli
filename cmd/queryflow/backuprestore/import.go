@@ -14,7 +14,7 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
 	var file string
 	importCmd := &cobra.Command{
-		Use:   "import [subcommands]",
+		Use:   "import",
 		Short: "Import entities to Discovery QueryFlow",
 		Long:  fmt.Sprintf(commands.LongImport, "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
