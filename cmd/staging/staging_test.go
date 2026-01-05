@@ -50,6 +50,6 @@ func TestNewStagingCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "status"}
+	expectedCommands := []string{"bucket", "config", "status"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
