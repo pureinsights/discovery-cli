@@ -55,12 +55,12 @@ func (s *WorkingStagingBucketControllerNoConflict) Get(string) (gjson.Result, er
 }
 
 // CreateIndex implements the interface.
-func (s *WorkingStagingBucketControllerNoConflict) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (s *WorkingStagingBucketControllerNoConflict) CreateIndex(string, string, []gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
 // DeleteIndex implements the interface.
-func (s *WorkingStagingBucketControllerNoConflict) DeleteIndex(bucket, index string) (gjson.Result, error) {
+func (s *WorkingStagingBucketControllerNoConflict) DeleteIndex(string, string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
@@ -141,14 +141,14 @@ func (s *WorkingStagingBucketControllerNameConflict) Get(string) (gjson.Result, 
 }
 
 // CreateIndex simulates a working Index update.
-func (s *WorkingStagingBucketControllerNameConflict) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (s *WorkingStagingBucketControllerNameConflict) CreateIndex(string, string, []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
 // DeleteIndex simulates a working Index deletion.
-func (s *WorkingStagingBucketControllerNameConflict) DeleteIndex(bucket, index string) (gjson.Result, error) {
+func (s *WorkingStagingBucketControllerNameConflict) DeleteIndex(string, string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
@@ -200,14 +200,14 @@ func (s *FailingStagingBucketControllerNotDiscoveryError) Get(string) (gjson.Res
 }
 
 // CreateIndex implements the interface.
-func (s *FailingStagingBucketControllerNotDiscoveryError) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerNotDiscoveryError) CreateIndex(string, string, []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
 // DeleteIndex implements the interface.
-func (s *FailingStagingBucketControllerNotDiscoveryError) DeleteIndex(bucket, index string) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerNotDiscoveryError) DeleteIndex(string, string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
@@ -264,14 +264,14 @@ func (s *FailingStagingBucketControllerNotFoundError) Get(string) (gjson.Result,
 }
 
 // CreateIndex implements the interface.
-func (s *FailingStagingBucketControllerNotFoundError) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerNotFoundError) CreateIndex(string, string, []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
 // DeleteIndex implements the interface.
-func (s *FailingStagingBucketControllerNotFoundError) DeleteIndex(bucket, index string) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerNotFoundError) DeleteIndex(string, string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
@@ -323,7 +323,7 @@ func (s *FailingStagingBucketControllerIndexCreationFails) Get(string) (gjson.Re
 }
 
 // CreateIndex returns an error.
-func (s *FailingStagingBucketControllerIndexCreationFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerIndexCreationFails) CreateIndex(string, string, []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
 }`), discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
@@ -332,7 +332,7 @@ func (s *FailingStagingBucketControllerIndexCreationFails) CreateIndex(bucket, i
 }
 
 // DeleteIndex implements the interface.
-func (s *FailingStagingBucketControllerIndexCreationFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerIndexCreationFails) DeleteIndex(string, string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
@@ -386,14 +386,14 @@ func (s *FailingStagingBucketControllerIndexDeletionFails) Get(string) (gjson.Re
 }
 
 // CreateIndex implements the interface.
-func (s *FailingStagingBucketControllerIndexDeletionFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerIndexDeletionFails) CreateIndex(string, string, []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
 // DeleteIndex returns an error.
-func (s *FailingStagingBucketControllerIndexDeletionFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerIndexDeletionFails) DeleteIndex(string, string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": false
 }`), discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
@@ -431,12 +431,12 @@ func (s *FailingStagingBucketControllerLastGetFails) Get(string) (gjson.Result, 
 }
 
 // CreateIndex implements the interface.
-func (s *FailingStagingBucketControllerLastGetFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerLastGetFails) CreateIndex(string, string, []gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
 // DeleteIndex implements the interface.
-func (s *FailingStagingBucketControllerLastGetFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerLastGetFails) DeleteIndex(string, string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
@@ -472,14 +472,14 @@ func (s *FailingStagingBucketControllerFirstGetFails) Get(string) (gjson.Result,
 }
 
 // CreateIndex implements the interface.
-func (s *FailingStagingBucketControllerFirstGetFails) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerFirstGetFails) CreateIndex(string, string, []gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
 }
 
 // DeleteIndex implements the interface.
-func (s *FailingStagingBucketControllerFirstGetFails) DeleteIndex(bucket, index string) (gjson.Result, error) {
+func (s *FailingStagingBucketControllerFirstGetFails) DeleteIndex(string, string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
 }`), nil
@@ -489,7 +489,7 @@ func (s *FailingStagingBucketControllerFirstGetFails) DeleteIndex(bucket, index 
 type WorkingStagingContentController struct{}
 
 // Scroll implements the interface.
-func (s *WorkingStagingContentController) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
+func (s *WorkingStagingContentController) Scroll(gjson.Result, gjson.Result, *int) ([]gjson.Result, error) {
 	return gjson.Parse(`[
     {
             "id": "1",
@@ -526,7 +526,7 @@ func (s *WorkingStagingContentController) Scroll(filters, projections gjson.Resu
 type WorkingStagingContentControllerNoContent struct{}
 
 // Scroll returns an empty array.
-func (s *WorkingStagingContentControllerNoContent) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
+func (s *WorkingStagingContentControllerNoContent) Scroll(gjson.Result, gjson.Result, *int) ([]gjson.Result, error) {
 	return []gjson.Result{}, nil
 }
 
@@ -534,7 +534,7 @@ func (s *WorkingStagingContentControllerNoContent) Scroll(filters, projections g
 type FailingStagingContentController struct{}
 
 // Scroll returns an error.
-func (s *FailingStagingContentController) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
+func (s *FailingStagingContentController) Scroll(gjson.Result, gjson.Result, *int) ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{

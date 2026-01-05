@@ -14,12 +14,12 @@ type WorkingSeedController struct {
 }
 
 // Start returns the result of a new seed execution.
-func (c *WorkingSeedController) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
+func (c *WorkingSeedController) Start(uuid.UUID, discoveryPackage.ScanType, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
 }
 
 // Halt returns the results of halting a seed.
-func (c *WorkingSeedController) Halt(id uuid.UUID) ([]gjson.Result, error) {
+func (c *WorkingSeedController) Halt(uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
@@ -29,12 +29,12 @@ type FailingSeedControllerGetEntityIdFails struct {
 }
 
 // Start implements the interface.
-func (c *FailingSeedControllerGetEntityIdFails) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
+func (c *FailingSeedControllerGetEntityIdFails) Start(uuid.UUID, discoveryPackage.ScanType, gjson.Result) (gjson.Result, error) {
 	return gjson.Parse(`{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","creationTimestamp":"2025-09-04T19:29:41.119013Z","lastUpdatedTimestamp":"2025-09-04T19:29:41.119013Z","triggerType":"MANUAL","status":"CREATED","scanType":"INCREMENTAL","properties":{"stagingBucket":"testBucket"}}`), nil
 }
 
 // Halt implements the interface.
-func (c *FailingSeedControllerGetEntityIdFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
+func (c *FailingSeedControllerGetEntityIdFails) Halt(uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[{"id":"a056c7fb-0ca1-45f6-97ea-ec849a0701fd","status":202}, {"id":"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b","status":202}]`).Array(), nil
 }
 
@@ -44,7 +44,7 @@ type FailingSeedControllerStartFails struct {
 }
 
 // Start mocks a failing seed execution response.
-func (c *FailingSeedControllerStartFails) Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error) {
+func (c *FailingSeedControllerStartFails) Start(uuid.UUID, discoveryPackage.ScanType, gjson.Result) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
 			"status": 409,
 			"code": 4001,
@@ -56,7 +56,7 @@ func (c *FailingSeedControllerStartFails) Start(id uuid.UUID, scan discoveryPack
 }
 
 // Halt implements the IngestionSeedController interface.
-func (c *FailingSeedControllerStartFails) Halt(id uuid.UUID) ([]gjson.Result, error) {
+func (c *FailingSeedControllerStartFails) Halt(uuid.UUID) ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -76,7 +76,7 @@ type WorkingSeedExecutionController struct {
 }
 
 // Halt returns the results of halting a seed.
-func (c *WorkingSeedExecutionController) Halt(id uuid.UUID) (gjson.Result, error) {
+func (c *WorkingSeedExecutionController) Halt(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{"acknowledged":true}`), nil
 }
 
@@ -86,7 +86,7 @@ type FailingSeedExecutionControllerHaltFails struct {
 }
 
 // Halt returns the results of halting a seed.
-func (c *FailingSeedExecutionControllerHaltFails) Halt(id uuid.UUID) (gjson.Result, error) {
+func (c *FailingSeedExecutionControllerHaltFails) Halt(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
 			"status": 409,
 			"code": 4001,
@@ -101,7 +101,7 @@ func (c *FailingSeedExecutionControllerHaltFails) Halt(id uuid.UUID) (gjson.Resu
 type WorkingRecordGetter struct{}
 
 // Get returns a record as if the request worked successfully.
-func (g *WorkingRecordGetter) Get(id string) (gjson.Result, error) {
+func (g *WorkingRecordGetter) Get(string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "id": {
     "plain": "4e7c8a47efd829ef7f710d64da661786",
@@ -126,7 +126,7 @@ func (g *WorkingRecordGetter) GetAll() ([]gjson.Result, error) {
 type FailingRecordGetter struct{}
 
 // Get returns a 404 Not Found.
-func (g *FailingRecordGetter) Get(id string) (gjson.Result, error) {
+func (g *FailingRecordGetter) Get(string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -149,7 +149,7 @@ func (g *FailingRecordGetter) GetAll() ([]gjson.Result, error) {
 type WorkingSeedExecutionGetter struct{}
 
 // Get returns a seed execution.
-func (g *WorkingSeedExecutionGetter) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *WorkingSeedExecutionGetter) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
   "id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
   "creationTimestamp": "2025-10-10T19:48:31Z",
@@ -170,7 +170,7 @@ func (g *WorkingSeedExecutionGetter) GetAll() ([]gjson.Result, error) {
 }
 
 // Audit returns real audited changes.
-func (g *WorkingSeedExecutionGetter) Audit(id uuid.UUID) ([]gjson.Result, error) {
+func (g *WorkingSeedExecutionGetter) Audit(uuid.UUID) ([]gjson.Result, error) {
 	return gjson.Parse(`[
 	{"timestamp":"2025-09-05T20:09:22.543Z","status":"CREATED","stages":[]},
 	{"timestamp":"2025-09-05T20:09:26.621Z","status":"RUNNING","stages":[]},
@@ -183,7 +183,7 @@ func (g *WorkingSeedExecutionGetter) Audit(id uuid.UUID) ([]gjson.Result, error)
 type FailingSeedExecutionGetterGetExecutionFails struct{}
 
 // Get returns seed execution not found.
-func (g *FailingSeedExecutionGetterGetExecutionFails) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSeedExecutionGetterGetExecutionFails) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
   "status": 404,
   "code": 1003,
@@ -200,7 +200,7 @@ func (g *FailingSeedExecutionGetterGetExecutionFails) GetAll() ([]gjson.Result, 
 }
 
 // Audit implements the interface.
-func (g *FailingSeedExecutionGetterGetExecutionFails) Audit(id uuid.UUID) ([]gjson.Result, error) {
+func (g *FailingSeedExecutionGetterGetExecutionFails) Audit(uuid.UUID) ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
@@ -208,7 +208,7 @@ func (g *FailingSeedExecutionGetterGetExecutionFails) Audit(id uuid.UUID) ([]gjs
 type FailingSeedExecutionGetterAuditFails struct{}
 
 // Get returns a seed execution.
-func (g *FailingSeedExecutionGetterAuditFails) Get(id uuid.UUID) (gjson.Result, error) {
+func (g *FailingSeedExecutionGetterAuditFails) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
   "id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
   "creationTimestamp": "2025-10-10T19:48:31Z",
@@ -229,7 +229,7 @@ func (g *FailingSeedExecutionGetterAuditFails) GetAll() ([]gjson.Result, error) 
 }
 
 // Audit returns an error.
-func (g *FailingSeedExecutionGetterAuditFails) Audit(id uuid.UUID) ([]gjson.Result, error) {
+func (g *FailingSeedExecutionGetterAuditFails) Audit(uuid.UUID) ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
