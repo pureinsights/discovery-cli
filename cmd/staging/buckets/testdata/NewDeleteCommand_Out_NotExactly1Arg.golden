@@ -1,0 +1,10 @@
+Usage:
+  delete [flags]
+
+Examples:
+	# Delete a bucket by name
+	discovery staging bucket delete my-bucket
+
+Flags:
+  -h, --help   help for delete
+
