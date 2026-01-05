@@ -17,6 +17,11 @@ type StagingBucketController interface {
 	Delete(bucket string) (gjson.Result, error)
 }
 
+// StagingContentController defines the methods to interact with a bucket's content.
+type StagingContentController interface {
+	Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error)
+}
+
 // updateIndices updates the indices in a bucket with the new configuration.
 // If any update fails, the function returns an error.
 func updateIndices(client StagingBucketController, bucketName string, oldIndices []gjson.Result, newIndices gjson.Result) error {
@@ -105,4 +110,18 @@ func (d discovery) DeleteBucket(client StagingBucketController, bucketName strin
 	}
 
 	return printer(*d.IOStreams(), result)
+}
+
+// DumpBucket scrolls the contents of a bucket based on the given filters, projections and maximum page size.
+func (d discovery) DumpBucket(client StagingContentController, bucketName string, filters, projections gjson.Result, size *int, printer Printer) error {
+	records, err := client.Scroll(filters, projections, size)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not scroll the bucket with name %q.", bucketName)
+	}
+
+	if printer == nil {
+		printer = JsonArrayPrinter(false)
+	}
+
+	return printer(*d.IOStreams(), records...)
 }
