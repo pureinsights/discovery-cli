@@ -1,5 +1,5 @@
 Usage:
-  get [flags]
+  get [<labelId>] [flags]
 
 Examples:
 	# Get a label by id
