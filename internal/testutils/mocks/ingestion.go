@@ -5,13 +5,11 @@ import (
 
 	"github.com/google/uuid"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
-	"github.com/stretchr/testify/mock"
 	"github.com/tidwall/gjson"
 )
 
 // WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedController struct {
-	mock.Mock
 	WorkingSearcher
 }
 
@@ -27,7 +25,6 @@ func (c *WorkingSeedController) Halt(id uuid.UUID) ([]gjson.Result, error) {
 
 // FailingSeedControllerGetEntityIdFails simulates a failing IngestionSeedController when GetEntityId fails.
 type FailingSeedControllerGetEntityIdFails struct {
-	mock.Mock
 	SearcherIDNotUUID
 }
 
@@ -43,7 +40,6 @@ func (c *FailingSeedControllerGetEntityIdFails) Halt(id uuid.UUID) ([]gjson.Resu
 
 // FailingSeedControllerStartFails simulates when starting a seed execution fails.
 type FailingSeedControllerStartFails struct {
-	mock.Mock
 	WorkingSearcher
 }
 
@@ -76,7 +72,6 @@ func (c *FailingSeedControllerStartFails) Halt(id uuid.UUID) ([]gjson.Result, er
 
 // WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedExecutionController struct {
-	mock.Mock
 	WorkingGetter
 }
 
@@ -87,7 +82,6 @@ func (c *WorkingSeedExecutionController) Halt(id uuid.UUID) (gjson.Result, error
 
 // FailingSeedControllerStartFails simulates when starting a seed execution fails.
 type FailingSeedExecutionControllerHaltFails struct {
-	mock.Mock
 	WorkingGetter
 }
 
@@ -104,9 +98,7 @@ func (c *FailingSeedExecutionControllerHaltFails) Halt(id uuid.UUID) (gjson.Resu
 }
 
 // WorkingGetter mocks the RecordGetter interface to always answer a working result.
-type WorkingRecordGetter struct {
-	mock.Mock
-}
+type WorkingRecordGetter struct{}
 
 // Get returns a record as if the request worked successfully.
 func (g *WorkingRecordGetter) Get(id string) (gjson.Result, error) {
@@ -131,9 +123,7 @@ func (g *WorkingRecordGetter) GetAll() ([]gjson.Result, error) {
 }
 
 // FailingRecordGetter mocks the RecordGetter struct to always return an HTTP error.
-type FailingRecordGetter struct {
-	mock.Mock
-}
+type FailingRecordGetter struct{}
 
 // Get returns a 404 Not Found.
 func (g *FailingRecordGetter) Get(id string) (gjson.Result, error) {
@@ -156,9 +146,7 @@ func (g *FailingRecordGetter) GetAll() ([]gjson.Result, error) {
 }
 
 // WorkingSeedExecutionGetter mocks a working seed execution getter.
-type WorkingSeedExecutionGetter struct {
-	mock.Mock
-}
+type WorkingSeedExecutionGetter struct{}
 
 // Get returns a seed execution.
 func (g *WorkingSeedExecutionGetter) Get(id uuid.UUID) (gjson.Result, error) {
@@ -192,9 +180,7 @@ func (g *WorkingSeedExecutionGetter) Audit(id uuid.UUID) ([]gjson.Result, error)
 }
 
 // FailingSeedExecutionGetterGetExecutionFails mocks when getting a seed execution fails.
-type FailingSeedExecutionGetterGetExecutionFails struct {
-	mock.Mock
-}
+type FailingSeedExecutionGetterGetExecutionFails struct{}
 
 // Get returns seed execution not found.
 func (g *FailingSeedExecutionGetterGetExecutionFails) Get(id uuid.UUID) (gjson.Result, error) {
@@ -219,9 +205,7 @@ func (g *FailingSeedExecutionGetterGetExecutionFails) Audit(id uuid.UUID) ([]gjs
 }
 
 // FFailingSeedExecutionGetterAuditFails mocks when getting the audit fails.
-type FailingSeedExecutionGetterAuditFails struct {
-	mock.Mock
-}
+type FailingSeedExecutionGetterAuditFails struct{}
 
 // Get returns a seed execution.
 func (g *FailingSeedExecutionGetterAuditFails) Get(id uuid.UUID) (gjson.Result, error) {
@@ -250,9 +234,7 @@ func (g *FailingSeedExecutionGetterAuditFails) Audit(id uuid.UUID) ([]gjson.Resu
 }
 
 // WorkingRecordSummarizer mocks when getting the record summary works.
-type WorkingRecordSummarizer struct {
-	mock.Mock
-}
+type WorkingRecordSummarizer struct{}
 
 // Summarize returns a real result.
 func (s *WorkingRecordSummarizer) Summarize() (gjson.Result, error) {
@@ -260,9 +242,7 @@ func (s *WorkingRecordSummarizer) Summarize() (gjson.Result, error) {
 }
 
 // NoContentRecordSummarizer mocks when the summarize does not return anything.
-type NoContentRecordSummarizer struct {
-	mock.Mock
-}
+type NoContentRecordSummarizer struct{}
 
 // NoContentRecordSummarizer returns an empty JSON.
 func (s *NoContentRecordSummarizer) Summarize() (gjson.Result, error) {
@@ -270,9 +250,7 @@ func (s *NoContentRecordSummarizer) Summarize() (gjson.Result, error) {
 }
 
 // WorkingJobSummarizer mocks when getting the job summary works.
-type WorkingJobSummarizer struct {
-	mock.Mock
-}
+type WorkingJobSummarizer struct{}
 
 // Summarizer returns real results.
 func (s *WorkingJobSummarizer) Summarize() (gjson.Result, error) {
@@ -280,9 +258,7 @@ func (s *WorkingJobSummarizer) Summarize() (gjson.Result, error) {
 }
 
 // FailingJobSummarizer mocks when getting the job summary fails.
-type FailingJobSummarizer struct {
-	mock.Mock
-}
+type FailingJobSummarizer struct{}
 
 // Summarize returns an error.
 func (s *FailingJobSummarizer) Summarize() (gjson.Result, error) {

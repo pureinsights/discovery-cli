@@ -4,16 +4,13 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/mock"
 	"github.com/tidwall/gjson"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
 // WorkingServerPinger simulates when a ping to a server worked.
-type WorkingServerPinger struct {
-	mock.Mock
-}
+type WorkingServerPinger struct{}
 
 // Ping returns the response of a working ping.
 func (s *WorkingServerPinger) Ping(uuid.UUID) (gjson.Result, error) {
@@ -74,9 +71,7 @@ func (s *WorkingServerPinger) GetAll() ([]gjson.Result, error) {
 }
 
 // FailingServerPinger simulates when a server that does not exist was pinged.
-type FailingServerPingerServerNotFound struct {
-	mock.Mock
-}
+type FailingServerPingerServerNotFound struct{}
 
 // Ping returns the response of a failing ping.
 func (s *FailingServerPingerServerNotFound) Ping(uuid.UUID) (gjson.Result, error) {
@@ -134,9 +129,7 @@ func (s *FailingServerPingerServerNotFound) GetAll() ([]gjson.Result, error) {
 }
 
 // FailingServerPinger simulates when a ping to a server fails.
-type FailingServerPingerPingFailed struct {
-	mock.Mock
-}
+type FailingServerPingerPingFailed struct{}
 
 // Ping returns the response of a failing ping.
 func (s *FailingServerPingerPingFailed) Ping(uuid.UUID) (gjson.Result, error) {

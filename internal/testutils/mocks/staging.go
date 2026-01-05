@@ -4,16 +4,13 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/tidwall/gjson"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
 // WorkingStagingBucketControllerNoConflict simulates when the StagingBucketController works.
-type WorkingStagingBucketControllerNoConflict struct {
-	mock.Mock
-}
+type WorkingStagingBucketControllerNoConflict struct{}
 
 // Create returns a working result.
 func (s *WorkingStagingBucketControllerNoConflict) Create(string, gjson.Result) (gjson.Result, error) {
@@ -69,7 +66,6 @@ func (s *WorkingStagingBucketControllerNoConflict) DeleteIndex(bucket, index str
 
 // WorkingStagingBucketControllerNameConflict simulates when the bucket already exists, but the updates succeed.
 type WorkingStagingBucketControllerNameConflict struct {
-	mock.Mock
 	call int
 }
 
@@ -159,9 +155,7 @@ func (s *WorkingStagingBucketControllerNameConflict) DeleteIndex(bucket, index s
 }
 
 // FailingStagingBucketControllerNotDiscoveryError mocks when the create request does not return a Discovery error.
-type FailingStagingBucketControllerNotDiscoveryError struct {
-	mock.Mock
-}
+type FailingStagingBucketControllerNotDiscoveryError struct{}
 
 // Create returns a different error.
 func (s *FailingStagingBucketControllerNotDiscoveryError) Create(string, gjson.Result) (gjson.Result, error) {
@@ -218,9 +212,7 @@ func (s *FailingStagingBucketControllerNotDiscoveryError) DeleteIndex(bucket, in
 }
 
 // FailingStagingBucketControllerNotFoundError mocks when the function receives a Discovery error that is not a conflict.
-type FailingStagingBucketControllerNotFoundError struct {
-	mock.Mock
-}
+type FailingStagingBucketControllerNotFoundError struct{}
 
 // Create returns not found error.
 func (s *FailingStagingBucketControllerNotFoundError) Create(string, gjson.Result) (gjson.Result, error) {
@@ -284,9 +276,7 @@ func (s *FailingStagingBucketControllerNotFoundError) DeleteIndex(bucket, index 
 }
 
 // FailingStagingBucketControllerIndexCreationFails mocks a failing index creation.
-type FailingStagingBucketControllerIndexCreationFails struct {
-	mock.Mock
-}
+type FailingStagingBucketControllerIndexCreationFails struct{}
 
 // Create returns a conflict to make the function go through that path.
 func (s *FailingStagingBucketControllerIndexCreationFails) Create(string, gjson.Result) (gjson.Result, error) {
@@ -349,9 +339,7 @@ func (s *FailingStagingBucketControllerIndexCreationFails) DeleteIndex(bucket, i
 }
 
 // FailingStagingBucketControllerIndexDeletionFails simulates when deleting an index fails.
-type FailingStagingBucketControllerIndexDeletionFails struct {
-	mock.Mock
-}
+type FailingStagingBucketControllerIndexDeletionFails struct{}
 
 // Create returns a conflict error.
 func (s *FailingStagingBucketControllerIndexDeletionFails) Create(string, gjson.Result) (gjson.Result, error) {
@@ -414,9 +402,7 @@ func (s *FailingStagingBucketControllerIndexDeletionFails) DeleteIndex(bucket, i
 }
 
 // FailingStagingBucketControllerLastGetFails simulates when the last get of the bucket fails.
-type FailingStagingBucketControllerLastGetFails struct {
-	mock.Mock
-}
+type FailingStagingBucketControllerLastGetFails struct{}
 
 // Create implements the interface.
 func (s *FailingStagingBucketControllerLastGetFails) Create(string, gjson.Result) (gjson.Result, error) {
@@ -455,9 +441,7 @@ func (s *FailingStagingBucketControllerLastGetFails) DeleteIndex(bucket, index s
 }
 
 // FailingStagingBucketControllerFirstGetFails mocks when the first get fails.
-type FailingStagingBucketControllerFirstGetFails struct {
-	mock.Mock
-}
+type FailingStagingBucketControllerFirstGetFails struct{}
 
 // Create returns a conflict.
 func (s *FailingStagingBucketControllerFirstGetFails) Create(string, gjson.Result) (gjson.Result, error) {
@@ -502,9 +486,7 @@ func (s *FailingStagingBucketControllerFirstGetFails) DeleteIndex(bucket, index 
 }
 
 // WorkingStagingContentController mocks a working content controller.
-type WorkingStagingContentController struct {
-	mock.Mock
-}
+type WorkingStagingContentController struct{}
 
 // Scroll implements the interface.
 func (s *WorkingStagingContentController) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
@@ -541,9 +523,7 @@ func (s *WorkingStagingContentController) Scroll(filters, projections gjson.Resu
 }
 
 // WorkingStagingContentControllerNoContent mocks when the scroll returns no content.
-type WorkingStagingContentControllerNoContent struct {
-	mock.Mock
-}
+type WorkingStagingContentControllerNoContent struct{}
 
 // Scroll returns an empty array.
 func (s *WorkingStagingContentControllerNoContent) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
@@ -551,9 +531,7 @@ func (s *WorkingStagingContentControllerNoContent) Scroll(filters, projections g
 }
 
 // FailingStagingContentController mocks a failing content controller.
-type FailingStagingContentController struct {
-	mock.Mock
-}
+type FailingStagingContentController struct{}
 
 // Scroll returns an error.
 func (s *FailingStagingContentController) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
