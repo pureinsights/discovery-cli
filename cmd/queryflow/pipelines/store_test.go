@@ -546,7 +546,6 @@ func TestNewStoreCommand(t *testing.T) {
 			}
 
 			if tc.file != "" {
-				args = append(args, "--file")
 				args = append(args, tc.file)
 			}
 
@@ -595,7 +594,7 @@ func TestNewStoreCommand_NoProfileFlag(t *testing.T) {
 	storeCmd.SetOut(ios.Out)
 	storeCmd.SetErr(ios.Err)
 
-	storeCmd.SetArgs([]string{"--file", "testdata/StoreCommand_JSONFile.json"})
+	storeCmd.SetArgs([]string{"testdata/StoreCommand_JSONFile.json"})
 
 	err := storeCmd.Execute()
 	require.Error(t, err)

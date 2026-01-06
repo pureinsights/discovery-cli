@@ -1,5 +1,5 @@
 Usage:
-  import <file> [subcommands] [flags]
+  import <file> [flags]
 
 Examples:
 	# Import the entities using profile "cn" and fail conflict resolution strategy.

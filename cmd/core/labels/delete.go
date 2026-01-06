@@ -12,7 +12,7 @@ import (
 // NewDeleteCommand creates the label delete command.
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete <labelId>",
 		Short: "The command that deletes labels from Discovery Core.",
 		Long:  fmt.Sprintf(commands.LongDeleteNoNames, "label", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {

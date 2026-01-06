@@ -1,0 +1,14 @@
+Usage:
+  store <bucketName> [configFile] [flags]
+
+Examples:
+	# Store a bucket with the JSON configuration in a file
+	discovery staging bucket store my-bucket configFile.json
+
+	# Store a bucket with the JSON configuration in the data flag
+	discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}
+
+Flags:
+  -d, --data string   the JSON with the configuration of the bucket
+  -h, --help          help for store
+

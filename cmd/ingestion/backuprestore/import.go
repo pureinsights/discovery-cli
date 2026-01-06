@@ -13,7 +13,7 @@ import (
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
 	importCmd := &cobra.Command{
-		Use:   "import <file> [subcommands]",
+		Use:   "import <file>",
 		Short: "Import entities to Discovery Ingestion",
 		Long:  fmt.Sprintf(commands.LongImport, "Ingestion"),
 		RunE: func(cmd *cobra.Command, args []string) error {
