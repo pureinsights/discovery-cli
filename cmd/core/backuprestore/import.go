@@ -12,9 +12,8 @@ import (
 // NewImportCommand creates the discovery core import command that imports entities to Discovery Core.
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
-	var file string
 	importCmd := &cobra.Command{
-		Use:   "import",
+		Use:   "import <file>",
 		Short: "Import entities to Discovery Core",
 		Long:  fmt.Sprintf(commands.LongImport, "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -26,17 +25,14 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return commands.ImportCommand(d, coreClient.BackupRestore(), file, discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
+			return commands.ImportCommand(d, coreClient.BackupRestore(), args[0], discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
 		},
-		Args: cobra.NoArgs,
+		Args: cobra.ExactArgs(1),
 		Example: `	# Import the entities using profile "cn" and update conflict resolution strategy.
-	discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE`,
+	discovery core import -p cn "entities/core.zip" --on-conflict UPDATE`,
 	}
 
-	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the entities that will be restored")
 	importCmd.Flags().StringVar(&onConflict, "on-conflict", string(discoveryPackage.OnConflictFail), "the conflict resolution strategy that will be used")
-
-	importCmd.MarkFlagRequired("file")
 
 	return importCmd
 }
