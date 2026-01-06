@@ -13,9 +13,8 @@ import (
 func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
-	var file string
 	store := &cobra.Command{
-		Use:   "store",
+		Use:   "store [<files>...]",
 		Short: "The command that stores labels to Discovery Core.",
 		Long:  fmt.Sprintf(commands.LongStore, "label", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -27,20 +26,16 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return commands.StoreCommand(d, coreClient.Labels(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), abortOnError, data, file))
+			return commands.StoreCommand(d, coreClient.Labels(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), abortOnError, data, args))
 		},
-		Args: cobra.NoArgs,
 		Example: `	# Store a label with the JSON configuration in a file
-	discovery core label store --file "labeljsonfile.json"
+	discovery core label store "labeljsonfile.json"
 	
 	# Store a label with the JSON configuration in the data flag
 	discovery core label store --data  '[{"key":"label","value":"labelvalue"}]'`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")
-	store.Flags().StringVarP(&file, "file", "f", "", "the path of the file that contains the JSON data")
 
-	store.MarkFlagsOneRequired("data", "file")
-	store.MarkFlagsMutuallyExclusive("data", "file")
 	return store
 }
