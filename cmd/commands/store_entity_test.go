@@ -118,7 +118,7 @@ func TestStoreCommand(t *testing.T) {
 		},
 		{
 			name:           "UpsertEntities returns 404 Not Found when using file arguments",
-			client:         new(FailingCreator),
+			client:         new(mocks.FailingCreator),
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
 			componentName:  "Core",
@@ -152,7 +152,7 @@ func TestStoreCommand(t *testing.T) {
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
 			componentName:  "Core",
-			client:         new(WorkingCreator),
+			client:         new(mocks.WorkingCreator),
 			abortOnError:   false,
 			data:           "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
 			files:          []string{"testdata/StoreCommand_JSONFile.json"},
