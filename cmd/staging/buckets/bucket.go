@@ -13,6 +13,7 @@ func NewBucketCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	bucket.AddCommand(NewStoreCommand(d))
+	bucket.AddCommand(NewDeleteCommand(d))
 
 	return bucket
 }

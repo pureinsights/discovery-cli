@@ -14,6 +14,12 @@ type StagingBucketController interface {
 	Get(bucket string) (gjson.Result, error)
 	CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error)
 	DeleteIndex(bucket, index string) (gjson.Result, error)
+	Delete(bucket string) (gjson.Result, error)
+}
+
+// StagingContentController defines the methods to interact with a bucket's content.
+type StagingContentController interface {
+	Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error)
 }
 
 // updateIndices updates the indices in a bucket with the new configuration.
@@ -90,4 +96,32 @@ func (d discovery) StoreBucket(client StagingBucketController, bucketName string
 	}
 
 	return printer(*d.IOStreams(), result)
+}
+
+// DeleteBucket deletes the bucket with the given name.
+func (d discovery) DeleteBucket(client StagingBucketController, bucketName string, printer Printer) error {
+	result, err := client.Delete(bucketName)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not delete the bucket with name %q.", bucketName)
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), result)
+}
+
+// DumpBucket scrolls the contents of a bucket based on the given filters, projections and maximum page size.
+func (d discovery) DumpBucket(client StagingContentController, bucketName string, filters, projections gjson.Result, size *int, printer Printer) error {
+	records, err := client.Scroll(filters, projections, size)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not scroll the bucket with name %q.", bucketName)
+	}
+
+	if printer == nil {
+		printer = JsonArrayPrinter(false)
+	}
+
+	return printer(*d.IOStreams(), records...)
 }

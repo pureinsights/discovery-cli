@@ -1272,6 +1272,431 @@ func Test_contentClient_DeleteMany(t *testing.T) {
 	}
 }
 
+// Test_scrollWithPagination_HTTPResponseCases tests how the scrollWithPagination() function behaves with various HTTP responses.
+func Test_scrollWithPagination_HTTPResponseCases(t *testing.T) {
+	tests := []struct {
+		name        string
+		method      string
+		path        string
+		statusCode  int
+		response    string
+		expectedLen int
+		err         error
+	}{
+		// Working cases
+		{
+			name:        "scrollWithPagination returns no content",
+			method:      http.MethodPost,
+			path:        "/",
+			statusCode:  http.StatusNoContent,
+			response:    `{"content": []}`,
+			expectedLen: 0,
+			err:         nil,
+		},
+		{
+			name:        "scrollWithPagination has no content field",
+			method:      http.MethodPost,
+			path:        "/",
+			statusCode:  http.StatusNoContent,
+			response:    ``,
+			expectedLen: 0,
+			err:         nil,
+		},
+
+		// Error cases
+		{
+			name:       "scrollWithPagination returns a 401 Unauthorized",
+			method:     http.MethodPost,
+			path:       "/",
+			statusCode: http.StatusUnauthorized,
+			response:   `{"error":"unauthorized"}`,
+			err:        Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, tc.path, r.URL.Path)
+			}))
+
+			defer srv.Close()
+
+			c := newClient(srv.URL, "")
+			results, err := scrollWithPagination(c, tc.method, "")
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.Len(t, results, tc.expectedLen)
+			} else {
+				assert.Equal(t, []gjson.Result(nil), results)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
+		})
+	}
+}
+
+// Test_scrollWithPagination_ErrorInSecondPage tests when scrollWithPagination fails in a request while trying to get every content from every page.
+func Test_scrollWithPagination_ErrorInSecondPage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, http.MethodPost, r.Method)
+			assert.Equal(t, "/content/my-bucket/scroll", r.URL.Path)
+			token := r.URL.Query().Get("token")
+			w.Header().Set("Content-Type", "application/json")
+			if token == "694eb7f378aedc7a163da907" {
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(`{"error":"Internal Server Error"}`))
+			} else {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{
+			"token": "694eb7f378aedc7a163da907",
+			"content": [
+                  {
+                          "id": "1",
+                          "creationTimestamp": "2025-12-26T16:28:38Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+                          "action": "STORE",
+                          "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+                          "content": {
+                                  "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                                  "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                                  "author": "Graham Gillen",
+                                  "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+                          },
+                          "transaction": "694eb7b678aedc7a163da8ff"
+                  },
+                  {
+                          "id": "2",
+                          "creationTimestamp": "2025-12-26T16:28:46Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
+                          "action": "STORE",
+                          "checksum": "b76292db9fd1c7aef145512dce131f4d",
+                          "content": {
+                                  "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
+                                  "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+                                  "author": "Matt Willsmore",
+                                  "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
+                          },
+                          "transaction": "694eb7be78aedc7a163da900"
+                  },
+                  {
+                          "id": "3",
+                          "creationTimestamp": "2025-12-26T16:28:54Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:54Z",
+                          "action": "STORE",
+                          "checksum": "cbffeeba8f4739650ae048fb382c8870",
+                          "content": {
+                                  "_id": "d758c733466967ea6f13b20bcbfcebb5",
+                                  "link": "https://pureinsights.com/blog/2024/modernizing-search-with-generative-ai/",
+                                  "author": "Martin Bayton",
+                                  "header": "Modernizing Search with Generative AI - Pureinsights: Blog: why you should implement Retrieval-Augmented Generation (RAG) and how platforms like Pureinsights Discovery streamline the process."
+                          },
+                          "transaction": "694eb7c678aedc7a163da901"
+                  }
+          ],
+		  "empty": false
+			}`))
+			}
+		}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := scrollWithPagination(c, http.MethodPost, "/content/my-bucket/scroll")
+	assert.Equal(t, []gjson.Result(nil), response)
+	var errStruct Error
+	require.ErrorAs(t, err, &errStruct)
+	assert.EqualError(t, err, Error{Status: http.StatusInternalServerError, Body: gjson.Parse(`{"error":"Internal Server Error"}`)}.Error())
+}
+
+// Test_scrollWithPagination_RestyReturnsError tests what happens when the Resty client fails to execute the request.
+func Test_scrollWithPagination_RestyReturnsError(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	base := srv.URL
+	srv.Close()
+
+	c := newClient(base, "")
+	response, err := scrollWithPagination(c, http.MethodPost, "/down")
+	require.Error(t, err)
+	assert.Equal(t, response, []gjson.Result(nil))
+	assert.Contains(t, err.Error(), base+"/down")
+}
+
+// Test_scrollWithPagination_ContentInSecondPage tests that the scrollWithPagination() function
+// can successfully get all content when there are two pages with content in them.
+func Test_scrollWithPagination_ContentInSecondPage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/content/my-bucket/scroll", r.URL.Path)
+		token := r.URL.Query().Get("token")
+		w.Header().Set("Content-Type", "application/json")
+		switch token {
+		case "694eb7f378aedc7a163da908":
+			w.WriteHeader(http.StatusNoContent)
+			_, _ = w.Write([]byte(`[]`))
+		case "694eb7f378aedc7a163da907":
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"token": "694eb7f378aedc7a163da908",
+			"content": [
+                  {
+                          "id": "4",
+                          "creationTimestamp": "2025-12-26T16:28:59Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:59Z",
+                          "action": "STORE",
+                          "checksum": "855609b26c318a627760fd36d2d6fe8f",
+                          "content": {
+                                  "_id": "4e7c8a47efd829ef7f710d64da661786",
+                                  "link": "https://pureinsights.com/blog/2024/kmworld-2024-key-takeaways-from-the-exhibit-hall/",
+                                  "author": "Graham Gillen",
+                                  "header": "KMWorld 2024: Key Takeaways from the Exhibit Hall - Pureinsights: Key insights from KMWorld 2024: AI's impact on knowledge management, standout vendors, and challenges for traditional players adapting to AI."
+                          },
+                          "transaction": "694eb7cb78aedc7a163da902"
+                  },
+                  {
+                          "id": "5",
+                          "creationTimestamp": "2025-12-26T16:29:05Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:29:05Z",
+                          "action": "STORE",
+                          "checksum": "855609b26c318a627760fd36d2d6fe8f",
+                          "content": {
+                                  "_id": "b1e3e4f42c0818b1580e306eb776d4a1",
+                                  "link": "https://pureinsights.com/blog/2024/google-unveils-ai-enhanced-search-features-at-2024-io-conference/",
+                                  "author": "Martin Bayton",
+                                  "header": "Google Unveils AI-Enhanced Search Features at I/O Conference - Pureinsights: Google I/O 2024 Developer Conference key takeaways, including AI-generated summaries and other features for search."
+                          },
+                          "transaction": "694eb7d178aedc7a163da903"
+                  },
+                  {
+                          "id": "6",
+                          "creationTimestamp": "2025-12-26T16:29:12Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:29:12Z",
+                          "action": "STORE",
+                          "checksum": "228cc56c873a457041454280c448b4e3",
+                          "content": {
+                                  "_id": "232638a332048c4cb159f8cf6636507f",
+                                  "link": "https://pureinsights.com/blog/2025/7-tech-trends-in-ai-and-search-for-2025/",
+                                  "author": "Phil Lewis",
+                                  "header": "7 Tech Trends in AI and Search for 2025 - Pureinsights: 7 Tech Trends is AI and Search for 2025 - presented by Pureinsights CTO, Phil Lewis. A blog about key trends to look for in the coming year."
+                          },
+                          "transaction": "694eb7d878aedc7a163da904"
+                  }
+          ],
+		  "empty": false
+			}`))
+		default:
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"token": "694eb7f378aedc7a163da907",
+			"content": [
+                  {
+                          "id": "1",
+                          "creationTimestamp": "2025-12-26T16:28:38Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+                          "action": "STORE",
+                          "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+                          "content": {
+                                  "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                                  "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                                  "author": "Graham Gillen",
+                                  "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+                          },
+                          "transaction": "694eb7b678aedc7a163da8ff"
+                  },
+                  {
+                          "id": "2",
+                          "creationTimestamp": "2025-12-26T16:28:46Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
+                          "action": "STORE",
+                          "checksum": "b76292db9fd1c7aef145512dce131f4d",
+                          "content": {
+                                  "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
+                                  "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+                                  "author": "Matt Willsmore",
+                                  "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
+                          },
+                          "transaction": "694eb7be78aedc7a163da900"
+                  },
+                  {
+                          "id": "3",
+                          "creationTimestamp": "2025-12-26T16:28:54Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:54Z",
+                          "action": "STORE",
+                          "checksum": "cbffeeba8f4739650ae048fb382c8870",
+                          "content": {
+                                  "_id": "d758c733466967ea6f13b20bcbfcebb5",
+                                  "link": "https://pureinsights.com/blog/2024/modernizing-search-with-generative-ai/",
+                                  "author": "Martin Bayton",
+                                  "header": "Modernizing Search with Generative AI - Pureinsights: Blog: why you should implement Retrieval-Augmented Generation (RAG) and how platforms like Pureinsights Discovery streamline the process."
+                          },
+                          "transaction": "694eb7c678aedc7a163da901"
+                  }
+          ],
+		  "empty": false
+			}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	c := newClient(srv.URL, "")
+	response, err := scrollWithPagination(c, http.MethodPost, "/content/my-bucket/scroll")
+	require.NoError(t, err)
+	assert.Len(t, response, 6)
+}
+
+// Test_contentClient_Scroll tests the contentClient.Scroll() function.
+func Test_contentClient_Scroll(t *testing.T) {
+	body := `{"filters":{
+	"equals": {
+		"field": "author",
+		"value": "Martin Bayton",
+		"normalize": true
+	}
+},"fields":{
+    "includes": [
+		"author",
+		"header"
+	]
+}}`
+	filters := `{
+	"equals": {
+		"field": "author",
+		"value": "Martin Bayton",
+		"normalize": true
+	}
+}`
+	projections := `{
+    "includes": [
+		"author",
+		"header"
+	]
+}`
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		requestBody, _ := io.ReadAll(r.Body)
+		assert.Equal(t, gjson.Parse(body), gjson.Parse(string(requestBody)))
+		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+		assert.Equal(t, "/content/my-bucket/scroll", r.URL.Path)
+		assert.Equal(t, "3", r.URL.Query().Get("size"))
+		token := r.URL.Query().Get("token")
+		w.Header().Set("Content-Type", "application/json")
+		switch token {
+		case "694eb7f378aedc7a163da908":
+			w.WriteHeader(http.StatusNoContent)
+			_, _ = w.Write([]byte(`[]`))
+		case "694eb7f378aedc7a163da907":
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"token": "694eb7f378aedc7a163da908",
+			"content": [
+                  {
+                          "id": "4",
+                          "creationTimestamp": "2025-12-26T16:28:59Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:59Z",
+                          "action": "STORE",
+                          "checksum": "855609b26c318a627760fd36d2d6fe8f",
+                          "content": {
+                                  "_id": "4e7c8a47efd829ef7f710d64da661786",
+                                  "link": "https://pureinsights.com/blog/2024/kmworld-2024-key-takeaways-from-the-exhibit-hall/",
+                                  "author": "Graham Gillen",
+                                  "header": "KMWorld 2024: Key Takeaways from the Exhibit Hall - Pureinsights: Key insights from KMWorld 2024: AI's impact on knowledge management, standout vendors, and challenges for traditional players adapting to AI."
+                          },
+                          "transaction": "694eb7cb78aedc7a163da902"
+                  },
+                  {
+                          "id": "5",
+                          "creationTimestamp": "2025-12-26T16:29:05Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:29:05Z",
+                          "action": "STORE",
+                          "checksum": "855609b26c318a627760fd36d2d6fe8f",
+                          "content": {
+                                  "_id": "b1e3e4f42c0818b1580e306eb776d4a1",
+                                  "link": "https://pureinsights.com/blog/2024/google-unveils-ai-enhanced-search-features-at-2024-io-conference/",
+                                  "author": "Martin Bayton",
+                                  "header": "Google Unveils AI-Enhanced Search Features at I/O Conference - Pureinsights: Google I/O 2024 Developer Conference key takeaways, including AI-generated summaries and other features for search."
+                          },
+                          "transaction": "694eb7d178aedc7a163da903"
+                  },
+                  {
+                          "id": "6",
+                          "creationTimestamp": "2025-12-26T16:29:12Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:29:12Z",
+                          "action": "STORE",
+                          "checksum": "228cc56c873a457041454280c448b4e3",
+                          "content": {
+                                  "_id": "232638a332048c4cb159f8cf6636507f",
+                                  "link": "https://pureinsights.com/blog/2025/7-tech-trends-in-ai-and-search-for-2025/",
+                                  "author": "Phil Lewis",
+                                  "header": "7 Tech Trends in AI and Search for 2025 - Pureinsights: 7 Tech Trends is AI and Search for 2025 - presented by Pureinsights CTO, Phil Lewis. A blog about key trends to look for in the coming year."
+                          },
+                          "transaction": "694eb7d878aedc7a163da904"
+                  }
+          ],
+		  "empty": false
+			}`))
+		default:
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+			"token": "694eb7f378aedc7a163da907",
+			"content": [
+                  {
+                          "id": "1",
+                          "creationTimestamp": "2025-12-26T16:28:38Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+                          "action": "STORE",
+                          "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+                          "content": {
+                                  "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                                  "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                                  "author": "Graham Gillen",
+                                  "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+                          },
+                          "transaction": "694eb7b678aedc7a163da8ff"
+                  },
+                  {
+                          "id": "2",
+                          "creationTimestamp": "2025-12-26T16:28:46Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
+                          "action": "STORE",
+                          "checksum": "b76292db9fd1c7aef145512dce131f4d",
+                          "content": {
+                                  "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
+                                  "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+                                  "author": "Matt Willsmore",
+                                  "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
+                          },
+                          "transaction": "694eb7be78aedc7a163da900"
+                  },
+                  {
+                          "id": "3",
+                          "creationTimestamp": "2025-12-26T16:28:54Z",
+                          "lastUpdatedTimestamp": "2025-12-26T16:28:54Z",
+                          "action": "STORE",
+                          "checksum": "cbffeeba8f4739650ae048fb382c8870",
+                          "content": {
+                                  "_id": "d758c733466967ea6f13b20bcbfcebb5",
+                                  "link": "https://pureinsights.com/blog/2024/modernizing-search-with-generative-ai/",
+                                  "author": "Martin Bayton",
+                                  "header": "Modernizing Search with Generative AI - Pureinsights: Blog: why you should implement Retrieval-Augmented Generation (RAG) and how platforms like Pureinsights Discovery streamline the process."
+                          },
+                          "transaction": "694eb7c678aedc7a163da901"
+                  }
+          ],
+		  "empty": false
+			}`))
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	contentClient := newContentClient(srv.URL, "", "my-bucket")
+	size := 3
+	response, err := contentClient.Scroll(gjson.Parse(filters), gjson.Parse(projections), &size)
+	require.NoError(t, err)
+	assert.Len(t, response, 6)
+}
+
 // TestWithContentAction tests the WithContentAction functional option.
 // It uses the Get function to call the option.
 func TestWithContentAction(t *testing.T) {

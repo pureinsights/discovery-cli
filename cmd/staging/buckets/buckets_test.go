@@ -47,6 +47,6 @@ func TestNewBucketCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"store"}
+	expectedCommands := []string{"delete", "store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
