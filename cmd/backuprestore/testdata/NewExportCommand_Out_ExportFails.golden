@@ -1,5 +1,5 @@
 Usage:
-  export [subcommands] [flags]
+  export [flags]
 
 Examples:
 	# Export the entities to a specific file.
