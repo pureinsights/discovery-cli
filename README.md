@@ -219,7 +219,7 @@ Staging API Key: "discovery.key.staging.cn"
 ```
 
 #### Export
-`export` is the command used to backup all of Discovery's entities at once. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
+`export` is the command used to backup all of Discovery's entities at once. With the `output-file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
 
 Usage: `discovery export [flags]`
 
@@ -231,7 +231,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
+`--output-file`::
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -245,7 +245,7 @@ discovery export -p cn
 ```bash
 # Export the entities to a specific file.
 # In this example, the Ingestion export failed.
-discovery export -p cn --file "entities/discovery.zip"
+discovery export -p cn --output-file "entities/discovery.zip"
 {"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
 ```
 #### Import
@@ -445,7 +445,7 @@ Core API Key: "discovery.key.core.cn"
 ```
 
 ##### Export
-`export` is the command used to backup Discovery Core's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+`export` is the command used to backup Discovery Core's entities. With the `output-file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
 
 Usage: `discovery core export [flags]`
 
@@ -457,7 +457,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
+`--output-file`::
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -470,7 +470,7 @@ discovery core export -p cn
 
 ```bash
 # Export the entities to a specific file.
-discovery core export -p cn --file "entities/core.zip"
+discovery core export -p cn --output-file "entities/core.zip"
 {"acknowledged":true}
 ```
 
@@ -1144,7 +1144,7 @@ Ingestion API Key: "discovery.key.ingestion.cn"
 ```
 
 ##### Export
-`export` is the command used to backup Discovery Ingestion's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+`export` is the command used to backup Discovery Ingestion's entities. With the `output-file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
 
 Usage: `discovery ingestion export [flags]`
 
@@ -1156,7 +1156,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
+`--output-file`::
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -1169,7 +1169,7 @@ discovery ingestion export -p cn
 
 ```bash
 # Export the entities to a specific file
-discovery ingestion export --file "entities/ingestion.zip"
+discovery ingestion export --output-file "entities/ingestion.zip"
 {"acknowledged":true}
 ```
 
@@ -1870,7 +1870,7 @@ QueryFlow API Key: "discovery.key.queryflow.cn"
 ```
 
 ##### Export
-`export` is the command used to backup Discovery QueryFlow's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+`export` is the command used to backup Discovery QueryFlow's entities. With the `output-file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
 
 Usage: `discovery queryflow export [flags]`
 
@@ -1882,7 +1882,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
+`--output-file`::
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -1895,7 +1895,7 @@ discovery queryflow export -p cn
 
 ```bash
 # Export the entities to a specific file.
-discovery queryflow export --file "entities/queryflow.zip"
+discovery queryflow export --output-file "entities/queryflow.zip"
 {"acknowledged":true}
 ```
 
