@@ -3,9 +3,11 @@ package cli
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
@@ -1071,6 +1073,119 @@ func (s *FailingStagingContentController) Scroll(filters, projections gjson.Resu
   "timestamp": "2025-12-23T14:53:32.321524600Z"
 }`),
 	}
+}
+
+func Test_writeRecordsToFile_AllFilesWritten(t *testing.T) {
+	records := gjson.Parse(`[
+    {
+            "id": "1",
+            "creationTimestamp": "2025-12-26T16:28:38Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+            "action": "STORE",
+            "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+            "content": {
+                    "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                    "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                    "author": "Graham Gillen",
+                    "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+            },
+            "transaction": "694eb7b678aedc7a163da8ff"
+    },
+    {
+            "id": "2",
+            "creationTimestamp": "2025-12-26T16:28:46Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
+            "action": "STORE",
+            "checksum": "b76292db9fd1c7aef145512dce131f4d",
+            "content": {
+                    "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
+                    "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+                    "author": "Matt Willsmore",
+                    "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
+            },
+            "transaction": "694eb7be78aedc7a163da900"
+    }
+]`).Array()
+
+	dir, err := writeRecordsToFile(records, "my-bucket")
+	require.NoError(t, err)
+	defer os.RemoveAll(dir)
+	assert.Contains(t, dir, "dump-my-bucket-")
+
+	entries, err := os.ReadDir(dir)
+	require.NoError(t, err)
+	require.Equal(t, 2, len(entries))
+	assert.Equal(t, "694eb7b678aedc7a163da8ff.json", entries[0].Name())
+	assert.Equal(t, "694eb7be78aedc7a163da900.json", entries[1].Name())
+}
+
+func Test_writeRecordsToFile_WriteFails(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Setenv("TMPDIR", tempDir)
+	t.Setenv("TEMP", tempDir)
+	t.Setenv("TMP", tempDir)
+
+	records := gjson.Parse(`[
+    {
+            "id": "1",
+            "creationTimestamp": "2025-12-26T16:28:38Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+            "action": "STORE",
+            "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+            "content": {
+                    "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                    "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                    "author": "Graham Gillen",
+                    "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+            },
+            "transaction": ` + `" file<name>with:invalid|chars?"` + `
+    }
+]`).Array()
+
+	dir, err := writeRecordsToFile(records, "my-bucket")
+	assert.Equal(t, "", dir)
+	assert.EqualError(t, err, "The filename, directory name, or volume label syntax is incorrect.")
+}
+
+func Test_writeRecordsToFile_MkDirTempFails(t *testing.T) {
+	t.Setenv("TMPDIR", "/does/not/exist")
+	t.Setenv("TEMP", "/does/not/exist")
+	t.Setenv("TMP", "/does/not/exist")
+
+	records := gjson.Parse(`[
+    {
+            "id": "1",
+            "creationTimestamp": "2025-12-26T16:28:38Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+            "action": "STORE",
+            "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+            "content": {
+                    "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                    "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                    "author": "Graham Gillen",
+                    "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+            },
+            "transaction": "694eb7b678aedc7a163da8ff"
+    },
+    {
+            "id": "2",
+            "creationTimestamp": "2025-12-26T16:28:46Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
+            "action": "STORE",
+            "checksum": "b76292db9fd1c7aef145512dce131f4d",
+            "content": {
+                    "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
+                    "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+                    "author": "Matt Willsmore",
+                    "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
+            },
+            "transaction": "694eb7be78aedc7a163da900"
+    }
+]`).Array()
+
+	dir, err := writeRecordsToFile(records, "my-bucket")
+	assert.Equal(t, "", dir)
+	assert.EqualError(t, err, fmt.Sprintf("the given path does not exist: %s", filepath.FromSlash("c:/does/not/exist")))
 }
 
 // Test_discovery_DumpBucket tests the discovery.DumpBucket() function.

@@ -117,17 +117,18 @@ func (d discovery) DeleteBucket(client StagingBucketController, bucketName strin
 	return printer(*d.IOStreams(), result)
 }
 
-func writeDocumentsToFile(documents []gjson.Result, bucket string) (string, error) {
+// writeRecordsToFile writes the records obtained from the scroll to a JSON file in a temporary directory.
+func writeRecordsToFile(records []gjson.Result, bucket string) (string, error) {
 	dir, err := os.MkdirTemp("", fmt.Sprintf("dump-%s-*", bucket))
 	if err != nil {
 		defer os.RemoveAll(dir)
-		return "", err
+		return "", NormalizeWriteFileError(os.TempDir(), err)
 	}
 
-	for _, document := range documents {
-		transaction := document.Get("transaction").String()
+	for _, record := range records {
+		transaction := record.Get("transaction").String()
 
-		err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%s.json", transaction)), []byte(document.Raw), 0o644)
+		err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%s.json", transaction)), []byte(record.Raw), 0o644)
 		if err != nil {
 			defer os.RemoveAll(dir)
 			return "", NormalizeWriteFileError(filepath.Join(dir, fmt.Sprintf("%s.json", transaction)), err)
@@ -136,7 +137,8 @@ func writeDocumentsToFile(documents []gjson.Result, bucket string) (string, erro
 	return dir, nil
 }
 
-func zipDocuments(file, dir string) error {
+// zipRecords zips the temporary directory into a file containing all of the records.
+func zipRecords(file, dir string) error {
 	zipFile, err := os.Create(file)
 	if err != nil {
 		return NormalizeWriteFileError(file, err)
@@ -177,13 +179,13 @@ func zipDocuments(file, dir string) error {
 			return err
 		}
 
-		documentFile, err := os.Open(path)
+		recordFile, err := os.Open(path)
 		if err != nil {
 			return err
 		}
-		defer documentFile.Close()
+		defer recordFile.Close()
 
-		_, err = io.Copy(fw, documentFile)
+		_, err = io.Copy(fw, recordFile)
 		if err != nil {
 			return err
 		}
@@ -199,13 +201,13 @@ func (d discovery) DumpBucket(client StagingContentController, bucketName, file 
 		return NewErrorWithCause(ErrorExitCode, err, "Could not scroll the bucket with name %q.", bucketName)
 	}
 
-	dir, err := writeDocumentsToFile(records, bucketName)
+	dir, err := writeRecordsToFile(records, bucketName)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not write documents to temporary folder.")
+		return NewErrorWithCause(ErrorExitCode, err, "Could not write records to temporary folder.")
 	}
 
 	defer os.RemoveAll(dir)
-	err = zipDocuments(file, dir)
+	err = zipRecords(file, dir)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not write dump to file.")
 	}
