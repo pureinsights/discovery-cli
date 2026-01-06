@@ -1,6 +1,8 @@
 package buckets
 
 import (
+	"fmt"
+
 	"github.com/pureinsights/discovery-cli/cmd/commands"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
@@ -13,6 +15,7 @@ func NewDumpCommand(d cli.Discovery) *cobra.Command {
 	var filters string
 	var projections string
 	var max int
+	var file string
 	dump := &cobra.Command{
 		Use:   "dump <bucketName>",
 		Short: "The command that dumps buckets to Discovery Staging.",
@@ -32,27 +35,25 @@ func NewDumpCommand(d cli.Discovery) *cobra.Command {
 
 			stagingClient := discoveryPackage.NewStaging(vpr.GetString(profile+".staging_url"), vpr.GetString(profile+".staging_key"))
 
-			output := vpr.GetString("output")
-			if output == "pretty-json" {
-				output = "json"
-			}
-			printer := cli.GetArrayPrinter(output)
-
-			var size *int
+			printer := cli.GetObjectPrinter(d.Config().GetString("output"))
 			if cmd.Flags().Changed("max") {
 				if max < 1 {
 					return cli.NewError(cli.ErrorExitCode, "The size flag can only be greater than or equal to 1.")
 				}
-				size = &max
 			}
 
-			return d.DumpBucket(stagingClient.Content(args[0]), args[0], gjson.Parse(filters), gjson.Parse(projections), size, printer)
+			if !(cmd.Flags().Changed("output-file")) {
+				file = fmt.Sprintf("%s.zip", args[0])
+			}
+
+			return d.DumpBucket(stagingClient.Content(args[0]), args[0], file, gjson.Parse(filters), gjson.Parse(projections), &max, printer)
 		},
 		Args: cobra.ExactArgs(1),
 		Example: `	# Dump a bucket with filters, include projections, and a max page size of 5
 	discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --max 5`,
 	}
 
+	dump.Flags().StringVar(&file, "output-file", "", "the file that will contain the dumped entities")
 	dump.Flags().StringVarP(&filters, "filter", "f", "", "the DSL containing the filters that will be applied to the scroll")
 	dump.Flags().StringVar(&projections, "projection", "", "the DSL containing the fields that will be included and excluded in the records that will be retrieved from the bucket")
 	dump.Flags().IntVar(&max, "max", -1, "the size of the pages that will be used when retrieving the records")

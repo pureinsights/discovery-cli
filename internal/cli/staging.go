@@ -1,8 +1,13 @@
 package cli
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
+	"io/fs"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/tidwall/gjson"
@@ -112,16 +117,102 @@ func (d discovery) DeleteBucket(client StagingBucketController, bucketName strin
 	return printer(*d.IOStreams(), result)
 }
 
+func writeDocumentsToFile(documents []gjson.Result, bucket string) (string, error) {
+	dir, err := os.MkdirTemp("", fmt.Sprintf("dump-%s-*", bucket))
+	if err != nil {
+		defer os.RemoveAll(dir)
+		return "", err
+	}
+
+	for _, document := range documents {
+		transaction := document.Get("transaction").String()
+
+		err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%s.json", transaction)), []byte(document.Raw), 0o644)
+		if err != nil {
+			defer os.RemoveAll(dir)
+			return "", NormalizeWriteFileError(filepath.Join(dir, fmt.Sprintf("%s.json", transaction)), err)
+		}
+	}
+	return dir, nil
+}
+
+func zipDocuments(file, dir string) error {
+	zipFile, err := os.Create(file)
+	if err != nil {
+		return NormalizeWriteFileError(file, err)
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	return filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+		header.Method = zip.Deflate
+
+		relPath, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
+		header.Name = filepath.ToSlash(relPath)
+
+		fw, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		documentFile, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer documentFile.Close()
+
+		_, err = io.Copy(fw, documentFile)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 // DumpBucket scrolls the contents of a bucket based on the given filters, projections and maximum page size.
-func (d discovery) DumpBucket(client StagingContentController, bucketName string, filters, projections gjson.Result, size *int, printer Printer) error {
+func (d discovery) DumpBucket(client StagingContentController, bucketName, file string, filters, projections gjson.Result, size *int, printer Printer) error {
 	records, err := client.Scroll(filters, projections, size)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not scroll the bucket with name %q.", bucketName)
 	}
 
-	if printer == nil {
-		printer = JsonArrayPrinter(false)
+	dir, err := writeDocumentsToFile(records, bucketName)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not write documents to temporary folder.")
 	}
 
-	return printer(*d.IOStreams(), records...)
+	defer os.RemoveAll(dir)
+	err = zipDocuments(file, dir)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not write dump to file.")
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), gjson.Parse(`{"acknowledged": true}`))
 }
