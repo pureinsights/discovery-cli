@@ -13,7 +13,7 @@ import (
 func NewExportCommand(d cli.Discovery) *cobra.Command {
 	var file string
 	export := &cobra.Command{
-		Use:   "export [subcommands]",
+		Use:   "export",
 		Short: "Export all of Discovery Core's entities",
 		Long:  fmt.Sprintf(commands.LongExport, "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
