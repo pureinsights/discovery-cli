@@ -12,9 +12,8 @@ import (
 // NewImportCommand creates the discovery ingestion import command that imports entities to Discovery Ingestion.
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
-	var file string
 	importCmd := &cobra.Command{
-		Use:   "import",
+		Use:   "import <file>",
 		Short: "Import entities to Discovery Ingestion",
 		Long:  fmt.Sprintf(commands.LongImport, "Ingestion"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -26,17 +25,14 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			return commands.ImportCommand(d, ingestionClient.BackupRestore(), file, discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"))
+			return commands.ImportCommand(d, ingestionClient.BackupRestore(), args[0], discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"))
 		},
-		Args: cobra.NoArgs,
+		Args: cobra.ExactArgs(1),
 		Example: `	# Import the entities using profile "cn" and ignore conflict resolution strategy.
-	discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict IGNORE`,
+	discovery ingestion import -p cn "entities/ingestion.zip" --on-conflict IGNORE`,
 	}
 
-	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the entities that will be restored")
 	importCmd.Flags().StringVar(&onConflict, "on-conflict", string(discoveryPackage.OnConflictFail), "the conflict resolution strategy that will be used")
-
-	importCmd.MarkFlagRequired("file")
 
 	return importCmd
 }
