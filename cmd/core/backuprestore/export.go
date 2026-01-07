@@ -13,7 +13,7 @@ import (
 func NewExportCommand(d cli.Discovery) *cobra.Command {
 	var file string
 	export := &cobra.Command{
-		Use:   "export [subcommands]",
+		Use:   "export",
 		Short: "Export all of Discovery Core's entities",
 		Long:  fmt.Sprintf(commands.LongExport, "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -29,9 +29,9 @@ func NewExportCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.NoArgs,
 		Example: `	# Export the entities to a specific file.
-	discovery core export -p cn --file "entities/core.zip`,
+	discovery core export -p cn --output-file "entities/core.zip`,
 	}
 
-	export.Flags().StringVarP(&file, "file", "f", "", "the file that will contain the exported entities")
+	export.Flags().StringVar(&file, "output-file", "", "the file that will contain the exported entities")
 	return export
 }

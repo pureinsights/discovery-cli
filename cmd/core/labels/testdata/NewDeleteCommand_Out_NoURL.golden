@@ -1,5 +1,5 @@
 Usage:
-  delete [flags]
+  delete <labelId> [flags]
 
 Examples:
 	# Delete a label by id

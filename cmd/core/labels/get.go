@@ -12,7 +12,7 @@ import (
 // NewGetCommand creates the label get command.
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "get",
+		Use:   "get [<labelId>]",
 		Short: "The command that obtains labels from Discovery Core.",
 		Long:  fmt.Sprintf(commands.LongGetNoNames, "label", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {

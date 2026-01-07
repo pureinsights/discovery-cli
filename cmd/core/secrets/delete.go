@@ -12,7 +12,7 @@ import (
 // NewDeleteCommand creates the secret delete command.
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete <secretId>",
 		Short: "The command that deletes secrets from Discovery Core.",
 		Long:  fmt.Sprintf(commands.LongDeleteNoNames, "secret", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {

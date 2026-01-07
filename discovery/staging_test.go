@@ -1580,6 +1580,7 @@ func Test_contentClient_Scroll(t *testing.T) {
 		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 		assert.Equal(t, "/content/my-bucket/scroll", r.URL.Path)
 		assert.Equal(t, "3", r.URL.Query().Get("size"))
+		assert.Equal(t, "STORE", r.URL.Query().Get("action"))
 		token := r.URL.Query().Get("token")
 		w.Header().Set("Content-Type", "application/json")
 		switch token {
