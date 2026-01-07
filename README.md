@@ -2523,7 +2523,7 @@ discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA",
 ```
 
 ###### Dump
-`dump` is the command used to scroll a bucket's content in the Discovery Staging Repository. The bucket's name is sent as the mandatory argument. The user can send filters with the `filter` flag, which is a single JSON string that contains all of the filters. With the `projection` flag, the user can send the fields that will be included or excluded from the results. With the `max` flag, the user can send the maximum number of elements that will be retrieved with every page.
+`dump` is the command used to scroll a bucket's content in the Discovery Staging Repository. The bucket's name is sent as the mandatory argument. The results are saved in a zip file that contains JSON files with the bucket's records. If the path is not sent, the dump will be saved in a zip file in the current directory with the name of the bucket. With the `output-file`, the user can send the path in which to save the records. The user can send filters with the `filter` flag, which is a single JSON string that contains all of the filters. With the `projection` flag, the user can send the fields that will be included or excluded from the results. With the `max` flag, the user can send the maximum number of elements that will be retrieved with every page.
 
 Usage: `discovery staging bucket dump [flags] <arg>`
 
@@ -2568,14 +2568,17 @@ Flags:
 `--max`::
 (Optional, string) The size of the pages that will be used when retrieving the records.
 
+`--output-file`::
+(Optional, string) The path in which to save the bucket's content. If not sent, it will be saved in a zip file with the bucket's name.
 
 Examples:
 
 ```bash
-# Dump a bucket with filters and projection
+# Dump a bucket with filters and projection.
 discovery staging bucket dump my-bucket -f '{"equals":{"field":"author","value":"John Doe"}}' --projection '{"includes":["header"]}'
-{"action":"STORE","checksum":"58b3d1b06729f1491373b97fd8287ae1","content":{"header":"Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."},"creationTimestamp":"2025-12-26T16:28:38Z","id":"1","lastUpdatedTimestamp":"2025-12-26T16:28:38Z","transaction":"694eb7b678aedc7a163da8ff"}
-{"action":"STORE","checksum":"855609b26c318a627760fd36d2d6fe8f","content":{"header":"KMWorld 2024: Key Takeaways from the Exhibit Hall - Pureinsights: Key insights from KMWorld 2024: AI's impact on knowledge management, standout vendors, and challenges for traditional players adapting to AI."},"creationTimestamp":"2025-12-26T16:28:59Z","id":"4","lastUpdatedTimestamp":"2025-12-26T16:28:59Z","transaction":"694eb7cb78aedc7a163da902"}
+{
+  "acknowledged": true
+}
 ```
 
 ###### Delete

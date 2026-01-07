@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -310,7 +311,7 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
 		"value": "Martin Bayton",
 		"normalize": true
 	}
-}`, "--max", "3"})
+}`, "--max", "3", "--output-file", filepath.Join(t.TempDir(), "my-bucket.zip")})
 
 	err := dumpCmd.Execute()
 	require.NoError(t, err)

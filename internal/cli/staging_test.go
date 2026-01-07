@@ -4,11 +4,11 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
@@ -1189,7 +1189,8 @@ func Test_writeRecordsToFile_MkDirTempFails(t *testing.T) {
 
 	dir, err := writeRecordsToFile(records, "my-bucket")
 	assert.Equal(t, "", dir)
-	assert.EqualError(t, err, fmt.Sprintf("the given path does not exist: %s", filepath.FromSlash("c:/does/not/exist")))
+	assert.Contains(t, err.Error(), "the given path does not exist:")
+	assert.Contains(t, err.Error(), strings.ToLower(filepath.FromSlash("/does/not/exist")))
 }
 
 // Test_zipRecords_ZipIsCreated tests the zipRecords() function to verify that the zip contains all of the record files.
@@ -1289,6 +1290,29 @@ func Test_zipRecords_ZipIsCreated(t *testing.T) {
             },
             "transaction": "694eb7be78aedc7a163da900"
     }`, string(gotBytes2))
+}
+
+// Test_zipRecords_EmptyZip tests the zipRecords() function to verify that an empty zip is created if the scroll returns an empty array.
+func Test_zipRecords_EmptyZip(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Setenv("TMPDIR", tempDir)
+	t.Setenv("TEMP", tempDir)
+	t.Setenv("TMP", tempDir)
+
+	records := []gjson.Result{}
+
+	dir, err := writeRecordsToFile(records, "my-bucket")
+	require.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	savePath := filepath.Join(t.TempDir(), "my-bucket.zip")
+	err = zipRecords(savePath, dir)
+
+	zipFile, err := os.ReadFile(savePath)
+	require.NoError(t, err)
+	zipReader, err := zip.NewReader(bytes.NewReader(zipFile), int64(len(zipFile)))
+	require.NoError(t, err)
+	assert.Equal(t, 0, len(zipReader.File))
 }
 
 // Test_zipRecords_TempDirDoesNotExist tests the zipRecords() function when reading the temporary directory fails.
@@ -1401,17 +1425,17 @@ func Test_discovery_DumpBucket(t *testing.T) {
 		{
 			name:           "DumpBucket correctly prints the received records with the ugly printer",
 			client:         new(WorkingStagingContentController),
-			printer:        nil,
-			expectedOutput: "{\"action\":\"STORE\",\"checksum\":\"58b3d1b06729f1491373b97fd8287ae1\",\"content\":{\"_id\":\"5625c64483bef0d48e9ad91aca9b2f94\",\"author\":\"Graham Gillen\",\"header\":\"Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP).\",\"link\":\"https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/\"},\"creationTimestamp\":\"2025-12-26T16:28:38Z\",\"id\":\"1\",\"lastUpdatedTimestamp\":\"2025-12-26T16:28:38Z\",\"transaction\":\"694eb7b678aedc7a163da8ff\"}\n{\"action\":\"STORE\",\"checksum\":\"b76292db9fd1c7aef145512dce131f4d\",\"content\":{\"_id\":\"768b0a3bcee501dc624484ba8a0d7f6d\",\"author\":\"Matt Willsmore\",\"header\":\"5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications.\",\"link\":\"https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/\"},\"creationTimestamp\":\"2025-12-26T16:28:46Z\",\"id\":\"2\",\"lastUpdatedTimestamp\":\"2025-12-26T16:28:46Z\",\"transaction\":\"694eb7be78aedc7a163da900\"}\n",
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"acknowledged\":true}\n",
 			file:           filepath.Join(t.TempDir(), "my-bucket.zip"),
 			err:            nil,
 		},
 		{
 			name:           "DumpBucket correctly prints the array with JSON pretty printer",
 			client:         new(WorkingStagingContentController),
-			printer:        JsonArrayPrinter(true),
+			printer:        nil,
 			file:           filepath.Join(t.TempDir(), "my-bucket.zip"),
-			expectedOutput: "[\n{\n  \"action\": \"STORE\",\n  \"checksum\": \"58b3d1b06729f1491373b97fd8287ae1\",\n  \"content\": {\n    \"_id\": \"5625c64483bef0d48e9ad91aca9b2f94\",\n    \"author\": \"Graham Gillen\",\n    \"header\": \"Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP).\",\n    \"link\": \"https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/\"\n  },\n  \"creationTimestamp\": \"2025-12-26T16:28:38Z\",\n  \"id\": \"1\",\n  \"lastUpdatedTimestamp\": \"2025-12-26T16:28:38Z\",\n  \"transaction\": \"694eb7b678aedc7a163da8ff\"\n},\n{\n  \"action\": \"STORE\",\n  \"checksum\": \"b76292db9fd1c7aef145512dce131f4d\",\n  \"content\": {\n    \"_id\": \"768b0a3bcee501dc624484ba8a0d7f6d\",\n    \"author\": \"Matt Willsmore\",\n    \"header\": \"5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications.\",\n    \"link\": \"https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/\"\n  },\n  \"creationTimestamp\": \"2025-12-26T16:28:46Z\",\n  \"id\": \"2\",\n  \"lastUpdatedTimestamp\": \"2025-12-26T16:28:46Z\",\n  \"transaction\": \"694eb7be78aedc7a163da900\"\n}\n]\n",
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
 			err:            nil,
 		},
 		{
@@ -1419,7 +1443,7 @@ func Test_discovery_DumpBucket(t *testing.T) {
 			client:         new(WorkingStagingContentControllerNoContent),
 			printer:        nil,
 			file:           filepath.Join(t.TempDir(), "my-bucket.zip"),
-			expectedOutput: "",
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
 			err:            nil,
 		},
 
@@ -1447,7 +1471,7 @@ func Test_discovery_DumpBucket(t *testing.T) {
 			printer:        nil,
 			expectedOutput: "",
 			file:           filepath.Join("doesnotexist", "my-bucket.zip"),
-			err:            NewErrorWithCause(ErrorExitCode, errors.New("the given path does not exist: doesnotexist"), "Could not write dump to file."),
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("the given path does not exist: "+filepath.Join("doesnotexist", "my-bucket.zip")), "Could not write dump to file."),
 		},
 		{
 			name:      "Printing fails",
@@ -1511,5 +1535,7 @@ func Test_discovery_DumpBucket_writeRecordsToFileFails(t *testing.T) {
 	d := NewDiscovery(&ios, viper.New(), "")
 	max := 3
 	err := d.DumpBucket(new(WorkingStagingContentController), "my-bucket", "", gjson.Result{}, gjson.Result{}, &max, nil)
-	assert.EqualError(t, err, NewErrorWithCause(ErrorExitCode, errors.New("the given path does not exist: "+filepath.FromSlash("c:/does/not/exist")), "Could not write records to temporary folder.").Error())
+	assert.Contains(t, err.Error(), "the given path does not exist:")
+	assert.Contains(t, err.Error(), strings.ToLower(filepath.FromSlash("/does/not/exist")))
+	assert.Contains(t, err.Error(), "Could not write records to temporary folder.")
 }
