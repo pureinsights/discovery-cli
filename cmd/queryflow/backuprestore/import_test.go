@@ -147,7 +147,6 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			)
 
 			args := []string{}
-			args = append(args, "--file")
 			args = append(args, tc.file)
 
 			args = append(args, "--on-conflict")
@@ -197,7 +196,7 @@ func TestNewImportCommand_NoProfileFlag(t *testing.T) {
 	getCmd.SetOut(ios.Out)
 	getCmd.SetErr(ios.Err)
 
-	getCmd.SetArgs([]string{"--file", "testdata/queryflow-export.zip"})
+	getCmd.SetArgs([]string{"testdata/queryflow-export.zip"})
 
 	err := getCmd.Execute()
 	require.Error(t, err)
