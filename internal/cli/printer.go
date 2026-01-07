@@ -35,6 +35,32 @@ func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result, 
 	return err
 }
 
+// printJsonInArray is an auxiliary function to reduce the complexity of printJsonArray.
+func printJsonInArray(object gjson.Result, pretty bool, index, arraySize int, ios iostreams.IOStreams) error {
+	if pretty {
+		_, err := fmt.Fprint(ios.Out, "  ")
+		if err != nil {
+			return err
+		}
+	}
+	err := printJsonObject(ios, pretty, object, "  ")
+	if err != nil {
+		return err
+	}
+	if pretty && index != (arraySize-1) {
+		_, err := fmt.Fprint(ios.Out, ",")
+		if err != nil {
+			return err
+		}
+	}
+	_, err = fmt.Fprint(ios.Out, "\n")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // printJsonArray prints the given JSON array to the Out IOStream.
 // If the pretty boolean is true, it prints the objects in the array with spacing and indentation and adds brackets at each end.
 // If not, it prints the objects in a compact format.
@@ -47,23 +73,7 @@ func printArrayObject(ios iostreams.IOStreams, pretty bool, array ...gjson.Resul
 	}
 
 	for index, object := range array {
-		if pretty {
-			_, err := fmt.Fprint(ios.Out, "  ")
-			if err != nil {
-				return err
-			}
-		}
-		err := printJsonObject(ios, pretty, object, "  ")
-		if err != nil {
-			return err
-		}
-		if pretty && index != (len(array)-1) {
-			_, err := fmt.Fprint(ios.Out, ",")
-			if err != nil {
-				return err
-			}
-		}
-		_, err = fmt.Fprint(ios.Out, "\n")
+		err := printJsonInArray(object, pretty, index, len(array), ios)
 		if err != nil {
 			return err
 		}
