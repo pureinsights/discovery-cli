@@ -189,7 +189,7 @@ func Test_discovery_HaltSeed(t *testing.T) {
 			name:           "HaltSeed correctly prints the stopped executions with the pretty printer",
 			client:         new(WorkingSeedController),
 			printer:        JsonArrayPrinter(true),
-			expectedOutput: "[\n{\n  \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n  \"status\": 202\n},\n{\n  \"id\": \"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b\",\n  \"status\": 202\n}\n]\n",
+			expectedOutput: "[\n  {\n    \"id\": \"a056c7fb-0ca1-45f6-97ea-ec849a0701fd\",\n    \"status\": 202\n  },\n  {\n    \"id\": \"365d3ce3-4ea6-47a8-ada5-4ab4bedcbb3b\",\n    \"status\": 202\n  }\n]\n",
 			err:            nil,
 		},
 		{

@@ -14,7 +14,7 @@ type Printer func(iostreams.IOStreams, ...gjson.Result) error
 // printJsonObject prints the given JSON object to the Out IOStream.
 // If the pretty boolean is true, it prints the object with spacing and indentation
 // If not, it prints it in a compact format.
-func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result) error {
+func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result, prefix string) error {
 	var v any
 	if err := json.Unmarshal([]byte(object.Raw), &v); err != nil {
 		return err
@@ -23,7 +23,7 @@ func printJsonObject(ios iostreams.IOStreams, pretty bool, object gjson.Result) 
 	var b []byte
 	var err error
 	if pretty {
-		b, err = json.MarshalIndent(v, "", "  ")
+		b, err = json.MarshalIndent(v, prefix, "  ")
 	} else {
 		b, err = json.Marshal(v)
 	}
@@ -47,7 +47,13 @@ func printArrayObject(ios iostreams.IOStreams, pretty bool, array ...gjson.Resul
 	}
 
 	for index, object := range array {
-		err := printJsonObject(ios, pretty, object)
+		if pretty {
+			_, err := fmt.Fprint(ios.Out, "  ")
+			if err != nil {
+				return err
+			}
+		}
+		err := printJsonObject(ios, pretty, object, "  ")
 		if err != nil {
 			return err
 		}
@@ -77,7 +83,7 @@ func JsonObjectPrinter(pretty bool) Printer {
 		if len(objects) != 1 {
 			return NewError(ErrorExitCode, "JsonObjectPrinter only works with a single JSON object")
 		}
-		err := printJsonObject(ios, pretty, objects[0])
+		err := printJsonObject(ios, pretty, objects[0], "")
 		if err != nil {
 			return NewErrorWithCause(ErrorExitCode, err, "Could not print JSON object")
 		}
