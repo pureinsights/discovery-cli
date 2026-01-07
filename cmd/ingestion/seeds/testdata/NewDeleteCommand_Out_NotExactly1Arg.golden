@@ -1,5 +1,5 @@
 Usage:
-  delete [flags]
+  delete <seed> [flags]
 
 Examples:
 	# Delete a seed by id

@@ -10,34 +10,11 @@ import (
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/pureinsights/discovery-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/testutils/mocks"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/tidwall/gjson"
 )
-
-// WorkingStatusChecker mocks the results of a StatusChecker that does a request to an online product.
-type WorkingStatusChecker struct {
-	mock.Mock
-}
-
-// StatusCheck returns the response of an online Discovery product.
-func (g *WorkingStatusChecker) StatusCheck() (gjson.Result, error) {
-	return gjson.Parse(`{
-    "status": "UP"
-}`), nil
-}
-
-// WorkingStatusChecker mocks the results of a StatusChecker that does a request to an offline product.
-type FailingStatusChecker struct {
-	mock.Mock
-}
-
-// StatusCheck returns the error of an offline Discovery product.
-func (g *FailingStatusChecker) StatusCheck() (gjson.Result, error) {
-	return gjson.Result{}, errors.New("Get \"http://localhost:12030/health\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.")
-}
 
 // TestStatusCheckCommand tests the StatusCheckCommand() function.
 func TestStatusCheckCommand(t *testing.T) {
@@ -54,7 +31,7 @@ func TestStatusCheckCommand(t *testing.T) {
 		// Working case
 		{
 			name:           "StatusCheck correctly prints the status with the pretty printer",
-			client:         new(WorkingStatusChecker),
+			client:         new(mocks.WorkingStatusChecker),
 			url:            "http://localhost:12010",
 			apiKey:         "core123",
 			product:        "Core",
@@ -65,7 +42,7 @@ func TestStatusCheckCommand(t *testing.T) {
 		// Error case
 		{
 			name:      "CheckCredentials fails",
-			client:    new(WorkingStatusChecker),
+			client:    new(mocks.WorkingStatusChecker),
 			url:       "",
 			apiKey:    "core123",
 			product:   "Core",
@@ -74,7 +51,7 @@ func TestStatusCheckCommand(t *testing.T) {
 		},
 		{
 			name:           "StatusCheck returns error",
-			client:         new(FailingStatusChecker),
+			client:         new(mocks.FailingStatusChecker),
 			expectedOutput: "",
 			url:            "http://localhost:12010",
 			apiKey:         "core123",
@@ -83,7 +60,7 @@ func TestStatusCheckCommand(t *testing.T) {
 		},
 		{
 			name:      "Printing fails",
-			client:    new(WorkingStatusChecker),
+			client:    new(mocks.WorkingStatusChecker),
 			url:       "http://localhost:12010",
 			apiKey:    "core123",
 			product:   "Core",
