@@ -1,11 +1,10 @@
 {"active":true,"creationTimestamp":"2025-08-14T18:02:11Z","id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","labels":[],"lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"MongoDB pipeline","secret":"mongo-secret","type":"mongo"}
 Usage:
-  store [flags]
+  store [<files>...] [flags]
 
 Flags:
       --abort-on-error   aborts the operation if there is an error
   -d, --data string      the JSON with the configurations that will be upserted
-  -f, --file string      the path the file that contains the JSON data
   -h, --help             help for store
   -p, --profile string   configuration profile to use (default "default")
 

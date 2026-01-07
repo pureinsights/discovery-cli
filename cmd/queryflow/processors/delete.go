@@ -14,7 +14,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "delete",
 		Short: "The command that deletes processors from Discovery QueryFlow.",
-		Long:  fmt.Sprintf(commands.LongDeleteNoNames, "processor", "QueryFlow"),
+		Long:  fmt.Sprintf(commands.LongDeleteSearch, "processor", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
