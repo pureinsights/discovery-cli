@@ -13,7 +13,7 @@ func NewStartCommand(d cli.Discovery) *cobra.Command {
 	var scanType string
 	var executionProperties string
 	start := &cobra.Command{
-		Use:   "start",
+		Use:   "start <seed>",
 		Short: "The command that starts a seed execution in Discovery Ingestion.",
 		Long:  "start is the command used to start a seed execution in Discovery Ingestion. With the properties flag, the user set the execution properties with which to run the seed. With the scan-type flag, the user can set the scan type of the execution: FULL or INCREMENTAL.",
 		RunE: func(cmd *cobra.Command, args []string) error {
