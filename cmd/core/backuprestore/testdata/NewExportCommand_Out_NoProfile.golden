@@ -3,9 +3,9 @@ Usage:
 
 Examples:
 	# Export the entities to a specific file.
-	discovery core export -p cn --file "entities/core.zip
+	discovery core export -p cn --output-file "entities/core.zip
 
 Flags:
-  -f, --file string   the file that will contain the exported entities
-  -h, --help          help for export
+  -h, --help                 help for export
+      --output-file string   the file that will contain the exported entities
 

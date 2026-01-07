@@ -161,7 +161,7 @@ func TestNewExportCommand(t *testing.T) {
 
 			args := []string{}
 			if tc.file != "" {
-				args = append(args, "--file")
+				args = append(args, "--output-file")
 				args = append(args, tc.file)
 			}
 
