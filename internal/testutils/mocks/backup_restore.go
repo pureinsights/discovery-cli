@@ -3,16 +3,13 @@ package mocks
 import (
 	"net/http"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/tidwall/gjson"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
 // WorkingBackupRestore mocks a working backup restore.
-type WorkingBackupRestore struct {
-	mock.Mock
-}
+type WorkingBackupRestore struct{}
 
 // Export returns zip bytes as if the request worked successfully.
 func (g *WorkingBackupRestore) Export() ([]byte, string, error) {
@@ -25,9 +22,7 @@ func (g *WorkingBackupRestore) Import(discoveryPackage.OnConflict, string) (gjso
 }
 
 // FailingBackupRestore mocks a failing backup restore.
-type FailingBackupRestore struct {
-	mock.Mock
-}
+type FailingBackupRestore struct{}
 
 // Export returns an error as if the request failed.
 func (g *FailingBackupRestore) Export() ([]byte, string, error) {

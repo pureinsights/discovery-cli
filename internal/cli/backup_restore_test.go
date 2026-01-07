@@ -17,7 +17,6 @@ import (
 	"github.com/pureinsights/discovery-cli/internal/testutils/mocks"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -69,9 +68,7 @@ var ingestionImport, _ = os.ReadFile("testdata/ingestion-import.json")
 var queryflowImport, _ = os.ReadFile("testdata/queryflow-import.json")
 
 // WorkingCoreBackupRestore mocks a working backup restore.
-type WorkingCoreBackupRestore struct {
-	mock.Mock
-}
+type WorkingCoreBackupRestore struct{}
 
 // Export returns zip bytes as if the request worked successfully.
 func (g *WorkingCoreBackupRestore) Export() ([]byte, string, error) {
@@ -84,9 +81,7 @@ func (g *WorkingCoreBackupRestore) Import(discoveryPackage.OnConflict, string) (
 }
 
 // WorkingIngestionBackupRestore mocks a working backup restore.
-type WorkingIngestionBackupRestore struct {
-	mock.Mock
-}
+type WorkingIngestionBackupRestore struct{}
 
 // Export returns zip bytes as if the request worked successfully.
 func (g *WorkingIngestionBackupRestore) Export() ([]byte, string, error) {
@@ -99,9 +94,7 @@ func (g *WorkingIngestionBackupRestore) Import(discoveryPackage.OnConflict, stri
 }
 
 // WorkingQueryFlowBackupRestore mocks a working backup restore.
-type WorkingQueryFlowBackupRestore struct {
-	mock.Mock
-}
+type WorkingQueryFlowBackupRestore struct{}
 
 // Export returns zip bytes as if the request worked successfully.
 func (g *WorkingQueryFlowBackupRestore) Export() ([]byte, string, error) {

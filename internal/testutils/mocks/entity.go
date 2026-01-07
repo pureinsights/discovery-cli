@@ -6,16 +6,13 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/mock"
 	"github.com/tidwall/gjson"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
 // WorkingGetter mocks the discovery.Getter struct to always answer a working result.
-type WorkingGetter struct {
-	mock.Mock
-}
+type WorkingGetter struct{}
 
 // Get returns a working processor as if the request worked successfully.
 func (g *WorkingGetter) Get(uuid.UUID) (gjson.Result, error) {
@@ -64,9 +61,7 @@ func (g *WorkingGetter) GetAll() ([]gjson.Result, error) {
 }
 
 // FailingGetter mocks the discovery.Getter struct to always return an HTTP error.
-type FailingGetter struct {
-	mock.Mock
-}
+type FailingGetter struct{}
 
 // Get returns a 404 Not Found.
 func (g *FailingGetter) Get(uuid.UUID) (gjson.Result, error) {
@@ -90,9 +85,7 @@ func (g *FailingGetter) GetAll() ([]gjson.Result, error) {
 
 // WorkingSearcher mocks the discovery.Searcher struct.
 // This struct is used to test when the search functions work.
-type WorkingSearcher struct {
-	mock.Mock
-}
+type WorkingSearcher struct{}
 
 // Search returns an array of results as it if correctly found matches.
 func (s *WorkingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
@@ -215,9 +208,7 @@ func (s *WorkingSearcher) GetAll() ([]gjson.Result, error) {
 }
 
 // FailingSearcher mocks the discovery.Searcher struct when its functions return errors.
-type FailingSearcher struct {
-	mock.Mock
-}
+type FailingSearcher struct{}
 
 // Search implements the searcher interface.
 func (s *FailingSearcher) Search(gjson.Result) ([]gjson.Result, error) {
@@ -263,9 +254,7 @@ func (s *FailingSearcher) GetAll() ([]gjson.Result, error) {
 }
 
 // FailingSearcherWorkingGetter mocks the discovery.searcher struct when the search by name fails, but the get does succeed.
-type FailingSearcherWorkingGetter struct {
-	mock.Mock
-}
+type FailingSearcherWorkingGetter struct{}
 
 // Search implements the searcher interface.
 func (s *FailingSearcherWorkingGetter) Search(gjson.Result) ([]gjson.Result, error) {
@@ -318,9 +307,7 @@ func (s *FailingSearcherWorkingGetter) GetAll() ([]gjson.Result, error) {
 }
 
 // FailingSearcherFailingGetter mocks the discovery.searcher struct when both the searchByName and Get function fails.
-type FailingSearcherFailingGetter struct {
-	mock.Mock
-}
+type FailingSearcherFailingGetter struct{}
 
 // Search returns an error.
 func (s *FailingSearcherFailingGetter) Search(gjson.Result) ([]gjson.Result, error) {
@@ -362,9 +349,7 @@ func (s *FailingSearcherFailingGetter) GetAll() ([]gjson.Result, error) {
 }
 
 // SearcherReturnsOtherError is a struct that mocks discovery.searcher when the search functions do not return a discovery.Error.
-type SearcherReturnsOtherError struct {
-	mock.Mock
-}
+type SearcherReturnsOtherError struct{}
 
 // Search implements the searcher interface.
 func (s *SearcherReturnsOtherError) Search(gjson.Result) ([]gjson.Result, error) {
@@ -393,9 +378,7 @@ func (s *SearcherReturnsOtherError) GetAll() ([]gjson.Result, error) {
 }
 
 // SearcherIDNotUUID simulates when the searcher returns a result with an ID that is not a UUID.
-type SearcherIDNotUUID struct {
-	mock.Mock
-}
+type SearcherIDNotUUID struct{}
 
 // Search implements the searcher interface.
 func (s *SearcherIDNotUUID) Search(gjson.Result) ([]gjson.Result, error) {
@@ -439,9 +422,7 @@ func (s *SearcherIDNotUUID) GetAll() ([]gjson.Result, error) {
 }
 
 // WorkingCreator mocks when creating and updating entities works.
-type WorkingCreator struct {
-	mock.Mock
-}
+type WorkingCreator struct{}
 
 // Create returns a JSON as if it worked successfully.
 func (g *WorkingCreator) Create(gjson.Result) (gjson.Result, error) {
@@ -472,9 +453,7 @@ func (g *WorkingCreator) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
 }
 
 // FailingCreator mocks when creating and updating entities fails.
-type FailingCreator struct {
-	mock.Mock
-}
+type FailingCreator struct{}
 
 // Create returns a JSON as if it worked successfully.
 func (g *FailingCreator) Create(gjson.Result) (gjson.Result, error) {
@@ -501,9 +480,7 @@ func (g *FailingCreator) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
 }
 
 // FailingCreator mocks when creating and updating entities fails.
-type FailingCreatorCreateWorksUpdateFails struct {
-	mock.Mock
-}
+type FailingCreatorCreateWorksUpdateFails struct{}
 
 // Create returns a JSON as if it worked successfully.
 func (g *FailingCreatorCreateWorksUpdateFails) Create(gjson.Result) (gjson.Result, error) {
@@ -525,9 +502,7 @@ func (g *FailingCreatorCreateWorksUpdateFails) Update(uuid.UUID, gjson.Result) (
 }
 
 // WorkingDeleter mocks when the deleter interface works correctly.
-type WorkingDeleter struct {
-	mock.Mock
-}
+type WorkingDeleter struct{}
 
 // Get returns a working processor as if the request worked successfully.
 func (g *WorkingDeleter) Delete(uuid.UUID) (gjson.Result, error) {
@@ -537,9 +512,7 @@ func (g *WorkingDeleter) Delete(uuid.UUID) (gjson.Result, error) {
 }
 
 // FailingDeleter mocks the deleter interface when the Delete() method fails.
-type FailingDeleter struct {
-	mock.Mock
-}
+type FailingDeleter struct{}
 
 // Get returns a working processor as if the request worked successfully.
 func (g *FailingDeleter) Delete(uuid.UUID) (gjson.Result, error) {
@@ -557,9 +530,7 @@ func (g *FailingDeleter) Delete(uuid.UUID) (gjson.Result, error) {
 }
 
 // WorkingSearchDeleter correctly finds the entity by its name and deletes it with its ID.
-type WorkingSearchDeleter struct {
-	mock.Mock
-}
+type WorkingSearchDeleter struct{}
 
 // Get returns a working processor as if the request worked successfully.
 func (g *WorkingSearchDeleter) Delete(uuid.UUID) (gjson.Result, error) {
@@ -605,9 +576,7 @@ func (g *WorkingSearchDeleter) GetAll() ([]gjson.Result, error) {
 }
 
 // FailingSearchDeleterSearchFails fails in the SearchByName() function.
-type FailingSearchDeleterSearchFails struct {
-	mock.Mock
-}
+type FailingSearchDeleterSearchFails struct{}
 
 // SearchByName returns a not found error, so the entity does not exist.
 func (g *FailingSearchDeleterSearchFails) SearchByName(name string) (gjson.Result, error) {
@@ -655,9 +624,7 @@ func (g *FailingSearchDeleterSearchFails) Delete(uuid.UUID) (gjson.Result, error
 }
 
 // FailingSearchDeleterSearchFails fails in the DeleteEntity() function.
-type FailingSearchDeleterDeleteFails struct {
-	mock.Mock
-}
+type FailingSearchDeleterDeleteFails struct{}
 
 // SearchByName returns a valid JSON.
 func (g *FailingSearchDeleterDeleteFails) SearchByName(string) (gjson.Result, error) {
@@ -711,9 +678,7 @@ func (g *FailingSearchDeleterDeleteFails) Delete(uuid.UUID) (gjson.Result, error
 }
 
 // FailingSearchDeleterParsingUUIDFails fails when trying to parse the id in the received search result.
-type FailingSearchDeleterParsingUUIDFails struct {
-	mock.Mock
-}
+type FailingSearchDeleterParsingUUIDFails struct{}
 
 // SearchByName returns a valid JSON.
 func (g *FailingSearchDeleterParsingUUIDFails) SearchByName(string) (gjson.Result, error) {

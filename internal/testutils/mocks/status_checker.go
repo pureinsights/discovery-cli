@@ -3,14 +3,11 @@ package mocks
 import (
 	"errors"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/tidwall/gjson"
 )
 
 // WorkingStatusChecker mocks the results of a StatusChecker that does a request to an online product.
-type WorkingStatusChecker struct {
-	mock.Mock
-}
+type WorkingStatusChecker struct{}
 
 // StatusCheck returns the response of an online Discovery product.
 func (g *WorkingStatusChecker) StatusCheck() (gjson.Result, error) {
@@ -20,9 +17,7 @@ func (g *WorkingStatusChecker) StatusCheck() (gjson.Result, error) {
 }
 
 // WorkingStatusChecker mocks the results of a StatusChecker that does a request to an offline product.
-type FailingStatusChecker struct {
-	mock.Mock
-}
+type FailingStatusChecker struct{}
 
 // StatusCheck returns the error of an offline Discovery product.
 func (g *FailingStatusChecker) StatusCheck() (gjson.Result, error) {
