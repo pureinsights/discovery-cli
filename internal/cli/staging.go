@@ -148,7 +148,7 @@ func zipRecords(file, dir string) error {
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
 
-	return filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -192,6 +192,12 @@ func zipRecords(file, dir string) error {
 
 		return nil
 	})
+
+	if err != nil {
+		return NormalizeWriteFileError(dir, err)
+	}
+
+	return nil
 }
 
 // DumpBucket scrolls the contents of a bucket based on the given filters, projections and maximum page size.

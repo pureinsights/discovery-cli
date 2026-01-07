@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"archive/zip"
 	"bytes"
 	"errors"
 	"fmt"
@@ -1075,6 +1076,7 @@ func (s *FailingStagingContentController) Scroll(filters, projections gjson.Resu
 	}
 }
 
+// Test_writeRecordsToFile_AllFilesWritten tests the writeRecordsToFile() function to verify that all the files are written correctly.
 func Test_writeRecordsToFile_AllFilesWritten(t *testing.T) {
 	records := gjson.Parse(`[
     {
@@ -1119,6 +1121,7 @@ func Test_writeRecordsToFile_AllFilesWritten(t *testing.T) {
 	assert.Equal(t, "694eb7be78aedc7a163da900.json", entries[1].Name())
 }
 
+// Test_writeRecordsToFile_WriteFails tests the writeRecordsToFile() function when writing a file fails.
 func Test_writeRecordsToFile_WriteFails(t *testing.T) {
 	tempDir := t.TempDir()
 	t.Setenv("TMPDIR", tempDir)
@@ -1147,6 +1150,7 @@ func Test_writeRecordsToFile_WriteFails(t *testing.T) {
 	assert.EqualError(t, err, "The filename, directory name, or volume label syntax is incorrect.")
 }
 
+// Test_writeRecordsToFile_MkDirTempFails tests the writeRecordsToFile() function when it fails because the temporary directory could not be created.
 func Test_writeRecordsToFile_MkDirTempFails(t *testing.T) {
 	t.Setenv("TMPDIR", "/does/not/exist")
 	t.Setenv("TEMP", "/does/not/exist")
@@ -1188,6 +1192,186 @@ func Test_writeRecordsToFile_MkDirTempFails(t *testing.T) {
 	assert.EqualError(t, err, fmt.Sprintf("the given path does not exist: %s", filepath.FromSlash("c:/does/not/exist")))
 }
 
+// Test_zipRecords_ZipIsCreated tests the zipRecords() function to verify that the zip contains all of the record files.
+func Test_zipRecords_ZipIsCreated(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Setenv("TMPDIR", tempDir)
+	t.Setenv("TEMP", tempDir)
+	t.Setenv("TMP", tempDir)
+
+	records := gjson.Parse(`[
+    {
+            "id": "1",
+            "creationTimestamp": "2025-12-26T16:28:38Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+            "action": "STORE",
+            "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+            "content": {
+                    "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                    "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                    "author": "Graham Gillen",
+                    "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+            },
+            "transaction": "694eb7b678aedc7a163da8ff"
+    },
+    {
+            "id": "2",
+            "creationTimestamp": "2025-12-26T16:28:46Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
+            "action": "STORE",
+            "checksum": "b76292db9fd1c7aef145512dce131f4d",
+            "content": {
+                    "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
+                    "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+                    "author": "Matt Willsmore",
+                    "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
+            },
+            "transaction": "694eb7be78aedc7a163da900"
+    }
+]`).Array()
+
+	dir, err := writeRecordsToFile(records, "my-bucket")
+	require.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	savePath := filepath.Join(t.TempDir(), "my-bucket.zip")
+	err = zipRecords(savePath, dir)
+
+	zipFile, err := os.ReadFile(savePath)
+	require.NoError(t, err)
+	zipReader, err := zip.NewReader(bytes.NewReader(zipFile), int64(len(zipFile)))
+	require.NoError(t, err)
+	files := make(map[string]*zip.File, len(zipReader.File))
+	for _, f := range zipReader.File {
+		files[f.Name] = f
+	}
+
+	recordFile1, ok := files["694eb7b678aedc7a163da8ff.json"]
+	require.True(t, ok)
+	fileContent1, err := recordFile1.Open()
+	require.NoError(t, err)
+	gotBytes, err := io.ReadAll(fileContent1)
+	require.NoError(t, err)
+	fileContent1.Close()
+	assert.Equal(t, `{
+            "id": "1",
+            "creationTimestamp": "2025-12-26T16:28:38Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+            "action": "STORE",
+            "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+            "content": {
+                    "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                    "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                    "author": "Graham Gillen",
+                    "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+            },
+            "transaction": "694eb7b678aedc7a163da8ff"
+    }`, string(gotBytes))
+
+	recordFile2, ok := files["694eb7be78aedc7a163da900.json"]
+	require.True(t, ok)
+	fileContent2, err := recordFile2.Open()
+	require.NoError(t, err)
+	gotBytes2, err := io.ReadAll(fileContent2)
+	require.NoError(t, err)
+	fileContent2.Close()
+	assert.Equal(t, `{
+            "id": "2",
+            "creationTimestamp": "2025-12-26T16:28:46Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
+            "action": "STORE",
+            "checksum": "b76292db9fd1c7aef145512dce131f4d",
+            "content": {
+                    "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
+                    "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+                    "author": "Matt Willsmore",
+                    "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
+            },
+            "transaction": "694eb7be78aedc7a163da900"
+    }`, string(gotBytes2))
+}
+
+// Test_zipRecords_TempDirDoesNotExist tests the zipRecords() function when reading the temporary directory fails.
+func Test_zipRecords_TempDirDoesNotExist(t *testing.T) {
+	savePath := filepath.Join(t.TempDir(), "my-bucket.zip")
+	err := zipRecords(savePath, "doesnotexist")
+
+	require.Error(t, err)
+	assert.EqualError(t, err, "the given path does not exist: doesnotexist")
+}
+
+// Test_zipRecords_FileDirDoesNotExist tests the zipRecords() function when creating the given file fails.
+func Test_zipRecords_FileDirDoesNotExist(t *testing.T) {
+	savePath := filepath.Join("doesnotexist", "my-bucket.zip")
+	err := zipRecords(savePath, "directory")
+
+	require.Error(t, err)
+	assert.EqualError(t, err, "the given path does not exist: "+savePath)
+}
+
+// Test_zipRecords_DirContainsDirectory tests the zipRecords() function when the given temporary directory contains another directory.
+func Test_zipRecords_DirContainsDirectory(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Setenv("TMPDIR", tempDir)
+	t.Setenv("TEMP", tempDir)
+	t.Setenv("TMP", tempDir)
+
+	records := gjson.Parse(`[
+    {
+            "id": "1",
+            "creationTimestamp": "2025-12-26T16:28:38Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
+            "action": "STORE",
+            "checksum": "58b3d1b06729f1491373b97fd8287ae1",
+            "content": {
+                    "_id": "5625c64483bef0d48e9ad91aca9b2f94",
+                    "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
+                    "author": "Graham Gillen",
+                    "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
+            },
+            "transaction": "694eb7b678aedc7a163da8ff"
+    },
+    {
+            "id": "2",
+            "creationTimestamp": "2025-12-26T16:28:46Z",
+            "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
+            "action": "STORE",
+            "checksum": "b76292db9fd1c7aef145512dce131f4d",
+            "content": {
+                    "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
+                    "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
+                    "author": "Matt Willsmore",
+                    "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
+            },
+            "transaction": "694eb7be78aedc7a163da900"
+    }
+]`).Array()
+
+	dir, err := writeRecordsToFile(records, "my-bucket")
+	require.NoError(t, err)
+	defer os.RemoveAll(dir)
+	os.Mkdir(filepath.Join(dir, "directory"), 0o755)
+
+	entries, err := os.ReadDir(dir)
+	require.NoError(t, err)
+	require.Equal(t, 3, len(entries))
+
+	savePath := filepath.Join(t.TempDir(), "my-bucket.zip")
+	err = zipRecords(savePath, dir)
+
+	zipFile, err := os.ReadFile(savePath)
+	require.NoError(t, err)
+	zipReader, err := zip.NewReader(bytes.NewReader(zipFile), int64(len(zipFile)))
+	require.NoError(t, err)
+	files := make(map[string]*zip.File, len(zipReader.File))
+	require.Equal(t, 2, len(zipReader.File))
+	for _, f := range zipReader.File {
+		files[f.Name] = f
+	}
+
+	assert.NotContains(t, files, "directory")
+}
+
 // Test_discovery_DumpBucket tests the discovery.DumpBucket() function.
 func Test_discovery_DumpBucket(t *testing.T) {
 	filters := `{
@@ -1203,10 +1387,12 @@ func Test_discovery_DumpBucket(t *testing.T) {
 		"header"
 	]
 }`
+
 	tests := []struct {
 		name           string
 		client         StagingContentController
 		printer        Printer
+		file           string
 		expectedOutput string
 		outWriter      io.Writer
 		err            error
@@ -1217,12 +1403,14 @@ func Test_discovery_DumpBucket(t *testing.T) {
 			client:         new(WorkingStagingContentController),
 			printer:        nil,
 			expectedOutput: "{\"action\":\"STORE\",\"checksum\":\"58b3d1b06729f1491373b97fd8287ae1\",\"content\":{\"_id\":\"5625c64483bef0d48e9ad91aca9b2f94\",\"author\":\"Graham Gillen\",\"header\":\"Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP).\",\"link\":\"https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/\"},\"creationTimestamp\":\"2025-12-26T16:28:38Z\",\"id\":\"1\",\"lastUpdatedTimestamp\":\"2025-12-26T16:28:38Z\",\"transaction\":\"694eb7b678aedc7a163da8ff\"}\n{\"action\":\"STORE\",\"checksum\":\"b76292db9fd1c7aef145512dce131f4d\",\"content\":{\"_id\":\"768b0a3bcee501dc624484ba8a0d7f6d\",\"author\":\"Matt Willsmore\",\"header\":\"5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications.\",\"link\":\"https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/\"},\"creationTimestamp\":\"2025-12-26T16:28:46Z\",\"id\":\"2\",\"lastUpdatedTimestamp\":\"2025-12-26T16:28:46Z\",\"transaction\":\"694eb7be78aedc7a163da900\"}\n",
+			file:           filepath.Join(t.TempDir(), "my-bucket.zip"),
 			err:            nil,
 		},
 		{
 			name:           "DumpBucket correctly prints the array with JSON pretty printer",
 			client:         new(WorkingStagingContentController),
 			printer:        JsonArrayPrinter(true),
+			file:           filepath.Join(t.TempDir(), "my-bucket.zip"),
 			expectedOutput: "[\n{\n  \"action\": \"STORE\",\n  \"checksum\": \"58b3d1b06729f1491373b97fd8287ae1\",\n  \"content\": {\n    \"_id\": \"5625c64483bef0d48e9ad91aca9b2f94\",\n    \"author\": \"Graham Gillen\",\n    \"header\": \"Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP).\",\n    \"link\": \"https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/\"\n  },\n  \"creationTimestamp\": \"2025-12-26T16:28:38Z\",\n  \"id\": \"1\",\n  \"lastUpdatedTimestamp\": \"2025-12-26T16:28:38Z\",\n  \"transaction\": \"694eb7b678aedc7a163da8ff\"\n},\n{\n  \"action\": \"STORE\",\n  \"checksum\": \"b76292db9fd1c7aef145512dce131f4d\",\n  \"content\": {\n    \"_id\": \"768b0a3bcee501dc624484ba8a0d7f6d\",\n    \"author\": \"Matt Willsmore\",\n    \"header\": \"5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications.\",\n    \"link\": \"https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/\"\n  },\n  \"creationTimestamp\": \"2025-12-26T16:28:46Z\",\n  \"id\": \"2\",\n  \"lastUpdatedTimestamp\": \"2025-12-26T16:28:46Z\",\n  \"transaction\": \"694eb7be78aedc7a163da900\"\n}\n]\n",
 			err:            nil,
 		},
@@ -1230,6 +1418,7 @@ func Test_discovery_DumpBucket(t *testing.T) {
 			name:           "DumpBucket correctly prints nothing with no content returned.",
 			client:         new(WorkingStagingContentControllerNoContent),
 			printer:        nil,
+			file:           filepath.Join(t.TempDir(), "my-bucket.zip"),
 			expectedOutput: "",
 			err:            nil,
 		},
@@ -1253,11 +1442,20 @@ func Test_discovery_DumpBucket(t *testing.T) {
 			}, "Could not scroll the bucket with name \"my-bucket\"."),
 		},
 		{
+			name:           "zipRecords fails",
+			client:         new(WorkingStagingContentController),
+			printer:        nil,
+			expectedOutput: "",
+			file:           filepath.Join("doesnotexist", "my-bucket.zip"),
+			err:            NewErrorWithCause(ErrorExitCode, errors.New("the given path does not exist: doesnotexist"), "Could not write dump to file."),
+		},
+		{
 			name:      "Printing fails",
 			client:    new(WorkingStagingContentController),
 			printer:   nil,
+			file:      filepath.Join(t.TempDir(), "my-bucket.zip"),
 			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
-			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
 		},
 	}
 
@@ -1279,7 +1477,7 @@ func Test_discovery_DumpBucket(t *testing.T) {
 
 			d := NewDiscovery(&ios, viper.New(), "")
 			max := 3
-			err := d.DumpBucket(tc.client, "my-bucket", "", gjson.Parse(filters), gjson.Parse(projections), &max, tc.printer)
+			err := d.DumpBucket(tc.client, "my-bucket", tc.file, gjson.Parse(filters), gjson.Parse(projections), &max, tc.printer)
 
 			if tc.err != nil {
 				require.Error(t, err)
@@ -1292,4 +1490,26 @@ func Test_discovery_DumpBucket(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Test_discovery_DumpBucket_writeRecordsToFileFails tests the discovery.DumpBucket() function when it fails because the temporary directory could not be created.
+func Test_discovery_DumpBucket_writeRecordsToFileFails(t *testing.T) {
+	t.Setenv("TMPDIR", "/does/not/exist")
+	t.Setenv("TEMP", "/does/not/exist")
+	t.Setenv("TMP", "/does/not/exist")
+
+	buf := &bytes.Buffer{}
+	var out io.Writer
+	out = buf
+
+	ios := iostreams.IOStreams{
+		In:  os.Stdin,
+		Out: out,
+		Err: os.Stderr,
+	}
+
+	d := NewDiscovery(&ios, viper.New(), "")
+	max := 3
+	err := d.DumpBucket(new(WorkingStagingContentController), "my-bucket", "", gjson.Result{}, gjson.Result{}, &max, nil)
+	assert.EqualError(t, err, NewErrorWithCause(ErrorExitCode, errors.New("the given path does not exist: "+filepath.FromSlash("c:/does/not/exist")), "Could not write records to temporary folder.").Error())
 }
