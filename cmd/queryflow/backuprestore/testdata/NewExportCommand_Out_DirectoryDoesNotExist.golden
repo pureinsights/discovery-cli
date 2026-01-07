@@ -1,12 +1,12 @@
 Usage:
-  export [subcommands] [flags]
+  export [flags]
 
 Examples:
 	# Export the entities to a specific file.
-	discovery queryflow export -p cn --file "entities/queryflow.zip"
+	discovery queryflow export -p cn --output-file "entities/queryflow.zip"
 
 Flags:
-  -f, --file string      the file that will contain the exported entities
-  -h, --help             help for export
-  -p, --profile string   configuration profile to use (default "default")
+  -h, --help                 help for export
+      --output-file string   the file that will contain the exported entities
+  -p, --profile string       configuration profile to use (default "default")
 
