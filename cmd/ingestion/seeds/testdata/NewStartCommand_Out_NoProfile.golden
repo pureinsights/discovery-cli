@@ -1,5 +1,5 @@
 Usage:
-  start [flags]
+  start <seed> [flags]
 
 Examples:
 # Start a seed execution with the properties and scan-type flags
