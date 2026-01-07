@@ -1141,7 +1141,7 @@ func Test_writeRecordsToFile_WriteFails(t *testing.T) {
                     "author": "Graham Gillen",
                     "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
             },
-            "transaction": ` + `" file<name>with:invalid|chars?"` + `
+            "transaction": ` + `"doesnotexist/file<name>with:invalid|chars?"` + `
     }
 ]`).Array()
 
