@@ -1,5 +1,5 @@
 Usage:
-  get [flags]
+  get <processor> [flags]
 
 Examples:
 	# Get processor by name

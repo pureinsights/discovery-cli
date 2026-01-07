@@ -12,7 +12,7 @@ import (
 // NewDeleteCommand creates the processor delete command.
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete <processor>",
 		Short: "The command that deletes processors from Discovery Ingestion.",
 		Long:  fmt.Sprintf(commands.LongDeleteSearch, "processor", "Ingestion"),
 		RunE: func(cmd *cobra.Command, args []string) error {

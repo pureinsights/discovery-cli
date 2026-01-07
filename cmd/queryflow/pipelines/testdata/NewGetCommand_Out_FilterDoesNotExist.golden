@@ -1,5 +1,5 @@
 Usage:
-  get [pipeline] [flags]
+  get [<pipeline>] [flags]
 
 Flags:
   -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
