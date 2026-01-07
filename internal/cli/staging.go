@@ -137,6 +137,44 @@ func writeRecordsToFile(records []gjson.Result, bucket string) (string, error) {
 	return dir, nil
 }
 
+// writeToZip is a function that separates writing the record files to the zip in order to reduce zipRecords' cognitive complexity.
+func writeToZip(dir, path string, d fs.DirEntry, zipWriter *zip.Writer) error {
+	info, err := d.Info()
+	if err != nil {
+		return err
+	}
+
+	header, err := zip.FileInfoHeader(info)
+	if err != nil {
+		return err
+	}
+	header.Method = zip.Deflate
+
+	relPath, err := filepath.Rel(dir, path)
+	if err != nil {
+		return err
+	}
+	header.Name = filepath.ToSlash(relPath)
+
+	fw, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+
+	recordFile, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer recordFile.Close()
+
+	_, err = io.Copy(fw, recordFile)
+	if err != nil {
+		return NormalizeWriteFileError(path, err)
+	}
+
+	return nil
+}
+
 // zipRecords zips the temporary directory into a file containing all of the records.
 func zipRecords(file, dir string) error {
 	zipFile, err := os.Create(file)
@@ -148,46 +186,18 @@ func zipRecords(file, dir string) error {
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
 
-	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
 		}
 
 		if d.IsDir() {
 			return nil
 		}
 
-		info, err := d.Info()
-		if err != nil {
-			return err
-		}
-
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-		header.Method = zip.Deflate
-
-		relPath, err := filepath.Rel(dir, path)
-		if err != nil {
-			return err
-		}
-		header.Name = filepath.ToSlash(relPath)
-
-		fw, err := zipWriter.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		recordFile, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer recordFile.Close()
-
-		_, err = io.Copy(fw, recordFile)
-		if err != nil {
-			return err
+		walkErr = writeToZip(dir, path, d, zipWriter)
+		if walkErr != nil {
+			return walkErr
 		}
 
 		return nil
