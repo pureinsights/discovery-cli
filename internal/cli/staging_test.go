@@ -1141,13 +1141,12 @@ func Test_writeRecordsToFile_WriteFails(t *testing.T) {
                     "author": "Graham Gillen",
                     "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
             },
-            "transaction": ` + `"doesnotexist/file<name>with:invalid|chars?"` + `
+            "transaction": "doesnotexist/694eb7be78aedc7a163da900"
     }
 ]`).Array()
 
 	dir, err := writeRecordsToFile(records, "my-bucket")
-	assert.Equal(t, "", dir)
-	assert.EqualError(t, err, "The filename, directory name, or volume label syntax is incorrect.")
+	assert.EqualError(t, err, errors.New("the given path does not exist: "+filepath.Join(dir, "doesnotexist", "694eb7be78aedc7a163da900.json")).Error())
 }
 
 // Test_writeRecordsToFile_MkDirTempFails tests the writeRecordsToFile() function when it fails because the temporary directory could not be created.

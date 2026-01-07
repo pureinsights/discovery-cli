@@ -131,7 +131,7 @@ func writeRecordsToFile(records []gjson.Result, bucket string) (string, error) {
 		err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%s.json", transaction)), []byte(record.Raw), 0o644)
 		if err != nil {
 			defer os.RemoveAll(dir)
-			return "", NormalizeWriteFileError(filepath.Join(dir, fmt.Sprintf("%s.json", transaction)), err)
+			return dir, NormalizeWriteFileError(filepath.Join(dir, fmt.Sprintf("%s.json", transaction)), err)
 		}
 	}
 	return dir, nil
