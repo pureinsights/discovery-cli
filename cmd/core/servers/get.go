@@ -13,7 +13,7 @@ import (
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var filters []string
 	get := &cobra.Command{
-		Use:   "get",
+		Use:   "get <server>",
 		Short: "The command that obtains servers from Discovery Core.",
 		Long:  fmt.Sprintf(commands.LongGetSearch, "server", "Core"),
 		RunE: func(cmd *cobra.Command, args []string) error {

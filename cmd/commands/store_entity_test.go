@@ -8,14 +8,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/uuid"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/pureinsights/discovery-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/testutils/mocks"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 )
@@ -31,8 +30,8 @@ func TestStoreCommandConfig(t *testing.T) {
 	}
 
 	data := "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]"
-	file := "config.json"
-	got := StoreCommandConfig(base, true, data, file)
+	files := []string{"config.json", "config2.json"}
+	got := StoreCommandConfig(base, true, data, files)
 
 	require.Equal(t, base, got.commandConfig)
 
@@ -44,69 +43,7 @@ func TestStoreCommandConfig(t *testing.T) {
 
 	assert.True(t, got.abortOnError)
 	assert.Equal(t, data, got.data)
-	assert.Equal(t, file, got.file)
-}
-
-// WorkingCreator mocks when creating and updating entities works.
-type WorkingCreator struct {
-	mock.Mock
-}
-
-// Create returns a JSON as if it worked successfully.
-func (g *WorkingCreator) Create(config gjson.Result) (gjson.Result, error) {
-	return gjson.Parse(`{
-		"type": "mongo",
-		"name": "MongoDB credential",
-		"labels": [],
-		"active": true,
-		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-		"creationTimestamp": "2025-08-14T18:02:11Z",
-		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-		"secret": "mongo-secret"
-	}`), nil
-}
-
-// Update returns a JSON as if it worked successfully.
-func (g *WorkingCreator) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
-	return gjson.Parse(`{
-		"type": "mongo",
-		"name": "MongoDB credential",
-		"labels": [],
-		"active": true,
-		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-		"creationTimestamp": "2025-08-14T18:02:11Z",
-		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-		"secret": "mongo-secret"
-	}`), nil
-}
-
-// FailingCreator mocks when creating and updating entities fails.
-type FailingCreator struct {
-	mock.Mock
-}
-
-// Create returns a JSON as if it worked successfully.
-func (g *FailingCreator) Create(config gjson.Result) (gjson.Result, error) {
-	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
-  "status": 400,
-  "code": 3002,
-  "messages": [
-    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
-  ],
-  "timestamp": "2025-10-29T14:46:48.055840300Z"
-}`)}
-}
-
-// Update returns a JSON as if it worked successfully.
-func (g *FailingCreator) Update(id uuid.UUID, config gjson.Result) (gjson.Result, error) {
-	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
-  "status": 404,
-  "code": 1003,
-  "messages": [
-    "Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
-  ],
-  "timestamp": "2025-10-29T14:47:36.290329Z"
-}`)}
+	assert.Equal(t, files, got.files)
 }
 
 // TestStoreCommand tests the StoreCommand() function.
@@ -119,7 +56,7 @@ func TestStoreCommand(t *testing.T) {
 		componentName  string
 		abortOnError   bool
 		data           string
-		file           string
+		files          []string
 		expectedOutput string
 		outWriter      io.Writer
 		err            error
@@ -130,30 +67,30 @@ func TestStoreCommand(t *testing.T) {
 			url:            "http://localhost:12010/v2",
 			apiKey:         "",
 			componentName:  "Core",
-			client:         new(WorkingCreator),
+			client:         new(mocks.WorkingCreator),
 			abortOnError:   false,
 			data:           "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
-			file:           "",
+			files:          []string{},
 			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
 			err:            nil,
 		},
 		{
-			name:           "UpsertEntities correctly reads the file and prints the array",
+			name:           "UpsertEntities correctly reads multiple files and prints the array",
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
 			componentName:  "Core",
-			client:         new(WorkingCreator),
+			client:         new(mocks.WorkingCreator),
 			abortOnError:   false,
 			data:           "",
-			file:           "testdata/StoreCommand_JSONFile.json",
-			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			files:          []string{"testdata/StoreCommand_JSONFile.json", "testdata/StoreCommand_JSONFile2.json"},
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
 			err:            nil,
 		},
 
 		// Error case
 		{
 			name:          "CheckCredentials fails",
-			client:        new(WorkingCreator),
+			client:        new(mocks.WorkingCreator),
 			url:           "",
 			apiKey:        "core123",
 			componentName: "Core",
@@ -162,13 +99,13 @@ func TestStoreCommand(t *testing.T) {
 		},
 		{
 			name:           "UpsertEntities returns 404 Not Found",
-			client:         new(FailingCreator),
+			client:         new(mocks.FailingCreator),
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
 			componentName:  "Core",
 			abortOnError:   true,
 			data:           "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
-			file:           "",
+			files:          []string{},
 			expectedOutput: "",
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
   "status": 404,
@@ -180,26 +117,57 @@ func TestStoreCommand(t *testing.T) {
 }`)}, "Could not store entities"),
 		},
 		{
+			name:           "UpsertEntities returns 404 Not Found when using file arguments",
+			client:         new(mocks.FailingCreator),
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			abortOnError:   true,
+			data:           "",
+			files:          []string{"testdata/StoreCommand_JSONFile.json"},
+			expectedOutput: "",
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 400,
+  "code": 3002,
+  "messages": [
+    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
+  ],
+  "timestamp": "2025-10-29T14:46:48.055840300Z"
+}`)}, "Could not store entities"),
+		},
+		{
 			name:           "StoreCommand reads an empty file",
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
 			componentName:  "Core",
-			client:         new(WorkingCreator),
+			client:         new(mocks.WorkingCreator),
 			abortOnError:   false,
 			data:           "",
-			file:           "testdata/StoreCommand_EmptyFile.json",
+			files:          []string{"testdata/StoreCommand_EmptyFile.json"},
 			expectedOutput: "",
 			err:            cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
+		},
+		{
+			name:           "StoreCommand receives both files and data",
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			client:         new(mocks.WorkingCreator),
+			abortOnError:   false,
+			data:           "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
+			files:          []string{"testdata/StoreCommand_JSONFile.json"},
+			expectedOutput: "",
+			err:            cli.NewError(cli.ErrorExitCode, "There cannot be both a file argument and the data flag"),
 		},
 		{
 			name:           "StoreCommand receives empty data",
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
 			componentName:  "Core",
-			client:         new(WorkingCreator),
+			client:         new(mocks.WorkingCreator),
 			abortOnError:   false,
 			data:           "",
-			file:           "",
+			files:          []string{},
 			expectedOutput: "",
 			err:            cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
 		},
@@ -208,22 +176,22 @@ func TestStoreCommand(t *testing.T) {
 			url:            "http://localhost:12010/v2",
 			apiKey:         "core123",
 			componentName:  "Core",
-			client:         new(WorkingCreator),
+			client:         new(mocks.WorkingCreator),
 			abortOnError:   false,
 			data:           "",
-			file:           "doesnotexist",
+			files:          []string{"doesnotexist"},
 			expectedOutput: "",
 			err:            cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("file does not exist: doesnotexist"), "Could not read file \"doesnotexist\""),
 		},
 		{
 			name:          "Printing Array fails",
-			client:        new(WorkingCreator),
+			client:        new(mocks.WorkingCreator),
 			url:           "http://localhost:12010/v2",
 			apiKey:        "core123",
 			componentName: "Core",
 			abortOnError:  false,
 			data:          "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
-			file:          "",
+			files:         []string{},
 			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
 			err:           cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
 		},
@@ -255,7 +223,7 @@ func TestStoreCommand(t *testing.T) {
 			}
 
 			d := cli.NewDiscovery(&ios, vpr, "")
-			err := StoreCommand(d, tc.client, StoreCommandConfig(GetCommandConfig("default", "pretty-json", tc.componentName, "core_url"), tc.abortOnError, tc.data, tc.file))
+			err := StoreCommand(d, tc.client, StoreCommandConfig(GetCommandConfig("default", "pretty-json", tc.componentName, "core_url"), tc.abortOnError, tc.data, tc.files))
 
 			if tc.err != nil {
 				require.Error(t, err)

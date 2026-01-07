@@ -12,9 +12,8 @@ import (
 // NewImportCommand creates the discovery queryflow import command that imports entities to Discovery QueryFlow.
 func NewImportCommand(d cli.Discovery) *cobra.Command {
 	var onConflict string
-	var file string
 	importCmd := &cobra.Command{
-		Use:   "import",
+		Use:   "import <file>",
 		Short: "Import entities to Discovery QueryFlow",
 		Long:  fmt.Sprintf(commands.LongImport, "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -26,17 +25,14 @@ func NewImportCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			queryflowClient := discoveryPackage.NewQueryFlow(vpr.GetString(profile+".queryflow_url"), vpr.GetString(profile+".queryflow_key"))
-			return commands.ImportCommand(d, queryflowClient.BackupRestore(), file, discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"))
+			return commands.ImportCommand(d, queryflowClient.BackupRestore(), args[0], discoveryPackage.OnConflict(onConflict), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"))
 		},
-		Args: cobra.NoArgs,
+		Args: cobra.ExactArgs(1),
 		Example: `	# Import the entities using profile "cn" and fail conflict resolution strategy.
-	discovery queryflow import -p cn --file "entities/queryflow.zip"`,
+	discovery queryflow import -p cn "entities/queryflow.zip"`,
 	}
 
-	importCmd.Flags().StringVarP(&file, "file", "f", "", "the file that contains the entities that will be restored")
 	importCmd.Flags().StringVar(&onConflict, "on-conflict", string(discoveryPackage.OnConflictFail), "the conflict resolution strategy that will be used")
-
-	importCmd.MarkFlagRequired("file")
 
 	return importCmd
 }
