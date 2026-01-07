@@ -14,6 +14,7 @@ import (
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/pureinsights/discovery-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/testutils/mocks"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -112,21 +113,6 @@ func (g *WorkingQueryFlowBackupRestore) Import(discoveryPackage.OnConflict, stri
 	return gjson.ParseBytes(queryflowImport), nil
 }
 
-// FailingBackupRestore mocks a failing backup restore.
-type FailingBackupRestore struct {
-	mock.Mock
-}
-
-// Export returns an error as if the request failed.
-func (g *FailingBackupRestore) Export() ([]byte, string, error) {
-	return []byte(nil), "discovery.zip", discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
-}
-
-// Import implements the interface.
-func (g *FailingBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
-	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
-}
-
 // TestWriteExport tests the WriteExport() function.
 func TestWriteExport(t *testing.T) {
 	testutils.ChangeDirectoryHelper(t)
@@ -160,7 +146,7 @@ func TestWriteExport(t *testing.T) {
 		},
 		{
 			name:                "WriteExport fails because export fails",
-			client:              new(FailingBackupRestore),
+			client:              new(mocks.FailingBackupRestore),
 			path:                filepath.Join(t.TempDir(), "export.zip"),
 			expectedAcknowledge: gjson.Parse("{\"acknowledged\": false,\"error\":\"status: 401, body: {\\\"error\\\":\\\"unauthorized\\\"}\\n\"}"),
 			err:                 NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not export entities"),
@@ -227,10 +213,11 @@ func TestExportEntitiesFromClient(t *testing.T) {
 			printer:        JsonObjectPrinter(false),
 			err:            nil,
 		},
+
 		// Error case
 		{
 			name:   "Export fails",
-			client: new(FailingBackupRestore),
+			client: new(mocks.FailingBackupRestore),
 			path:   filepath.Join(t.TempDir(), "export.zip"),
 			err:    NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not export entities"),
 		},
@@ -294,7 +281,7 @@ func TestWriteExportsIntoFile(t *testing.T) {
 		},
 		{
 			name:           "Export works for core and queryflow but fails for ingestion",
-			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:           filepath.Join(t.TempDir(), "export.zip"),
 			expectedOutput: "{\"core\":{\"acknowledged\": true},\"ingestion\":{\"acknowledged\": false,\"error\":\"status: 401, body: {\\\"error\\\":\\\"unauthorized\\\"}\\n\"},\"queryflow\":{\"acknowledged\": true}}",
 			err:            nil,
@@ -316,7 +303,7 @@ func TestWriteExportsIntoFile(t *testing.T) {
 		},
 		{
 			name:           "WriteExportsIntoFile receives an invalid product name with a failing backup.",
-			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:           filepath.Join(t.TempDir(), "export.zip"),
 			expectedOutput: "",
 			err:            errors.New("path cannot be empty"),
@@ -384,7 +371,7 @@ func TestExportEntitiesFromClients(t *testing.T) {
 		},
 		{
 			name:           "ExportEntitiesFromClients correctly prints with pretty printer when export works for core and queryflow but fails for ingestion",
-			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:           "",
 			expectedPath:   filepath.Join(".", "discovery.zip"),
 			printer:        nil,
@@ -473,7 +460,7 @@ func TestImportEntitiesFromClient(t *testing.T) {
 		// Error case
 		{
 			name:   "Import fails",
-			client: new(FailingBackupRestore),
+			client: new(mocks.FailingBackupRestore),
 			path:   filepath.Join(t.TempDir(), "core-export.zip"),
 			err:    NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not import entities"),
 		},
@@ -800,7 +787,7 @@ func Test_callImports(t *testing.T) {
 		},
 		{
 			name:           "callImports adds the results when even when one import fails",
-			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:           "testdata/discovery.zip",
 			expectedFields: []string{"core", "ingestion", "queryflow"},
 			err:            nil,
@@ -851,7 +838,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 		// Working cases
 		{
 			name:        "ImportEntitiesFromClients correctly prints with pretty printer when one of the imports fails",
-			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:        "testdata/discovery.zip",
 			printer:     nil,
 			goldenFile:  "FailingIngestionImport",
@@ -869,7 +856,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 		},
 		{
 			name:        "ImportEntitiesFromClients correctly prints with pretty printer when the imports and it only prints the results of the received products",
-			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
 			path:        "testdata/OnlyCoreQueryFlow.zip",
 			printer:     JsonObjectPrinter(true),
 			goldenFile:  "PrettyImport",
