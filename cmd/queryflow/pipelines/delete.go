@@ -14,7 +14,7 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "delete <pipeline>",
 		Short: "The command that deletes pipelines from Discovery QueryFlow.",
-		Long:  fmt.Sprintf(commands.LongDeleteNoNames, "pipeline", "QueryFlow"),
+		Long:  fmt.Sprintf(commands.LongDeleteSearch, "pipeline", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {

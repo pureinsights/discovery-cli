@@ -1,5 +1,5 @@
 Usage:
-  get [flags]
+  get <server> [flags]
 
 Examples:
 	# Get server by name
