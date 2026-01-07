@@ -2530,6 +2530,65 @@ discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA",
 }
 ```
 
+###### Dump
+`dump` is the command used to scroll a bucket's content in the Discovery Staging Repository. The bucket's name is sent as the mandatory argument. The results are saved in a zip file that contains JSON files with the bucket's records. If the path is not sent, the dump will be saved in a zip file in the current directory with the name of the bucket. Each record is stored in its own JSON file that uses the record's transaction as its name. With the `output-file`, the user can send the path in which to save the records. The user can send filters with the `filter` flag, which is a single JSON string that contains all of the filters. With the `projection` flag, the user can send the fields that will be included or excluded from the results. With the `page-size` flag, the user can send the maximum number of elements that will be retrieved with every page.
+
+Usage: `discovery staging bucket dump [flags] <arg>`
+
+Arguments:
+
+`arg`::
+(Required, string) The name of the bucket that will be scrolled.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) The DSL containing the filters that will be applied to the scroll. For example:
+
+```json
+{
+	"equals": {
+		"field": "author",
+		"value": "John Doe",
+		"normalize": true
+	}
+}
+```
+
+`--projection`::
+(Optional, string) The DSL containing the fields that will be included and excluded in the records that will be retrieved from the bucket. See [Discovery's documentation](https://discovery.pureinsights.live/latest/reference/index.html#dsl-projections) for more details. For example:
+
+```json
+{
+    "includes": [
+		"author",
+		"header"
+	]
+}
+```
+
+`--page-size`::
+(Optional, string) The size of the pages that will be used when retrieving the records.
+
+`--output-file`::
+(Optional, string) The path in which to save the bucket's content. If not sent, it will be saved in a zip file with the bucket's name.
+
+Examples:
+
+```bash
+# # Dump a bucket with filters, include projections, and a page size of 5
+discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5'
+{
+  "acknowledged": true
+}
+```
+
 ###### Delete
 `delete` is the command used to delete Discovery Staging's buckets. The user must send the bucket's name as a required argument.
 

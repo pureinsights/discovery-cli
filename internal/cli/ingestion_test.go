@@ -12,6 +12,7 @@ import (
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/pureinsights/discovery-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/internal/testutils/mocks"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -19,56 +20,10 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// SearcherIDNotUUID simulates when the searcher returns a result with an ID that is not a UUID.
-type SearcherIDNotUUID struct {
-	mock.Mock
-}
-
-// Search implements the searcher interface.
-func (s *SearcherIDNotUUID) Search(gjson.Result) ([]gjson.Result, error) {
-	return []gjson.Result(nil), discoveryPackage.Error{
-		Status: http.StatusNotFound,
-		Body:   gjson.Result{},
-	}
-}
-
-// SearchByName returns a result with an ID that is not a UUID so that the conversion can fail.
-func (s *SearcherIDNotUUID) SearchByName(name string) (gjson.Result, error) {
-	return gjson.Parse(`{
-			"type": "mongo",
-			"name": "MongoDB Atlas seed clone",
-			"labels": [],
-			"active": true,
-			"id": "test",
-			"creationTimestamp": "2025-09-29T15:50:17Z",
-			"lastUpdatedTimestamp": "2025-09-29T15:50:17Z"
-		}`), nil
-}
-
-// Get implements the Searcher interface.
-func (s *SearcherIDNotUUID) Get(id uuid.UUID) (gjson.Result, error) {
-	return gjson.Result{}, discoveryPackage.Error{
-		Status: http.StatusNotFound,
-		Body: gjson.Parse(`{
-			"status": 404,
-			"code": 1003,
-			"messages": [
-				"Seed not found: 986ce864-af76-4fcb-8b4f-f4e4c6ab0951"
-			],
-			"timestamp": "2025-10-16T00:15:31.888410500Z"
-		}`),
-	}
-}
-
-// GetAll implements the searcher interface.
-func (s *SearcherIDNotUUID) GetAll() ([]gjson.Result, error) {
-	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
-}
-
 // WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedController struct {
 	mock.Mock
-	WorkingSearcher
+	mocks.WorkingSearcher
 }
 
 // Start returns the result of a new seed execution.
@@ -84,7 +39,7 @@ func (c *WorkingSeedController) Halt(id uuid.UUID) ([]gjson.Result, error) {
 // FailingSeedControllerGetEntityIdFails simulates a failing IngestionSeedController when GetEntityId fails.
 type FailingSeedControllerGetEntityIdFails struct {
 	mock.Mock
-	SearcherIDNotUUID
+	mocks.SearcherIDNotUUID
 }
 
 // Start implements the interface.
@@ -100,7 +55,7 @@ func (c *FailingSeedControllerGetEntityIdFails) Halt(id uuid.UUID) ([]gjson.Resu
 // FailingSeedControllerStartFails simulates when starting a seed execution fails.
 type FailingSeedControllerStartFails struct {
 	mock.Mock
-	WorkingSearcher
+	mocks.WorkingSearcher
 }
 
 // Start mocks a failing seed execution response.
@@ -313,7 +268,7 @@ func Test_discovery_HaltSeed(t *testing.T) {
 // WorkingSeedController simulates a working IngestionSeedController.
 type WorkingSeedExecutionController struct {
 	mock.Mock
-	WorkingGetter
+	mocks.WorkingGetter
 }
 
 // Halt returns the results of halting a seed.
@@ -324,7 +279,7 @@ func (c *WorkingSeedExecutionController) Halt(id uuid.UUID) (gjson.Result, error
 // FailingSeedControllerStartFails simulates when starting a seed execution fails.
 type FailingSeedExecutionControllerHaltFails struct {
 	mock.Mock
-	WorkingGetter
+	mocks.WorkingGetter
 }
 
 // Halt returns the results of halting a seed.
