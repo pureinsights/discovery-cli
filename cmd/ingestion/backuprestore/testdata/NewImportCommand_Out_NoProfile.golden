@@ -1,12 +1,11 @@
 Usage:
-  import [subcommands] [flags]
+  import <file> [flags]
 
 Examples:
 	# Import the entities using profile "cn" and ignore conflict resolution strategy.
-	discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict IGNORE
+	discovery ingestion import -p cn "entities/ingestion.zip" --on-conflict IGNORE
 
 Flags:
-  -f, --file string          the file that contains the entities that will be restored
   -h, --help                 help for import
       --on-conflict string   the conflict resolution strategy that will be used (default "FAIL")
 

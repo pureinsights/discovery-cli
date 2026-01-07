@@ -122,7 +122,7 @@ func (c contentClient) Scroll(filters, projections gjson.Result, size *int) ([]g
 		}
 	}
 
-	options := []RequestOption{}
+	options := []RequestOption{WithQueryParameters(map[string][]string{"action": {"STORE"}})}
 	if size != nil {
 		options = append(options, WithQueryParameters(map[string][]string{"size": {strconv.Itoa(*size)}}))
 	}

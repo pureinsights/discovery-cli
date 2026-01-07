@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -85,16 +86,16 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 			}, "Could not scroll the bucket with name \"my-bucket\"."),
 		},
 		{
-			name:      "Sent max flag is < 1",
-			args:      []string{"my-bucket", "--max", "-1"},
+			name:      "Sent page size flag is < 1",
+			args:      []string{"my-bucket", "--page-size", "-1"},
 			url:       true,
 			apiKey:    "apiKey123",
-			outGolden: "NewDumpCommand_Out_InvalidMax",
-			errGolden: "NewDumpCommand_Err_InvalidMax",
-			outBytes:  testutils.Read(t, "NewDumpCommand_Out_InvalidMax"),
-			errBytes:  testutils.Read(t, "NewDumpCommand_Err_InvalidMax"),
+			outGolden: "NewDumpCommand_Out_InvalidPageSize",
+			errGolden: "NewDumpCommand_Err_InvalidPageSize",
+			outBytes:  testutils.Read(t, "NewDumpCommand_Out_InvalidPageSize"),
+			errBytes:  testutils.Read(t, "NewDumpCommand_Err_InvalidPageSize"),
 			responses: map[string]testutils.MockResponse{},
-			err:       cli.NewError(cli.ErrorExitCode, "The size flag can only be greater than or equal to 1."),
+			err:       cli.NewError(cli.ErrorExitCode, "The page size flag can only be greater than or equal to 1."),
 		},
 	}
 
@@ -284,7 +285,7 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "json")
+	vpr.Set("output", "pretty-json")
 	vpr.Set("default.staging_url", srv.URL)
 
 	vpr.Set("default.staging_key", "")
@@ -310,7 +311,7 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
 		"value": "Martin Bayton",
 		"normalize": true
 	}
-}`, "--max", "3"})
+}`, "--page-size", "3", "--output-file", filepath.Join(t.TempDir(), "my-bucket.zip")})
 
 	err := dumpCmd.Execute()
 	require.NoError(t, err)
