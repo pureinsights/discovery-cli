@@ -2582,7 +2582,7 @@ Flags:
 Examples:
 
 ```bash
-# # Dump a bucket with filters, include projections, and a page size of 5
+# Dump a bucket with filters, include projections, and a page size of 5
 discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5'
 {
   "acknowledged": true
