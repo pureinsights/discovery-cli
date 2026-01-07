@@ -219,7 +219,7 @@ Staging API Key: "discovery.key.staging.cn"
 ```
 
 #### Export
-`export` is the command used to backup all of Discovery's entities at once. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
+`export` is the command used to backup all of Discovery's entities at once. With the `output-file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.
 
 Usage: `discovery export [flags]`
 
@@ -231,7 +231,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
+`--output-file`::
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -245,13 +245,18 @@ discovery export -p cn
 ```bash
 # Export the entities to a specific file.
 # In this example, the Ingestion export failed.
-discovery export -p cn --file "entities/discovery.zip"
+discovery export -p cn --output-file "entities/discovery.zip"
 {"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
 ```
 #### Import
-`import` is the command used to restore entities to all of Discovery's products at once. With the `file` flag, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files product by the `/export` endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format `productName-*`. For example, the Core can be called `core-export-20251112T1629.zip` and the one for Ingestion can be called `ingestion-export-20251110T1607.zip`. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+`import` is the command used to restore entities to all of Discovery's products at once. With the required argument, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files produced by the `/export` endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format `productName-*`. For example, the Core can be called `core-export-20251112T1629.zip` and the one for Ingestion can be called `ingestion-export-20251110T1607.zip`. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
 
-Usage: `discovery import [flags]`
+Usage: `discovery import <file> [flags]`
+
+Arguments: 
+
+`file`::
+(Required, string) The file that contains the files with the exported entities of the Discovery products.
 
 Flags:
 
@@ -261,9 +266,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
-(Required, string) The file that contains the files with the exported entities of the Discovery products.
-
 `--on-conflict`::
 (Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
@@ -272,7 +274,7 @@ Examples:
 ```bash
 # Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
 # The rest of the command's output is omitted.
-discovery import -p cn --file "entities/discovery.zip" --on-conflict IGNORE
+discovery import -p cn "entities/discovery.zip" --on-conflict IGNORE
 {
   "core": {
     "Credential": [
@@ -443,7 +445,7 @@ Core API Key: "discovery.key.core.cn"
 ```
 
 ##### Export
-`export` is the command used to backup Discovery Core's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+`export` is the command used to backup Discovery Core's entities. With the `output-file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
 
 Usage: `discovery core export [flags]`
 
@@ -455,7 +457,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
+`--output-file`::
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -468,14 +470,19 @@ discovery core export -p cn
 
 ```bash
 # Export the entities to a specific file.
-discovery core export -p cn --file "entities/core.zip"
+discovery core export -p cn --output-file "entities/core.zip"
 {"acknowledged":true}
 ```
 
 ##### Import
-`import` is the command used to restore Discovery Core's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+`import` is the command used to restore Discovery Core's entities. With the required argument, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
 
-Usage: `discovery core import [flags]`
+Usage: `discovery core import <file> [flags]`
+
+Arguments:
+
+`file`::
+(Required, string) The file that contains the configurations of the entities.
 
 Flags:
 
@@ -485,9 +492,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
-(Required, string) The file that contains the configurations of the entities.
-
 `--on-conflict`::
 (Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
@@ -496,7 +500,7 @@ Examples:
 ```bash
 # Import the entities using profile "cn" and update conflict resolution strategy.
 # The rest of the command's output is omitted.
-discovery core import -p cn --file "entities/core.zip" --on-conflict UPDATE
+discovery core import -p cn "entities/core.zip" --on-conflict UPDATE
 {
   "Credential": [
     {
@@ -562,17 +566,19 @@ discovery core label get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's labels. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple labels. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's labels. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple labels. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery core label store [flags]`
+Usage: `discovery core label store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -587,7 +593,7 @@ Examples:
 
 ```bash
 # Store a label with the JSON configuration in a file
-discovery core label store --file "labeljsonfile.json"
+discovery core label store "labeljsonfile.json"
 {"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"my-label","lastUpdatedTimestamp":"2025-10-29T22:41:37Z","value":"my-value"}
 {"code":1003,"messages":["Entity not found: 3d51beef-8b90-40aa-84b5-033241dc6230"],"status":404,"timestamp":"2025-10-30T00:05:35.995533500Z"}
 {"creationTimestamp":"2025-10-30T00:05:36.004363Z","id":"4967bc7b-ed89-4843-ab0f-1fd73daad30d","key":"my-label-3","lastUpdatedTimestamp":"2025-10-30T00:05:36.004363Z","value":"my-value-3"}
@@ -672,17 +678,19 @@ discovery core secret get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's secrets. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple secrets. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's secrets. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple secrets. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery core secret store [flags]`
+Usage: `discovery core secret store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -697,7 +705,7 @@ Examples:
 
 ```bash
 # Store a secret with the JSON configuration in a file
-discovery core secret store --file "secretjsonfile.json"
+discovery core secret store "secretjsonfile.json"
 {"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:15:22.738365Z","name":"my-openai-secret"}
 {"code":1003,"messages":["Entity not found: b8bd5ec3-8f60-4502-b25e-8f6d36c98415"],"status":404,"timestamp":"2025-10-30T15:15:22.778371Z"}
 {"active":true,"creationTimestamp":"2025-10-30T15:15:22.801771Z","id":"c9731417-38c9-4a65-8bbc-78c5f59b9cbb","lastUpdatedTimestamp":"2025-10-30T15:15:22.801771Z","name":"my-mongo-user"}
@@ -800,17 +808,19 @@ discovery core credential get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's credentials. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple credentials. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's credentials. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple credentials. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery core credential store [flags]`
+Usage: `discovery core credential store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -825,7 +835,7 @@ Examples:
 
 ```bash
 # Store a credential with the JSON configuration in a file
-discovery core credential store --file "credentialjsonfile.json"
+discovery core credential store "credentialjsonfile.json"
 {"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential-1","secret":"my-secret","type":"mongo"}
 {"code":1003,"messages":["Entity not found: 3b32e410-2f33-412d-9fb8-17970131921d"],"status":404,"timestamp":"2025-10-30T16:50:38.250661200Z"}
 {"active":true,"creationTimestamp":"2025-10-30T16:50:38.262086Z","id":"5b76ae0d-f383-47e5-be6f-90e9046092cd","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-30T16:50:38.262086Z","name":"my-credential-2","secret":"my-secret","type":"mongo"}
@@ -934,17 +944,19 @@ discovery core server get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple servers. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Core's servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple servers. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery core server store [flags]`
+Usage: `discovery core server store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -959,7 +971,7 @@ Examples:
 
 ```bash
 # Store a server with the JSON configuration in a file
-discovery core server store --file "serverjsonfile.json"
+discovery core server store "serverjsonfile.json"
 {"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"my-server","type":"mongo"}       
 {"code":1003,"messages":["Entity not found: 2b839453-ddad-4ced-8e13-2c7860af60a8"],"status":404,"timestamp":"2025-10-30T17:45:48.176913700Z"}
 {"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-10-30T17:45:48.184774Z","id":"152e1175-e54d-4de6-90b9-388d45f8256e","labels":[],"lastUpdatedTimestamp":"2025-10-30T17:45:48.184774Z","name":"my-server-2","type":"mongo"}
@@ -1141,7 +1153,7 @@ Ingestion API Key: "discovery.key.ingestion.cn"
 ```
 
 ##### Export
-`export` is the command used to backup Discovery Ingestion's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+`export` is the command used to backup Discovery Ingestion's entities. With the `output-file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
 
 Usage: `discovery ingestion export [flags]`
 
@@ -1153,7 +1165,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
+`--output-file`::
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -1166,14 +1178,19 @@ discovery ingestion export -p cn
 
 ```bash
 # Export the entities to a specific file
-discovery ingestion export --file "entities/ingestion.zip"
+discovery ingestion export --output-file "entities/ingestion.zip"
 {"acknowledged":true}
 ```
 
 ##### Import
-`import` is the command used to restore Discovery Ingestion's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+`import` is the command used to restore Discovery Ingestion's entities. With the required argument, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
 
-Usage: `discovery Ingestion import [flags]`
+Usage: `discovery ingestion import <file> [flags]`
+
+Arguments:
+
+`file`::
+(Required, string) The file that contains the configurations of the entities.
 
 Flags:
 
@@ -1183,9 +1200,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
-(Required, string) The file that contains the configurations of the entities.
-
 `--on-conflict`::
 (Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
@@ -1194,7 +1208,7 @@ Examples:
 ```bash
 # Import the entities using profile "cn" and ignore conflict resolution strategy.
 # The rest of the command's output is omitted.
-discovery ingestion import -p cn --file "entities/ingestion.zip" --on-conflict IGNORE
+discovery ingestion import -p cn "entities/ingestion.zip" --on-conflict IGNORE
 {
   "Pipeline": [
     {
@@ -1277,17 +1291,19 @@ discovery ingestion processor get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery ingestion processor store [flags]`
+Usage: `discovery ingestion processor store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -1302,7 +1318,7 @@ Examples:
 
 ```bash
 # Store a processor with the JSON configuration in a file
-discovery ingestion processor store --file "ingestionprocessorjsonfile.json"
+discovery ingestion processor store "ingestionprocessorjsonfile.json"
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:44Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 {"code":1003,"messages":["Entity not found: e9c4173f-6906-43a8-b3ca-7319d3d24755"],"status":404,"timestamp":"2025-10-30T20:09:29.314467Z"}
 {"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:09:29.346792Z","id":"aef648d8-171d-479a-a6fd-14ec9b235dc7","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:09:29.346792Z","name":"my-processor-2","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
@@ -1411,17 +1427,19 @@ discovery ingestion pipeline get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery ingestion pipeline store [flags]`
+Usage: `discovery ingestion pipeline store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -1436,7 +1454,7 @@ Examples:
 
 ```bash
 # Store a pipeline with the JSON configuration in a file
-discovery ingestion pipeline store --file pipelines.json
+discovery ingestion pipeline store pipelines.json
 {"active":true,"creationTimestamp":"2025-10-31T19:41:13Z","id":"36f8ce72-f23d-4768-91e8-58693ff1b272","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:54:23Z","name":"my-pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
 {"code":1003,"messages":["Entity not found: 5888b852-d7d4-4761-9058-738b2ad1b5c9"],"status":404,"timestamp":"2025-10-31T19:55:34.723693100Z"}
 {"active":true,"creationTimestamp":"2025-10-31T19:55:34.758757Z","id":"bfb882a7-59e6-4cd6-afe4-7732163637f1","initialState":"ingestionState","labels":[],"lastUpdatedTimestamp":"2025-10-31T19:55:34.758757Z","name":"my-pipeline-3","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
@@ -1607,17 +1625,19 @@ discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --execution 0f
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's seeds. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple seeds. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery Ingestion's seeds. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple seeds. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery ingestion seed store [flags]`
+Usage: `discovery ingestion seed store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -1632,7 +1652,7 @@ Examples:
 
 ```bash
 # Store a seed with the JSON configuration in a file
-discovery ingestion seed store --file seeds.json
+discovery ingestion seed store seeds.json
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-09-04T15:50:08Z","id":"1d81d3d5-58a2-44a5-9acf-3fc8358afe09","labels":[],"lastUpdatedTimestamp":"2025-09-04T15:50:08Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
 {"code":1003,"messages":["Entity not found: 1d81d3d5-58a2-44a5-9acf-3fc8358afe00"],"status":404,"timestamp":"2025-10-31T20:32:39.832877700Z"}
 {"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T20:32:39.855952Z","id":"d818d852-18ac-4059-8f17-37a1b649bbfd","labels":[],"lastUpdatedTimestamp":"2025-10-31T20:32:39.855952Z","name":"my-seed-3","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
@@ -1867,7 +1887,7 @@ QueryFlow API Key: "discovery.key.queryflow.cn"
 ```
 
 ##### Export
-`export` is the command used to backup Discovery QueryFlow's entities. With the `file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
+`export` is the command used to backup Discovery QueryFlow's entities. With the `output-file` flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory.
 
 Usage: `discovery queryflow export [flags]`
 
@@ -1879,7 +1899,7 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
+`--output-file`::
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -1892,14 +1912,19 @@ discovery queryflow export -p cn
 
 ```bash
 # Export the entities to a specific file.
-discovery queryflow export --file "entities/queryflow.zip"
+discovery queryflow export --output-file "entities/queryflow.zip"
 {"acknowledged":true}
 ```
 
 ##### Import
-`import` is the command used to restore Discovery QueryFlow's entities. With the `file` flag, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
+`import` is the command used to restore Discovery QueryFlow's entities. With the required argument, the user must send the specific file that has the entities' configuration. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
 
-Usage: `discovery queryflow import [flags]`
+Usage: `discovery queryflow import <file> [flags]`
+
+Arguments:
+
+`file`::
+(Required, string) The file that contains the configurations of the entities.
 
 Flags:
 
@@ -1909,9 +1934,6 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --file`::
-(Required, string) The file that contains the configurations of the entities.
-
 `--on-conflict`::
 (Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
@@ -1920,7 +1942,7 @@ Examples:
 ```bash
 # Import the entities using profile "cn" and fail conflict resolution strategy.
 # The rest of the command's output is omitted.
-discovery queryflow import -p cn --file "entities/queryflow.zip"
+discovery queryflow import -p cn "entities/queryflow.zip"
 {
   "Endpoint": [
     {
@@ -2007,17 +2029,19 @@ discovery queryflow processor get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery QueryFlow's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery QueryFlow's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery queryflow processor store [flags]`
+Usage: `discovery queryflow processor store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -2032,7 +2056,7 @@ Examples:
 
 ```bash
 # Store a processor with the JSON configuration in a file
-discovery queryflow processor store --file "queryflowprocessorjsonfile.json"
+discovery queryflow processor store "queryflowprocessorjsonfile.json"
 {"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:08:23Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:23Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 {"code":1003,"messages":["Entity not found: 0a7caa9b-99aa-4a63-aa6d-a1e40941984e"],"status":404,"timestamp":"2025-11-20T00:16:10.216366100Z"}
 {"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-20T00:16:10.253229Z","id":"74f4cffb-1a4f-4470-8485-f759cdc203bd","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:16:10.253229Z","name":"my-processor-3","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
@@ -2138,17 +2162,19 @@ MISSING
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery QueryFlow's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery QueryFlow's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery queryflow pipeline store [flags]`
+Usage: `discovery queryflow pipeline store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -2163,7 +2189,7 @@ Examples:
 
 ```bash
 # Store a pipeline with the JSON configuration in a file
-discovery queryflow pipeline store --file pipelines.json
+discovery queryflow pipeline store pipelines.json
 MISSING
 ```
 
@@ -2270,17 +2296,19 @@ discovery queryflow endpoint get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery QueryFlow's endpoints. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple endpoints. With the `file` flag, the user can also send the path of a file that contains the JSON configurations. The `data` and `file` flags are required, but mutually exclusive.
+`store` is the command used to create and update Discovery QueryFlow's endpoints. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple endpoints. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
 
-Usage: `discovery queryflow endpoint store [flags]`
+Usage: `discovery queryflow endpoint store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
 `-d, --data`::
-(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `file` flag.
-
-`-f, --file`::
-(Required, string) Set the path of the file that contains the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the `data` flag.
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
 `--abort-on-error`::
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
@@ -2295,7 +2323,7 @@ Examples:
 
 ```bash
 # Store an endpoint with the JSON configuration in a file
-discovery queryflow endpoint store --file endpointjsonfile.json
+discovery queryflow endpoint store endpointjsonfile.json
 {"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"my-endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
 {"code":1003,"messages":["Entity not found: 2fee5e27-4147-48de-ba1e-d7f32476a4a3"],"status":404,"timestamp":"2025-11-20T00:37:02.827065700Z"}
 {"active":true,"creationTimestamp":"2025-11-20T00:37:02.857266Z","httpMethod":"GET","id":"7324b140-3240-4e67-90cb-9ffe5e7f574b","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:37:02.857266Z","name":"my-endpoint-3","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/blog-search"}
@@ -2527,6 +2555,65 @@ discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA",
     ...
   ],
   "name": "my-bucket"
+}
+```
+
+###### Dump
+`dump` is the command used to scroll a bucket's content in the Discovery Staging Repository. The bucket's name is sent as the mandatory argument. The results are saved in a zip file that contains JSON files with the bucket's records. If the path is not sent, the dump will be saved in a zip file in the current directory with the name of the bucket. Each record is stored in its own JSON file that uses the record's transaction as its name. With the `output-file`, the user can send the path in which to save the records. The user can send filters with the `filter` flag, which is a single JSON string that contains all of the filters. With the `projection` flag, the user can send the fields that will be included or excluded from the results. With the `page-size` flag, the user can send the maximum number of elements that will be retrieved with every page.
+
+Usage: `discovery staging bucket dump [flags] <arg>`
+
+Arguments:
+
+`arg`::
+(Required, string) The name of the bucket that will be scrolled.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, string) The DSL containing the filters that will be applied to the scroll. For example:
+
+```json
+{
+	"equals": {
+		"field": "author",
+		"value": "John Doe",
+		"normalize": true
+	}
+}
+```
+
+`--projection`::
+(Optional, string) The DSL containing the fields that will be included and excluded in the records that will be retrieved from the bucket. See [Discovery's documentation](https://discovery.pureinsights.live/latest/reference/index.html#dsl-projections) for more details. For example:
+
+```json
+{
+    "includes": [
+		"author",
+		"header"
+	]
+}
+```
+
+`--page-size`::
+(Optional, string) The size of the pages that will be used when retrieving the records.
+
+`--output-file`::
+(Optional, string) The path in which to save the bucket's content. If not sent, it will be saved in a zip file with the bucket's name.
+
+Examples:
+
+```bash
+# # Dump a bucket with filters, include projections, and a page size of 5
+discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5'
+{
+  "acknowledged": true
 }
 ```
 

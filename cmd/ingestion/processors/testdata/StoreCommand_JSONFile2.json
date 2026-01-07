@@ -1,0 +1,22 @@
+[
+    {
+        "type": "mongo",
+        "name": "MongoDB processor 4",
+        "labels": [],
+        "active": true,
+        "id": "2fba75cd-e5dc-454f-b028-a505f0c690b2",
+        "creationTimestamp": "2025-08-14T18:02:11Z",
+        "lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+        "secret": "mongo-secret-2"
+    },
+    {
+        "type": "openai",
+        "name": "OpenAI processor 5",
+        "labels": [],
+        "active": true,
+        "id": "77cd87e5-5c29-4960-9058-4a2eda0c513f",
+        "creationTimestamp": "2025-08-14T18:02:11Z",
+        "lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+        "secret": "openai-secret"
+    }
+]

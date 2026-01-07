@@ -1,0 +1,11 @@
+Error: Could not scroll the bucket with name "my-bucket".
+status: 404, body: {
+  "status": 404,
+  "code": 1002,
+  "messages": [
+    "The bucket 'my-bucket' was not found."
+  ],
+  "timestamp": "2025-12-23T14:53:32.321524600Z"
+}
+
+
