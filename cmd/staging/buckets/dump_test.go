@@ -285,7 +285,7 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "json")
+	vpr.Set("output", "pretty-json")
 	vpr.Set("default.staging_url", srv.URL)
 
 	vpr.Set("default.staging_key", "")
