@@ -12,7 +12,7 @@ go install github.com/pureinsights/discovery-cli/cmd/discovery@$latest
 ```
 
 #### Troubleshooting
-If the installation does not work, make sure you have the the `%GOPATH%/bin`added to the `PATH` environment variable. See this [wiki](https://go.dev/wiki/SettingGOPATH) to set the `GOPATH` variable.
+If the installation does not work, make sure you have the `%GOPATH%/bin` added to the `PATH` environment variable. See this [wiki](https://go.dev/wiki/SettingGOPATH) to set the `GOPATH` variable.
 
 ### Making the Binary Global (Advanced)
 This method requires downloading the binary of the Discovery CLI and making it available globally from a terminal or command prompt.
