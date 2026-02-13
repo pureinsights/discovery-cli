@@ -1,0 +1,12 @@
+Usage:
+  import <file> [flags]
+
+Examples:
+	# Import the entities using profile "cn" and update conflict resolution strategy.
+	discovery core import -p cn "entities/core.zip" --on-conflict UPDATE
+
+Flags:
+  -h, --help                 help for import
+      --on-conflict string   the conflict resolution strategy that will be used (default "FAIL")
+  -p, --profile string       configuration profile to use (default "default")
+

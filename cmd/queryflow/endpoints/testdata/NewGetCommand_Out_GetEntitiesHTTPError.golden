@@ -1,0 +1,20 @@
+Usage:
+  get [<endpoint>] [flags]
+
+Examples:
+	# Get an endpoint by name
+	discovery queryflow endpoint get "my-endpoint"
+	
+	# Get endpoints using filters
+	discovery queryflow endpoint get --filter label=A:B
+
+	# Get all endpoints using the configuration in profile "cn"
+	discovery queryflow endpoint get -p cn
+
+Flags:
+  -f, --filter stringArray   apply filters in the format "filter=key:value". The available filters are:
+                             - Label: The format is label={key}[:{value}], where the value is optional
+                             - Type: The format is type={type}
+  -h, --help                 help for get
+  -p, --profile string       configuration profile to use (default "default")
+

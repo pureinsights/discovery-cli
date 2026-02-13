@@ -1,0 +1,11 @@
+Usage:
+  delete <labelId> [flags]
+
+Examples:
+	# Delete a label by id
+	discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
+
+Flags:
+  -h, --help             help for delete
+  -p, --profile string   configuration profile to use (default "default")
+

@@ -1,0 +1,11 @@
+Usage:
+  import <file> [flags]
+
+Examples:
+	# Import the entities using profile "cn" and ignore conflict resolution strategy.
+	discovery ingestion import -p cn "entities/ingestion.zip" --on-conflict IGNORE
+
+Flags:
+  -h, --help                 help for import
+      --on-conflict string   the conflict resolution strategy that will be used (default "FAIL")
+

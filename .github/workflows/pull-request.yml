@@ -1,26 +1,100 @@
-name: Build
+name: Pull Request
+
 on:
-  push:
-    branches:
-      - master
-      - main
-      - release*
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+env:
+  GITHUB_PACKAGE_REGISTRY_USER: ${{ secrets.CI_USERNAME }}
+  GITHUB_PACKAGE_REGISTRY_API_KEY: ${{ secrets.CI_TOKEN }}
+
 jobs:
-  sonarcloud:
-    name: SonarCloud
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      code-changes: ${{ steps.changes.outputs.code }}
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check base branch
+        id: check-branch
+        run: |
+          prerelease=${{ startsWith(github.head_ref, 'hotfix/') || startsWith(github.head_ref, 'release/')}}
+          
+          if [[ ${{ github.base_ref }} == 'master' ]] && ! ${prerelease} ]]; then
+            echo "Pull requests against master can only be created from release or hotfix branches"
+            exit 1
+          fi
+
+      - name: Filter changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            code:
+              - '**.go'
+              - 'go.mod'
+              - '.github/workflows/pull-request.yml'
+              - '**/testdata/**'
+
+  build:
+    if: ${{ needs.validate.outputs.code-changes == 'true' }}
+    needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout the code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          go get ./cmd/discovery 
+          
+      - name: Run Go Vet Tool
+        run: go vet ./...
+
+      - name: Build the Go application
+        run: go build -v ./...
+
+      - name: Unit tests (race + coverage)
+        run: |
+          go install github.com/jstemmer/go-junit-report/v2@latest
+          go test ./... -v -race -coverprofile=coverage.out -covermode=atomic | go-junit-report -set-exit-code > report.xml
+          
+      - name: Publish Tests Report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          check_name: 'Tests Report'
+          report_paths: 'report.xml'
+          
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  checks:
+    if: ${{ needs.validate.outputs.code-changes != 'true' }}
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: SonarCloud analysis for untracked changes
+        uses: LouisBrunner/checks-action@v1.1.1
         with:
-          args: >
-            -Dsonar.organization=pureinsights-1
-            -Dsonar.projectKey=pureinsights_pdp_cli
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: SonarCloud Code Analysis
+          conclusion: success

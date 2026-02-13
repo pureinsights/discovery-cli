@@ -1,0 +1,52 @@
+package endpoints
+
+import (
+	"bytes"
+	"slices"
+	"strings"
+	"testing"
+
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+)
+
+// TestNewEndpointCommand tests the NewEndpointCommand() function.
+func TestNewEndpointCommand(t *testing.T) {
+	in := strings.NewReader("In Reader")
+	out := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	dir := t.TempDir()
+	vpr := viper.New()
+	vpr.SetDefault("profile", "default")
+	d := cli.NewDiscovery(&ios, vpr, dir)
+	coreCmd := NewEndpointCommand(d)
+
+	coreCmd.SetIn(ios.In)
+	coreCmd.SetOut(ios.Out)
+	coreCmd.SetErr(ios.Err)
+
+	coreCmd.PersistentFlags().StringP(
+		"profile",
+		"p",
+		d.Config().GetString("profile"),
+		"configuration profile to use",
+	)
+
+	var commandNames []string
+	for _, c := range coreCmd.Commands() {
+		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+			commandNames = append(commandNames, c.Name())
+		}
+	}
+
+	expectedCommands := []string{"delete", "get", "store"}
+	assert.Equal(t, expectedCommands, commandNames)
+}

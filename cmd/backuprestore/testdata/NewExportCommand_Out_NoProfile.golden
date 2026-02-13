@@ -1,0 +1,11 @@
+Usage:
+  export [flags]
+
+Examples:
+	# Export the entities to a specific file.
+	discovery export -p cn --output-file "entities/discovery.zip"
+
+Flags:
+  -h, --help                 help for export
+      --output-file string   the file in which the information of the entities is going to be saved
+

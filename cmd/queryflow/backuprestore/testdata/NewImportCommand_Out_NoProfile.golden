@@ -1,0 +1,11 @@
+Usage:
+  import <file> [flags]
+
+Examples:
+	# Import the entities using profile "cn" and fail conflict resolution strategy.
+	discovery queryflow import -p cn "entities/queryflow.zip"
+
+Flags:
+  -h, --help                 help for import
+      --on-conflict string   the conflict resolution strategy that will be used (default "FAIL")
+

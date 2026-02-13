@@ -1,0 +1,15 @@
+Usage:
+  delete <processor> [flags]
+
+Examples:
+	# Delete a processor by id
+	discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
+	{"acknowledged":true}
+
+	# Delete a processor by name
+	discovery ingestion processor delete my-processor"
+	{"acknowledged":true}
+
+Flags:
+  -h, --help   help for delete
+

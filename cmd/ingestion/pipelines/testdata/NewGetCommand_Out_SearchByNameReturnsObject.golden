@@ -1,0 +1,14 @@
+{
+  "active": true,
+  "creationTimestamp": "2025-10-17T22:37:53Z",
+  "id": "4957145b-6192-4862-a5da-e97853974e9f",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-10-17T22:37:53Z",
+  "name": "my-pipeline",
+  "type": "mongo"
+}

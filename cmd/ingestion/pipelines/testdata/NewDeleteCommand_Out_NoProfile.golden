@@ -1,0 +1,13 @@
+Usage:
+  delete <pipeline> [flags]
+
+Examples:
+	# Delete a pipeline by id
+	discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
+
+	# Delete a pipeline by name
+	discovery ingestion pipeline delete my-pipeline
+
+Flags:
+  -h, --help   help for delete
+
