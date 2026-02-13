@@ -12,9 +12,9 @@ import (
 // NewDeleteCommand creates the seed delete command.
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete <seed>",
 		Short: "The command that deletes seeds from Discovery Ingestion.",
-		Long:  fmt.Sprintf(commands.LongDeleteNoNames, "seed", "Ingestion"),
+		Long:  fmt.Sprintf(commands.LongDeleteSearch, "seed", "Ingestion"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {

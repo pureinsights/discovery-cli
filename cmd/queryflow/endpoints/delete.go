@@ -12,9 +12,9 @@ import (
 // NewDeleteCommand creates the endpoint delete command.
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete <endpoint>",
 		Short: "The command that deletes endpoints from Discovery QueryFlow.",
-		Long:  fmt.Sprintf(commands.LongDeleteNoNames, "endpoint", "QueryFlow"),
+		Long:  fmt.Sprintf(commands.LongDeleteSearch, "endpoint", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -27,10 +27,10 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchDeleteCommand(args[0], d, queryflowClient.Endpoints(), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"))
 		},
 		Args: cobra.ExactArgs(1),
-		Example: `	# Delete a endpoint by id
+		Example: `	# Delete an endpoint by id
 	discovery queryflow endpoint delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
 
-	# Delete a endpoint by name
+	# Delete an endpoint by name
 	discovery queryflow endpoint delete my-endpoint`,
 	}
 	return get

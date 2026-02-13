@@ -11,9 +11,9 @@ import (
 func NewExportCommand(d cli.Discovery) *cobra.Command {
 	var file string
 	export := &cobra.Command{
-		Use:   "export [subcommands]",
+		Use:   "export",
 		Short: "Export all of Discovery's entities",
-		Long:  "export is the command used to backup all of Discovery's entities at once. With the --file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.",
+		Long:  "export is the command used to backup all of Discovery's entities at once. With the --output-file flag, the user can send the specific file in which to save the configurations. If not, they will be saved in a zip file in the current directory. The resulting zip file contains three zip files containing the entities of Discovery Core, Ingestion, and QueryFlow. If an export fails, the error is reported in the returned JSON.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -52,9 +52,9 @@ func NewExportCommand(d cli.Discovery) *cobra.Command {
 		},
 		Args: cobra.NoArgs,
 		Example: `	# Export the entities to a specific file.
-	discovery export -p cn --file "entities/discovery.zip"`,
+	discovery export -p cn --output-file "entities/discovery.zip"`,
 	}
 
-	export.Flags().StringVarP(&file, "file", "f", "", "the file in which the information of the entities is going to be saved")
+	export.Flags().StringVar(&file, "output-file", "", "the file in which the information of the entities is going to be saved")
 	return export
 }
