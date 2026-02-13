@@ -17,5 +17,5 @@ archives:
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
     files:
-    - src: ./USER.md
-      dst: USER.md
+    - src: ./README.md
+      dst: README.md
