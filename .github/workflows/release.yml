@@ -1,53 +1,31 @@
 name: Release
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main, master, release* ]
-jobs:
-  build:
-    runs-on: windows-latest
+    tags:
+      - "*"
 
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      -
+        name: Checkout
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v1
+      -
+        name: Set up Go
+        uses: actions/setup-go@v5
+      -
+        name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
         with:
-          python-version: 3.9
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
-      - name: Build executable with pyinstaller
-        run: |
-          pyinstaller --onefile pdp.py --add-data "configuration/templates;configuration/templates"
-      - name: Zip dist folder
-        uses: thedoctor0/zip-release@master
-        with:
-          type: 'zip'
-          filename: 'pdp.zip'
-          directory: 'dist'
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        with:
-          tag_name: ${{ github.run_id }}
-          release_name: Release ${{ github.run_id }}
-          draft: false
-          prerelease: false
-      - name: Upload release assets
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./dist/pdp.zip
-          asset_name: pdp.zip
-          asset_content_type: application/zip
