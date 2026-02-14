@@ -8,7 +8,7 @@ There are two methods to install the Discovery CLI:
 The easiest way to install the Discovery CLI is using [Go](https://go.dev/doc/install). Then, we can simply run:
 
 ```bash
-go install github.com/pureinsights/discovery-cli/cmd/discovery@$latest
+go install github.com/pureinsights/discovery-cli/cmd/discovery@latest
 ```
 
 #### Troubleshooting
