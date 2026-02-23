@@ -1766,13 +1766,20 @@ Examples:
 ```bash
 # Halt all active seed executions
 discovery ingestion seed halt 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
-{"id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","status":202}
+[
+  {
+    "id": "b1224864-394b-4912-99ef-c52d9b001cf2",
+    "status": 202
+  }
+]
 ```
 
 ```bash
 # Halt a single seed execution
 discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Status
