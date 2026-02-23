@@ -29,9 +29,9 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			printer := cli.GetObjectPrinter(vpr.GetString("output"))
+
 			if execution == "" {
-				return d.HaltSeed(ingestionClient.Seeds(), args[0], printer)
+				return d.HaltSeed(ingestionClient.Seeds(), args[0], cli.GetArrayPrinter(vpr.GetString("output")))
 			}
 
 			executionId, err := uuid.Parse(execution)
@@ -39,7 +39,7 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 				seedsClient := ingestionClient.Seeds()
 				seedId, err := cli.GetEntityId(d, seedsClient, args[0])
 				if err == nil {
-					return d.HaltSeedExecution(seedsClient.Executions(seedId), executionId, printer)
+					return d.HaltSeedExecution(seedsClient.Executions(seedId), executionId, cli.GetObjectPrinter(vpr.GetString("output")))
 				}
 			}
 
