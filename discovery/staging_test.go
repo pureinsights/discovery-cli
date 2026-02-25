@@ -1780,10 +1780,8 @@ func Test_staging_StatusChecker(t *testing.T) {
 
 // TestNewStaging tests the staging client constructor.
 func TestNewStaging(t *testing.T) {
-	url := "http://localhost:12020/v2"
-	apiKey := "Api Key"
-	s := NewStaging(url, apiKey)
+	s := NewStaging("http://localhost:12020////", "Api Key")
 
-	assert.Equal(t, apiKey, s.ApiKey, "ApiKey should be stored")
-	assert.Equal(t, url+"/v2", s.Url, "BaseURL should match server URL")
+	assert.Equal(t, "Api Key", s.ApiKey, "ApiKey should be stored")
+	assert.Equal(t, "http://localhost:12020/v2", s.Url, "BaseURL should match server URL")
 }

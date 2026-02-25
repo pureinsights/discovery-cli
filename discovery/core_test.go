@@ -743,10 +743,8 @@ func Test_core_StatusChecker(t *testing.T) {
 // Test_NewCore_UrlAndAPIKey tests the function to create a new core client.
 // It verifies that the API Key and base URL correctly match.
 func Test_NewCore_UrlAndAPIKey(t *testing.T) {
-	url := "http://localhost:12010"
-	apiKey := "secret-key"
-	c := NewCore(url, apiKey)
+	c := NewCore("http://localhost:12010////////////", "secret-key")
 
-	assert.Equal(t, apiKey, c.ApiKey, "ApiKey should be stored")
-	assert.Equal(t, url+"/v2", c.Url, "BaseURL should match server URL")
+	assert.Equal(t, "secret-key", c.ApiKey, "ApiKey should be stored")
+	assert.Equal(t, "http://localhost:12010/v2", c.Url, "BaseURL should match server URL")
 }

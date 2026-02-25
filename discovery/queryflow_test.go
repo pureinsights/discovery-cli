@@ -514,7 +514,7 @@ func Test_queryFlow_StatusChecker(t *testing.T) {
 
 // Test_NewQueryFlow tests the QueryFlow constructor.
 func Test_NewQueryFlow(t *testing.T) {
-	i := NewQueryFlow("http://localhost:12040", "Api Key")
+	i := NewQueryFlow("http://localhost:12040/////", "Api Key")
 
 	assert.Equal(t, "http://localhost:12040/v2", i.Url)
 	assert.Equal(t, "Api Key", i.ApiKey)
