@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
@@ -284,5 +285,5 @@ func (i ingestion) StatusChecker() statusChecker {
 // NewIngestion is the constructor of the ingestion struct.
 // It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewIngestion(url, apiKey string) ingestion {
-	return ingestion{Url: url + "/v2", ApiKey: apiKey}
+	return ingestion{Url: strings.TrimRight(url, "/") + "/v2", ApiKey: apiKey}
 }

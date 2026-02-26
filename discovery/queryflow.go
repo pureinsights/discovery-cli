@@ -138,5 +138,5 @@ func (q queryFlow) StatusChecker() statusChecker {
 // NewQueryFlow is the constructor for the QueryFlow struct.
 // It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewQueryFlow(url, apiKey string) queryFlow {
-	return queryFlow{Url: url + "/v2", ApiKey: apiKey}
+	return queryFlow{Url: strings.TrimRight(url, "/") + "/v2", ApiKey: apiKey}
 }
