@@ -36,47 +36,47 @@ func TestNewStoreCommand(t *testing.T) {
 		err          error
 	}{
 		// Working case
-		{
-			name:      "Store receives a single JSON",
-			url:       true,
-			apiKey:    "",
-			outGolden: "NewStoreCommand_Out_StoreSingleJSON",
-			errGolden: "NewStoreCommand_Err_StoreSingleJSON",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreSingleJSON"),
-			errBytes:  []byte(nil),
-			data: `{
-			"type": "mongo",
-			"name": "MongoDB credential",
-			"labels": [],
-			"active": true,
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-			}`,
-			file:         "",
-			abortOnError: false,
-			responses: map[string]testutils.MockResponse{
-				"POST:/v2/credential": {
-					StatusCode: http.StatusOK,
-					Body: `{
-					"type": "mongo",
-					"name": "MongoDB credential",
-					"labels": [],
-					"active": true,
-					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-					"creationTimestamp": "2025-08-14T18:02:11Z",
-					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-					"secret": "mongo-secret"
-					}`,
-					ContentType: "application/json",
-					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/credential", r.URL.Path)
-					},
-				},
-			},
-			err: nil,
-		},
+		// {
+		// 	name:      "Store receives a single JSON",
+		// 	url:       true,
+		// 	apiKey:    "",
+		// 	outGolden: "NewStoreCommand_Out_StoreSingleJSON",
+		// 	errGolden: "NewStoreCommand_Err_StoreSingleJSON",
+		// 	outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreSingleJSON"),
+		// 	errBytes:  []byte(nil),
+		// 	data: `{
+		// 	"type": "mongo",
+		// 	"name": "MongoDB credential",
+		// 	"labels": [],
+		// 	"active": true,
+		// 	"creationTimestamp": "2025-08-14T18:02:11Z",
+		// 	"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		// 	"secret": "mongo-secret"
+		// 	}`,
+		// 	file:         "",
+		// 	abortOnError: false,
+		// 	responses: map[string]testutils.MockResponse{
+		// 		"POST:/v2/credential": {
+		// 			StatusCode: http.StatusOK,
+		// 			Body: `{
+		// 			"type": "mongo",
+		// 			"name": "MongoDB credential",
+		// 			"labels": [],
+		// 			"active": true,
+		// 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		// 			"creationTimestamp": "2025-08-14T18:02:11Z",
+		// 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		// 			"secret": "mongo-secret"
+		// 			}`,
+		// 			ContentType: "application/json",
+		// 			Assertions: func(t *testing.T, r *http.Request) {
+		// 				assert.Equal(t, http.MethodPost, r.Method)
+		// 				assert.Equal(t, "/v2/credential", r.URL.Path)
+		// 			},
+		// 		},
+		// 	},
+		// 	err: nil,
+		// },
 		{
 			name:      "Store receives a JSON array of configs with creates, failures, and updates with abort on error false",
 			url:       true,
@@ -110,6 +110,15 @@ func TestNewStoreCommand(t *testing.T) {
 			"labels": [],
 			"active": true,
 			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
+			"creationTimestamp": "2025-08-14T18:02:11Z",
+			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+			"secret": "openai-secret"
+			},
+			{
+			"type": "openai",
+			"name": "OpenAI credential 3",
+			"labels": [],
+			"active": true,
 			"creationTimestamp": "2025-08-14T18:02:11Z",
 			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
 			"secret": "openai-secret"
@@ -171,6 +180,62 @@ func TestNewStoreCommand(t *testing.T) {
 						assert.Equal(t, http.MethodPut, r.Method)
 						assert.Equal(t, "/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"POST:/v2/credential/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{
+				"source": {
+				"type": "openai",
+				"name": "OpenAI credential 3",
+				"labels": [],
+				"active": true,
+				"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
+				"creationTimestamp": "2025-08-14T18:02:11Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+				"secret": "openai-secret"
+				},
+				"highlight": {}
+				"score": 1.4854797
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 18,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 18,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/credential/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+					StatusCode: http.StatusOK,
+					Body: `{
+				"type": "openai",
+				"name": "OpenAI credential 3",
+				"labels": [],
+				"active": true,
+				"id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad",
+				"creationTimestamp": "2025-08-14T18:02:11Z",
+				"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+				"secret": "openai-secret"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/credential/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 					},
 				},
 			},

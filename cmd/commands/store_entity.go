@@ -78,3 +78,30 @@ func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig
 		return d.UpsertEntities(client, gjson.Parse(config.data), config.abortOnError, printer)
 	}
 }
+
+// SearchStoreCommand has the command logic to upsert an entity into Discovery and update an entity using its name.
+func SearchStoreCommand(d cli.Discovery, client cli.SearchCreator, config storeCommandConfig) error {
+	err := CheckCredentials(d, config.profile, config.componentName, config.url)
+	if err != nil {
+		return err
+	}
+
+	output := config.output
+	if output == "pretty-json" {
+		output = "json"
+	}
+	printer := cli.GetArrayPrinter(output)
+
+	if len(config.files) != 0 {
+		if config.data != "" {
+			return cli.NewError(cli.ErrorExitCode, "There cannot be both a file argument and the data flag")
+		}
+		return upsertFromFiles(d, client, config, printer)
+	} else {
+		if config.data == "" {
+			return cli.NewError(cli.ErrorExitCode, "Data cannot be empty")
+		}
+
+		return d.SearchUpsertEntities(client, gjson.Parse(config.data), config.abortOnError, printer)
+	}
+}
