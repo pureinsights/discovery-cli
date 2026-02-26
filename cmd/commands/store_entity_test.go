@@ -19,6 +19,95 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// Test_readDataFromFiles tests the readDataFromFiles() method.
+func Test_readDataFromFiles(t *testing.T) {
+	tests := []struct {
+		name         string
+		file         string
+		expectedJson gjson.Result
+		err          error
+	}{
+		// Working case
+		{
+			name: "A JSON file is correctly read.",
+			file: "testdata/StoreCommand_JSONFile.json",
+			expectedJson: gjson.Parse(`[
+    {
+        "type": "mongo",
+        "name": "label test 1 clone 10",
+        "labels": [
+            {
+                "key": "A",
+                "value": "A"
+            }
+        ],
+        "active": true,
+        "creationTimestamp": "2025-10-17T22:37:57Z",
+        "lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+    },
+    {
+        "type": "mongo",
+        "name": "label test 2",
+        "labels": [
+            {
+                "key": "A",
+                "value": "B"
+            }
+        ],
+        "active": true,
+        "id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
+        "creationTimestamp": "2025-10-17T22:40:15Z",
+        "lastUpdatedTimestamp": "2025-10-17T22:40:15Z"
+    },
+    {
+        "type": "mongo",
+        "name": "label test 1 clone 9",
+        "labels": [
+            {
+                "key": "A",
+                "value": "A"
+            }
+        ],
+        "active": true,
+        "creationTimestamp": "2025-10-17T22:37:56Z",
+        "lastUpdatedTimestamp": "2025-10-17T22:37:56Z"
+    }
+]`),
+			err: nil,
+		},
+
+		// Error cases
+		{
+			name:         "An empty JSON file is read",
+			file:         "testdata/StoreCommand_EmptyFile.json",
+			expectedJson: gjson.Result{},
+			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
+		},
+		{
+			name:         "An empty JSON file is read",
+			file:         "doesnotexist",
+			expectedJson: gjson.Result{},
+			err:          cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("file does not exist: doesnotexist"), "Could not read file \"doesnotexist\""),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := readDataFromFiles(tc.file)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedJson, result)
+			}
+		})
+	}
+}
+
 // TestStoreCommandConfig tests the StoreCommandConfig() function.
 func TestStoreCommandConfig(t *testing.T) {
 	base := commandConfig{
