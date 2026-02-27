@@ -32,8 +32,8 @@ func StoreCommandConfig(baseConfig commandConfig, abortOnError bool, data string
 	}
 }
 
-// readDataFromFiles is an auxiliary function to process the files sent as arguments.
-func readDataFromFiles(file string) (gjson.Result, error) {
+// readDataFromFile is an auxiliary function to process the files sent as arguments.
+func readDataFromFile(file string) (gjson.Result, error) {
 	jsonBytes, err := os.ReadFile(file)
 	if err != nil {
 		err = cli.NormalizeReadFileError(file, err)
@@ -47,18 +47,26 @@ func readDataFromFiles(file string) (gjson.Result, error) {
 	return gjson.ParseBytes(jsonBytes), nil
 }
 
-// StoreCommand has the command logic to upsert an entity into Discovery.
-func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig) error {
+// prepareStoreCommand checks the credentials and returns the configured printer
+func prepareStoreCommand(d cli.Discovery, config storeCommandConfig) (cli.Printer, error) {
 	err := CheckCredentials(d, config.profile, config.componentName, config.url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	output := config.output
 	if output == "pretty-json" {
 		output = "json"
 	}
-	printer := cli.GetArrayPrinter(output)
+	return cli.GetArrayPrinter(output), nil
+}
+
+// StoreCommand has the command logic to upsert an entity into Discovery.
+func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig) error {
+	printer, err := prepareStoreCommand(d, config)
+	if err != nil {
+		return err
+	}
 
 	if len(config.files) != 0 {
 		if config.data != "" {
@@ -66,7 +74,7 @@ func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig
 		}
 
 		for _, file := range config.files {
-			data, err := readDataFromFiles(file)
+			data, err := readDataFromFile(file)
 			if err != nil {
 				return err
 			}
@@ -88,16 +96,10 @@ func StoreCommand(d cli.Discovery, client cli.Creator, config storeCommandConfig
 
 // SearchStoreCommand has the command logic to upsert an entity into Discovery and update an entity using its name.
 func SearchStoreCommand(d cli.Discovery, client cli.SearchCreator, config storeCommandConfig) error {
-	err := CheckCredentials(d, config.profile, config.componentName, config.url)
+	printer, err := prepareStoreCommand(d, config)
 	if err != nil {
 		return err
 	}
-
-	output := config.output
-	if output == "pretty-json" {
-		output = "json"
-	}
-	printer := cli.GetArrayPrinter(output)
 
 	if len(config.files) != 0 {
 		if config.data != "" {
@@ -105,7 +107,7 @@ func SearchStoreCommand(d cli.Discovery, client cli.SearchCreator, config storeC
 		}
 
 		for _, file := range config.files {
-			data, err := readDataFromFiles(file)
+			data, err := readDataFromFile(file)
 			if err != nil {
 				return err
 			}

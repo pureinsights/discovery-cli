@@ -19,8 +19,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// Test_readDataFromFiles tests the readDataFromFiles() method.
-func Test_readDataFromFiles(t *testing.T) {
+// Test_readDataFromFile tests the readDataFromFile() method.
+func Test_readDataFromFile(t *testing.T) {
 	tests := []struct {
 		name         string
 		file         string
@@ -93,7 +93,7 @@ func Test_readDataFromFiles(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := readDataFromFiles(tc.file)
+			result, err := readDataFromFile(tc.file)
 
 			if tc.err != nil {
 				require.Error(t, err)
@@ -133,6 +133,71 @@ func TestStoreCommandConfig(t *testing.T) {
 	assert.True(t, got.abortOnError)
 	assert.Equal(t, data, got.data)
 	assert.Equal(t, files, got.files)
+}
+
+// Test_prepareStoreCommand tests the prepareStoreCommand method.
+func Test_prepareStoreCommand(t *testing.T) {
+	tests := []struct {
+		name           string
+		url            string
+		output         string
+		expectedOutput string
+		err            error
+	}{
+		// Working case
+		{
+			name:           "Converts the pretty-printer to the ugly printer",
+			url:            "http://localhost:12010/v2",
+			output:         "pretty-json",
+			expectedOutput: `{"active":true,"content":{"mechanism":"SCRAM-SHA-1","password":"password","username":"user"},"name":"test-secret"}` + "\n",
+			err:            nil,
+		},
+		{
+			name:           "Keeps the ugly printer as is",
+			url:            "http://localhost:12010/v2",
+			output:         "json",
+			expectedOutput: `{"active":true,"content":{"mechanism":"SCRAM-SHA-1","password":"password","username":"user"},"name":"test-secret"}` + "\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name: "CheckCredentials fails",
+			url:  "",
+			err:  cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: buf,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			vpr.Set("profile", "default")
+			if tc.url != "" {
+				vpr.Set("default.core_url", tc.url)
+			}
+
+			d := cli.NewDiscovery(&ios, vpr, "")
+			printer, err := prepareStoreCommand(d, StoreCommandConfig(GetCommandConfig("default", tc.output, "Core", "core_url"), false, "", []string{}))
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				printer(ios, gjson.Parse(`{"name":"test-secret","active":true,"content":{"mechanism":"SCRAM-SHA-1","username":"user","password":"password"}}`))
+				assert.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
 }
 
 // TestStoreCommand tests the StoreCommand() function.
