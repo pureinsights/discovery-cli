@@ -1519,15 +1519,15 @@ func Test_discovery_SearchUpsertEntity(t *testing.T) {
 					"secret": "mongo-secret"
 				}`),
 			expected: gjson.Parse(`{
-			"type": "mongo",
-			"name": "MongoDB credential",
-			"labels": [],
-			"active": true,
-			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-		}`),
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
 			err: nil,
 		},
 		{
@@ -1544,15 +1544,15 @@ func Test_discovery_SearchUpsertEntity(t *testing.T) {
 					"secret": "openai-secret"
 				}`),
 			expected: gjson.Parse(`{
-			"type": "mongo",
-			"name": "MongoDB credential",
-			"labels": [],
-			"active": true,
-			"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
-			"creationTimestamp": "2025-08-14T18:02:11Z",
-			"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
-			"secret": "mongo-secret"
-		}`),
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`),
 			err: nil,
 		},
 		{
