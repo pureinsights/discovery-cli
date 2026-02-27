@@ -501,7 +501,7 @@ func (g *FailingCreatorCreateWorksUpdateFails) Update(uuid.UUID, gjson.Result) (
 	return gjson.Result{}, errors.New(`invalid UUID length: 4`)
 }
 
-// WorkingSearchObjectNWorkingSearchCreatorObjectNotExistsotExists mocks when the user sends an entity with no ID and the search by name fails
+// WorkingSearchCreatorObjectNotExists mocks when the user sends an entity with no ID and the search by name fails
 type WorkingSearchCreatorObjectNotExists struct {
 	FailingSearcher
 }
