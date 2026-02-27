@@ -26,7 +26,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return commands.StoreCommand(d, coreClient.Credentials(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), abortOnError, data, args))
+			return commands.SearchStoreCommand(d, coreClient.Credentials(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"), abortOnError, data, args))
 		},
 		Example: `	# Store a credential with the JSON configuration in a file
 	discovery core credential store "credentialjsonfile.json"

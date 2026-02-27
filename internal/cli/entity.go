@@ -278,6 +278,70 @@ func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, a
 	return errors.Join(err, upsertErr)
 }
 
+// SearchCreator defines the methods to create and update entities using names.
+type SearchCreator interface {
+	Creator
+	Searcher
+}
+
+// SearchUpsertEntity creates or updates an entity in Discovery with the given configuration.
+// It searches for the entity by name or id to check if it exists and needs to update it.
+func (d discovery) SearchUpsertEntity(client SearchCreator, config gjson.Result) (gjson.Result, error) {
+	if config.Get("id").Exists() {
+		if parsedId, uuidErr := uuid.Parse(config.Get("id").String()); uuidErr == nil {
+			return client.Update(parsedId, config)
+		} else {
+			return gjson.Result{}, uuidErr
+		}
+	} else if config.Get("name").Exists() {
+		id, err := GetEntityId(d, client, config.Get("name").String())
+		if err != nil || id == uuid.Nil {
+			return client.Create(config)
+		} else {
+			return client.Update(id, config)
+		}
+	} else {
+		return gjson.Result{}, errors.New("entities must have a name")
+	}
+}
+
+// SearchUpsertEntities creates or updates one or multiple entities based on the array of configurations it receives.
+// It searches for the entities by name or id to check if they exist and needs to update them.
+func (d discovery) SearchUpsertEntities(client SearchCreator, configurations gjson.Result, abortOnError bool, printer Printer) error {
+	configArray := configurations.Array()
+	upsertedEntites := []gjson.Result{}
+
+	var upsertErr error
+	for _, config := range configArray {
+		upsert, err := d.SearchUpsertEntity(client, config)
+		if err != nil {
+			if abortOnError {
+				upsertErr = NewErrorWithCause(ErrorExitCode, err, "Could not store entities")
+				break
+			}
+
+			var discoveryErr discoveryPackage.Error
+			if errors.As(err, &discoveryErr) {
+				upsertedEntites = append(upsertedEntites, discoveryErr.Body)
+			} else {
+				errJson := gjson.Parse(fmt.Sprintf("{\"error\":%q}", err.Error()))
+				upsertedEntites = append(upsertedEntites, errJson)
+			}
+		} else {
+			upsertedEntites = append(upsertedEntites, upsert)
+		}
+	}
+
+	var err error
+	if printer == nil {
+		jsonPrinter := JsonArrayPrinter(false)
+		err = jsonPrinter(*d.IOStreams(), upsertedEntites...)
+	} else {
+		err = printer(*d.IOStreams(), upsertedEntites...)
+	}
+	return errors.Join(err, upsertErr)
+}
+
 // Deleter is the interface that implements the delete method.
 type Deleter interface {
 	Delete(uuid.UUID) (gjson.Result, error)

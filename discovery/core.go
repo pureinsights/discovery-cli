@@ -3,6 +3,7 @@ package discovery
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
@@ -235,5 +236,5 @@ func (c core) StatusChecker() statusChecker {
 // NewCore is the constructor for the core struct.
 // It adds a /v2 path to the URL in order to properly connect to Discovery.
 func NewCore(url, apiKey string) core {
-	return core{Url: url + "/v2", ApiKey: apiKey}
+	return core{Url: strings.TrimRight(url, "/") + "/v2", ApiKey: apiKey}
 }

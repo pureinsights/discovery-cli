@@ -566,7 +566,7 @@ discovery core label get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's labels. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple labels. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery Core's labels. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple labels. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration has a UUID, then the entity identified by it will be updated if it exists.
 
 Usage: `discovery core label store [<file>...] [flags]`
 
@@ -678,7 +678,7 @@ discovery core secret get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's secrets. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple secrets. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery Core's secrets. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple secrets. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration has a UUID, then the entity identified by it will be updated if it exists.
 
 Usage: `discovery core secret store [<file>...] [flags]`
 
@@ -808,7 +808,7 @@ discovery core credential get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's credentials. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple credentials. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery Core's credentials. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple credentials. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
 
 Usage: `discovery core credential store [<file>...] [flags]`
 
@@ -944,7 +944,7 @@ discovery core server get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Core's servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple servers. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery Core's servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple servers. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
 
 Usage: `discovery core server store [<file>...] [flags]`
 
@@ -1291,7 +1291,7 @@ discovery ingestion processor get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery Ingestion's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
 
 Usage: `discovery ingestion processor store [<file>...] [flags]`
 
@@ -1427,7 +1427,7 @@ discovery ingestion pipeline get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery Ingestion's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
 
 Usage: `discovery ingestion pipeline store [<file>...] [flags]`
 
@@ -1625,7 +1625,7 @@ discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --execution 0f
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery Ingestion's seeds. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple seeds. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery Ingestion's seeds. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple seeds. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
 
 Usage: `discovery ingestion seed store [<file>...] [flags]`
 
@@ -1766,13 +1766,20 @@ Examples:
 ```bash
 # Halt all active seed executions
 discovery ingestion seed halt 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
-{"id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","status":202}
+[
+  {
+    "id": "b1224864-394b-4912-99ef-c52d9b001cf2",
+    "status": 202
+  }
+]
 ```
 
 ```bash
 # Halt a single seed execution
 discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Status
@@ -2029,7 +2036,7 @@ discovery queryflow processor get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery QueryFlow's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery QueryFlow's processors. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple processors. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
 
 Usage: `discovery queryflow processor store [<file>...] [flags]`
 
@@ -2162,7 +2169,7 @@ MISSING
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery QueryFlow's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery QueryFlow's pipelines. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple pipelines. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
 
 Usage: `discovery queryflow pipeline store [<file>...] [flags]`
 
@@ -2296,7 +2303,7 @@ discovery queryflow endpoint get -p cn
 ```
 
 ###### Store
-`store` is the command used to create and update Discovery QueryFlow's endpoints. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple endpoints. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time.
+`store` is the command used to create and update Discovery QueryFlow's endpoints. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple endpoints. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
 
 Usage: `discovery queryflow endpoint store [<file>...] [flags]`
 

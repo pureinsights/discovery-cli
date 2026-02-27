@@ -26,7 +26,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			queryflowClient := discoveryPackage.NewQueryFlow(vpr.GetString(profile+".queryflow_url"), vpr.GetString(profile+".queryflow_key"))
-			return commands.StoreCommand(d, queryflowClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, args))
+			return commands.SearchStoreCommand(d, queryflowClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, args))
 		},
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")

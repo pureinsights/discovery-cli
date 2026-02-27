@@ -26,7 +26,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-			return commands.StoreCommand(d, ingestionClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), abortOnError, data, args))
+			return commands.SearchStoreCommand(d, ingestionClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), abortOnError, data, args))
 		},
 		Example: `	# Store a pipeline with the JSON configuration in a file
 	discovery ingestion pipeline store pipelines.json

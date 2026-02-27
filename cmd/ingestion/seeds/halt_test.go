@@ -99,8 +99,85 @@ func TestNewHaltCommand(t *testing.T) {
 					},
 				},
 				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/halt": {
-					StatusCode:  http.StatusOK,
+					StatusCode:  http.StatusMultiStatus,
 					Body:        `[{"id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","status":202}]`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/halt", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			name:      "Halt works when there are no active executions",
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewHaltCommand_Out_NoActiveExecutions",
+			errGolden: "NewHaltCommand_Err_NoActiveExecutions",
+			outBytes:  testutils.Read(t, "NewHaltCommand_Out_NoActiveExecutions"),
+			errBytes:  []byte(nil),
+			execution: "",
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-08-14T18:02:11Z",
+					"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+					"seed": "mongo-seed"
+				},
+				"highlight": {},
+				"singestion": 0.15534057
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 13,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 13,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "MongoDB seed",
+					"labels": [],
+					"active": true,
+					"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c", r.URL.Path)
+					},
+				},
+				"POST:/v2/seed/9ababe08-0b74-4672-bb7c-e7a8227d6d4c/halt": {
+					StatusCode:  http.StatusMultiStatus,
+					Body:        `[]`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
@@ -570,6 +647,7 @@ func TestNewHaltCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
+			vpr.Set("output", "pretty-json")
 			if tc.url {
 				vpr.Set("default.ingestion_url", srv.URL)
 			}
@@ -629,7 +707,7 @@ func TestNewHaltCommand_NoProfileFlag(t *testing.T) {
 
 	vpr := viper.New()
 	vpr.Set("profile", "default")
-	vpr.Set("output", "json")
+	vpr.Set("output", "pretty-json")
 
 	vpr.Set("default.ingestion_url", "test")
 	vpr.Set("default.ingestion_key", "test")

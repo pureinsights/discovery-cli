@@ -26,7 +26,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			queryflowClient := discoveryPackage.NewQueryFlow(vpr.GetString(profile+".queryflow_url"), vpr.GetString(profile+".queryflow_key"))
-			return commands.StoreCommand(d, queryflowClient.Endpoints(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, args))
+			return commands.SearchStoreCommand(d, queryflowClient.Endpoints(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, args))
 		},
 		Example: `	# Store an endpoint with the JSON configuration in a file
 	discovery queryflow endpoint store endpointjsonfile.json

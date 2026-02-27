@@ -1690,7 +1690,7 @@ func Test_ingestion_StatusChecker(t *testing.T) {
 
 // Test_NewIngestion tests the ingestion constructor.
 func Test_NewIngestion(t *testing.T) {
-	i := NewIngestion("http://localhost:12030", "Api Key")
+	i := NewIngestion("http://localhost:12030///", "Api Key")
 
 	assert.Equal(t, "http://localhost:12030/v2", i.Url)
 	assert.Equal(t, "Api Key", i.ApiKey)
