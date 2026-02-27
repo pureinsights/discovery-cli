@@ -19,6 +19,95 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// Test_readDataFromFile tests the readDataFromFile() method.
+func Test_readDataFromFile(t *testing.T) {
+	tests := []struct {
+		name         string
+		file         string
+		expectedJson gjson.Result
+		err          error
+	}{
+		// Working case
+		{
+			name: "A JSON file is correctly read.",
+			file: "testdata/StoreCommand_JSONFile.json",
+			expectedJson: gjson.Parse(`[
+    {
+        "type": "mongo",
+        "name": "label test 1 clone 10",
+        "labels": [
+            {
+                "key": "A",
+                "value": "A"
+            }
+        ],
+        "active": true,
+        "creationTimestamp": "2025-10-17T22:37:57Z",
+        "lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+    },
+    {
+        "type": "mongo",
+        "name": "label test 2",
+        "labels": [
+            {
+                "key": "A",
+                "value": "B"
+            }
+        ],
+        "active": true,
+        "id": "458d245a-6ed2-4c2b-a73f-5540d550a479",
+        "creationTimestamp": "2025-10-17T22:40:15Z",
+        "lastUpdatedTimestamp": "2025-10-17T22:40:15Z"
+    },
+    {
+        "type": "mongo",
+        "name": "label test 1 clone 9",
+        "labels": [
+            {
+                "key": "A",
+                "value": "A"
+            }
+        ],
+        "active": true,
+        "creationTimestamp": "2025-10-17T22:37:56Z",
+        "lastUpdatedTimestamp": "2025-10-17T22:37:56Z"
+    }
+]`),
+			err: nil,
+		},
+
+		// Error cases
+		{
+			name:         "An empty JSON file is read",
+			file:         "testdata/StoreCommand_EmptyFile.json",
+			expectedJson: gjson.Result{},
+			err:          cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
+		},
+		{
+			name:         "An empty JSON file is read",
+			file:         "doesnotexist",
+			expectedJson: gjson.Result{},
+			err:          cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("file does not exist: doesnotexist"), "Could not read file \"doesnotexist\""),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := readDataFromFile(tc.file)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedJson, result)
+			}
+		})
+	}
+}
+
 // TestStoreCommandConfig tests the StoreCommandConfig() function.
 func TestStoreCommandConfig(t *testing.T) {
 	base := commandConfig{
@@ -44,6 +133,71 @@ func TestStoreCommandConfig(t *testing.T) {
 	assert.True(t, got.abortOnError)
 	assert.Equal(t, data, got.data)
 	assert.Equal(t, files, got.files)
+}
+
+// Test_prepareStoreCommand tests the prepareStoreCommand method.
+func Test_prepareStoreCommand(t *testing.T) {
+	tests := []struct {
+		name           string
+		url            string
+		output         string
+		expectedOutput string
+		err            error
+	}{
+		// Working case
+		{
+			name:           "Converts the pretty-printer to the ugly printer",
+			url:            "http://localhost:12010/v2",
+			output:         "pretty-json",
+			expectedOutput: `{"active":true,"content":{"mechanism":"SCRAM-SHA-1","password":"password","username":"user"},"name":"test-secret"}` + "\n",
+			err:            nil,
+		},
+		{
+			name:           "Keeps the ugly printer as is",
+			url:            "http://localhost:12010/v2",
+			output:         "json",
+			expectedOutput: `{"active":true,"content":{"mechanism":"SCRAM-SHA-1","password":"password","username":"user"},"name":"test-secret"}` + "\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name: "CheckCredentials fails",
+			url:  "",
+			err:  cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: buf,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			vpr.Set("profile", "default")
+			if tc.url != "" {
+				vpr.Set("default.core_url", tc.url)
+			}
+
+			d := cli.NewDiscovery(&ios, vpr, "")
+			printer, err := prepareStoreCommand(d, StoreCommandConfig(GetCommandConfig("default", tc.output, "Core", "core_url"), false, "", []string{}))
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				printer(ios, gjson.Parse(`{"name":"test-secret","active":true,"content":{"mechanism":"SCRAM-SHA-1","username":"user","password":"password"}}`))
+				assert.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
 }
 
 // TestStoreCommand tests the StoreCommand() function.
@@ -224,6 +378,198 @@ func TestStoreCommand(t *testing.T) {
 
 			d := cli.NewDiscovery(&ios, vpr, "")
 			err := StoreCommand(d, tc.client, StoreCommandConfig(GetCommandConfig("default", "pretty-json", tc.componentName, "core_url"), tc.abortOnError, tc.data, tc.files))
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
+
+// TestSearchStoreCommand tests the SearchStoreCommand() function.
+func TestSearchStoreCommand(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         cli.SearchCreator
+		url            string
+		apiKey         string
+		componentName  string
+		abortOnError   bool
+		data           string
+		files          []string
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "SearchUpsertEntities correctly prints the array",
+			url:            "http://localhost:12010/v2",
+			apiKey:         "",
+			componentName:  "Core",
+			client:         new(mocks.WorkingSearchCreatorObjectNotExists),
+			abortOnError:   false,
+			data:           "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
+			files:          []string{},
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			err:            nil,
+		},
+		{
+			name:           "UpsertEntities correctly reads multiple files and prints the array",
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			client:         new(mocks.WorkingSearchCreatorObjectExists),
+			abortOnError:   false,
+			data:           "",
+			files:          []string{"testdata/StoreCommand_JSONFile.json", "testdata/StoreCommand_JSONFile2.json"},
+			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name:          "CheckCredentials fails",
+			client:        new(mocks.WorkingSearchCreatorObjectExists),
+			url:           "",
+			apiKey:        "core123",
+			componentName: "Core",
+			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
+			err:           cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
+		},
+		{
+			name:           "UpsertEntities returns 404 Not Found",
+			client:         new(mocks.FailingSearchCreator),
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			abortOnError:   true,
+			data:           "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
+			files:          []string{},
+			expectedOutput: "",
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+  ],
+  "timestamp": "2025-10-29T14:47:36.290329Z"
+}`)}, "Could not store entities"),
+		},
+		{
+			name:           "UpsertEntities returns 404 Not Found when using file arguments",
+			client:         new(mocks.FailingSearchCreator),
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			abortOnError:   true,
+			data:           "",
+			files:          []string{"testdata/StoreCommand_JSONFile.json"},
+			expectedOutput: "",
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 400,
+  "code": 3002,
+  "messages": [
+    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
+  ],
+  "timestamp": "2025-10-29T14:46:48.055840300Z"
+}`)}, "Could not store entities"),
+		},
+		{
+			name:           "StoreCommand reads an empty file",
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			client:         new(mocks.WorkingSearchCreatorObjectExists),
+			abortOnError:   false,
+			data:           "",
+			files:          []string{"testdata/StoreCommand_EmptyFile.json"},
+			expectedOutput: "",
+			err:            cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
+		},
+		{
+			name:           "StoreCommand receives both files and data",
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			client:         new(mocks.WorkingSearchCreatorObjectExists),
+			abortOnError:   false,
+			data:           "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
+			files:          []string{"testdata/StoreCommand_JSONFile.json"},
+			expectedOutput: "",
+			err:            cli.NewError(cli.ErrorExitCode, "There cannot be both a file argument and the data flag"),
+		},
+		{
+			name:           "StoreCommand receives empty data",
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			client:         new(mocks.WorkingSearchCreatorObjectExists),
+			abortOnError:   false,
+			data:           "",
+			files:          []string{},
+			expectedOutput: "",
+			err:            cli.NewError(cli.ErrorExitCode, "Data cannot be empty"),
+		},
+		{
+			name:           "StoreCommand tries to read a file that does not exist",
+			url:            "http://localhost:12010/v2",
+			apiKey:         "core123",
+			componentName:  "Core",
+			client:         new(mocks.WorkingSearchCreatorObjectExists),
+			abortOnError:   false,
+			data:           "",
+			files:          []string{"doesnotexist"},
+			expectedOutput: "",
+			err:            cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("file does not exist: doesnotexist"), "Could not read file \"doesnotexist\""),
+		},
+		{
+			name:          "Printing Array fails",
+			client:        new(mocks.WorkingSearchCreatorObjectExists),
+			url:           "http://localhost:12010/v2",
+			apiKey:        "core123",
+			componentName: "Core",
+			abortOnError:  false,
+			data:          "[{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"},{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}]",
+			files:         []string{},
+			outWriter:     testutils.ErrWriter{Err: errors.New("write failed")},
+			err:           cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print JSON Array"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			vpr := viper.New()
+			vpr.Set("profile", "default")
+			if tc.url != "" {
+				vpr.Set("default.core_url", tc.url)
+			}
+			if tc.apiKey != "" {
+				vpr.Set("default.core_key", tc.apiKey)
+			}
+
+			d := cli.NewDiscovery(&ios, vpr, "")
+			err := SearchStoreCommand(d, tc.client, StoreCommandConfig(GetCommandConfig("default", "pretty-json", tc.componentName, "core_url"), tc.abortOnError, tc.data, tc.files))
 
 			if tc.err != nil {
 				require.Error(t, err)

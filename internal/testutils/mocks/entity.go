@@ -501,6 +501,125 @@ func (g *FailingCreatorCreateWorksUpdateFails) Update(uuid.UUID, gjson.Result) (
 	return gjson.Result{}, errors.New(`invalid UUID length: 4`)
 }
 
+// WorkingSearchCreatorObjectNotExists mocks when the user sends an entity with no ID and the search by name fails
+type WorkingSearchCreatorObjectNotExists struct {
+	FailingSearcher
+}
+
+// Create returns a JSON as if it worked successfully.
+func (g *WorkingSearchCreatorObjectNotExists) Create(gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// Update returns a JSON as if it worked successfully.
+func (g *WorkingSearchCreatorObjectNotExists) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// WorkingSearchCreatorObjectExists mocks when the user sends an entity with no ID and the search by name succeeds, so the object is updated
+type WorkingSearchCreatorObjectExists struct {
+	WorkingSearcher
+}
+
+// Create returns a JSON as if it worked successfully.
+func (g *WorkingSearchCreatorObjectExists) Create(gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// Update returns a JSON as if it worked successfully.
+func (g *WorkingSearchCreatorObjectExists) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// FailingSearchCreator mocks when creating and updating entities fails.
+type FailingSearchCreator struct {
+	FailingSearcher
+}
+
+// Create returns a JSON as if it worked successfully.
+func (g *FailingSearchCreator) Create(gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 400,
+  "code": 3002,
+  "messages": [
+    "Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]"
+  ],
+  "timestamp": "2025-10-29T14:46:48.055840300Z"
+}`)}
+}
+
+// Update returns a JSON error.
+func (g *FailingSearchCreator) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusBadRequest, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+  ],
+  "timestamp": "2025-10-29T14:47:36.290329Z"
+}`)}
+}
+
+// FailingCreator mocks when creating and updating entities fails.
+type FailingSearchCreatorCreateWorksUpdateFails struct {
+	FailingSearcher
+}
+
+// Create returns a JSON error.
+func (g *FailingSearchCreatorCreateWorksUpdateFails) Create(gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{
+		"type": "mongo",
+		"name": "MongoDB credential",
+		"labels": [],
+		"active": true,
+		"id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+		"creationTimestamp": "2025-08-14T18:02:11Z",
+		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
+		"secret": "mongo-secret"
+	}`), nil
+}
+
+// Update returns an error that is not a Discovery.Error
+func (g *FailingSearchCreatorCreateWorksUpdateFails) Update(uuid.UUID, gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, errors.New(`invalid UUID length: 4`)
+}
+
 // WorkingDeleter mocks when the deleter interface works correctly.
 type WorkingDeleter struct{}
 
