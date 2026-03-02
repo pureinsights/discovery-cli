@@ -2146,26 +2146,89 @@ Examples:
 
 ```bash
 # Get a pipeline by id
-discovery queryflow pipeline get 04536687-f083-4353-8ecc-b7348e14b748
-MISSING
+discovery queryflow pipeline get 782bfece-20a2-4382-bacb-1c9c550e2d58
+{
+  "active": true,
+  "creationTimestamp": "2026-03-02T15:13:48Z",
+  "id": "782bfece-20a2-4382-bacb-1c9c550e2d58",
+  "initialState": "searchState",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-03-02T15:13:48Z",
+  "name": "my-pipeline",
+  "states": {
+    "responseState": {
+      "type": "message"
+    },
+    "searchState": {
+      "mode": {
+        "type": "group"
+      },
+      "next": "responseState",
+      "processors": [
+        {
+          "active": true,
+          "id": "38c35b42-56c2-42b3-85c5-b6dcd10b360b"
+        },
+        {
+          "active": true,
+          "id": "4048e82c-efe9-437f-bfb1-e141e7335a53"
+        }
+      ],
+      "type": "processor"
+    }
+  }
+}
 ```
 
 ```bash
 # Get pipeline by name
 discovery queryflow pipeline get "my-pipeline"
-MISSING
+{
+  "active": true,
+  "creationTimestamp": "2026-03-02T15:13:48Z",
+  "id": "782bfece-20a2-4382-bacb-1c9c550e2d58",
+  "initialState": "searchState",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-03-02T15:13:48Z",
+  "name": "my-pipeline",
+  "states": {
+    "responseState": {
+      "type": "message"
+    },
+    "searchState": {
+      "mode": {
+        "type": "group"
+      },
+      "next": "responseState",
+      "processors": [
+        {
+          "active": true,
+          "id": "38c35b42-56c2-42b3-85c5-b6dcd10b360b"
+        },
+        {
+          "active": true,
+          "id": "4048e82c-efe9-437f-bfb1-e141e7335a53"
+        }
+      ],
+      "type": "processor"
+    }
+  }
+}
 ```
 
 ```bash
 # Get pipelines using filters
 discovery queryflow pipeline get --filter label=A:A
-MISSING
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-02T15:40:32Z","name":"my-pipeline"}
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-02T15:40:32Z","name":"my-pipeline-2"}
 ```
 
 ```bash
 # Get all pipelines using the configuration in profile "cn"
 discovery queryflow pipeline get -p cn
-MISSING
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-02T15:40:32Z","name":"my-pipeline"}
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-02T15:40:32Z","name":"my-pipeline-2"}
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"4048e82c-efe9-437f-bfb1-e141e7335a53","labels":[],"lastUpdatedTimestamp":"2026-03-02T15:40:32Z","name":"my-pipeline-3"}
 ```
 
 ###### Store
@@ -2197,13 +2260,13 @@ Examples:
 ```bash
 # Store a pipeline with the JSON configuration in a file
 discovery queryflow pipeline store pipelines.json
-MISSING
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":{"responseState":{"type":"message"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
 ```
 
 ```bash
 # Store a pipeline with the JSON configuration in the data flag
-discovery queryflow pipeline store --data 'MISSING'
-MISSING
+discovery queryflow pipeline store --data '{"name":"my-pipeline","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"next":"responseState"},"responseState":{"type":"message","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":{"responseState":{"type":"message"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
 ```
 
 ###### Delete
@@ -2278,14 +2341,38 @@ Examples:
 
 ```bash
 # Get an endpoint by id
-discovery queryflow endpoint get cf56470f-0ab4-4754-b05c-f760669315af
-{"active":true,"creationTimestamp":"2025-11-06T16:24:40Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-06T16:24:40Z","name":"my-endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
+discovery queryflow endpoint get 75c24eb5-657d-4258-b592-b5454396924f
+{
+  "active": true,
+  "creationTimestamp": "2026-03-02T15:23:01Z",
+  "httpMethod": "GET",
+  "id": "75c24eb5-657d-4258-b592-b5454396924f",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-03-02T15:23:01Z",
+  "name": "my-endpoint",
+  "pipeline": "782bfece-20a2-4382-bacb-1c9c550e2d58",
+  "timeout": "PT1M",
+  "type": "default",
+  "uri": "/my/endpoint"
+}
 ```
 
 ```bash
 # Get an endpoint by name
 discovery queryflow endpoint get "my-endpoint"
-{"active":true,"creationTimestamp":"2025-11-20T00:08:26Z","httpMethod":"GET","id":"4ef9da31-2ba6-442c-86bb-1c9566dac4c2","initialState":"searchState","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:26Z","name":"my-endpoint","states":{"searchState":{"mode":{"type":"group"},"processors":[{"active":true,"continueOnError":false,"id":"5f125024-1e5e-4591-9fee-365dc20eeeed"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/blogs-search"}
+{
+  "active": true,
+  "creationTimestamp": "2026-03-02T15:23:01Z",
+  "httpMethod": "GET",
+  "id": "75c24eb5-657d-4258-b592-b5454396924f",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-03-02T15:23:01Z",
+  "name": "my-endpoint",
+  "pipeline": "782bfece-20a2-4382-bacb-1c9c550e2d58",
+  "timeout": "PT1M",
+  "type": "default",
+  "uri": "/my/endpoint"
+}
 ```
 
 ```bash
@@ -2331,15 +2418,15 @@ Examples:
 ```bash
 # Store an endpoint with the JSON configuration in a file
 discovery queryflow endpoint store endpointjsonfile.json
-{"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"my-endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
+{"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"my-endpoint","pipeline":"782bfece-20a2-4382-bacb-1c9c550e2d58","timeout":"PT1H","type":"default","uri":"/wikis-search"}
 {"code":1003,"messages":["Entity not found: 2fee5e27-4147-48de-ba1e-d7f32476a4a3"],"status":404,"timestamp":"2025-11-20T00:37:02.827065700Z"}
-{"active":true,"creationTimestamp":"2025-11-20T00:37:02.857266Z","httpMethod":"GET","id":"7324b140-3240-4e67-90cb-9ffe5e7f574b","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:37:02.857266Z","name":"my-endpoint-3","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/blog-search"}
+{"active":true,"creationTimestamp":"2025-11-20T00:37:02.857266Z","httpMethod":"GET","id":"7324b140-3240-4e67-90cb-9ffe5e7f574b","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:37:02.857266Z","name":"my-endpoint-3","pipeline":"727c810e-4eb0-4611-b3b6-26c621170895","timeout":"PT1H","type":"default","uri":"/blog-search"}
 ```
 
 ```bash
 # Store an endpoint with the JSON configuration in the data flag
-discovery queryflow endpoint store --data '{"type":"default","name":"my-endpoint","labels":[{"key":"A","value":"B"}],"active":true,"id":"cf56470f-0ab4-4754-b05c-f760669315af","creationTimestamp":"2025-11-20T00:10:53Z","lastUpdatedTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","uri":"/wikis-search","timeout":"PT1H","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89","continueOnError":false,"active":true},{"id":"a5ee116b-bd95-474e-9d50-db7be988b196","continueOnError":false,"active":true},{"id":"86e7f920-a4e4-4b64-be84-5437a7673db8","continueOnError":false,"active":true},{"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer","continueOnError":false,"active":true}],"mode":{"type":"group"},"next":"responseState"},"responseState":{"type":"response","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'
-{"active":true,"creationTimestamp":"2025-11-20T00:10:53Z","httpMethod":"GET","id":"cf56470f-0ab4-4754-b05c-f760669315af","initialState":"searchState","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-11-20T00:10:53Z","name":"my-endpoint","states":{"responseState":{"body":{"answer":"#{ data('/answer/choices/0/message/content') }"},"statusCode":200,"type":"response"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"continueOnError":false,"id":"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89"},{"active":true,"continueOnError":false,"id":"a5ee116b-bd95-474e-9d50-db7be988b196"},{"active":true,"continueOnError":false,"id":"86e7f920-a4e4-4b64-be84-5437a7673db8"},{"active":true,"continueOnError":false,"id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","outputField":"answer"}],"type":"processor"}},"timeout":"PT1H","type":"default","uri":"/wikis-search"}
+discovery queryflow endpoint store --data '{"type":"default","uri":"/my/endpoint","httpMethod":"GET","name":"my-endpoint","pipeline":"782bfece-20a2-4382-bacb-1c9c550e2d58","timeout":"60s"}'
+{"active":true,"creationTimestamp":"2026-03-02T15:27:55Z","httpMethod":"GET","id":"727c810e-4eb0-4611-b3b6-26c621170895","lastUpdatedTimestamp":"2026-03-02T15:31:58.124477Z","name":"my-endpoint","pipeline":"782bfece-20a2-4382-bacb-1c9c550e2d58","timeout":"PT1M","type":"default","uri":"/my/endpoint"}
 ```
 
 ###### Delete
