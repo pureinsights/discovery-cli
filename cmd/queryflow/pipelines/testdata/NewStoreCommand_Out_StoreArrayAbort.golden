@@ -2,6 +2,13 @@
 Usage:
   store [<files>...] [flags]
 
+Examples:
+	# Store a pipeline with the JSON configuration in a file
+	discovery queryflow pipeline store pipelines.json
+
+	# Store a pipeline with the JSON configuration in the data flag
+	discovery queryflow pipeline store --data '{"name":"my-pipeline","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"next":"responseState"},"responseState":{"type":"message","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'
+
 Flags:
       --abort-on-error   aborts the operation if there is an error
   -d, --data string      the JSON with the configurations that will be upserted

@@ -28,6 +28,11 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			queryflowClient := discoveryPackage.NewQueryFlow(vpr.GetString(profile+".queryflow_url"), vpr.GetString(profile+".queryflow_key"))
 			return commands.SearchStoreCommand(d, queryflowClient.Pipelines(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), abortOnError, data, args))
 		},
+		Example: `	# Store a pipeline with the JSON configuration in a file
+	discovery queryflow pipeline store pipelines.json
+
+	# Store a pipeline with the JSON configuration in the data flag
+	discovery queryflow pipeline store --data '{"name":"my-pipeline","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"next":"responseState"},"responseState":{"type":"message","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")

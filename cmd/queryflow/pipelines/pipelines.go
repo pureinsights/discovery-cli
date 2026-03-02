@@ -12,7 +12,9 @@ func NewPipelineCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command to interact with Discovery QueryFlow's pipelines.",
 	}
 
+	pipeline.AddCommand(NewStoreCommand(d))
 	pipeline.AddCommand(NewGetCommand(d))
+	pipeline.AddCommand(NewDeleteCommand(d))
 
 	return pipeline
 }

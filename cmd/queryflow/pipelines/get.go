@@ -28,6 +28,14 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			return commands.SearchCommand(args, d, queryflowClient.Pipelines(), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
+		Example: `	# Get pipeline by name
+	discovery queryflow pipeline get "my-pipeline"
+
+	# Get pipelines using filters
+	discovery queryflow pipeline get --filter label=A:A
+
+	# Get all pipelines using the configuration in profile "cn"
+	discovery queryflow pipeline get -p cn`,
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
