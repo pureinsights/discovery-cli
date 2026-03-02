@@ -73,8 +73,9 @@ jobs:
           echo "Building version $VERSION"
 
           go build -v \
-            -ldflags "-X 'github.com/pureinsights/discovery-cli/cmd/version.Version=$VERSION'" \
-            ./...
+            -ldflags "-X github.com/pureinsights/discovery-cli/cmd/version.Version=$VERSION" \
+            -o build/discovery \
+            ./cmd/discovery
 
       - name: Unit tests (race + coverage)
         run: |
