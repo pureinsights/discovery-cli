@@ -67,7 +67,14 @@ jobs:
         run: go vet ./...
 
       - name: Build the Go application
-        run: go build -v ./...
+        run: |
+          VERSION=$(awk -F= '/^version.semver=/{print $2}' semver.properties)
+
+          echo "Building version $VERSION"
+
+          go build -v \
+            -ldflags "-X 'github.com/pureinsights/discovery-cli/cmd/version.Version=$VERSION'" \
+            ./cmd/discovery
 
       - name: Unit tests (race + coverage)
         run: |

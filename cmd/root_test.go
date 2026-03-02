@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"testing"
 
+	"github.com/pureinsights/discovery-cli/cmd/version"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/viper"
@@ -56,8 +57,31 @@ func Test_newRootCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "core", "export", "import", "ingestion", "queryflow", "staging", "status"}
+	expectedCommands := []string{"config", "core", "export", "import", "ingestion", "queryflow", "staging", "status", "version"}
 	assert.Equal(t, expectedCommands, commandNames)
+}
+
+// Test_newRootCommand_versionFlag tests when the discovery command is run with the version flag.
+func Test_newRootCommand_versionFlag(t *testing.T) {
+	in := strings.NewReader("In Reader")
+	out := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	dir := t.TempDir()
+	vpr := viper.New()
+	vpr.SetDefault("profile", "default")
+	version.Version = "2.7.1"
+	d := cli.NewDiscovery(&ios, vpr, dir)
+	discoveryCmd := newRootCommand(d)
+	discoveryCmd.SetArgs([]string{"--version"})
+	err := discoveryCmd.Execute()
+	assert.Nil(t, err)
+	assert.Equal(t, "Discovery CLI Version 2.7.1\n", out.String())
 }
 
 // TestRun_SetDiscoveryDirFails tests the Run function when the SetDiscoveryDir() function fails.
