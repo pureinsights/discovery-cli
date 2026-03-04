@@ -57,7 +57,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/entrypoint/endpoint": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -72,7 +72,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 					},
 				},
 			},
@@ -128,7 +128,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/entrypoint/endpoint": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -143,11 +143,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -160,11 +160,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -179,11 +179,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -218,10 +218,10 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 					},
 				},
-				"GET:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"GET:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 				"type": "openai",
@@ -236,7 +236,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 					},
 				},
 			},
@@ -254,7 +254,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "testdata/StoreCommand_JSONFile.json",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/entrypoint/endpoint": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -269,11 +269,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -286,11 +286,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -305,7 +305,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -376,7 +376,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/entrypoint/endpoint": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -391,11 +391,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+				"PUT:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 					StatusCode: http.StatusNotFound,
 					Body: `{
 					"status": 404,
@@ -407,11 +407,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+				"PUT:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "openai",
@@ -426,7 +426,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPut, r.Method)
-						assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -498,7 +498,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/entrypoint/endpoint": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -512,7 +512,7 @@ func TestNewStoreCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -540,7 +540,7 @@ func TestNewStoreCommand(t *testing.T) {
 			file:         "",
 			abortOnError: true,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint": {
+				"POST:/v2/entrypoint/endpoint": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -555,7 +555,7 @@ func TestNewStoreCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -642,7 +642,7 @@ func TestNewStoreCommand(t *testing.T) {
 // TestNewStoreCommand_MultipleFiles tests what happens if the user sends multiple files as arguments.
 func TestNewStoreCommand_MultipleFiles(t *testing.T) {
 	responses := map[string]testutils.MockResponse{
-		"POST:/v2/endpoint": {
+		"POST:/v2/entrypoint/endpoint": {
 			StatusCode: http.StatusOK,
 			Body: `{
 			"type": "mongo",
@@ -657,11 +657,11 @@ func TestNewStoreCommand_MultipleFiles(t *testing.T) {
 			ContentType: "application/json",
 			Assertions: func(t *testing.T, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
-				assert.Equal(t, "/v2/endpoint", r.URL.Path)
+				assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 				assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 			},
 		},
-		"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
+		"PUT:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d": {
 			StatusCode: http.StatusNotFound,
 			Body: `{
 			"status": 404,
@@ -674,11 +674,11 @@ func TestNewStoreCommand_MultipleFiles(t *testing.T) {
 			ContentType: "application/json",
 			Assertions: func(t *testing.T, r *http.Request) {
 				assert.Equal(t, http.MethodPut, r.Method)
-				assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
+				assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6d4d", r.URL.Path)
 				assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 			},
 		},
-		"PUT:/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
+		"PUT:/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad": {
 			StatusCode: http.StatusOK,
 			Body: `{
 			"type": "openai",
@@ -693,11 +693,11 @@ func TestNewStoreCommand_MultipleFiles(t *testing.T) {
 			ContentType: "application/json",
 			Assertions: func(t *testing.T, r *http.Request) {
 				assert.Equal(t, http.MethodPut, r.Method)
-				assert.Equal(t, "/v2/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
+				assert.Equal(t, "/v2/entrypoint/endpoint/9ababe08-0b74-4672-bb7c-e7a8227d6dad", r.URL.Path)
 				assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 			},
 		},
-		"PUT:/v2/endpoint/2fba75cd-e5dc-454f-b028-a505f0c690b2": {
+		"PUT:/v2/entrypoint/endpoint/2fba75cd-e5dc-454f-b028-a505f0c690b2": {
 			StatusCode: http.StatusOK,
 			Body: `{
 				"type": "mongo",
@@ -712,11 +712,11 @@ func TestNewStoreCommand_MultipleFiles(t *testing.T) {
 			ContentType: "application/json",
 			Assertions: func(t *testing.T, r *http.Request) {
 				assert.Equal(t, http.MethodPut, r.Method)
-				assert.Equal(t, "/v2/endpoint/2fba75cd-e5dc-454f-b028-a505f0c690b2", r.URL.Path)
+				assert.Equal(t, "/v2/entrypoint/endpoint/2fba75cd-e5dc-454f-b028-a505f0c690b2", r.URL.Path)
 				assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 			},
 		},
-		"PUT:/v2/endpoint/77cd87e5-5c29-4960-9058-4a2eda0c513f": {
+		"PUT:/v2/entrypoint/endpoint/77cd87e5-5c29-4960-9058-4a2eda0c513f": {
 			StatusCode: http.StatusOK,
 			Body: `{
 				"type": "openai",
@@ -731,7 +731,7 @@ func TestNewStoreCommand_MultipleFiles(t *testing.T) {
 			ContentType: "application/json",
 			Assertions: func(t *testing.T, r *http.Request) {
 				assert.Equal(t, http.MethodPut, r.Method)
-				assert.Equal(t, "/v2/endpoint/77cd87e5-5c29-4960-9058-4a2eda0c513f", r.URL.Path)
+				assert.Equal(t, "/v2/entrypoint/endpoint/77cd87e5-5c29-4960-9058-4a2eda0c513f", r.URL.Path)
 				assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 			},
 		},

@@ -43,7 +43,7 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchByNameReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -104,10 +104,10 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 					},
 				},
-				"GET:/v2/endpoint/3b32e410-2f33-412d-9fb8-17970131921c": {
+				"GET:/v2/entrypoint/endpoint/3b32e410-2f33-412d-9fb8-17970131921c": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -126,7 +126,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
 					},
 				},
 			},
@@ -142,7 +142,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"GET:/v2/endpoint": {
+				"GET:/v2/entrypoint/endpoint": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -186,7 +186,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -203,7 +203,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
@@ -260,7 +260,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -290,13 +290,13 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewGetCommand_Out_NameDoesNotExist"),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"/v2/endpoint/search": {
+				"/v2/entrypoint/endpoint/search": {
 					StatusCode:  http.StatusNoContent,
 					Body:        ``,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -322,7 +322,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode: http.StatusInternalServerError,
 					Body: `{
 			"status": 500,
@@ -335,7 +335,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -359,13 +359,13 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"GET:/v2/endpoint": {
+				"GET:/v2/entrypoint/endpoint": {
 					StatusCode:  http.StatusUnauthorized,
 					Body:        `{"error": "unauthorized"}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -382,7 +382,7 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchHTTPError"),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_SearchHTTPError"),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode: http.StatusUnauthorized,
 					Body: `{
 	"status": 401,
@@ -395,7 +395,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -422,13 +422,13 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewGetCommand_Out_FilterDoesNotExist"),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_FilterDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode:  http.StatusBadRequest,
 					Body:        ``,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -445,7 +445,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -482,11 +482,11 @@ func TestNewGetCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"GET:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -505,7 +505,7 @@ func TestNewGetCommand(t *testing.T) {
 				}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -522,7 +522,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"GET:/v2/endpoint": {
+				"GET:/v2/entrypoint/endpoint": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","endpoints":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}},     
@@ -545,7 +545,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
