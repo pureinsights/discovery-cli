@@ -49,13 +49,13 @@ func Test_newEndpointsClient(t *testing.T) {
 	qec := newEndpointsClient(url, apiKey)
 
 	assert.Equal(t, apiKey, qec.crud.client.ApiKey)
-	assert.Equal(t, url+"/endpoint", qec.crud.client.client.BaseURL)
+	assert.Equal(t, url+"/entrypoint/endpoint", qec.crud.client.client.BaseURL)
 	assert.Equal(t, apiKey, qec.cloner.client.ApiKey)
-	assert.Equal(t, url+"/endpoint", qec.cloner.client.client.BaseURL)
+	assert.Equal(t, url+"/entrypoint/endpoint", qec.cloner.client.client.BaseURL)
 	assert.Equal(t, apiKey, qec.enabler.client.ApiKey)
-	assert.Equal(t, url+"/endpoint", qec.enabler.client.client.BaseURL)
+	assert.Equal(t, url+"/entrypoint/endpoint", qec.enabler.client.client.BaseURL)
 	assert.Equal(t, apiKey, qec.searcher.client.ApiKey)
-	assert.Equal(t, url+"/endpoint", qec.searcher.client.client.BaseURL)
+	assert.Equal(t, url+"/entrypoint/endpoint", qec.searcher.client.client.BaseURL)
 }
 
 // Test_queryFlow_Processors tests the queryFlow.Processors() function.
@@ -90,13 +90,13 @@ func Test_queryFlow_Endpoints(t *testing.T) {
 	qec := q.Endpoints()
 
 	assert.Equal(t, q.ApiKey, qec.crud.client.ApiKey)
-	assert.Equal(t, q.Url+"/endpoint", qec.crud.client.client.BaseURL)
+	assert.Equal(t, q.Url+"/entrypoint/endpoint", qec.crud.client.client.BaseURL)
 	assert.Equal(t, q.ApiKey, qec.cloner.client.ApiKey)
-	assert.Equal(t, q.Url+"/endpoint", qec.cloner.client.client.BaseURL)
+	assert.Equal(t, q.Url+"/entrypoint/endpoint", qec.cloner.client.client.BaseURL)
 	assert.Equal(t, q.ApiKey, qec.enabler.client.ApiKey)
-	assert.Equal(t, q.Url+"/endpoint", qec.enabler.client.client.BaseURL)
+	assert.Equal(t, q.Url+"/entrypoint/endpoint", qec.enabler.client.client.BaseURL)
 	assert.Equal(t, q.ApiKey, qec.searcher.client.ApiKey)
-	assert.Equal(t, q.Url+"/endpoint", qec.searcher.client.client.BaseURL)
+	assert.Equal(t, q.Url+"/entrypoint/endpoint", qec.searcher.client.client.BaseURL)
 }
 
 // Test_queryFlow_BackupRestore tests the queryFlow.BackupRestore() function.
