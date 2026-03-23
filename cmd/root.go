@@ -10,6 +10,7 @@ import (
 	"github.com/pureinsights/discovery-cli/cmd/queryflow"
 	"github.com/pureinsights/discovery-cli/cmd/staging"
 	"github.com/pureinsights/discovery-cli/cmd/statuscheck"
+	"github.com/pureinsights/discovery-cli/cmd/version"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/spf13/cobra"
@@ -46,6 +47,9 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery.AddCommand(queryflow.NewQueryFlowCommand(d))
 	discovery.AddCommand(staging.NewStagingCommand(d))
 	discovery.AddCommand(statuscheck.NewStatusCommand(d))
+	discovery.AddCommand(version.NewVersionCommand(d))
+	discovery.Version = version.Version
+	discovery.SetVersionTemplate("Discovery CLI Version {{.Version}}\n")
 
 	return discovery
 }

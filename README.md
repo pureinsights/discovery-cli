@@ -106,11 +106,20 @@ Flags:
 `-p, --profile`::
 (Optional, string) Set the configuration profile that will execute the command.
 
+`-v, --version`::
+(Optional, bool) Prints the current version of the Discovery CLI
+
 Examples:
 
 ```bash
-# Print Discovery's help
+# Print the Discovery CLI's help
 discovery -h
+```
+
+```bash
+# Print the Discovery CLI's version
+discovery --version
+Discovery CLI Version 2.7.1
 ```
 
 #### Config
@@ -2758,4 +2767,17 @@ discovery staging status -p cn
 {
   "status": "UP"
 }
+```
+
+#### Version
+`version` is the command used to print the current version of the Discovery CLI.
+
+Usage: `discovery version`
+
+Example:
+
+```bash
+# Check the current version of the Discovery CLI
+discovery version
+Discovery CLI Version 2.7.1
 ```
