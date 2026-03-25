@@ -40,6 +40,22 @@ func Test_newSeedRecordsClient(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/record", ingestionSeedRecordsClient.summarizer.client.client.BaseURL)
 }
 
+// Test_newSeedSchedulesClient tests the constructor of seedSchedulesClient.
+func Test_newSeedSchedulesClient(t *testing.T) {
+	url := "http://localhost:12030"
+	apiKey := "Api Key"
+	seedSchedulesClient := newSeedSchedulesClient(url, apiKey)
+
+	assert.Equal(t, apiKey, seedSchedulesClient.crud.client.ApiKey)
+	assert.Equal(t, url+"/seed/schedule", seedSchedulesClient.crud.client.client.BaseURL)
+	assert.Equal(t, apiKey, seedSchedulesClient.cloner.client.ApiKey)
+	assert.Equal(t, url+"/seed/schedule", seedSchedulesClient.cloner.client.client.BaseURL)
+	assert.Equal(t, apiKey, seedSchedulesClient.enabler.client.ApiKey)
+	assert.Equal(t, url+"/seed/schedule", seedSchedulesClient.enabler.client.client.BaseURL)
+	assert.Equal(t, apiKey, seedSchedulesClient.searcher.client.ApiKey)
+	assert.Equal(t, url+"/seed/schedule", seedSchedulesClient.searcher.client.client.BaseURL)
+}
+
 // Test_newSeedExecutionRecordsClient tests the constructor of seedExecutionRecordsClient.
 func Test_newSeedExecutionRecordsClient(t *testing.T) {
 	url := "http://localhost:12030"
@@ -1642,6 +1658,21 @@ func Test_ingestion_Processors(t *testing.T) {
 	assert.Equal(t, i.Url+"/processor", ipc.cloner.client.client.BaseURL)
 	assert.Equal(t, i.ApiKey, ipc.searcher.client.ApiKey)
 	assert.Equal(t, i.Url+"/processor", ipc.searcher.client.client.BaseURL)
+}
+
+// Test_ingestion_SeedSchedules tests the ingestion.SeedSchedules() function.
+func Test_ingestion_SeedSchedules(t *testing.T) {
+	i := NewIngestion("http://localhost:12030", "Api Key")
+	seedSchedulesClient := i.SeedSchedules()
+
+	assert.Equal(t, i.ApiKey, seedSchedulesClient.crud.client.ApiKey)
+	assert.Equal(t, i.Url+"/seed/schedule", seedSchedulesClient.crud.client.client.BaseURL)
+	assert.Equal(t, i.ApiKey, seedSchedulesClient.cloner.client.ApiKey)
+	assert.Equal(t, i.Url+"/seed/schedule", seedSchedulesClient.cloner.client.client.BaseURL)
+	assert.Equal(t, i.ApiKey, seedSchedulesClient.enabler.client.ApiKey)
+	assert.Equal(t, i.Url+"/seed/schedule", seedSchedulesClient.enabler.client.client.BaseURL)
+	assert.Equal(t, i.ApiKey, seedSchedulesClient.searcher.client.ApiKey)
+	assert.Equal(t, i.Url+"/seed/schedule", seedSchedulesClient.searcher.client.client.BaseURL)
 }
 
 // Test_ingestion_Pipelines tests the ingestion.Pipelines() function.

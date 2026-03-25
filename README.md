@@ -1270,7 +1270,7 @@ Flags:
 (Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
-- 
+
 Examples:
 
 ```bash
