@@ -62,6 +62,35 @@ func (src seedRecordsClient) GetAll() ([]gjson.Result, error) {
 	return executeWithPagination(src.client, http.MethodGet, "")
 }
 
+// seedSchedulesClient is the struct that performs the CRUD and cloning of seed schedules.
+type seedSchedulesClient struct {
+	crud
+	cloner
+	searcher
+	enabler
+}
+
+// newSeedSchedulesClient is the constructor of an seedSchedulesClient.
+func newSeedSchedulesClient(url, apiKey string) seedSchedulesClient {
+	client := newClient(url+"/seed/schedule", apiKey)
+	return seedSchedulesClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+		enabler: enabler{
+			client: client,
+		},
+		searcher: searcher{
+			client: client,
+		},
+	}
+}
+
 // SeedExecutionClient can carry out every operation regarding seed executions.
 // With its Getter embedded struct, it can obtain seed executions.
 type seedExecutionsClient struct {
@@ -123,7 +152,7 @@ func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClien
 	return newSeedExecutionJobsClient(c, executionId)
 }
 
-// ingestionProcessorsClient is the struct performs the CRUD and cloning of processors.
+// ingestionProcessorsClient is the struct that performs the CRUD and cloning of processors.
 type ingestionProcessorsClient struct {
 	crud
 	cloner
@@ -253,7 +282,7 @@ type ingestion struct {
 	Url, ApiKey string
 }
 
-// Procesors is used to create an ingestionProcessorsClient.
+// Processors is used to create an ingestionProcessorsClient.
 func (i ingestion) Processors() ingestionProcessorsClient {
 	return newIngestionProcessorsClient(i.Url, i.ApiKey)
 }
@@ -266,6 +295,11 @@ func (i ingestion) Pipelines() ingestionPipelinesClient {
 // Seeds is used to create a seedsClient.
 func (i ingestion) Seeds() seedsClient {
 	return newSeedsClient(i.Url, i.ApiKey)
+}
+
+// SeedSchedules creates a new newSeedSchedulesClient.
+func (i ingestion) SeedSchedules() seedSchedulesClient {
+	return newSeedSchedulesClient(i.Url, i.ApiKey)
 }
 
 // BackupRestore creates a backUpRestore struct.
