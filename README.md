@@ -1830,28 +1830,29 @@ Examples:
 
 ```bash
 # Get a seed schedule by id
-discovery ingestion seed-schedule get 3b32e410-2f33-412d-9fb8-17970131921c
-{"name": "my-seed-schedule","labels": [],"active": true,"id": "3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp": "2026-03-26T19:45:40Z","lastUpdatedTimestamp": "2026-03-26T19:45:40Z","expression": "0 0 * * *","seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b","scanType": "FULL"}
+discovery ingestion seed-schedule get e9cec918-69a9-4053-946b-c2538a7a49be
+{"active": true,"creationTimestamp": "2026-03-26T19:45:40Z","expression": "0 0 * * *","id": "e9cec918-69a9-4053-946b-c2538a7a49be","labels": [],"lastUpdatedTimestamp": "2026-03-26T19:45:40Z","name": "my-seed-schedule","scanType": "FULL","seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b"}
 ```
 
 ```bash
 # Get seed schedule by name
 discovery ingestion seed-schedule get "my-seed-schedule"
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-seed-schedule","cronExpression":"0 0 * * *"}
+{"active": true,"creationTimestamp": "2026-03-26T19:45:40Z","expression": "0 0 * * *","id": "e9cec918-69a9-4053-946b-c2538a7a49be","labels": [],"lastUpdatedTimestamp": "2026-03-26T21:30:02Z","name": "my-seed-schedule","scanType": "FULL", "seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b"}
 ```
 
 ```bash
 # Get seed schedules using filters
 discovery ingestion seed-schedule get --filter label=A:A
-{"active":true,"creationTimestamp":"2025-10-17T15:33:58Z","id":"8c243a1d-9384-421d-8f99-4ef28d4e0ab0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T15:33:58Z","name":"my-seed-schedule","cronExpression":"0 0 * * *"}
-{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"my-seed-schedule-2","cronExpression":"0 0 12 * * *"}
+{"active":true,"creationTimestamp":"2026-03-26T21:46:43Z","id":"d8b8fb8e-5b92-4cac-abb2-f083af4ceaed","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-26T21:46:43Z","name":"my-other-seed-schedule"}
+{"active":true,"creationTimestamp":"2026-03-26T21:46:51Z","id":"57a23009-25ef-4d91-ac1a-f425a7ce854f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-26T21:46:51Z","name":"my-third-seed-schedule"}
 ```
 
 ```bash
 # Get all seed schedules using the configuration in profile "cn"
 discovery ingestion seed-schedule get -p cn
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-seed-schedule","cronExpression":"0 0 * * *"}
-{"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"my-seed-schedule-2","cronExpression":"0 0 12 * * *"}
+{"active":true,"creationTimestamp":"2026-03-26T21:46:51Z","id":"57a23009-25ef-4d91-ac1a-f425a7ce854f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-26T21:46:51Z","name":"my-third-seed-schedule"}
+{"active":true,"creationTimestamp":"2026-03-26T21:46:31Z","id":"be595fb7-29e7-4213-98da-e7441fc078bb","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2026-03-26T21:46:31Z","name":"my-seed-schedule"}
+{"active":true,"creationTimestamp":"2026-03-26T21:46:43Z","id":"d8b8fb8e-5b92-4cac-abb2-f083af4ceaed","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-26T21:46:43Z","name":"my-other-seed-schedule"}
 ```
 
 ##### Status
