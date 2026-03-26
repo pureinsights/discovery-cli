@@ -1791,6 +1791,69 @@ discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f
 }
 ```
 
+##### SeedSchedule
+`seed-schedule` is the command used to manage seed schedules in Discovery Ingestion. This command contains subcommands to read.
+
+Usage: `discovery ingestion seed-schedule [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Ingestion's seed schedules. The user can send a name or UUID to get a specific seed schedule. If no argument is given, then the command retrieves every seed schedule. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery ingestion seed-schedule get [flags] [<arg>]`
+
+Arguments:
+
+`arg`::
+(Optional, string) The name or UUID of the seed schedule that will be retrieved.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`::
+(Optional, Array of strings) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+
+Examples:
+
+```bash
+# Get a seed schedule by id
+discovery ingestion seed-schedule get 3b32e410-2f33-412d-9fb8-17970131921c
+{"name": "my-seed-schedule","labels": [],"active": true,"id": "3b32e410-2f33-412d-9fb8-17970131921c","creationTimestamp": "2026-03-26T19:45:40Z","lastUpdatedTimestamp": "2026-03-26T19:45:40Z","expression": "0 0 * * *","seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b","scanType": "FULL"}
+```
+
+```bash
+# Get seed schedule by name
+discovery ingestion seed-schedule get "my-seed-schedule"
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-seed-schedule","cronExpression":"0 0 * * *"}
+```
+
+```bash
+# Get seed schedules using filters
+discovery ingestion seed-schedule get --filter label=A:A
+{"active":true,"creationTimestamp":"2025-10-17T15:33:58Z","id":"8c243a1d-9384-421d-8f99-4ef28d4e0ab0","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T15:33:58Z","name":"my-seed-schedule","cronExpression":"0 0 * * *"}
+{"active":true,"creationTimestamp":"2025-10-17T22:37:53Z","id":"4957145b-6192-4862-a5da-e97853974e9f","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:53Z","name":"my-seed-schedule-2","cronExpression":"0 0 12 * * *"}
+```
+
+```bash
+# Get all seed schedules using the configuration in profile "cn"
+discovery ingestion seed-schedule get -p cn
+{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-seed-schedule","cronExpression":"0 0 * * *"}
+{"active":true,"creationTimestamp":"2025-10-17T22:40:15Z","id":"458d245a-6ed2-4c2b-a73f-5540d550a479","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2025-10-17T22:40:15Z","name":"my-seed-schedule-2","cronExpression":"0 0 12 * * *"}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery Ingestion. If it is healthy, it should return a JSON with an "UP" status field.
 
