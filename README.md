@@ -1855,6 +1855,44 @@ discovery ingestion seed-schedule get -p cn
 {"active":true,"creationTimestamp":"2026-03-26T21:46:43Z","id":"d8b8fb8e-5b92-4cac-abb2-f083af4ceaed","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-03-26T21:46:43Z","name":"my-other-seed-schedule"}
 ```
 
+###### Store
+`store` is the command used to create and update Discovery Ingestion's seed schedules. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple seed schedules. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
+
+Usage: `discovery ingestion seed-schedule store [<file>...] [flags]`
+
+Arguments:
+
+`file`::
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
+
+Flags:
+
+`-d, --data`::
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
+
+`--abort-on-error`::
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a seed schedule with the JSON configuration in a file
+discovery ingestion seed-schedule store seed-schedules.json
+{"active":true,"creationTimestamp":"2026-03-26T19:45:40Z","expression":"0 0 * * *","id":"e9cec918-69a9-4053-946b-c2538a7a49be","labels":[],"lastUpdatedTimestamp":"2026-03-26T19:45:40Z","name":"my-seed-schedule","scanType":"FULL","seed":"ac7c5765-bef6-42cc-b519-c75df51ebf3b"}
+```
+
+```bash
+# Store a seed schedule with the JSON configuration in the data flag
+discovery ingestion seed-schedule store --data '{"name": "my-seed-schedule","expression": "0 0 * * *","properties": {"some-property": "a"},"seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b","scanType": "INCREMENTAL"}'
+{"active":true,"creationTimestamp":"2026-03-26T19:45:40Z","expression":"0 0 * * *","id":"e9cec918-69a9-4053-946b-c2538a7a49be","labels":[],"lastUpdatedTimestamp":"2026-03-26T19:45:40Z","name":"my-seed-schedule","properties":{"some-property":"a"},"scanType":"INCREMENTAL","seed":"ac7c5765-bef6-42cc-b519-c75df51ebf3b"}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery Ingestion. If it is healthy, it should return a JSON with an "UP" status field.
 

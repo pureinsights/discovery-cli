@@ -13,6 +13,7 @@ func NewSeedScheduleCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	seedSchedule.AddCommand(NewGetCommand(d))
+	seedSchedule.AddCommand(NewStoreCommand(d))
 
 	return seedSchedule
 }
