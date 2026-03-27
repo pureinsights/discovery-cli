@@ -1,0 +1,14 @@
+Usage:
+  delete <seed-schedule> [flags]
+
+Examples:
+	# Delete a seed schedule by id
+	discovery ingestion seed-schedule delete e9cec918-69a9-4053-946b-c2538a7a49be
+
+	# Delete a seed schedule by name
+	discovery ingestion seed-schedule delete my-seed-schedule
+
+Flags:
+  -h, --help             help for delete
+  -p, --profile string   configuration profile to use (default "default")
+
