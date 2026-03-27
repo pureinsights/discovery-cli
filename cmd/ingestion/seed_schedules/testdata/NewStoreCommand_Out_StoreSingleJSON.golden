@@ -1,0 +1,1 @@
+{"creationTimestamp":"2025-08-14T18:02:11Z","expression":"0 0 * * *","id":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","lastUpdatedTimestamp":"2025-08-14T18:02:11Z","name":"my-seed-schedule","properties":{"some-property":"a"},"scanType":"INCREMENTAL","seed":"ac7c5765-bef6-42cc-b519-c75df51ebf3b"}
