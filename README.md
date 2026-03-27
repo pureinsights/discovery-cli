@@ -1893,6 +1893,36 @@ discovery ingestion seed-schedule store --data '{"name": "my-seed-schedule","exp
 {"active":true,"creationTimestamp":"2026-03-26T19:45:40Z","expression":"0 0 * * *","id":"e9cec918-69a9-4053-946b-c2538a7a49be","labels":[],"lastUpdatedTimestamp":"2026-03-26T19:45:40Z","name":"my-seed-schedule","properties":{"some-property":"a"},"scanType":"INCREMENTAL","seed":"ac7c5765-bef6-42cc-b519-c75df51ebf3b"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery Ingestion's seed schedules. The user must send a name or UUID to delete a specific seed schedule.
+
+Usage: `discovery ingestion seed-schedule delete <seed-schedule> [flags]`
+
+Arguments:
+
+`<seed-schedule>`::
+(Required, string) The name or UUID of the seed schedule that will be deleted.
+
+Flags:
+
+`-h, --help`::
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`::
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a seed schedule by id
+discovery ingestion seed-schedule delete e9cec918-69a9-4053-946b-c2538a7a49be
+```
+
+```bash
+# Delete a seed schedule by name
+discovery ingestion seed-schedule delete "my-seed-schedule"
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery Ingestion. If it is healthy, it should return a JSON with an "UP" status field.
 
