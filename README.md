@@ -1831,13 +1831,33 @@ Examples:
 ```bash
 # Get a seed schedule by id
 discovery ingestion seed-schedule get e9cec918-69a9-4053-946b-c2538a7a49be
-{"active": true,"creationTimestamp": "2026-03-26T19:45:40Z","expression": "0 0 * * *","id": "e9cec918-69a9-4053-946b-c2538a7a49be","labels": [],"lastUpdatedTimestamp": "2026-03-26T19:45:40Z","name": "my-seed-schedule","scanType": "FULL","seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b"}
+{
+  "active": true,
+  "creationTimestamp": "2026-03-26T19:45:40Z",
+  "expression": "0 0 * * *",
+  "id": "e9cec918-69a9-4053-946b-c2538a7a49be",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-03-26T19:45:40Z",
+  "name": "my-seed-schedule",
+  "scanType": "FULL",
+  "seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b"
+}
 ```
 
 ```bash
 # Get seed schedule by name
 discovery ingestion seed-schedule get "my-seed-schedule"
-{"active": true,"creationTimestamp": "2026-03-26T19:45:40Z","expression": "0 0 * * *","id": "e9cec918-69a9-4053-946b-c2538a7a49be","labels": [],"lastUpdatedTimestamp": "2026-03-26T21:30:02Z","name": "my-seed-schedule","scanType": "FULL", "seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b"}
+{
+  "active": true,
+  "creationTimestamp": "2026-03-26T19:45:40Z",
+  "expression": "0 0 * * *",
+  "id": "e9cec918-69a9-4053-946b-c2538a7a49be",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-03-26T21:30:02Z",
+  "name": "my-seed-schedule",
+  "scanType": "FULL",
+  "seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b"
+}
 ```
 
 ```bash
