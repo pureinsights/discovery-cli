@@ -1,0 +1,16 @@
+{
+  "active": true,
+  "creationTimestamp": "2026-03-26T19:45:40Z",
+  "expression": "0 0 * * *",
+  "id": "3b32e410-2f33-412d-9fb8-17970131921c",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2026-03-26T19:45:40Z",
+  "name": "my-seed-schedule",
+  "scanType": "FULL",
+  "seed": "3b32e410-2f33-412d-9fb8-17970131921c"
+}
