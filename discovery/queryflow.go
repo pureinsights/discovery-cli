@@ -66,7 +66,7 @@ type endpointsClient struct {
 
 // newEndpointsClient is the constructor of a newEndpointsClient.
 func newEndpointsClient(url, apiKey string) endpointsClient {
-	client := newClient(url+"/endpoint", apiKey)
+	client := newClient(url+"/entrypoint/endpoint", apiKey)
 	return endpointsClient{
 		crud: crud{
 			getter{

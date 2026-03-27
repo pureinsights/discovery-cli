@@ -1,0 +1,15 @@
+Usage:
+  store [<files>...] [flags]
+
+Examples:
+	# Store a seed schedule with the JSON configuration in a file
+	discovery ingestion seed-schedule store seed-schedules.json
+
+	# Store a seed schedule with the JSON configuration in the data flag
+	discovery ingestion seed-schedule store --data '{"name": "my-seed-schedule","expression": "0 0 * * *","properties": {"some-property": "a"},"seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b","scanType": "INCREMENTAL"}'
+
+Flags:
+      --abort-on-error   aborts the operation if there is an error
+  -d, --data string      the JSON with the configurations that will be upserted
+  -h, --help             help for store
+

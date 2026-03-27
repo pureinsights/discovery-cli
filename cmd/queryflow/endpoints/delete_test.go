@@ -43,7 +43,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode: http.StatusNoContent,
 					Body: `{
 			"content": [],
@@ -63,10 +63,10 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 					},
 				},
-				"GET:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -85,10 +85,10 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
-				"DELETE:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 				"acknowledged": true
@@ -97,7 +97,7 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
 			},
@@ -113,7 +113,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByNameReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -150,11 +150,11 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"GET:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -173,10 +173,10 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
-				"DELETE:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -184,7 +184,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -214,13 +214,13 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NameDoesNotExist"),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode:  http.StatusNoContent,
 					Body:        ``,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -246,7 +246,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -283,11 +283,11 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"GET:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -306,10 +306,10 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
-				"DELETE:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -317,7 +317,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -334,7 +334,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/endpoint/search": {
+				"POST:/v2/entrypoint/endpoint/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -371,11 +371,11 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/endpoint/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"GET:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
@@ -394,17 +394,17 @@ func TestNewDeleteCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 					},
 				},
-				"DELETE:/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"DELETE:/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode: http.StatusOK,
 					Body: `{
 				"acknowledged": true
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/endpoint/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
