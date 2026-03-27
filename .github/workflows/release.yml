@@ -23,7 +23,7 @@ jobs:
       -
         name: Set the version environment variable
         run: |
-          VERSION=$(awk -F= '/^version.semver=/{print $2}' semver.properties)
+          VERSION=2.8.0
 
           echo "Building version $VERSION"
 
