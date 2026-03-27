@@ -1,0 +1,25 @@
+[
+    {
+        "name": "my-seed-schedule",
+        "expression": "0 0 * * *",
+        "properties": {"some-property": "a"},
+        "seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b",
+        "scanType": "INCREMENTAL"
+    },
+    {
+        "name": "my-seed-schedule-2",
+        "expression": "0 1 * * *",
+        "properties": {"some-property": "b"},
+        "seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b",
+        "scanType": "INCREMENTAL",
+        "id": "9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+    },
+    {
+        "name": "my-seed-schedule-3",
+        "expression": "0 2 * * *",
+        "properties": {"some-property": "c"},
+        "seed": "ac7c5765-bef6-42cc-b519-c75df51ebf3b",
+        "scanType": "FULL",
+        "id": "9ababe08-0b74-4672-bb7c-e7a8227d6dad"
+    }
+]
