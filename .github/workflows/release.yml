@@ -23,11 +23,11 @@ jobs:
       -
         name: Set the version environment variable
         run: |
-          VERSION=2.8.0
+          $VERSION = "2.8.0"
 
           echo "Building version $VERSION"
 
-          export GORELEASER_CURRENT_TAG="v$VERSION"
+          "GORELEASER_CURRENT_TAG=v$VERSION" >> $env:GITHUB_ENV
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
