@@ -215,6 +215,16 @@ It inherits from:
 
 Creating a `queryFlowProcessorsClient` can be done with `queryFlow.Processors()` or `newQueryFlowProcessorsClient(URL, API Key)`.
 
+##### QueryFlowPipelinesClient
+This struct manages QueryFlow's pipelines. 
+
+It inherits from:
+* [CRUD](#crud)
+* [Cloner](#cloner)
+* [Searcher](#searcher)
+
+Creating a `queryFlowPipelinesClient` can be done with `queryFlow.Pipelines()` or `newQueryFlowPipelinesClient(URL, API Key)`.
+
 ##### EndpointsClient
 This struct manages QueryFlow's endpoints. 
 
@@ -277,6 +287,17 @@ It has the following methods:
 | Reset | POST | `{URL}/seed/{UUID}/reset` |  | `application/json` | Resets the metadata of the seed and deletes its records. It only works if the seed does not have any active executions. |
 
 Creating a `seedsClient` can be done with `ingestion.Seeds()` or `newSeedsClient(URL, API Key)`.
+
+##### SeedSchedulesClient
+This struct manages Ingestion's seed schedules.
+
+It inherits from:
+* [CRUD](#crud)
+* [Cloner](#cloner)
+* [Searcher](#searcher)
+* [Enabler](#enabler)
+
+Creating a `seedSchedulesClient` can be done with `ingestion.SeedSchedules()` or `newSeedSchedulesClient(URL, API Key)`.
 
 ##### SeedExecutionsClient
 This struct manages an execution of a seed. 
