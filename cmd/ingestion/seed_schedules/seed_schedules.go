@@ -14,6 +14,7 @@ func NewSeedScheduleCommand(d cli.Discovery) *cobra.Command {
 
 	seedSchedule.AddCommand(NewGetCommand(d))
 	seedSchedule.AddCommand(NewStoreCommand(d))
+	seedSchedule.AddCommand(NewDeleteCommand(d))
 
 	return seedSchedule
 }
