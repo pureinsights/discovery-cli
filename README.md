@@ -1916,11 +1916,17 @@ Examples:
 ```bash
 # Delete a seed schedule by id
 discovery ingestion seed-schedule delete e9cec918-69a9-4053-946b-c2538a7a49be
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Delete a seed schedule by name
 discovery ingestion seed-schedule delete "my-seed-schedule"
+{
+  "acknowledged": true
+}
 ```
 
 ##### Status
