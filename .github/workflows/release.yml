@@ -27,7 +27,7 @@ jobs:
 
           echo "Building version $VERSION"
 
-          "GORELEASER_CURRENT_TAG=v$VERSION" >> $env:GITHUB_ENV
+          "GORELEASER_CURRENT_TAG=$VERSION" >> $env:GITHUB_ENV
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
