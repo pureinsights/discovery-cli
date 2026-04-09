@@ -23,11 +23,11 @@ jobs:
       -
         name: Set the version environment variable
         run: |
-          $version = Get-Content semver.properties |
+          $VERSION = Get-Content semver.properties |
               Where-Object { $_ -match '^version\.semver=' } |
               ForEach-Object { ($_ -split '=')[1].Trim() }
 
-          Write-Host "Building version $version"
+          Write-Host "Building version $VERSION"
 
           "GORELEASER_CURRENT_TAG=$VERSION" >> $env:GITHUB_ENV
       -
