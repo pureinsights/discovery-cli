@@ -271,7 +271,7 @@ discovery export -p cn --output-file "entities/discovery.zip"
   },
   "ingestion": {
     "acknowledged": false,
-    "error": "status: 401, body: {\"error\":\"unauthorized\"}\n"
+    "error": "Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."
   },
   "queryflow": {
     "acknowledged": true
