@@ -446,6 +446,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 
 			startCmd := NewStartCommand(d)
 
+			startCmd.SilenceUsage = true
 			startCmd.SetIn(ios.In)
 			startCmd.SetOut(ios.Out)
 			startCmd.SetErr(ios.Err)

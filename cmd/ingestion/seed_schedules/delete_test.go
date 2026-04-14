@@ -428,6 +428,7 @@ func TestNewDeleteCommand(t *testing.T) {
 
 			deleteCmd := NewDeleteCommand(d)
 
+			deleteCmd.SilenceUsage = true
 			deleteCmd.SetIn(ios.In)
 			deleteCmd.SetOut(ios.Out)
 			deleteCmd.SetErr(ios.Err)

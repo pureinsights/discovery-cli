@@ -135,6 +135,7 @@ func TestNewStatusCommand(t *testing.T) {
 
 			statusCmd := NewStatusCommand(d)
 
+			statusCmd.SilenceUsage = true
 			statusCmd.SetIn(ios.In)
 			statusCmd.SetOut(ios.Out)
 			statusCmd.SetErr(ios.Err)

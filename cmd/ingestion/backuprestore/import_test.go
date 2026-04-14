@@ -136,6 +136,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 
 			importCmd := NewImportCommand(d)
 
+			importCmd.SilenceUsage = true
 			importCmd.SetIn(ios.In)
 			importCmd.SetOut(ios.Out)
 			importCmd.SetErr(ios.Err)

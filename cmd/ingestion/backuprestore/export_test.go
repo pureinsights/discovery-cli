@@ -148,6 +148,7 @@ func TestNewExportCommand(t *testing.T) {
 
 			exportCmd := NewExportCommand(d)
 
+			exportCmd.SilenceUsage = true
 			exportCmd.SetIn(ios.In)
 			exportCmd.SetOut(ios.Out)
 			exportCmd.SetErr(ios.Err)

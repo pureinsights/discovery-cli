@@ -568,6 +568,7 @@ func TestNewStoreCommand(t *testing.T) {
 
 			storeCmd := NewStoreCommand(d)
 
+			storeCmd.SilenceUsage = true
 			storeCmd.SetIn(ios.In)
 			storeCmd.SetOut(ios.Out)
 			storeCmd.SetErr(ios.Err)
@@ -729,6 +730,7 @@ func TestNewStoreCommand_MultipleFiles(t *testing.T) {
 
 	storeCmd := NewStoreCommand(d)
 
+	storeCmd.SilenceUsage = true
 	storeCmd.SetIn(ios.In)
 	storeCmd.SetOut(ios.Out)
 	storeCmd.SetErr(ios.Err)

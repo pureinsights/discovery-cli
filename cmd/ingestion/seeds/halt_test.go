@@ -659,6 +659,7 @@ func TestNewHaltCommand(t *testing.T) {
 
 			haltCmd := NewHaltCommand(d)
 
+			haltCmd.SilenceUsage = true
 			haltCmd.SetIn(ios.In)
 			haltCmd.SetOut(ios.Out)
 			haltCmd.SetErr(ios.Err)

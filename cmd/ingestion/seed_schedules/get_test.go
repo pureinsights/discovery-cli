@@ -581,6 +581,7 @@ func TestNewGetCommand(t *testing.T) {
 
 			getCmd := NewGetCommand(d)
 
+			getCmd.SilenceUsage = true
 			getCmd.SetIn(ios.In)
 			getCmd.SetOut(ios.Out)
 			getCmd.SetErr(ios.Err)
