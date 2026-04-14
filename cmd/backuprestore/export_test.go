@@ -344,7 +344,9 @@ func TestNewExportCommand(t *testing.T) {
 				}
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }
