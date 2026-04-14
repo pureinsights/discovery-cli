@@ -19,9 +19,10 @@ import (
 // NewRootCommand creates and sets up the root command of the Discovery CLI.
 func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery := &cobra.Command{
-		Use:   "discovery [subcommand]",
-		Short: "A CLI to assist with operations on Pureinsights Discovery",
-		Long:  "discovery is the Discovery CLI's root command. This is the command used to run the CLI. It contains all of the other subcommands.",
+		Use:          "discovery [subcommand]",
+		SilenceUsage: true,
+		Short:        "A CLI to assist with operations on Pureinsights Discovery",
+		Long:         "discovery is the Discovery CLI's root command. This is the command used to run the CLI. It contains all of the other subcommands.",
 	}
 
 	ios := d.IOStreams()
