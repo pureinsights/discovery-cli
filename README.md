@@ -92,6 +92,26 @@ TODO
 
 ## Documentation
 
+The following sections contain the explanation of the CLI's commands. Some commands can receive JSON data through the command line. Some precautions must be taken in order to get the expected behavior. Normally, sending the JSON data wrapped in single quotes `'` works very well. For example: 
+
+```bash
+discovery ingestion processor store --data '{"type":"chunker","name":"My Chunk-By-Sentence Action","config":{"action":"sentence","text":"my-text","sentences":1}}'
+```
+
+However, if the JSON itself contains `'`, then these will be lost:
+
+```bash
+discovery ingestion processor store --data '{"type":"chunker","name":"My Chunk-By-Sentence Action","config":{"action":"sentence","text":"#{data('/text')}","sentences":1}}'
+{"active":true,"config":{"action":"sentence","sentences":1,"text":"#{data(/text)}"},"creationTimestamp":"2026-04-14T17:02:07Z","id":"2c55ba35-9f8a-467e-91c8-68575e567526","lastUpdatedTimestamp":"2026-04-14T17:56:07.340638Z","name":"My Chunk-By-Sentence Action","type":"chunker"}
+```
+
+The recommendation to avoid this is to use files instead. If the command line must be used, then the JSON needs to be wrapped in `"` and the `"` inside the JSON must be escaped with `\"`:
+
+```bash
+discovery ingestion processor store --data "{\"type\":\"chunker\",\"name\":\"My Chunk-By-Sentence Action\",\"config\":{\"action\":\"sentence\",\"text\":\"#{data('/text')}\",\"sentences\":1}}"
+{"active":true,"config":{"action":"sentence","sentences":1,"text":"#{data('/text')}"},"creationTimestamp":"2026-04-14T17:02:07Z","id":"2c55ba35-9f8a-467e-91c8-68575e567526","lastUpdatedTimestamp":"2026-04-14T17:57:33.247637Z","name":"My Chunk-By-Sentence Action","type":"chunker"}
+```
+
 ### Discovery
 
 `discovery` is the Discovery CLI's root command. This is the command used to run the CLI. It contains all of the other subcommands.
@@ -1336,7 +1356,7 @@ discovery ingestion processor store "ingestionprocessorjsonfile.json"
 ```bash
 # Store a processor with the JSON configuration in the data flag
 discovery ingestion processor store --data '{"type":"mongo","name":"my-processor","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
 ###### Delete
@@ -2323,14 +2343,10 @@ discovery queryflow pipeline get 782bfece-20a2-4382-bacb-1c9c550e2d58
   "lastUpdatedTimestamp": "2026-03-02T15:13:48Z",
   "name": "my-pipeline",
   "states": {
-    "responseState": {
-      "type": "message"
-    },
     "searchState": {
       "mode": {
         "type": "group"
       },
-      "next": "responseState",
       "processors": [
         {
           "active": true,
@@ -2359,14 +2375,10 @@ discovery queryflow pipeline get "my-pipeline"
   "lastUpdatedTimestamp": "2026-03-02T15:13:48Z",
   "name": "my-pipeline",
   "states": {
-    "responseState": {
-      "type": "message"
-    },
     "searchState": {
       "mode": {
         "type": "group"
       },
-      "next": "responseState",
       "processors": [
         {
           "active": true,
@@ -2427,13 +2439,13 @@ Examples:
 ```bash
 # Store a pipeline with the JSON configuration in a file
 discovery queryflow pipeline store pipelines.json
-{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":{"responseState":{"type":"message"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":{"searchState":{"mode":{"type":"group"},"processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
 ```
 
 ```bash
 # Store a pipeline with the JSON configuration in the data flag
-discovery queryflow pipeline store --data '{"name":"my-pipeline","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"next":"responseState"},"responseState":{"type":"message","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'
-{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":{"responseState":{"type":"message"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
+discovery queryflow pipeline store --data '{"name":"my-pipeline","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}]}}}'
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":"searchState":{"mode":{"type":"group"},"processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
 ```
 
 ###### Delete
