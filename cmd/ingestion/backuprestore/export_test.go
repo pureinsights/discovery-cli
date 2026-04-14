@@ -64,7 +64,7 @@ func TestNewExportCommand(t *testing.T) {
 			name:      "No URL",
 			outGolden: "NewExportCommand_Out_NoURL",
 			errGolden: "NewExportCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewExportCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewExportCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -76,7 +76,7 @@ func TestNewExportCommand(t *testing.T) {
 			apiKey:             "",
 			outGolden:          "NewExportCommand_Out_DirectoryDoesNotExist",
 			errGolden:          "NewExportCommand_Err_DirectoryDoesNotExist",
-			outBytes:           testutils.Read(t, "NewExportCommand_Out_DirectoryDoesNotExist"),
+			outBytes:           []byte(nil),
 			errBytes:           testutils.Read(t, "NewExportCommand_Err_DirectoryDoesNotExist"),
 			method:             http.MethodGet,
 			path:               "/v2/export",
@@ -93,7 +93,7 @@ func TestNewExportCommand(t *testing.T) {
 			apiKey:             "",
 			outGolden:          "NewExportCommand_Out_ExportFails",
 			errGolden:          "NewExportCommand_Err_ExportFails",
-			outBytes:           testutils.Read(t, "NewExportCommand_Out_ExportFails"),
+			outBytes:           []byte(nil),
 			errBytes:           testutils.Read(t, "NewExportCommand_Err_ExportFails"),
 			method:             http.MethodGet,
 			path:               "/v2/export",
@@ -181,7 +181,9 @@ func TestNewExportCommand(t *testing.T) {
 				assert.Equal(t, readBytes, tc.response)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

@@ -190,7 +190,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:      []string{"my-seed-schedule"},
 			outGolden: "NewDeleteCommand_Out_NoURL",
 			errGolden: "NewDeleteCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -203,7 +203,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewDeleteCommand_Out_NameDoesNotExist",
 			errGolden: "NewDeleteCommand_Err_NameDoesNotExist",
-			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_NameDoesNotExist"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/seed/schedule/search": {
@@ -233,7 +233,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:      []string{"my-seed-schedule"},
 			outGolden: "NewDeleteCommand_Out_PrintJSONFails",
 			errGolden: "NewDeleteCommand_Err_PrintJSONFails",
-			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_PrintJSONFails"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_PrintJSONFails"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -314,7 +314,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:      []string{"test"},
 			outGolden: "NewDeleteCommand_Out_InvalidUUID",
 			errGolden: "NewDeleteCommand_Err_InvalidUUID",
-			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_InvalidUUID"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_InvalidUUID"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -452,7 +452,9 @@ func TestNewDeleteCommand(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

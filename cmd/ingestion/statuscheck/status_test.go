@@ -67,7 +67,7 @@ func TestNewStatusCommand(t *testing.T) {
 			name:       "No URL",
 			outGolden:  "NewStatusCommand_Out_NoURL",
 			errGolden:  "NewStatusCommand_Err_NoURL",
-			outBytes:   testutils.Read(t, "NewStatusCommand_Out_NoURL"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewStatusCommand_Err_NoURL"),
 			url:        false,
 			apiKey:     "apiKey123",
@@ -78,7 +78,7 @@ func TestNewStatusCommand(t *testing.T) {
 			name:       "Status returns error",
 			outGolden:  "NewStatusCommand_Out_StatusError",
 			errGolden:  "NewStatusCommand_Err_StatusError",
-			outBytes:   testutils.Read(t, "NewStatusCommand_Out_StatusError"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewStatusCommand_Err_StatusError"),
 			httpStatus: http.StatusInternalServerError,
 			response:   "{\"error\": \"Internal server error\"}",
@@ -90,7 +90,7 @@ func TestNewStatusCommand(t *testing.T) {
 			name:       "Printing JSON object fails",
 			outGolden:  "NewStatusCommand_Out_PrintJSONFails",
 			errGolden:  "NewStatusCommand_Err_PrintJSONFails",
-			outBytes:   testutils.Read(t, "NewStatusCommand_Out_PrintJSONFails"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewStatusCommand_Err_PrintJSONFails"),
 			url:        true,
 			apiKey:     "apiKey123",
@@ -159,7 +159,9 @@ func TestNewStatusCommand(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

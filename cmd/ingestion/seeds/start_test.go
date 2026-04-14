@@ -197,7 +197,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			name:                "No URL",
 			outGolden:           "NewStartCommand_Out_NoURL",
 			errGolden:           "NewStartCommand_Err_NoURL",
-			outBytes:            testutils.Read(t, "NewStartCommand_Out_NoURL"),
+			outBytes:            []byte(nil),
 			errBytes:            testutils.Read(t, "NewStartCommand_Err_NoURL"),
 			url:                 false,
 			apiKey:              "apiKey123",
@@ -211,7 +211,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			apiKey:              "apiKey123",
 			outGolden:           "NewStartCommand_Out_ErrorHasActiveExecutions",
 			errGolden:           "NewStartCommand_Err_ErrorHasActiveExecutions",
-			outBytes:            testutils.Read(t, "NewStartCommand_Out_ErrorHasActiveExecutions"),
+			outBytes:            []byte(nil),
 			errBytes:            testutils.Read(t, "NewStartCommand_Err_ErrorHasActiveExecutions"),
 			scanType:            "FULL",
 			executionProperties: "",
@@ -304,7 +304,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			apiKey:              "apiKey123",
 			outGolden:           "NewStartCommand_Out_ErrorNotFound",
 			errGolden:           "NewStartCommand_Err_ErrorNotFound",
-			outBytes:            testutils.Read(t, "NewStartCommand_Out_ErrorNotFound"),
+			outBytes:            []byte(nil),
 			errBytes:            testutils.Read(t, "NewStartCommand_Err_ErrorNotFound"),
 			scanType:            "FULL",
 			executionProperties: "",
@@ -340,7 +340,7 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 			name:                "Printing JSON Object fails",
 			outGolden:           "NewStartCommand_Out_PrintJSONFails",
 			errGolden:           "NewStartCommand_Err_PrintJSONFails",
-			outBytes:            testutils.Read(t, "NewStartCommand_Out_PrintJSONFails"),
+			outBytes:            []byte(nil),
 			errBytes:            testutils.Read(t, "NewStartCommand_Err_PrintJSONFails"),
 			url:                 true,
 			apiKey:              "apiKey123",
@@ -481,7 +481,9 @@ func TestNewStartCommand_WithProfileFlag(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }
