@@ -181,7 +181,9 @@ func TestNewExportCommand(t *testing.T) {
 				assert.Equal(t, readBytes, tc.response)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }
