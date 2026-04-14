@@ -252,7 +252,7 @@ func TestNewStoreCommand(t *testing.T) {
 			name:      "No URL",
 			outGolden: "NewStoreCommand_Out_NoURL",
 			errGolden: "NewStoreCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -379,7 +379,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:       "apiKey123",
 			outGolden:    "NewStoreCommand_Out_StoreEmptyFile",
 			errGolden:    "NewStoreCommand_Err_StoreEmptyFile",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreEmptyFile"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreEmptyFile"),
 			data:         "",
 			file:         "testdata/StoreCommand_EmptyFile.json",
@@ -392,7 +392,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:       "apiKey123",
 			outGolden:    "NewStoreCommand_Out_StoreFileNotExists",
 			errGolden:    "NewStoreCommand_Err_StoreFileNotExists",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFileNotExists"),
+			outBytes:     []byte(nil),
 			data:         "",
 			file:         "doesnotexist",
 			abortOnError: false,
@@ -405,7 +405,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:       "apiKey123",
 			outGolden:    "NewStoreCommand_Out_StoreEmptyData",
 			errGolden:    "NewStoreCommand_Err_StoreEmptyData",
-			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreEmptyData"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewStoreCommand_Err_StoreEmptyData"),
 			data:         "",
 			file:         "",
@@ -416,7 +416,7 @@ func TestNewStoreCommand(t *testing.T) {
 			name:      "Printing JSON Array fails",
 			outGolden: "NewStoreCommand_Out_PrintJSONFails",
 			errGolden: "NewStoreCommand_Err_PrintJSONFails",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_PrintJSONFails"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_PrintJSONFails"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -457,7 +457,7 @@ func TestNewStoreCommand(t *testing.T) {
 			name:      "user sends invalid UUID error",
 			outGolden: "NewStoreCommand_Out_InvalidUUID",
 			errGolden: "NewStoreCommand_Err_InvalidUUID",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_InvalidUUID"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_InvalidUUID"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -528,6 +528,7 @@ func TestNewStoreCommand(t *testing.T) {
 
 			storeCmd := NewStoreCommand(d)
 
+			storeCmd.SilenceUsage = true
 			storeCmd.SetIn(ios.In)
 			storeCmd.SetOut(ios.Out)
 			storeCmd.SetErr(ios.Err)

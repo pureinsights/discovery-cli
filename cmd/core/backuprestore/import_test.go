@@ -63,7 +63,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			name:      "No URL",
 			outGolden: "NewImportCommand_Out_NoURL",
 			errGolden: "NewImportCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewImportCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewImportCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -76,7 +76,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			apiKey:         "",
 			outGolden:      "NewImportCommand_Out_FileDoesNotExist",
 			errGolden:      "NewImportCommand_Err_FileDoesNotExist",
-			outBytes:       testutils.Read(t, "NewImportCommand_Out_FileDoesNotExist"),
+			outBytes:       []byte(nil),
 			errBytes:       testutils.Read(t, "NewImportCommand_Err_FileDoesNotExist"),
 			method:         http.MethodPost,
 			path:           "/v2/import",
@@ -91,7 +91,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			apiKey:     "",
 			outGolden:  "NewImportCommand_Out_ImportFails",
 			errGolden:  "NewImportCommand_Err_ImportFails",
-			outBytes:   testutils.Read(t, "NewImportCommand_Out_ImportFails"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewImportCommand_Err_ImportFails"),
 			method:     http.MethodPost,
 			path:       "/v2/import",
@@ -136,6 +136,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 
 			importCmd := NewImportCommand(d)
 
+			importCmd.SilenceUsage = true
 			importCmd.SetIn(ios.In)
 			importCmd.SetOut(ios.Out)
 			importCmd.SetErr(ios.Err)

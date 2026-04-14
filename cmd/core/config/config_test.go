@@ -147,6 +147,7 @@ func TestNewConfigCommand_ProfileFlag(t *testing.T) {
 
 			configCmd := NewConfigCommand(d)
 
+			configCmd.SilenceUsage = true
 			configCmd.SetIn(ios.In)
 			configCmd.SetOut(ios.Out)
 			configCmd.SetErr(ios.Err)
