@@ -88,9 +88,29 @@ macOS and Linux work in a very similar way. However, on macOS, due to Apple's se
 
 ## Getting started
 
-TODO
+To get started with Discovery and its CLI, follow these [tutorials](https://discovery.pureinsights.live/latest/tutorials/index.html).
 
 ## Documentation
+
+The following sections contain the explanation of the CLI's commands. Some commands can receive JSON data through the command line. Some precautions must be taken in order to get the expected behavior. Normally, sending the JSON data wrapped in single quotes `'` works very well. For example: 
+
+```bash
+discovery ingestion processor store --data '{"type":"chunker","name":"My Chunk-By-Sentence Action","config":{"action":"sentence","text":"my-text","sentences":1}}'
+```
+
+However, if the JSON itself contains `'`, then these will be lost:
+
+```bash
+discovery ingestion processor store --data '{"type":"chunker","name":"My Chunk-By-Sentence Action","config":{"action":"sentence","text":"#{data('/text')}","sentences":1}}'
+{"active":true,"config":{"action":"sentence","sentences":1,"text":"#{data(/text)}"},"creationTimestamp":"2026-04-14T17:02:07Z","id":"2c55ba35-9f8a-467e-91c8-68575e567526","lastUpdatedTimestamp":"2026-04-14T17:56:07.340638Z","name":"My Chunk-By-Sentence Action","type":"chunker"}
+```
+
+The recommendation to avoid this is to use files instead. If the command line must be used, then the JSON needs to be wrapped in `"` and the `"` inside the JSON must be escaped with `\"`:
+
+```bash
+discovery ingestion processor store --data "{\"type\":\"chunker\",\"name\":\"My Chunk-By-Sentence Action\",\"config\":{\"action\":\"sentence\",\"text\":\"#{data('/text')}\",\"sentences\":1}}"
+{"active":true,"config":{"action":"sentence","sentences":1,"text":"#{data('/text')}"},"creationTimestamp":"2026-04-14T17:02:07Z","id":"2c55ba35-9f8a-467e-91c8-68575e567526","lastUpdatedTimestamp":"2026-04-14T17:57:33.247637Z","name":"My Chunk-By-Sentence Action","type":"chunker"}
+```
 
 ### Discovery
 
@@ -100,13 +120,13 @@ Usage: `discovery [command]`
 
 Flags:
  
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-v, --version`::
+`-v, --version`:
 (Optional, bool) Prints the current version of the Discovery CLI
 
 Examples:
@@ -129,10 +149,10 @@ Usage: `discovery config [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -171,13 +191,13 @@ Usage: `discovery config get [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-s, --sensitive`::
+`-s, --sensitive`:
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
 
 Examples:
@@ -234,13 +254,13 @@ Usage: `discovery export [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`--output-file`::
+`--output-file`:
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -248,14 +268,35 @@ Examples:
 ```bash
 # Export the entities using profile "cn".
 discovery export -p cn
-{"core":{"acknowledged":true},"ingestion":{"acknowledged":true},"queryflow":{"acknowledged":true}}
+{
+  "core": {
+    "acknowledged": true
+  },
+  "ingestion": {
+    "acknowledged": true
+  },
+  "queryflow": {
+    "acknowledged": true
+  }
+}
 ```
 
 ```bash
 # Export the entities to a specific file.
 # In this example, the Ingestion export failed.
 discovery export -p cn --output-file "entities/discovery.zip"
-{"core":{"acknowledged":true},"ingestion":{"acknowledged":false,"error":"Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."},"queryflow":{"acknowledged":true}}
+{
+  "core": {
+    "acknowledged": true
+  },
+  "ingestion": {
+    "acknowledged": false,
+    "error": "Get \"http://localhost:12030/v2/export\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."
+  },
+  "queryflow": {
+    "acknowledged": true
+  }
+}
 ```
 #### Import
 `import` is the command used to restore entities to all of Discovery's products at once. With the required argument, the user must send the specific file that has the entities' configuration. This file is a compressed zip file that contains the zip files produced by the `/export` endpoint in a Discovery product. It should have at most three zip files: one for Core, one for Ingestion, and a final one for QueryFlow. The export file for a Discovery product has the format `productName-*`. For example, the Core can be called `core-export-20251112T1629.zip` and the one for Ingestion can be called `ingestion-export-20251110T1607.zip`. The sent file does not need to contain the export files for all of Discovery's products. This command can restore entities to one, two, or all products. With the `on-conflict` flag, the user can send the conflict resolution strategy in case there are duplicate entities.
@@ -264,18 +305,18 @@ Usage: `discovery import <file> [flags]`
 
 Arguments: 
 
-`file`::
+`file`:
 (Required, string) The file that contains the files with the exported entities of the Discovery products.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`--on-conflict`::
+`--on-conflict`:
 (Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
 Examples:
@@ -338,10 +379,10 @@ Usage: `discovery staging status`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Example:
@@ -372,10 +413,10 @@ Usage: `discovery core [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ##### Config
@@ -385,10 +426,10 @@ Usage: `discovery core config [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -415,13 +456,13 @@ Usage: `discovery core config get [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-s, --sensitive`::
+`-s, --sensitive`:
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
 
 Examples: 
@@ -460,13 +501,13 @@ Usage: `discovery core export [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`--output-file`::
+`--output-file`:
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -474,13 +515,17 @@ Examples:
 ```bash
 # Export the entities using profile "cn".
 discovery core export -p cn
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Export the entities to a specific file.
 discovery core export -p cn --output-file "entities/core.zip"
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Import
@@ -490,18 +535,18 @@ Usage: `discovery core import <file> [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Required, string) The file that contains the configurations of the entities.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`--on-conflict`::
+`--on-conflict`:
 (Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
 Examples:
@@ -534,10 +579,10 @@ Usage: `discovery core label [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -547,15 +592,15 @@ Usage: `discovery core label get [flags] [<uuid>]`
 
 Arguments:
 
-`uuid`::
+`uuid`:
 (Optional, string) The UUID of the label that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -563,7 +608,13 @@ Examples:
 ```bash
 # Get a label by id
 discovery core label get 3d51beef-8b90-40aa-84b5-033241dc6239
-{"creationTimestamp":"2025-08-27T19:22:06Z","id":"3d51beef-8b90-40aa-84b5-033241dc6239","key":"my-label","lastUpdatedTimestamp":"2025-08-27T19:22:47Z","value":"my-value"}
+{
+  "creationTimestamp": "2026-04-09T17:04:06Z",
+  "id": "1334b032-2ac0-4fde-a98d-df811cc70e2e",
+  "key": "my-label",
+  "lastUpdatedTimestamp": "2026-04-09T17:04:06Z",
+  "value": "my-value"
+}
 ```
 
 ```bash
@@ -581,21 +632,21 @@ Usage: `discovery core label store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -621,15 +672,15 @@ Usage: `discovery core label delete [flags] <uuid>`
 
 Arguments:
 
-`uuid`::
+`uuid`:
 (Required, string) The UUID of the label that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -637,7 +688,9 @@ Examples:
 ```bash
 # Delete a label by id
 discovery core label delete 3d51beef-8b90-40aa-84b5-033241dc6239
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Secret
@@ -647,10 +700,10 @@ Usage: `discovery core secret [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -660,15 +713,15 @@ Usage: `discovery core secret get [flags] [<uuid>]`
 
 Arguments:
 
-`uuid`::
+`uuid`:
 (Optional, string) The UUID of the secret that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -676,7 +729,14 @@ Examples:
 ```bash
 # Get a secret by id
 discovery core secret get 81ca1ac6-3058-4ecd-a292-e439827a675a
-{"active":true,"creationTimestamp":"2025-08-26T21:56:50Z","id":"81ca1ac6-3058-4ecd-a292-e439827a675a","labels":[],"lastUpdatedTimestamp":"2025-08-26T21:56:50Z","name":"my-openai-secret"}
+{
+  "active": true,
+  "creationTimestamp": "2026-04-09T17:11:31Z",
+  "id": "6b8cdf12-a2b2-4fce-9d8d-0922d280dab3",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-04-09T17:11:31Z",
+  "name": "my-secret"
+}
 ```
 
 ```bash
@@ -693,21 +753,21 @@ Usage: `discovery core secret store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -722,7 +782,7 @@ discovery core secret store "secretjsonfile.json"
 
 ```bash
 # Store a secret with the JSON configuration in the data flag
-discovery core secret store --data  '{"name":"my-secret","active":true,"id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","content":{"apiKey":"apiKey"}}'
+discovery core secret store --data  '{"name":"my-secret","active":true,"content":{"apiKey":"apiKey"}}'
 {"active":true,"creationTimestamp":"2025-10-30T15:09:16Z","id":"b8bd5ec3-8f60-4502-b25e-8f6d36c98410","lastUpdatedTimestamp":"2025-10-30T15:43:52.496829Z","name":"my-secret"}
 ```
 
@@ -733,15 +793,15 @@ Usage: `discovery core secret delete [flags] <uuid>`
 
 Arguments:
 
-`uuid`::
+`uuid`:
 (Required, string) The UUID of the secret that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -749,7 +809,9 @@ Examples:
 ```bash
 # Delete a secret by id
 discovery core secret delete 3d51beef-8b90-40aa-84b5-033241dc6239
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Credential
@@ -759,10 +821,10 @@ Usage: `discovery core credential [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -772,18 +834,18 @@ Usage: `discovery core credential get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the credential that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
@@ -793,13 +855,36 @@ Examples:
 ```bash
 # Get a credential by id
 discovery core credential get 3b32e410-2f33-412d-9fb8-17970131921c
-{"active":true,"creationTimestamp":"2025-10-17T22:37:57Z","id":"3b32e410-2f33-412d-9fb8-17970131921c","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-17T22:37:57Z","name":"my-credential","secret":"my-secret","type":"mongo"}
+{
+  "active": true,
+  "creationTimestamp": "2025-10-17T22:37:57Z",
+  "id": "3b32e410-2f33-412d-9fb8-17970131921c",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-10-17T22:37:57Z",
+  "name": "my-credential",
+  "secret": "my-secret",
+  "type": "mongo"
+}
 ```
 
 ```bash
 # Get credential by name
 discovery core credential get "my-credential"
-{"active":true,"creationTimestamp":"2025-11-20T00:08:14Z","id":"9be0e625-a510-46c5-8130-438823f849c2","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:08:14Z","name":"my-credential","secret":"my-secret","type":"openai"}
+{
+  "active": true,
+  "creationTimestamp": "2025-11-20T00:08:14Z",
+  "id": "9be0e625-a510-46c5-8130-438823f849c2",
+  "labels": [],
+  "lastUpdatedTimestamp": "2025-11-20T00:08:14Z",
+  "name": "my-credential",
+  "secret": "my-secret",
+  "type": "openai"
+}
 ```
 
 ```bash
@@ -823,21 +908,21 @@ Usage: `discovery core credential store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -863,15 +948,15 @@ Usage: `discovery core credential delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the credential that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -879,13 +964,17 @@ Examples:
 ```bash
 # Delete a credential by id
 discovery core credential delete 3d51beef-8b90-40aa-84b5-033241dc6239
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Delete a credential by name
 discovery core credential delete my-credential
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Server
@@ -895,10 +984,10 @@ Usage: `discovery core server [subcommand] [flags]
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -908,18 +997,18 @@ Usage: `discovery core server get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the server that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
@@ -929,13 +1018,59 @@ Examples:
 ```bash
 # Get a server by id
 discovery core server get 21029da3-041c-43b5-a67e-870251f2f6a6
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"my-server","type":"mongo"}
+{
+  "active": true,
+  "config": {
+    "connection": {
+      "connectTimeout": "1m",
+      "readTimeout": "30s"
+    },
+    "credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+    "servers": [
+      "mongodb+srv://cluster0.mymongo.mongodb.net/"
+    ]
+  },
+  "creationTimestamp": "2025-09-29T15:50:19Z",
+  "id": "21029da3-041c-43b5-a67e-870251f2f6a6",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-09-29T15:50:19Z",
+  "name": "my-server",
+  "type": "mongo"
+}
 ```
 
 ```bash
 # Get server by name
 discovery core server get "my-server"
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:19Z","id":"21029da3-041c-43b5-a67e-870251f2f6a6","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-09-29T15:50:19Z","name":"my-server","type":"mongo"}
+{
+  "active": true,
+  "config": {
+    "connection": {
+      "connectTimeout": "1m",
+      "readTimeout": "30s"
+    },
+    "credentialId": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+    "servers": [
+      "mongodb+srv://cluster0.mymongo.mongodb.net/"
+    ]
+  },
+  "creationTimestamp": "2025-09-29T15:50:19Z",
+  "id": "21029da3-041c-43b5-a67e-870251f2f6a6",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-09-29T15:50:19Z",
+  "name": "my-server",
+  "type": "mongo"
+}
 ```
 
 ```bash
@@ -959,21 +1094,21 @@ Usage: `discovery core server store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -981,15 +1116,15 @@ Examples:
 ```bash
 # Store a server with the JSON configuration in a file
 discovery core server store "serverjsonfile.json"
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"my-server","type":"mongo"}       
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.mymongo.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"my-server","type":"mongo"}       
 {"code":1003,"messages":["Entity not found: 2b839453-ddad-4ced-8e13-2c7860af60a8"],"status":404,"timestamp":"2025-10-30T17:45:48.176913700Z"}
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-10-30T17:45:48.184774Z","id":"152e1175-e54d-4de6-90b9-388d45f8256e","labels":[],"lastUpdatedTimestamp":"2025-10-30T17:45:48.184774Z","name":"my-server-2","type":"mongo"}
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.mymongo.mongodb.net/"]},"creationTimestamp":"2025-10-30T17:45:48.184774Z","id":"152e1175-e54d-4de6-90b9-388d45f8256e","labels":[],"lastUpdatedTimestamp":"2025-10-30T17:45:48.184774Z","name":"my-server-2","type":"mongo"}
 ```
 
 ```bash
 # Store a server with the JSON configuration in the data flag
-discovery core server store --data '{"type":"mongo","name":"my-server","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.dleud.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
-{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.dleud.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"my-server","type":"mongo"}
+discovery core server store --data '{"type":"mongo","name":"my-server","labels":[],"active":true,"id":"2b839453-ddad-4ced-8e13-2c7860af60a7","creationTimestamp":"2025-09-29T15:50:26Z","lastUpdatedTimestamp":"2025-09-29T15:50:26Z","config":{"servers":["mongodb+srv://cluster0.mymongo.mongodb.net/"],"connection":{"readTimeout":"30s","connectTimeout":"1m"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
+{"active":true,"config":{"connection":{"connectTimeout":"1m","readTimeout":"30s"},"credentialId":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","servers":["mongodb+srv://cluster0.mymongo.mongodb.net/"]},"creationTimestamp":"2025-09-29T15:50:26Z","id":"2b839453-ddad-4ced-8e13-2c7860af60a7","labels":[],"lastUpdatedTimestamp":"2025-09-29T15:50:26Z","name":"my-server","type":"mongo"}
 ```
 
 ###### Delete
@@ -999,15 +1134,15 @@ Usage: `discovery core server delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the server that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1015,13 +1150,17 @@ Examples:
 ```bash
 # Delete a server by id
 discovery core server delete 3d51beef-8b90-40aa-84b5-033241dc6239
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Delete a server by name
 discovery core server delete my-server
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ###### Ping
@@ -1031,15 +1170,15 @@ Usage: `discovery core server ping [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the server that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Example:
@@ -1047,7 +1186,9 @@ Example:
 ```bash
 # Ping a server by name
 discovery core server ping "Elasticsearch Server"
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Status
@@ -1057,10 +1198,10 @@ Usage: `discovery core status`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Example:
@@ -1080,10 +1221,10 @@ Usage: `discovery ingestion [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ##### Config
@@ -1093,10 +1234,10 @@ Usage: `discovery ingestion config [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1123,13 +1264,13 @@ Usage: `discovery ingestion config get [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-s, --sensitive`::
+`-s, --sensitive`:
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
 
 Examples: 
@@ -1168,13 +1309,13 @@ Usage: `discovery ingestion export [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`--output-file`::
+`--output-file`:
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -1182,13 +1323,17 @@ Examples:
 ```bash
 # Export the entities using profile "cn".
 discovery ingestion export -p cn
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Export the entities to a specific file
 discovery ingestion export --output-file "entities/ingestion.zip"
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Import
@@ -1198,18 +1343,18 @@ Usage: `discovery ingestion import <file> [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Required, string) The file that contains the configurations of the entities.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`--on-conflict`::
+`--on-conflict`:
 (Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
 Examples:
@@ -1242,10 +1387,10 @@ Usage: `discovery ingestion processor [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -1255,18 +1400,18 @@ Usage: `discovery ingestion processor get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the processor that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
@@ -1276,13 +1421,58 @@ Examples:
 ```bash
 # Get a processor by id
 discovery ingestion processor get 90675678-fc9f-47ec-8bab-89969dc204f0
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:43Z","id":"90675678-fc9f-47ec-8bab-89969dc204f0","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:07:43Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{
+  "active": true,
+  "config": {
+    "action": "hydrate",
+    "collection": "blogs",
+    "data": {
+      "author": "#{ data('/author') }",
+      "header": "#{ data('/header') }",
+      "link": "#{ data('/reference') }"
+    },
+    "database": "pureinsights"
+  },
+  "creationTimestamp": "2025-10-30T20:07:43Z",
+  "id": "90675678-fc9f-47ec-8bab-89969dc204f0",
+  "labels": [],
+  "lastUpdatedTimestamp": "2025-10-30T20:07:43Z",
+  "name": "my-processor",
+  "server": {
+    "credential": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+    "id": "f6950327-3175-4a98-a570-658df852424a"
+  },
+  "type": "mongo"
+}
 ```
 
 ```bash
 # Get processor by name
 discovery ingestion processor get "my-processor"
-{"active":true,"config":{"action":"select","charset":"UTF-8","file":"#{data('/file')}","selectors":{"section0":{"mode":"HTML","selector":".sect0"},"section1":{"mode":"HTML","selector":".sect1"}}},"creationTimestamp":"2025-11-17T22:38:26Z","id":"56ace252-4731-4428-84b8-7cd13bf059d3","labels":[],"lastUpdatedTimestamp":"2025-11-17T22:38:26Z","name":"my-processor","type":"html"}
+{
+  "active": true,
+  "config": {
+    "action": "select",
+    "charset": "UTF-8",
+    "file": "#{data('/file')}",
+    "selectors": {
+      "section0": {
+        "mode": "HTML",
+        "selector": ".sect0"
+      },
+      "section1": {
+        "mode": "HTML",
+        "selector": ".sect1"
+      }
+    }
+  },
+  "creationTimestamp": "2025-11-17T22:38:26Z",
+  "id": "56ace252-4731-4428-84b8-7cd13bf059d3",
+  "labels": [],
+  "lastUpdatedTimestamp": "2025-11-17T22:38:26Z",
+  "name": "my-processor",
+  "type": "html"
+}
 ```
 
 ```bash
@@ -1306,21 +1496,21 @@ Usage: `discovery ingestion processor store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1336,7 +1526,7 @@ discovery ingestion processor store "ingestionprocessorjsonfile.json"
 ```bash
 # Store a processor with the JSON configuration in the data flag
 discovery ingestion processor store --data '{"type":"mongo","name":"my-processor","labels":[],"active":true,"id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","creationTimestamp":"2025-10-30T20:07:43.825231Z","lastUpdatedTimestamp":"2025-10-30T20:07:43.825231Z","config":{"data":{"link":"#{ data('/reference') }","author":"#{ data('/author') }","header":"#{ data('/header') }"},"action":"hydrate","database":"pureinsights","collection":"blogs"},"server":{"id":"f6950327-3175-4a98-a570-658df852424a","credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c"}}'
-{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data(/author) }","header":"#{ data(/header) }","link":"#{ data(/reference) }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{"active":true,"config":{"action":"hydrate","collection":"blogs","data":{"author":"#{ data('/author') }","header":"#{ data('/header') }","link":"#{ data('/reference') }"},"database":"pureinsights"},"creationTimestamp":"2025-10-30T20:07:44Z","id":"e9c4173f-6906-43a8-b3ca-7319d3d24754","labels":[],"lastUpdatedTimestamp":"2025-10-30T20:10:23.698799Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
 ```
 
 ###### Delete
@@ -1346,15 +1536,15 @@ Usage: `discovery ingestion processor delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the processor that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1362,13 +1552,17 @@ Examples:
 ```bash
 # Delete a processor by id
 discovery ingestion processor delete 83a009d5-5d2f-481c-b8bf-f96d3a35c240
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Delete a processor by name
 discovery ingestion processor delete "my-processor"
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Pipeline
@@ -1378,10 +1572,10 @@ Usage: `discovery ingestion pipeline [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -1391,18 +1585,18 @@ Usage: `discovery ingestion pipeline get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the pipeline that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, Array of strings) Add a filter to the search. The available filter is the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 
@@ -1411,13 +1605,74 @@ Examples:
 ```bash
 # Get a pipeline by id
 discovery ingestion pipeline get 04536687-f083-4353-8ecc-b7348e14b748
-{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","initialState":"ingestionState","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"my-pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+{
+  "active": true,
+  "creationTimestamp": "2025-10-31T22:07:02Z",
+  "id": "04536687-f083-4353-8ecc-b7348e14b748",
+  "initialState": "ingestionState",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-10-31T22:07:02Z",
+  "name": "my-pipeline",
+  "recordPolicy": {
+    "errorPolicy": "FAIL",
+    "idPolicy": {},
+    "outboundPolicy": {
+      "batchPolicy": {
+        "flushAfter": "PT1M",
+        "maxCount": 25
+      },
+      "mode": "INLINE",
+      "splitPolicy": {
+        "children": {
+          "idPolicy": {},
+          "snapshotPolicy": {}
+        },
+        "source": {
+          "snapshotPolicy": {}
+        }
+      }
+    },
+    "retryPolicy": {
+      "active": true,
+      "maxRetries": 3
+    },
+    "timeoutPolicy": {
+      "record": "PT1M"
+    }
+  },
+  "states": {
+    "ingestionState": {
+      "processors": [
+        {
+          "active": true,
+          "id": "516d4a8a-e8ae-488c-9e37-d5746a907454",
+          "outputField": "header"
+        },
+        {
+          "active": true,
+          "id": "aa0186f1-746f-4b20-b1b0-313bd79e78b8"
+        }
+      ],
+      "type": "processor"
+    }
+  }
+}
 ```
 
 ```bash
 # Get pipeline by name
 discovery ingestion pipeline get "my-pipeline"
-{"active":true,"creationTimestamp":"2025-10-31T22:07:02Z","id":"04536687-f083-4353-8ecc-b7348e14b748","initialState":"ingestionState","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:07:02Z","name":"my-pipeline","recordPolicy":{"errorPolicy":"FAIL","idPolicy":{},"outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"mode":"INLINE","splitPolicy":{"children":{"idPolicy":{},"snapshotPolicy":{}},"source":{"snapshotPolicy":{}}}},"retryPolicy":{"active":true,"maxRetries":3},"timeoutPolicy":{"record":"PT1M"}},"states":{"ingestionState":{"processors":[{"active":true,"id":"516d4a8a-e8ae-488c-9e37-d5746a907454","outputField":"header"},{"active":true,"id":"aa0186f1-746f-4b20-b1b0-313bd79e78b8"}],"type":"processor"}}}
+{
+  "active": true,
+  "creationTimestamp": "2025-10-31T22:07:02Z",
+  "id": "04536687-f083-4353-8ecc-b7348e14b748",
+  ...
+}
 ```
 
 ```bash
@@ -1442,21 +1697,21 @@ Usage: `discovery ingestion pipeline store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1482,15 +1737,15 @@ Usage: `discovery ingestion pipeline delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the pipeline that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1498,13 +1753,17 @@ Examples:
 ```bash
 # Delete a pipeline by id
 discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Delete a pipeline by name
 discovery ingestion pipeline delete "my-pipeline"
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Seed
@@ -1514,10 +1773,10 @@ Usage: `discovery ingestion seed [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -1527,29 +1786,29 @@ Usage: `discovery ingestion seed get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the seed that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
 
-`--record`::
+`--record`:
 (Optional, string) The id of the record that will be retrieved. The result is appended to the seed in a `record` field.
 
-`--execution`::
+`--execution`:
 (Optional, string) The UUID of the seed execution that will be retrieved.
 
-`--details`::
+`--details`:
 (Optional, string) Makes the get operation retrieve more information when getting a seed execution, like the audited changes and record and job summaries.
 
 The `filter`, `execution`, and `record` flags are mutually exclusive. The `details` flag can only be used with the `execution` flag.
@@ -1559,13 +1818,54 @@ Examples:
 ```bash
 # Get a seed by id
 discovery ingestion seed get 7251d693-7382-452f-91dc-859add803a43
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+{
+  "active": true,
+  "config": {
+    "action": "scroll",
+    "bucket": "blogs"
+  },
+  "creationTimestamp": "2025-10-31T22:54:08Z",
+  "id": "7251d693-7382-452f-91dc-859add803a43",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-10-31T22:54:08Z",
+  "name": "my-seed",
+  "pipeline": "9a74bf3a-eb2a-4334-b803-c92bf1bc45fe",
+  "recordPolicy": {
+    "errorPolicy": "FATAL",
+    "outboundPolicy": {
+      "batchPolicy": {
+        "flushAfter": "PT1M",
+        "maxCount": 25
+      },
+      "idPolicy": {}
+    },
+    "timeoutPolicy": {
+      "slice": "PT1H"
+    }
+  },
+  "type": "staging"
+}
 ```
 
 ```bash
 # Get seed by name
 discovery ingestion seed get "my-seed"
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-10-31T22:54:08Z","id":"7251d693-7382-452f-91dc-859add803a43","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-10-31T22:54:08Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+{
+  "active": true,
+  "config": {
+    "action": "scroll",
+    "bucket": "blogs"
+  },
+  "creationTimestamp": "2025-10-31T22:54:08Z",
+  "id": "7251d693-7382-452f-91dc-859add803a43",
+  ...
+  "type": "staging"
+}
 ```
 
 ```bash
@@ -1585,8 +1885,45 @@ discovery ingestion seed get -p cn
 
 ```bash
 # Get a seed record by id
-discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --record A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=
-{"active":true,"config":{"action":"scroll","bucket":"blogs"},"creationTimestamp":"2025-08-21T21:52:03Z","id":"2acd0a61-852c-4f38-af2b-9c84e152873e","labels":[],"lastUpdatedTimestamp":"2025-08-21T21:52:03Z","name":"my-seed","pipeline":"9a74bf3a-eb2a-4334-b803-c92bf1bc45fe","record":{"creationTimestamp":"2025-09-04T21:05:25Z","id":{"hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0=","plain":"4e7c8a47efd829ef7f710d64da661786"},"lastUpdatedTimestamp":"2025-09-04T21:05:25Z","status":"SUCCESS"},"recordPolicy":{"errorPolicy":"FATAL","outboundPolicy":{"batchPolicy":{"flushAfter":"PT1M","maxCount":25},"idPolicy":{}},"timeoutPolicy":{"slice":"PT1H"}},"type":"staging"}
+discovery ingestion seed get 63d88900-a428-4be6-aef0-bdf73cbe7acb --record Yuv7jAuvfMwtJ7VR1GbtsnkPD8CCdpdzlX-1mDHT54U=
+{
+  "active": true,
+  "config": {
+    "action": "plain",
+    "charsPerRecord": 50,
+    "records": 2
+  },
+  "creationTimestamp": "2026-04-08T16:32:58Z",
+  "id": "63d88900-a428-4be6-aef0-bdf73cbe7acb",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-04-08T16:32:58Z",
+  "name": "fieldmapper",
+  "pipeline": "f8263a42-c930-43d0-9868-46335732a243",
+  "record": {
+    "creationTimestamp": "2026-04-08T16:39:28Z",
+    "id": {
+      "hash": "Yuv7jAuvfMwtJ7VR1GbtsnkPD8CCdpdzlX-1mDHT54U=",
+      "plain": "fbb91d68b9de1acd1c24c3c6bcad0a86"
+    },
+    "lastUpdatedTimestamp": "2026-04-08T16:39:28Z",
+    "status": "SUCCESS"
+  },
+  "recordPolicy": {
+    "errorPolicy": "FATAL",
+    "outboundPolicy": {
+      "batchPolicy": {
+        "flushAfter": "PT1M",
+        "maxCount": 25
+      },
+      "idPolicy": {}
+    },
+    "snapshotPolicy": {},
+    "timeoutPolicy": {
+      "slice": "PT1H"
+    }
+  },
+  "type": "random"
+}
 ```
 
 ```bash
@@ -1640,21 +1977,21 @@ Usage: `discovery ingestion seed store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1680,15 +2017,15 @@ Usage: `discovery ingestion seed delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the seed that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1696,13 +2033,17 @@ Examples:
 ```bash
 # Delete a seed by id
 discovery ingestion seed delete 04536687-f083-4353-8ecc-b7348e14b748
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Delete a seed by name
 discovery ingestion seed delete "my-seed"
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ###### Start
@@ -1712,21 +2053,21 @@ Usage: `discovery ingestion seed start <arg> [flags]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the seed that will be executed.
 
 Flags:
 
-`--properties`::
+`--properties`:
 (Optional, string) Set the properties of the seed execution.
 
-`--scan-type`::
+`--scan-type`:
 (Optional, string) Sets the scan type of the seed execution. It can be `FULL` or `INCREMENTAL`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1734,19 +2075,43 @@ Examples:
 ```bash
 # Start a seed execution with no flags
 discovery ingestion seed start 1d81d3d5-58a2-44a5-9acf-3fc8358afe09
-{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+{
+  "creationTimestamp": "2025-11-03T23:56:18.513923Z",
+  "id": "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
+  "lastUpdatedTimestamp": "2025-11-03T23:56:18.513923Z",
+  "scanType": "FULL",
+  "status": "CREATED",
+  "triggerType": "MANUAL"
+}
 ```
 
 ```bash
 # Start a seed execution with no flags using the seed's name
 discovery ingestion seed start "my-seed"
-{"creationTimestamp":"2025-11-03T23:56:18.513923Z","id":"f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36","lastUpdatedTimestamp":"2025-11-03T23:56:18.513923Z","scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+{
+  "creationTimestamp": "2025-11-03T23:56:18.513923Z",
+  "id": "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
+  "lastUpdatedTimestamp": "2025-11-03T23:56:18.513923Z",
+  "scanType": "FULL",
+  "status": "CREATED",
+  "triggerType": "MANUAL"
+}
 ```
 
 ```bash
 # Start a seed execution with the properties and scan-type flags
 discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"my-bucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
-{"creationTimestamp":"2025-11-03T23:58:23.972883Z","id":"cb48ab6b-577a-4354-8edf-981e1b0c9acb","lastUpdatedTimestamp":"2025-11-03T23:58:23.972883Z","properties":{"stagingBucket":"my-bucket"},"scanType":"FULL","status":"CREATED","triggerType":"MANUAL"}
+{
+  "creationTimestamp": "2025-11-03T23:58:23.972883Z",
+  "id": "cb48ab6b-577a-4354-8edf-981e1b0c9acb",
+  "lastUpdatedTimestamp": "2025-11-03T23:58:23.972883Z",
+  "properties": {
+    "stagingBucket": "my-bucket"
+  },
+  "scanType": "FULL",
+  "status": "CREATED",
+  "triggerType": "MANUAL"
+}
 ```
 
 ###### Halt
@@ -1756,18 +2121,18 @@ Usage: `discovery ingestion seed halt <seed> [flags] `
 
 Arguments:
 
-`seed`::
+`seed`:
 (Required, string) The name or UUID of the seed that will have its executions halted.
 
 Flags:
 
-`--execution`::
+`--execution`:
 (Optional, string) The UUID of the execution that will be halted.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1798,10 +2163,10 @@ Usage: `discovery ingestion seed-schedule [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -1811,18 +2176,18 @@ Usage: `discovery ingestion seed-schedule get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the seed schedule that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, Array of strings) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 
@@ -1882,21 +2247,21 @@ Usage: `discovery ingestion seed-schedule store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1920,15 +2285,15 @@ Usage: `discovery ingestion seed-schedule delete <seed-schedule> [flags]`
 
 Arguments:
 
-`<seed-schedule>`::
+`<seed-schedule>`:
 (Required, string) The name or UUID of the seed schedule that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -1956,10 +2321,10 @@ Usage: `discovery ingestion status`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Example:
@@ -1979,10 +2344,10 @@ Usage: `discovery queryflow [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ##### Config
@@ -1992,10 +2357,10 @@ Usage: `discovery queryflow config [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -2022,13 +2387,13 @@ Usage: `discovery queryflow config get [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-s, --sensitive`::
+`-s, --sensitive`:
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
 
 Examples: 
@@ -2067,13 +2432,13 @@ Usage: `discovery queryflow export [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`--output-file`::
+`--output-file`:
 (Optional, string) The file that will contain the exported entities.
 
 Examples:
@@ -2081,13 +2446,17 @@ Examples:
 ```bash
 # Export the entities using profile "cn".
 discovery queryflow export -p cn
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Export the entities to a specific file.
 discovery queryflow export --output-file "entities/queryflow.zip"
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Import
@@ -2097,18 +2466,18 @@ Usage: `discovery queryflow import <file> [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Required, string) The file that contains the configurations of the entities.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`--on-conflict`::
+`--on-conflict`:
 (Optional, string) Sets the conflict resolution strategy when importing entities with the same id. The default value is "FAIL".
 
 Examples:
@@ -2145,10 +2514,10 @@ Usage: `discovery queryflow processor [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -2158,18 +2527,18 @@ Usage: `discovery queryflow processor get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the processor that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, string) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
@@ -2179,13 +2548,66 @@ Examples:
 ```bash
 # Get a processor by id
 discovery queryflow processor get 8e9ce4af-0f0b-44c7-bff7-c3c4f546e577
-{"active":true,"config":{"action":"aggregate","collection":"blogs","database":"pureinsights","stages":[{"$match":{"$text":{"$search":"#{ data(\"/httpRequest/queryParams/q\") }"}}}]},"creationTimestamp":"2025-11-06T14:52:14Z","id":"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2025-11-06T14:52:14Z","name":"my-processor","server":{"credential":"9ababe08-0b74-4672-bb7c-e7a8227d6d4c","id":"f6950327-3175-4a98-a570-658df852424a"},"type":"mongo"}
+{
+  "active": true,
+  "config": {
+    "action": "aggregate",
+    "collection": "blogs",
+    "database": "pureinsights",
+    "stages": [
+      {
+        "$match": {
+          "$text": {
+            "$search": "#{ data(\"/httpRequest/queryParams/q\") }"
+          }
+        }
+      }
+    ]
+  },
+  "creationTimestamp": "2025-11-06T14:52:14Z",
+  "id": "8e9ce4af-0f0b-44c7-bff7-c3c4f546e577",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-11-06T14:52:14Z",
+  "name": "my-processor",
+  "server": {
+    "credential": "9ababe08-0b74-4672-bb7c-e7a8227d6d4c",
+    "id": "f6950327-3175-4a98-a570-658df852424a"
+  },
+  "type": "mongo"
+}
 ```
 
 ```bash
 # Get processor by name
 discovery queryflow processor get "my-processor"
-{"active":true,"config":{"action":"chat-completion","messages":[{"content":"#{ data(\"/script\") }","role":"user"}],"model":"gpt-4.1"},"creationTimestamp":"2025-11-20T00:10:50Z","id":"8a399b1c-95fc-406c-a220-7d321aaa7b0e","labels":[],"lastUpdatedTimestamp":"2025-11-20T00:10:50Z","name":"my-processor","server":{"credential":"9be0e625-a510-46c5-8130-438823f849c2","id":"741df47e-208f-47c1-812f-53cc62c726af"},"type":"openai"}
+{
+  "active": true,
+  "config": {
+    "action": "chat-completion",
+    "messages": [
+      {
+        "content": "#{ data(\"/script\") }",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-4.1"
+  },
+  "creationTimestamp": "2025-11-20T00:10:50Z",
+  "id": "8a399b1c-95fc-406c-a220-7d321aaa7b0e",
+  "labels": [],
+  "lastUpdatedTimestamp": "2025-11-20T00:10:50Z",
+  "name": "my-processor",
+  "server": {
+    "credential": "9be0e625-a510-46c5-8130-438823f849c2",
+    "id": "741df47e-208f-47c1-812f-53cc62c726af"
+  },
+  "type": "openai"
+}
 ```
 
 ```bash
@@ -2209,21 +2631,21 @@ Usage: `discovery queryflow processor store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -2249,15 +2671,15 @@ Usage: `discovery queryflow processor delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the processor that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -2265,13 +2687,17 @@ Examples:
 ```bash
 # Delete a processor by id
 discovery queryflow processor delete 189b3fa5-e011-43aa-ae57-f6e4a6f4b552
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Delete a processor by name
 discovery queryflow processor delete my-processor
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Pipeline
@@ -2281,10 +2707,10 @@ Usage: `discovery queryflow pipeline [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -2294,18 +2720,18 @@ Usage: `discovery queryflow pipeline get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the pipeline that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, Array of strings) Add a filter to the search. The available filter is the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 
@@ -2323,14 +2749,10 @@ discovery queryflow pipeline get 782bfece-20a2-4382-bacb-1c9c550e2d58
   "lastUpdatedTimestamp": "2026-03-02T15:13:48Z",
   "name": "my-pipeline",
   "states": {
-    "responseState": {
-      "type": "message"
-    },
     "searchState": {
       "mode": {
         "type": "group"
       },
-      "next": "responseState",
       "processors": [
         {
           "active": true,
@@ -2359,14 +2781,10 @@ discovery queryflow pipeline get "my-pipeline"
   "lastUpdatedTimestamp": "2026-03-02T15:13:48Z",
   "name": "my-pipeline",
   "states": {
-    "responseState": {
-      "type": "message"
-    },
     "searchState": {
       "mode": {
         "type": "group"
       },
-      "next": "responseState",
       "processors": [
         {
           "active": true,
@@ -2405,21 +2823,21 @@ Usage: `discovery queryflow pipeline store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -2427,13 +2845,13 @@ Examples:
 ```bash
 # Store a pipeline with the JSON configuration in a file
 discovery queryflow pipeline store pipelines.json
-{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":{"responseState":{"type":"message"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":{"searchState":{"mode":{"type":"group"},"processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
 ```
 
 ```bash
 # Store a pipeline with the JSON configuration in the data flag
-discovery queryflow pipeline store --data '{"name":"my-pipeline","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"next":"responseState"},"responseState":{"type":"message","statusCode":200,"body":{"answer":"#{ data('/answer/choices/0/message/content') }"}}}}'
-{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":{"responseState":{"type":"message"},"searchState":{"mode":{"type":"group"},"next":"responseState","processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
+discovery queryflow pipeline store --data '{"name":"my-pipeline","initialState":"searchState","states":{"searchState":{"type":"processor","processors":[{"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}]}}}'
+{"active":true,"creationTimestamp":"2026-03-02T15:13:48Z","id":"782bfece-20a2-4382-bacb-1c9c550e2d58","initialState":"searchState","lastUpdatedTimestamp":"2026-03-02T15:40:31.659043Z","name":"my-pipeline","states":"searchState":{"mode":{"type":"group"},"processors":[{"active":true,"id":"38c35b42-56c2-42b3-85c5-b6dcd10b360b"},{"active":true,"id":"4048e82c-efe9-437f-bfb1-e141e7335a53"}],"type":"processor"}}}
 ```
 
 ###### Delete
@@ -2443,15 +2861,15 @@ Usage: `discovery queryflow pipeline delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the pipeline that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -2459,13 +2877,17 @@ Examples:
 ```bash
 # Delete a pipeline by id
 discovery ingestion pipeline delete 04536687-f083-4353-8ecc-b7348e14b748
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ```bash
 # Delete a pipeline by name
 discovery ingestion pipeline delete "my-pipeline"
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Endpoint
@@ -2475,10 +2897,10 @@ Usage: `discovery queryflow endpoint [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
@@ -2488,18 +2910,18 @@ Usage: `discovery queryflow endpoint get [flags] [<arg>]`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Optional, string) The name or UUID of the endpoint that will be retrieved.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
+`-f, --filter`:
 (Optional, string) Add a filter to the search. The available filters are the following:
 - Label: The format is `label={key}[:{value}]`, where the value is optional.
 - Type: The format is `type={type}`.
@@ -2563,21 +2985,21 @@ Usage: `discovery queryflow endpoint store [<file>...] [flags]`
 
 Arguments:
 
-`file`::
+`file`:
 (Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
 
-`-d, --data`::
+`-d, --data`:
 (Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
 
-`--abort-on-error`::
+`--abort-on-error`:
 (Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -2603,14 +3025,14 @@ Usage: `discovery queryflow endpoint delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name or UUID of the endpoint that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
-`-p, --profile`::
+`-p, --profile`:
 
 (Optional, string) Set the configuration profile that will execute the command.
 
@@ -2619,13 +3041,17 @@ Examples:
 ```bash
 # Delete an endpoint by id
 discovery queryflow endpoint delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 
 ```
 ```bash
 # Delete an endpoint by name
 discovery queryflow endpoint delete my-endpoint
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Status
@@ -2635,10 +3061,10 @@ Usage: `discovery queryflow status`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Example:
@@ -2658,10 +3084,10 @@ Usage: `discovery staging [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ##### Config
@@ -2671,10 +3097,10 @@ Usage: `discovery staging config [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -2701,13 +3127,13 @@ Usage: `discovery staging config get [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-s, --sensitive`::
+`-s, --sensitive`:
 (Optional, bool) Obfuscates the API Keys if true. Defaults to `true`.
 
 Examples: 
@@ -2746,10 +3172,10 @@ Usage: `discovery staging bucket [subcommand] [flags]`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Store
@@ -2759,21 +3185,21 @@ Usage: `discovery staging bucket store <bucketName> [configFile] [flags]`
 
 Arguments:
 
-`bucketName`::
+`bucketName`:
 (Required, string) The name of bucket that will be created or updated.
 
-`configFile`::
+`configFile`:
 (Optional, string) The path of the file that contains the bucket's configuration.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-d, --data`::
+`-d, --data`:
 (Optional, string) The JSON with the configuration of the bucket.
 
 Examples:
@@ -2826,19 +3252,19 @@ Usage: `discovery staging bucket dump [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name of the bucket that will be scrolled.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-f, --filter`::
-(Optional, string) The DSL containing the filters that will be applied to the scroll. For example:
+`-f, --filter`:
+(Optional, string) The [DSL](https://discovery.pureinsights.live/latest/reference/index.html#dsl) containing the filters that will be applied to the scroll. For example:
 
 ```json
 {
@@ -2850,7 +3276,7 @@ Flags:
 }
 ```
 
-`--projection`::
+`--projection`:
 (Optional, string) The DSL containing the fields that will be included and excluded in the records that will be retrieved from the bucket. See [Discovery's documentation](https://discovery.pureinsights.live/latest/reference/index.html#dsl-projections) for more details. For example:
 
 ```json
@@ -2862,10 +3288,10 @@ Flags:
 }
 ```
 
-`--page-size`::
+`--page-size`:
 (Optional, string) The size of the pages that will be used when retrieving the records.
 
-`--output-file`::
+`--output-file`:
 (Optional, string) The path in which to save the bucket's content. If not sent, it will be saved in a zip file with the bucket's name.
 
 Examples:
@@ -2885,15 +3311,15 @@ Usage: `discovery staging bucket delete [flags] <arg>`
 
 Arguments:
 
-`arg`::
+`arg`:
 (Required, string) The name of the bucket that will be deleted.
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Example:
@@ -2901,7 +3327,9 @@ Example:
 ```bash
 # Delete a bucket by name
 discovery staging bucket delete my-bucket
-{"acknowledged":true}
+{
+  "acknowledged": true
+}
 ```
 
 ##### Status
@@ -2911,10 +3339,10 @@ Usage: `discovery staging status`
 
 Flags:
 
-`-h, --help`::
+`-h, --help`:
 (Optional, bool) Prints the usage of the command.
 
-`-p, --profile`::
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Example:
