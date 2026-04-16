@@ -1,12 +1,8 @@
 Usage:
   status <seed> [flags]
 
-Examples:
-# Start a seed execution with the properties and scan-type flags
-	discovery ingestion seed start --scan-type FULL --properties '{"stagingBucket":"my-bucket"}' 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
-
 Flags:
-      --details            gets more information when getting a seed execution, like the audited changes and record and job summaries
-      --execution string   the id of the seed execution that will be retrieved
+      --details            gets more information when checking the status of a seed execution, like the audited changes and record and job summaries
+      --execution string   the id of the seed execution that will be checked
   -h, --help               help for status
 
