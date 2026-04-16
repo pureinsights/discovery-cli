@@ -91,7 +91,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			apiKey:     "",
 			outGolden:  "NewImportCommand_Out_ImportFails",
 			errGolden:  "NewImportCommand_Err_ImportFails",
-			outBytes:   testutils.Read(t, "NewImportCommand_Out_ImportFails"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewImportCommand_Err_ImportFails"),
 			method:     http.MethodPost,
 			path:       "/v2/import",
