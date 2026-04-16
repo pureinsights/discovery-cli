@@ -10,6 +10,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	// ingestionUrl is the key with the Ingestion URL
+	ingestionUrl string = "ingestion_url"
+	// ingestionKey is the key with the Ingestion API Key
+	ingestionKey string = "ingestion_key"
+)
+
 // getSeedExecution gets the seed execution, with details if the flag is enabled.
 func getSeedExecution(d cli.Discovery, seedId uuid.UUID, executionId, profile string, details bool, printer cli.Printer) error {
 	seedExecutionId, err := uuid.Parse(executionId)
@@ -18,7 +25,7 @@ func getSeedExecution(d cli.Discovery, seedId uuid.UUID, executionId, profile st
 	}
 
 	vpr := d.Config()
-	ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
+	ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+"."+ingestionUrl), vpr.GetString(profile+"."+ingestionKey))
 	seedExecutionClient := ingestionClient.Seeds().Executions(seedId)
 
 	summarizers := map[string]cli.Summarizer{
@@ -31,7 +38,7 @@ func getSeedExecution(d cli.Discovery, seedId uuid.UUID, executionId, profile st
 
 // RecordOrExecution determines whether to call the AppendSeedRecord() or SeedExecution() functions.
 func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profile, recordId, executionId string, details bool) error {
-	err := commands.CheckCredentials(d, profile, "Ingestion", "ingestion_url")
+	err := commands.CheckCredentials(d, profile, "Ingestion", ingestionUrl)
 	if err != nil {
 		return err
 	}
@@ -41,7 +48,7 @@ func RecordOrExecution(cmd *cobra.Command, args []string, d cli.Discovery, profi
 	}
 
 	vpr := d.Config()
-	ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
+	ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+"."+ingestionUrl), vpr.GetString(profile+"."+ingestionKey))
 	seed, err := cli.SearchEntity(d, ingestionClient.Seeds(), args[0])
 	if err != nil {
 		return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not search for entity with id %q", args[0])
@@ -83,8 +90,8 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			if !cmd.Flags().Changed("record") && !cmd.Flags().Changed("execution") {
-				ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
-				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", "ingestion_url"), &filters)
+				ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+"."+ingestionUrl), vpr.GetString(profile+"."+ingestionKey))
+				return commands.SearchCommand(args, d, ingestionClient.Seeds(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Ingestion", ingestionUrl), &filters)
 			}
 
 			return RecordOrExecution(cmd, args, d, profile, recordId, executionId, details)
