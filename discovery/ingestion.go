@@ -97,6 +97,20 @@ type seedExecutionsClient struct {
 	getter
 }
 
+// GetLast5Executions gets the last five executions sorted by creation timestamp in a descending order and returns the array as a gjson.Result
+func (src seedExecutionsClient) GetLast5Executions() (gjson.Result, error) {
+	response, err := execute(src.client, http.MethodGet, "", WithQueryParameters(map[string][]string{"size": {"5"}, "sort": {"creationTimestamp,desc"}}))
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	if !(response.Get("content").Exists()) {
+		return gjson.Parse("[]"), nil
+	}
+
+	return response.Get("content"), nil
+}
+
 // newSeedExecutionsClient is the constructor of a seedExecutionClient.
 func newSeedExecutionsClient(sc seedsClient, seedId uuid.UUID) seedExecutionsClient {
 	return seedExecutionsClient{

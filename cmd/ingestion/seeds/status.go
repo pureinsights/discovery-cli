@@ -17,7 +17,7 @@ func NewStatusCommand(d cli.Discovery) *cobra.Command {
 	status := &cobra.Command{
 		Use:   "status <seed>",
 		Short: "The command that gets the status of seed executions.",
-		Long:  "",
+		Long:  "status is the command to check the status of a seed. It can check the status of seed by its name or UUID. When the command only receives the seed, it returns the information of the last five seed executions and a summary of the records processed. If there are no executions, it shows an empty array. If there are no records, the records field is not included in the response. Also, just like the get command, it has the --execution and --details flags to get more information about a specific seed execution.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -31,9 +31,7 @@ func NewStatusCommand(d cli.Discovery) *cobra.Command {
 
 			vpr := d.Config()
 
-			if !cmd.Flags().Changed("execution") {
-				return nil
-			}
+			printer := cli.GetObjectPrinter(vpr.GetString("output"))
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
 			seed, err := cli.SearchEntity(d, ingestionClient.Seeds(), args[0])
@@ -46,13 +44,18 @@ func NewStatusCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
 			}
 
-			output := vpr.GetString("output")
-			printer := cli.GetObjectPrinter(output)
+			if !cmd.Flags().Changed("execution") {
+				return d.StatusOfSeedExecutions(ingestionClient.Seeds().Executions(seedId), ingestionClient.Seeds().Records(seedId), printer)
+			}
 
 			return getSeedExecution(d, seedId, executionId, profile, details, printer)
 		},
-		Args:    cobra.ExactArgs(1),
-		Example: ``,
+		Args: cobra.ExactArgs(1),
+		Example: `	# Check the status of a seed
+	discovery ingestion seed status "my-seed"
+	
+	# Check the status of a seed execution and with details
+	discovery ingestion seed status "my-seed" --execution 0f20f984-1854-4741-81ea-30f8b965b007 --details`,
 	}
 
 	status.Flags().StringVar(&executionId, "execution", "", "the id of the seed execution that will be checked")
