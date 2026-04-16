@@ -166,11 +166,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			fmt.Println("asdfadsf Está llegando aqi")
 			if tc.outBytes != nil {
-				*testutils.Update = true
-				fmt.Println(tc.name)
-				fmt.Println("Está llegando aqi")
 				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 			}
 		})
