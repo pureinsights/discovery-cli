@@ -431,7 +431,7 @@ func TestNewDeleteCommand(t *testing.T) {
 
 			vpr := viper.New()
 			vpr.Set("profile", "default")
-			vpr.Set("output", "json")
+
 			if tc.url {
 				vpr.Set("default.queryflow_url", srv.URL)
 			}
