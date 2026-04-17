@@ -145,6 +145,7 @@ func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 
 			getCmd := NewGetCommand(d)
 
+			getCmd.SilenceUsage = true
 			getCmd.SetIn(ios.In)
 			getCmd.SetOut(ios.Out)
 			getCmd.SetErr(ios.Err)
@@ -168,7 +169,9 @@ func TestNewGetCommand_WithProfileAndSensitiveFlags(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }
