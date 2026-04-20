@@ -31,6 +31,7 @@ func TestNewVersionCommand_versionPrints(t *testing.T) {
 	Version = "2.7.1"
 	d := cli.NewDiscovery(&ios, vpr, dir)
 	versionCmd := NewVersionCommand(d)
+	versionCmd.SilenceUsage = true
 	versionCmd.SetIn(ios.In)
 	versionCmd.SetOut(ios.Out)
 	versionCmd.SetErr(ios.Err)
@@ -57,6 +58,7 @@ func TestNewVersionCommand_versionFails(t *testing.T) {
 	Version = "2.7.1"
 	d := cli.NewDiscovery(&ios, vpr, dir)
 	versionCmd := NewVersionCommand(d)
+	versionCmd.SilenceUsage = true
 	versionCmd.SetIn(ios.In)
 	versionCmd.SetOut(ios.Out)
 	versionCmd.SetErr(ios.Err)
