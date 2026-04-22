@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
@@ -17,6 +19,257 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 )
+
+func Test_discovery_GetFile(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         CoreFileController
+		file           string
+		fileContent    []byte
+		fileOutput	   string
+		expectedOutput gjson.Result
+		err            error
+	}{
+		//Working Case
+		{
+			name:           "GetFile Obtains an existing file",
+			client:         new(mocks.WorkingFileClient),
+			file:			"script.py",
+			fileContent: 	[]byte(`
+	def main():
+		print("Hello, World!")
+
+	if __name__ == "__main__":
+		main()
+
+	`),
+			expectedOutput: gjson.Parse(`{"acknowledged": true}`),
+			err:            nil,
+		},
+		{
+			name:           "GetFile Obtains an existing file with output",
+			client:         new(mocks.WorkingFileClient),
+			file:			"script.py",
+			fileContent: 	[]byte(`
+	def main():
+		print("Hello, World!")
+
+	if __name__ == "__main__":
+		main()
+
+	`),
+			fileOutput:     "./test",
+			expectedOutput: gjson.Parse(`{"acknowledged": true}`),
+			err:            nil,
+		},
+		//Error Case
+		{
+			name:           "Key does not exists",
+			client:         new(mocks.FailingFileClient),
+			file: 			"script.py",			
+			expectedOutput: gjson.Result{},
+			err:            NewErrorWithCause(
+				ErrorExitCode, 
+				discoveryPackage.Error{
+					Status: http.StatusNotFound,
+					Body:   gjson.Result{},
+				}, 
+				"Could not get file with key \"script.py\"",
+			),
+		},
+	}
+	testutils.ChangeDirectoryHelper(t)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var output string
+			if tc.fileOutput == "" {
+				output = "."
+			} else {
+				output = tc.fileOutput
+			}
+
+			response, err := GetFile(tc.client, tc.file, output)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, response)
+				file,err := os.ReadFile(filepath.Join(".",tc.file))
+				require.NoError(t, err)
+				require.Equal(t, tc.fileContent,file)
+			}
+		})
+	}
+}
+
+func Test_discovery_GetFiles(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         CoreFileController
+		files          []string
+		filesContent   [][]byte
+		filesOutput	   string
+		expectedOutput string
+		err            error
+	}{
+		//Working Case
+		{
+			name:           "GetFiles Obtains an existing file",
+			client:         new(mocks.WorkingFileClient),
+			files:			[]string{"script.py"},
+			filesContent: 	[][]byte{[]byte(`
+	def main():
+		print("Hello, World!")
+
+	if __name__ == "__main__":
+		main()
+
+	`)},
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
+			err:            nil,
+		},
+		{
+			name:           "GetFiles Obtains an existing file with output",
+			client:         new(mocks.WorkingFileClient),
+			files:			[]string{"script.py"},
+			filesContent: 	[][]byte{[]byte(`
+	def main():
+		print("Hello, World!")
+
+	if __name__ == "__main__":
+		main()
+
+	`)},
+			filesOutput:     "./test",
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
+			err:            nil,
+		},
+		//Error Case
+		{
+			name:           "Key does not exists",
+			client:         new(mocks.FailingFileClient),
+			files: 			[]string{"script.py"},			
+			err:            NewErrorWithCause(
+				ErrorExitCode, 
+				discoveryPackage.Error{
+					Status: http.StatusNotFound,
+					Body:   gjson.Result{},
+				}, 
+				"Could not get file with key \"script.py\"",
+			),
+		},
+	}
+	testutils.ChangeDirectoryHelper(t)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var output string
+			if tc.filesOutput == "" {
+				output = "."
+			} else {
+				output = tc.filesOutput
+			}
+
+			in := strings.NewReader("")
+			out := &bytes.Buffer{}
+
+			errBuf := &bytes.Buffer{}
+			ios := iostreams.IOStreams{
+				In:  in,
+				Out: out,
+				Err: errBuf,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+
+			err := d.GetFiles(tc.client, tc.files, output, nil)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, out.String())
+				for i, file := range tc.files {
+					fileContent,err := os.ReadFile(filepath.Join(".",file))
+					require.NoError(t, err)
+					require.Equal(t, tc.filesContent[i],fileContent)
+				}
+				
+			}
+		})
+	}
+}
+
+func Test_discovery_GetFileList(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         CoreFileController
+		expectedOutput string
+		err            error
+	}{
+		//Working Case
+		{
+			name:           "Prints list of files",
+			client:         new(mocks.WorkingFileClient),
+			expectedOutput: "\"Credential.ndjson\"\n\"Server.ndjson\"\n\"buildContextPrompt.js\"\n\"buildSimplePrompt.js\"\n\"constructPrompt.js\"\n\"constructSuggestedPrompt.js\"\n\"elastic-extraction.py\"\n\"extractReference.groovy\"\n\"extractReferenceAtlas.groovy\"\n\"formatAnalysisResponse.js\"\n\"formatAutocompleteResponse.js\"\n\"formatChunksResponse.js\"\n\"formatKeywordResponse.js\"\n\"formatKeywordResponseAtlas.js\"\n\"formatKeywordSearch.js\"\n\"formatQuestionsResponse.js\"\n\"formatSearchResponse.js\"\n\"formatSearchResponseAtlas.js\"\n\"formatSemanticResponse.js\"\n\"formatSuggestionsResponse.js\"\n\"keywordSearchTemplateAtlas.json\"\n\"searchTemplate.json\"\n\"searchTemplateAtlas.json\"\n",
+			err:            nil,
+		},
+		//Error Case
+		{
+			name:           "GetFile List HTTP Error",
+			client:         new(mocks.FailingFileClient),
+			expectedOutput: "",
+			err:            NewErrorWithCause(
+				ErrorExitCode, 
+				discoveryPackage.Error{
+					Status: http.StatusInternalServerError,
+					Body:   gjson.Parse(`{
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`,
+					),
+				}, 
+				"Could not get file list",
+			),
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			in := strings.NewReader("")
+			out := &bytes.Buffer{}
+			errBuf := &bytes.Buffer{}
+
+			ios := iostreams.IOStreams{
+				In:  in,
+				Out: out,
+				Err: errBuf,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.GetFileList(tc.client, nil)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, out.String())
+			}
+		})
+	}
+}
 
 // Test_discovery_PingServer tests the discovery.PingServer() function.
 func Test_discovery_PingServer(t *testing.T) {
