@@ -8,6 +8,78 @@ import (
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
+// WorkingFileClient simulates a working file client.
+type WorkingFileClient struct{}
+
+func (w *WorkingFileClient) List() ([]gjson.Result, error) {
+	return gjson.Parse(`[
+		"Credential.ndjson",
+		"Server.ndjson",
+		"buildContextPrompt.js",
+		"buildSimplePrompt.js",
+		"constructPrompt.js",
+		"constructSuggestedPrompt.js",
+		"elastic-extraction.py",
+		"extractReference.groovy",
+		"extractReferenceAtlas.groovy",
+		"formatAnalysisResponse.js",
+		"formatAutocompleteResponse.js",
+		"formatChunksResponse.js",
+		"formatKeywordResponse.js",
+		"formatKeywordResponseAtlas.js",
+		"formatKeywordSearch.js",
+		"formatQuestionsResponse.js",
+		"formatSearchResponse.js",
+		"formatSearchResponseAtlas.js",
+		"formatSemanticResponse.js",
+		"formatSuggestionsResponse.js",
+		"keywordSearchTemplateAtlas.json",
+		"searchTemplate.json",
+		"searchTemplateAtlas.json"
+	]`).Array(), nil
+}
+
+func (w *WorkingFileClient) Upload(key, file string) (gjson.Result, error) {
+	return gjson.Result{},nil
+}
+
+func (w *WorkingFileClient) Retrieve(key string) ([]byte, error) {
+	return []byte(`
+	def main():
+		print("Hello, World!")
+
+	if __name__ == "__main__":
+		main()
+
+	`),nil
+}
+
+func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
+	return gjson.Result{},nil
+}
+
+// WorkingFileClient simulates a working file client.
+type FailingFileClient struct{}
+
+func (w *FailingFileClient) List() ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+func (w *FailingFileClient) Upload(key, file string) (gjson.Result, error) {
+	return gjson.Result{},nil
+}
+
+func (w *FailingFileClient) Retrieve(key string) ([]byte, error) {
+	return nil,discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body:   gjson.Result{},
+	}
+}
+
+func (w *FailingFileClient) Delete(key string) (gjson.Result, error) {
+	return gjson.Result{},nil
+}
+
 
 // WorkingServerPinger simulates when a ping to a server worked.
 type WorkingServerPinger struct{}

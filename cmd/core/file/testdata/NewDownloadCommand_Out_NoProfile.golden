@@ -1,0 +1,20 @@
+Usage:
+  download [<file>]... [flags]
+
+Examples:
+	# Download file by name
+	discovery core file download "my_file.json"
+
+	# Output file to different directory
+	discovery core file download "my_file.json" -o "./my_directory"
+
+	# Download file by nested path
+	discovery core file download "my_directory/my_file.json"
+
+	# Download multiple files by specifying nested paths or names
+	discovery core file download "my_directory/my_file.json" "my_other_file.json"
+
+Flags:
+  -h, --help            help for download
+  -o, --output string   the path/directory to download the file to
+
