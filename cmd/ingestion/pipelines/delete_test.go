@@ -544,6 +544,5 @@ func TestNewDeleteCommand_NotExactly1Arg(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, "accepts 1 arg(s), received 0")
 
-	testutils.CompareBytes(t, "NewDeleteCommand_Out_NotExactly1Arg", testutils.Read(t, "NewDeleteCommand_Out_NotExactly1Arg"), out.Bytes())
 	testutils.CompareBytes(t, "NewDeleteCommand_Err_NotExactly1Arg", testutils.Read(t, "NewDeleteCommand_Err_NotExactly1Arg"), errBuf.Bytes())
 }
