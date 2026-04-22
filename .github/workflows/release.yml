@@ -19,18 +19,20 @@ jobs:
           fetch-depth: 0
       -
         name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
       -
         name: Set the version environment variable
         run: |
-          VERSION=$(awk -F= '/^version.semver=/{print $2}' semver.properties)
+          $VERSION = Get-Content semver.properties |
+              Where-Object { $_ -match '^version\.semver=' } |
+              ForEach-Object { ($_ -split '=')[1].Trim() }
 
-          echo "Building version $VERSION"
+          Write-Host "Building version $VERSION"
 
-          export GORELEASER_CURRENT_TAG="v$VERSION"
+          "GORELEASER_CURRENT_TAG=$VERSION" >> $env:GITHUB_ENV
       -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           version: '~> v2'
