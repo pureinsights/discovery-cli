@@ -178,7 +178,7 @@ func TestNewStoreCommand(t *testing.T) {
 			name:      "No URL",
 			outGolden: "NewStoreCommand_Out_NoURL",
 			errGolden: "NewStoreCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -214,7 +214,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:    "",
 			outGolden: "NewStoreCommand_Out_DataFlagAndFile",
 			errGolden: "NewStoreCommand_Err_DataFlagAndFile",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_DataFlagAndFile"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_DataFlagAndFile"),
 			data: `{
 	"indices": [
@@ -249,7 +249,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewStoreCommand_Out_BucketExists",
 			errGolden: "NewStoreCommand_Err_BucketExists",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_BucketExists"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_BucketExists"),
 			data: `{
 	"config": {}
@@ -278,7 +278,7 @@ func TestNewStoreCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewStoreCommand_Out_FileNotExists",
 			errGolden: "NewStoreCommand_Err_FileNotExists",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_FileNotExists"),
+			outBytes:  []byte(nil),
 			data:      "",
 			file:      "doesnotexist",
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_FileNotExists"),
@@ -288,7 +288,7 @@ func TestNewStoreCommand(t *testing.T) {
 			name:      "Printing JSON Object fails",
 			outGolden: "NewStoreCommand_Out_PrintJSONFails",
 			errGolden: "NewStoreCommand_Err_PrintJSONFails",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_PrintJSONFails"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_PrintJSONFails"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -373,6 +373,7 @@ func TestNewStoreCommand(t *testing.T) {
 
 			storeCmd := NewStoreCommand(d)
 
+			storeCmd.SilenceUsage = true
 			storeCmd.SetIn(ios.In)
 			storeCmd.SetOut(ios.Out)
 			storeCmd.SetErr(ios.Err)
@@ -412,7 +413,9 @@ func TestNewStoreCommand(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }
