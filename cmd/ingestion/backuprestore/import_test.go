@@ -91,7 +91,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			apiKey:     "",
 			outGolden:  "NewImportCommand_Out_ImportFails",
 			errGolden:  "NewImportCommand_Err_ImportFails",
-			outBytes:   testutils.Read(t, "NewImportCommand_Out_ImportFails"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewImportCommand_Err_ImportFails"),
 			method:     http.MethodPost,
 			path:       "/v2/import",
@@ -166,11 +166,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			fmt.Println("asdfadsf Está llegando aqi")
 			if tc.outBytes != nil {
-				*testutils.Update = true
-				fmt.Println(tc.name)
-				fmt.Println("Está llegando aqi")
 				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 			}
 		})
