@@ -1,0 +1,8 @@
+Usage:
+  status <seed> [flags]
+
+Flags:
+      --details            gets more information when checking the status of a seed execution, like the audited changes and record and job summaries
+      --execution string   the id of the seed execution that will be checked
+  -h, --help               help for status
+
