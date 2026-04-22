@@ -116,3 +116,89 @@ func Test_discovery_PingServer(t *testing.T) {
 		})
 	}
 }
+
+// Test_discovery_DeleteFile tests the discovery.DeleteFile() function.
+func Test_discovery_DeleteFile(t *testing.T) {
+	tests := []struct {
+		name           string
+		client         CoreFileController
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "DeleteEntity correctly prints the deletion confirmation with the pretty printer",
+			client:         new(mocks.WorkingFileClient),
+			printer:        nil,
+			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
+			err:            nil,
+		},
+		{
+			name:           "DeleteEntity correctly prints an object with JSON ugly printer",
+			client:         new(mocks.WorkingFileClient),
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"acknowledged\":true}\n",
+			err:            nil,
+		},
+
+		// Error case
+		{
+			name:           "Delete returns 500 Internal Server Error",
+			client:         new(mocks.FailingFileClient),
+			printer:        nil,
+			expectedOutput: "",
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusInternalServerError,
+				Body: gjson.Parse(`{
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+			}, "Could not delete file with key \"my-file\""),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(mocks.WorkingFileClient),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			key := "my-file"
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.DeleteFile(tc.client, key, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}

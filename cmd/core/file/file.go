@@ -14,8 +14,7 @@ func NewFileCommand(d cli.Discovery) *cobra.Command {
 
 	file.AddCommand(NewGetCommand(d))
 	file.AddCommand(NewDownloadCommand(d))
-	// credential.AddCommand(NewStoreCommand(d))
-	// credential.AddCommand(NewDeleteCommand(d))
+	file.AddCommand(NewDeleteCommand(d))
 
 	return file
 }

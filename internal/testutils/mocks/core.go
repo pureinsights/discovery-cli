@@ -8,6 +8,7 @@ import (
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
+
 // WorkingFileClient simulates a working file client.
 type WorkingFileClient struct{}
 
@@ -40,7 +41,7 @@ func (w *WorkingFileClient) List() ([]gjson.Result, error) {
 }
 
 func (w *WorkingFileClient) Upload(key, file string) (gjson.Result, error) {
-	return gjson.Result{},nil
+	return gjson.Result{}, nil
 }
 
 func (w *WorkingFileClient) Retrieve(key string) ([]byte, error) {
@@ -51,11 +52,14 @@ func (w *WorkingFileClient) Retrieve(key string) ([]byte, error) {
 	if __name__ == "__main__":
 		main()
 
-	`),nil
+	`), nil
 }
 
+// Delete returns acknowledged true
 func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
-	return gjson.Result{},nil
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
 }
 
 // WorkingFileClient simulates a working file client.
@@ -66,20 +70,30 @@ func (w *FailingFileClient) List() ([]gjson.Result, error) {
 }
 
 func (w *FailingFileClient) Upload(key, file string) (gjson.Result, error) {
-	return gjson.Result{},nil
+	return gjson.Result{}, nil
 }
 
 func (w *FailingFileClient) Retrieve(key string) ([]byte, error) {
-	return nil,discoveryPackage.Error{
+	return nil, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body:   gjson.Result{},
 	}
 }
 
+// Delete returns an error
 func (w *FailingFileClient) Delete(key string) (gjson.Result, error) {
-	return gjson.Result{},nil
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusInternalServerError,
+		Body: gjson.Parse(`{
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+	}
 }
-
 
 // WorkingServerPinger simulates when a ping to a server worked.
 type WorkingServerPinger struct{}
