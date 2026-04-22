@@ -1,8 +1,6 @@
 package file
 
 import (
-	"fmt"
-
 	"github.com/pureinsights/discovery-cli/cmd/commands"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
@@ -14,7 +12,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "get",
 		Short: "The command that obtains the list of all files from Discovery Core.",
-		Long:  fmt.Sprintf(commands.LongGetFiles, "file", "Core"),
+		Long:  "get is the command used to obtain the list of all Discovery Core's files.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -24,7 +22,14 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return commands.GetFilesCommand(args, d, coreClient.Files(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"))
+			
+			err = commands.CheckCredentials(d, profile, "Core", "core_url")
+			if err != nil {
+				return err
+			}
+
+			printer := cli.GetArrayPrinter("json")
+			return d.GetFileList(coreClient.Files(), printer)		
 		},
 		Args: cobra.NoArgs,
 		Example: `	# Get the list of all files
