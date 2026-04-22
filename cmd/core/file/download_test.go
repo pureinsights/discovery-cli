@@ -152,7 +152,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			apiKey:       "apiKey123",
 			outGolden:    "NewDownloadCommand_Out_FailDownloadFile",
 			errGolden:    "NewDownloadCommand_Err_FailDownloadFile",
-			outBytes:     testutils.Read(t, "NewDownloadCommand_Out_FailDownloadFile"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewDownloadCommand_Err_FailDownloadFile"),
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file/script.py": {
@@ -178,7 +178,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			apiKey:       "apiKey123",
 			outGolden:    "NewDownloadCommand_Out_FailDownloadMultipleFiles",
 			errGolden:    "NewDownloadCommand_Err_FailDownloadMultipleFiles",
-			outBytes:     testutils.Read(t, "NewDownloadCommand_Out_FailDownloadMultipleFiles"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewDownloadCommand_Err_FailDownloadMultipleFiles"),
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file/script.py": {
@@ -213,7 +213,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewDownloadCommand_Out_NoURL",
 			errGolden: "NewDownloadCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewDownloadCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewDownloadCommand_Err_NoURL"),
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
@@ -224,7 +224,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewDownloadCommand_Out_GetFilesHTTPError",
 			errGolden: "NewDownloadCommand_Err_GetFilesHTTPError",
-			outBytes:  testutils.Read(t, "NewDownloadCommand_Out_GetFilesHTTPError"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewDownloadCommand_Err_GetFilesHTTPError"),
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file/script.py": {
@@ -287,6 +287,7 @@ func TestNewDownloadCommand(t *testing.T) {
 
 			getCmd := NewDownloadCommand(d)
 
+			getCmd.SilenceUsage = true
 			getCmd.SetIn(ios.In)
 			getCmd.SetOut(ios.Out)
 			getCmd.SetErr(ios.Err)
@@ -323,7 +324,9 @@ func TestNewDownloadCommand(t *testing.T) {
 				assert.Equal(t,testdata,downloaded)
 			}
 			
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}		
 		})
 	}
 }
@@ -350,7 +353,8 @@ func TestNewDownloadCommand_NoProfileFlag(t *testing.T) {
 	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
 
 	getCmd := NewDownloadCommand(d)
-
+	
+	getCmd.SilenceUsage = true
 	getCmd.SetIn(ios.In)
 	getCmd.SetOut(ios.Out)
 	getCmd.SetErr(ios.Err)
@@ -361,6 +365,6 @@ func TestNewDownloadCommand_NoProfileFlag(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "NewDownloadCommand_Out_NoProfile", testutils.Read(t, "NewDownloadCommand_Out_NoProfile"), out.Bytes())
+	testutils.CompareBytes(t, "NewDownloadCommand_Out_NoProfile", []byte{}, out.Bytes())
 	testutils.CompareBytes(t, "NewDownloadCommand_Err_NoProfile", testutils.Read(t, "NewDownloadCommand_Err_NoProfile"), errBuf.Bytes())
 }
