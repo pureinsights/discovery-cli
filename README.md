@@ -1191,6 +1191,35 @@ discovery core server ping "Elasticsearch Server"
 }
 ```
 
+##### File
+###### Delete
+`delete` is the command used to delete files from Discovery Core's object storage. The user sends the file's key and Discovery returns an acknowledgement message.
+
+Usage: `discovery core file delete [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The key of the file that will be deleted.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a server by name
+discovery core file delete my-file
+{
+  "acknowledged": true
+}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery Core. If it is healthy, it should return a JSON with an "UP" status field.
 
