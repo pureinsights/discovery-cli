@@ -1,0 +1,44 @@
+{
+  "executions": [
+    {
+      "creationTimestamp": "2026-04-14T16:06:44Z",
+      "id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+      "lastUpdatedTimestamp": "2026-04-14T16:24:03Z",
+      "scanType": "FULL",
+      "status": "DONE",
+      "triggerType": "MANUAL"
+    },
+    {
+      "creationTimestamp": "2026-04-13T17:26:56Z",
+      "id": "79fde75b-ce25-4620-a0e3-19506dac7030",
+      "lastUpdatedTimestamp": "2026-04-13T22:17:44Z",
+      "scanType": "FULL",
+      "status": "DONE",
+      "triggerType": "MANUAL"
+    },
+    {
+      "creationTimestamp": "2026-04-13T17:01:46Z",
+      "id": "55588e89-600a-4c22-bc9b-c6ef51d2f0ea",
+      "lastUpdatedTimestamp": "2026-04-13T17:09:29Z",
+      "scanType": "FULL",
+      "status": "DONE",
+      "triggerType": "MANUAL"
+    },
+    {
+      "creationTimestamp": "2026-04-10T22:04:51Z",
+      "id": "ffaa0321-5e63-44de-981e-217d3d56f152",
+      "lastUpdatedTimestamp": "2026-04-13T13:57:44Z",
+      "scanType": "FULL",
+      "status": "DONE",
+      "triggerType": "MANUAL"
+    },
+    {
+      "creationTimestamp": "2026-04-10T21:39:49Z",
+      "id": "5acc72cf-9e51-42b2-b298-7b1c2bc65e06",
+      "lastUpdatedTimestamp": "2026-04-10T21:43:17Z",
+      "scanType": "FULL",
+      "status": "HALTED",
+      "triggerType": "MANUAL"
+    }
+  ]
+}

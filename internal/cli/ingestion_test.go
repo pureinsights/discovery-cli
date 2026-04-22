@@ -969,3 +969,112 @@ func TestSeedExecution(t *testing.T) {
 		})
 	}
 }
+
+// TestStatusOfSeedExecutions tests the StatusOfSeedExecutions() function.
+func TestStatusOfSeedExecutions(t *testing.T) {
+	tests := []struct {
+		name            string
+		executionClient SeedExecutionGetter
+		recordClient    RecordGetter
+		expectedOutput  string
+		printer         Printer
+		outWriter       io.Writer
+		err             error
+	}{
+		// Working case
+		{
+			name:            "GetLast5Executions returns a working array and the record client returns the summary",
+			executionClient: new(mocks.WorkingSeedExecutionGetter),
+			recordClient:    new(mocks.WorkingRecordGetter),
+			expectedOutput:  "{\"executions\":[{\"creationTimestamp\":\"2026-04-09T17:26:26Z\",\"id\":\"9afd17f2-8034-4244-b44b-df0662783f15\",\"lastUpdatedTimestamp\":\"2026-04-09T17:26:47Z\",\"scanType\":\"FULL\",\"status\":\"HALTED\",\"triggerType\":\"MANUAL\"},{\"creationTimestamp\":\"2026-04-08T16:33:32Z\",\"id\":\"3fdddf51-fa6b-406b-9b28-cc40969d908d\",\"lastUpdatedTimestamp\":\"2026-04-08T16:39:32Z\",\"scanType\":\"FULL\",\"status\":\"DONE\",\"triggerType\":\"MANUAL\"}],\"records\":{\"DONE\":4,\"PROCESSING\":4}}\n",
+			printer:         JsonObjectPrinter(false),
+			err:             nil,
+		},
+		{
+			name:            "GetLast5Executions returns a working array, but the record client does not return a summary",
+			executionClient: new(mocks.WorkingSeedExecutionGetter),
+			recordClient:    new(mocks.WorkingRecordGetterNoSummary),
+			expectedOutput:  "{\n  \"executions\": [\n    {\n      \"creationTimestamp\": \"2026-04-09T17:26:26Z\",\n      \"id\": \"9afd17f2-8034-4244-b44b-df0662783f15\",\n      \"lastUpdatedTimestamp\": \"2026-04-09T17:26:47Z\",\n      \"scanType\": \"FULL\",\n      \"status\": \"HALTED\",\n      \"triggerType\": \"MANUAL\"\n    },\n    {\n      \"creationTimestamp\": \"2026-04-08T16:33:32Z\",\n      \"id\": \"3fdddf51-fa6b-406b-9b28-cc40969d908d\",\n      \"lastUpdatedTimestamp\": \"2026-04-08T16:39:32Z\",\n      \"scanType\": \"FULL\",\n      \"status\": \"DONE\",\n      \"triggerType\": \"MANUAL\"\n    }\n  ]\n}\n",
+			printer:         nil,
+			err:             nil,
+		},
+		{
+			name:            "GetLast5Executions returns an empty array, but the record client does returns a summary",
+			executionClient: new(mocks.WorkingSeedExecutionGetterNoExecutions),
+			recordClient:    new(mocks.WorkingRecordGetter),
+			expectedOutput:  "{\n  \"executions\": [],\n  \"records\": {\n    \"DONE\": 4,\n    \"PROCESSING\": 4\n  }\n}\n",
+			printer:         nil,
+			err:             nil,
+		},
+		{
+			name:            "GetLast5Executions returns an empty array and the record client does not return a summary",
+			executionClient: new(mocks.WorkingSeedExecutionGetterNoExecutions),
+			recordClient:    new(mocks.WorkingRecordGetterNoSummary),
+			expectedOutput:  "{\"executions\":[]}\n",
+			printer:         JsonObjectPrinter(false),
+			err:             nil,
+		},
+
+		// Error case
+		{
+			name:            "Getting the seed executions fails",
+			executionClient: new(mocks.FailingSeedExecutionGetterLastExecutionsFails),
+			recordClient:    new(mocks.WorkingRecordGetter),
+			err:             NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}, "Could not get the five last seed executions"),
+		},
+		{
+			name:            "Getting the record summary fails",
+			executionClient: new(mocks.WorkingSeedExecutionGetter),
+			recordClient:    new(mocks.FailingRecordGetter),
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed not found: 3b32e410-2f33-412d-9fb8-17970131921c"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)}, "Could not get the record summary"),
+		},
+		{
+			name:            "Printing fails",
+			executionClient: new(mocks.WorkingSeedExecutionGetter),
+			recordClient:    new(mocks.WorkingRecordGetter),
+			expectedOutput:  "{\n  \"id\": \"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\",\n  \"creationTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"lastUpdatedTimestamp\": \"2025-10-10T19:48:31Z\",\n  \"triggerType\": \"MANUAL\",\n  \"status\": \"RUNNING\",\n  \"scanType\": \"FULL\",\n  \"properties\": {\n    \"stagingBucket\": \"testBucket\"\n  },\n  \"stages\": [\"BEFORE_HOOKS\",\"INGEST\"]\n,\"audit\":[\n{\"timestamp\":\"2025-09-05T20:09:22.543Z\",\"status\":\"CREATED\",\"stages\":[]},\n{\"timestamp\":\"2025-09-05T20:09:26.621Z\",\"status\":\"RUNNING\",\"stages\":[]},\n{\"timestamp\":\"2025-09-05T20:09:37.592Z\",\"status\":\"RUNNING\",\"stages\":[\"BEFORE_HOOKS\"]},\n{\"timestamp\":\"2025-09-05T20:13:26.602Z\",\"status\":\"RUNNING\",\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"]}\n],\"records\":{\"PROCESSING\":4,\"DONE\": 4},\"jobs\":{\"DONE\":5,\"RUNNING\":3}}",
+			printer:         JsonObjectPrinter(false),
+			outWriter:       testutils.ErrWriter{Err: errors.New("write failed")},
+			err:             NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+
+			err := d.StatusOfSeedExecutions(tc.executionClient, tc.recordClient, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}

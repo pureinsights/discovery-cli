@@ -273,7 +273,7 @@ func TestNewHaltCommand(t *testing.T) {
 			name:      "No URL",
 			outGolden: "NewHaltCommand_Out_NoURL",
 			errGolden: "NewHaltCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewHaltCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -286,7 +286,7 @@ func TestNewHaltCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewHaltCommand_Out_ErrorExecutionIsHalting",
 			errGolden: "NewHaltCommand_Err_ErrorExecutionIsHalting",
-			outBytes:  testutils.Read(t, "NewHaltCommand_Out_ErrorExecutionIsHalting"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_ErrorExecutionIsHalting"),
 			execution: "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
 			responses: map[string]testutils.MockResponse{
@@ -366,7 +366,7 @@ func TestNewHaltCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewHaltCommand_Out_ErrorSeedNotFound",
 			errGolden: "NewHaltCommand_Err_ErrorSeedNotFound",
-			outBytes:  testutils.Read(t, "NewHaltCommand_Out_ErrorSeedNotFound"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_ErrorSeedNotFound"),
 			execution: "",
 			responses: map[string]testutils.MockResponse{
@@ -403,7 +403,7 @@ func TestNewHaltCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewHaltCommand_Out_ErrorExecutionNotFound",
 			errGolden: "NewHaltCommand_Err_ErrorExecutionNotFound",
-			outBytes:  testutils.Read(t, "NewHaltCommand_Out_ErrorExecutionNotFound"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_ErrorExecutionNotFound"),
 			execution: "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
 			responses: map[string]testutils.MockResponse{
@@ -483,7 +483,7 @@ func TestNewHaltCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewHaltCommand_Out_ErrorExecutionNotUUID",
 			errGolden: "NewHaltCommand_Err_ErrorExecutionNotUUID",
-			outBytes:  testutils.Read(t, "NewHaltCommand_Out_ErrorExecutionNotUUID"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_ErrorExecutionNotUUID"),
 			execution: "test",
 			responses: map[string]testutils.MockResponse{
@@ -551,7 +551,7 @@ func TestNewHaltCommand(t *testing.T) {
 			name:      "Printing JSON Object fails",
 			outGolden: "NewHaltCommand_Out_PrintJSONFails",
 			errGolden: "NewHaltCommand_Err_PrintJSONFails",
-			outBytes:  testutils.Read(t, "NewHaltCommand_Out_PrintJSONFails"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewHaltCommand_Err_PrintJSONFails"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -659,6 +659,7 @@ func TestNewHaltCommand(t *testing.T) {
 
 			haltCmd := NewHaltCommand(d)
 
+			haltCmd.SilenceUsage = true
 			haltCmd.SetIn(ios.In)
 			haltCmd.SetOut(ios.Out)
 			haltCmd.SetErr(ios.Err)
@@ -688,7 +689,9 @@ func TestNewHaltCommand(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

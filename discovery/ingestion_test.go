@@ -649,6 +649,154 @@ func Test_seedExecutionsClient_Credential(t *testing.T) {
 	}
 }
 
+// Test_seedExecutionsClient_GetLast5Executions tests the seedExecutionsClient.GetLast5Executions() function.
+func Test_seedExecutionsClient_GetLast5Executions(t *testing.T) {
+	tests := []struct {
+		name        string
+		method      string
+		path        string
+		statusCode  int
+		response    string
+		expectedLen int
+		err         error
+	}{
+		// Working case
+		{
+			name:       "Get works correctly",
+			method:     http.MethodGet,
+			path:       "/",
+			statusCode: http.StatusOK,
+			response: `{
+			"content": [
+				{
+				"id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+				"creationTimestamp": "2026-04-14T16:06:44Z",
+				"lastUpdatedTimestamp": "2026-04-14T16:24:03Z",
+				"triggerType": "MANUAL",
+				"status": "DONE",
+				"scanType": "FULL"
+				},
+				{
+				"id": "79fde75b-ce25-4620-a0e3-19506dac7030",
+				"creationTimestamp": "2026-04-13T17:26:56Z",
+				"lastUpdatedTimestamp": "2026-04-13T22:17:44Z",
+				"triggerType": "MANUAL",
+				"status": "DONE",
+				"scanType": "FULL"
+				},
+				{
+				"id": "55588e89-600a-4c22-bc9b-c6ef51d2f0ea",
+				"creationTimestamp": "2026-04-13T17:01:46Z",
+				"lastUpdatedTimestamp": "2026-04-13T17:09:29Z",
+				"triggerType": "MANUAL",
+				"status": "DONE",
+				"scanType": "FULL"
+				},
+				{
+				"id": "ffaa0321-5e63-44de-981e-217d3d56f152",
+				"creationTimestamp": "2026-04-10T22:04:51Z",
+				"lastUpdatedTimestamp": "2026-04-13T13:57:44Z",
+				"triggerType": "MANUAL",
+				"status": "DONE",
+				"scanType": "FULL"
+				},
+				{
+				"id": "5acc72cf-9e51-42b2-b298-7b1c2bc65e06",
+				"creationTimestamp": "2026-04-10T21:39:49Z",
+				"lastUpdatedTimestamp": "2026-04-10T21:43:17Z",
+				"triggerType": "MANUAL",
+				"status": "HALTED",
+				"scanType": "FULL"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 5,
+				"sort": [
+				{
+					"property": "creationTimestamp",
+					"direction": "DESC"
+				}
+				]
+			},
+			"totalSize": 21,
+			"totalPages": 5,
+			"empty": false,
+			"size": 5,
+			"offset": 0,
+			"numberOfElements": 5,
+			"pageNumber": 0
+			}`,
+			expectedLen: 5,
+			err:         nil,
+		},
+		{
+			name:        "Get returns no content",
+			method:      http.MethodGet,
+			path:        "/",
+			statusCode:  http.StatusNoContent,
+			response:    ``,
+			expectedLen: 0,
+			err:         nil,
+		},
+
+		// Error cases
+		{
+			name:       "Get fails",
+			method:     http.MethodGet,
+			path:       "/",
+			statusCode: http.StatusNotFound,
+			response: `{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+  ],
+  "timestamp": "2026-04-15T23:52:26.878700200Z"
+}`,
+			expectedLen: 0,
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 2acd0a61-852c-4f38-af2b-9c84e152873e"
+  ],
+  "timestamp": "2026-04-15T23:52:26.878700200Z"
+}`)},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, "/seed/2acd0a61-852c-4f38-af2b-9c84e152873e/execution"+strings.TrimLeft(tc.path, "/"), r.URL.Path)
+					assert.Equal(t, "5", r.URL.Query().Get("size"))
+					assert.Equal(t, []string{"creationTimestamp,desc"}, r.URL.Query()["sort"])
+				}))
+			defer srv.Close()
+
+			apiKey := "Api Key"
+			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+			require.NoError(t, err)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
+
+			response, err := ingestionSeedExecutionsClient.GetLast5Executions()
+			assert.Equal(t, tc.expectedLen, len(response.Array()))
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsArray())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
+		})
+	}
+}
+
 // Test_seedExecutionsClient_Halt tests the seedExecutionsClient.Halt() function.
 func Test_seedExecutionsClient_Halt(t *testing.T) {
 	tests := []struct {
