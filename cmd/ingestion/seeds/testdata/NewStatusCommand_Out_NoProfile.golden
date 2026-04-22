@@ -1,6 +1,13 @@
 Usage:
   status <seed> [flags]
 
+Examples:
+	# Check the status of a seed
+	discovery ingestion seed status "my-seed"
+	
+	# Check the status of a seed execution and with details
+	discovery ingestion seed status "my-seed" --execution 0f20f984-1854-4741-81ea-30f8b965b007 --details
+
 Flags:
       --details            gets more information when checking the status of a seed execution, like the audited changes and record and job summaries
       --execution string   the id of the seed execution that will be checked

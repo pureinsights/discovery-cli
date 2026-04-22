@@ -97,7 +97,7 @@ func (c *FailingSeedExecutionControllerHaltFails) Halt(uuid.UUID) (gjson.Result,
 			}`)}
 }
 
-// WorkingGetter mocks the RecordGetter interface to always answer a working result.
+// WorkingRecordGetter mocks the RecordGetter interface to always answer a working result.
 type WorkingRecordGetter struct{}
 
 // Get returns a record as if the request worked successfully.
@@ -122,6 +122,41 @@ func (g *WorkingRecordGetter) GetAll() ([]gjson.Result, error) {
 	]`).Array(), nil
 }
 
+// Summarize returns a real result.
+func (s *WorkingRecordGetter) Summarize() (gjson.Result, error) {
+	return gjson.Parse(`{"PROCESSING":4,"DONE": 4}`), nil
+}
+
+// WorkingRecordGetterNoSummary mocks the RecordGetter interface to always answer a working result.
+type WorkingRecordGetterNoSummary struct{}
+
+// Get returns a record as if the request worked successfully.
+func (g *WorkingRecordGetterNoSummary) Get(string) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "id": {
+    "plain": "4e7c8a47efd829ef7f710d64da661786",
+    "hash": "A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="
+  },
+  "creationTimestamp": "2025-09-03T21:02:54Z",
+  "lastUpdatedTimestamp": "2025-09-03T21:02:54Z",
+  "status": "SUCCESS"
+}`), nil
+}
+
+// GetAll returns a list of records.
+func (g *WorkingRecordGetterNoSummary) GetAll() ([]gjson.Result, error) {
+	return gjson.Parse(`[
+		{"id":{"plain":"4e7c8a47efd829ef7f710d64da661786","hash":"A3HTDEgCa65BFZsac9TInFisvloRlL3M50ijCWNCKx0="},"creationTimestamp":"2025-09-05T20:13:47Z","lastUpdatedTimestamp":"2025-09-05T20:13:47Z","status":"SUCCESS"},
+		{"id":{"plain":"8148e6a7b952a3b2964f706ced8c6885","hash":"IJeF-losyj33EAuqjgGW2G7sT-eE7poejQ5HokerZio="},"creationTimestamp":"2025-09-05T20:13:47Z","lastUpdatedTimestamp":"2025-09-05T20:13:47Z","status":"SUCCESS"},
+		{"id":{"plain":"b1e3e4f42c0818b1580e306eb776d4a1","hash":"N2lubqCWTqEEaymQVntpdP5dqKDP-LYk81C_PCr6btQ="},"creationTimestamp":"2025-09-05T20:13:47Z","lastUpdatedTimestamp":"2025-09-05T20:13:47Z","status":"SUCCESS"}
+	]`).Array(), nil
+}
+
+// Summarize returns a real result.
+func (s *WorkingRecordGetterNoSummary) Summarize() (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
 // FailingRecordGetter mocks the RecordGetter struct to always return an HTTP error.
 type FailingRecordGetter struct{}
 
@@ -143,6 +178,18 @@ func (g *FailingRecordGetter) Get(string) (gjson.Result, error) {
 // GetAll returns 401 unauthorized.
 func (g *FailingRecordGetter) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result(nil), discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// Summarize returns a real result.
+func (s *FailingRecordGetter) Summarize() (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed not found: 3b32e410-2f33-412d-9fb8-17970131921c"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)}
 }
 
 // WorkingSeedExecutionGetter mocks a working seed execution getter.
@@ -179,6 +226,53 @@ func (g *WorkingSeedExecutionGetter) Audit(uuid.UUID) ([]gjson.Result, error) {
 ]`).Array(), nil
 }
 
+// GetLast5Executions returns the last five seed executions.
+func (g *WorkingSeedExecutionGetter) GetLast5Executions() (gjson.Result, error) {
+	return gjson.Parse(`[
+	{"id":"9afd17f2-8034-4244-b44b-df0662783f15","creationTimestamp":"2026-04-09T17:26:26Z","lastUpdatedTimestamp":"2026-04-09T17:26:47Z","triggerType":"MANUAL","status":"HALTED","scanType":"FULL"},
+	{"id":"3fdddf51-fa6b-406b-9b28-cc40969d908d","creationTimestamp":"2026-04-08T16:33:32Z","lastUpdatedTimestamp":"2026-04-08T16:39:32Z","triggerType":"MANUAL","status":"DONE","scanType":"FULL"}
+	]`), nil
+}
+
+// WorkingSeedExecutionGetterNoExecutions mocks a working seed execution getter.
+type WorkingSeedExecutionGetterNoExecutions struct{}
+
+// Get returns a seed execution.
+func (g *WorkingSeedExecutionGetterNoExecutions) Get(uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
+  "creationTimestamp": "2025-10-10T19:48:31Z",
+  "lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+  "triggerType": "MANUAL",
+  "status": "RUNNING",
+  "scanType": "FULL",
+  "properties": {
+    "stagingBucket": "testBucket"
+  },
+  "stages": ["BEFORE_HOOKS","INGEST"]
+}`), nil
+}
+
+// GetAll implements the interface.
+func (g *WorkingSeedExecutionGetterNoExecutions) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+// Audit returns real audited changes.
+func (g *WorkingSeedExecutionGetterNoExecutions) Audit(uuid.UUID) ([]gjson.Result, error) {
+	return gjson.Parse(`[
+	{"timestamp":"2025-09-05T20:09:22.543Z","status":"CREATED","stages":[]},
+	{"timestamp":"2025-09-05T20:09:26.621Z","status":"RUNNING","stages":[]},
+	{"timestamp":"2025-09-05T20:09:37.592Z","status":"RUNNING","stages":["BEFORE_HOOKS"]},
+	{"timestamp":"2025-09-05T20:13:26.602Z","status":"RUNNING","stages":["BEFORE_HOOKS","INGEST"]}
+]`).Array(), nil
+}
+
+// GetLast5Executions returns the last five seed executions.
+func (g *WorkingSeedExecutionGetterNoExecutions) GetLast5Executions() (gjson.Result, error) {
+	return gjson.Parse(`[]`), nil
+}
+
 // FailingSeedExecutionGetterGetExecutionFails mocks when getting a seed execution fails.
 type FailingSeedExecutionGetterGetExecutionFails struct{}
 
@@ -204,7 +298,15 @@ func (g *FailingSeedExecutionGetterGetExecutionFails) Audit(uuid.UUID) ([]gjson.
 	return []gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// FFailingSeedExecutionGetterAuditFails mocks when getting the audit fails.
+// GetLast5Executions returns the last five seed executions.
+func (g *FailingSeedExecutionGetterGetExecutionFails) GetLast5Executions() (gjson.Result, error) {
+	return gjson.Parse(`[
+	{"id":"9afd17f2-8034-4244-b44b-df0662783f15","creationTimestamp":"2026-04-09T17:26:26Z","lastUpdatedTimestamp":"2026-04-09T17:26:47Z","triggerType":"MANUAL","status":"HALTED","scanType":"FULL"},
+	{"id":"3fdddf51-fa6b-406b-9b28-cc40969d908d","creationTimestamp":"2026-04-08T16:33:32Z","lastUpdatedTimestamp":"2026-04-08T16:39:32Z","triggerType":"MANUAL","status":"DONE","scanType":"FULL"}
+	]`), nil
+}
+
+// FailingSeedExecutionGetterAuditFails mocks when getting the audit fails.
 type FailingSeedExecutionGetterAuditFails struct{}
 
 // Get returns a seed execution.
@@ -231,6 +333,48 @@ func (g *FailingSeedExecutionGetterAuditFails) GetAll() ([]gjson.Result, error) 
 // Audit returns an error.
 func (g *FailingSeedExecutionGetterAuditFails) Audit(uuid.UUID) ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// GetLast5Executions returns the last five seed executions.
+func (g *FailingSeedExecutionGetterAuditFails) GetLast5Executions() (gjson.Result, error) {
+	return gjson.Parse(`[
+	{"id":"9afd17f2-8034-4244-b44b-df0662783f15","creationTimestamp":"2026-04-09T17:26:26Z","lastUpdatedTimestamp":"2026-04-09T17:26:47Z","triggerType":"MANUAL","status":"HALTED","scanType":"FULL"},
+	{"id":"3fdddf51-fa6b-406b-9b28-cc40969d908d","creationTimestamp":"2026-04-08T16:33:32Z","lastUpdatedTimestamp":"2026-04-08T16:39:32Z","triggerType":"MANUAL","status":"DONE","scanType":"FULL"}
+	]`), nil
+}
+
+// FailingSeedExecutionGetterLastExecutionsFails mocks when getting the last executions fails.
+type FailingSeedExecutionGetterLastExecutionsFails struct{}
+
+// Get returns a seed execution.
+func (g *FailingSeedExecutionGetterLastExecutionsFails) Get(uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{
+  "id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
+  "creationTimestamp": "2025-10-10T19:48:31Z",
+  "lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+  "triggerType": "MANUAL",
+  "status": "RUNNING",
+  "scanType": "FULL",
+  "properties": {
+    "stagingBucket": "testBucket"
+  },
+  "stages": ["BEFORE_HOOKS","INGEST"]
+}`), nil
+}
+
+// GetAll implements the interface.
+func (g *FailingSeedExecutionGetterLastExecutionsFails) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+// Audit returns an error.
+func (g *FailingSeedExecutionGetterLastExecutionsFails) Audit(uuid.UUID) ([]gjson.Result, error) {
+	return []gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// GetLast5Executions returns the last five seed executions.
+func (g *FailingSeedExecutionGetterLastExecutionsFails) GetLast5Executions() (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
 // WorkingRecordSummarizer mocks when getting the record summary works.

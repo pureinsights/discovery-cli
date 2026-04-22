@@ -34,6 +34,378 @@ func TestNewStatusCommand(t *testing.T) {
 	}{
 		// Working case
 		{
+			name:      "The user gets the status of a seed and returns executions and record summary",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusSeed",
+			errGolden: "NewStatusCommand_Err_StatusSeed",
+			outBytes:  testutils.Read(t, "NewStatusCommand_Out_StatusSeed"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"content": [
+						{
+						"id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+						"creationTimestamp": "2026-04-14T16:06:44Z",
+						"lastUpdatedTimestamp": "2026-04-14T16:24:03Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "79fde75b-ce25-4620-a0e3-19506dac7030",
+						"creationTimestamp": "2026-04-13T17:26:56Z",
+						"lastUpdatedTimestamp": "2026-04-13T22:17:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "55588e89-600a-4c22-bc9b-c6ef51d2f0ea",
+						"creationTimestamp": "2026-04-13T17:01:46Z",
+						"lastUpdatedTimestamp": "2026-04-13T17:09:29Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "ffaa0321-5e63-44de-981e-217d3d56f152",
+						"creationTimestamp": "2026-04-10T22:04:51Z",
+						"lastUpdatedTimestamp": "2026-04-13T13:57:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "5acc72cf-9e51-42b2-b298-7b1c2bc65e06",
+						"creationTimestamp": "2026-04-10T21:39:49Z",
+						"lastUpdatedTimestamp": "2026-04-10T21:43:17Z",
+						"triggerType": "MANUAL",
+						"status": "HALTED",
+						"scanType": "FULL"
+						}
+					],
+					"pageable": {
+						"page": 0,
+						"size": 5,
+						"sort": [
+						{
+							"property": "creationTimestamp",
+							"direction": "DESC"
+						}
+						]
+					},
+					"totalSize": 21,
+					"totalPages": 5,
+					"empty": false,
+					"size": 5,
+					"offset": 0,
+					"numberOfElements": 5,
+					"pageNumber": 0
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"SUCCESS": 8
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			name:      "The user gets the status of a seed and returns no executions and record summary",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusSeedNoExecutions",
+			errGolden: "NewStatusCommand_Err_StatusSeedNoExecutions",
+			outBytes:  testutils.Read(t, "NewStatusCommand_Out_StatusSeedNoExecutions"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"SUCCESS": 8
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			name:      "The user gets the status of a seed and returns executions, but no record summary",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusSeedNoSummary",
+			errGolden: "NewStatusCommand_Err_StatusSeedNoSummary",
+			outBytes:  testutils.Read(t, "NewStatusCommand_Out_StatusSeedNoSummary"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"content": [
+						{
+						"id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+						"creationTimestamp": "2026-04-14T16:06:44Z",
+						"lastUpdatedTimestamp": "2026-04-14T16:24:03Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "79fde75b-ce25-4620-a0e3-19506dac7030",
+						"creationTimestamp": "2026-04-13T17:26:56Z",
+						"lastUpdatedTimestamp": "2026-04-13T22:17:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "55588e89-600a-4c22-bc9b-c6ef51d2f0ea",
+						"creationTimestamp": "2026-04-13T17:01:46Z",
+						"lastUpdatedTimestamp": "2026-04-13T17:09:29Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "ffaa0321-5e63-44de-981e-217d3d56f152",
+						"creationTimestamp": "2026-04-10T22:04:51Z",
+						"lastUpdatedTimestamp": "2026-04-13T13:57:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "5acc72cf-9e51-42b2-b298-7b1c2bc65e06",
+						"creationTimestamp": "2026-04-10T21:39:49Z",
+						"lastUpdatedTimestamp": "2026-04-10T21:43:17Z",
+						"triggerType": "MANUAL",
+						"status": "HALTED",
+						"scanType": "FULL"
+						}
+					],
+					"pageable": {
+						"page": 0,
+						"size": 5,
+						"sort": [
+						{
+							"property": "creationTimestamp",
+							"direction": "DESC"
+						}
+						]
+					},
+					"totalSize": 21,
+					"totalPages": 5,
+					"empty": false,
+					"size": 5,
+					"offset": 0,
+					"numberOfElements": 5,
+					"pageNumber": 0
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			name:      "The user gets the status of a seed and returns no executions and no record summary",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusSeedNoExecutionsNoRecordSummary",
+			errGolden: "NewStatusCommand_Err_StatusSeedNoExecutionsNoRecordSummary",
+			outBytes:  testutils.Read(t, "NewStatusCommand_Out_StatusSeedNoExecutionsNoRecordSummary"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
+		{
 			name:      "The user gets the status of a seed execution by its id and with details",
 			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--execution", "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3", "--details"},
 			url:       true,
@@ -219,6 +591,226 @@ func TestNewStatusCommand(t *testing.T) {
 			url:       false,
 			apiKey:    "apiKey123",
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Ingestion URL is missing for profile \"default\".\nTo set the URL for the Discovery Ingestion API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery ingestion config --profile \"default\""),
+		},
+		{
+			name:      "The user gets the status of a seed and getting the executions fails",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusSeedExecutionsFail",
+			errGolden: "NewStatusCommand_Err_StatusSeedExecutionsFail",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewStatusCommand_Err_StatusSeedExecutionsFail"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode: http.StatusNotFound,
+					Body: `{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 3b32e410-2f33-412d-9fb8-17970131921c"
+  ],
+  "timestamp": "2026-04-15T23:52:26.878700200Z"
+}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"SUCCESS": 8
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary", r.URL.Path)
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 3b32e410-2f33-412d-9fb8-17970131921c"
+  ],
+  "timestamp": "2026-04-15T23:52:26.878700200Z"
+}`),
+			}, "Could not get the five last seed executions"),
+		},
+		{
+			name:      "The user gets the status of a seed and returns getting record summary fails",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusSeedSummaryFails",
+			errGolden: "NewStatusCommand_Err_StatusSeedSummaryFails",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewStatusCommand_Err_StatusSeedSummaryFails"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"content": [
+						{
+						"id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+						"creationTimestamp": "2026-04-14T16:06:44Z",
+						"lastUpdatedTimestamp": "2026-04-14T16:24:03Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "79fde75b-ce25-4620-a0e3-19506dac7030",
+						"creationTimestamp": "2026-04-13T17:26:56Z",
+						"lastUpdatedTimestamp": "2026-04-13T22:17:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "55588e89-600a-4c22-bc9b-c6ef51d2f0ea",
+						"creationTimestamp": "2026-04-13T17:01:46Z",
+						"lastUpdatedTimestamp": "2026-04-13T17:09:29Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "ffaa0321-5e63-44de-981e-217d3d56f152",
+						"creationTimestamp": "2026-04-10T22:04:51Z",
+						"lastUpdatedTimestamp": "2026-04-13T13:57:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "5acc72cf-9e51-42b2-b298-7b1c2bc65e06",
+						"creationTimestamp": "2026-04-10T21:39:49Z",
+						"lastUpdatedTimestamp": "2026-04-10T21:43:17Z",
+						"triggerType": "MANUAL",
+						"status": "HALTED",
+						"scanType": "FULL"
+						}
+					],
+					"pageable": {
+						"page": 0,
+						"size": 5,
+						"sort": [
+						{
+							"property": "creationTimestamp",
+							"direction": "DESC"
+						}
+						]
+					},
+					"totalSize": 21,
+					"totalPages": 5,
+					"empty": false,
+					"size": 5,
+					"offset": 0,
+					"numberOfElements": 5,
+					"pageNumber": 0
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary": {
+					StatusCode: http.StatusNotFound,
+					Body: `{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 3b32e410-2f33-412d-9fb8-17970131921c"
+  ],
+  "timestamp": "2026-04-15T23:52:26.878700200Z"
+}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary", r.URL.Path)
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 3b32e410-2f33-412d-9fb8-17970131921c"
+  ],
+  "timestamp": "2026-04-15T23:52:26.878700200Z"
+}`),
+			}, "Could not get the record summary"),
 		},
 		{
 			name:      "user sends a name that does not exist",
