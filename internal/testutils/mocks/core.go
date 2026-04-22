@@ -62,7 +62,17 @@ func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
 type FailingFileClient struct{}
 
 func (w *FailingFileClient) List() ([]gjson.Result, error) {
-	return []gjson.Result{}, nil
+	return []gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusInternalServerError,
+		Body:   gjson.Parse(`{
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+	}
 }
 
 func (w *FailingFileClient) Upload(key, file string) (gjson.Result, error) {
