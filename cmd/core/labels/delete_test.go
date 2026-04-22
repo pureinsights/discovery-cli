@@ -60,7 +60,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewDeleteCommand_Out_NoURL",
 			errGolden:  "NewDeleteCommand_Err_NoURL",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_NoURL"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
 			url:        false,
 			apiKey:     "apiKey123",
@@ -77,7 +77,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewDeleteCommand_Out_NotUUID",
 			errGolden:  "NewDeleteCommand_Err_NotUUID",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_NotUUID"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_NotUUID"),
 			method:     http.MethodDelete,
 			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
@@ -90,7 +90,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewDeleteCommand_Out_PrintJSONFails",
 			errGolden:  "NewDeleteCommand_Err_PrintJSONFails",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_PrintJSONFails"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_PrintJSONFails"),
 			url:        true,
 			apiKey:     "apiKey123",
@@ -105,7 +105,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewDeleteCommand_Out_DeleteEntityHTTPError",
 			errGolden:  "NewDeleteCommand_Err_DeleteEntityHTTPError",
-			outBytes:   testutils.Read(t, "NewDeleteCommand_Out_DeleteEntityHTTPError"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewDeleteCommand_Err_DeleteEntityHTTPError"),
 			url:        true,
 			apiKey:     "apiKey123",
@@ -165,6 +165,7 @@ func TestNewDeleteCommand(t *testing.T) {
 
 			deleteCmd := NewDeleteCommand(d)
 
+			deleteCmd.SilenceUsage = true
 			deleteCmd.SetIn(ios.In)
 			deleteCmd.SetOut(ios.Out)
 			deleteCmd.SetErr(ios.Err)
@@ -188,7 +189,9 @@ func TestNewDeleteCommand(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

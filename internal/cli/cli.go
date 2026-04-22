@@ -41,6 +41,7 @@ type Discovery interface {
 	AppendSeedRecord(seed gjson.Result, client RecordGetter, id string, printer Printer) error
 	AppendSeedRecords(seed gjson.Result, client RecordGetter, printer Printer) error
 	SeedExecution(client SeedExecutionGetter, seedExecutionId uuid.UUID, summarizers map[string]Summarizer, details bool, printer Printer) error
+	StatusOfSeedExecutions(executionClient SeedExecutionGetter, recordClient RecordGetter, printer Printer) error
 	ExportEntitiesFromClient(client BackupRestore, path string, printer Printer) error
 	ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error
 	ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error

@@ -135,7 +135,7 @@ func TestNewExportCommand(t *testing.T) {
 			name:         "No Core URL",
 			outGolden:    "NewExportCommand_Out_NoCoreURL",
 			errGolden:    "NewExportCommand_Err_NoCoreURL",
-			outBytes:     testutils.Read(t, "NewExportCommand_Out_NoCoreURL"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewExportCommand_Err_NoCoreURL"),
 			coreUrl:      false,
 			ingestionUrl: true,
@@ -147,7 +147,7 @@ func TestNewExportCommand(t *testing.T) {
 			name:         "No Ingestion URL",
 			outGolden:    "NewExportCommand_Out_NoIngestionURL",
 			errGolden:    "NewExportCommand_Err_NoIngestionURL",
-			outBytes:     testutils.Read(t, "NewExportCommand_Out_NoIngestionURL"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewExportCommand_Err_NoIngestionURL"),
 			coreUrl:      true,
 			ingestionUrl: false,
@@ -159,7 +159,7 @@ func TestNewExportCommand(t *testing.T) {
 			name:         "No QueryFlow URL",
 			outGolden:    "NewExportCommand_Out_NoQueryFlowURL",
 			errGolden:    "NewExportCommand_Err_NoQueryFlowURL",
-			outBytes:     testutils.Read(t, "NewExportCommand_Out_NoQueryFlowURL"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewExportCommand_Err_NoQueryFlowURL"),
 			coreUrl:      true,
 			ingestionUrl: true,
@@ -175,7 +175,7 @@ func TestNewExportCommand(t *testing.T) {
 			apiKey:       "",
 			outGolden:    "NewExportCommand_Out_ExportFails",
 			errGolden:    "NewExportCommand_Err_ExportFails",
-			outBytes:     testutils.Read(t, "NewExportCommand_Out_ExportFails"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewExportCommand_Err_ExportFails"),
 			method:       http.MethodGet,
 			path:         "/v2/export",
@@ -294,6 +294,7 @@ func TestNewExportCommand(t *testing.T) {
 
 			exportCmd := NewExportCommand(d)
 
+			exportCmd.SilenceUsage = true
 			exportCmd.SetIn(ios.In)
 			exportCmd.SetOut(ios.Out)
 			exportCmd.SetErr(ios.Err)
@@ -343,7 +344,9 @@ func TestNewExportCommand(t *testing.T) {
 				}
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

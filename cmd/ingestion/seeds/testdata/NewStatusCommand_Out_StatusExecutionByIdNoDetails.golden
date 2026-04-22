@@ -1,0 +1,15 @@
+{
+  "creationTimestamp": "2025-10-10T19:48:31Z",
+  "id": "f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3",
+  "lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+  "properties": {
+    "stagingBucket": "testBucket"
+  },
+  "scanType": "FULL",
+  "stages": [
+    "BEFORE_HOOKS",
+    "INGEST"
+  ],
+  "status": "RUNNING",
+  "triggerType": "MANUAL"
+}

@@ -2156,6 +2156,137 @@ discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f
 }
 ```
 
+###### Status
+`status` is the command to check the status of a seed. It can check the status of seed by its name or UUID. When the command only receives the seed, it returns the information of the last five seed executions and a summary of the records processed. If there are no executions, it shows an empty array. If there are no records, the `records` field is not included in the response. Also, just like the get command, it has the `execution` and `details` flags to get more information about a specific seed execution.
+
+Usage: `discovery ingestion seed status <seed> [flags] `
+
+Arguments:
+
+`seed`:
+(Required, string) The name or UUID of the seed that will be checked.
+
+Flags:
+
+`--execution`:
+(Optional, string) The UUID of the seed execution that will be checked.
+
+`--details`:
+(Optional, string) Makes the status check operation retrieve more information when getting the seed execution, like the audited changes and record and job summaries. This flag does nothing if the `execution` flag is not used.
+
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Check the status of a seed
+discovery ingestion seed status "my-seed"
+{
+  "executions": [
+    {
+      "creationTimestamp": "2026-04-14T16:06:44Z",
+      "id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+      "lastUpdatedTimestamp": "2026-04-14T16:24:03Z",
+      "scanType": "FULL",
+      "status": "DONE",
+      "triggerType": "MANUAL"
+    },
+    {
+      "creationTimestamp": "2026-04-13T17:26:56Z",
+      "id": "79fde75b-ce25-4620-a0e3-19506dac7030",
+      "lastUpdatedTimestamp": "2026-04-13T22:17:44Z",
+      "scanType": "FULL",
+      "status": "DONE",
+      "triggerType": "MANUAL"
+    },
+    {
+      "creationTimestamp": "2026-04-13T17:01:46Z",
+      "id": "55588e89-600a-4c22-bc9b-c6ef51d2f0ea",
+      "lastUpdatedTimestamp": "2026-04-13T17:09:29Z",
+      "scanType": "FULL",
+      "status": "DONE",
+      "triggerType": "MANUAL"
+    },
+    {
+      "creationTimestamp": "2026-04-10T22:04:51Z",
+      "id": "ffaa0321-5e63-44de-981e-217d3d56f152",
+      "lastUpdatedTimestamp": "2026-04-13T13:57:44Z",
+      "scanType": "FULL",
+      "status": "DONE",
+      "triggerType": "MANUAL"
+    },
+    {
+      "creationTimestamp": "2026-04-10T21:39:49Z",
+      "id": "5acc72cf-9e51-42b2-b298-7b1c2bc65e06",
+      "lastUpdatedTimestamp": "2026-04-10T21:43:17Z",
+      "scanType": "FULL",
+      "status": "HALTED",
+      "triggerType": "MANUAL"
+    }
+  ],
+  "records": {
+    "SUCCESS": 8
+  }
+}
+```
+
+```bash
+# Check the status of a seed that has no executions and records
+discovery ingestion seed status "my-seed"
+{
+  "executions": []
+}
+```
+
+```bash
+# Check the status of a seed execution and with details
+discovery ingestion seed status "my-seed" --execution 0f20f984-1854-4741-81ea-30f8b965b007 --details
+{
+  "audit": [
+    {
+      "stages": [],
+      "status": "CREATED",
+      "timestamp": "2025-11-18T16:22:23.865Z"
+    },
+    {
+      "stages": [],
+      "status": "RUNNING",
+      "timestamp": "2025-11-18T16:22:34.655Z"
+    },
+    {
+      "stages": [
+        "BEFORE_HOOKS"
+      ],
+      "status": "RUNNING",
+      "timestamp": "2025-11-18T16:23:13.120Z"
+    }
+  ],
+  "creationTimestamp": "2025-11-18T16:22:24Z",
+  "id": "0f20f984-1854-4741-81ea-30f8b965b007",
+  "jobs": {
+    "DONE": 3,
+    "RUNNING": 1
+  },
+  "lastUpdatedTimestamp": "2025-11-18T16:23:13Z",
+  "records": {
+    "CREATE": {
+      "PROCESSING": 2
+    }
+  },
+  "scanType": "FULL",
+  "stages": [
+    "BEFORE_HOOKS"
+  ],
+  "status": "RUNNING",
+  "triggerType": "MANUAL"
+}
+```
+
 ##### SeedSchedule
 `seed-schedule` is the command used to manage seed schedules in Discovery Ingestion. This command contains subcommands to read.
 
