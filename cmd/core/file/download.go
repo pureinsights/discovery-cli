@@ -1,8 +1,6 @@
 package file
 
 import (
-	"fmt"
-
 	"github.com/pureinsights/discovery-cli/cmd/commands"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
@@ -15,7 +13,7 @@ func NewDownloadCommand(d cli.Discovery) *cobra.Command {
 	download := &cobra.Command{
 		Use:   "download [<file>]...",
 		Short: "The command that obtains files from Discovery Core.",
-		Long:  fmt.Sprintf(commands.LongDownloadFiles, "file", "Core"),
+		Long:  "download is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specify to download multiple files.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -25,7 +23,18 @@ func NewDownloadCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			return commands.DownloadCommand(args, d, coreClient.Files(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Core", "core_url"),output)
+			
+			err = commands.CheckCredentials(d, profile, "Core", "core_url")
+			if err != nil {
+				return err
+			}
+
+			printer := cli.GetObjectPrinter(vpr.GetString("output"))
+			if output == "" {
+				output = "."
+			}
+
+			return d.GetFiles(coreClient.Files(), args, output, printer)
 		},
 		Args: cobra.MinimumNArgs(1),
 		Example: `	# Download file by name

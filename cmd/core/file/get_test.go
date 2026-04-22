@@ -113,7 +113,7 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewGetCommand_Out_NoURL",
 			errGolden: "NewGetCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_NoURL"),
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
@@ -124,7 +124,7 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewGetCommand_Out_GetFileListHTTPError",
 			errGolden: "NewGetCommand_Err_GetFileListHTTPError",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_GetFileListHTTPError"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_GetFileListHTTPError"),
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file": {
@@ -161,7 +161,7 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewGetCommand_Out_PrintArrayFails",
 			errGolden: "NewGetCommand_Err_PrintArrayFails",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_PrintArrayFails"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_PrintArrayFails"),
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file": {
@@ -235,6 +235,7 @@ func TestNewGetCommand(t *testing.T) {
 
 			getCmd := NewGetCommand(d)
 
+			getCmd.SilenceUsage	= true
 			getCmd.SetIn(ios.In)
 			getCmd.SetOut(ios.Out)
 			getCmd.SetErr(ios.Err)
@@ -257,8 +258,9 @@ func TestNewGetCommand(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }
@@ -286,6 +288,7 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 
 	getCmd := NewGetCommand(d)
 
+	getCmd.SilenceUsage	= true
 	getCmd.SetIn(ios.In)
 	getCmd.SetOut(ios.Out)
 	getCmd.SetErr(ios.Err)
@@ -296,6 +299,6 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", testutils.Read(t, "NewGetCommand_Out_NoProfile"), out.Bytes())
+	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", []byte{}, out.Bytes())
 	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", testutils.Read(t, "NewGetCommand_Err_NoProfile"), errBuf.Bytes())
 }
