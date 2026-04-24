@@ -977,6 +977,118 @@ discovery core credential delete my-credential
 }
 ```
 
+##### file
+`file` is the command used to interact with files in Discovery Core. This command contains various subcommands used to get the list of files and download files.
+
+Usage: `discovery core file [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain the list of all Discovery Core's files.
+
+Usage: `discovery core file get [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get the list of all files
+discovery core file get
+"Credential.ndjson"
+"Server.ndjson"
+"buildContextPrompt.js"
+"buildSimplePrompt.js"
+"constructPrompt.js"
+"constructSuggestedPrompt.js"
+"elastic-extraction.py"
+"extractReference.groovy"
+"extractReferenceAtlas.groovy"
+"format/formatAnalysisResponse.js"
+"format/formatAutocompleteResponse.js"
+"format/formatChunksResponse.js"
+"format/formatKeywordResponse.js"
+"format/formatKeywordResponseAtlas.js"
+"format/formatKeywordSearch.js"
+"format/formatQuestionsResponse.js"
+"format/formatSearchResponse.js"
+"format/formatSearchResponseAtlas.js"
+"format/formatSemanticResponse.js"
+"format/formatSuggestionsResponse.js"
+"templates/keywordSearchTemplateAtlas.json"
+"templates/searchTemplate.json"
+"templates/searchTemplateAtlas.json"
+```
+
+###### Download
+`download` is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specify to download multiple files.
+
+Usage: `discovery core file download [flags] [<file>]...`
+
+Arguments:
+
+`file`:
+(Required, string) The key of the file that will be downloaded. At least one file should be specified. Multiple keys can be specified.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-p, --profile`:
+(Optional, string) The path/directory to download the file to.
+
+Examples:
+
+```bash
+# Download file by name
+discovery core file download "my_file.json"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+ # Output file to different directory
+discovery core file download "my_file.json" -o "./my_directory"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+ # Download file by nested path
+discovery core file download "my_directory/my_file.json"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# Download multiple files by specifying nested paths or names
+discovery core file download "my_directory/my_file.json" "my_other_file.json"
+{
+  "acknowledged": true
+}
+```
+
+
 ##### Server
 `server` is the command used to manage servers in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
