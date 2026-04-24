@@ -237,16 +237,16 @@ func Test_discovery_GetFile(t *testing.T) {
 		client         CoreFileController
 		file           string
 		fileContent    []byte
-		fileOutput	   string
+		fileOutput     string
 		expectedOutput gjson.Result
 		err            error
 	}{
 		//Working Case
 		{
-			name:           "GetFile Obtains an existing file",
-			client:         new(mocks.WorkingFileClient),
-			file:			"script.py",
-			fileContent: 	[]byte(`
+			name:   "GetFile Obtains an existing file",
+			client: new(mocks.WorkingFileClient),
+			file:   "script.py",
+			fileContent: []byte(`
 	def main():
 		print("Hello, World!")
 
@@ -258,10 +258,10 @@ func Test_discovery_GetFile(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:           "GetFile Obtains an existing file with output",
-			client:         new(mocks.WorkingFileClient),
-			file:			"script.py",
-			fileContent: 	[]byte(`
+			name:   "GetFile Obtains an existing file with output",
+			client: new(mocks.WorkingFileClient),
+			file:   "script.py",
+			fileContent: []byte(`
 	def main():
 		print("Hello, World!")
 
@@ -277,14 +277,14 @@ func Test_discovery_GetFile(t *testing.T) {
 		{
 			name:           "Key does not exists",
 			client:         new(mocks.FailingFileClient),
-			file: 			"script.py",			
+			file:           "script.py",
 			expectedOutput: gjson.Result{},
-			err:            NewErrorWithCause(
-				ErrorExitCode, 
+			err: NewErrorWithCause(
+				ErrorExitCode,
 				discoveryPackage.Error{
 					Status: http.StatusNotFound,
 					Body:   gjson.Result{},
-				}, 
+				},
 				"Could not get file with key \"script.py\"",
 			),
 		},
@@ -309,9 +309,9 @@ func Test_discovery_GetFile(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, response)
-				file,err := os.ReadFile(filepath.Join(".",tc.file))
+				file, err := os.ReadFile(filepath.Join(".", tc.file))
 				require.NoError(t, err)
-				require.Equal(t, tc.fileContent,file)
+				require.Equal(t, tc.fileContent, file)
 			}
 		})
 	}
@@ -323,16 +323,16 @@ func Test_discovery_GetFiles(t *testing.T) {
 		client         CoreFileController
 		files          []string
 		filesContent   [][]byte
-		filesOutput	   string
+		filesOutput    string
 		expectedOutput string
 		err            error
 	}{
 		//Working Case
 		{
-			name:           "GetFiles Obtains an existing file",
-			client:         new(mocks.WorkingFileClient),
-			files:			[]string{"script.py"},
-			filesContent: 	[][]byte{[]byte(`
+			name:   "GetFiles Obtains an existing file",
+			client: new(mocks.WorkingFileClient),
+			files:  []string{"script.py"},
+			filesContent: [][]byte{[]byte(`
 	def main():
 		print("Hello, World!")
 
@@ -344,10 +344,10 @@ func Test_discovery_GetFiles(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:           "GetFiles Obtains an existing file with output",
-			client:         new(mocks.WorkingFileClient),
-			files:			[]string{"script.py"},
-			filesContent: 	[][]byte{[]byte(`
+			name:   "GetFiles Obtains an existing file with output",
+			client: new(mocks.WorkingFileClient),
+			files:  []string{"script.py"},
+			filesContent: [][]byte{[]byte(`
 	def main():
 		print("Hello, World!")
 
@@ -355,21 +355,21 @@ func Test_discovery_GetFiles(t *testing.T) {
 		main()
 
 	`)},
-			filesOutput:     "./test",
+			filesOutput:    "./test",
 			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
 			err:            nil,
 		},
 		//Error Case
 		{
-			name:           "Key does not exists",
-			client:         new(mocks.FailingFileClient),
-			files: 			[]string{"script.py"},			
-			err:            NewErrorWithCause(
-				ErrorExitCode, 
+			name:   "Key does not exists",
+			client: new(mocks.FailingFileClient),
+			files:  []string{"script.py"},
+			err: NewErrorWithCause(
+				ErrorExitCode,
 				discoveryPackage.Error{
 					Status: http.StatusNotFound,
 					Body:   gjson.Result{},
-				}, 
+				},
 				"Could not get file with key \"script.py\"",
 			),
 		},
@@ -407,11 +407,11 @@ func Test_discovery_GetFiles(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, out.String())
 				for i, file := range tc.files {
-					fileContent,err := os.ReadFile(filepath.Join(".",file))
+					fileContent, err := os.ReadFile(filepath.Join(".", file))
 					require.NoError(t, err)
-					require.Equal(t, tc.filesContent[i],fileContent)
+					require.Equal(t, tc.filesContent[i], fileContent)
 				}
-				
+
 			}
 		})
 	}
@@ -436,11 +436,11 @@ func Test_discovery_GetFileList(t *testing.T) {
 			name:           "GetFile List HTTP Error",
 			client:         new(mocks.FailingFileClient),
 			expectedOutput: "",
-			err:            NewErrorWithCause(
-				ErrorExitCode, 
+			err: NewErrorWithCause(
+				ErrorExitCode,
 				discoveryPackage.Error{
 					Status: http.StatusInternalServerError,
-					Body:   gjson.Parse(`{
+					Body: gjson.Parse(`{
 	"status": 500,
 	"code": 1003,
 	"messages": [
@@ -449,7 +449,7 @@ func Test_discovery_GetFileList(t *testing.T) {
 	"timestamp": "2025-10-16T17:46:45.386963700Z"
 }`,
 					),
-				}, 
+				},
 				"Could not get file list",
 			),
 		},

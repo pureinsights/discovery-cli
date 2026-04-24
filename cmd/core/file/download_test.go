@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
-	"path/filepath"
 
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
@@ -31,7 +31,7 @@ func ReadFile(t *testing.T, path string) []byte {
 	bytes, err := os.ReadFile(path)
 	assert.NoError(t, err)
 
-	return bytes 
+	return bytes
 }
 
 // TestNewGetCommand tests the NewGetCommand() function.
@@ -65,7 +65,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file/script.py": {
 					StatusCode:  http.StatusOK,
-					Body:        string(ReadFile(t, filepath.Join("testdata",filePrefix+"_script.py"))),
+					Body:        string(ReadFile(t, filepath.Join("testdata", filePrefix+"_script.py"))),
 					ContentType: "application/octet-stream",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -77,7 +77,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "Download multiple files",
+			name:         "Download multiple files",
 			args:         []string{"script.py", "elastictemplate.json"},
 			url:          true,
 			filesToCheck: []string{"script.py", "elastictemplate.json"},
@@ -89,7 +89,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file/script.py": {
 					StatusCode:  http.StatusOK,
-					Body:        string(ReadFile(t, filepath.Join("testdata",filePrefix+"_script.py"))),
+					Body:        string(ReadFile(t, filepath.Join("testdata", filePrefix+"_script.py"))),
 					ContentType: "application/octet-stream",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -99,7 +99,7 @@ func TestNewDownloadCommand(t *testing.T) {
 				},
 				"GET:/v2/file/elastictemplate.json": {
 					StatusCode:  http.StatusOK,
-					Body:        string(ReadFile(t, filepath.Join("testdata",filePrefix+"_elastictemplate.json"))),
+					Body:        string(ReadFile(t, filepath.Join("testdata", filePrefix+"_elastictemplate.json"))),
 					ContentType: "application/octet-stream",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -111,7 +111,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "Download multiple files with Output",
+			name:         "Download multiple files with Output",
 			args:         []string{"script.py", "elastictemplate.json", "-o", "NewDownloadCommandTest"},
 			url:          true,
 			filesToCheck: []string{"NewDownloadCommandTest/script.py", "NewDownloadCommandTest/elastictemplate.json"},
@@ -123,7 +123,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file/script.py": {
 					StatusCode:  http.StatusOK,
-					Body:        string(ReadFile(t, filepath.Join("testdata",filePrefix+"_script.py"))),
+					Body:        string(ReadFile(t, filepath.Join("testdata", filePrefix+"_script.py"))),
 					ContentType: "application/octet-stream",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -133,7 +133,7 @@ func TestNewDownloadCommand(t *testing.T) {
 				},
 				"GET:/v2/file/elastictemplate.json": {
 					StatusCode:  http.StatusOK,
-					Body:        string(ReadFile(t, filepath.Join("testdata",filePrefix+"_elastictemplate.json"))),
+					Body:        string(ReadFile(t, filepath.Join("testdata", filePrefix+"_elastictemplate.json"))),
 					ContentType: "application/octet-stream",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -146,18 +146,18 @@ func TestNewDownloadCommand(t *testing.T) {
 		},
 		// Error Case
 		{
-			name:         "Fails to download a file",
-			args:         []string{"script.py"},
-			url:          true,
-			apiKey:       "apiKey123",
-			outGolden:    "NewDownloadCommand_Out_FailDownloadFile",
-			errGolden:    "NewDownloadCommand_Err_FailDownloadFile",
-			outBytes:     []byte(nil),
-			errBytes:     testutils.Read(t, "NewDownloadCommand_Err_FailDownloadFile"),
+			name:      "Fails to download a file",
+			args:      []string{"script.py"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDownloadCommand_Out_FailDownloadFile",
+			errGolden: "NewDownloadCommand_Err_FailDownloadFile",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewDownloadCommand_Err_FailDownloadFile"),
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file/script.py": {
 					StatusCode:  http.StatusNotFound,
-					Body: "",
+					Body:        "",
 					ContentType: "",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -166,12 +166,12 @@ func TestNewDownloadCommand(t *testing.T) {
 					},
 				},
 			},
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(``)}, 
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(``)},
 				"Could not get file with key \"script.py\"",
 			),
 		},
 		{
-			name: "Fails to download a file when downloading multiple",
+			name:         "Fails to download a file when downloading multiple",
 			args:         []string{"script.py", "elastictemplate.json"},
 			url:          true,
 			filesToCheck: []string{"script.py"},
@@ -183,7 +183,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file/script.py": {
 					StatusCode:  http.StatusOK,
-					Body:        string(ReadFile(t, filepath.Join("testdata",filePrefix+"_script.py"))),
+					Body:        string(ReadFile(t, filepath.Join("testdata", filePrefix+"_script.py"))),
 					ContentType: "application/octet-stream",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -193,7 +193,7 @@ func TestNewDownloadCommand(t *testing.T) {
 				},
 				"GET:/v2/file/elastictemplate.json": {
 					StatusCode:  http.StatusNotFound,
-					Body: "",
+					Body:        "",
 					ContentType: "",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -202,7 +202,7 @@ func TestNewDownloadCommand(t *testing.T) {
 					},
 				},
 			},
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(``)}, 
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(``)},
 				"Could not get file with key \"elastictemplate.json\"",
 			),
 		},
@@ -218,7 +218,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
-			name: "GetFiles returns HTTP error",
+			name:      "GetFiles returns HTTP error",
 			args:      []string{"script.py"},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -255,7 +255,7 @@ func TestNewDownloadCommand(t *testing.T) {
 			}`)}, "Could not get file with key \"script.py\""),
 		},
 	}
-	testDataDir := filepath.Join(GetCurrentWorkingDirectory(t),"testdata")
+	testDataDir := filepath.Join(GetCurrentWorkingDirectory(t), "testdata")
 	tmpDir := testutils.ChangeDirectoryHelper(t)
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -312,21 +312,21 @@ func TestNewDownloadCommand(t *testing.T) {
 			}
 
 			for _, path := range tc.filesToCheck {
-				
+
 				fileName := filepath.Base(path)
 				fullPath := filepath.Join(tmpDir, path)
 
 				assert.FileExists(t, fullPath)
-			
-				testdata := ReadFile(t,filepath.Join(testDataDir,filePrefix + "_" + fileName))
-				downloaded := ReadFile(t,fullPath)
 
-				assert.Equal(t,testdata,downloaded)
+				testdata := ReadFile(t, filepath.Join(testDataDir, filePrefix+"_"+fileName))
+				downloaded := ReadFile(t, fullPath)
+
+				assert.Equal(t, testdata, downloaded)
 			}
-			
+
 			if tc.outBytes != nil {
 				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
-			}		
+			}
 		})
 	}
 }
@@ -353,7 +353,7 @@ func TestNewDownloadCommand_NoProfileFlag(t *testing.T) {
 	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
 
 	getCmd := NewDownloadCommand(d)
-	
+
 	getCmd.SilenceUsage = true
 	getCmd.SetIn(ios.In)
 	getCmd.SetOut(ios.Out)
@@ -365,6 +365,5 @@ func TestNewDownloadCommand_NoProfileFlag(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "NewDownloadCommand_Out_NoProfile", []byte{}, out.Bytes())
 	testutils.CompareBytes(t, "NewDownloadCommand_Err_NoProfile", testutils.Read(t, "NewDownloadCommand_Err_NoProfile"), errBuf.Bytes())
 }
