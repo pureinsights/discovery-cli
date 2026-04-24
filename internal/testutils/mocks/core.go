@@ -59,7 +59,7 @@ func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
-// WorkingFileClient simulates a working file client.
+// FailingFileClient simulates a Failing file client.
 type FailingFileClient struct{}
 
 func (w *FailingFileClient) List() ([]gjson.Result, error) {
