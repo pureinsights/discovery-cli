@@ -22,14 +22,14 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			
+
 			err = commands.CheckCredentials(d, profile, "Core", "core_url")
 			if err != nil {
 				return err
 			}
 
 			printer := cli.GetArrayPrinter("json")
-			return d.GetFileList(coreClient.Files(), printer)		
+			return d.GetFileList(coreClient.Files(), printer)
 		},
 		Args: cobra.NoArgs,
 		Example: `	# Get the list of all files
@@ -37,7 +37,6 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 
 	# Get the list of all files using the configuration in profile "cn"
 	discovery core file get -p "cn"`,
-
 	}
 	return get
 }

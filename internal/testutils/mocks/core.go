@@ -62,13 +62,13 @@ func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
 }`), nil
 }
 
-// WorkingFileClient simulates a working file client.
+// FailingFileClient simulates a Failing file client.
 type FailingFileClient struct{}
 
 func (w *FailingFileClient) List() ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusInternalServerError,
-		Body:   gjson.Parse(`{
+		Body: gjson.Parse(`{
 	"status": 500,
 	"code": 1003,
 	"messages": [

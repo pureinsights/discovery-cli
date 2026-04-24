@@ -122,8 +122,8 @@ func (fc filesClient) Retrieve(key string) ([]byte, error) {
 	return fc.execute(http.MethodGet, "/"+key)
 }
 
-// List displays an array of strings that contains every file key that is stored in Discovery.
-// If there are no keys, the endpoint returns a No Content response and the function returns an empty array.
+// List gets the json containing the list of all the files stored in Discovery Core, then converts it to
+// An array for ease of use.
 func (fc filesClient) List() ([]gjson.Result, error) {
 	result, err := execute(fc.client, http.MethodGet, "")
 	return result.Array(), err

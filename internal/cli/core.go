@@ -2,11 +2,10 @@ package cli
 
 import (
 	//"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+	"os"
+	"path/filepath"
 )
 
 // CoreFileController defines the methods to interact with files.
@@ -17,14 +16,14 @@ type CoreFileController interface {
 	Delete(key string) (gjson.Result, error)
 }
 
-// GetFile
+// GetFile download an individual file. If directory structure does not exists, it gets created.
 func GetFile(client CoreFileController, key string, output string) (gjson.Result, error) {
 	file, err := client.Retrieve(key)
 	if err != nil {
 		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not get file with key %q", key)
 	}
-	
-	fullPath := filepath.Join(output,key)
+
+	fullPath := filepath.Join(output, key)
 	os.MkdirAll(filepath.Dir(fullPath), 0o755)
 	if err != nil {
 		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create the necessary directories to write the file %q", fullPath)
@@ -39,7 +38,7 @@ func GetFile(client CoreFileController, key string, output string) (gjson.Result
 	return gjson.Parse(`{"acknowledged": true}`), nil
 }
 
-// GetFiles
+// GetFiles uses the GetFile function to download all the specified files.
 func (d discovery) GetFiles(client CoreFileController, keys []string, output string, printer Printer) error {
 	var response gjson.Result
 	var err error
@@ -56,7 +55,7 @@ func (d discovery) GetFiles(client CoreFileController, keys []string, output str
 	return printer(*d.IOStreams(), response)
 }
 
-// GetFileList
+// GetFileList obtains the list of all the available files
 func (d discovery) GetFileList(client CoreFileController, printer Printer) error {
 	files, err := client.List()
 	if err != nil {
