@@ -23,7 +23,7 @@ func NewDownloadCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			coreClient := discoveryPackage.NewCore(vpr.GetString(profile+".core_url"), vpr.GetString(profile+".core_key"))
-			
+
 			err = commands.CheckCredentials(d, profile, "Core", "core_url")
 			if err != nil {
 				return err

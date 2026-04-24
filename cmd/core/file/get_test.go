@@ -34,7 +34,7 @@ func TestNewGetCommand(t *testing.T) {
 	}{
 		// Working case
 		{
-			name: "Get returns an array",
+			name:      "Get returns an array",
 			args:      []string{},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -83,7 +83,7 @@ func TestNewGetCommand(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "Get returns nothing",
+			name:      "Get returns nothing",
 			args:      []string{},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -93,8 +93,8 @@ func TestNewGetCommand(t *testing.T) {
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
 				"GET:/v2/file": {
-					StatusCode: http.StatusNoContent,
-					Body: ``,
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
@@ -118,7 +118,7 @@ func TestNewGetCommand(t *testing.T) {
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
-			name: "GetFileList returns HTTP error",
+			name:      "GetFileList returns HTTP error",
 			args:      []string{},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -155,7 +155,7 @@ func TestNewGetCommand(t *testing.T) {
 			}`)}, "Could not get file list"),
 		},
 		{
-			name: "Printing JSON array fails",
+			name:      "Printing JSON array fails",
 			args:      []string{},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -235,7 +235,7 @@ func TestNewGetCommand(t *testing.T) {
 
 			getCmd := NewGetCommand(d)
 
-			getCmd.SilenceUsage	= true
+			getCmd.SilenceUsage = true
 			getCmd.SetIn(ios.In)
 			getCmd.SetOut(ios.Out)
 			getCmd.SetErr(ios.Err)
@@ -288,7 +288,7 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 
 	getCmd := NewGetCommand(d)
 
-	getCmd.SilenceUsage	= true
+	getCmd.SilenceUsage = true
 	getCmd.SetIn(ios.In)
 	getCmd.SetOut(ios.Out)
 	getCmd.SetErr(ios.Err)

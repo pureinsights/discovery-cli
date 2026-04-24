@@ -2,10 +2,10 @@ package cli
 
 import (
 	//"fmt"
-	"os"
-	"path/filepath"
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+	"os"
+	"path/filepath"
 )
 
 // CoreFileController defines the methods to interact with files.
@@ -22,15 +22,15 @@ func GetFile(client CoreFileController, key string, output string) (gjson.Result
 	if err != nil {
 		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not get file with key %q", key)
 	}
-	
-	fullPath := filepath.Join(output,key)
+
+	fullPath := filepath.Join(output, key)
 	os.MkdirAll(filepath.Dir(fullPath), 0o755)
 	if err != nil {
 		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create the necessary directories to write the file %q", fullPath)
-		
+
 	}
 
-	err = os.WriteFile(fullPath,file,0o644)
+	err = os.WriteFile(fullPath, file, 0o644)
 	if err != nil {
 		return gjson.Result{}, NormalizeWriteFileError(fullPath, err)
 	}
@@ -41,13 +41,13 @@ func GetFile(client CoreFileController, key string, output string) (gjson.Result
 // GetFiles
 func (d discovery) GetFiles(client CoreFileController, keys []string, output string, printer Printer) error {
 	var response gjson.Result
-	var err error 
+	var err error
 	if printer == nil {
 		printer = JsonObjectPrinter(true)
 	}
-	
+
 	for _, key := range keys {
-		response, err = GetFile(client,key,output)
+		response, err = GetFile(client, key, output)
 		if err != nil {
 			return err
 		}
@@ -61,7 +61,7 @@ func (d discovery) GetFileList(client CoreFileController, printer Printer) error
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get file list")
 	}
-	
+
 	if printer == nil {
 		printer = JsonArrayPrinter(false)
 	}
