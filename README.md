@@ -1051,7 +1051,7 @@ Flags:
 `-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-p, --profile`:
+`-o, --output`:
 (Optional, string) The path/directory to download the file to.
 
 Examples:
