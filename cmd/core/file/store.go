@@ -13,7 +13,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	store := &cobra.Command{
 		Use:   "store",
 		Short: "The command to store files inside Discovery Core.",
-		Long:  "store is the command used to store files inside Discovery Core",
+		Long:  "store is the command used to upload files inside Discovery Core. The user can specify a file path to upload a single file or a directory path to upload all the files inside the directory. Absolute paths and relative paths can be used. With the recursive flag, all the subfolders inside the specified directory  will be uploaded.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {

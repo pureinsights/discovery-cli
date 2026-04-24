@@ -1088,6 +1088,52 @@ discovery core file download "my_directory/my_file.json" "my_other_file.json"
 }
 ```
 
+###### Store
+`store` is the command used to upload files inside Discovery Core. The user can specify a file path to upload a single file or a directory path to upload all the files inside the directory. Absolute paths and relative paths can be used. With the recursive flag, all the subfolders inside the specified directory  will be uploaded.
+
+Usage: `discovery core file download [flags] [<path>]`
+
+Arguments:
+
+`path`:
+(Required, string) The path to the file or directory you want to upload. 
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-r, --recursive`:
+(Optional, string) Whether to recursively store every file in the specified key/path
+
+Examples:
+
+```bash
+# Store the file using the name as key
+discovery core file store "my_file.json"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# If the input is a path, store each file
+discovery core file store .
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# With the recursive flag, go recursively and store each file using the relative path as key
+discovery core file store "my_path/" --recursive
+{
+  "acknowledged": true
+}
+```
 
 ##### Server
 `server` is the command used to manage servers in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
