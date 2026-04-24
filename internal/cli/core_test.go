@@ -20,14 +20,14 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func getDirectoryDoesNotExistError(t *testing.T, path string, useReadDir bool) (error){
+func getDirectoryDoesNotExistError(t *testing.T, path string, useReadDir bool) error {
 	var err error
 	if useReadDir {
 		_, err = os.ReadDir(path)
 	} else {
 		_, err = os.Stat(path)
 	}
-	require.Error(t,err)
+	require.Error(t, err)
 	return err
 }
 
@@ -35,15 +35,15 @@ func TestRecursiveStore(t *testing.T) {
 	tests := []struct {
 		name           string
 		client         CoreFileController
-		path		   string
-		recursive	   bool
+		path           string
+		recursive      bool
 		expectedOutput gjson.Result
 		err            error
 	}{
 		//Working Case
 		{
 			name:           "Store a directory",
-			path: 			"./testdata",
+			path:           "./testdata",
 			client:         new(mocks.WorkingFileClient),
 			recursive:      false,
 			expectedOutput: gjson.Parse(`{"acknowledged": true}`),
@@ -59,36 +59,36 @@ func TestRecursiveStore(t *testing.T) {
 		},
 		{
 			name:           "Directory is empty",
-			path: 			t.TempDir(),		
-			client:         new(mocks.WorkingFileClient),	
+			path:           t.TempDir(),
+			client:         new(mocks.WorkingFileClient),
 			expectedOutput: gjson.Parse(`{"acknowledged": false}`),
 			err:            nil,
 		},
 		//Error Case
 		{
 			name:           "Directory does not exist",
-			path: 			"./test/",
-			recursive: 		false,		
-			client:         new(mocks.FailingFileClient),	
+			path:           "./test/",
+			recursive:      false,
+			client:         new(mocks.FailingFileClient),
 			expectedOutput: gjson.Result{},
-			err:            getDirectoryDoesNotExistError(t,"./test/", true),
+			err:            getDirectoryDoesNotExistError(t, "./test/", true),
 		},
 		{
 			name:           "Invalid format error",
-			path: 			"./testdata",
-			recursive: 		false,	
-			client:         new(mocks.FailingFileClient),	
+			path:           "./testdata",
+			recursive:      false,
+			client:         new(mocks.FailingFileClient),
 			expectedOutput: gjson.Result{},
-			err:            discoveryPackage.Error{
-					Status: http.StatusBadRequest,
-					Body:   gjson.Parse(`{
+			err: discoveryPackage.Error{
+				Status: http.StatusBadRequest,
+				Body: gjson.Parse(`{
 	"status": 400,
 	"code": 3002,
 	"messages": [
 		"key: Invalid format for file path, use only alphanumeric symbols with a limit of 255 characters and a max of 10 path levels."
 	],
 	"timestamp": "2025-10-16T17:46:45.386963700Z"
-}`),},
+}`)},
 		},
 	}
 	for _, tc := range tests {
@@ -111,15 +111,15 @@ func Test_discovery_StoreFiles(t *testing.T) {
 	tests := []struct {
 		name           string
 		client         CoreFileController
-		path		   string
-		recursive	   bool
+		path           string
+		recursive      bool
 		expectedOutput string
 		err            error
 	}{
 		//Working Case
 		{
 			name:           "Store a file",
-			path: 			"./testdata/discovery.zip",
+			path:           "./testdata/discovery.zip",
 			client:         new(mocks.WorkingFileClient),
 			recursive:      false,
 			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
@@ -127,7 +127,7 @@ func Test_discovery_StoreFiles(t *testing.T) {
 		},
 		{
 			name:           "Store a directory",
-			path: 			"./testdata",
+			path:           "./testdata",
 			client:         new(mocks.WorkingFileClient),
 			recursive:      false,
 			expectedOutput: "{\n  \"acknowledged\": true\n}\n",
@@ -143,60 +143,60 @@ func Test_discovery_StoreFiles(t *testing.T) {
 		},
 		{
 			name:           "Directory is empty",
-			path: 			t.TempDir(),		
-			client:         new(mocks.WorkingFileClient),	
+			path:           t.TempDir(),
+			client:         new(mocks.WorkingFileClient),
 			expectedOutput: "{\n  \"acknowledged\": false\n}\n",
 			err:            nil,
 		},
 		//Error Case
 		{
-			name:           "Directory does not exist",
-			path: 			"./test/",
-			recursive: 		false,		
-			client:         new(mocks.FailingFileClient),	
-			err:            NewErrorWithCause(
-				ErrorExitCode, 
-				getDirectoryDoesNotExistError(t,"./test/",false), 
+			name:      "Directory does not exist",
+			path:      "./test/",
+			recursive: false,
+			client:    new(mocks.FailingFileClient),
+			err: NewErrorWithCause(
+				ErrorExitCode,
+				getDirectoryDoesNotExistError(t, "./test/", false),
 				"The path \"./test/\" does not exist",
 			),
 		},
 		{
-			name:           "Invalid format error for directory",
-			path: 			"./testdata",
-			recursive: 		false,	
-			client:         new(mocks.FailingFileClient),	
-			err:            NewErrorWithCause(
-				ErrorExitCode, 
+			name:      "Invalid format error for directory",
+			path:      "./testdata",
+			recursive: false,
+			client:    new(mocks.FailingFileClient),
+			err: NewErrorWithCause(
+				ErrorExitCode,
 				discoveryPackage.Error{
 					Status: http.StatusBadRequest,
-					Body:   gjson.Parse(`{
+					Body: gjson.Parse(`{
 	"status": 400,
 	"code": 3002,
 	"messages": [
 		"key: Invalid format for file path, use only alphanumeric symbols with a limit of 255 characters and a max of 10 path levels."
 	],
 	"timestamp": "2025-10-16T17:46:45.386963700Z"
-}`),}, 
+}`)},
 				"Could not store directory \"./testdata\"",
 			),
 		},
 		{
-			name:           "Invalid format error for file",
-			path: 			"./testdata/discovery.zip",
-			recursive: 		false,	
-			client:         new(mocks.FailingFileClient),	
-			err:            NewErrorWithCause(
-				ErrorExitCode, 
+			name:      "Invalid format error for file",
+			path:      "./testdata/discovery.zip",
+			recursive: false,
+			client:    new(mocks.FailingFileClient),
+			err: NewErrorWithCause(
+				ErrorExitCode,
 				discoveryPackage.Error{
 					Status: http.StatusBadRequest,
-					Body:   gjson.Parse(`{
+					Body: gjson.Parse(`{
 	"status": 400,
 	"code": 3002,
 	"messages": [
 		"key: Invalid format for file path, use only alphanumeric symbols with a limit of 255 characters and a max of 10 path levels."
 	],
 	"timestamp": "2025-10-16T17:46:45.386963700Z"
-}`),}, 
+}`)},
 				"Could not store the file with path \"./testdata/discovery.zip\"",
 			),
 		},

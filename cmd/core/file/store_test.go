@@ -34,7 +34,7 @@ func TestNewStoreCommand(t *testing.T) {
 	}{
 		// Working case
 		{
-			name: "Store a single file",
+			name:      "Store a single file",
 			args:      []string{"./testdata/NewDownloadCommand_script.py"},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -61,7 +61,7 @@ func TestNewStoreCommand(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "Stores a directory",
+			name:      "Stores a directory",
 			args:      []string{"./testdata/NewStoreCommand"},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -102,7 +102,7 @@ func TestNewStoreCommand(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "Stores an empty directory",
+			name:      "Stores an empty directory",
 			args:      []string{t.TempDir()},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -111,11 +111,11 @@ func TestNewStoreCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreEmptyDirectory"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{},
-			err: nil,
+			err:       nil,
 		},
 		{
-			name: "Stores a directory recursively",
-			args:      []string{"./testdata/NewStoreCommand","--recursive"},
+			name:      "Stores a directory recursively",
+			args:      []string{"./testdata/NewStoreCommand", "--recursive"},
 			url:       true,
 			apiKey:    "apiKey123",
 			outGolden: "NewStoreCommand_Out_StoreDirectoryRecursively",
@@ -181,7 +181,7 @@ func TestNewStoreCommand(t *testing.T) {
 			err:       cli.NewError(cli.ErrorExitCode, "The Discovery Core URL is missing for profile \"default\".\nTo set the URL for the Discovery Core API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery core config --profile \"default\""),
 		},
 		{
-			name: 	   "Upload returns HTTP error",
+			name:      "Upload returns HTTP error",
 			args:      []string{"./testdata/NewDownloadCommand_script.py"},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -218,7 +218,7 @@ func TestNewStoreCommand(t *testing.T) {
 			}`)}, "Could not store the file with path \"./testdata/NewDownloadCommand_script.py\""),
 		},
 		{
-			name: "Printing JSON array fails",
+			name:      "Printing JSON array fails",
 			args:      []string{"./testdata/NewDownloadCommand_script.py"},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -245,7 +245,7 @@ func TestNewStoreCommand(t *testing.T) {
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character 'a' looking for beginning of object key string"), "Could not print JSON object"),
 		},
 		{
-			name: 	   "Invalid key to store file",
+			name:      "Invalid key to store file",
 			args:      []string{"./testdata/NewDownloadCommand_script.py"},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -273,17 +273,17 @@ func TestNewStoreCommand(t *testing.T) {
 				},
 			},
 			err: cli.NewErrorWithCause(
-				cli.ErrorExitCode, 
+				cli.ErrorExitCode,
 				discoveryPackage.Error{
 					Status: http.StatusBadRequest,
-					Body:   gjson.Parse(`{
+					Body: gjson.Parse(`{
 						"status": 400,
 						"code": 3002,
 						"messages": [
 							"key: Invalid format for file path, use only alphanumeric symbols with a limit of 255 characters and a max of 10 path levels."
 						],
 						"timestamp": "2025-10-16T17:46:45.386963700Z"
-					}`),}, 
+					}`)},
 				"Could not store the file with path \"./testdata/NewDownloadCommand_script.py\"",
 			),
 		},
@@ -319,7 +319,7 @@ func TestNewStoreCommand(t *testing.T) {
 
 			getCmd := NewStoreCommand(d)
 
-			getCmd.SilenceUsage	= true
+			getCmd.SilenceUsage = true
 			getCmd.SetIn(ios.In)
 			getCmd.SetOut(ios.Out)
 			getCmd.SetErr(ios.Err)
@@ -372,7 +372,7 @@ func TestNewStoreCommand_NoProfileFlag(t *testing.T) {
 
 	getCmd := NewStoreCommand(d)
 
-	getCmd.SilenceUsage	= true
+	getCmd.SilenceUsage = true
 	getCmd.SetIn(ios.In)
 	getCmd.SetOut(ios.Out)
 	getCmd.SetErr(ios.Err)

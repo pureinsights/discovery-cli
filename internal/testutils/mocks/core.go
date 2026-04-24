@@ -41,7 +41,7 @@ func (w *WorkingFileClient) List() ([]gjson.Result, error) {
 }
 
 func (w *WorkingFileClient) Upload(key, file string) (gjson.Result, error) {
-	return gjson.Parse(`{"acknowledged": true}`),nil
+	return gjson.Parse(`{"acknowledged": true}`), nil
 }
 
 func (w *WorkingFileClient) Retrieve(key string) ([]byte, error) {
@@ -77,9 +77,9 @@ func (w *FailingFileClient) List() ([]gjson.Result, error) {
 }
 
 func (w *FailingFileClient) Upload(key, file string) (gjson.Result, error) {
-	return gjson.Result{},discoveryPackage.Error{
+	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusBadRequest,
-		Body:   gjson.Parse(`{
+		Body: gjson.Parse(`{
 	"status": 400,
 	"code": 3002,
 	"messages": [
