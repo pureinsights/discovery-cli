@@ -20,6 +20,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// GetCurrentWorkingDirectory returns the current working directory without requiring callers to handle an error return value.
 func GetCurrentWorkingDirectory(t *testing.T) string {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
@@ -27,6 +28,7 @@ func GetCurrentWorkingDirectory(t *testing.T) string {
 	return wd
 }
 
+// ReadFile reads a file and returns its contents as bytes, without requiring callers to deal with the error return value.
 func ReadFile(t *testing.T, path string) []byte {
 	bytes, err := os.ReadFile(path)
 	assert.NoError(t, err)

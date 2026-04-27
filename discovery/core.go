@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	//"encoding/json"
 	"net/http"
 	"strings"
 

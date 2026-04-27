@@ -12,6 +12,7 @@ import (
 // WorkingFileClient simulates a working file client.
 type WorkingFileClient struct{}
 
+// simulates a working List() function of the fileClient 
 func (w *WorkingFileClient) List() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		"Credential.ndjson",
@@ -40,10 +41,12 @@ func (w *WorkingFileClient) List() ([]gjson.Result, error) {
 	]`).Array(), nil
 }
 
+// simulates a working Upload() function of the fileClient
 func (w *WorkingFileClient) Upload(key, file string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
+// simulates a working Retrieve() function of the fileClient
 func (w *WorkingFileClient) Retrieve(key string) ([]byte, error) {
 	return []byte(`
 	def main():
@@ -55,7 +58,7 @@ func (w *WorkingFileClient) Retrieve(key string) ([]byte, error) {
 	`), nil
 }
 
-// Delete returns acknowledged true
+// simulates a working Delete() function of the fileClient
 func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
 	return gjson.Parse(`{
   "acknowledged": true
@@ -65,6 +68,7 @@ func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
 // FailingFileClient simulates a Failing file client.
 type FailingFileClient struct{}
 
+// simulates a failing List() function of the fileClient
 func (w *FailingFileClient) List() ([]gjson.Result, error) {
 	return []gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusInternalServerError,
@@ -79,10 +83,12 @@ func (w *FailingFileClient) List() ([]gjson.Result, error) {
 	}
 }
 
+// simulates a failing Upload() function of the fileClient
 func (w *FailingFileClient) Upload(key, file string) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
+// simulates a failing Retrieve() function of the fileClient
 func (w *FailingFileClient) Retrieve(key string) ([]byte, error) {
 	return nil, discoveryPackage.Error{
 		Status: http.StatusNotFound,
@@ -90,7 +96,7 @@ func (w *FailingFileClient) Retrieve(key string) ([]byte, error) {
 	}
 }
 
-// Delete returns an error
+// simulates a failing Delete() function of the fileClient
 func (w *FailingFileClient) Delete(key string) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusInternalServerError,
