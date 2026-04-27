@@ -47,7 +47,7 @@ func TestNewStoreCommand(t *testing.T) {
 					StatusCode: http.StatusOK,
 					Body: `
 					{
-						"acknowledge": true
+						"acknowledged": true
 					}
 					`,
 					ContentType: "application/json",
@@ -74,7 +74,7 @@ func TestNewStoreCommand(t *testing.T) {
 					StatusCode: http.StatusOK,
 					Body: `
 					{
-						"acknowledge": true
+						"acknowledged": true
 					}
 					`,
 					ContentType: "application/json",
@@ -88,7 +88,7 @@ func TestNewStoreCommand(t *testing.T) {
 					StatusCode: http.StatusOK,
 					Body: `
 					{
-						"acknowledge": true
+						"acknowledged": true
 					}
 					`,
 					ContentType: "application/json",
@@ -127,7 +127,7 @@ func TestNewStoreCommand(t *testing.T) {
 					StatusCode: http.StatusOK,
 					Body: `
 					{
-						"acknowledge": true
+						"acknowledged": true
 					}
 					`,
 					ContentType: "application/json",
@@ -141,7 +141,7 @@ func TestNewStoreCommand(t *testing.T) {
 					StatusCode: http.StatusOK,
 					Body: `
 					{
-						"acknowledge": true
+						"acknowledged": true
 					}
 					`,
 					ContentType: "application/json",
@@ -155,7 +155,7 @@ func TestNewStoreCommand(t *testing.T) {
 					StatusCode: http.StatusOK,
 					Body: `
 					{
-						"acknowledge": true
+						"acknowledged": true
 					}
 					`,
 					ContentType: "application/json",
@@ -231,7 +231,7 @@ func TestNewStoreCommand(t *testing.T) {
 					StatusCode: http.StatusOK,
 					Body: `
 					{
-						acknowledge: true
+						acknowledged: true
 					}
 					`,
 					ContentType: "application/json",

@@ -20,6 +20,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// function used to get the exact error of opening a directory that doesn't exist using the
+// ReadDir() function or Stat() function
 func getDirectoryDoesNotExistError(t *testing.T, path string, useReadDir bool) error {
 	var err error
 	if useReadDir {
