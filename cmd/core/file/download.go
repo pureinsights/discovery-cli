@@ -13,7 +13,7 @@ func NewDownloadCommand(d cli.Discovery) *cobra.Command {
 	download := &cobra.Command{
 		Use:   "download [<file>]...",
 		Short: "The command that obtains files from Discovery Core.",
-		Long:  "download is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specify to download multiple files.",
+		Long:  "download is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specified to download multiple files.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
