@@ -231,6 +231,7 @@ func Test_discovery_StoreFiles(t *testing.T) {
 	}
 }
 
+// Test_discovery_GetFile tests the GetFile auxiliary function used in discovery.GetFiles().
 func Test_discovery_GetFile(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -317,6 +318,7 @@ func Test_discovery_GetFile(t *testing.T) {
 	}
 }
 
+// Test_discovery_GetFiles tests the discovery.GetFiles function.
 func Test_discovery_GetFiles(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -417,6 +419,7 @@ func Test_discovery_GetFiles(t *testing.T) {
 	}
 }
 
+// Test_discovery_GetFileList tests the discovery.GetFileList function.
 func Test_discovery_GetFileList(t *testing.T) {
 	tests := []struct {
 		name           string
