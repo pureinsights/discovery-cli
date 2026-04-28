@@ -23,8 +23,9 @@ func GetFile(client CoreFileController, key string, output string) (gjson.Result
 	}
 
 	fullPath := filepath.Join(output, key)
-	os.MkdirAll(filepath.Dir(fullPath), 0o755)
+	err = os.MkdirAll(filepath.Dir(fullPath), 0o755)
 	if err != nil {
+		err = NormalizeWriteFileError(filepath.Dir(fullPath), err)
 		return gjson.Result{}, NewErrorWithCause(ErrorExitCode, err, "Could not create the necessary directories to write the file %q", fullPath)
 
 	}
