@@ -1,6 +1,7 @@
 package file
 
 import (
+	"os"
 	"bytes"
 	"errors"
 	"net/http"
@@ -17,6 +18,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 )
+
+// function used to get the exact error of trying to get the Stat() of a directory or file that doesn't exist.
+func getFileAttributesExError(t *testing.T, path string) error {
+	_, err := os.Stat(path)
+	require.Error(t, err)
+	return err
+}
 
 // TestNewStoreCommand tests the NewStoreCommand() function.
 func TestNewStoreCommand(t *testing.T) {
@@ -285,6 +293,21 @@ func TestNewStoreCommand(t *testing.T) {
 						"timestamp": "2025-10-16T17:46:45.386963700Z"
 					}`)},
 				"Could not store the file with path \"./testdata/NewDownloadCommand_script.py\"",
+			),
+		},
+		{
+			name:      "Invalid key to store file",
+			args:      []string{"./testdata/NewDownloadCommand_this_file_does_not_exist.py"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewStoreCommand_Out_FileDoesNotExist",
+			errGolden: "NewStoreCommand_Err_FileDoesNotExist",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewStoreCommand_Err_FileDoesNotExist"),
+			err: cli.NewErrorWithCause(
+				cli.ErrorExitCode,
+				getFileAttributesExError(t,"./testdata/NewDownloadCommand_this_file_does_not_exist.py"),
+				"The path \"./testdata/NewDownloadCommand_this_file_does_not_exist.py\" does not exist",
 			),
 		},
 	}
