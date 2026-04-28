@@ -1034,7 +1034,7 @@ discovery core file get
 ```
 
 ###### Download
-`download` is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specify to download multiple files. When specifying multiple keys, downloads are attempted sequentially. If you specify three keys and the second one fails, only the first file will be downloaded and the remaining downloads (second and third) will fail. You can specify an output directory using the `output` flag. Both absolute and relative paths are supported. If the specified directory does not exist, it will be created. Any required nested directories will also be created.
+`download` is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specified to download multiple files. When specifying multiple keys, downloads are attempted sequentially. If you specify three keys and the second one fails, only the first file will be downloaded and the remaining downloads (second and third) will fail. You can specify an output directory using the `output` flag. Both absolute and relative paths are supported. If the specified directory does not exist, it will be created. Any required nested directories will also be created.
 
 Usage: `discovery core file download [flags] [<file>]...`
 
