@@ -1089,7 +1089,7 @@ discovery core file download "my_directory/my_file.json" "my_other_file.json"
 ```
 
 ###### Store
-`store` is the command used to upload files inside Discovery Core. The user can specify a file path to upload a single file or a directory path to upload all the files inside the directory. Absolute paths and relative paths can be used. With the recursive flag, all the subfolders inside the specified directory  will be uploaded.
+`store` is the command used to upload files inside Discovery Core. The user can specify a file path to upload a single file or a directory path to upload all the files inside the directory. Absolute paths and relative paths can be used. When you enable the `recursive` flag, the command will walk the entire directory tree under the path you provided and upload every file it finds, including files in any nested subfolders. When storing multiple files from a specified path, if one file fails, any files that were stored successfully before the failure will remain stored. 
 
 Usage: `discovery core file download [flags] [<path>]`
 

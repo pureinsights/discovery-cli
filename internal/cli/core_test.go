@@ -33,6 +33,7 @@ func getDirectoryDoesNotExistError(t *testing.T, path string, useReadDir bool) e
 	return err
 }
 
+// TestRecursiveStore tests the recursiveStore() auxiliary function used by discovery.StoreFiles()
 func TestRecursiveStore(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -109,6 +110,7 @@ func TestRecursiveStore(t *testing.T) {
 	}
 }
 
+// Test_discovery_StoreFiles tests the discovery.StoreFiles() function.
 func Test_discovery_StoreFiles(t *testing.T) {
 	tests := []struct {
 		name           string
