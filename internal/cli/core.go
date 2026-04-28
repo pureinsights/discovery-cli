@@ -1,7 +1,6 @@
 package cli
 
 import (
-	//"fmt"
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 	"os"
