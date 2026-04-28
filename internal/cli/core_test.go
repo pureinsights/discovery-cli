@@ -30,7 +30,7 @@ func getDirectoryDoesNotExistError(t *testing.T, path string, useReadDir bool) e
 		_, err = os.Stat(path)
 	}
 	require.Error(t, err)
-	return err
+	return NormalizeReadFileError(path,err)
 }
 
 // TestRecursiveStore tests the recursiveStore() auxiliary function used by discovery.StoreFiles()

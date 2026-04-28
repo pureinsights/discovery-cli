@@ -75,6 +75,7 @@ func recursiveStore(client CoreFileController, currentkey, startingKey string, r
 
 	files, err := os.ReadDir(currentkey)
 	if err != nil {
+		err = NormalizeReadFileError(currentkey, err)
 		return response, err
 	}
 
@@ -111,6 +112,7 @@ func (d discovery) StoreFiles(client CoreFileController, key string, recursive b
 	fileInfo, err := os.Stat(key)
 
 	if err != nil {
+		err = NormalizeReadFileError(key, err)
 		return NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(key))
 	}
 

@@ -20,10 +20,11 @@ import (
 )
 
 // function used to get the exact error of trying to get the Stat() of a directory or file that doesn't exist.
+// it also Normalizes the error
 func getFileAttributesExError(t *testing.T, path string) error {
 	_, err := os.Stat(path)
 	require.Error(t, err)
-	return err
+	return cli.NormalizeReadFileError(path,err)
 }
 
 // TestNewStoreCommand tests the NewStoreCommand() function.
