@@ -24,6 +24,8 @@ type Discovery interface {
 	PrintIngestionConfigToUser(profile string, sensitive bool) error
 	PrintQueryFlowConfigToUser(profile string, sensitive bool) error
 	PrintStagingConfigToUser(profile string, sensitive bool) error
+	GetFiles(client CoreFileController, keys []string, output string, printer Printer) error
+	GetFileList(client CoreFileController, printer Printer) error
 	GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	GetEntities(client Getter, printer Printer) error
 	searchEntity(client Searcher, id string) (gjson.Result, error)

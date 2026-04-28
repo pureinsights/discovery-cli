@@ -9,6 +9,96 @@ import (
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
+// WorkingFileClient simulates a working file client.
+type WorkingFileClient struct{}
+
+// simulates a working List() function of the fileClient 
+func (w *WorkingFileClient) List() ([]gjson.Result, error) {
+	return gjson.Parse(`[
+		"Credential.ndjson",
+		"Server.ndjson",
+		"buildContextPrompt.js",
+		"buildSimplePrompt.js",
+		"constructPrompt.js",
+		"constructSuggestedPrompt.js",
+		"elastic-extraction.py",
+		"extractReference.groovy",
+		"extractReferenceAtlas.groovy",
+		"formatAnalysisResponse.js",
+		"formatAutocompleteResponse.js",
+		"formatChunksResponse.js",
+		"formatKeywordResponse.js",
+		"formatKeywordResponseAtlas.js",
+		"formatKeywordSearch.js",
+		"formatQuestionsResponse.js",
+		"formatSearchResponse.js",
+		"formatSearchResponseAtlas.js",
+		"formatSemanticResponse.js",
+		"formatSuggestionsResponse.js",
+		"keywordSearchTemplateAtlas.json",
+		"searchTemplate.json",
+		"searchTemplateAtlas.json"
+	]`).Array(), nil
+}
+
+// simulates a working Upload() function of the fileClient
+func (w *WorkingFileClient) Upload(key, file string) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
+// simulates a working Retrieve() function of the fileClient
+func (w *WorkingFileClient) Retrieve(key string) ([]byte, error) {
+	return []byte(`
+	def main():
+		print("Hello, World!")
+
+	if __name__ == "__main__":
+		main()
+
+	`), nil
+}
+
+// simulates a working Delete() function of the fileClient
+func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
+// FailingFileClient simulates a Failing file client.
+type FailingFileClient struct{}
+
+// simulates a failing List() function of the fileClient
+func (w *FailingFileClient) List() ([]gjson.Result, error) {
+	return []gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusInternalServerError,
+		Body: gjson.Parse(`{
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+	}
+}
+
+// simulates a failing Upload() function of the fileClient
+func (w *FailingFileClient) Upload(key, file string) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
+// simulates a failing Retrieve() function of the fileClient
+func (w *FailingFileClient) Retrieve(key string) ([]byte, error) {
+	return nil, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body:   gjson.Result{},
+	}
+}
+
+// simulates a failing Delete() function of the fileClient
+func (w *FailingFileClient) Delete(key string) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
 // WorkingServerPinger simulates when a ping to a server worked.
 type WorkingServerPinger struct{}
 

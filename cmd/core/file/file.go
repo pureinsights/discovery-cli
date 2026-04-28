@@ -12,7 +12,8 @@ func NewFileCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command to interact with Discovery Core's files.",
 	}
 
-	// credential.AddCommand(NewGetCommand(d))
+	file.AddCommand(NewGetCommand(d))
+	file.AddCommand(NewDownloadCommand(d))
 	// credential.AddCommand(NewStoreCommand(d))
 	// credential.AddCommand(NewDeleteCommand(d))
 

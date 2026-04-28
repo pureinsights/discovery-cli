@@ -977,6 +977,118 @@ discovery core credential delete my-credential
 }
 ```
 
+##### file
+`file` is the command used to interact with files in Discovery Core. This command contains various subcommands used to get the list of files and download files.
+
+Usage: `discovery core file [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain the list of all Discovery Core's files.
+
+Usage: `discovery core file get [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get the list of all files
+discovery core file get
+"DataFile01.ndjson"
+"DataFile02.ndjson"
+"script01.js"
+"script02.js"
+"script03.js"
+"script04.js"
+"tool01.py"
+"automation01.groovy"
+"automation02.groovy"
+"format/formatter01.js"
+"format/formatter02.js"
+"format/formatter03.js"
+"format/formatter04.js"
+"format/formatter05.js"
+"format/formatter06.js"
+"format/formatter07.js"
+"format/formatter08.js"
+"format/formatter09.js"
+"format/formatter10.js"
+"format/formatter11.js"
+"templates/template01.json"
+"templates/template02.json"
+"templates/template03.json"
+```
+
+###### Download
+`download` is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specified to download multiple files. When specifying multiple keys, downloads are attempted sequentially. If you specify three keys and the second one fails, only the first file will be downloaded and the remaining downloads (second and third) will fail. You can specify an output directory using the `output` flag. Both absolute and relative paths are supported. If the specified directory does not exist, it will be created. Any required nested directories will also be created.
+
+Usage: `discovery core file download [flags] [<file>]...`
+
+Arguments:
+
+`file`:
+(Required, string) The key of the file that will be downloaded. At least one file should be specified. Multiple keys can be specified.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-o, --output`:
+(Optional, string) The path/directory to download the file to.
+
+Examples:
+
+```bash
+# Download file by name
+discovery core file download "my_file.json"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+ # Output file to different directory
+discovery core file download "my_file.json" -o "./my_directory"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+ # Download file by nested path
+discovery core file download "my_directory/my_file.json"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# Download multiple files by specifying nested paths or names
+discovery core file download "my_directory/my_file.json" "my_other_file.json"
+{
+  "acknowledged": true
+}
+```
+
+
 ##### Server
 `server` is the command used to manage servers in Discovery Core. This command contains various subcommands used to create, read, update, and delete.
 
