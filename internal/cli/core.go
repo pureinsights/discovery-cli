@@ -1,11 +1,11 @@
 package cli
 
 import (
-	//"fmt"
-	"github.com/google/uuid"
-	"github.com/tidwall/gjson"
 	"os"
 	"path/filepath"
+
+	"github.com/google/uuid"
+	"github.com/tidwall/gjson"
 )
 
 // CoreFileController defines the methods to interact with files.
@@ -69,7 +69,6 @@ func (d discovery) GetFileList(client CoreFileController, printer Printer) error
 
 	return printer(*d.IOStreams(), files...)
 }
-
 
 // DeleteFile deletes a file from the object storage.
 func (d discovery) DeleteFile(client CoreFileController, key string, printer Printer) error {
