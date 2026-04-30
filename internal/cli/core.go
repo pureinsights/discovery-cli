@@ -69,6 +69,73 @@ func (d discovery) GetFileList(client CoreFileController, printer Printer) error
 	return printer(*d.IOStreams(), files...)
 }
 
+// recursiveStore is a recursive function that saves everything inside a directory. If the recursive flag
+// is set to true, it will also save recursively the file inside the subdirectories found in the directory specified.
+func recursiveStore(client CoreFileController, currentkey, startingKey string, recursive bool) (gjson.Result, error) {
+	response := gjson.Parse(`{"acknowledged": false}`)
+
+	files, err := os.ReadDir(currentkey)
+	if err != nil {
+		err = NormalizeReadFileError(currentkey, err)
+		return response, err
+	}
+
+	newKey, err := filepath.Rel(startingKey, currentkey)
+	if err != nil {
+		return response, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			if recursive {
+				response, err = recursiveStore(client, filepath.Join(currentkey, file.Name()), startingKey, recursive)
+				if err != nil {
+					return response, err
+				}
+			}
+			continue
+		}
+
+		response, err = client.Upload(filepath.ToSlash(filepath.Join(newKey, file.Name())), filepath.Join(currentkey, file.Name()))
+		if err != nil {
+			return response, err
+		}
+	}
+
+	return response, nil
+}
+
+// StoreFiles is in charge of determine if the key/path specified by the user is from a directory or
+// from a file. If it is a directory we assume they want to upload every file inside the directory.
+// If it is a file we assume they want to store that individual file
+func (d discovery) StoreFiles(client CoreFileController, key string, recursive bool, printer Printer) error {
+	response := gjson.Result{}
+	fileInfo, err := os.Stat(key)
+
+	if err != nil {
+		err = NormalizeReadFileError(key, err)
+		return NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(key))
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	if fileInfo.IsDir() {
+		response, err = recursiveStore(client, key, key, recursive)
+		if err != nil {
+			return NewErrorWithCause(ErrorExitCode, err, "Could not store directory %q", filepath.ToSlash(key))
+		}
+	} else {
+		response, err = client.Upload(filepath.Base(key), key)
+		if err != nil {
+			return NewErrorWithCause(ErrorExitCode, err, "Could not store the file with path %q", filepath.ToSlash(key))
+		}
+	}
+
+	return printer(*d.IOStreams(), response)
+}
+
 // ServerPinger defines the interface to ping servers.
 type ServerPinger interface {
 	Searcher
