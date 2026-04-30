@@ -1,10 +1,11 @@
 package cli
 
 import (
-	"github.com/google/uuid"
-	"github.com/tidwall/gjson"
 	"os"
 	"path/filepath"
+
+	"github.com/google/uuid"
+	"github.com/tidwall/gjson"
 )
 
 // CoreFileController defines the methods to interact with files.
@@ -134,6 +135,20 @@ func (d discovery) StoreFiles(client CoreFileController, key string, recursive b
 	}
 
 	return printer(*d.IOStreams(), response)
+}
+
+// DeleteFile deletes a file from the object storage.
+func (d discovery) DeleteFile(client CoreFileController, key string, printer Printer) error {
+	result, err := client.Delete(key)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not delete file with key %q", key)
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), result)
 }
 
 // ServerPinger defines the interface to ping servers.

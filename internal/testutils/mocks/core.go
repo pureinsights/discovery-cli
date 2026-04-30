@@ -60,7 +60,9 @@ func (w *WorkingFileClient) Retrieve(key string) ([]byte, error) {
 
 // simulates a working Delete() function of the fileClient
 func (w *WorkingFileClient) Delete(key string) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Parse(`{
+  "acknowledged": true
+}`), nil
 }
 
 // FailingFileClient simulates a Failing file client.
@@ -106,7 +108,17 @@ func (w *FailingFileClient) Retrieve(key string) ([]byte, error) {
 
 // simulates a failing Delete() function of the fileClient
 func (w *FailingFileClient) Delete(key string) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusInternalServerError,
+		Body: gjson.Parse(`{
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+	}
 }
 
 // WorkingServerPinger simulates when a ping to a server worked.

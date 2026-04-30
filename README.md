@@ -977,7 +977,7 @@ discovery core credential delete my-credential
 }
 ```
 
-##### file
+##### File
 `file` is the command used to interact with files in Discovery Core. This command contains various subcommands used to get the list of files and download files.
 
 Usage: `discovery core file [subcommand] [flags]`
@@ -1130,6 +1130,34 @@ discovery core file store .
 ```bash
 # With the recursive flag, go recursively and store each file using the relative path as key
 discovery core file store "my_path/" --recursive
+{
+  "acknowledged": true
+}
+```
+
+###### Delete
+`delete` is the command used to delete files from Discovery Core's object storage. The user sends the file's key and Discovery returns an acknowledgement message.
+
+Usage: `discovery core file delete [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The key of the file that will be deleted.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a file by key
+discovery core file delete my-file
 {
   "acknowledged": true
 }
