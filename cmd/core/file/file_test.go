@@ -47,6 +47,6 @@ func TestNewFileCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"delete", "download", "get"}
+	expectedCommands := []string{"delete", "download", "get", "store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

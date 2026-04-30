@@ -1088,6 +1088,53 @@ discovery core file download "my_directory/my_file.json" "my_other_file.json"
 }
 ```
 
+###### Store
+`store` is the command used to upload files inside Discovery Core. The user can specify a file path to upload a single file or a directory path to upload all the files inside the directory. Absolute paths and relative paths can be used. When you enable the `recursive` flag, the command will walk the entire directory tree under the path you provided and upload every file it finds, including files in any nested subfolders. When storing multiple files from a specified path, if one file fails, any files that were stored successfully before the failure will remain stored. 
+
+Usage: `discovery core file download [flags] [<path>]`
+
+Arguments:
+
+`path`:
+(Required, string) The path to the file or directory you want to upload. 
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-r, --recursive`:
+(Optional, string) Whether to recursively store every file in the specified key/path
+
+Examples:
+
+```bash
+# Store the file using the name as key
+discovery core file store "my_file.json"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# If the input is a path, store each file
+discovery core file store .
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# With the recursive flag, go recursively and store each file using the relative path as key
+discovery core file store "my_path/" --recursive
+{
+  "acknowledged": true
+}
+```
+
 ###### Delete
 `delete` is the command used to delete files from Discovery Core's object storage. The user sends the file's key and Discovery returns an acknowledgement message.
 

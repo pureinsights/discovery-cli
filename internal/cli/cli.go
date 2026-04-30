@@ -26,6 +26,7 @@ type Discovery interface {
 	PrintStagingConfigToUser(profile string, sensitive bool) error
 	GetFiles(client CoreFileController, keys []string, output string, printer Printer) error
 	GetFileList(client CoreFileController, printer Printer) error
+	StoreFiles(client CoreFileController, key string, recursive bool, printer Printer) error
 	DeleteFile(client CoreFileController, key string, printer Printer) error
 	GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	GetEntities(client Getter, printer Printer) error

@@ -43,7 +43,7 @@ func (w *WorkingFileClient) List() ([]gjson.Result, error) {
 
 // simulates a working Upload() function of the fileClient
 func (w *WorkingFileClient) Upload(key, file string) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Parse(`{"acknowledged": true}`), nil
 }
 
 // simulates a working Retrieve() function of the fileClient
@@ -85,7 +85,17 @@ func (w *FailingFileClient) List() ([]gjson.Result, error) {
 
 // simulates a failing Upload() function of the fileClient
 func (w *FailingFileClient) Upload(key, file string) (gjson.Result, error) {
-	return gjson.Result{}, nil
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusBadRequest,
+		Body: gjson.Parse(`{
+	"status": 400,
+	"code": 3002,
+	"messages": [
+		"key: Invalid format for file path, use only alphanumeric symbols with a limit of 255 characters and a max of 10 path levels."
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+	}
 }
 
 // simulates a failing Retrieve() function of the fileClient
