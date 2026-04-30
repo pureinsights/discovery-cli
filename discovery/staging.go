@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -173,20 +172,9 @@ func (b bucketsClient) Create(bucket string, options gjson.Result) (gjson.Result
 }
 
 // GetAll obtains a list with the names of every bucket.
-func (b bucketsClient) GetAll() ([]string, error) {
-	bucketsBytes, err := b.execute(http.MethodGet, "")
-	if err != nil {
-		return []string(nil), err
-	}
-	if len(bucketsBytes) > 0 {
-		var bucketNames []string
-		if err := json.Unmarshal(bucketsBytes, &bucketNames); err != nil {
-			return []string(nil), err
-		}
-		return bucketNames, nil
-	} else {
-		return []string{}, nil
-	}
+func (b bucketsClient) GetAll() ([]gjson.Result, error) {
+	result, err := execute(b.client, http.MethodGet, "")
+	return result.Array(), err
 }
 
 // Get obtains the information of a bucket with the given name.

@@ -16,6 +16,7 @@ import (
 // StagingBucketController defines the methods to interact with buckets.
 type StagingBucketController interface {
 	Create(bucket string, options gjson.Result) (gjson.Result, error)
+	GetAll() ([]gjson.Result, error)
 	Get(bucket string) (gjson.Result, error)
 	CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error)
 	DeleteIndex(bucket, index string) (gjson.Result, error)
@@ -115,6 +116,19 @@ func (d discovery) DeleteBucket(client StagingBucketController, bucketName strin
 	}
 
 	return printer(*d.IOStreams(), result)
+}
+
+func (d discovery) GetBucket(client StagingBucketController, bucketName string, printer Printer) error {
+	bucket, err := client.Get(bucketName)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get bucket with name %q to update it.", bucketName)
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), bucket)
 }
 
 // writeRecordsToFile writes the records obtained from the scroll to a JSON file in a temporary directory.
