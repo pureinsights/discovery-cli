@@ -1036,7 +1036,7 @@ discovery core file get
 ###### Download
 `download` is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specified to download multiple files. When specifying multiple keys, downloads are attempted sequentially. If you specify three keys and the second one fails, only the first file will be downloaded and the remaining downloads (second and third) will fail. You can specify an output directory using the `output` flag. Both absolute and relative paths are supported. If the specified directory does not exist, it will be created. Any required nested directories will also be created.
 
-Usage: `discovery core file download [flags] [<file>]...`
+Usage: `discovery core file download [flags] <file>...`
 
 Arguments:
 
@@ -1091,7 +1091,7 @@ discovery core file download "my_directory/my_file.json" "my_other_file.json"
 ###### Store
 `store` is the command used to upload files inside Discovery Core. The user can specify a file path to upload a single file or a directory path to upload all the files inside the directory. Absolute paths and relative paths can be used. When you enable the `recursive` flag, the command will walk the entire directory tree under the path you provided and upload every file it finds, including files in any nested subfolders. When storing multiple files from a specified path, if one file fails, any files that were stored successfully before the failure will remain stored. 
 
-Usage: `discovery core file download [flags] [<path>]`
+Usage: `discovery core file store [flags] <path>`
 
 Arguments:
 
