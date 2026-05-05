@@ -344,7 +344,7 @@ func writeNDJSONLine(filePath string, writer *bufio.Writer) error {
 }
 
 // createNDJSON reads the JSON files of an entity type and makes an NDJSON file that contains the information of all the entities.
-func createNDJSON(subfolderPath string, outputFilePath string) error {
+func createNDJSON(subfolderPath, outputFilePath string) error {
 	files, err := collectJSONFiles(subfolderPath)
 	if err != nil {
 		err = NormalizeReadFileError(subfolderPath, err)
@@ -389,6 +389,23 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, arcName string) error 
 	return NormalizeWriteFileError(filePath, err)
 }
 
+func addNDJSONToZip(zipWriter *zip.Writer, subfolder, subfolderPath, tempDir string) error {
+	ndjsonFilename := strings.ToUpper(subfolder[:1]) + subfolder[1:] + ".ndjson"
+	ndjsonPath := filepath.Join(tempDir, ndjsonFilename)
+
+	err := createNDJSON(subfolderPath, ndjsonPath)
+	if err != nil {
+		return err
+	}
+
+	err = addFileToZip(zipWriter, ndjsonPath, ndjsonFilename)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // createBaseZip creates the zip with the entities of a Discovery product.
 func createBaseZip(client CoreFileController, basePath, tempDir string) (string, error) {
 	baseName := filepath.Base(basePath)
@@ -421,15 +438,7 @@ func createBaseZip(client CoreFileController, basePath, tempDir string) (string,
 		}
 
 		if entry.IsDir() {
-			ndjsonFilename := strings.ToUpper(subfolder[:1]) + subfolder[1:] + ".ndjson"
-			ndjsonPath := filepath.Join(tempDir, ndjsonFilename)
-
-			err := createNDJSON(subfolderPath, ndjsonPath)
-			if err != nil {
-				return "", err
-			}
-
-			err = addFileToZip(zipWriter, ndjsonPath, ndjsonFilename)
+			err = addNDJSONToZip(zipWriter, subfolder, subfolderPath, tempDir)
 			if err != nil {
 				return "", err
 			}
@@ -437,6 +446,30 @@ func createBaseZip(client CoreFileController, basePath, tempDir string) (string,
 	}
 
 	return baseZipPath, nil
+}
+
+// createDeployZips creates the zip files for every Discovery product based on the NDJSON entities in the directory.
+func createDeployZips(fileClient CoreFileController, path, tempDir string) (map[string]string, error) {
+	baseFolders := []string{filepath.Join(path, "core"), filepath.Join(path, "ingestion"), filepath.Join(path, "queryflow")}
+	tempZips := map[string]string{}
+
+	for _, base := range baseFolders {
+		baseFileInfo, err := os.Stat(base)
+		if err != nil {
+			err = NormalizeReadFileError(base, err)
+			return nil, NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(base))
+		}
+
+		if baseFileInfo.IsDir() {
+			zipPath, err := createBaseZip(fileClient, base, tempDir)
+			if err != nil {
+				return nil, err
+			}
+			tempZips[filepath.Base(base)] = zipPath
+		}
+	}
+
+	return tempZips, nil
 }
 
 // Deploy is the function that imports every Core, Ingestion, and QueryFlow entity that is contained in a directory into Discovery.
@@ -457,23 +490,9 @@ func (d discovery) Deploy(fileClient CoreFileController, clients []BackupRestore
 
 		defer os.RemoveAll(tempDir)
 
-		baseFolders := []string{filepath.Join(path, "core"), filepath.Join(path, "ingestion"), filepath.Join(path, "queryflow")}
-		tempZips := map[string]string{}
-
-		for _, base := range baseFolders {
-			baseFileInfo, err := os.Stat(base)
-			if err != nil {
-				err = NormalizeReadFileError(base, err)
-				return NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(base))
-			}
-
-			if baseFileInfo.IsDir() {
-				zipPath, err := createBaseZip(fileClient, base, tempDir)
-				if err != nil {
-					return err
-				}
-				tempZips[filepath.Base(base)] = zipPath
-			}
+		tempZips, err := createDeployZips(fileClient, path, tempDir)
+		if err != nil {
+			return err
 		}
 
 		results, err := callImports(clients, tempZips, discoveryPackage.OnConflictUpdate)
