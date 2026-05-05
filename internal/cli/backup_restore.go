@@ -300,6 +300,7 @@ func collectJSONFiles(folderPath string) ([]string, error) {
 
 	err := filepath.WalkDir(folderPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
+			err = NormalizeReadFileError(path, err)
 			return err
 		}
 
@@ -347,13 +348,12 @@ func writeNDJSONLine(filePath string, writer *bufio.Writer) error {
 func createNDJSON(subfolderPath, outputFilePath string) error {
 	files, err := collectJSONFiles(subfolderPath)
 	if err != nil {
-		err = NormalizeReadFileError(subfolderPath, err)
 		return err
 	}
 
 	outFile, err := os.Create(outputFilePath)
 	if err != nil {
-		err = NormalizeWriteFileError(subfolderPath, err)
+		err = NormalizeWriteFileError(outputFilePath, err)
 		return err
 	}
 	defer outFile.Close()
@@ -372,23 +372,24 @@ func createNDJSON(subfolderPath, outputFilePath string) error {
 }
 
 // addFileToZip adds an NDJSON file to the zip.
-func addFileToZip(zipWriter *zip.Writer, filePath string, arcName string) error {
+func addFileToZip(zipWriter *zip.Writer, filePath string, zipName string) error {
 	sourceFile, err := os.Open(filePath)
 	if err != nil {
-		err = NormalizeWriteFileError(filePath, err)
+		err = NormalizeReadFileError(filePath, err)
 		return err
 	}
 	defer sourceFile.Close()
 
-	writer, err := zipWriter.Create(arcName)
+	writer, err := zipWriter.Create(zipName)
 	if err != nil {
 		return err
 	}
 
 	_, err = io.Copy(writer, sourceFile)
-	return NormalizeWriteFileError(filePath, err)
+	return NormalizeWriteFileError(zipName, err)
 }
 
+// addNDJSONToZip reads the NDJSON files of an entity and adds the entity to the zip.
 func addNDJSONToZip(zipWriter *zip.Writer, subfolder, subfolderPath, tempDir string) error {
 	ndjsonFilename := strings.ToUpper(subfolder[:1]) + subfolder[1:] + ".ndjson"
 	ndjsonPath := filepath.Join(tempDir, ndjsonFilename)

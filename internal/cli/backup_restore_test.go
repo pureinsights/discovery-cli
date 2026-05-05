@@ -2,6 +2,7 @@ package cli
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -908,4 +909,210 @@ func TestImportEntitiesFromClients(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_collectJSONFiles_NoError(t *testing.T) {
+	expectedList := []string{filepath.Join("testdata", "deploy", "queryflow", "endpoint", "project", "hybrid.json"), filepath.Join("testdata", "deploy", "queryflow", "endpoint", "vector.json")}
+
+	actualList, err := collectJSONFiles(filepath.Join("testdata", "deploy", "queryflow", "endpoint"))
+
+	require.NoError(t, err)
+	assert.Equal(t, expectedList, actualList)
+}
+
+func Test_collectJSONFiles_Error(t *testing.T) {
+	_, err := collectJSONFiles("doesnotexist")
+
+	require.Error(t, err)
+	assert.EqualError(t, err, "file does not exist: doesnotexist")
+}
+
+func Test_writeNDJSONLine_Working(t *testing.T) {
+	tempDir := t.TempDir()
+	ndjson := filepath.Join(tempDir, "writeNDJSONWorking.ndjson")
+	defer os.Remove(ndjson)
+
+	outFile, err := os.Create(ndjson)
+	require.NoError(t, err)
+	defer os.Remove(ndjson)
+	defer outFile.Close()
+
+	writer := bufio.NewWriter(outFile)
+	defer writer.Flush()
+
+	err = writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "endpoint", "project", "hybrid.json"), writer)
+	err = writer.Flush()
+	require.NoError(t, err)
+	err = outFile.Close()
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(ndjson)
+	assert.Equal(t, "{\"httpMethod\":\"GET\",\"name\":\"Hybrid Search\",\"pipeline\":\"Hybrid Search Pipeline\",\"type\":\"default\",\"uri\":\"/hybrid\"}\n", string(data))
+}
+
+func Test_writeNDJSONLine_JSONDecodeFails(t *testing.T) {
+	tempDir := t.TempDir()
+	ndjson := filepath.Join(tempDir, "writeNDJSONDecodeFails.ndjson")
+	defer os.Remove(ndjson)
+
+	outFile, err := os.Create(ndjson)
+	require.NoError(t, err)
+	defer os.Remove(ndjson)
+	defer outFile.Close()
+
+	writer := bufio.NewWriter(outFile)
+	defer writer.Flush()
+
+	err = writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "endpoint", "text.txt"), writer)
+	require.Error(t, err)
+	assert.EqualError(t, err, "invalid character 'T' looking for beginning of value")
+}
+
+func Test_writeNDJSONLine_WriteFails(t *testing.T) {
+	writer := bufio.NewWriterSize(testutils.ErrWriter{Err: errors.New("write failed")}, 1)
+
+	err := writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "endpoint", "vector.json"), writer)
+	require.Error(t, err)
+	assert.EqualError(t, err, "write failed")
+}
+
+func Test_writeNDJSONLine_JSONNotExists(t *testing.T) {
+	writer := bufio.NewWriter(testutils.ErrWriter{Err: errors.New("write failed")})
+
+	err := writeNDJSONLine("doesnotexist", writer)
+	require.Error(t, err)
+	assert.EqualError(t, err, "file does not exist: doesnotexist")
+}
+
+func Test_createNDJSON_Working(t *testing.T) {
+	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
+	outputFilePath := filepath.Join(t.TempDir(), "entity.ndjson")
+
+	err := createNDJSON(subfolderPath, outputFilePath)
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(outputFilePath)
+	assert.Equal(t, "{\"httpMethod\":\"GET\",\"name\":\"Hybrid Search\",\"pipeline\":\"Hybrid Search Pipeline\",\"type\":\"default\",\"uri\":\"/hybrid\"}\n{\"httpMethod\":\"GET\",\"name\":\"Vector Search\",\"pipeline\":\"Vector Search Pipeline\",\"type\":\"default\",\"uri\":\"/vector\"}\n", string(data))
+}
+
+func Test_createNDJSON_CreateFileFails(t *testing.T) {
+	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
+	outputFilePath := filepath.Join("doesnotexist", "entity.ndjson")
+
+	err := createNDJSON(subfolderPath, outputFilePath)
+	require.Error(t, err)
+
+	assert.EqualError(t, err, fmt.Sprintf("the given path does not exist: %s", outputFilePath))
+}
+
+func Test_createNDJSON_InvalidJSONFails(t *testing.T) {
+	subfolderPath := filepath.Join("testdata", "wrongJSON")
+	outputFilePath := filepath.Join(t.TempDir(), "entity.ndjson")
+
+	err := createNDJSON(subfolderPath, outputFilePath)
+	require.Error(t, err)
+
+	assert.EqualError(t, err, "invalid character 'T' looking for beginning of value")
+}
+
+func Test_addFileToZip_Working(t *testing.T) {
+	tempDir := t.TempDir()
+	entityFile := "entity.ndjson"
+	baseZipPath := filepath.Join(tempDir, "test.zip")
+	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
+	outputFilePath := filepath.Join(tempDir, entityFile)
+
+	zipFile, err := os.Create(baseZipPath)
+	require.NoError(t, err)
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	err = createNDJSON(subfolderPath, outputFilePath)
+	require.NoError(t, err)
+
+	err = addFileToZip(zipWriter, outputFilePath, entityFile)
+	require.NoError(t, err)
+	zipWriter.Close()
+	zipFile.Close()
+
+	readZip, err := os.ReadFile(baseZipPath)
+	require.NoError(t, err)
+	zipReader, err := zip.NewReader(bytes.NewReader(readZip), int64(len(readZip)))
+	require.NoError(t, err)
+	files := make(map[string]*zip.File, len(zipReader.File))
+	require.Equal(t, 1, len(zipReader.File))
+	for _, f := range zipReader.File {
+		files[f.Name] = f
+	}
+
+	assert.Contains(t, files, entityFile)
+}
+
+func Test_addFileToZip_FileDoesNotExist(t *testing.T) {
+	tempDir := t.TempDir()
+	entityFile := "entity.ndjson"
+	baseZipPath := filepath.Join(tempDir, "test.zip")
+	outputFilePath := filepath.Join("doesnotexist", entityFile)
+
+	zipFile, err := os.Create(baseZipPath)
+	require.NoError(t, err)
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	err = addFileToZip(zipWriter, outputFilePath, entityFile)
+	require.Error(t, err)
+	assert.EqualError(t, err, fmt.Sprintf("file does not exist: %s", outputFilePath))
+}
+
+func Test_addNDJSONToZip_Working(t *testing.T) {
+	tempDir := t.TempDir()
+	baseZipPath := filepath.Join(tempDir, "test.zip")
+	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
+	subfolder := "endpoint"
+
+	zipFile, err := os.Create(baseZipPath)
+	require.NoError(t, err)
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	err = addNDJSONToZip(zipWriter, subfolder, subfolderPath, tempDir)
+	require.NoError(t, err)
+	zipWriter.Close()
+	zipFile.Close()
+
+	readZip, err := os.ReadFile(baseZipPath)
+	require.NoError(t, err)
+	zipReader, err := zip.NewReader(bytes.NewReader(readZip), int64(len(readZip)))
+	require.NoError(t, err)
+	files := make(map[string]*zip.File, len(zipReader.File))
+	require.Equal(t, 1, len(zipReader.File))
+	for _, f := range zipReader.File {
+		files[f.Name] = f
+	}
+
+	assert.Contains(t, files, "Endpoint.ndjson")
+}
+
+func Test_addNDJSONToZip_CreateNDJSONFails(t *testing.T) {
+	tempDir := t.TempDir()
+	baseZipPath := filepath.Join(tempDir, "test.zip")
+	subfolderPath := filepath.Join("doesnotexist", "endpoint")
+	subfolder := "endpoint"
+
+	zipFile, err := os.Create(baseZipPath)
+	require.NoError(t, err)
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	err = addNDJSONToZip(zipWriter, subfolder, subfolderPath, tempDir)
+	require.Error(t, err)
+	assert.EqualError(t, err, fmt.Sprintf("file does not exist: %s", subfolderPath))
 }
