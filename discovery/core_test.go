@@ -368,7 +368,7 @@ func Test_filesClient_List(t *testing.T) {
 		path             string
 		statusCode       int
 		response         string
-		expectedResponse []string
+		expectedResponse []gjson.Result
 		err              error
 	}{
 		// Working case
@@ -402,7 +402,7 @@ func Test_filesClient_List(t *testing.T) {
 				"searchTemplate.json",
 				"searchTemplateAtlas.json"
 				]`,
-			expectedResponse: []string{
+			expectedResponse: gjson.Parse(`[
 				"Credential.ndjson",
 				"Server.ndjson",
 				"buildContextPrompt.js",
@@ -425,8 +425,8 @@ func Test_filesClient_List(t *testing.T) {
 				"formatSuggestionsResponse.js",
 				"keywordSearchTemplateAtlas.json",
 				"searchTemplate.json",
-				"searchTemplateAtlas.json",
-			},
+				"searchTemplateAtlas.json"
+				]`).Array(),
 		},
 		{
 			name:             "List returns no content",
@@ -434,25 +434,16 @@ func Test_filesClient_List(t *testing.T) {
 			path:             "/file",
 			statusCode:       http.StatusNoContent,
 			response:         ``,
-			expectedResponse: []string{},
+			expectedResponse: []gjson.Result{},
 		},
 		// Error case
-		{
-			name:             "List returns a response that cannot be marshalled into a []string",
-			method:           http.MethodGet,
-			path:             "/file",
-			statusCode:       http.StatusOK,
-			response:         `{"message"} : "This cannot be marshalled."`,
-			expectedResponse: []string(nil),
-			err:              fmt.Errorf("invalid character '}' after object key"),
-		},
 		{
 			name:             "List returns a internal server error",
 			method:           http.MethodGet,
 			path:             "/file",
 			statusCode:       http.StatusInternalServerError,
 			response:         ``,
-			expectedResponse: []string(nil),
+			expectedResponse: []gjson.Result{},
 			err:              Error{Status: http.StatusInternalServerError, Body: gjson.Result{}},
 		},
 	}
