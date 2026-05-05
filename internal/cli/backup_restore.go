@@ -2,7 +2,9 @@ package cli
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -290,4 +292,221 @@ func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, p
 	}
 
 	return printer(*d.IOStreams(), gjson.Parse(results))
+}
+
+// collectJSONFiles makes a list of all the JSON files in an entity's directory in order to add them all into the NDJSON.
+func collectJSONFiles(folderPath string) ([]string, error) {
+	var result []string
+
+	err := filepath.WalkDir(folderPath, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			err = NormalizeReadFileError(path, err)
+			return err
+		}
+
+		if !d.IsDir() && strings.HasSuffix(d.Name(), ".json") {
+			result = append(result, path)
+		}
+
+		return nil
+	})
+
+	return result, err
+}
+
+// writeNDJSONLine reads a JSON file and writes that entity's information into the NDJSON.
+func writeNDJSONLine(filePath string, writer *bufio.Writer) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		err = NormalizeReadFileError(filePath, err)
+		return err
+	}
+
+	defer file.Close()
+
+	var data any
+
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&data); err != nil {
+		return err
+	}
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(append(jsonBytes, '\n'))
+	if err != nil {
+		err = NormalizeWriteFileError(filePath, err)
+		return err
+	}
+
+	return nil
+}
+
+// createNDJSON reads the JSON files of an entity type and makes an NDJSON file that contains the information of all the entities.
+func createNDJSON(subfolderPath, outputFilePath string) error {
+	files, err := collectJSONFiles(subfolderPath)
+	if err != nil {
+		return err
+	}
+
+	outFile, err := os.Create(outputFilePath)
+	if err != nil {
+		err = NormalizeWriteFileError(outputFilePath, err)
+		return err
+	}
+	defer outFile.Close()
+
+	writer := bufio.NewWriter(outFile)
+	defer writer.Flush()
+
+	for _, filePath := range files {
+		err = writeNDJSONLine(filePath, writer)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// addFileToZip adds an NDJSON file to the zip.
+func addFileToZip(zipWriter *zip.Writer, filePath string, zipName string) error {
+	sourceFile, err := os.Open(filePath)
+	if err != nil {
+		err = NormalizeReadFileError(filePath, err)
+		return err
+	}
+	defer sourceFile.Close()
+
+	writer, err := zipWriter.Create(zipName)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(writer, sourceFile)
+	return NormalizeWriteFileError(zipName, err)
+}
+
+// addNDJSONToZip reads the NDJSON files of an entity and adds the entity to the zip.
+func addNDJSONToZip(zipWriter *zip.Writer, subfolder, subfolderPath, tempDir string) error {
+	ndjsonFilename := strings.ToUpper(subfolder[:1]) + subfolder[1:] + ".ndjson"
+	ndjsonPath := filepath.Join(tempDir, ndjsonFilename)
+
+	err := createNDJSON(subfolderPath, ndjsonPath)
+	if err != nil {
+		return err
+	}
+
+	err = addFileToZip(zipWriter, ndjsonPath, ndjsonFilename)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// createBaseZip creates the zip with the entities of a Discovery product.
+func createBaseZip(client CoreFileController, basePath, tempDir string) (string, error) {
+	baseName := filepath.Base(basePath)
+	baseZipPath := filepath.Join(tempDir, baseName+".zip")
+
+	zipFile, err := os.Create(baseZipPath)
+	if err != nil {
+		return "", NormalizeWriteFileError(baseZipPath, err)
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	entries, err := os.ReadDir(basePath)
+	if err != nil {
+		return "", NormalizeReadFileError(baseZipPath, err)
+	}
+
+	for _, entry := range entries {
+		subfolder := entry.Name()
+		subfolderPath := filepath.Join(basePath, subfolder)
+
+		if strings.HasPrefix(subfolder, "files") {
+			_, err = recursiveStore(client, subfolderPath, subfolderPath, false)
+			if err != nil {
+				return "", err
+			}
+			continue
+		}
+
+		if entry.IsDir() {
+			err = addNDJSONToZip(zipWriter, subfolder, subfolderPath, tempDir)
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+
+	return baseZipPath, nil
+}
+
+// createDeployZips creates the zip files for every Discovery product based on the NDJSON entities in the directory.
+func createDeployZips(fileClient CoreFileController, path, tempDir string) (map[string]string, error) {
+	baseFolders := []string{filepath.Join(path, "core"), filepath.Join(path, "ingestion"), filepath.Join(path, "queryflow")}
+	tempZips := map[string]string{}
+
+	for _, base := range baseFolders {
+		baseFileInfo, err := os.Stat(base)
+		if err != nil {
+			err = NormalizeReadFileError(base, err)
+			return nil, NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(base))
+		}
+
+		if baseFileInfo.IsDir() {
+			zipPath, err := createBaseZip(fileClient, base, tempDir)
+			if err != nil {
+				return nil, err
+			}
+			tempZips[filepath.Base(base)] = zipPath
+		}
+	}
+
+	return tempZips, nil
+}
+
+// Deploy is the function that imports every Core, Ingestion, and QueryFlow entity that is contained in a directory into Discovery.
+// The directory must have the entities of each type and Discovery product in their own subfolder.
+func (d discovery) Deploy(fileClient CoreFileController, clients []BackupRestoreClientEntry, path string, printer Printer) error {
+	fileInfo, err := os.Stat(path)
+
+	if err != nil {
+		err = NormalizeReadFileError(path, err)
+		return NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(path))
+	}
+
+	if fileInfo.IsDir() {
+		tempDir, err := os.MkdirTemp("", "discovery-deploy-*")
+		if err != nil {
+			NewErrorWithCause(ErrorExitCode, err, "Could not create temporary directory to import entities")
+		}
+
+		defer os.RemoveAll(tempDir)
+
+		tempZips, err := createDeployZips(fileClient, path, tempDir)
+		if err != nil {
+			return err
+		}
+
+		results, err := callImports(clients, tempZips, discoveryPackage.OnConflictUpdate)
+		if err != nil {
+			return err
+		}
+
+		if printer == nil {
+			printer = JsonObjectPrinter(true)
+		}
+
+		return printer(*d.IOStreams(), gjson.Parse(results))
+	} else {
+		return NewErrorWithCause(ErrorExitCode, err, "The path %q is not a directory", filepath.ToSlash(path))
+	}
 }

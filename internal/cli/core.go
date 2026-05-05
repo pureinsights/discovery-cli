@@ -16,7 +16,7 @@ type CoreFileController interface {
 	Delete(key string) (gjson.Result, error)
 }
 
-// GetFile download an individual file. If directory structure does not exists, it gets created.
+// GetFile download an individual file. If directory structure does not exist, it gets created.
 func GetFile(client CoreFileController, key string, output string) (gjson.Result, error) {
 	file, err := client.Retrieve(key)
 	if err != nil {
@@ -106,7 +106,7 @@ func recursiveStore(client CoreFileController, currentkey, startingKey string, r
 	return response, nil
 }
 
-// StoreFiles is in charge of determine if the key/path specified by the user is from a directory or
+// StoreFiles is in charge of determining if the key/path specified by the user is from a directory or
 // from a file. If it is a directory we assume they want to upload every file inside the directory.
 // If it is a file we assume they want to store that individual file
 func (d discovery) StoreFiles(client CoreFileController, key string, recursive bool, printer Printer) error {
