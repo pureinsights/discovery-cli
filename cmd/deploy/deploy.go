@@ -25,7 +25,7 @@ func NewDeployCommand(d cli.Discovery) *cobra.Command {
 |---> endpoint
 |---> pipeline
 |---> processor
-Inside these directories, the entities can be themselves divided into other subdirectories in the user wants, but the Discovery product directories must have this structure. The files folder is optional. If present, it uploads those files into Discovery Core's object storage. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. If a Discovery product's entities do not show up in the results JSON, then they could not be read.`,
+Inside these directories, the entities can be themselves divided into other subdirectories if desired, but the Discovery product directories must have this structure. The files folder is optional. If present, it uploads those files into Discovery Core's object storage. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. If a Discovery product's entities do not show up in the results JSON, then they could not be read.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
