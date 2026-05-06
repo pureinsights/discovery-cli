@@ -372,6 +372,91 @@ discovery import -p cn "entities/discovery.zip" --on-conflict IGNORE
 }
 ```
 
+#### Deploy
+`deploy` is a command that restores entities into Discovery if the user does not have the required export file. This command receives a directory or folder that must have a specific, but simple structure:
+--> core
+|---> server
+|---> credential
+|---> files
+--> ingestion
+|---> pipeline
+|---> processor
+|---> seed
+|---> seedSchedule
+--> queryflow
+|---> endpoint
+|---> pipeline
+|---> processor
+The entity directories have JSON files with the configurations that will be imported. Inside these directories, the entities can be themselves divided into other subdirectories if desired, but the Discovery product directories must have this structure. The `files` folder is optional. If present, it uploads those files into Discovery Core's object storage. The command will fail if any file upload is unsuccessful. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. Entities that already exist are updated. If a Discovery product's entities do not show up in the results JSON, then they could not be read or are not included in the directory.
+
+Usage: `discovery deploy <path> [flags]`
+
+Arguments:
+
+`path`:
+(Required, string) The directory that contains the Discovery entities.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Import the entities in the directory "entities" to Discovery
+# The rest of the command's output is omitted.
+discovery deploy -p cn "entities"
+{
+  "core": {
+    "Credential": [
+      {
+        "id": "6e2f1c2a-9885-4263-8945-38b0cda4b6d3",
+        "status": 204
+      },
+      {
+        "id": "721997cd-b16f-4acb-93cf-b44a959dbcf2",
+        "status": 204
+      }
+    ],
+    "Server": [
+      {
+        "id": "6817ccf5-b4bc-4f97-82f5-c8016d26f2fb",
+        "status": 204
+      },
+      {
+        "id": "f7a65744-a3b1-4655-b472-c612bb490ff9",
+        "status": 204
+      }
+    ]
+  },
+  "ingestion": {
+    "Pipeline": [
+      {
+        "id": "128b1127-0ea0-4aa5-9a4e-9160285d2f61",
+        "status": 204
+      }
+    ],
+    "Processor": [
+      {
+        "id": "11de1d9b-d037-4d27-8304-37b62e79d044",
+        "status": 204
+      }
+    ],
+    "Seed": [
+      {
+        "id": "bb8d13c6-73b5-47a1-b0fb-06a141e32309",
+        "status": 204
+      }
+    ],
+    "SeedSchedule": []
+  }
+}
+```
+
 #### Status
 `status` is the command used to check the status of every Discovery product. If a product is healthy, it should return a JSON with an "UP" status field, which is added to a results JSON that matches the product to the received status response.
 

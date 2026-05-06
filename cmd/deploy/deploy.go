@@ -6,12 +6,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewDeployCommand creates the discovery deploy command that deploys entities to Discovery Core, Ingestion, and QueryFlow.
+// NewDeployCommand creates the discovery deploy command that imports entities in a directory to Discovery Core, Ingestion, and QueryFlow.
 func NewDeployCommand(d cli.Discovery) *cobra.Command {
 	deployCmd := &cobra.Command{
 		Use:   "deploy <path>",
 		Short: "deploy entities in a directory to all of Discovery's products",
-		Long: `deploy is a command to restore entities into Discovery if the user does not have the required export file. This command receives a directory or folder that must have a specific, but simple structure:
+		Long: `deploy is a command that restores entities into Discovery if the user does not have the required export file. This command receives a directory or folder that must have a specific, but simple structure:
 --> core
 |---> server
 |---> credential
@@ -25,7 +25,7 @@ func NewDeployCommand(d cli.Discovery) *cobra.Command {
 |---> endpoint
 |---> pipeline
 |---> processor
-Inside these directories, the entities can be themselves divided into other subdirectories if desired, but the Discovery product directories must have this structure. The files folder is optional. If present, it uploads those files into Discovery Core's object storage. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. If a Discovery product's entities do not show up in the results JSON, then they could not be read or are not included in the directory.`,
+The entity directories have JSON files with the configurations that will be imported. Inside these directories, the entities can be themselves divided into other subdirectories if desired, but the Discovery product directories must have this structure. The files folder is optional. If present, it uploads those files into Discovery Core's object storage. The command will fail if any file upload is unsuccessful. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. Entities that already exist are updated. If a Discovery product's entities do not show up in the results JSON, then they could not be read or are not included in the directory.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
