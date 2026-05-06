@@ -1,0 +1,14 @@
+{
+  "type": "template",
+  "name": "Demo Processor with Functions",
+  "config": {
+    "action": "process",
+    "template": "UUID: ${generated_uuid}, Random: ${random_value}, Now: ${current_time}",
+    "bindings": {
+      "generated_uuid": "#{ uuid() }",
+      "random_value": "#{ random() }",
+      "current_time": "#{ now() }"
+    },
+    "outputFormat": "PLAIN"
+  }
+}

@@ -1,0 +1,18 @@
+{
+    "type": "mongo",
+    "name": "MongoDB seed",
+    "config": {
+        "action": "scan",
+        "database": "searchapi",
+        "collection": "search-documents",
+        "filter": {
+            "equals": {
+                "field": "document",
+                "value": "document"
+            }
+        },
+        "size": 500
+    },
+    "server": "MongoDB Server",
+    "pipeline": "pipeline"
+}

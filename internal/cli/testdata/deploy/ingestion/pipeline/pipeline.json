@@ -1,0 +1,57 @@
+{
+  "active": true,
+  "creationTimestamp": "2025-10-31T22:07:02Z",
+  "id": "04536687-f083-4353-8ecc-b7348e14b748",
+  "initialState": "ingestionState",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2025-10-31T22:07:02Z",
+  "name": "my-pipeline",
+  "recordPolicy": {
+    "errorPolicy": "FAIL",
+    "idPolicy": {},
+    "outboundPolicy": {
+      "batchPolicy": {
+        "flushAfter": "PT1M",
+        "maxCount": 25
+      },
+      "mode": "INLINE",
+      "splitPolicy": {
+        "children": {
+          "idPolicy": {},
+          "snapshotPolicy": {}
+        },
+        "source": {
+          "snapshotPolicy": {}
+        }
+      }
+    },
+    "retryPolicy": {
+      "active": true,
+      "maxRetries": 3
+    },
+    "timeoutPolicy": {
+      "record": "PT1M"
+    }
+  },
+  "states": {
+    "ingestionState": {
+      "processors": [
+        {
+          "active": true,
+          "id": "516d4a8a-e8ae-488c-9e37-d5746a907454",
+          "outputField": "header"
+        },
+        {
+          "active": true,
+          "id": "aa0186f1-746f-4b20-b1b0-313bd79e78b8"
+        }
+      ],
+      "type": "processor"
+    }
+  }
+}

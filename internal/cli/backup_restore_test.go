@@ -911,6 +911,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 	}
 }
 
+// Test_collectJSONFiles_NoError tests the collectJSONFiles() function when it works correctly.
 func Test_collectJSONFiles_NoError(t *testing.T) {
 	expectedList := []string{filepath.Join("testdata", "deploy", "queryflow", "endpoint", "project", "hybrid.json"), filepath.Join("testdata", "deploy", "queryflow", "endpoint", "vector.json")}
 
@@ -920,6 +921,7 @@ func Test_collectJSONFiles_NoError(t *testing.T) {
 	assert.Equal(t, expectedList, actualList)
 }
 
+// Test_collectJSONFiles_Error tests the collectJSONFiles() function when an error occurs.
 func Test_collectJSONFiles_Error(t *testing.T) {
 	_, err := collectJSONFiles("doesnotexist")
 
@@ -927,6 +929,7 @@ func Test_collectJSONFiles_Error(t *testing.T) {
 	assert.EqualError(t, err, "file does not exist: doesnotexist")
 }
 
+// Test_writeNDJSONLine_Working tests the writeNDJSONLine() function when it works correctly.
 func Test_writeNDJSONLine_Working(t *testing.T) {
 	tempDir := t.TempDir()
 	ndjson := filepath.Join(tempDir, "writeNDJSONWorking.ndjson")
@@ -950,6 +953,7 @@ func Test_writeNDJSONLine_Working(t *testing.T) {
 	assert.Equal(t, "{\"httpMethod\":\"GET\",\"name\":\"Hybrid Search\",\"pipeline\":\"Hybrid Search Pipeline\",\"type\":\"default\",\"uri\":\"/hybrid\"}\n", string(data))
 }
 
+// Test_writeNDJSONLine_JSONDecodeFails tests the writeNDJSONLine() function when the JSON decoder fails.
 func Test_writeNDJSONLine_JSONDecodeFails(t *testing.T) {
 	tempDir := t.TempDir()
 	ndjson := filepath.Join(tempDir, "writeNDJSONDecodeFails.ndjson")
@@ -968,6 +972,7 @@ func Test_writeNDJSONLine_JSONDecodeFails(t *testing.T) {
 	assert.EqualError(t, err, "invalid character 'T' looking for beginning of value")
 }
 
+// Test_writeNDJSONLine_WriteFails tests the writeNDJSONLine() function when writing the NDJSON line fails.
 func Test_writeNDJSONLine_WriteFails(t *testing.T) {
 	writer := bufio.NewWriterSize(testutils.ErrWriter{Err: errors.New("write failed")}, 1)
 
@@ -976,6 +981,7 @@ func Test_writeNDJSONLine_WriteFails(t *testing.T) {
 	assert.EqualError(t, err, "write failed")
 }
 
+// Test_writeNDJSONLine_JSONNotExists tests the writeNDJSONLine() function when it receives a JSON that does not exist.
 func Test_writeNDJSONLine_JSONNotExists(t *testing.T) {
 	writer := bufio.NewWriter(testutils.ErrWriter{Err: errors.New("write failed")})
 
@@ -984,6 +990,7 @@ func Test_writeNDJSONLine_JSONNotExists(t *testing.T) {
 	assert.EqualError(t, err, "file does not exist: doesnotexist")
 }
 
+// Test_createNDJSON_Working tests the createNDJSON() function when it works correctly.
 func Test_createNDJSON_Working(t *testing.T) {
 	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
 	outputFilePath := filepath.Join(t.TempDir(), "entity.ndjson")
@@ -995,6 +1002,7 @@ func Test_createNDJSON_Working(t *testing.T) {
 	assert.Equal(t, "{\"httpMethod\":\"GET\",\"name\":\"Hybrid Search\",\"pipeline\":\"Hybrid Search Pipeline\",\"type\":\"default\",\"uri\":\"/hybrid\"}\n{\"httpMethod\":\"GET\",\"name\":\"Vector Search\",\"pipeline\":\"Vector Search Pipeline\",\"type\":\"default\",\"uri\":\"/vector\"}\n", string(data))
 }
 
+// Test_createNDJSON_CreateFileFails tests the createNDJSON() function when creating the file fails.
 func Test_createNDJSON_CreateFileFails(t *testing.T) {
 	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
 	outputFilePath := filepath.Join("doesnotexist", "entity.ndjson")
@@ -1005,6 +1013,7 @@ func Test_createNDJSON_CreateFileFails(t *testing.T) {
 	assert.EqualError(t, err, fmt.Sprintf("the given path does not exist: %s", outputFilePath))
 }
 
+// Test_createNDJSON_InvalidJSONFails tests the createNDJSON() function when it receives an invalid JSON.
 func Test_createNDJSON_InvalidJSONFails(t *testing.T) {
 	subfolderPath := filepath.Join("testdata", "wrongJSON")
 	outputFilePath := filepath.Join(t.TempDir(), "entity.ndjson")
@@ -1015,6 +1024,7 @@ func Test_createNDJSON_InvalidJSONFails(t *testing.T) {
 	assert.EqualError(t, err, "invalid character 'T' looking for beginning of value")
 }
 
+// Test_addFileToZip_Working tests the addFileToZip() function when it works correctly.
 func Test_addFileToZip_Working(t *testing.T) {
 	tempDir := t.TempDir()
 	entityFile := "entity.ndjson"
@@ -1050,6 +1060,7 @@ func Test_addFileToZip_Working(t *testing.T) {
 	assert.Contains(t, files, entityFile)
 }
 
+// Test_addFileToZip_FileDoesNotExist tests the addFileToZip() function when the file it receives does not exist.
 func Test_addFileToZip_FileDoesNotExist(t *testing.T) {
 	tempDir := t.TempDir()
 	entityFile := "entity.ndjson"
@@ -1068,6 +1079,7 @@ func Test_addFileToZip_FileDoesNotExist(t *testing.T) {
 	assert.EqualError(t, err, fmt.Sprintf("file does not exist: %s", outputFilePath))
 }
 
+// Test_addNDJSONToZip_Working tests the addNDJSONToZip() function when it works correctly.
 func Test_addNDJSONToZip_Working(t *testing.T) {
 	tempDir := t.TempDir()
 	baseZipPath := filepath.Join(tempDir, "test.zip")
@@ -1099,6 +1111,7 @@ func Test_addNDJSONToZip_Working(t *testing.T) {
 	assert.Contains(t, files, "Endpoint.ndjson")
 }
 
+// Test_addNDJSONToZip_CreateNDJSONFails tests the addNDJSONToZip() function when creating the NDJSON fails.
 func Test_addNDJSONToZip_CreateNDJSONFails(t *testing.T) {
 	tempDir := t.TempDir()
 	baseZipPath := filepath.Join(tempDir, "test.zip")
@@ -1115,4 +1128,259 @@ func Test_addNDJSONToZip_CreateNDJSONFails(t *testing.T) {
 	err = addNDJSONToZip(zipWriter, subfolder, subfolderPath, tempDir)
 	require.Error(t, err)
 	assert.EqualError(t, err, fmt.Sprintf("file does not exist: %s", subfolderPath))
+}
+
+// Test_createBaseZip_Working tests the createBaseZip() function when it works correctly.
+func Test_createBaseZip_Working(t *testing.T) {
+	tempDir := t.TempDir()
+	basePath := filepath.Join("testdata", "deploy", "core")
+
+	fileClient := new(mocks.WorkingFileClient)
+
+	baseZipPath, err := createBaseZip(fileClient, basePath, tempDir)
+	require.NoError(t, err)
+
+	readZip, err := os.ReadFile(baseZipPath)
+	require.NoError(t, err)
+	zipReader, err := zip.NewReader(bytes.NewReader(readZip), int64(len(readZip)))
+	require.NoError(t, err)
+	files := make(map[string]*zip.File, len(zipReader.File))
+	require.Equal(t, 2, len(zipReader.File))
+	for _, f := range zipReader.File {
+		files[f.Name] = f
+	}
+
+	assert.Contains(t, files, "Server.ndjson")
+	assert.Contains(t, files, "Credential.ndjson")
+}
+
+// Test_createBaseZip_BasePathDoesNotExist tests the createBaseZip() function when the base path does not exist.
+func Test_createBaseZip_BasePathDoesNotExist(t *testing.T) {
+	tempDir := t.TempDir()
+	basePath := filepath.Join("doesnotexist", "deploy", "core")
+
+	fileClient := new(mocks.WorkingFileClient)
+
+	_, err := createBaseZip(fileClient, basePath, tempDir)
+	require.Error(t, err)
+	assert.EqualError(t, err, "file does not exist: "+basePath)
+}
+
+// Test_createBaseZip_FileUploadFails tests the createBaseZip() function when Core file upload fails.
+func Test_createBaseZip_FileUploadFails(t *testing.T) {
+	tempDir := t.TempDir()
+	basePath := filepath.Join("testdata", "deploy", "core")
+
+	fileClient := new(mocks.FailingFileClient)
+
+	_, err := createBaseZip(fileClient, basePath, tempDir)
+	require.Error(t, err)
+	assert.EqualError(t, err, discoveryPackage.Error{
+		Status: http.StatusBadRequest,
+		Body: gjson.Parse(`{
+	"status": 400,
+	"code": 3002,
+	"messages": [
+		"key: Invalid format for file path, use only alphanumeric symbols with a limit of 255 characters and a max of 10 path levels."
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+	}.Error())
+}
+
+// Test_createDeployZips_Working tests the createDeployZips() function when it works correctly.
+func Test_createDeployZips_Working(t *testing.T) {
+	tempDir := t.TempDir()
+	path := filepath.Join("testdata", "deploy")
+	fileClient := new(mocks.WorkingFileClient)
+
+	tempZips, err := createDeployZips(fileClient, path, tempDir)
+	require.NoError(t, err)
+
+	expectedFiles := map[string][]string{
+		"core":      {"Credential.ndjson", "Server.ndjson"},
+		"ingestion": {"Processor.ndjson", "Pipeline.ndjson", "Seed.ndjson", "SeedSchedule.ndjson"},
+		"queryflow": {"Processor.ndjson", "Pipeline.ndjson", "Endpoint.ndjson"},
+	}
+
+	for product, productZip := range tempZips {
+		readZip, err := os.ReadFile(productZip)
+		require.NoError(t, err)
+		zipReader, err := zip.NewReader(bytes.NewReader(readZip), int64(len(readZip)))
+		require.NoError(t, err)
+		files := make(map[string]*zip.File, len(zipReader.File))
+		require.Equal(t, len(expectedFiles[product]), len(zipReader.File))
+		for _, f := range zipReader.File {
+			files[f.Name] = f
+		}
+
+		for _, file := range expectedFiles[product] {
+			assert.Contains(t, files, file)
+		}
+	}
+}
+
+// Test_createDeployZips_Failing tests the createDeployZips() function when the file upload fails.
+func Test_createDeployZips_Failing(t *testing.T) {
+	tempDir := t.TempDir()
+	path := filepath.Join("testdata", "deploy")
+	fileClient := new(mocks.FailingFileClient)
+
+	_, err := createDeployZips(fileClient, path, tempDir)
+	require.Error(t, err)
+	assert.EqualError(t, err, discoveryPackage.Error{
+		Status: http.StatusBadRequest,
+		Body: gjson.Parse(`{
+	"status": 400,
+	"code": 3002,
+	"messages": [
+		"key: Invalid format for file path, use only alphanumeric symbols with a limit of 255 characters and a max of 10 path levels."
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+	}.Error())
+}
+
+// TestDeploy tests the Deploy() function.
+func TestDeploy(t *testing.T) {
+	tests := []struct {
+		name        string
+		fileClient  CoreFileController
+		clients     []BackupRestoreClientEntry
+		path        string
+		printer     Printer
+		goldenFile  string
+		goldenBytes []byte
+		outWriter   io.Writer
+		err         error
+	}{
+		// Working cases
+		{
+			name:        "Deploy correctly prints with pretty printer when one of the imports fails",
+			fileClient:  new(mocks.WorkingFileClient),
+			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:        filepath.Join("testdata", "deploy"),
+			printer:     nil,
+			goldenFile:  "FailingIngestionImport",
+			goldenBytes: testutils.Read(t, "FailingIngestionImport"),
+			err:         nil,
+		},
+		{
+			name:        "Deploy correctly prints the results with ugly printer when the imports succeed",
+			fileClient:  new(mocks.WorkingFileClient),
+			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:        filepath.Join("testdata", "deploy"),
+			printer:     JsonObjectPrinter(false),
+			goldenFile:  "UglyImport",
+			goldenBytes: testutils.Read(t, "UglyImport"),
+			err:         nil,
+		},
+		{
+			name:        "Deploy correctly prints with pretty printer when the imports and it only prints the results of the received products",
+			fileClient:  new(mocks.WorkingFileClient),
+			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:        filepath.Join("testdata", "deploy_OnlyCoreQueryFlow"),
+			printer:     JsonObjectPrinter(true),
+			goldenFile:  "PrettyImport",
+			goldenBytes: testutils.Read(t, "PrettyImport"),
+			err:         nil,
+		},
+		// Error cases
+		{
+			name:       "The given directory does not exist",
+			fileClient: new(mocks.WorkingFileClient),
+			clients:    []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:       "doesnotexist",
+			err:        NewErrorWithCause(ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not open the \"doesnotexist\" directory"),
+		},
+		{
+			name:       "The path is not a directory",
+			fileClient: new(mocks.WorkingFileClient),
+			clients:    []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:       "testdata/discovery.zip",
+			err:        NewError(ErrorExitCode, "The path \"testdata/discovery.zip\" is not a directory"),
+		},
+		{
+			name:       "Upload files fails",
+			fileClient: new(mocks.FailingFileClient),
+			clients:    []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:       filepath.Join("testdata", "deploy"),
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusBadRequest,
+				Body: gjson.Parse(`{
+	"status": 400,
+	"code": 3002,
+	"messages": [
+		"key: Invalid format for file path, use only alphanumeric symbols with a limit of 255 characters and a max of 10 path levels."
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}`),
+			}, "Could not create the temporary zips to import entities"),
+		},
+		{
+			name:       "Printing fails",
+			fileClient: new(mocks.WorkingFileClient),
+			clients:    []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:       filepath.Join("testdata", "deploy"),
+			printer:    nil,
+			outWriter:  testutils.ErrWriter{Err: errors.New("write failed")},
+			err:        NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.Deploy(tc.fileClient, tc.clients, tc.path, tc.printer)
+
+			if tc.err != nil {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				testutils.CompareBytes(t, tc.goldenFile, tc.goldenBytes, buf.Bytes())
+			}
+		})
+	}
+}
+
+// TestDeploy_MkdirTempFails tests the Deploy() function when making the temporary directory fails.
+func TestDeploy_MkdirTempFails(t *testing.T) {
+	t.Setenv("TMPDIR", "/does/not/exist")
+	t.Setenv("TEMP", "/does/not/exist")
+	t.Setenv("TMP", "/does/not/exist")
+	path := filepath.Join("testdata", "deploy")
+	fileClient := new(mocks.WorkingFileClient)
+
+	buf := &bytes.Buffer{}
+	var out io.Writer
+	out = buf
+
+	ios := iostreams.IOStreams{
+		In:  os.Stdin,
+		Out: out,
+		Err: os.Stderr,
+	}
+
+	clients := []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}}
+
+	d := NewDiscovery(&ios, viper.New(), "")
+	err := d.Deploy(fileClient, clients, path, nil)
+	require.Error(t, err)
+	assert.EqualError(t, err, "Could not create temporary directory to import entities\nthe given path does not exist: "+os.TempDir()+"\n")
 }

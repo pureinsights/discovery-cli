@@ -1,0 +1,11 @@
+{
+  "type": "mongo",
+  "name": "MongoDB Aggregation",
+  "config": {
+    "action": "aggregate",
+    "database": "#{ endpoint.properties.db }",
+    "collection": "#{ endpoint.properties.collection }",
+    "stages": "#{ data('/mongo')}"
+  },
+  "server": "MongoDB Server"
+}

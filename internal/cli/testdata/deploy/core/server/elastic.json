@@ -1,0 +1,11 @@
+{
+  "type": "elasticsearch",
+  "name": "Elasticsearch Server",
+  "config": {
+    "servers": [
+      "http://localhost:9200"
+    ]
+  },
+  "credential": "Elasticsearch Credential",
+  "active": true
+}

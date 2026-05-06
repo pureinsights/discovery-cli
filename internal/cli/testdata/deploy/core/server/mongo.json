@@ -1,0 +1,11 @@
+{
+  "type": "mongo",
+  "name": "MongoDB Server",
+  "config": {
+    "servers": [
+      "mongodb://localhost:27017"
+    ],
+    "retryWrites": true
+  },
+  "active": true
+}

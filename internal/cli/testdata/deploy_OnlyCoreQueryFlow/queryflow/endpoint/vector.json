@@ -1,0 +1,7 @@
+{
+  "type": "default",
+  "name": "Vector Search",
+  "httpMethod": "GET",
+  "pipeline": "Vector Search Pipeline",
+  "uri": "/vector"
+}

@@ -423,7 +423,7 @@ func createBaseZip(client CoreFileController, basePath, tempDir string) (string,
 
 	entries, err := os.ReadDir(basePath)
 	if err != nil {
-		return "", NormalizeReadFileError(baseZipPath, err)
+		return "", NormalizeReadFileError(basePath, err)
 	}
 
 	for _, entry := range entries {
@@ -457,8 +457,12 @@ func createDeployZips(fileClient CoreFileController, path, tempDir string) (map[
 	for _, base := range baseFolders {
 		baseFileInfo, err := os.Stat(base)
 		if err != nil {
-			err = NormalizeReadFileError(base, err)
-			return nil, NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(base))
+			if !os.IsNotExist(err) {
+				err = NormalizeReadFileError(base, err)
+				return nil, NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(base))
+			} else {
+				continue
+			}
 		}
 
 		if baseFileInfo.IsDir() {
@@ -480,25 +484,26 @@ func (d discovery) Deploy(fileClient CoreFileController, clients []BackupRestore
 
 	if err != nil {
 		err = NormalizeReadFileError(path, err)
-		return NewErrorWithCause(ErrorExitCode, err, "The path %q does not exist", filepath.ToSlash(path))
+		return NewErrorWithCause(ErrorExitCode, err, "Could not open the %q directory", filepath.ToSlash(path))
 	}
 
 	if fileInfo.IsDir() {
 		tempDir, err := os.MkdirTemp("", "discovery-deploy-*")
 		if err != nil {
-			NewErrorWithCause(ErrorExitCode, err, "Could not create temporary directory to import entities")
+			err = NormalizeWriteFileError(os.TempDir(), err)
+			return NewErrorWithCause(ErrorExitCode, err, "Could not create temporary directory to import entities")
 		}
 
 		defer os.RemoveAll(tempDir)
 
 		tempZips, err := createDeployZips(fileClient, path, tempDir)
 		if err != nil {
-			return err
+			return NewErrorWithCause(ErrorExitCode, err, "Could not create the temporary zips to import entities")
 		}
 
 		results, err := callImports(clients, tempZips, discoveryPackage.OnConflictUpdate)
 		if err != nil {
-			return err
+			return NewErrorWithCause(ErrorExitCode, err, "Could not import entities")
 		}
 
 		if printer == nil {
@@ -507,6 +512,6 @@ func (d discovery) Deploy(fileClient CoreFileController, clients []BackupRestore
 
 		return printer(*d.IOStreams(), gjson.Parse(results))
 	} else {
-		return NewErrorWithCause(ErrorExitCode, err, "The path %q is not a directory", filepath.ToSlash(path))
+		return NewError(ErrorExitCode, "The path %q is not a directory", filepath.ToSlash(path))
 	}
 }
