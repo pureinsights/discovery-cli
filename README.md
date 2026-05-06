@@ -323,7 +323,6 @@ Examples:
 
 ```bash
 # Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
-# The rest of the command's output is omitted.
 discovery import -p cn "entities/discovery.zip" --on-conflict IGNORE
 {
   "core": {
@@ -392,7 +391,7 @@ directory
     ├── pipeline
     └── processor
 ```
-The entity directories have JSON files with the configurations that will be imported. Inside these directories, the entities can be themselves divided into other subdirectories if desired, but the Discovery product directories must have this structure. The `files` folder is optional. If present, it uploads those files into Discovery Core's object storage. The command will fail if any file upload is unsuccessful. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. Entities that already exist are updated. If a Discovery product's entities do not show up in the results JSON, then they could not be read or are not included in the directory.
+The entity directories have JSON files with the configurations that will be imported. Inside these directories, entities can be further divided into subdirectories if desired, but the Discovery product directories must have this structure. The `files` folder is optional. If present, it uploads those files into Discovery Core's object storage. The command will fail if any file upload is unsuccessful. The files folder can be in any of the product directories, it does not need to be in Core's directory. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. Entities that already exist are updated. If a Discovery product's entities do not show up in the results JSON, then they could not be read or are not included in the directory.
 
 Usage: `discovery deploy <path> [flags]`
 
@@ -413,7 +412,6 @@ Examples:
 
 ```bash
 # Import the entities in the directory "entities" to Discovery
-# The rest of the command's output is omitted.
 discovery deploy -p cn "entities"
 {
   "core": {
