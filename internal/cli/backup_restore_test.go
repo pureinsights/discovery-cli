@@ -754,6 +754,18 @@ func TestUnzipExportsToTemp(t *testing.T) {
 	}
 }
 
+// TestUnzipExportsToTemp_MkdirTempFails tests the UnzipExportsToTemp() function when making the temporary directory fails.
+func TestUnzipExportsToTemp_MkdirTempFails(t *testing.T) {
+	t.Setenv("TMPDIR", "/does/not/exist")
+	t.Setenv("TEMP", "/does/not/exist")
+	t.Setenv("TMP", "/does/not/exist")
+	correctZip, err := os.ReadFile("testdata/discovery.zip")
+	require.NoError(t, err)
+	_, _, err = UnzipExportsToTemp(correctZip)
+	require.Error(t, err)
+	assert.EqualError(t, err, "Could not create temporary directory to import entities\nthe given path does not exist: "+os.TempDir()+"\n")
+}
+
 // Test_callImports tests the callImports() function.
 func Test_callImports(t *testing.T) {
 	tests := []struct {

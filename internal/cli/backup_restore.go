@@ -231,7 +231,7 @@ func UnzipExportsToTemp(zipBytes []byte) (string, map[string]string, error) {
 
 	tmpDir, err := os.MkdirTemp("", "discovery-import-*")
 	if err != nil {
-		return "", nil, NewErrorWithCause(ErrorExitCode, err, "Could not create temporary directory to import entities")
+		return "", nil, NewErrorWithCause(ErrorExitCode, NormalizeWriteFileError(os.TempDir(), err), "Could not create temporary directory to import entities")
 	}
 
 	paths, err := readInnerZipFiles(tmpDir, zipReader)
