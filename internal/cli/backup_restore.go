@@ -389,9 +389,24 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, zipName string) error 
 	return NormalizeWriteFileError(zipName, err)
 }
 
+// Converts the snake case names to title case
+func toTitleCase(input string) string {
+	parts := strings.Split(input, "-")
+
+	for i, part := range parts {
+		if len(part) == 0 {
+			continue
+		}
+
+		parts[i] = strings.ToUpper(part[:1]) + strings.ToLower(part[1:])
+	}
+
+	return strings.Join(parts, "")
+}
+
 // addNDJSONToZip reads the NDJSON files of an entity and adds the entity to the zip.
 func addNDJSONToZip(zipWriter *zip.Writer, subfolder, subfolderPath, tempDir string) error {
-	ndjsonFilename := strings.ToUpper(subfolder[:1]) + subfolder[1:] + ".ndjson"
+	ndjsonFilename := toTitleCase(subfolder) + ".ndjson"
 	ndjsonPath := filepath.Join(tempDir, ndjsonFilename)
 
 	err := createNDJSON(subfolderPath, ndjsonPath)
@@ -430,12 +445,19 @@ func createBaseZip(client CoreFileController, basePath, tempDir string) (string,
 		subfolder := entry.Name()
 		subfolderPath := filepath.Join(basePath, subfolder)
 
-		if strings.HasPrefix(subfolder, "files") {
+		if strings.HasPrefix(subfolder, "file") {
 			_, err = recursiveStore(client, subfolderPath, subfolderPath, false)
 			if err != nil {
 				return "", err
 			}
 			continue
+		}
+
+		if subfolder == "entrypoint" {
+			if endpointInfo, err := os.Stat(filepath.Join(subfolderPath, "endpoint")); err == nil && endpointInfo.IsDir() {
+				subfolder = "endpoint"
+				subfolderPath = filepath.Join(subfolderPath, "endpoint")
+			}
 		}
 
 		if entry.IsDir() {

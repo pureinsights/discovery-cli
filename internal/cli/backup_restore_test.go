@@ -923,11 +923,68 @@ func TestImportEntitiesFromClients(t *testing.T) {
 	}
 }
 
+// Test_toTitleCase tests the toTitleCase() function.
+func Test_toTitleCase(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "single word",
+			input:    "hello",
+			expected: "Hello",
+		},
+		{
+			name:     "hyphen separated words",
+			input:    "seed-schedule",
+			expected: "SeedSchedule",
+		},
+		{
+			name:     "multiple words",
+			input:    "my-example-string",
+			expected: "MyExampleString",
+		},
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "leading hyphen",
+			input:    "-hello-world",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "trailing hyphen",
+			input:    "hello-world-",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "consecutive hyphens",
+			input:    "hello--world",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "numbers included",
+			input:    "version-2-config",
+			expected: "Version2Config",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := toTitleCase(tc.input)
+			assert.Equal(t, tc.expected, actual)
+		})
+	}
+}
+
 // Test_collectJSONFiles_NoError tests the collectJSONFiles() function when it works correctly.
 func Test_collectJSONFiles_NoError(t *testing.T) {
-	expectedList := []string{filepath.Join("testdata", "deploy", "queryflow", "endpoint", "project", "hybrid.json"), filepath.Join("testdata", "deploy", "queryflow", "endpoint", "vector.json")}
+	expectedList := []string{filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint", "project", "hybrid.json"), filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint", "vector.json")}
 
-	actualList, err := collectJSONFiles(filepath.Join("testdata", "deploy", "queryflow", "endpoint"))
+	actualList, err := collectJSONFiles(filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint"))
 
 	require.NoError(t, err)
 	assert.Equal(t, expectedList, actualList)
@@ -955,7 +1012,7 @@ func Test_writeNDJSONLine_Working(t *testing.T) {
 	writer := bufio.NewWriter(outFile)
 	defer writer.Flush()
 
-	err = writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "endpoint", "project", "hybrid.json"), writer)
+	err = writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint", "project", "hybrid.json"), writer)
 	err = writer.Flush()
 	require.NoError(t, err)
 	err = outFile.Close()
@@ -979,7 +1036,7 @@ func Test_writeNDJSONLine_JSONDecodeFails(t *testing.T) {
 	writer := bufio.NewWriter(outFile)
 	defer writer.Flush()
 
-	err = writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "endpoint", "text.txt"), writer)
+	err = writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint", "text.txt"), writer)
 	require.Error(t, err)
 	assert.EqualError(t, err, "invalid character 'T' looking for beginning of value")
 }
@@ -988,7 +1045,7 @@ func Test_writeNDJSONLine_JSONDecodeFails(t *testing.T) {
 func Test_writeNDJSONLine_WriteFails(t *testing.T) {
 	writer := bufio.NewWriterSize(testutils.ErrWriter{Err: errors.New("write failed")}, 1)
 
-	err := writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "endpoint", "vector.json"), writer)
+	err := writeNDJSONLine(filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint", "vector.json"), writer)
 	require.Error(t, err)
 	assert.EqualError(t, err, "write failed")
 }
@@ -1004,7 +1061,7 @@ func Test_writeNDJSONLine_JSONNotExists(t *testing.T) {
 
 // Test_createNDJSON_Working tests the createNDJSON() function when it works correctly.
 func Test_createNDJSON_Working(t *testing.T) {
-	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
+	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint")
 	outputFilePath := filepath.Join(t.TempDir(), "entity.ndjson")
 
 	err := createNDJSON(subfolderPath, outputFilePath)
@@ -1016,7 +1073,7 @@ func Test_createNDJSON_Working(t *testing.T) {
 
 // Test_createNDJSON_CreateFileFails tests the createNDJSON() function when creating the file fails.
 func Test_createNDJSON_CreateFileFails(t *testing.T) {
-	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
+	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint")
 	outputFilePath := filepath.Join("doesnotexist", "entity.ndjson")
 
 	err := createNDJSON(subfolderPath, outputFilePath)
@@ -1041,7 +1098,7 @@ func Test_addFileToZip_Working(t *testing.T) {
 	tempDir := t.TempDir()
 	entityFile := "entity.ndjson"
 	baseZipPath := filepath.Join(tempDir, "test.zip")
-	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
+	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint")
 	outputFilePath := filepath.Join(tempDir, entityFile)
 
 	zipFile, err := os.Create(baseZipPath)
@@ -1095,7 +1152,7 @@ func Test_addFileToZip_FileDoesNotExist(t *testing.T) {
 func Test_addNDJSONToZip_Working(t *testing.T) {
 	tempDir := t.TempDir()
 	baseZipPath := filepath.Join(tempDir, "test.zip")
-	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "endpoint")
+	subfolderPath := filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint")
 	subfolder := "endpoint"
 
 	zipFile, err := os.Create(baseZipPath)
