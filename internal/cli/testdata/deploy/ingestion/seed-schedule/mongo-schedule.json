@@ -1,0 +1,6 @@
+{
+  "name": "QueryLogs Schedule",
+  "expression": "0 0 * * *",
+  "seed": "MongoDB seed",
+  "scanType": "INCREMENTAL"
+}

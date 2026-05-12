@@ -1,0 +1,7 @@
+{
+  "type": "default",
+  "name": "Hybrid Search",
+  "httpMethod": "GET",
+  "pipeline": "Hybrid Search Pipeline",
+  "uri": "/hybrid"
+}

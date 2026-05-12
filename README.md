@@ -323,8 +323,97 @@ Examples:
 
 ```bash
 # Import the entities to Discovery Core and Ingestion using profile "cn" and ignore conflict resolution strategy.
-# The rest of the command's output is omitted.
 discovery import -p cn "entities/discovery.zip" --on-conflict IGNORE
+{
+  "core": {
+    "Credential": [
+      {
+        "id": "6e2f1c2a-9885-4263-8945-38b0cda4b6d3",
+        "status": 204
+      },
+      {
+        "id": "721997cd-b16f-4acb-93cf-b44a959dbcf2",
+        "status": 204
+      }
+    ],
+    "Server": [
+      {
+        "id": "6817ccf5-b4bc-4f97-82f5-c8016d26f2fb",
+        "status": 204
+      },
+      {
+        "id": "f7a65744-a3b1-4655-b472-c612bb490ff9",
+        "status": 204
+      }
+    ]
+  },
+  "ingestion": {
+    "Pipeline": [
+      {
+        "id": "128b1127-0ea0-4aa5-9a4e-9160285d2f61",
+        "status": 204
+      }
+    ],
+    "Processor": [
+      {
+        "id": "11de1d9b-d037-4d27-8304-37b62e79d044",
+        "status": 204
+      }
+    ],
+    "Seed": [
+      {
+        "id": "bb8d13c6-73b5-47a1-b0fb-06a141e32309",
+        "status": 204
+      }
+    ],
+    "SeedSchedule": []
+  }
+}
+```
+
+#### Deploy
+`deploy` is a command that restores entities into Discovery if the user does not have the required export zip file. This command receives a directory or folder that must have a specific, but simple structure:
+```
+directory
+├── core
+│   ├── server
+│   ├── credential
+│   └── file
+│
+├── ingestion
+│   ├── pipeline
+│   ├── processor
+│   ├── seed
+│   └── seed-schedule
+│
+└── queryflow	
+    ├── pipeline
+    ├── processor
+    └── entrypoint
+	    └── endpoint
+```
+The entity directories have JSON files with the configurations that will be imported. Inside these directories, entities can be further divided into subdirectories if desired, but the Discovery product directories must have this structure. The `file` folder is optional. If present, it uploads those files into Discovery Core's object storage. The command will fail if any file upload is unsuccessful. The `file` folder can be in any of the product directories, it does not need to be in Core's directory. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. Entities that already exist are updated. If a Discovery product's entities do not show up in the results JSON, then they could not be read or are not included in the directory.
+
+Usage: `discovery deploy <path> [flags]`
+
+Arguments:
+
+`path`:
+(Required, string) The directory that contains the Discovery entities.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Import the entities in the directory "entities" to Discovery
+discovery deploy -p cn "entities"
 {
   "core": {
     "Credential": [
@@ -1036,7 +1125,7 @@ discovery core file get
 ###### Download
 `download` is the command used to download Discovery Core's files. The user can send a key, representing a path, to get a specific file or multiple keys can be specified to download multiple files. When specifying multiple keys, downloads are attempted sequentially. If you specify three keys and the second one fails, only the first file will be downloaded and the remaining downloads (second and third) will fail. You can specify an output directory using the `output` flag. Both absolute and relative paths are supported. If the specified directory does not exist, it will be created. Any required nested directories will also be created.
 
-Usage: `discovery core file download [flags] [<file>]...`
+Usage: `discovery core file download [flags] <file>...`
 
 Arguments:
 
@@ -1091,7 +1180,7 @@ discovery core file download "my_directory/my_file.json" "my_other_file.json"
 ###### Store
 `store` is the command used to upload files inside Discovery Core. The user can specify a file path to upload a single file or a directory path to upload all the files inside the directory. Absolute paths and relative paths can be used. When you enable the `recursive` flag, the command will walk the entire directory tree under the path you provided and upload every file it finds, including files in any nested subfolders. When storing multiple files from a specified path, if one file fails, any files that were stored successfully before the failure will remain stored. 
 
-Usage: `discovery core file download [flags] [<path>]`
+Usage: `discovery core file store [flags] <path>`
 
 Arguments:
 
