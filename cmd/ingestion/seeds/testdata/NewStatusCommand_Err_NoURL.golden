@@ -1,0 +1,5 @@
+Error: The Discovery Ingestion URL is missing for profile "default".
+To set the URL for the Discovery Ingestion API, run any of the following commands:
+      discovery config  --profile "default"
+      discovery ingestion config --profile "default"
+

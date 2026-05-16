@@ -71,8 +71,8 @@ func TestRead_SucceedsWhenFileExists(t *testing.T) {
 	require.Equal(t, []byte("this is a test\n"), got)
 }
 
-// TestRead_ReturnsNilWhenUpdateTrue tests the Read function when the update flag is true.
-func TestRead_ReturnsNilWhenUpdateTrue(t *testing.T) {
+// TestRead_ReturnsEmptyWhenUpdateTrue tests the Read function when the update flag is true.
+func TestRead_ReturnsEmptyWhenUpdateTrue(t *testing.T) {
 	ChangeDirectoryHelper(t)
 
 	old := *Update
@@ -80,7 +80,7 @@ func TestRead_ReturnsNilWhenUpdateTrue(t *testing.T) {
 	t.Cleanup(func() { *Update = old })
 
 	got := Read(t, "test")
-	require.Nil(t, got)
+	require.Empty(t, got)
 }
 
 // TestCompareBytes_UpdateWritesNewGolden tests the CompareBytes() function when the golden file needs to be updated.

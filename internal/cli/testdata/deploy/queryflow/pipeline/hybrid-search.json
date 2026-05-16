@@ -1,0 +1,28 @@
+{
+  "name": "Hybrid Search Pipeline",
+  "initialState": "search",
+  "states": {
+    "search": {
+      "type": "processor",
+      "processors": [
+        {
+          "id": "MongoDB Aggregation",
+          "outputField": "mongoResult"
+        }
+      ],
+      "next": "formatResponse"
+    },
+    "formatResponse": {
+      "type": "pipeline",
+      "mode": {
+        "type": "default",
+        "unwrap": true
+      },
+      "pipelines": {
+        "response": {
+          "id": "Formatter"
+        }
+      }
+    }
+  }
+}

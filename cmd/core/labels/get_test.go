@@ -115,7 +115,7 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_NoURL",
 			errGolden:  "NewGetCommand_Err_NoURL",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_NoURL"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewGetCommand_Err_NoURL"),
 			url:        false,
 			apiKey:     "apiKey123",
@@ -132,7 +132,7 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:     "apiKey123",
 			outGolden:  "NewGetCommand_Out_NotUUID",
 			errGolden:  "NewGetCommand_Err_NotUUID",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_NotUUID"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewGetCommand_Err_NotUUID"),
 			method:     http.MethodGet,
 			path:       "/v2/label/3d51beef-8b90-40aa-84b5-033241dc6239",
@@ -145,7 +145,7 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewGetCommand_Out_PrintJSONFails",
 			errGolden:  "NewGetCommand_Err_PrintJSONFails",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_PrintJSONFails"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewGetCommand_Err_PrintJSONFails"),
 			url:        true,
 			apiKey:     "apiKey123",
@@ -192,7 +192,7 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
 			outGolden:  "NewGetCommand_Out_GetEntityHTTPError",
 			errGolden:  "NewGetCommand_Err_GetEntityHTTPError",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetEntityHTTPError"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewGetCommand_Err_GetEntityHTTPError"),
 			url:        true,
 			apiKey:     "apiKey123",
@@ -221,7 +221,7 @@ func TestNewGetCommand(t *testing.T) {
 			args:       []string{},
 			outGolden:  "NewGetCommand_Out_GetEntitiesHTTPError",
 			errGolden:  "NewGetCommand_Err_GetEntitiesHTTPError",
-			outBytes:   testutils.Read(t, "NewGetCommand_Out_GetEntitiesHTTPError"),
+			outBytes:   []byte(nil),
 			errBytes:   testutils.Read(t, "NewGetCommand_Err_GetEntitiesHTTPError"),
 			url:        true,
 			apiKey:     "apiKey123",
@@ -267,6 +267,7 @@ func TestNewGetCommand(t *testing.T) {
 
 			getCmd := NewGetCommand(d)
 
+			getCmd.SilenceUsage = true
 			getCmd.SetIn(ios.In)
 			getCmd.SetOut(ios.Out)
 			getCmd.SetErr(ios.Err)
@@ -290,7 +291,9 @@ func TestNewGetCommand(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

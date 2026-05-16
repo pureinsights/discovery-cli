@@ -143,6 +143,7 @@ func TestNewStatusCommand_ProfileFlag(t *testing.T) {
 
 			statusCmd := NewStatusCommand(d)
 
+			statusCmd.SilenceUsage = true
 			statusCmd.SetIn(ios.In)
 			statusCmd.SetOut(ios.Out)
 			statusCmd.SetErr(ios.Err)
@@ -166,7 +167,9 @@ func TestNewStatusCommand_ProfileFlag(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

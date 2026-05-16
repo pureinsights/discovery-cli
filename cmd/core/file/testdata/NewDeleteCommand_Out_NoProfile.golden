@@ -1,0 +1,10 @@
+Usage:
+  delete <file> [flags]
+
+Examples:
+	# Delete a file by its key
+	discovery core file delete "my-file"
+
+Flags:
+  -h, --help   help for delete
+

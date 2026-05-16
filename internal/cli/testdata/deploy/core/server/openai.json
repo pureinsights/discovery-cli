@@ -1,0 +1,7 @@
+{
+  "type": "openai",
+  "name": "OpenAI Server",
+  "config": {},
+  "credential": "OpenAI Credential",
+  "active": true
+}

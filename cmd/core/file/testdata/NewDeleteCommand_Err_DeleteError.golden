@@ -1,0 +1,11 @@
+Error: Could not delete file with key "my-file"
+status: 500, body: {
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2025-10-16T17:46:45.386963700Z"
+}
+
+

@@ -24,6 +24,10 @@ type Discovery interface {
 	PrintIngestionConfigToUser(profile string, sensitive bool) error
 	PrintQueryFlowConfigToUser(profile string, sensitive bool) error
 	PrintStagingConfigToUser(profile string, sensitive bool) error
+	GetFiles(client CoreFileController, keys []string, output string, printer Printer) error
+	GetFileList(client CoreFileController, printer Printer) error
+	StoreFiles(client CoreFileController, key string, recursive bool, printer Printer) error
+	DeleteFile(client CoreFileController, key string, printer Printer) error
 	GetEntity(client Getter, id uuid.UUID, printer Printer) error
 	GetEntities(client Getter, printer Printer) error
 	searchEntity(client Searcher, id string) (gjson.Result, error)
@@ -39,6 +43,7 @@ type Discovery interface {
 	AppendSeedRecord(seed gjson.Result, client RecordGetter, id string, printer Printer) error
 	AppendSeedRecords(seed gjson.Result, client RecordGetter, printer Printer) error
 	SeedExecution(client SeedExecutionGetter, seedExecutionId uuid.UUID, summarizers map[string]Summarizer, details bool, printer Printer) error
+	StatusOfSeedExecutions(executionClient SeedExecutionGetter, recordClient RecordGetter, printer Printer) error
 	ExportEntitiesFromClient(client BackupRestore, path string, printer Printer) error
 	ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error
 	ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error
@@ -49,6 +54,7 @@ type Discovery interface {
 	StoreBucket(client StagingBucketController, name string, options gjson.Result, printer Printer) error
 	DeleteBucket(client StagingBucketController, bucketName string, printer Printer) error
 	DumpBucket(client StagingContentController, bucketName, file string, filters, projections gjson.Result, size *int, printer Printer) error
+	Deploy(fileClient CoreFileController, clients []BackupRestoreClientEntry, path string, printer Printer) error
 }
 
 // Discovery is the struct that has the implementation of Discovery's CLI.

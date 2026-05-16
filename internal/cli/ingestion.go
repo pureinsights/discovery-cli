@@ -90,6 +90,7 @@ func ConvertJSONArrayToString(array []gjson.Result) string {
 type RecordGetter interface {
 	Get(id string) (gjson.Result, error)
 	GetAll() ([]gjson.Result, error)
+	Summarizer
 }
 
 // AppendSeedRecord adds a "record" field to the seed, which contains the record obtained using the given id.
@@ -152,6 +153,7 @@ type Summarizer interface {
 type SeedExecutionGetter interface {
 	Getter
 	Audit(executionId uuid.UUID) ([]gjson.Result, error)
+	GetLast5Executions() (gjson.Result, error)
 }
 
 // AppendSeedExecutionDetails appends details, like the audited changes and summaries to a seed execution JSON.
@@ -205,4 +207,35 @@ func (d discovery) SeedExecution(client SeedExecutionGetter, seedExecutionId uui
 	}
 
 	return printer(*d.IOStreams(), execution)
+}
+
+// SeedExecution gets a seed execution, appends details if needed, and prints out the result.
+func (d discovery) StatusOfSeedExecutions(executionClient SeedExecutionGetter, recordClient RecordGetter, printer Printer) error {
+	executions, err := executionClient.GetLast5Executions()
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get the five last seed executions")
+	}
+
+	recordSummary, err := recordClient.Summarize()
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get the record summary")
+	}
+
+	response, err := sjson.SetRaw("{}", "executions", executions.Raw)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not format response")
+	}
+
+	if recordSummary.Exists() {
+		response, err = sjson.SetRaw(response, "records", recordSummary.Raw)
+		if err != nil {
+			return NewErrorWithCause(ErrorExitCode, err, "Could not format response")
+		}
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), gjson.Parse(response))
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/pureinsights/discovery-cli/cmd/backuprestore"
 	"github.com/pureinsights/discovery-cli/cmd/config"
 	"github.com/pureinsights/discovery-cli/cmd/core"
+	"github.com/pureinsights/discovery-cli/cmd/deploy"
 	"github.com/pureinsights/discovery-cli/cmd/ingestion"
 	"github.com/pureinsights/discovery-cli/cmd/queryflow"
 	"github.com/pureinsights/discovery-cli/cmd/staging"
@@ -19,9 +20,10 @@ import (
 // NewRootCommand creates and sets up the root command of the Discovery CLI.
 func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery := &cobra.Command{
-		Use:   "discovery [subcommand]",
-		Short: "A CLI to assist with operations on Pureinsights Discovery",
-		Long:  "discovery is the Discovery CLI's root command. This is the command used to run the CLI. It contains all of the other subcommands.",
+		Use:          "discovery [subcommand]",
+		SilenceUsage: true,
+		Short:        "A CLI to assist with operations on Pureinsights Discovery",
+		Long:         "discovery is the Discovery CLI's root command. This is the command used to run the CLI. It contains all of the other subcommands.",
 	}
 
 	ios := d.IOStreams()
@@ -48,6 +50,7 @@ func newRootCommand(d cli.Discovery) *cobra.Command {
 	discovery.AddCommand(staging.NewStagingCommand(d))
 	discovery.AddCommand(statuscheck.NewStatusCommand(d))
 	discovery.AddCommand(version.NewVersionCommand(d))
+	discovery.AddCommand(deploy.NewDeployCommand(d))
 	discovery.Version = version.Version
 	discovery.SetVersionTemplate("Discovery CLI Version {{.Version}}\n")
 

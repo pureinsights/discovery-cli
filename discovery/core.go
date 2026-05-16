@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -122,22 +121,11 @@ func (fc filesClient) Retrieve(key string) ([]byte, error) {
 	return fc.execute(http.MethodGet, "/"+key)
 }
 
-// List displays an array of strings that contains every file key that is stored in Discovery.
-// If there are no keys, the endpoint returns a No Content response and the function returns an empty array.
-func (fc filesClient) List() ([]string, error) {
-	filesBytes, err := fc.execute(http.MethodGet, "")
-	if err != nil {
-		return []string(nil), err
-	}
-	if len(filesBytes) > 0 {
-		var files []string
-		if err := json.Unmarshal(filesBytes, &files); err != nil {
-			return []string(nil), err
-		}
-		return files, nil
-	} else {
-		return []string{}, nil
-	}
+// List gets the json containing the list of all the files stored in Discovery Core, then converts it to
+// An array for ease of use.
+func (fc filesClient) List() ([]gjson.Result, error) {
+	result, err := execute(fc.client, http.MethodGet, "")
+	return result.Array(), err
 }
 
 // Delete removes a file from Discovery based on the sent key.

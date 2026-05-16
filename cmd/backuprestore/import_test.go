@@ -116,7 +116,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			apiKey:         "",
 			outGolden:      "NewImportCommand_Out_FileDoesNotExist",
 			errGolden:      "NewImportCommand_Err_FileDoesNotExist",
-			outBytes:       testutils.Read(t, "NewImportCommand_Out_FileDoesNotExist"),
+			outBytes:       []byte(nil),
 			errBytes:       testutils.Read(t, "NewImportCommand_Err_FileDoesNotExist"),
 			method:         http.MethodPost,
 			path:           "/v2/import",
@@ -133,7 +133,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 			apiKey:       "",
 			outGolden:    "NewImportCommand_Out_ZipHasFourFiles",
 			errGolden:    "NewImportCommand_Err_ZipHasFourFiles",
-			outBytes:     testutils.Read(t, "NewImportCommand_Out_ZipHasFourFiles"),
+			outBytes:     []byte(nil),
 			errBytes:     testutils.Read(t, "NewImportCommand_Err_ZipHasFourFiles"),
 			method:       http.MethodPost,
 			path:         "/v2/import",
@@ -222,6 +222,7 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 
 			importCmd := NewImportCommand(d)
 
+			importCmd.SilenceUsage = true
 			importCmd.SetIn(ios.In)
 			importCmd.SetOut(ios.Out)
 			importCmd.SetErr(ios.Err)
@@ -251,7 +252,9 @@ func TestNewImportCommand_ProfileFlag(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

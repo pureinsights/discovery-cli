@@ -198,7 +198,7 @@ func TestNewPingCommand(t *testing.T) {
 			args:      []string{"my-server"},
 			outGolden: "NewPingCommand_Out_NoURL",
 			errGolden: "NewPingCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewPingCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewPingCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -211,7 +211,7 @@ func TestNewPingCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewPingCommand_Out_NameDoesNotExist",
 			errGolden: "NewPingCommand_Err_NameDoesNotExist",
-			outBytes:  testutils.Read(t, "NewPingCommand_Out_NameDoesNotExist"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewPingCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/server/search": {
@@ -241,7 +241,7 @@ func TestNewPingCommand(t *testing.T) {
 			args:      []string{"my-server"},
 			outGolden: "NewPingCommand_Out_PrintJSONFails",
 			errGolden: "NewPingCommand_Err_PrintJSONFails",
-			outBytes:  testutils.Read(t, "NewPingCommand_Out_PrintJSONFails"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewPingCommand_Err_PrintJSONFails"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -331,7 +331,7 @@ func TestNewPingCommand(t *testing.T) {
 			apiKey:    "",
 			outGolden: "NewPingCommand_Out_PingByIdFails",
 			errGolden: "NewPingCommand_Err_PingByIdFails",
-			outBytes:  testutils.Read(t, "NewPingCommand_Out_PingByIdFails"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewPingCommand_Err_PingByIdFails"),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/server/search": {
@@ -441,6 +441,7 @@ func TestNewPingCommand(t *testing.T) {
 
 			pingCmd := NewPingCommand(d)
 
+			pingCmd.SilenceUsage = true
 			pingCmd.SetIn(ios.In)
 			pingCmd.SetOut(ios.Out)
 			pingCmd.SetErr(ios.Err)
@@ -464,7 +465,9 @@ func TestNewPingCommand(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

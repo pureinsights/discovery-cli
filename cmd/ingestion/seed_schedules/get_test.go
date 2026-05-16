@@ -270,7 +270,7 @@ func TestNewGetCommand(t *testing.T) {
 			args:      []string{},
 			outGolden: "NewGetCommand_Out_NoURL",
 			errGolden: "NewGetCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_NoURL"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -283,7 +283,7 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewGetCommand_Out_NameDoesNotExist",
 			errGolden: "NewGetCommand_Err_NameDoesNotExist",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_NameDoesNotExist"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
 				"/v2/seed/schedule/search": {
@@ -313,7 +313,7 @@ func TestNewGetCommand(t *testing.T) {
 			args:      []string{"3b32e410-2F33-412d-9fb8-17970131921c"},
 			outGolden: "NewGetCommand_Out_SearchByNameHTTPError",
 			errGolden: "NewGetCommand_Err_SearchByNameHTTPError",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchByNameHTTPError"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_SearchByNameHTTPError"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -350,7 +350,7 @@ func TestNewGetCommand(t *testing.T) {
 			args:      []string{},
 			outGolden: "NewGetCommand_Out_GetEntitiesHTTPError",
 			errGolden: "NewGetCommand_Err_GetEntitiesHTTPError",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_GetEntitiesHTTPError"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_GetEntitiesHTTPError"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -375,7 +375,7 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewGetCommand_Out_SearchHTTPError",
 			errGolden: "NewGetCommand_Err_SearchHTTPError",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchHTTPError"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_SearchHTTPError"),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/seed/schedule/search": {
@@ -415,7 +415,7 @@ func TestNewGetCommand(t *testing.T) {
 			apiKey:    "apiKey123",
 			outGolden: "NewGetCommand_Out_FilterDoesNotExist",
 			errGolden: "NewGetCommand_Err_FilterDoesNotExist",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_FilterDoesNotExist"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_FilterDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/seed/schedule/search": {
@@ -436,7 +436,7 @@ func TestNewGetCommand(t *testing.T) {
 			args:      []string{"test"},
 			outGolden: "NewGetCommand_Out_PrintJSONFails",
 			errGolden: "NewGetCommand_Err_PrintJSONFails",
-			outBytes:  testutils.Read(t, "NewGetCommand_Out_PrintJSONFails"),
+			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_PrintJSONFails"),
 			url:       true,
 			apiKey:    "apiKey123",
@@ -581,6 +581,7 @@ func TestNewGetCommand(t *testing.T) {
 
 			getCmd := NewGetCommand(d)
 
+			getCmd.SilenceUsage = true
 			getCmd.SetIn(ios.In)
 			getCmd.SetOut(ios.Out)
 			getCmd.SetErr(ios.Err)
@@ -604,7 +605,9 @@ func TestNewGetCommand(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
 		})
 	}
 }

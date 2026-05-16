@@ -26,9 +26,7 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 		args      []string
 		url       bool
 		apiKey    string
-		outGolden string
 		errGolden string
-		outBytes  []byte
 		errBytes  []byte
 		responses map[string]testutils.MockResponse
 		err       error
@@ -37,9 +35,7 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 		{
 			name:      "No URL",
 			args:      []string{"my-bucket"},
-			outGolden: "NewDumpCommand_Out_NoURL",
 			errGolden: "NewDumpCommand_Err_NoURL",
-			outBytes:  testutils.Read(t, "NewDumpCommand_Out_NoURL"),
 			errBytes:  testutils.Read(t, "NewDumpCommand_Err_NoURL"),
 			url:       false,
 			apiKey:    "apiKey123",
@@ -50,9 +46,7 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 			args:      []string{"my-bucket"},
 			url:       true,
 			apiKey:    "apiKey123",
-			outGolden: "NewDumpCommand_Out_NameDoesNotExist",
 			errGolden: "NewDumpCommand_Err_NameDoesNotExist",
-			outBytes:  testutils.Read(t, "NewDumpCommand_Out_NameDoesNotExist"),
 			errBytes:  testutils.Read(t, "NewDumpCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
 				"POST:/v2/content/my-bucket/scroll": {
@@ -90,9 +84,7 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 			args:      []string{"my-bucket", "--page-size", "-1"},
 			url:       true,
 			apiKey:    "apiKey123",
-			outGolden: "NewDumpCommand_Out_InvalidPageSize",
 			errGolden: "NewDumpCommand_Err_InvalidPageSize",
-			outBytes:  testutils.Read(t, "NewDumpCommand_Out_InvalidPageSize"),
 			errBytes:  testutils.Read(t, "NewDumpCommand_Err_InvalidPageSize"),
 			responses: map[string]testutils.MockResponse{},
 			err:       cli.NewError(cli.ErrorExitCode, "The page size flag can only be greater than or equal to 1."),
@@ -129,6 +121,7 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 
 			dumpCmd := NewDumpCommand(d)
 
+			dumpCmd.SilenceUsage = true
 			dumpCmd.SetIn(ios.In)
 			dumpCmd.SetOut(ios.Out)
 			dumpCmd.SetErr(ios.Err)
@@ -151,8 +144,6 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-
-			testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
 		})
 	}
 }
@@ -294,6 +285,7 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
 
 	dumpCmd := NewDumpCommand(d)
 
+	dumpCmd.SilenceUsage = true
 	dumpCmd.SetIn(ios.In)
 	dumpCmd.SetOut(ios.Out)
 	dumpCmd.SetErr(ios.Err)

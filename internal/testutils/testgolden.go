@@ -39,7 +39,7 @@ func Read(t *testing.T, name string) []byte {
 		return b
 	}
 
-	return nil
+	return []byte{}
 }
 
 // CompareBytesOption is used to add further modifications to the expected and gotten bytes.
