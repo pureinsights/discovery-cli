@@ -13,7 +13,7 @@ import (
 func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 	get := &cobra.Command{
 		Use:   "delete <mcp-server>",
-		Short: "The command that deletes mcp-servers from Discovery QueryFlow.",
+		Short: "The command that deletes MCP servers from Discovery QueryFlow.",
 		Long:  fmt.Sprintf(commands.LongDeleteSearch, "MCP server", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
