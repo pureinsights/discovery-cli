@@ -31,10 +31,10 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 		Example: `	# Get an MCP server by name
 	discovery queryflow mcp-server get "my-mcp-server"
 	
-	# Get mcp-servers using filters
+	# Get MCP servers using filters
 	discovery queryflow mcp-server get --filter label=A:B
 
-	# Get all mcp-servers using the configuration in profile "cn"
+	# Get all MCP servers using the configuration in profile "cn"
 	discovery queryflow mcp-server get -p cn`,
 	}
 
