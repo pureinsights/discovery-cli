@@ -16,7 +16,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	store := &cobra.Command{
 		Use:   "store [<files>...]",
 		Short: "The command that stores MCP servers to Discovery QueryFlow.",
-		Long:  fmt.Sprintf(commands.LongStore, "mcp-server", "QueryFlow"),
+		Long:  fmt.Sprintf(commands.LongStore, "MCP server", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
