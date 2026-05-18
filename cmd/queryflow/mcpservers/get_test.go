@@ -1,4 +1,4 @@
-package pipelines
+package mcpservers
 
 import (
 	"bytes"
@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// NewGetCommand creates the pipeline get command
+// TestNewGetCommand tests the NewGetCommand() function.
 func TestNewGetCommand(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -35,7 +35,7 @@ func TestNewGetCommand(t *testing.T) {
 		// Working case
 		{
 			name:      "Search by name returns an array of which the first object is returned",
-			args:      []string{"my-pipeline"},
+			args:      []string{"my-mcp-server"},
 			url:       true,
 			apiKey:    "",
 			outGolden: "NewGetCommand_Out_SearchByNameReturnsObject",
@@ -43,14 +43,14 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewGetCommand_Out_SearchByNameReturnsObject"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/pipeline/search": {
+				"POST:/v2/entrypoint/mcp-server/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
 				{
 				"source": {
 					"type": "mongo",
-					"name": "my-pipeline",
+					"name": "my-mcp-server",
 					"labels": [
 					{
 						"key": "A",
@@ -68,7 +68,7 @@ func TestNewGetCommand(t *testing.T) {
 				{
 				"source": {
 					"type": "mongo",
-					"name": "my-pipeline",
+					"name": "my-mcp-server",
 					"labels": [
 					{
 						"key": "A",
@@ -104,14 +104,14 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/pipeline/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
 					},
 				},
-				"GET:/v2/pipeline/3b32e410-2f33-412d-9fb8-17970131921c": {
+				"GET:/v2/entrypoint/mcp-server/3b32e410-2f33-412d-9fb8-17970131921c": {
 					StatusCode: http.StatusOK,
 					Body: `{
 					"type": "mongo",
-					"name": "my-pipeline",
+					"name": "my-mcp-server",
 					"labels": [
 					{
 						"key": "A",
@@ -126,7 +126,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/pipeline/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
 					},
 				},
 			},
@@ -142,13 +142,13 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"GET:/v2/pipeline": {
+				"GET:/v2/entrypoint/mcp-server": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
 				{
 				"type": "mongo",
-				"name": "my-pipeline",
+				"name": "my-mcp-server",
 				"labels": [
 					{
 					"key": "A",
@@ -162,7 +162,7 @@ func TestNewGetCommand(t *testing.T) {
 				},
 				{
 				"type": "openai",
-				"name": "OpenAI pipeline",
+				"name": "OpenAI mcp-server",
 				"labels": [],
 				"active": true,
 				"id": "5c09589e-b643-41aa-a766-3b7fc3660473",
@@ -186,7 +186,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/pipeline", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -203,14 +203,14 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/pipeline/search": {
+				"POST:/v2/entrypoint/mcp-server/search": {
 					StatusCode: http.StatusOK,
 					Body: `{
 			"content": [
 				{
 				"source": {
 					"type": "mongo",
-					"name": "pipeline-2",
+					"name": "mcp-server-2",
 					"labels": [
 					{
 						"key": "A",
@@ -228,7 +228,7 @@ func TestNewGetCommand(t *testing.T) {
 				{
 				"source": {
 					"type": "mongo",
-					"name": "my-pipeline",
+					"name": "my-mcp-server",
 					"labels": [
 					{
 						"key": "A",
@@ -260,7 +260,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/pipeline/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -290,13 +290,13 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"/v2/pipeline/search": {
+				"/v2/entrypoint/mcp-server/search": {
 					StatusCode:  http.StatusNoContent,
 					Body:        ``,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/pipeline/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -322,7 +322,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/pipeline/search": {
+				"POST:/v2/entrypoint/mcp-server/search": {
 					StatusCode: http.StatusInternalServerError,
 					Body: `{
 			"status": 500,
@@ -335,7 +335,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/pipeline/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -359,13 +359,13 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"GET:/v2/pipeline": {
+				"GET:/v2/entrypoint/mcp-server": {
 					StatusCode:  http.StatusUnauthorized,
 					Body:        `{"error": "unauthorized"}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/pipeline", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -382,7 +382,7 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_SearchHTTPError"),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/pipeline/search": {
+				"POST:/v2/entrypoint/mcp-server/search": {
 					StatusCode: http.StatusUnauthorized,
 					Body: `{
 	"status": 401,
@@ -395,7 +395,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/pipeline/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -422,13 +422,13 @@ func TestNewGetCommand(t *testing.T) {
 			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewGetCommand_Err_FilterDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/pipeline/search": {
+				"POST:/v2/entrypoint/mcp-server/search": {
 					StatusCode:  http.StatusBadRequest,
 					Body:        ``,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/pipeline/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -445,7 +445,7 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/pipeline/search": {
+				"POST:/v2/entrypoint/mcp-server/search": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -482,16 +482,16 @@ func TestNewGetCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/pipeline/search", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
-				"GET:/v2/pipeline/3d51beef-8b90-40aa-84b5-033241dc6239": {
+				"GET:/v2/entrypoint/mcp-server/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
 					"type": "mongo",
-					"name": "my-pipeline",
+					"name": "my-mcp-server",
 					"labels": [
 					{
 						"key": "A",
@@ -505,7 +505,7 @@ func TestNewGetCommand(t *testing.T) {
 				}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/pipeline/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -522,12 +522,12 @@ func TestNewGetCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"GET:/v2/pipeline": {
+				"GET:/v2/entrypoint/mcp-server": {
 					StatusCode: http.StatusOK,
 					Body: `{
-			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","pipelines":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}},     
-			{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","pipelines":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text pipeline","type":mongo}},       
-			{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","pipelines":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script pipeline","type":"script"}}
+			"content": [{"source":{"active":true,"creationTimestamp":"2025-08-21T17:57:16Z","id":"3393f6d9-94c1-4b70-ba02-5f582727d998","mcp-servers":[],"lastUpdatedTimestamp":"2025-08-21T17:57:16Z","name":"test","type":"mongo"}},     
+			{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"5f125024-1e5e-4591-9fee-365dc20eeeed","mcp-servers":[],"lastUpdatedTimestamp":"2025-08-18T20:55:43Z","name":"MongoDB text mcp-server","type":mongo}},       
+			{"source":{"active":true,"creationTimestamp":"2025-08-14T18:02:38Z","id":"86e7f920-a4e4-4b64-be84-5437a7673db8","mcp-servers":[],"lastUpdatedTimestamp":"2025-08-14T18:02:38Z","name":"Script mcp-server","type":"script"}}
 			],
 			"pageable": {
 				"page": 0,
@@ -545,7 +545,7 @@ func TestNewGetCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/pipeline", r.URL.Path)
+						assert.Equal(t, "/v2/entrypoint/mcp-server", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},

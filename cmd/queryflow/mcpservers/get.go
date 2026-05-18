@@ -1,4 +1,4 @@
-package pipelines
+package mcpservers
 
 import (
 	"fmt"
@@ -9,13 +9,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewGetCommand creates the pipeline get command
+// NewGetCommand creates the mcp-server get command.
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var filters []string
 	get := &cobra.Command{
-		Use:   "get [<pipeline>]",
-		Short: "The command that obtains pipelines from Discovery QueryFlow.",
-		Long:  fmt.Sprintf(commands.LongGetSearch, "pipeline", "QueryFlow"),
+		Use:   "get [<mcp-server>]",
+		Short: "The command that obtains MCP servers from Discovery QueryFlow.",
+		Long:  fmt.Sprintf(commands.LongGetSearch, "MCP server", "QueryFlow"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -25,17 +25,17 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 			vpr := d.Config()
 
 			queryflowClient := discoveryPackage.NewQueryFlow(vpr.GetString(profile+".queryflow_url"), vpr.GetString(profile+".queryflow_key"))
-			return commands.SearchCommand(args, d, queryflowClient.Pipelines(), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), &filters)
+			return commands.SearchCommand(args, d, queryflowClient.MCPServers(), commands.GetCommandConfig(profile, vpr.GetString("output"), "QueryFlow", "queryflow_url"), &filters)
 		},
 		Args: cobra.MaximumNArgs(1),
-		Example: `	# Get pipeline by name
-	discovery queryflow pipeline get "my-pipeline"
+		Example: `	# Get an MCP server by name
+	discovery queryflow mcp-server get "my-mcp-server"
+	
+	# Get mcp-servers using filters
+	discovery queryflow mcp-server get --filter label=A:B
 
-	# Get pipelines using filters
-	discovery queryflow pipeline get --filter label=A:A
-
-	# Get all pipelines using the configuration in profile "cn"
-	discovery queryflow pipeline get -p cn`,
+	# Get all mcp-servers using the configuration in profile "cn"
+	discovery queryflow mcp-server get -p cn`,
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:

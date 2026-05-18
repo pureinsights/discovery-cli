@@ -58,6 +58,22 @@ func Test_newEndpointsClient(t *testing.T) {
 	assert.Equal(t, url+"/entrypoint/endpoint", qec.searcher.client.client.BaseURL)
 }
 
+// Test_newMCPServersClient tests the constructor of mcpServersClient.
+func Test_newMCPServersClient(t *testing.T) {
+	url := "http://localhost:12040"
+	apiKey := "Api Key"
+	qec := newMCPServersClient(url, apiKey)
+
+	assert.Equal(t, apiKey, qec.crud.client.ApiKey)
+	assert.Equal(t, url+"/entrypoint/mcp-server", qec.crud.client.client.BaseURL)
+	assert.Equal(t, apiKey, qec.cloner.client.ApiKey)
+	assert.Equal(t, url+"/entrypoint/mcp-server", qec.cloner.client.client.BaseURL)
+	assert.Equal(t, apiKey, qec.enabler.client.ApiKey)
+	assert.Equal(t, url+"/entrypoint/mcp-server", qec.enabler.client.client.BaseURL)
+	assert.Equal(t, apiKey, qec.searcher.client.ApiKey)
+	assert.Equal(t, url+"/entrypoint/mcp-server", qec.searcher.client.client.BaseURL)
+}
+
 // Test_queryFlow_Processors tests the queryFlow.Processors() function.
 func Test_queryFlow_Processors(t *testing.T) {
 	q := NewQueryFlow("http://localhost:12040", "Api Key")
@@ -97,6 +113,21 @@ func Test_queryFlow_Endpoints(t *testing.T) {
 	assert.Equal(t, q.Url+"/entrypoint/endpoint", qec.enabler.client.client.BaseURL)
 	assert.Equal(t, q.ApiKey, qec.searcher.client.ApiKey)
 	assert.Equal(t, q.Url+"/entrypoint/endpoint", qec.searcher.client.client.BaseURL)
+}
+
+// Test_queryFlow_MCPServers tests the queryFlow.MCPServers() function.
+func Test_queryFlow_MCPServers(t *testing.T) {
+	q := NewQueryFlow("http://localhost:12040", "Api Key")
+	qec := q.MCPServers()
+
+	assert.Equal(t, q.ApiKey, qec.crud.client.ApiKey)
+	assert.Equal(t, q.Url+"/entrypoint/mcp-server", qec.crud.client.client.BaseURL)
+	assert.Equal(t, q.ApiKey, qec.cloner.client.ApiKey)
+	assert.Equal(t, q.Url+"/entrypoint/mcp-server", qec.cloner.client.client.BaseURL)
+	assert.Equal(t, q.ApiKey, qec.enabler.client.ApiKey)
+	assert.Equal(t, q.Url+"/entrypoint/mcp-server", qec.enabler.client.client.BaseURL)
+	assert.Equal(t, q.ApiKey, qec.searcher.client.ApiKey)
+	assert.Equal(t, q.Url+"/entrypoint/mcp-server", qec.searcher.client.client.BaseURL)
 }
 
 // Test_queryFlow_BackupRestore tests the queryFlow.BackupRestore() function.
