@@ -32,7 +32,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	discovery queryflow mcp-server store mcp-server-jsonfile.json
 
 	# Store an MCP server with the JSON configuration in the data flag
-	discovery queryflow mcp-server store --data '{"type":"default","uri":"/my/mcp-server","httpMethod":"GET","name":"my-mcp-server","pipeline":"782bfece-20a2-4382-bacb-1c9c550e2d58","timeout":"60s"}'`,
+	discovery queryflow mcp-server store --data '{"uri":"/my/mcp/server","name":"My MCP Server","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","capabilities":{"logging":{},"tools":{}},"serverInfo":{"name":"mcp-server","version":"1.0"},"requestTimeout":"60s","expireAfter":"1h","labels":[{"key":"A","value":"A"}]}'`,
 	}
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")
 	store.Flags().StringVarP(&data, "data", "d", "", "the JSON with the configurations that will be upserted")
