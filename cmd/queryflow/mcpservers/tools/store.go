@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewStoreCommand creates the mcp-server store command.
+// NewStoreCommand creates the mcp-server tool store command.
 func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	var abortOnError bool
 	var data string
