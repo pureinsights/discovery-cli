@@ -1,0 +1,10 @@
+Error: Could not get the MCP server "my-mcp-server"
+status: 404, body: {
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-mcp-server" does not exist"
+	]
+}
+
+

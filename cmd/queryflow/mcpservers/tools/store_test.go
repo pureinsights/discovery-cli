@@ -1700,7 +1700,7 @@ func TestNewStoreCommand_MultipleFiles(t *testing.T) {
 	testutils.CompareBytes(t, "NewStoreCommand_Out_MultipleFiles", testutils.Read(t, "NewStoreCommand_Out_MultipleFiles"), out.Bytes())
 }
 
-// TestNewStoreCommand_NoMCPServer tests the NewStoreCommand when the MPC server argument was not included.
+// TestNewStoreCommand_NoMCPServer tests the NewStoreCommand when the MCP server argument was not included.
 func TestNewStoreCommand_NoMCPServer(t *testing.T) {
 	in := strings.NewReader("")
 	out := &bytes.Buffer{}

@@ -17,6 +17,7 @@ func NewToolCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command to interact with an MCP server's tools in Discovery QueryFlow.",
 	}
 
+	tool.AddCommand(NewGetCommand(d))
 	tool.AddCommand(NewStoreCommand(d))
 
 	return tool

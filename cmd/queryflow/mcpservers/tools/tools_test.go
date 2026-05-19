@@ -47,6 +47,6 @@ func TestNewMCPServerCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"store"}
+	expectedCommands := []string{"get", "store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

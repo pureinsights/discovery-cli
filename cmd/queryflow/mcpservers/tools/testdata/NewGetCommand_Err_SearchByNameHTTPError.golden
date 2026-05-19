@@ -1,0 +1,11 @@
+Error: Could not search for entity with id "3b32e410-2F33-412d-9fb8-17970131921c"
+status: 500, body: {
+			"status": 500,
+			"code": 1003,
+			"messages": [
+				"Internal server error"
+			],
+			"timestamp": "2025-10-16T17:46:45.386963700Z"
+			}
+
+
