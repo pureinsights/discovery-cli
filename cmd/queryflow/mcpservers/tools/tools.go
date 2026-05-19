@@ -5,6 +5,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	// LongTool is the message that explains that the first argument must be the MCP server.
+	LongTool string = " The first argument of this command must be the name or UUID of the MCP server that will contain the tool."
+)
+
 // NewToolCommand creates the tool command.
 func NewToolCommand(d cli.Discovery) *cobra.Command {
 	tool := &cobra.Command{

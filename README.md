@@ -3646,6 +3646,60 @@ discovery queryflow mcp-server delete my-mcp-server
 }
 ```
 
+##### Tool
+`tool` is the command used to manage tools in MCP servers in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery queryflow mcp-server tool [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Store
+`store` is the command used to create and update Discovery QueryFlow's MCP tools in MCP servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple tools. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created. The first argument of this command must be the name or UUID of the MCP server that will contain the tool.
+
+Usage: `discovery queryflow mcp-server tool store <mcp-server> [<file>...] [flags]`
+
+Arguments:
+
+`mcp-server`:
+(Required, string) The name or UUID of the MCP server that will contain the tool.
+
+`file`:
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
+
+Flags:
+
+`-d, --data`:
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
+
+`--abort-on-error`:
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store an MCP tool in an MCP server with the JSON configuration in a file
+discovery queryflow mcp-server tool store my-mcp-server mcp-tool-jsonfile.json
+{"active":true,"creationTimestamp":"2026-05-19T20:13:09.359145Z","id":"6fee66f0-0ecd-495b-99ee-a07e4eeecb42","inputSchema":{"properties":{"age":{"minimum":0,"type":"integer"},"name":{"type":"string"}},"required":["name"],"type":"object"},"lastUpdatedTimestamp":"2026-05-19T20:13:09.359145Z","name":"my-mcp-server-tool","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","timeout":"PT1M"}
+```
+
+```bash
+# Store an MCP tool in an MCP server with the JSON configuration in the data flag
+discovery queryflow mcp-server tool store my-mcp-server --data '{"name":"my-mcp-server-tool","inputSchema":{"type":"object","properties":{"name":{"type":"string"},"age":{"type":"integer","minimum":0}},"required":["name"]},"pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","timeout":"60s"}'
+{"active":true,"creationTimestamp":"2026-05-19T20:13:09.359145Z","id":"6fee66f0-0ecd-495b-99ee-a07e4eeecb42","inputSchema":{"properties":{"age":{"minimum":0,"type":"integer"},"name":{"type":"string"}},"required":["name"],"type":"object"},"lastUpdatedTimestamp":"2026-05-19T20:13:09.359145Z","name":"my-mcp-server-tool","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","timeout":"PT1M"}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery QueryFlow. If it is healthy, it should return a JSON with an "UP" status field.
 
