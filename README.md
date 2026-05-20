@@ -3660,7 +3660,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain tools in an MCP server from Discovery QueryFlow. The user can send a name or UUID to get a specific MCP tool. If no argument is given, then the command retrieves every tool. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The first argument of this command must be the name or UUID of the MCP server that will contain the tool.
+`get` is the command used to obtain tools in an MCP server from Discovery QueryFlow. The user can send a name or UUID to get a specific MCP tool. If no argument is given, then the command retrieves every tool. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The first argument of this command must be the name or UUID of the MCP server that contains the tool.
 
 Usage: `discovery queryflow mcp-server tool get <mcp-server> [flags] [<arg>]`
 
