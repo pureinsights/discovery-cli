@@ -1,0 +1,1009 @@
+package tools
+
+import (
+	"bytes"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/internal/testutils"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/tidwall/gjson"
+)
+
+// TestNewDeleteCommand tests the NewDeleteCommand() function.
+func TestNewDeleteCommand(t *testing.T) {
+	tests := []struct {
+		name      string
+		args      []string
+		url       bool
+		apiKey    string
+		outGolden string
+		errGolden string
+		outBytes  []byte
+		errBytes  []byte
+		responses map[string]testutils.MockResponse
+		err       error
+	}{
+		// Working case
+		{
+			name:      "Delete by ID returns an acknowledged true",
+			args:      []string{"my-mcp-server", "3d51beef-8b90-40aa-84b5-033241dc6239"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewDeleteCommand_Out_DeleteByIdReturnsObject",
+			errGolden: "NewDeleteCommand_Err_DeleteByIdReturnsObject",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByIdReturnsObject"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/entrypoint/mcp-server/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+				"score": 1.4854797
+				},
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> 1 <em>clone</em>"
+					]
+				},
+				"score": 0.3980717
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 18,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 18,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f", r.URL.Path)
+					},
+				},
+				"POST:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search": {
+					StatusCode: http.StatusNoContent,
+					Body: `{
+			"content": [],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 1,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 1,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-mcp-tool",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
+				"DELETE:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+				"acknowledged": true
+			}`,
+
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			name:      "Delete by name returns an acknowledged true",
+			args:      []string{"my-mcp-server", "my-mcp-tool"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDeleteCommand_Out_DeleteByNameReturnsObject",
+			errGolden: "NewDeleteCommand_Err_DeleteByNameReturnsObject",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteByNameReturnsObject"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/entrypoint/mcp-server/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+				"score": 1.4854797
+				},
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> 1 <em>clone</em>"
+					]
+				},
+				"score": 0.3980717
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 18,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 18,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f", r.URL.Path)
+					},
+				},
+				"POST:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-tool",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 18,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 18,
+			"pageNumber": 0
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-mcp-tool",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
+				"DELETE:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+				"acknowledged": true
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: nil,
+		},
+
+		// Error case
+		{
+			name:      "No URL",
+			args:      []string{"my-mcp-server", "my-mcp-tool"},
+			outGolden: "NewDeleteCommand_Out_NoURL",
+			errGolden: "NewDeleteCommand_Err_NoURL",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NoURL"),
+			url:       false,
+			apiKey:    "apiKey123",
+			err:       cli.NewError(cli.ErrorExitCode, "The Discovery QueryFlow URL is missing for profile \"default\".\nTo set the URL for the Discovery QueryFlow API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery queryflow config --profile \"default\""),
+		},
+		{
+			name:      "sent name does not exist",
+			args:      []string{"my-mcp-server", "test"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDeleteCommand_Out_NameDoesNotExist",
+			errGolden: "NewDeleteCommand_Err_NameDoesNotExist",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NameDoesNotExist"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/entrypoint/mcp-server/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+				"score": 1.4854797
+				},
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> 1 <em>clone</em>"
+					]
+				},
+				"score": 0.3980717
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 18,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 18,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f", r.URL.Path)
+					},
+				},
+				"POST:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "test" does not exist"
+	]
+}`),
+			}, "Could not search for entity with name \"test\""),
+		},
+		{
+			name:      "DeleteCommand receives an MCP server that does not exist.",
+			args:      []string{"my-mcp-server", "my-mcp-tool"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDeleteCommand_Out_MCPServerDoesNotExist",
+			errGolden: "NewDeleteCommand_Err_MCPServerDoesNotExist",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_MCPServerDoesNotExist"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/entrypoint/mcp-server/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-mcp-server" does not exist"
+	]
+}`)}, "Could not get the MCP server \"my-mcp-server\""),
+		},
+		{
+			name:      "Printing JSON object fails",
+			args:      []string{"my-mcp-server", "my-mcp-tool"},
+			outGolden: "NewDeleteCommand_Out_PrintJSONFails",
+			errGolden: "NewDeleteCommand_Err_PrintJSONFails",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_PrintJSONFails"),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/entrypoint/mcp-server/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+				"score": 1.4854797
+				},
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> 1 <em>clone</em>"
+					]
+				},
+				"score": 0.3980717
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 18,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 18,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f", r.URL.Path)
+					},
+				},
+				"POST:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-tool",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 1,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 1,
+			"pageNumber": 0
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-mcp-tool",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
+				"DELETE:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+				"acknowledged: true
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '\\n' in string literal"), "Could not print JSON object"),
+		},
+		{
+			name:      "Search returns invalid UUID error",
+			args:      []string{"my-mcp-server", "test"},
+			outGolden: "NewDeleteCommand_Out_InvalidUUID",
+			errGolden: "NewDeleteCommand_Err_InvalidUUID",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_InvalidUUID"),
+			url:       true,
+			apiKey:    "apiKey123",
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/entrypoint/mcp-server/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+				"score": 1.4854797
+				},
+				{
+				"source": {
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				},
+				"highlight": {
+					"name": [
+					"<em>label</em> <em>test</em> 1 <em>clone</em>"
+					]
+				},
+				"score": 0.3980717
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 18,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 18,
+			"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "my-mcp-server",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "4957145b-6192-4862-a5da-e97853974e9f",
+					"creationTimestamp": "2025-10-17T22:37:53Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f", r.URL.Path)
+					},
+				},
+				"POST:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+			"content": [
+				{
+				"source": {
+					"type": "mongo",
+					"name": "test",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				},
+				"highlight": {}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 25,
+				"sort": []
+			},
+			"totalSize": 1,
+			"totalPages": 1,
+			"empty": false,
+			"size": 25,
+			"offset": 0,
+			"numberOfElements": 1,
+			"pageNumber": 0
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"GET:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"type": "mongo",
+					"name": "test",
+					"labels": [
+					{
+						"key": "A",
+						"value": "A"
+					}
+					],
+					"active": true,
+					"id": "test",
+					"creationTimestamp": "2025-10-17T22:37:57Z",
+					"lastUpdatedTimestamp": "2025-10-17T22:37:57Z"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
+				"DELETE:/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+				"acknowledged": true
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/entrypoint/mcp-server/4957145b-6192-4862-a5da-e97853974e9f/tool/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid UUID length: 4"), "Could not delete entity with name \"test\""),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpMultiResponseHandler(t, tc.responses))
+
+			defer srv.Close()
+
+			in := strings.NewReader("")
+			out := &bytes.Buffer{}
+
+			errBuf := &bytes.Buffer{}
+			ios := iostreams.IOStreams{
+				In:  in,
+				Out: out,
+				Err: errBuf,
+			}
+
+			vpr := viper.New()
+			vpr.Set("profile", "default")
+			vpr.Set("output", "pretty-json")
+			if tc.url {
+				vpr.Set("default.queryflow_url", srv.URL)
+			}
+			if tc.apiKey != "" {
+				vpr.Set("default.queryflow_key", tc.apiKey)
+			}
+
+			d := cli.NewDiscovery(&ios, vpr, t.TempDir())
+
+			deleteCmd := NewDeleteCommand(d)
+
+			deleteCmd.SilenceUsage = true
+			deleteCmd.SetIn(ios.In)
+			deleteCmd.SetOut(ios.Out)
+			deleteCmd.SetErr(ios.Err)
+
+			deleteCmd.PersistentFlags().StringP(
+				"profile",
+				"p",
+				d.Config().GetString("profile"),
+				"configuration profile to use",
+			)
+
+			deleteCmd.SetArgs(tc.args)
+
+			err := deleteCmd.Execute()
+			if tc.err != nil {
+				var errStruct cli.Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+				testutils.CompareBytes(t, tc.errGolden, tc.errBytes, errBuf.Bytes())
+			} else {
+				require.NoError(t, err)
+			}
+
+			if tc.outBytes != nil {
+				testutils.CompareBytes(t, tc.outGolden, tc.outBytes, out.Bytes())
+			}
+		})
+	}
+}
+
+// TestNewDeleteCommand_NoProfileFlag tests the NewDeleteCommand when the profile flag was not defined.
+func TestNewDeleteCommand_NoProfileFlag(t *testing.T) {
+	in := strings.NewReader("")
+	out := &bytes.Buffer{}
+
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	vpr := viper.New()
+	vpr.Set("profile", "default")
+	vpr.Set("output", "pretty-json")
+
+	vpr.Set("default.queryflow_url", "test")
+	vpr.Set("default.queryflow_key", "test")
+
+	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
+
+	deleteCmd := NewDeleteCommand(d)
+
+	deleteCmd.SilenceUsage = true
+	deleteCmd.SetIn(ios.In)
+	deleteCmd.SetOut(ios.Out)
+	deleteCmd.SetErr(ios.Err)
+
+	deleteCmd.SetArgs([]string{"my-mcp-server", "my-mcp-tool"})
+
+	err := deleteCmd.Execute()
+	require.Error(t, err)
+	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
+
+	testutils.CompareBytes(t, "NewDeleteCommand_Err_NoProfile", testutils.Read(t, "NewDeleteCommand_Err_NoProfile"), errBuf.Bytes())
+}
+
+// TestNewDeleteCommand_NotExactly2Arg tests the NewDeleteCommand function when it does not receive exactly two arguments.
+func TestNewDeleteCommand_NotExactly2Arg(t *testing.T) {
+	in := strings.NewReader("")
+	out := &bytes.Buffer{}
+
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	vpr := viper.New()
+	vpr.Set("profile", "default")
+	vpr.Set("output", "pretty-json")
+
+	vpr.Set("default.queryflow_url", "test")
+	vpr.Set("default.queryflow_key", "test")
+
+	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
+
+	deleteCmd := NewDeleteCommand(d)
+
+	deleteCmd.SilenceUsage = true
+	deleteCmd.SetIn(ios.In)
+	deleteCmd.SetOut(ios.Out)
+	deleteCmd.SetErr(ios.Err)
+
+	deleteCmd.SetArgs([]string{})
+
+	err := deleteCmd.Execute()
+	require.Error(t, err)
+	assert.EqualError(t, err, "accepts 2 arg(s), received 0")
+
+	testutils.CompareBytes(t, "NewDeleteCommand_Err_NotExactly2Arg", testutils.Read(t, "NewDeleteCommand_Err_NotExactly2Arg"), errBuf.Bytes())
+}

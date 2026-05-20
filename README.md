@@ -3764,6 +3764,45 @@ discovery queryflow mcp-server tool store my-mcp-server --data '{"name":"my-mcp-
 {"active":true,"creationTimestamp":"2026-05-19T20:13:09.359145Z","id":"6fee66f0-0ecd-495b-99ee-a07e4eeecb42","inputSchema":{"properties":{"age":{"minimum":0,"type":"integer"},"name":{"type":"string"}},"required":["name"],"type":"object"},"lastUpdatedTimestamp":"2026-05-19T20:13:09.359145Z","name":"my-mcp-server-tool","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","timeout":"PT1M"}
 ```
 
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's MCP servers. The user must send a name or UUID to delete a specific MCP server. The first argument of this command must be the name or UUID of the MCP server that will contain the tool.
+
+Usage: `discovery queryflow mcp-server delete [flags] <mcp-server> <arg>`
+
+Arguments:
+
+`mcp-server`:
+(Required, string) The name or UUID of the MCP server that contains the tool.
+
+`arg`:
+(Required, string) The name or UUID of the MCP tool that will be deleted.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a tool in an MCP server by id
+discovery queryflow mcp-server tool delete my-mcp-server ea02fc14-f07b-49f2-b185-e9ceaedcb367
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# Delete a tool in an MCP server by name
+discovery queryflow mcp-server tool delete my-mcp-server my-tool
+{
+  "acknowledged": true
+}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery QueryFlow. If it is healthy, it should return a JSON with an "UP" status field.
 
