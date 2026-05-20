@@ -3570,6 +3570,44 @@ discovery queryflow mcp-server get -p cn
 {"active":true,"creationTimestamp":"2026-05-18T14:40:35Z","id":"40f3e2e3-cdd7-4375-89ed-fbab299fe989","labels":[],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"my-mcp-server-3","uri":"/my/last/mcp/server"}
 ```
 
+###### Store
+`store` is the command used to create and update Discovery QueryFlow's MCP servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple MCP servers. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created.
+
+Usage: `discovery queryflow mcp-server store [<file>...] [flags]`
+
+Arguments:
+
+`file`:
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
+
+Flags:
+
+`-d, --data`:
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
+
+`--abort-on-error`:
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store an MCP server with the JSON configuration in a file
+discovery queryflow mcp-server store mcp-server-jsonfile.json
+{"active":true,"capabilities":{"logging":{},"tools":{}},"creationTimestamp":"2026-05-18T14:40:35Z","expireAfter":"PT1H","id":"c05632a7-e4db-4fc6-b88c-63317f9965a4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"My MCP Server","requestTimeout":"PT1M","serverInfo":{"name":"mcp-server","version":"1.0"},"uri":"/my/mcp/server"}
+{"code":1003,"messages":["Entity not found: 2fee5e27-4147-48de-ba1e-d7f32476a4a3"],"status":404,"timestamp":"2025-11-20T00:37:02.827065700Z"}
+```
+
+```bash
+# Store an MCP server with the JSON configuration in the data flag
+discovery queryflow mcp-server store --data '{"uri":"/my/mcp/server","name":"My MCP Server","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","capabilities":{"logging":{},"tools":{}},"serverInfo":{"name":"mcp-server","version":"1.0"},"requestTimeout":"60s","expireAfter":"1h","labels":[{"key":"A","value":"A"}]}'
+{"active":true,"capabilities":{"logging":{},"tools":{}},"creationTimestamp":"2026-05-18T14:40:35Z","expireAfter":"PT1H","id":"c05632a7-e4db-4fc6-b88c-63317f9965a4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"My MCP Server","requestTimeout":"PT1M","serverInfo":{"name":"mcp-server","version":"1.0"},"uri":"/my/mcp/server"}
+```
 
 ##### Status
 `status` is the command used to check the status of Discovery QueryFlow. If it is healthy, it should return a JSON with an "UP" status field.

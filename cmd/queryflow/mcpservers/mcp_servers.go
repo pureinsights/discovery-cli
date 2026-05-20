@@ -13,6 +13,7 @@ func NewMCPServerCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	mcpServer.AddCommand(NewGetCommand(d))
+	mcpServer.AddCommand(NewStoreCommand(d))
 
 	return mcpServer
 }
