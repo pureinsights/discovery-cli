@@ -3460,6 +3460,117 @@ discovery queryflow endpoint delete my-endpoint
 }
 ```
 
+##### MCP Server
+`mcp-server` is the command used to manage MCP servers in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery queryflow mcp-server [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery QueryFlow's MCP servers. The user can send a name or UUID to get a specific MCP server. If no argument is given, then the command retrieves every MCP server. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery queryflow mcp-server get [flags] [<arg>]`
+
+Arguments:
+
+`arg`:
+(Optional, string) The name or UUID of the MCP server that will be retrieved.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`:
+(Optional, string) Add a filter to the search. The available filter is the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+
+Examples:
+
+```bash
+# Get an MCP server by id
+discovery queryflow mcp-server get c05632a7-e4db-4fc6-b88c-63317f9965a4
+{
+  "active": true,
+  "capabilities": {
+    "logging": {},
+    "tools": {}
+  },
+  "creationTimestamp": "2026-05-18T14:40:35Z",
+  "expireAfter": "PT1H",
+  "id": "c05632a7-e4db-4fc6-b88c-63317f9965a4",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2026-05-18T14:40:35Z",
+  "name": "my-mcp-server",
+  "requestTimeout": "PT1M",
+  "serverInfo": {
+    "name": "mcp-server",
+    "version": "1.0"
+  },
+  "uri": "/my/mcp/server"
+}
+```
+
+```bash
+# Get an MCP server by name
+discovery queryflow mcp-server get "my-mcp-server"
+{
+  "active": true,
+  "capabilities": {
+    "logging": {},
+    "tools": {}
+  },
+  "creationTimestamp": "2026-05-18T14:40:35Z",
+  "expireAfter": "PT1H",
+  "id": "c05632a7-e4db-4fc6-b88c-63317f9965a4",
+  "labels": [
+    {
+      "key": "A",
+      "value": "A"
+    }
+  ],
+  "lastUpdatedTimestamp": "2026-05-18T14:40:35Z",
+  "name": "my-mcp-server",
+  "requestTimeout": "PT1M",
+  "serverInfo": {
+    "name": "mcp-server",
+    "version": "1.0"
+  },
+  "uri": "/my/mcp/server"
+}
+```
+
+```bash
+# Get MCP servers using filters
+discovery queryflow mcp-server get --filter label=A:A
+{"active":true,"creationTimestamp":"2026-05-18T14:40:35Z","id":"c05632a7-e4db-4fc6-b88c-63317f9965a4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"my-mcp-server","uri":"/my/mcp/server"}
+{"active":true,"creationTimestamp":"2026-05-18T14:40:35Z","id":"af739565-6363-4355-b701-2b7504817e6a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"my-mcp-server-2","uri":"/my/other/mcp/server"}
+```
+
+```bash
+# Get all MCP servers using the configuration in profile "cn"
+discovery queryflow mcp-server get -p cn
+{"active":true,"creationTimestamp":"2026-05-18T14:40:35Z","id":"c05632a7-e4db-4fc6-b88c-63317f9965a4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"my-mcp-server","uri":"/my/mcp/server"}
+{"active":true,"creationTimestamp":"2026-05-18T14:40:35Z","id":"af739565-6363-4355-b701-2b7504817e6a","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"my-mcp-server-2","uri":"/my/other/mcp/server"}
+{"active":true,"creationTimestamp":"2026-05-18T14:40:35Z","id":"40f3e2e3-cdd7-4375-89ed-fbab299fe989","labels":[],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"my-mcp-server-3","uri":"/my/last/mcp/server"}
+```
+
+
 ##### Status
 `status` is the command used to check the status of Discovery QueryFlow. If it is healthy, it should return a JSON with an "UP" status field.
 
