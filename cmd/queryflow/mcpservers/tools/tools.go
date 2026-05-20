@@ -19,6 +19,7 @@ func NewToolCommand(d cli.Discovery) *cobra.Command {
 
 	tool.AddCommand(NewGetCommand(d))
 	tool.AddCommand(NewStoreCommand(d))
+	tool.AddCommand(NewDeleteCommand(d))
 
 	return tool
 }
