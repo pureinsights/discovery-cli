@@ -3660,7 +3660,7 @@ Flags:
 (Optional, string) Set the configuration profile that will execute the command.
 
 ###### Get
-`get` is the command used to obtain tools in an MCP server from Discovery QueryFlow. The user can send a name or UUID to get a specific MCP tool. If no argument is given, then the command retrieves every tool. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The first argument of this command must be the name or UUID of the MCP server that will contain the tool.
+`get` is the command used to obtain tools in an MCP server from Discovery QueryFlow. The user can send a name or UUID to get a specific MCP tool. If no argument is given, then the command retrieves every tool. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The first argument of this command must be the name or UUID of the MCP server that contains the tool.
 
 Usage: `discovery queryflow mcp-server tool get <mcp-server> [flags] [<arg>]`
 
@@ -3765,9 +3765,9 @@ discovery queryflow mcp-server tool store my-mcp-server --data '{"name":"my-mcp-
 ```
 
 ###### Delete
-`delete` is the command used to delete Discovery QueryFlow's MCP servers. The user must send a name or UUID to delete a specific MCP server. The first argument of this command must be the name or UUID of the MCP server that will contain the tool.
+`delete` is the command used to delete Discovery QueryFlow's MCP tools in MCP servers. The user must send a name or UUID to delete a specific MCP tool. The first argument of this command must be the name or UUID of the MCP server that contains the tool.
 
-Usage: `discovery queryflow mcp-server delete [flags] <mcp-server> <arg>`
+Usage: `discovery queryflow mcp-server tool delete [flags] <mcp-server> <arg>`
 
 Arguments:
 
