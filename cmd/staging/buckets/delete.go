@@ -19,20 +19,16 @@ func NewDeleteCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
 			}
 
-			err = commands.CheckCredentials(d, profile, "Staging", "staging_url")
-			if err != nil {
-				return err
-			}
-
 			vpr := d.Config()
 
 			stagingClient := discoveryPackage.NewStaging(vpr.GetString(profile+".staging_url"), vpr.GetString(profile+".staging_key"))
-			printer := cli.GetObjectPrinter(vpr.GetString("output"))
-
-			return d.DeleteBucket(stagingClient.Buckets(), args[0], printer)
+			return commands.SearchDeleteCommand(args[0], d, stagingClient.Buckets(), commands.GetCommandConfig(profile, vpr.GetString("output"), "Staging", "staging_url"))
 		},
 		Args: cobra.ExactArgs(1),
-		Example: `	# Delete a bucket by name
+		Example: `	# Delete a bucket by id
+	discovery staging bucket delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
+
+	# Delete a bucket by name
 	discovery staging bucket delete my-bucket`,
 	}
 	return get

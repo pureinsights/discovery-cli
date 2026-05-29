@@ -12,6 +12,7 @@ func NewBucketCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command to interact with Discovery Staging's buckets.",
 	}
 
+	bucket.AddCommand(NewGetCommand(d))
 	bucket.AddCommand(NewStoreCommand(d))
 	bucket.AddCommand(NewDeleteCommand(d))
 	bucket.AddCommand(NewDumpCommand(d))
