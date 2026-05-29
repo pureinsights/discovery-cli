@@ -3438,8 +3438,8 @@ Flags:
 
 `-h, --help`:
 (Optional, bool) Prints the usage of the command.
-`-p, --profile`:
 
+`-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
 Examples:
@@ -3452,6 +3452,7 @@ discovery queryflow endpoint delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
 }
 
 ```
+
 ```bash
 # Delete an endpoint by name
 discovery queryflow endpoint delete my-endpoint
@@ -3607,6 +3608,42 @@ discovery queryflow mcp-server store mcp-server-jsonfile.json
 # Store an MCP server with the JSON configuration in the data flag
 discovery queryflow mcp-server store --data '{"uri":"/my/mcp/server","name":"My MCP Server","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","capabilities":{"logging":{},"tools":{}},"serverInfo":{"name":"mcp-server","version":"1.0"},"requestTimeout":"60s","expireAfter":"1h","labels":[{"key":"A","value":"A"}]}'
 {"active":true,"capabilities":{"logging":{},"tools":{}},"creationTimestamp":"2026-05-18T14:40:35Z","expireAfter":"PT1H","id":"c05632a7-e4db-4fc6-b88c-63317f9965a4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"My MCP Server","requestTimeout":"PT1M","serverInfo":{"name":"mcp-server","version":"1.0"},"uri":"/my/mcp/server"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's MCP servers. The user must send a name or UUID to delete a specific MCP server.
+
+Usage: `discovery queryflow mcp-server delete [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the MCP server that will be deleted.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete an MCP server by id
+discovery queryflow mcp-server delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# Delete an MCP server by name
+discovery queryflow mcp-server delete my-mcp-server
+{
+  "acknowledged": true
+}
 ```
 
 ##### Status
