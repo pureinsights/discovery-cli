@@ -13,7 +13,7 @@ import (
 func NewGetCommand(d cli.Discovery) *cobra.Command {
 	var filters []string
 	get := &cobra.Command{
-		Use:   "get [<bucket>]",
+		Use:   "get <bucketName>",
 		Short: "The command that obtains buckets from Discovery Staging.",
 		Long:  fmt.Sprintf(commands.LongGetSearch, "bucket", "Staging"),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -39,6 +39,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filter is:
-- Label: The format is label={key}[:{value}], where the value is optional`)
+- Label: The format is label={key}[:{value}], where the value is optional
+- Type: The format is type={type}`)
 	return get
 }
