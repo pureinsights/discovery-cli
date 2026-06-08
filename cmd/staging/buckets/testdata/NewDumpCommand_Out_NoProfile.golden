@@ -1,9 +1,12 @@
 Usage:
-  dump <bucketName> [flags]
+  dump [flags]
 
 Examples:
-	# Dump a bucket with filters, include projections, and a page size of 5
-	discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5
+	# Dump a bucket by name with filters, include projections, and a page size of 5
+	discovery staging bucket dump "my-bucket" -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5
+
+		# Dump a bucket by id
+	discovery staging bucket dump ab0b4548-909d-4b23-aa62-69d8a6f8ed50
 
 Flags:
   -f, --filter string        the DSL containing the filters that will be applied to the scroll

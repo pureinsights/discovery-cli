@@ -1,11 +1,10 @@
-Error: Could not scroll the bucket with name "my-bucket".
+Error: Could not find bucket with name or id "my-bucket".
 status: 404, body: {
-  "status": 404,
-  "code": 1002,
-  "messages": [
-    "The bucket 'my-bucket' was not found."
-  ],
-  "timestamp": "2025-12-23T14:53:32.321524600Z"
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-bucket" does not exist"
+	]
 }
 
 

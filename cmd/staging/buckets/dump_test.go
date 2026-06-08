@@ -53,12 +53,11 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 					StatusCode:  http.StatusNotFound,
 					ContentType: "application/json",
 					Body: `{
-  "status": 404,
-  "code": 1002,
-  "messages": [
-    "The bucket 'my-bucket' was not found."
-  ],
-  "timestamp": "2025-12-23T14:53:32.321524600Z"
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-bucket" does not exist"
+	]
 }`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
@@ -70,14 +69,13 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
 				Status: http.StatusNotFound,
 				Body: gjson.Parse(`{
-  "status": 404,
-  "code": 1002,
-  "messages": [
-    "The bucket 'my-bucket' was not found."
-  ],
-  "timestamp": "2025-12-23T14:53:32.321524600Z"
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-bucket" does not exist"
+	]
 }`),
-			}, "Could not scroll the bucket with name \"my-bucket\"."),
+			}, "Could not find bucket with name or id \"my-bucket\"."),
 		},
 		{
 			name:      "Sent page size flag is < 1",
@@ -151,18 +149,47 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 // TestNewDumpCommand_WorkingCase tests the Dump command with a working scroll.
 func TestNewDumpCommand_WorkingCase(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, http.MethodPost, r.Method)
-		assert.Equal(t, "/v2/content/my-bucket/scroll", r.URL.Path)
-		token := r.URL.Query().Get("token")
-		assert.Equal(t, "3", r.URL.Query().Get("size"))
 		w.Header().Set("Content-Type", "application/json")
-		switch token {
-		case "694eb7f378aedc7a163da908":
-			w.WriteHeader(http.StatusNoContent)
-			_, _ = w.Write([]byte(`[]`))
-		case "694eb7f378aedc7a163da907":
+
+		switch r.URL.Path {
+		case "/v2/bucket/search":
+			assert.Equal(t, http.MethodPost, r.Method)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{
+				"content": [
+					{
+						"source": {
+							"id": "fbe3e8ab-44a7-4b8f-b696-cbfc528d9bb0",
+							"name": "my-bucket",
+							"active": true
+						},
+						"highlight": {},
+						"score": 1.0
+					}
+				],
+				"empty": false
+			}`))
+		case "/v2/bucket/fbe3e8ab-44a7-4b8f-b696-cbfc528d9bb0":
+			assert.Equal(t, http.MethodGet, r.Method)
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+        "id": "fbe3e8ab-44a7-4b8f-b696-cbfc528d9bb0",
+        "name": "my-bucket",
+        "active": true
+    }`))
+		case "/v2/content/my-bucket/scroll":
+			assert.Equal(t, http.MethodPost, r.Method)
+			assert.Equal(t, "/v2/content/my-bucket/scroll", r.URL.Path)
+			token := r.URL.Query().Get("token")
+			assert.Equal(t, "3", r.URL.Query().Get("size"))
+			w.Header().Set("Content-Type", "application/json")
+			switch token {
+			case "694eb7f378aedc7a163da908":
+				w.WriteHeader(http.StatusNoContent)
+				_, _ = w.Write([]byte(`[]`))
+			case "694eb7f378aedc7a163da907":
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{
 			"token": "694eb7f378aedc7a163da908",
 			"content": [
                   {
@@ -210,9 +237,9 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
           ],
 		  "empty": false
 			}`))
-		default:
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{
+			default:
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{
 			"token": "694eb7f378aedc7a163da907",
 			"content": [
                   {
@@ -260,177 +287,11 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
           ],
 		  "empty": false
 			}`))
-		}
-	}))
-	t.Cleanup(srv.Close)
-
-	in := strings.NewReader("")
-	out := &bytes.Buffer{}
-
-	errBuf := &bytes.Buffer{}
-	ios := iostreams.IOStreams{
-		In:  in,
-		Out: out,
-		Err: errBuf,
-	}
-
-	vpr := viper.New()
-	vpr.Set("profile", "default")
-	vpr.Set("output", "pretty-json")
-	vpr.Set("default.staging_url", srv.URL)
-
-	vpr.Set("default.staging_key", "")
-
-	d := cli.NewDiscovery(&ios, vpr, t.TempDir())
-
-	dumpCmd := NewDumpCommand(d)
-
-	dumpCmd.SilenceUsage = true
-	dumpCmd.SetIn(ios.In)
-	dumpCmd.SetOut(ios.Out)
-	dumpCmd.SetErr(ios.Err)
-
-	dumpCmd.PersistentFlags().StringP(
-		"profile",
-		"p",
-		d.Config().GetString("profile"),
-		"configuration profile to use",
-	)
-
-	dumpCmd.SetArgs([]string{"my-bucket", "--filter", `{
-	"equals": {
-		"field": "author",
-		"value": "Martin Bayton",
-		"normalize": true
-	}
-}`, "--page-size", "3", "--output-file", filepath.Join(t.TempDir(), "my-bucket.zip")})
-
-	err := dumpCmd.Execute()
-	require.NoError(t, err)
-	testutils.CompareBytes(t, "NewDumpCommand_Out_WorkingScroll", testutils.Read(t, "NewDumpCommand_Out_WorkingScroll"), out.Bytes())
-}
-
-// TestNewDumpCommand_WorkingCase_ByID tests the Dump command with a working scroll.
-func TestNewDumpCommand_WorkingCase_ByID(t *testing.T) {
-	bucketID := "fbe3e8ab-44a7-4b8f-b696-cbfc528d9bb0"
-
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		if r.Method == http.MethodGet && r.URL.Path == "/bucket/"+bucketID {
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":"fbe3e8ab-44a7-4b8f-b696-cbfc528d9bb0","name":"my-bucket","active":true,"indices":[],"labels":[], "documentCount":{"STORE":3}}`))
-			return
-		}
-
-		assert.Equal(t, http.MethodPost, r.Method)
-		assert.Equal(t, "/v2/content/my-bucket/scroll", r.URL.Path)
-		token := r.URL.Query().Get("token")
-		assert.Equal(t, "3", r.URL.Query().Get("size"))
-		switch token {
-		case "694eb7f378aedc7a163da908":
-			w.WriteHeader(http.StatusNoContent)
-			_, _ = w.Write([]byte(`[]`))
-		case "694eb7f378aedc7a163da907":
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{
-			"token": "694eb7f378aedc7a163da908",
-			"content": [
-                  {
-                          "id": "4",
-                          "creationTimestamp": "2025-12-26T16:28:59Z",
-                          "lastUpdatedTimestamp": "2025-12-26T16:28:59Z",
-                          "action": "STORE",
-                          "checksum": "855609b26c318a627760fd36d2d6fe8f",
-                          "content": {
-                                  "_id": "4e7c8a47efd829ef7f710d64da661786",
-                                  "link": "https://pureinsights.com/blog/2024/kmworld-2024-key-takeaways-from-the-exhibit-hall/",
-                                  "author": "Graham Gillen",
-                                  "header": "KMWorld 2024: Key Takeaways from the Exhibit Hall - Pureinsights: Key insights from KMWorld 2024: AI's impact on knowledge management, standout vendors, and challenges for traditional players adapting to AI."
-                          },
-                          "transaction": "694eb7cb78aedc7a163da902"
-                  },
-                  {
-                          "id": "5",
-                          "creationTimestamp": "2025-12-26T16:29:05Z",
-                          "lastUpdatedTimestamp": "2025-12-26T16:29:05Z",
-                          "action": "STORE",
-                          "checksum": "855609b26c318a627760fd36d2d6fe8f",
-                          "content": {
-                                  "_id": "b1e3e4f42c0818b1580e306eb776d4a1",
-                                  "link": "https://pureinsights.com/blog/2024/google-unveils-ai-enhanced-search-features-at-2024-io-conference/",
-                                  "author": "Martin Bayton",
-                                  "header": "Google Unveils AI-Enhanced Search Features at I/O Conference - Pureinsights: Google I/O 2024 Developer Conference key takeaways, including AI-generated summaries and other features for search."
-                          },
-                          "transaction": "694eb7d178aedc7a163da903"
-                  },
-                  {
-                          "id": "6",
-                          "creationTimestamp": "2025-12-26T16:29:12Z",
-                          "lastUpdatedTimestamp": "2025-12-26T16:29:12Z",
-                          "action": "STORE",
-                          "checksum": "228cc56c873a457041454280c448b4e3",
-                          "content": {
-                                  "_id": "232638a332048c4cb159f8cf6636507f",
-                                  "link": "https://pureinsights.com/blog/2025/7-tech-trends-in-ai-and-search-for-2025/",
-                                  "author": "Phil Lewis",
-                                  "header": "7 Tech Trends in AI and Search for 2025 - Pureinsights: 7 Tech Trends is AI and Search for 2025 - presented by Pureinsights CTO, Phil Lewis. A blog about key trends to look for in the coming year."
-                          },
-                          "transaction": "694eb7d878aedc7a163da904"
-                  }
-          ],
-		  "empty": false
-			}`))
+			}
 		default:
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{
-			"token": "694eb7f378aedc7a163da907",
-			"content": [
-                  {
-                          "id": "1",
-                          "creationTimestamp": "2025-12-26T16:28:38Z",
-                          "lastUpdatedTimestamp": "2025-12-26T16:28:38Z",
-                          "action": "STORE",
-                          "checksum": "58b3d1b06729f1491373b97fd8287ae1",
-                          "content": {
-                                  "_id": "5625c64483bef0d48e9ad91aca9b2f94",
-                                  "link": "https://pureinsights.com/blog/2024/pureinsights-named-mongodbs-2024-ai-partner-of-the-year/",
-                                  "author": "Graham Gillen",
-                                  "header": "Pureinsights Named MongoDB's 2024 AI Partner of the Year - Pureinsights: PRESS RELEASE - Pureinsights named MongoDB's Service AI Partner of the Year for 2024 and also joins the MongoDB AI Application Program (MAAP)."
-                          },
-                          "transaction": "694eb7b678aedc7a163da8ff"
-                  },
-                  {
-                          "id": "2",
-                          "creationTimestamp": "2025-12-26T16:28:46Z",
-                          "lastUpdatedTimestamp": "2025-12-26T16:28:46Z",
-                          "action": "STORE",
-                          "checksum": "b76292db9fd1c7aef145512dce131f4d",
-                          "content": {
-                                  "_id": "768b0a3bcee501dc624484ba8a0d7f6d",
-                                  "link": "https://pureinsights.com/blog/2024/five-common-challenges-when-implementing-rag-retrieval-augmented-generation/",
-                                  "author": "Matt Willsmore",
-                                  "header": "5 Challenges Implementing Retrieval Augmented Generation (RAG) - Pureinsights: A blog on 5 common challenges when implementing RAG (Retrieval Augmented Generation) and possible solutions for search applications."
-                          },
-                          "transaction": "694eb7be78aedc7a163da900"
-                  },
-                  {
-                          "id": "3",
-                          "creationTimestamp": "2025-12-26T16:28:54Z",
-                          "lastUpdatedTimestamp": "2025-12-26T16:28:54Z",
-                          "action": "STORE",
-                          "checksum": "cbffeeba8f4739650ae048fb382c8870",
-                          "content": {
-                                  "_id": "d758c733466967ea6f13b20bcbfcebb5",
-                                  "link": "https://pureinsights.com/blog/2024/modernizing-search-with-generative-ai/",
-                                  "author": "Martin Bayton",
-                                  "header": "Modernizing Search with Generative AI - Pureinsights: Blog: why you should implement Retrieval-Augmented Generation (RAG) and how platforms like Pureinsights Discovery streamline the process."
-                          },
-                          "transaction": "694eb7c678aedc7a163da901"
-                  }
-          ],
-		  "empty": false
-			}`))
+			w.WriteHeader(http.StatusNotFound)
 		}
+
 	}))
 	t.Cleanup(srv.Close)
 

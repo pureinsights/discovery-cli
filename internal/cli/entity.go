@@ -381,3 +381,21 @@ func (d discovery) SearchDeleteEntity(client SearchDeleter, name string, printer
 	}
 	return d.DeleteEntity(client, deleteId, printer)
 }
+
+// SearchDumper is the interface that implements the dump method that works with names.
+type SearchDumper interface {
+	Getter
+	Searcher
+}
+
+// SearchDumperEntity searches for the entity with the given name and then dumps it.
+// SearchDumpBucket searches for the bucket with the given name or UUID and then dumps it.
+func (d discovery) SearchDumpBucket(client SearchDumper, contentProvider func(string) StagingContentController, nameOrID, file string, filters, projections gjson.Result, size *int, printer Printer) error {
+	result, err := d.searchEntity(client, nameOrID)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not find bucket with name or id %q.", nameOrID)
+	}
+
+	bucketName := result.Get("name").String()
+	return d.DumpBucket(contentProvider(bucketName), bucketName, file, filters, projections, size, printer)
+}

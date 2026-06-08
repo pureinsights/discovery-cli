@@ -3,7 +3,6 @@ package buckets
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/pureinsights/discovery-cli/cmd/commands"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
@@ -18,9 +17,9 @@ func NewDumpCommand(d cli.Discovery) *cobra.Command {
 	var pageSize int
 	var file string
 	dump := &cobra.Command{
-		Use:   "dump <bucketName>",
+		Use:   "dump",
 		Short: "The command that dumps buckets to Discovery Staging.",
-		Long:  "dump is the command used to scroll a bucket's content in the Discovery Staging Repository. The bucket's name is sent as the mandatory argument. The results are saved in a zip file that contains JSON files with the bucket's records. Each record is stored in its own JSON file that uses the record's transaction as its name. With the --output-file, the user can send the path in which to save the records. If the path is not sent, the dump will be saved in a zip file in the current directory with the name of the bucket. The user can send filters with the --filter flag, which is a single JSON string that contains all of the filters. With the --projection flag, the user can send the fields that will be included or excluded from the results. With the --page-size flag, the user can send the maximum number of elements that will be retrieved with every page.",
+		Long:  "dump is the command used to scroll a bucket's content in the Discovery Staging Repository. The bucket's name or UUID is sent as the mandatory argument. The results are saved in a zip file that contains JSON files with the bucket's records. Each record is stored in its own JSON file that uses the record's transaction as its name. With the --output-file, the user can send the path in which to save the records. If the path is not sent, the dump will be saved in a zip file in the current directory with the name of the bucket. The user can send filters with the --filter flag, which is a single JSON string that contains all of the filters. With the --projection flag, the user can send the fields that will be included or excluded from the results. With the --page-size flag, the user can send the maximum number of elements that will be retrieved with every page.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -43,27 +42,20 @@ func NewDumpCommand(d cli.Discovery) *cobra.Command {
 				}
 			}
 
-			bucketName := args[0]
-			if id, err := uuid.Parse(args[0]); err == nil {
-				result, err := stagingClient.Buckets().Get(id)
-				if err != nil {
-					return err
-				}
-				bucketName = result.Get("name").String()
-				if bucketName == "" {
-					return cli.NewError(cli.ErrorExitCode, "Could not find bucket with id %q", args[0])
-				}
-			}
-
 			if !(cmd.Flags().Changed("output-file")) {
-				file = fmt.Sprintf("%s.zip", bucketName)
+				file = fmt.Sprintf("%s.zip", args[0])
 			}
 
-			return d.DumpBucket(stagingClient.Content(bucketName), bucketName, file, gjson.Parse(filters), gjson.Parse(projections), &pageSize, printer)
+			return commands.DumpCommand(args[0], d, stagingClient.Buckets(), func(name string) cli.StagingContentController {
+				return stagingClient.Content(name)
+			}, file, gjson.Parse(filters), gjson.Parse(projections), &pageSize, printer)
 		},
 		Args: cobra.ExactArgs(1),
-		Example: `	# Dump a bucket with filters, include projections, and a page size of 5
-	discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5`,
+		Example: `	# Dump a bucket by name with filters, include projections, and a page size of 5
+	discovery staging bucket dump "my-bucket" -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5
+
+		# Dump a bucket by id
+	discovery staging bucket dump ab0b4548-909d-4b23-aa62-69d8a6f8ed50`,
 	}
 
 	dump.Flags().StringVar(&file, "output-file", "", "the file that will contain the bucket's records")
