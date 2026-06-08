@@ -2,6 +2,9 @@ Usage:
   delete [flags]
 
 Examples:
+	# Delete a bucket by id
+	discovery staging bucket delete ea02fc14-f07b-49f2-b185-e9ceaedcb367
+
 	# Delete a bucket by name
 	discovery staging bucket delete my-bucket
 

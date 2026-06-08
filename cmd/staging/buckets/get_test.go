@@ -54,23 +54,19 @@ func TestNewGetCommand(t *testing.T) {
 					"description": "description",
 					"labels": [
 						{
-							"key": "type",
-							"value": "test"
+							"key": "A",
+							"value": "B"
 						}
 					],
 					"active": false,
-					"id": "2831800d-289a-4a06-a65b-c3f2499547f8",
-					"creationTimestamp": "2026-06-04T22:07:56Z",
-					"lastUpdatedTimestamp": "2026-06-04T22:20:23Z"
+					"id": "2831800d-289a-4a06-a65b-c3f2499547f8"
 				},
 				{
 					"name": "my-bucket",
 					"description": "description",
 					"labels": [],
 					"active": true,
-					"id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0",
-					"creationTimestamp": "2026-06-04T22:06:02Z",
-					"lastUpdatedTimestamp": "2026-06-04T22:06:02Z"
+					"id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0"
 				}
 			],
 			"pageable": {

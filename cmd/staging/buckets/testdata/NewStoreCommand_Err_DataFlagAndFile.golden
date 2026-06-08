@@ -1,2 +1,2 @@
-Error: The data flag can only have the bucket name argument.
+Error: There cannot be both a file argument and the data flag
 

@@ -28,12 +28,11 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 			stagingClient := discoveryPackage.NewStaging(vpr.GetString(profile+".staging_url"), vpr.GetString(profile+".staging_key"))
 			return commands.SearchStoreCommand(d, stagingClient.Buckets(), commands.StoreCommandConfig(commands.GetCommandConfig(profile, vpr.GetString("output"), "Staging", "staging_url"), abortOnError, data, args))
 		},
-		Args: cobra.RangeArgs(1, 2),
 		Example: `	# Store a bucket with the JSON configuration in a file
 	discovery staging bucket store configFile.json
 
 	# Store a bucket with the JSON configuration in the data flag
-	discovery staging bucket store --data '{"name":"my-bucket","config":{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}}`,
+	discovery staging bucket store --data '{"name":"my-bucket","config":{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}}'`,
 	}
 
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")

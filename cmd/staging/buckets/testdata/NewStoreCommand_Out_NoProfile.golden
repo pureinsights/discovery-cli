@@ -1,14 +1,15 @@
 Usage:
-  store <bucketName> [configFile] [flags]
+  store [<files>...] [flags]
 
 Examples:
 	# Store a bucket with the JSON configuration in a file
-	discovery staging bucket store my-bucket configFile.json
+	discovery staging bucket store configFile.json
 
 	# Store a bucket with the JSON configuration in the data flag
-	discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}
+	discovery staging bucket store --data '{"name":"my-bucket","config":{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}}'
 
 Flags:
-  -d, --data string   the JSON with the configuration of the bucket
-  -h, --help          help for store
+      --abort-on-error   aborts the operation if there is an error
+  -d, --data string      the JSON with the configurations that will be upserted
+  -h, --help             help for store
 

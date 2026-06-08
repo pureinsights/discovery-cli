@@ -10,30 +10,29 @@ import (
 	"strings"
 	"testing"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tidwall/gjson"
 )
 
 // TestNewStoreCommand tests the NewStoreCommand() function.
 func TestNewStoreCommand(t *testing.T) {
 	tests := []struct {
-		name      string
-		url       bool
-		apiKey    string
-		outGolden string
-		errGolden string
-		outBytes  []byte
-		errBytes  []byte
-		data      string
-		file      string
-		responses map[string]testutils.MockResponse
-		err       error
+		name         string
+		url          bool
+		apiKey       string
+		outGolden    string
+		errGolden    string
+		outBytes     []byte
+		errBytes     []byte
+		data         string
+		file         string
+		abortOnError bool
+		responses    map[string]testutils.MockResponse
+		err          error
 	}{
 		// Working case
 		{
@@ -45,6 +44,7 @@ func TestNewStoreCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreDataFlag"),
 			errBytes:  []byte(nil),
 			data: `{
+	"name": "my-bucket-a",
 	"indices": [
 		{
 			"name": "myIndexA",
@@ -67,80 +67,128 @@ func TestNewStoreCommand(t *testing.T) {
 	],
 	"config": {}
 }`,
-			file: "",
+			file:         "",
+			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket/my-bucket": {
+				"POST:/v2/bucket": {
 					StatusCode: http.StatusOK,
 					Body: `{
-  "acknowledged": true
+  "name": "my-bucket-a",
+  "id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0",
+  "active": true,
+  "indices": [
+    {
+      "name": "myIndexA",
+      "fields": [
+        {
+          "fieldName": "ASC"
+        }
+      ],
+      "unique": false
+    },
+    {
+      "name": "myIndexB",
+      "fields": [
+        {
+          "fieldName2": "DESC"
+        }
+      ],
+      "unique": false
+    }
+  ]
 }`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket", r.URL.Path)
 					},
 				},
-				"GET:/v2/bucket/my-bucket": {
+				"GET:/v2/bucket/69eeb20b-8ded-478f-937f-64caa0a3e8c0": {
 					StatusCode: http.StatusOK,
 					Body: `{
-  "name": "my-bucket",
-  "documentCount": {},
+  "name": "my-bucket-a",
+  "id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0",
+  "active": true,
   "indices": [
     {
-		"name": "myIndexA",
-		"fields": [
-			{
-			"fieldName": "ASC"
-			}
-		],
-		"unique": false
-	},
-	{
-		"name": "myIndexB",
-		"fields": [
-			{
-			"fieldName2": "DESC"
-			}
-		],
-		"unique": false
-	}
+      "name": "myIndexA",
+      "fields": [
+        {
+          "fieldName": "ASC"
+        }
+      ],
+      "unique": false
+    },
+    {
+      "name": "myIndexB",
+      "fields": [
+        {
+          "fieldName2": "DESC"
+        }
+      ],
+      "unique": false
+    }
   ]
 }`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket/69eeb20b-8ded-478f-937f-64caa0a3e8c0", r.URL.Path)
 					},
 				},
 			},
 			err: nil,
 		},
 		{
-			name:      "Store receives the bucket config through the argument",
-			url:       true,
-			apiKey:    "",
-			outGolden: "NewStoreCommand_Out_StoreFileArg",
-			errGolden: "NewStoreCommand_Err_StoreFileArg",
-			outBytes:  testutils.Read(t, "NewStoreCommand_Out_StoreFileArg"),
-			errBytes:  []byte(nil),
-			data:      ``,
-			file:      "testdata/StoreCommand_BucketConfig.json",
+			name:         "Store receives the bucket config through the argument",
+			url:          true,
+			apiKey:       "",
+			outGolden:    "NewStoreCommand_Out_StoreFileArg",
+			errGolden:    "NewStoreCommand_Err_StoreFileArg",
+			outBytes:     testutils.Read(t, "NewStoreCommand_Out_StoreFileArg"),
+			errBytes:     []byte(nil),
+			data:         ``,
+			file:         "testdata/StoreCommand_BucketConfig.json",
+			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket/my-bucket": {
+				"POST:/v2/bucket": {
 					StatusCode: http.StatusOK,
 					Body: `{
-  "acknowledged": true
-}`,
+							"documentCount": {},
+							"indices": [
+							{
+								"fields": [
+								{
+									"fieldName": "ASC"
+								}
+								],
+								"name": "myIndexA",
+								"unique": false
+							},
+							{
+								"fields": [
+								{
+									"fieldName2": "DESC"
+								}
+								],
+								"name": "myIndexB",
+								"unique": false
+							}
+							],
+							"name": "my-bucket-a",
+							"id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0"
+						}`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket", r.URL.Path)
 					},
 				},
-				"GET:/v2/bucket/my-bucket": {
+				"GET:/v2/bucket/69eeb20b-8ded-478f-937f-64caa0a3e8c0": {
 					StatusCode: http.StatusOK,
 					Body: `{
   "name": "my-bucket",
+  "id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0",
   "documentCount": {},
   "indices": [
     {
@@ -166,7 +214,7 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket/69eeb20b-8ded-478f-937f-64caa0a3e8c0", r.URL.Path)
 					},
 				},
 			},
@@ -205,8 +253,9 @@ func TestNewStoreCommand(t *testing.T) {
 	],
 	"config": {}
 }`,
-			file: "",
-			err:  cli.NewError(cli.ErrorExitCode, "The Discovery Staging URL is missing for profile \"default\".\nTo set the URL for the Discovery Staging API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery staging config --profile \"default\""),
+			file:         "",
+			abortOnError: false,
+			err:          cli.NewError(cli.ErrorExitCode, "The Discovery Staging URL is missing for profile \"default\".\nTo set the URL for the Discovery Staging API, run any of the following commands:\n      discovery config  --profile \"default\"\n      discovery staging config --profile \"default\""),
 		},
 		{
 			name:      "Store receives the data flag and bucket config file",
@@ -239,74 +288,48 @@ func TestNewStoreCommand(t *testing.T) {
 	],
 	"config": {}
 }`,
-			file:      "testdata/StoreCommand_BucketConfig.json",
-			responses: map[string]testutils.MockResponse{},
-			err:       cli.NewError(cli.ErrorExitCode, "The data flag can only have the bucket name argument."),
+			file:         "testdata/StoreCommand_BucketConfig.json",
+			abortOnError: false,
+			responses:    map[string]testutils.MockResponse{},
+			err:          cli.NewError(cli.ErrorExitCode, "There cannot be both a file argument and the data flag"),
 		},
 		{
-			name:      "The bucket already exists",
-			url:       true,
-			apiKey:    "apiKey123",
-			outGolden: "NewStoreCommand_Out_BucketExists",
-			errGolden: "NewStoreCommand_Err_BucketExists",
-			outBytes:  []byte(nil),
-			errBytes:  testutils.Read(t, "NewStoreCommand_Err_BucketExists"),
-			data: `{
-	"config": {}
-}`,
-			file: "",
+			name:         "StoreCommand tries to read a file that does not exist",
+			url:          true,
+			apiKey:       "apiKey123",
+			outGolden:    "NewStoreCommand_Out_FileNotExists",
+			errGolden:    "NewStoreCommand_Err_FileNotExists",
+			outBytes:     []byte(nil),
+			data:         "",
+			file:         "doesnotexist",
+			abortOnError: false,
+			errBytes:     testutils.Read(t, "NewStoreCommand_Err_FileNotExists"),
+			err:          cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
+		},
+		{
+			name:         "Printing JSON Object fails",
+			outGolden:    "NewStoreCommand_Out_PrintJSONFails",
+			errGolden:    "NewStoreCommand_Err_PrintJSONFails",
+			outBytes:     []byte(nil),
+			errBytes:     testutils.Read(t, "NewStoreCommand_Err_PrintJSONFails"),
+			url:          true,
+			apiKey:       "apiKey123",
+			data:         ``,
+			file:         "testdata/StoreCommand_BucketConfig.json",
+			abortOnError: false,
 			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket/my-bucket": {
-					StatusCode: http.StatusConflict,
-					Body: `{
-  "acknowledged": false
-}`,
-					ContentType: "application/json",
-					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
-					},
-				},
-			},
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusConflict, Body: gjson.Parse(`{
-  "acknowledged": false
-}`)}, "Could not create bucket with name \"my-bucket\"."),
-		},
-		{
-			name:      "StoreCommand tries to read a file that does not exist",
-			url:       true,
-			apiKey:    "apiKey123",
-			outGolden: "NewStoreCommand_Out_FileNotExists",
-			errGolden: "NewStoreCommand_Err_FileNotExists",
-			outBytes:  []byte(nil),
-			data:      "",
-			file:      "doesnotexist",
-			errBytes:  testutils.Read(t, "NewStoreCommand_Err_FileNotExists"),
-			err:       cli.NewErrorWithCause(cli.ErrorExitCode, fmt.Errorf("file does not exist: %s", "doesnotexist"), "Could not read file \"doesnotexist\""),
-		},
-		{
-			name:      "Printing JSON Object fails",
-			outGolden: "NewStoreCommand_Out_PrintJSONFails",
-			errGolden: "NewStoreCommand_Err_PrintJSONFails",
-			outBytes:  []byte(nil),
-			errBytes:  testutils.Read(t, "NewStoreCommand_Err_PrintJSONFails"),
-			url:       true,
-			apiKey:    "apiKey123",
-			data:      ``,
-			file:      "testdata/StoreCommand_BucketConfig.json",
-			responses: map[string]testutils.MockResponse{
-				"POST:/v2/bucket/my-bucket": {
+				"POST:/v2/bucket": {
 					StatusCode: http.StatusOK,
 					Body: `{
-  "acknowledged": true
+  "acknowledged: true
 }`,
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket", r.URL.Path)
 					},
 				},
-				"GET:/v2/bucket/my-bucket": {
+				"GET:/v2/bucket": {
 					StatusCode: http.StatusOK,
 					Body: `{
   "name": "my-bucket",
@@ -335,11 +358,11 @@ func TestNewStoreCommand(t *testing.T) {
 					ContentType: "application/json",
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodGet, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket", r.URL.Path)
 					},
 				},
 			},
-			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '\\n' in string literal"), "Could not print JSON object"),
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("invalid character '\\n' in string literal"), "Could not print JSON Array"),
 		},
 	}
 
@@ -385,7 +408,7 @@ func TestNewStoreCommand(t *testing.T) {
 				"configuration profile to use",
 			)
 
-			args := []string{"my-bucket"}
+			args := []string{}
 			if tc.data != "" || tc.file == "" {
 				args = append(args, "--data")
 				args = append(args, tc.data)
@@ -395,6 +418,7 @@ func TestNewStoreCommand(t *testing.T) {
 				args = append(args, tc.file)
 			}
 
+			args = append(args, fmt.Sprintf("--abort-on-error=%t", tc.abortOnError))
 			storeCmd.SetArgs(args)
 
 			err := storeCmd.Execute()
