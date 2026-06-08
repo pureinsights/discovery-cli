@@ -3911,7 +3911,7 @@ Usage: `discovery staging bucket dump [flags] <arg>`
 Arguments:
 
 `arg`:
-(Required, string) The name of the bucket that will be scrolled.
+(Required, string) The name or UUID of the bucket that will be scrolled.
 
 Flags:
 
@@ -3955,8 +3955,14 @@ Flags:
 Examples:
 
 ```bash
-# Dump a bucket with filters, include projections, and a page size of 5
+# Dump a bucket by name with filters, include projections, and a page size of 5
 discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5'
+{
+  "acknowledged": true
+}
+
+# Dump a bucket by id
+discovery staging bucket dump ab0b4548-909d-4b23-aa62-69d8a6f8ed50
 {
   "acknowledged": true
 }

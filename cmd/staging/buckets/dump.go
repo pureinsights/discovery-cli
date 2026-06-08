@@ -3,6 +3,7 @@ package buckets
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/pureinsights/discovery-cli/cmd/commands"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
@@ -42,11 +43,23 @@ func NewDumpCommand(d cli.Discovery) *cobra.Command {
 				}
 			}
 
-			if !(cmd.Flags().Changed("output-file")) {
-				file = fmt.Sprintf("%s.zip", args[0])
+			bucketName := args[0]
+			if id, err := uuid.Parse(args[0]); err == nil {
+				result, err := stagingClient.Buckets().Get(id)
+				if err != nil {
+					return err
+				}
+				bucketName = result.Get("name").String()
+				if bucketName == "" {
+					return cli.NewError(cli.ErrorExitCode, "Could not find bucket with id %q", args[0])
+				}
 			}
 
-			return d.DumpBucket(stagingClient.Content(args[0]), args[0], file, gjson.Parse(filters), gjson.Parse(projections), &pageSize, printer)
+			if !(cmd.Flags().Changed("output-file")) {
+				file = fmt.Sprintf("%s.zip", bucketName)
+			}
+
+			return d.DumpBucket(stagingClient.Content(bucketName), bucketName, file, gjson.Parse(filters), gjson.Parse(projections), &pageSize, printer)
 		},
 		Args: cobra.ExactArgs(1),
 		Example: `	# Dump a bucket with filters, include projections, and a page size of 5
