@@ -3646,6 +3646,163 @@ discovery queryflow mcp-server delete my-mcp-server
 }
 ```
 
+##### Tool
+`tool` is the command used to manage tools in MCP servers in Discovery QueryFlow. This command contains various subcommands used to create, read, update, and delete.
+
+Usage: `discovery queryflow mcp-server tool [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain tools in an MCP server from Discovery QueryFlow. The user can send a name or UUID to get a specific MCP tool. If no argument is given, then the command retrieves every tool. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`. The first argument of this command must be the name or UUID of the MCP server that contains the tool.
+
+Usage: `discovery queryflow mcp-server tool get <mcp-server> [flags] [<arg>]`
+
+Arguments:
+
+`mcp-server`:
+(Required, string) The name or UUID of the MCP server that contains the tool.
+
+`arg`:
+(Optional, string) The name or UUID of the MCP tool that will be retrieved.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`:
+(Optional, string) Add a filter to the search. The available filter is the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+
+Examples:
+
+```bash
+# Get an MCP tool from an MCP server by name
+discovery queryflow mcp-server tool get my-mcp-server my-mcp-server-tool
+{
+  "name": "my-mcp-server-tool",
+  "labels": [],
+  "active": true,
+  "id": "9fd7037c-1e5a-4f00-9ed3-b15a137cbbe3",
+  "creationTimestamp": "2026-05-19T22:19:31Z",
+  "lastUpdatedTimestamp": "2026-05-19T22:19:31Z",
+  "pipeline": "4b558077-cb0f-4e1c-ab6b-ed96870529e4",
+  "timeout": "PT1M",
+  "inputSchema": {
+    "type": "object",
+    "required": [
+      "name"
+    ],
+    "properties": {
+      "age": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "name": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+```bash
+# Get all tools in an MCP server using the configuration in profile "cn"
+discovery queryflow mcp-server tool get my-mcp-server -p cn
+{"active":true,"creationTimestamp":"2026-05-19T22:19:31Z","id":"9fd7037c-1e5a-4f00-9ed3-b15a137cbbe3","labels":[],"lastUpdatedTimestamp":"2026-05-19T22:19:31Z","name":"my-mcp-server-tool"}
+{"active":true,"creationTimestamp":"2026-05-19T22:19:31Z","id":"0b4bdc42-8127-4d64-8199-ecc08400c052","labels":[],"lastUpdatedTimestamp":"2026-05-19T22:19:31Z","name":"my-mcp-server-tool-2"}
+```
+
+###### Store
+`store` is the command used to create and update Discovery QueryFlow's MCP tools in MCP servers. With the `data` flag, the user can send a single JSON configuration or an array to upsert multiple tools. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all entities will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the entity with that UUID. If no such entity exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for an entity with the given name. If found, it is updated; otherwise, a new entity is created. The first argument of this command must be the name or UUID of the MCP server that will contain the tool.
+
+Usage: `discovery queryflow mcp-server tool store <mcp-server> [<file>...] [flags]`
+
+Arguments:
+
+`mcp-server`:
+(Required, string) The name or UUID of the MCP server that will contain the tool.
+
+`file`:
+(Optional, string) The path of a file that contains entities to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
+
+Flags:
+
+`-d, --data`:
+(Required, string) Set the JSON configurations of the entities that will be stored. This flag is mutually exclusive to the file arguments.
+
+`--abort-on-error`:
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store an MCP tool in an MCP server with the JSON configuration in a file
+discovery queryflow mcp-server tool store my-mcp-server mcp-tool-jsonfile.json
+{"active":true,"creationTimestamp":"2026-05-19T20:13:09.359145Z","id":"6fee66f0-0ecd-495b-99ee-a07e4eeecb42","inputSchema":{"properties":{"age":{"minimum":0,"type":"integer"},"name":{"type":"string"}},"required":["name"],"type":"object"},"lastUpdatedTimestamp":"2026-05-19T20:13:09.359145Z","name":"my-mcp-server-tool","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","timeout":"PT1M"}
+```
+
+```bash
+# Store an MCP tool in an MCP server with the JSON configuration in the data flag
+discovery queryflow mcp-server tool store my-mcp-server --data '{"name":"my-mcp-server-tool","inputSchema":{"type":"object","properties":{"name":{"type":"string"},"age":{"type":"integer","minimum":0}},"required":["name"]},"pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","timeout":"60s"}'
+{"active":true,"creationTimestamp":"2026-05-19T20:13:09.359145Z","id":"6fee66f0-0ecd-495b-99ee-a07e4eeecb42","inputSchema":{"properties":{"age":{"minimum":0,"type":"integer"},"name":{"type":"string"}},"required":["name"],"type":"object"},"lastUpdatedTimestamp":"2026-05-19T20:13:09.359145Z","name":"my-mcp-server-tool","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","timeout":"PT1M"}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery QueryFlow's MCP tools in MCP servers. The user must send a name or UUID to delete a specific MCP tool. The first argument of this command must be the name or UUID of the MCP server that contains the tool.
+
+Usage: `discovery queryflow mcp-server tool delete [flags] <mcp-server> <arg>`
+
+Arguments:
+
+`mcp-server`:
+(Required, string) The name or UUID of the MCP server that contains the tool.
+
+`arg`:
+(Required, string) The name or UUID of the MCP tool that will be deleted.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a tool in an MCP server by id
+discovery queryflow mcp-server tool delete my-mcp-server ea02fc14-f07b-49f2-b185-e9ceaedcb367
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# Delete a tool in an MCP server by name
+discovery queryflow mcp-server tool delete my-mcp-server my-tool
+{
+  "acknowledged": true
+}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery QueryFlow. If it is healthy, it should return a JSON with an "UP" status field.
 

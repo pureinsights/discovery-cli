@@ -1,4 +1,4 @@
-package mcpservers
+package tools
 
 import (
 	"bytes"
@@ -27,7 +27,7 @@ func TestNewMCPServerCommand(t *testing.T) {
 	vpr := viper.New()
 	vpr.SetDefault("profile", "default")
 	d := cli.NewDiscovery(&ios, vpr, dir)
-	coreCmd := NewMCPServerCommand(d)
+	coreCmd := NewToolCommand(d)
 
 	coreCmd.SetIn(ios.In)
 	coreCmd.SetOut(ios.Out)
@@ -47,6 +47,6 @@ func TestNewMCPServerCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"delete", "get", "store", "tool"}
+	expectedCommands := []string{"delete", "get", "store"}
 	assert.Equal(t, expectedCommands, commandNames)
 }

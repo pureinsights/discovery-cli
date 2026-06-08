@@ -398,6 +398,43 @@ func TestNewHaltCommand(t *testing.T) {
 					}`)}, "Could not get seed ID to halt execution."),
 		},
 		{
+			name:      "Halt execution fails because seed was not found",
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewHaltCommand_Out_ExecutionErrorSeedNotFound",
+			errGolden: "NewHaltCommand_Err_ExecutionErrorSeedNotFound",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewHaltCommand_Err_ExecutionErrorSeedNotFound"),
+			execution: "f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36",
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode: http.StatusNotFound,
+					Body: `{
+					"status": 404,
+					"code": 1003,
+					"messages": [
+						"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+					],
+					"timestamp": "2025-10-29T23:12:08.002244700Z"
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+					"status": 404,
+					"code": 1003,
+					"messages": [
+						"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d"
+					],
+					"timestamp": "2025-10-29T23:12:08.002244700Z"
+					}`)}, "Could not get seed \"MongoDB seed\""),
+		},
+		{
 			name:      "Halt fails because the execution not found",
 			url:       true,
 			apiKey:    "apiKey123",

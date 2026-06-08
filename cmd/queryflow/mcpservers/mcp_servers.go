@@ -1,6 +1,7 @@
 package mcpservers
 
 import (
+	"github.com/pureinsights/discovery-cli/cmd/queryflow/mcpservers/tools"
 	"github.com/pureinsights/discovery-cli/internal/cli"
 	"github.com/spf13/cobra"
 )
@@ -15,6 +16,7 @@ func NewMCPServerCommand(d cli.Discovery) *cobra.Command {
 	mcpServer.AddCommand(NewGetCommand(d))
 	mcpServer.AddCommand(NewStoreCommand(d))
 	mcpServer.AddCommand(NewDeleteCommand(d))
+	mcpServer.AddCommand(tools.NewToolCommand(d))
 
 	return mcpServer
 }
