@@ -48,7 +48,12 @@ func NewDumpCommand(d cli.Discovery) *cobra.Command {
 
 			return commands.DumpCommand(args[0], d, stagingClient.Buckets(), func(name string) cli.StagingContentController {
 				return stagingClient.Content(name)
-			}, file, gjson.Parse(filters), gjson.Parse(projections), &pageSize, printer)
+			}, cli.DumpConfig{
+				File:        file,
+				Filters:     gjson.Parse(filters),
+				Projections: gjson.Parse(projections),
+				Size:        &pageSize,
+			}, printer)
 		},
 		Args: cobra.ExactArgs(1),
 		Example: `	# Dump a bucket by name with filters, include projections, and a page size of 5

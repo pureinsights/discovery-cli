@@ -75,7 +75,7 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 		"Entity not found: entity with name "my-bucket" does not exist"
 	]
 }`),
-			}, "Could not find bucket with name or id \"my-bucket\"."),
+			}, "Could not find bucket with name or id \"my-bucket\""),
 		},
 		{
 			name:      "Sent page size flag is < 1",

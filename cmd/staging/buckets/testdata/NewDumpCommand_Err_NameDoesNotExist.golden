@@ -1,4 +1,4 @@
-Error: Could not find bucket with name or id "my-bucket".
+Error: Could not find bucket with name or id "my-bucket"
 status: 404, body: {
 	"status": 404,
 	"code": 1003,
