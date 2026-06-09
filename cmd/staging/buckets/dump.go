@@ -46,7 +46,7 @@ func NewDumpCommand(d cli.Discovery) *cobra.Command {
 				file = fmt.Sprintf("%s.zip", args[0])
 			}
 
-			return commands.DumpCommand(args[0], d, stagingClient.Buckets(), func(name string) cli.StagingContentController {
+			return commands.SearchDumpCommand(args[0], d, stagingClient.Buckets(), func(name string) cli.StagingContentController {
 				return stagingClient.Content(name)
 			}, cli.DumpConfig{
 				File:        file,
