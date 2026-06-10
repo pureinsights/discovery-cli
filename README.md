@@ -2565,7 +2565,7 @@ discovery ingestion seed status "my-seed" --execution 0f20f984-1854-4741-81ea-30
 ```
 
 ```bash
-# Check the status of of the latest seed execution and with details
+# Check the status of the latest seed execution and with details
 discovery ingestion seed status "my-seed" --latest-execution --details
 {
   "audit": [
