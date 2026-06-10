@@ -11,8 +11,9 @@ import (
 // NewStatusCommand creates the seed status command
 func NewStatusCommand(d cli.Discovery) *cobra.Command {
 	var (
-		executionId string
-		details     bool
+		executionId     string
+		details         bool
+		latestExecution bool
 	)
 	status := &cobra.Command{
 		Use:   "status <seed>",
@@ -44,11 +45,27 @@ func NewStatusCommand(d cli.Discovery) *cobra.Command {
 				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed id")
 			}
 
-			if !cmd.Flags().Changed("execution") {
-				return d.StatusOfSeedExecutions(ingestionClient.Seeds().Executions(seedId), ingestionClient.Seeds().Records(seedId), printer)
+			if cmd.Flags().Changed("execution") {
+				return getSeedExecution(d, seedId, executionId, profile, details, printer)
 			}
 
-			return getSeedExecution(d, seedId, executionId, profile, details, printer)
+			if cmd.Flags().Changed("latest-execution") {
+				executionClient := ingestionClient.Seeds().Executions(seedId)
+				last5Executions, err := executionClient.GetLast5Executions()
+				if err != nil {
+					return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the five last seed executions")
+				}
+
+				executions := last5Executions.Array()
+				if len(executions) <= 0 {
+					return cli.NewError(cli.ErrorExitCode, "The seed %q has no executions", seedId)
+				}
+
+				execution := executions[0]
+				return getSeedExecution(d, seedId, execution.Get("id").String(), profile, details, printer)
+			}
+
+			return d.StatusOfSeedExecutions(ingestionClient.Seeds().Executions(seedId), ingestionClient.Seeds().Records(seedId), printer)
 		},
 		Args: cobra.ExactArgs(1),
 		Example: `	# Check the status of a seed
@@ -60,6 +77,8 @@ func NewStatusCommand(d cli.Discovery) *cobra.Command {
 
 	status.Flags().StringVar(&executionId, "execution", "", "the id of the seed execution that will be checked")
 	status.Flags().BoolVar(&details, "details", false, "gets more information when checking the status of a seed execution, like the audited changes and record and job summaries")
+	status.Flags().BoolVar(&latestExecution, "latest-execution", false, "gets the information of the latest seed execution")
 
+	status.MarkFlagsMutuallyExclusive("latest-execution", "execution")
 	return status
 }
