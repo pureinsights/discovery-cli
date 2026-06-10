@@ -2084,7 +2084,7 @@ Flags:
 (Optional, string) The UUID of the seed execution that will be retrieved.
 
 `--details`:
-(Optional, string) Makes the get operation retrieve more information when getting a seed execution, like the audited changes and record and job summaries.
+(Optional, bool) Makes the get operation retrieve more information when getting a seed execution, like the audited changes and record and job summaries.
 
 The `filter`, `execution`, and `record` flags are mutually exclusive. The `details` flag can only be used with the `execution` flag.
 
@@ -2432,7 +2432,7 @@ discovery ingestion seed halt 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f
 ```
 
 ###### Status
-`status` is the command to check the status of a seed. It can check the status of seed by its name or UUID. When the command only receives the seed, it returns the information of the last five seed executions and a summary of the records processed. If there are no executions, it shows an empty array. If there are no records, the `records` field is not included in the response. Also, just like the get command, it has the `execution` and `details` flags to get more information about a specific seed execution.
+`status` is the command to check the status of a seed. It can check the status of seed by its name or UUID. When the command only receives the seed, it returns the information of the last five seed executions and a summary of the records processed. If there are no executions, it shows an empty array. If there are no records, the `records` field is not included in the response. Also, just like the get command, it has the `execution` and `details` flags to get more information about a specific seed execution. There is also the `last-execution` flag that makes the command get the status of the last seed execution. It is also compatible with the `details` flag to obtain more information. However, the `execution` and `last-execution` flags are mutually exclusive.
 
 Usage: `discovery ingestion seed status <seed> [flags] `
 
@@ -2444,11 +2444,13 @@ Arguments:
 Flags:
 
 `--execution`:
-(Optional, string) The UUID of the seed execution that will be checked.
+(Optional, string) The UUID of the seed execution that will be checked. It is mutually exclusive with the `latest-execution` flag.
+
+`--latest-execution`:
+(Optional, bool) Makes the command obtain the status of the latest seed execution. It is mutually exclusive with the `execution` flag.
 
 `--details`:
-(Optional, string) Makes the status check operation retrieve more information when getting the seed execution, like the audited changes and record and job summaries. This flag does nothing if the `execution` flag is not used.
-
+(Optional, bool) Makes the status check operation retrieve more information when getting the seed execution, like the audited changes and record and job summaries. This flag does nothing if the `execution` or the `latest-execution` flags are not used.
 
 `-h, --help`:
 (Optional, bool) Prints the usage of the command.
@@ -2558,6 +2560,39 @@ discovery ingestion seed status "my-seed" --execution 0f20f984-1854-4741-81ea-30
     "BEFORE_HOOKS"
   ],
   "status": "RUNNING",
+  "triggerType": "MANUAL"
+}
+```
+
+```bash
+# Check the status of of the latest seed execution and with details
+discovery ingestion seed status "my-seed" --latest-execution --details
+{
+  "audit": [
+    {
+      "stages": [],
+      "status": "CREATED",
+      "timestamp": "2026-06-09T17:40:27.835Z"
+    },
+    {
+      "stages": [],
+      "status": "HALTING",
+      "timestamp": "2026-06-09T17:53:25.257Z"
+    },
+    {
+      "stages": [],
+      "status": "HALTED",
+      "timestamp": "2026-06-09T17:54:43.584Z"
+    }
+  ],
+  "creationTimestamp": "2026-06-09T17:40:28Z",
+  "id": "d761c937-b2b8-48ee-8e12-c457c809067d",
+  "jobs": {},
+  "lastUpdatedTimestamp": "2026-06-10T02:50:53Z",
+  "records": {},
+  "scanType": "FULL",
+  "stages": [],
+  "status": "HALTED",
   "triggerType": "MANUAL"
 }
 ```
