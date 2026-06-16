@@ -40,6 +40,8 @@ func NewHaltCommand(d cli.Discovery) *cobra.Command {
 				seedId, err := cli.GetEntityId(d, seedsClient, args[0])
 				if err == nil {
 					return d.HaltSeedExecution(seedsClient.Executions(seedId), executionId, cli.GetObjectPrinter(vpr.GetString("output")))
+				} else {
+					return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed %q", args[0])
 				}
 			}
 

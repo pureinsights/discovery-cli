@@ -38,8 +38,7 @@ func NewGetCommand(d cli.Discovery) *cobra.Command {
 	discovery queryflow pipeline get -p cn`,
 	}
 
-	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filters are:
-- Label: The format is label={key}[:{value}], where the value is optional
-- Type: The format is type={type}`)
+	get.Flags().StringArrayVarP(&filters, "filter", "f", []string{}, `apply filters in the format "filter=key:value". The available filter is:
+- Label: The format is label={key}[:{value}], where the value is optional`)
 	return get
 }

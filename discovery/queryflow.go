@@ -3,6 +3,7 @@ package discovery
 import (
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 )
 
@@ -64,7 +65,7 @@ type endpointsClient struct {
 	searcher
 }
 
-// newEndpointsClient is the constructor of a newEndpointsClient.
+// newEndpointsClient is the constructor of a new endpointsClient.
 func newEndpointsClient(url, apiKey string) endpointsClient {
 	client := newClient(url+"/entrypoint/endpoint", apiKey)
 	return endpointsClient{
@@ -85,6 +86,65 @@ func newEndpointsClient(url, apiKey string) endpointsClient {
 	}
 }
 
+// mcpServersClient is a struct that performs the CRUD of MCP servers.
+type mcpServersClient struct {
+	crud
+	cloner
+	enabler
+	searcher
+}
+
+// newMCPServersClient is the constructor of a new mcpServersClient.
+func newMCPServersClient(url, apiKey string) mcpServersClient {
+	client := newClient(url+"/entrypoint/mcp-server", apiKey)
+	return mcpServersClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+		enabler: enabler{
+			client: client,
+		},
+		searcher: searcher{
+			client: client,
+		},
+	}
+}
+
+// toolsClient is a struct that performs the CRUD of tools in MCP servers.
+type toolsClient struct {
+	crud
+	cloner
+	searcher
+}
+
+// newToolsClient is the constructor of a toolsClient.
+func newToolsClient(sc mcpServersClient, serverId uuid.UUID) toolsClient {
+	client := newSubClient(sc.crud.client, "/"+serverId.String()+"/tool")
+	return toolsClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+		searcher: searcher{
+			client: client,
+		},
+	}
+}
+
+// Tools creates a new toolsClient.
+func (sc mcpServersClient) Tools(serverId uuid.UUID) toolsClient {
+	return newToolsClient(sc, serverId)
+}
+
 // queryFlow is the struct for the client that can carry out every QueryFlow operation.
 type queryFlow struct {
 	Url, ApiKey string
@@ -100,9 +160,14 @@ func (q queryFlow) Pipelines() queryFlowPipelinesClient {
 	return newQueryFlowPipelinesClient(q.Url, q.ApiKey)
 }
 
-// Endpoints creates a endpointsClient with QueryFlow's URL and API Key.
+// Endpoints creates an endpointsClient with QueryFlow's URL and API Key.
 func (q queryFlow) Endpoints() endpointsClient {
 	return newEndpointsClient(q.Url, q.ApiKey)
+}
+
+// MCPServers creates a new mcpServersClient with QueryFlow's URL and API Key.
+func (q queryFlow) MCPServers() mcpServersClient {
+	return newMCPServersClient(q.Url, q.ApiKey)
 }
 
 // BackupRestore creates a backupRestore with QueryFlow's URL and API Key.

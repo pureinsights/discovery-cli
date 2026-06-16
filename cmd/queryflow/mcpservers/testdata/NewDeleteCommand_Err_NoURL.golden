@@ -1,0 +1,5 @@
+Error: The Discovery QueryFlow URL is missing for profile "default".
+To set the URL for the Discovery QueryFlow API, run any of the following commands:
+      discovery config  --profile "default"
+      discovery queryflow config --profile "default"
+

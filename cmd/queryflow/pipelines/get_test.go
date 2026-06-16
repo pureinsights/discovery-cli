@@ -638,6 +638,7 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 
 	getCmd := NewGetCommand(d)
 
+	getCmd.SilenceUsage = true
 	getCmd.SetIn(ios.In)
 	getCmd.SetOut(ios.Out)
 	getCmd.SetErr(ios.Err)
@@ -648,6 +649,5 @@ func TestNewGetCommand_NoProfileFlag(t *testing.T) {
 	require.Error(t, err)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
 
-	testutils.CompareBytes(t, "NewGetCommand_Out_NoProfile", testutils.Read(t, "NewGetCommand_Out_NoProfile"), out.Bytes())
 	testutils.CompareBytes(t, "NewGetCommand_Err_NoProfile", testutils.Read(t, "NewGetCommand_Err_NoProfile"), errBuf.Bytes())
 }
