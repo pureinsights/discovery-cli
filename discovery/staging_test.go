@@ -51,8 +51,7 @@ func Test_bucketsClient_Create(t *testing.T) {
 					"fields": [{"author": "ASC"}],
 					"unique": false
 				}
-			],
-			"config": {}
+			]
 			}`),
 			response:         `{"acknowledged": true}`,
 			expectedResponse: gjson.Parse(`{"acknowledged": true}`),
@@ -83,8 +82,7 @@ func Test_bucketsClient_Create(t *testing.T) {
 					"fields": [{"author": "ASC"}],
 					"unique": false
 				}
-			],
-			"config": {}
+			]
 			}`),
 			response:         `{"acknowledged":false}`,
 			expectedResponse: gjson.Result{},

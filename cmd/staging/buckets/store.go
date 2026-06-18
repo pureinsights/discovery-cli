@@ -32,7 +32,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	discovery staging bucket store configFile.json
 
 	# Store a bucket with the JSON configuration in the data flag
-	discovery staging bucket store --data '{"name":"my-bucket","config":{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}}'`,
+	discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}]}'`,
 	}
 
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")

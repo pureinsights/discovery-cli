@@ -64,8 +64,7 @@ func TestNewStoreCommand(t *testing.T) {
 			],
 			"unique": false
 		}
-	],
-	"config": {}
+	]
 }`,
 			file:         "",
 			abortOnError: false,
@@ -250,8 +249,7 @@ func TestNewStoreCommand(t *testing.T) {
 			],
 			"unique": false
 		}
-	],
-	"config": {}
+	]
 }`,
 			file:         "",
 			abortOnError: false,
@@ -285,8 +283,7 @@ func TestNewStoreCommand(t *testing.T) {
 			],
 			"unique": false
 		}
-	],
-	"config": {}
+	]
 }`,
 			file:         "testdata/StoreCommand_BucketConfig.json",
 			abortOnError: false,

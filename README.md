@@ -4050,7 +4050,7 @@ discovery staging bucket store bucketConfig.json
 
 ```bash
 # Store a bucket with the data flag. The indices are omitted in the output.
-discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}'
+discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}]}'
 {
   "documentCount": {},
   "indices": [

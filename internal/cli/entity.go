@@ -382,7 +382,6 @@ func (d discovery) SearchDeleteEntity(client SearchDeleter, name string, printer
 	return d.DeleteEntity(client, deleteId, printer)
 }
 
-// SearchDumperEntity searches for the entity with the given name and then dumps it.
 // SearchDumpBucket searches for the bucket with the given name or UUID and then dumps it.
 func (d discovery) SearchDumpBucket(client Searcher, contentProvider func(string) StagingContentController, nameOrID string, config DumpConfig, printer Printer) error {
 	result, err := d.searchEntity(client, nameOrID)
