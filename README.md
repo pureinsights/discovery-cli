@@ -3962,15 +3962,80 @@ Flags:
 `-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-###### Store
-`store` is the command used to create and update buckets in the Discovery Staging Repository. The bucket's name is sent as the mandatory first argument. The creation options, like the indices and bucket configuration, can be sent either through the optional second argument, which contains the name of the file with the information, or through the `data` flag as a JSON string. The `data` flag and the file name argument are mutually exclusive. When the bucket already exists, the command will try to modify its indices by updating them and deleting the ones no longer needed.
+###### Get
+`get` is the command used to obtain buckets in the Discovery Staging Repository. The user can send a name or UUID to get a specific bucket. If no argument is given, then the command retrieves every bucket. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
 
-Usage: `discovery staging bucket store <bucketName> [configFile] [flags]`
+Usage: `discovery staging bucket get [flags] [<arg>]`
 
 Arguments:
 
-`bucketName`:
-(Required, string) The name of bucket that will be created or updated.
+`arg`:
+(Optional, string) The name or UUID of the bucket that will be retrieved.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`:
+(Optional, string) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+
+Examples:
+
+```bash
+# Get a bucket by id
+discovery staging bucket get 69eeb20b-8ded-478f-937f-64caa0a3e8c0
+{
+  "active": true,
+  "creationTimestamp": "2026-06-04T22:06:02Z",
+  "description": "description",
+  "id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-06-04T22:06:02Z",
+  "name": "my-bucket"
+}
+```
+
+```bash
+# Get a bucket by name
+discovery staging bucket get "my-bucket"
+{
+  "active": true,
+  "creationTimestamp": "2026-06-04T22:06:02Z",
+  "description": "description",
+  "id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-06-04T22:06:02Z",
+  "name": "my-bucket"
+}
+```
+
+```bash
+# Get buckets using filters
+discovery staging bucket get --filter label=A:B
+{"active":false,"creationTimestamp":"2026-06-04T22:07:56Z","description":"description","id":"2831800d-289a-4a06-a65b-c3f2499547f8","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2026-06-04T22:20:23Z","name":"my-bucket-b"}
+```
+
+```bash
+# Get all buckets using the configuration in profile "cn"
+discovery staging bucket get -p cn
+{"active":false,"creationTimestamp":"2026-06-04T22:07:56Z","description":"description","id":"2831800d-289a-4a06-a65b-c3f2499547f8","labels":[{"key":"A","value":"B"}],"lastUpdatedTimestamp":"2026-06-04T22:20:23Z","name":"my-bucket-b"}
+{"active":true,"creationTimestamp":"2026-06-05T16:54:00Z","id":"5178f82e-a3dd-4388-bb38-a34321536e8d","labels":[],"lastUpdatedTimestamp":"2026-06-05T16:54:00Z","name":"my-bucket-a"}
+{"active":true,"creationTimestamp":"2026-06-04T22:06:02Z","description":"description","id":"69eeb20b-8ded-478f-937f-64caa0a3e8c0","labels":[],"lastUpdatedTimestamp":"2026-06-04T22:06:02Z","name":"my-bucket"}
+```
+
+
+
+###### Store
+`store` is the command used to create and update buckets in the Discovery Staging Repository. The bucket's configuration, including its name, indices, and other options, must be provided either through the `configFile` argument as a path to a JSON file, or through the `data` flag as a JSON string. The `data` flag and the `configFile` argument are mutually exclusive. When the bucket already exists, the command will try to modify its indices by updating them and deleting the ones no longer needed.
+
+Usage: `discovery staging bucket store [configFile] [flags]`
+
+Arguments:
 
 `configFile`:
 (Optional, string) The path of the file that contains the bucket's configuration.
@@ -3990,8 +4055,9 @@ Examples:
 
 ```bash
 # Store a bucket with the configuration file argument.
-discovery staging bucket store my-bucket bucketConfig.json
+discovery staging bucket store bucketConfig.json
 {
+  "name": "my-bucket",
   "documentCount": {},
   "indices": [
     {
@@ -4019,7 +4085,7 @@ discovery staging bucket store my-bucket bucketConfig.json
 
 ```bash
 # Store a bucket with the data flag. The indices are omitted in the output.
-discovery staging bucket store my-bucket --data '{"indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}],"config":{}}'
+discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}]}'
 {
   "documentCount": {},
   "indices": [
@@ -4037,7 +4103,7 @@ Usage: `discovery staging bucket dump [flags] <arg>`
 Arguments:
 
 `arg`:
-(Required, string) The name of the bucket that will be scrolled.
+(Required, string) The name or UUID of the bucket that will be scrolled.
 
 Flags:
 
@@ -4081,8 +4147,14 @@ Flags:
 Examples:
 
 ```bash
-# Dump a bucket with filters, include projections, and a page size of 5
+# Dump a bucket by name with filters, include projections, and a page size of 5
 discovery staging bucket dump my-bucket -f '{"equals":{"field":"my-field","value":"my-value"}}' --projection '{"includes":["my-field","my-field-2"]}' --page-size 5'
+{
+  "acknowledged": true
+}
+
+# Dump a bucket by id
+discovery staging bucket dump ab0b4548-909d-4b23-aa62-69d8a6f8ed50
 {
   "acknowledged": true
 }
@@ -4096,7 +4168,7 @@ Usage: `discovery staging bucket delete [flags] <arg>`
 Arguments:
 
 `arg`:
-(Required, string) The name of the bucket that will be deleted.
+(Required, string) The name or UUID of the bucket that will be retrieved.
 
 Flags:
 
@@ -4110,7 +4182,15 @@ Example:
 
 ```bash
 # Delete a bucket by name
-discovery staging bucket delete my-bucket
+discovery staging bucket delete "my-bucket"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# Delete a bucket by id
+discovery staging bucket delete 69eeb20b-8ded-478f-937f-64caa0a3e8c0
 {
   "acknowledged": true
 }

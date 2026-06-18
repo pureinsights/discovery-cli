@@ -37,6 +37,7 @@ type Discovery interface {
 	SearchUpsertEntities(client SearchCreator, configurations gjson.Result, abortOnError bool, printer Printer) error
 	DeleteEntity(client Deleter, id uuid.UUID, printer Printer) error
 	SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error
+	SearchDumpBucket(client Searcher, contentProvider func(string) StagingContentController, nameOrID string, config DumpConfig, printer Printer) error
 	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
 	HaltSeed(client IngestionSeedController, name string, printer Printer) error
 	HaltSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error
@@ -51,9 +52,6 @@ type Discovery interface {
 	StatusCheck(client StatusChecker, product string, printer Printer) error
 	StatusCheckOfClients(clients []StatusCheckClientEntry, printer Printer) error
 	PingServer(client ServerPinger, server string, printer Printer) error
-	StoreBucket(client StagingBucketController, name string, options gjson.Result, printer Printer) error
-	DeleteBucket(client StagingBucketController, bucketName string, printer Printer) error
-	DumpBucket(client StagingContentController, bucketName, file string, filters, projections gjson.Result, size *int, printer Printer) error
 	Deploy(fileClient CoreFileController, clients []BackupRestoreClientEntry, path string, printer Printer) error
 }
 

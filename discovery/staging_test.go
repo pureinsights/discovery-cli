@@ -1,17 +1,19 @@
 package discovery
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 )
+
+var id = "3d51beef-8b90-40aa-84b5-033241dc6239"
 
 // Test_newBucketsClient tests the bucketsClient constructor.
 func Test_newBucketsClient(t *testing.T) {
@@ -39,17 +41,17 @@ func Test_bucketsClient_Create(t *testing.T) {
 		{
 			name:       "Create works with full config",
 			method:     http.MethodPost,
-			path:       "/testBucket",
+			path:       "",
 			statusCode: http.StatusCreated,
 			config: gjson.Parse(`{
+			"name": "testBucket",
 			"indices": [
 				{
 					"name": "indexTest",
 					"fields": [{"author": "ASC"}],
 					"unique": false
 				}
-			],
-			"config": {}
+			]
 			}`),
 			response:         `{"acknowledged": true}`,
 			expectedResponse: gjson.Parse(`{"acknowledged": true}`),
@@ -58,7 +60,7 @@ func Test_bucketsClient_Create(t *testing.T) {
 		{
 			name:             "Create works with empty config",
 			method:           http.MethodPost,
-			path:             "/testBucket",
+			path:             "",
 			statusCode:       http.StatusCreated,
 			config:           gjson.Parse(``),
 			response:         `{"acknowledged": true}`,
@@ -70,17 +72,17 @@ func Test_bucketsClient_Create(t *testing.T) {
 		{
 			name:       "Create returns 409 Conflict",
 			method:     http.MethodPost,
-			path:       "/testBucket",
+			path:       "",
 			statusCode: http.StatusConflict,
 			config: gjson.Parse(`{
+			"name": "testBucket",
 			"indices": [
 				{
 					"name": "indexTest",
 					"fields": [{"author": "ASC"}],
 					"unique": false
 				}
-			],
-			"config": {}
+			]
 			}`),
 			response:         `{"acknowledged":false}`,
 			expectedResponse: gjson.Result{},
@@ -89,9 +91,10 @@ func Test_bucketsClient_Create(t *testing.T) {
 		{
 			name:       "Create returns 400 Bad Request",
 			method:     http.MethodPost,
-			path:       "/testBucket",
+			path:       "",
 			statusCode: http.StatusBadRequest,
 			config: gjson.Parse(`{
+			"name": "testBucket",
 			"indices": [
 				{
 					"fields": [{"author": "ASC"}],
@@ -133,7 +136,7 @@ func Test_bucketsClient_Create(t *testing.T) {
 
 			bucketsClient := newBucketsClient(srv.URL, "")
 
-			response, err := bucketsClient.Create("testBucket", tc.config)
+			response, err := bucketsClient.Create(tc.config)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
@@ -162,10 +165,10 @@ func Test_bucketsClient_Get(t *testing.T) {
 		{
 			name:             "Get works",
 			method:           http.MethodGet,
-			path:             "/testBucket",
+			path:             "/" + id,
 			statusCode:       http.StatusOK,
-			response:         `{"name":"testBucket","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`,
-			expectedResponse: gjson.Parse(`{"name":"testBucket","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`),
+			response:         `{"name":"testBucket","id":"` + id + `","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`,
+			expectedResponse: gjson.Parse(`{"name":"testBucket","id":"` + id + `","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`),
 			err:              nil,
 		},
 
@@ -173,22 +176,22 @@ func Test_bucketsClient_Get(t *testing.T) {
 		{
 			name:       "Get returns 404 Not Found",
 			method:     http.MethodGet,
-			path:       "/testBucket",
+			path:       "/" + id,
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
-			"code": 1002,
+			"code": 1003,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"Entity not found: ` + id + `"
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
 			expectedResponse: gjson.Result{},
 			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 			"status": 404,
-			"code": 1002,
+			"code": 1003,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"Entity not found: ` + id + `"
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`)},
@@ -206,7 +209,7 @@ func Test_bucketsClient_Get(t *testing.T) {
 
 			bucketsClient := newBucketsClient(srv.URL, "")
 
-			response, err := bucketsClient.Get("testBucket")
+			response, err := bucketsClient.Get(uuid.MustParse(id))
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
@@ -223,13 +226,13 @@ func Test_bucketsClient_Get(t *testing.T) {
 // Test_bucketsClient_GetAll tests the bucketsClient.GetAll() function.
 func Test_bucketsClient_GetAll(t *testing.T) {
 	tests := []struct {
-		name             string
-		method           string
-		path             string
-		statusCode       int
-		response         string
-		expectedResponse []string
-		err              error
+		name        string
+		method      string
+		path        string
+		statusCode  int
+		response    string
+		expectedLen int
+		err         error
 	}{
 		// Working case
 		{
@@ -237,44 +240,73 @@ func Test_bucketsClient_GetAll(t *testing.T) {
 			method:     http.MethodGet,
 			path:       "",
 			statusCode: http.StatusOK,
-			response: `[
-			"blogs",
-			"blogsq",
-			"wikis"
-			]`,
-			expectedResponse: []string{
-				"blogs",
-				"blogsq",
-				"wikis",
+			response: `{
+			"content": [
+				{
+					"name": "my-bucket-b",
+					"description": "description",
+					"labels": [
+						{
+							"key": "A",
+							"value": "B"
+						}
+					],
+					"active": false,
+					"id": "2831800d-289a-4a06-a65b-c3f2499547f8",
+					"creationTimestamp": "2026-06-04T22:07:56Z",
+					"lastUpdatedTimestamp": "2026-06-04T22:20:23Z"
+				},
+				{
+					"name": "my-bucket-a",
+					"labels": [],
+					"active": true,
+					"id": "5178f82e-a3dd-4388-bb38-a34321536e8d",
+					"creationTimestamp": "2026-06-05T16:54:00Z",
+					"lastUpdatedTimestamp": "2026-06-05T16:54:00Z"
+				},
+				{
+					"name": "my-bucket",
+					"description": "description",
+					"labels": [],
+					"active": true,
+					"id": "69eeb20b-8ded-478f-937f-64caa0a3e8c0",
+					"creationTimestamp": "2026-06-04T22:06:02Z",
+					"lastUpdatedTimestamp": "2026-06-04T22:06:02Z"
+				}
+			],
+			"pageable": {
+				"page": 0,
+				"size": 20,
+				"sort": []
 			},
-			err: nil,
-		}, {
-			name:             "GetAll returns no content",
-			method:           http.MethodGet,
-			path:             "",
-			statusCode:       http.StatusNoContent,
-			response:         ``,
-			expectedResponse: []string{},
-			err:              nil,
+			"totalSize": 3,
+			"totalPages": 1,
+			"empty": false,
+			"size": 20,
+			"offset": 0,
+			"numberOfElements": 3,
+			"pageNumber": 0
+			}`,
+			expectedLen: 3,
+			err:         nil,
+		},
+		{
+			name:        "GetAll returns no content",
+			method:      http.MethodGet,
+			path:        "",
+			statusCode:  http.StatusNoContent,
+			response:    `{"content": []}`,
+			expectedLen: 0,
+			err:         nil,
 		},
 		// Error case
 		{
-			name:             "GetAll returns an internal server error",
-			method:           http.MethodGet,
-			path:             "",
-			statusCode:       http.StatusInternalServerError,
-			response:         ``,
-			expectedResponse: []string(nil),
-			err:              Error{Status: http.StatusInternalServerError, Body: gjson.Result{}},
-		},
-		{
-			name:             "GetAll returns a response that cannot be marshalled into an []string",
-			method:           http.MethodGet,
-			path:             "",
-			statusCode:       http.StatusOK,
-			response:         `{"message"} : "This cannot be marshalled."`,
-			expectedResponse: []string(nil),
-			err:              fmt.Errorf("invalid character '}' after object key"),
+			name:       "GetAll returns an internal server error",
+			method:     http.MethodGet,
+			path:       "",
+			statusCode: http.StatusInternalServerError,
+			response:   ``,
+			err:        Error{Status: http.StatusInternalServerError, Body: gjson.Result{}},
 		},
 	}
 
@@ -290,7 +322,7 @@ func Test_bucketsClient_GetAll(t *testing.T) {
 			bucketsClient := newBucketsClient(srv.URL, "")
 
 			response, err := bucketsClient.GetAll()
-			assert.Equal(t, tc.expectedResponse, response)
+			assert.Equal(t, tc.expectedLen, len(response))
 			if tc.err == nil {
 				require.NoError(t, err)
 			} else {
@@ -315,7 +347,7 @@ func Test_bucketsClient_Delete(t *testing.T) {
 		{
 			name:             "Delete works",
 			method:           http.MethodDelete,
-			path:             "/testBucket",
+			path:             "/" + id,
 			statusCode:       http.StatusOK,
 			response:         `{"acknowledged":true}`,
 			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
@@ -326,22 +358,22 @@ func Test_bucketsClient_Delete(t *testing.T) {
 		{
 			name:       "Delete returns 404 Not Found",
 			method:     http.MethodDelete,
-			path:       "/testBucket",
+			path:       "/" + id,
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
-			"code": 1002,
+			"code": 1003,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"Entity not found: ` + id + `"
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
 			expectedResponse: gjson.Result{},
 			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 			"status": 404,
-			"code": 1002,
+			"code": 1003,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"Entity not found: ` + id + `"
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`)},
@@ -359,7 +391,7 @@ func Test_bucketsClient_Delete(t *testing.T) {
 
 			bucketsClient := newBucketsClient(srv.URL, "")
 
-			response, err := bucketsClient.Delete("testBucket")
+			response, err := bucketsClient.Delete(uuid.MustParse(id))
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
@@ -388,7 +420,7 @@ func Test_bucketsClient_Purge(t *testing.T) {
 		{
 			name:             "Purge works",
 			method:           http.MethodDelete,
-			path:             "/testBucket/purge",
+			path:             "/" + id + "/purge",
 			statusCode:       http.StatusOK,
 			response:         `{"acknowledged":true}`,
 			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
@@ -399,22 +431,22 @@ func Test_bucketsClient_Purge(t *testing.T) {
 		{
 			name:       "Purge returns 404 Not Found",
 			method:     http.MethodDelete,
-			path:       "/testBucket/purge",
+			path:       "/" + id + "/purge",
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
-			"code": 1002,
+			"code": 1003,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"Entity not found: ` + id + `"
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
 			expectedResponse: gjson.Result{},
 			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 			"status": 404,
-			"code": 1002,
+			"code": 1003,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"Entity not found: ` + id + `"
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`)},
@@ -432,7 +464,7 @@ func Test_bucketsClient_Purge(t *testing.T) {
 
 			bucketsClient := newBucketsClient(srv.URL, "")
 
-			response, err := bucketsClient.Purge("testBucket")
+			response, err := bucketsClient.Purge(uuid.MustParse(id))
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
@@ -462,7 +494,7 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 		{
 			name:             "Create Index works",
 			method:           http.MethodPut,
-			path:             "/testBucket/index/testIndex",
+			path:             "/" + id + "/index/testIndex",
 			statusCode:       http.StatusOK,
 			response:         `{"acknowledged":true}`,
 			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
@@ -474,22 +506,22 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 		{
 			name:       "Create Index returns 404 Conflict",
 			method:     http.MethodPut,
-			path:       "/testBucket/index/testIndex",
+			path:       "/" + id + "/index/testIndex",
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
-			"code": 1002,
+			"code": 1003,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"The bucket '` + id + `' was not found."
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
 			expectedResponse: gjson.Result{},
 			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
 			"status": 404,
-			"code": 1002,
+			"code": 1003,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"The bucket '` + id + `' was not found."
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`)},
@@ -498,7 +530,7 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 		{
 			name:       "Create Index returns 400 Index already exists.",
 			method:     http.MethodPut,
-			path:       "/testBucket/index/testIndex",
+			path:       "/" + id + "/index/testIndex",
 			statusCode: http.StatusBadRequest,
 			response: `{
 			"status": 400,
@@ -522,7 +554,7 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 		{
 			name:       "Create Index returns 400 Invalid JSON",
 			method:     http.MethodPut,
-			path:       "/testBucket/index/testIndex",
+			path:       "/" + id + "/index/testIndex",
 			statusCode: http.StatusBadRequest,
 			response: `{
 			"status": 400,
@@ -564,7 +596,7 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 			bucketsClient := newBucketsClient(srv.URL, "")
 
 			indices := []gjson.Result{gjson.Parse(tc.indexConfig[0]), gjson.Parse(tc.indexConfig[1])}
-			response, err := bucketsClient.CreateIndex("testBucket", "testIndex", indices)
+			response, err := bucketsClient.CreateIndex(uuid.MustParse(id), "testIndex", indices)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
@@ -593,7 +625,7 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 		{
 			name:             "Delete index works",
 			method:           http.MethodDelete,
-			path:             "/testBucket/index/testIndex",
+			path:             "/" + id + "/index/testIndex",
 			statusCode:       http.StatusOK,
 			response:         `{"acknowledged":true}`,
 			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
@@ -604,13 +636,13 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 		{
 			name:       "Delete index returns 404 Bucket Not Found",
 			method:     http.MethodDelete,
-			path:       "/testBucket/index/testIndex",
+			path:       "/" + id + "/index/testIndex",
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
 			"code": 1002,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"The bucket '` + id + `' was not found."
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`,
@@ -619,7 +651,7 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 			"status": 404,
 			"code": 1002,
 			"messages": [
-				"The bucket 'testBucket' was not found."
+				"The bucket '` + id + `' was not found."
 			],
 			"timestamp": "2025-09-08T23:05:32.202752400Z"
 			}`)},
@@ -627,7 +659,7 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 		{
 			name:       "Delete index returns 404 Index Not Found",
 			method:     http.MethodDelete,
-			path:       "/testBucket/index/testIndex",
+			path:       "/" + id + "/index/testIndex",
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
@@ -660,7 +692,7 @@ func Test_bucketsClient_DeleteIndex(t *testing.T) {
 
 			bucketsClient := newBucketsClient(srv.URL, "")
 
-			response, err := bucketsClient.DeleteIndex("testBucket", "testIndex")
+			response, err := bucketsClient.DeleteIndex(uuid.MustParse(id), "testIndex")
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)

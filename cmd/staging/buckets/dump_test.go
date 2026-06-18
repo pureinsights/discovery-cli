@@ -53,12 +53,11 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 					StatusCode:  http.StatusNotFound,
 					ContentType: "application/json",
 					Body: `{
-  "status": 404,
-  "code": 1002,
-  "messages": [
-    "The bucket 'my-bucket' was not found."
-  ],
-  "timestamp": "2025-12-23T14:53:32.321524600Z"
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-bucket" does not exist"
+	]
 }`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodPost, r.Method)
@@ -70,14 +69,13 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
 				Status: http.StatusNotFound,
 				Body: gjson.Parse(`{
-  "status": 404,
-  "code": 1002,
-  "messages": [
-    "The bucket 'my-bucket' was not found."
-  ],
-  "timestamp": "2025-12-23T14:53:32.321524600Z"
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-bucket" does not exist"
+	]
 }`),
-			}, "Could not scroll the bucket with name \"my-bucket\"."),
+			}, "Could not find bucket with name or id \"my-bucket\""),
 		},
 		{
 			name:      "Sent page size flag is < 1",
@@ -151,18 +149,47 @@ func TestNewDumpCommand_ErrorCases(t *testing.T) {
 // TestNewDumpCommand_WorkingCase tests the Dump command with a working scroll.
 func TestNewDumpCommand_WorkingCase(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, http.MethodPost, r.Method)
-		assert.Equal(t, "/v2/content/my-bucket/scroll", r.URL.Path)
-		token := r.URL.Query().Get("token")
-		assert.Equal(t, "3", r.URL.Query().Get("size"))
 		w.Header().Set("Content-Type", "application/json")
-		switch token {
-		case "694eb7f378aedc7a163da908":
-			w.WriteHeader(http.StatusNoContent)
-			_, _ = w.Write([]byte(`[]`))
-		case "694eb7f378aedc7a163da907":
+
+		switch r.URL.Path {
+		case "/v2/bucket/search":
+			assert.Equal(t, http.MethodPost, r.Method)
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{
+				"content": [
+					{
+						"source": {
+							"id": "fbe3e8ab-44a7-4b8f-b696-cbfc528d9bb0",
+							"name": "my-bucket",
+							"active": true
+						},
+						"highlight": {},
+						"score": 1.0
+					}
+				],
+				"empty": false
+			}`))
+		case "/v2/bucket/fbe3e8ab-44a7-4b8f-b696-cbfc528d9bb0":
+			assert.Equal(t, http.MethodGet, r.Method)
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{
+        "id": "fbe3e8ab-44a7-4b8f-b696-cbfc528d9bb0",
+        "name": "my-bucket",
+        "active": true
+    }`))
+		case "/v2/content/my-bucket/scroll":
+			assert.Equal(t, http.MethodPost, r.Method)
+			assert.Equal(t, "/v2/content/my-bucket/scroll", r.URL.Path)
+			token := r.URL.Query().Get("token")
+			assert.Equal(t, "3", r.URL.Query().Get("size"))
+			w.Header().Set("Content-Type", "application/json")
+			switch token {
+			case "694eb7f378aedc7a163da908":
+				w.WriteHeader(http.StatusNoContent)
+				_, _ = w.Write([]byte(`[]`))
+			case "694eb7f378aedc7a163da907":
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{
 			"token": "694eb7f378aedc7a163da908",
 			"content": [
                   {
@@ -210,9 +237,9 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
           ],
 		  "empty": false
 			}`))
-		default:
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{
+			default:
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{
 			"token": "694eb7f378aedc7a163da907",
 			"content": [
                   {
@@ -260,7 +287,11 @@ func TestNewDumpCommand_WorkingCase(t *testing.T) {
           ],
 		  "empty": false
 			}`))
+			}
+		default:
+			w.WriteHeader(http.StatusNotFound)
 		}
+
 	}))
 	t.Cleanup(srv.Close)
 

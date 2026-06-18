@@ -839,3 +839,20 @@ func (g *FailingSearchDeleterParsingUUIDFails) GetAll() ([]gjson.Result, error) 
 func (g *FailingSearchDeleterParsingUUIDFails) Delete(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
+
+// WorkingContentController mocks a StagingContentController that returns empty records.
+type WorkingContentController struct{}
+
+func (c *WorkingContentController) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+// FailingContentController mocks a StagingContentController where Scroll fails.
+type FailingContentController struct{}
+
+func (c *FailingContentController) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
+	return nil, discoveryPackage.Error{
+		Status: http.StatusInternalServerError,
+		Body:   gjson.Parse(`{"status": 500, "code": 5000, "messages": ["Internal server error"]}`),
+	}
+}
