@@ -579,6 +579,139 @@ func TestNewStatusCommand(t *testing.T) {
 			},
 			err: nil,
 		},
+		{
+			name:      "The user gets the status the latest seed execution",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--latest-execution"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusLatestExecution",
+			errGolden: "NewStatusCommand_Err_StatusLatestExecution",
+			outBytes:  testutils.Read(t, "NewStatusCommand_Out_StatusLatestExecution"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"content": [
+						{
+						"id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+						"creationTimestamp": "2026-04-14T16:06:44Z",
+						"lastUpdatedTimestamp": "2026-04-14T16:24:03Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "79fde75b-ce25-4620-a0e3-19506dac7030",
+						"creationTimestamp": "2026-04-13T17:26:56Z",
+						"lastUpdatedTimestamp": "2026-04-13T22:17:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "55588e89-600a-4c22-bc9b-c6ef51d2f0ea",
+						"creationTimestamp": "2026-04-13T17:01:46Z",
+						"lastUpdatedTimestamp": "2026-04-13T17:09:29Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "ffaa0321-5e63-44de-981e-217d3d56f152",
+						"creationTimestamp": "2026-04-10T22:04:51Z",
+						"lastUpdatedTimestamp": "2026-04-13T13:57:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "5acc72cf-9e51-42b2-b298-7b1c2bc65e06",
+						"creationTimestamp": "2026-04-10T21:39:49Z",
+						"lastUpdatedTimestamp": "2026-04-10T21:43:17Z",
+						"triggerType": "MANUAL",
+						"status": "HALTED",
+						"scanType": "FULL"
+						}
+					],
+					"pageable": {
+						"page": 0,
+						"size": 5,
+						"sort": [
+						{
+							"property": "creationTimestamp",
+							"direction": "DESC"
+						}
+						]
+					},
+					"totalSize": 21,
+					"totalPages": 5,
+					"empty": false,
+					"size": 5,
+					"offset": 0,
+					"numberOfElements": 5,
+					"pageNumber": 0
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f4242ca1-0572-4244-8fcb-1305332351b9": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+							"creationTimestamp": "2025-10-10T19:48:31Z",
+							"lastUpdatedTimestamp": "2025-10-10T19:48:31Z",
+							"triggerType": "MANUAL",
+							"status": "RUNNING",
+							"scanType": "FULL",
+							"properties": {
+								"stagingBucket": "testBucket"
+							},
+							"stages": ["BEFORE_HOOKS","INGEST"]
+							}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f4242ca1-0572-4244-8fcb-1305332351b9", r.URL.Path)
+					},
+				},
+			},
+			err: nil,
+		},
 
 		// Error case
 		{
@@ -674,7 +807,299 @@ func TestNewStatusCommand(t *testing.T) {
 			}, "Could not get the five last seed executions"),
 		},
 		{
-			name:      "The user gets the status of a seed and returns getting record summary fails",
+			name:      "The user gets the latest seed execution and getting the executions fails",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--latest-execution"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusLatestExecutionsFail",
+			errGolden: "NewStatusCommand_Err_StatusLatestExecutionsFail",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewStatusCommand_Err_StatusLatestExecutionsFail"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode: http.StatusNotFound,
+					Body: `{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 3b32e410-2f33-412d-9fb8-17970131921c"
+  ],
+  "timestamp": "2026-04-15T23:52:26.878700200Z"
+}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"SUCCESS": 8
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/record/summary", r.URL.Path)
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: 3b32e410-2f33-412d-9fb8-17970131921c"
+  ],
+  "timestamp": "2026-04-15T23:52:26.878700200Z"
+}`),
+			}, "Could not get the five last seed executions"),
+		},
+		{
+			name:      "The user gets the latest seed execution and getting the latest execution fails",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--latest-execution"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusLatestExecutionFails",
+			errGolden: "NewStatusCommand_Err_StatusLatestExecutionFails",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewStatusCommand_Err_StatusLatestExecutionFails"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"content": [
+						{
+						"id": "f4242ca1-0572-4244-8fcb-1305332351b9",
+						"creationTimestamp": "2026-04-14T16:06:44Z",
+						"lastUpdatedTimestamp": "2026-04-14T16:24:03Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "79fde75b-ce25-4620-a0e3-19506dac7030",
+						"creationTimestamp": "2026-04-13T17:26:56Z",
+						"lastUpdatedTimestamp": "2026-04-13T22:17:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "55588e89-600a-4c22-bc9b-c6ef51d2f0ea",
+						"creationTimestamp": "2026-04-13T17:01:46Z",
+						"lastUpdatedTimestamp": "2026-04-13T17:09:29Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "ffaa0321-5e63-44de-981e-217d3d56f152",
+						"creationTimestamp": "2026-04-10T22:04:51Z",
+						"lastUpdatedTimestamp": "2026-04-13T13:57:44Z",
+						"triggerType": "MANUAL",
+						"status": "DONE",
+						"scanType": "FULL"
+						},
+						{
+						"id": "5acc72cf-9e51-42b2-b298-7b1c2bc65e06",
+						"creationTimestamp": "2026-04-10T21:39:49Z",
+						"lastUpdatedTimestamp": "2026-04-10T21:43:17Z",
+						"triggerType": "MANUAL",
+						"status": "HALTED",
+						"scanType": "FULL"
+						}
+					],
+					"pageable": {
+						"page": 0,
+						"size": 5,
+						"sort": [
+						{
+							"property": "creationTimestamp",
+							"direction": "DESC"
+						}
+						]
+					},
+					"totalSize": 21,
+					"totalPages": 5,
+					"empty": false,
+					"size": 5,
+					"offset": 0,
+					"numberOfElements": 5,
+					"pageNumber": 0
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f4242ca1-0572-4244-8fcb-1305332351b9": {
+					StatusCode: http.StatusNotFound,
+					Body: `{
+		  "status": 404,
+		  "code": 1003,
+		  "messages": [
+		    "Seed execution not found: f4242ca1-0572-4244-8fcb-1305332351b9"
+		  ],
+		  "timestamp": "2025-11-18T01:26:12.946825800Z"
+		}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f4242ca1-0572-4244-8fcb-1305332351b9", r.URL.Path)
+					},
+				},
+			},
+			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+		  "status": 404,
+		  "code": 1003,
+		  "messages": [
+		    "Seed execution not found: f4242ca1-0572-4244-8fcb-1305332351b9"
+		  ],
+		  "timestamp": "2025-11-18T01:26:12.946825800Z"
+		}`),
+			}, "Could not get seed execution with id \"f4242ca1-0572-4244-8fcb-1305332351b9\""),
+		},
+		{
+			name:      "The user gets the latest seed execution but there are no executions",
+			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c", "--latest-execution"},
+			url:       true,
+			apiKey:    "",
+			outGolden: "NewStatusCommand_Out_StatusLatestExecutionNoExecutions",
+			errGolden: "NewStatusCommand_Err_StatusLatestExecutionNoExecutions",
+			outBytes:  []byte(nil),
+			errBytes:  testutils.Read(t, "NewStatusCommand_Err_StatusLatestExecutionNoExecutions"),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/seed/search": {
+					StatusCode:  http.StatusNoContent,
+					Body:        ``,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/seed/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c": {
+					StatusCode: http.StatusOK,
+					Body: `{
+							"type": "mongo",
+							"name": "my-seed",
+							"labels": [
+							{
+								"key": "A",
+								"value": "A"
+							}
+							],
+							"active": true,
+							"id": "3b32e410-2F33-412D-9fb8-17970131921c",
+							"creationTimestamp": "2025-10-17T22:37:53Z",
+							"lastUpdatedTimestamp": "2025-10-17T22:37:53Z"
+						}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c", r.URL.Path)
+					},
+				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution": {
+					StatusCode: http.StatusNoContent,
+					Body: `{
+					"content": [],
+					"pageable": {
+						"page": 0,
+						"size": 5,
+						"sort": [
+						{
+							"property": "creationTimestamp",
+							"direction": "DESC"
+						}
+						]
+					},
+					"totalSize": 21,
+					"totalPages": 5,
+					"empty": false,
+					"size": 5,
+					"offset": 0,
+					"numberOfElements": 5,
+					"pageNumber": 0
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution", r.URL.Path)
+					},
+				},
+			},
+			err: cli.NewError(cli.ErrorExitCode, "The seed \"3b32e410-2f33-412d-9fb8-17970131921c\" has no executions"),
+		},
+		{
+			name:      "The user gets the status of a seed and getting record summary fails",
 			args:      []string{"3b32e410-2f33-412d-9fb8-17970131921c"},
 			url:       true,
 			apiKey:    "",
@@ -1188,6 +1613,7 @@ func TestNewStatusCommand_NoProfileFlag(t *testing.T) {
 
 	statusCmd := NewStatusCommand(d)
 
+	statusCmd.SilenceUsage = true
 	statusCmd.SetIn(ios.In)
 	statusCmd.SetOut(ios.Out)
 	statusCmd.SetErr(ios.Err)
@@ -1197,7 +1623,5 @@ func TestNewStatusCommand_NoProfileFlag(t *testing.T) {
 	err := statusCmd.Execute()
 	require.Error(t, err)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("flag accessed but not defined: profile"), "Could not get the profile").Error())
-
-	testutils.CompareBytes(t, "NewStatusCommand_Out_NoProfile", testutils.Read(t, "NewStatusCommand_Out_NoProfile"), out.Bytes())
 	testutils.CompareBytes(t, "NewStatusCommand_Err_NoProfile", testutils.Read(t, "NewStatusCommand_Err_NoProfile"), errBuf.Bytes())
 }
