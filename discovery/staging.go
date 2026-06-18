@@ -1,11 +1,11 @@
 package discovery
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -157,67 +157,44 @@ func (c contentClient) DeleteMany(parentId string, filter gjson.Result) (gjson.R
 
 // bucketsClient is the struct that manages buckets in the Staging Repository.
 type bucketsClient struct {
-	client
+	crud
+	searcher
 }
 
 // newBuckets is the constructor of the bucketsClient struct.
 func newBucketsClient(url, apiKey string) bucketsClient {
+	client := newClient(url+"/bucket", apiKey)
 	return bucketsClient{
-		client: newClient(url+"/bucket", apiKey),
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		searcher: searcher{
+			client: client,
+		},
 	}
-}
-
-// Create adds a new bucket with the given name and options, which can be used to create indices and set configurations.
-func (b bucketsClient) Create(bucket string, options gjson.Result) (gjson.Result, error) {
-	return execute(b.client, http.MethodPost, "/"+bucket, WithJSONBody(options.Raw))
-}
-
-// GetAll obtains a list with the names of every bucket.
-func (b bucketsClient) GetAll() ([]string, error) {
-	bucketsBytes, err := b.execute(http.MethodGet, "")
-	if err != nil {
-		return []string(nil), err
-	}
-	if len(bucketsBytes) > 0 {
-		var bucketNames []string
-		if err := json.Unmarshal(bucketsBytes, &bucketNames); err != nil {
-			return []string(nil), err
-		}
-		return bucketNames, nil
-	} else {
-		return []string{}, nil
-	}
-}
-
-// Get obtains the information of a bucket with the given name.
-func (b bucketsClient) Get(bucket string) (gjson.Result, error) {
-	return execute(b.client, http.MethodGet, "/"+bucket)
-}
-
-// Delete deletes the bucket with the given name.
-func (b bucketsClient) Delete(bucket string) (gjson.Result, error) {
-	return execute(b.client, http.MethodDelete, "/"+bucket)
 }
 
 // Purge deletes all of the records in the given bucket.
-func (b bucketsClient) Purge(bucket string) (gjson.Result, error) {
-	return execute(b.client, http.MethodDelete, "/"+bucket+"/purge")
+func (b bucketsClient) Purge(bucket uuid.UUID) (gjson.Result, error) {
+	return execute(b.client, http.MethodDelete, "/"+bucket.String()+"/purge")
 }
 
 // CreateIndex adds an index with the given name and configuration to a bucket.
-func (b bucketsClient) CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error) {
+func (b bucketsClient) CreateIndex(id uuid.UUID, index string, config []gjson.Result) (gjson.Result, error) {
 	var parts []string
 	for _, r := range config {
 		parts = append(parts, r.Raw)
 	}
 	jsonArray := "[" + strings.Join(parts, ",") + "]"
 
-	return execute(b.client, http.MethodPut, "/"+bucket+"/index/"+index, WithJSONBody(jsonArray))
+	return execute(b.client, http.MethodPut, "/"+id.String()+"/index/"+index, WithJSONBody(jsonArray))
 }
 
 // DeleteIndex removes the index of a bucket.
-func (b bucketsClient) DeleteIndex(bucket, index string) (gjson.Result, error) {
-	return execute(b.client, http.MethodDelete, "/"+bucket+"/index/"+index)
+func (b bucketsClient) DeleteIndex(id uuid.UUID, index string) (gjson.Result, error) {
+	return execute(b.client, http.MethodDelete, "/"+id.String()+"/index/"+index)
 }
 
 // staging is the struct for the client that can carry out every Staging operation.

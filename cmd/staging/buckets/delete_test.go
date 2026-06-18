@@ -34,7 +34,104 @@ func TestNewDeleteCommand(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:      "Delete bucket returns an acknowledged true",
+			name:      "Delete bucket by ID returns an acknowledged true",
+			args:      []string{"3d51beef-8b90-40aa-84b5-033241dc6239"},
+			url:       true,
+			apiKey:    "apiKey123",
+			outGolden: "NewDeleteCommand_Out_DeleteBucketReturnsTrue",
+			errGolden: "NewDeleteCommand_Err_DeleteBucketReturnsTrue",
+			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteBucketReturnsTrue"),
+			errBytes:  []byte(nil),
+			responses: map[string]testutils.MockResponse{
+				"POST:/v2/bucket/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+				"content": [
+					{
+						"source": {
+							"name": "my-bucket",
+							"description": "description",
+							"labels": [],
+							"active": true,
+							"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+							"creationTimestamp": "2026-06-04T22:06:02Z",
+							"lastUpdatedTimestamp": "2026-06-04T22:06:02Z"
+						},
+						"highlight": {},
+						"score": 1.0
+					}
+				],
+				"pageable": {
+					"page": 0,
+					"size": 20,
+					"sort": []
+				},
+				"totalSize": 1,
+				"totalPages": 1,
+				"empty": false,
+				"size": 20,
+				"offset": 0,
+				"numberOfElements": 1,
+				"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/bucket/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"active":true,
+					"documentCount":{},
+					"id":"3d51beef-8b90-40aa-84b5-033241dc6239",
+					"indices":[
+						{
+							"fields":[
+								{
+									"fieldName":"ASC"
+								}
+							],
+							"name":"myIndexA",
+							"unique":false
+						},
+						{
+							"fields":[
+								{
+									"fieldName2":"DESC"
+								}
+							],
+							"name":"myIndexB",
+							"unique":false
+						}
+					],
+					"labels":[],
+					"name":"my-bucket"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
+				"DELETE:/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+				"acknowledged": true
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodDelete, r.Method)
+						assert.Equal(t, "/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			name:      "Delete bucket by name returns an acknowledged true",
 			args:      []string{"my-bucket"},
 			url:       true,
 			apiKey:    "apiKey123",
@@ -43,15 +140,87 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  testutils.Read(t, "NewDeleteCommand_Out_DeleteBucketReturnsTrue"),
 			errBytes:  []byte(nil),
 			responses: map[string]testutils.MockResponse{
-				"DELETE:/v2/bucket/my-bucket": {
+				"POST:/v2/bucket/search": {
+					StatusCode: http.StatusOK,
+					Body: `{
+				"content": [
+					{
+						"source": {
+							"name": "my-bucket",
+							"description": "description",
+							"labels": [],
+							"active": true,
+							"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+							"creationTimestamp": "2026-06-04T22:06:02Z",
+							"lastUpdatedTimestamp": "2026-06-04T22:06:02Z"
+						},
+						"highlight": {},
+						"score": 1.0
+					}
+				],
+				"pageable": {
+					"page": 0,
+					"size": 20,
+					"sort": []
+				},
+				"totalSize": 1,
+				"totalPages": 1,
+				"empty": false,
+				"size": 20,
+				"offset": 0,
+				"numberOfElements": 1,
+				"pageNumber": 0
+			}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/bucket/search", r.URL.Path)
+					},
+				},
+				"GET:/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"active":true,
+					"documentCount":{},
+					"id":"3d51beef-8b90-40aa-84b5-033241dc6239",
+					"indices":[
+						{
+							"fields":[
+								{
+									"fieldName":"ASC"
+								}
+							],
+							"name":"myIndexA",
+							"unique":false
+						},
+						{
+							"fields":[
+								{
+									"fieldName2":"DESC"
+								}
+							],
+							"name":"myIndexB",
+							"unique":false
+						}
+					],
+					"labels":[],
+					"name":"my-bucket"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
+				"DELETE:/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
-	"acknowledged": true
-}`,
+				"acknowledged": true
+			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -81,20 +250,13 @@ func TestNewDeleteCommand(t *testing.T) {
 			outBytes:  []byte(nil),
 			errBytes:  testutils.Read(t, "NewDeleteCommand_Err_NameDoesNotExist"),
 			responses: map[string]testutils.MockResponse{
-				"DELETE:/v2/bucket/my-bucket": {
-					StatusCode:  http.StatusNotFound,
+				"POST:/v2/bucket/search": {
+					StatusCode:  http.StatusOK,
+					Body:        ``,
 					ContentType: "application/json",
-					Body: `{
-  "status": 404,
-  "code": 1002,
-  "messages": [
-    "The bucket 'my-bucket' was not found."
-  ],
-  "timestamp": "2025-12-23T14:53:32.321524600Z"
-}`,
 					Assertions: func(t *testing.T, r *http.Request) {
-						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/bucket/search", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},
@@ -102,14 +264,13 @@ func TestNewDeleteCommand(t *testing.T) {
 			err: cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{
 				Status: http.StatusNotFound,
 				Body: gjson.Parse(`{
-  "status": 404,
-  "code": 1002,
-  "messages": [
-    "The bucket 'my-bucket' was not found."
-  ],
-  "timestamp": "2025-12-23T14:53:32.321524600Z"
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-bucket" does not exist"
+	]
 }`),
-			}, "Could not delete the bucket with name \"my-bucket\"."),
+			}, "Could not search for entity with name \"my-bucket\""),
 		},
 		{
 			name:      "Printing JSON object fails",
@@ -121,7 +282,80 @@ func TestNewDeleteCommand(t *testing.T) {
 			url:       true,
 			apiKey:    "apiKey123",
 			responses: map[string]testutils.MockResponse{
-				"DELETE:/v2/bucket/my-bucket": {
+				"POST:/v2/bucket/search": {
+					StatusCode:  http.StatusOK,
+					ContentType: "application/json",
+					Body: `{
+				"content": [
+					{
+						"source": {
+							"name": "my-bucket",
+							"description": "description",
+							"labels": [],
+							"active": true,
+							"id": "3d51beef-8b90-40aa-84b5-033241dc6239",
+							"creationTimestamp": "2026-06-04T22:06:02Z",
+							"lastUpdatedTimestamp": "2026-06-04T22:06:02Z"
+						},
+						"highlight": {},
+						"score": 1.0
+					}
+				],
+				"pageable": {
+					"page": 0,
+					"size": 20,
+					"sort": []
+				},
+				"totalSize": 1,
+				"totalPages": 1,
+				"empty": false,
+				"size": 20,
+				"offset": 0,
+				"numberOfElements": 1,
+				"pageNumber": 0
+			}`,
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodPost, r.Method)
+						assert.Equal(t, "/v2/bucket/search", r.URL.Path)
+						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
+					},
+				},
+				"GET:/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239": {
+					StatusCode: http.StatusOK,
+					Body: `{
+					"active":true,
+					"documentCount":{},
+					"id":"3d51beef-8b90-40aa-84b5-033241dc6239",
+					"indices":[
+					{
+						"fields":[
+							{
+								"fieldName":"ASC
+							}
+						],
+						"name":"myIndexA",
+						"unique":false
+					},
+					{
+						"fields":[
+							{
+								"fieldName2":"DESC"
+							}
+						],
+						"name":"myIndexB",
+						"unique":false
+					}
+					],
+					"labels":[],
+					"name":"my-bucket"
+				}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
+					},
+				},
+				"DELETE:/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239": {
 					StatusCode:  http.StatusOK,
 					ContentType: "application/json",
 					Body: `{
@@ -129,7 +363,7 @@ func TestNewDeleteCommand(t *testing.T) {
 			}`,
 					Assertions: func(t *testing.T, r *http.Request) {
 						assert.Equal(t, http.MethodDelete, r.Method)
-						assert.Equal(t, "/v2/bucket/my-bucket", r.URL.Path)
+						assert.Equal(t, "/v2/bucket/3d51beef-8b90-40aa-84b5-033241dc6239", r.URL.Path)
 						assert.Equal(t, "apiKey123", r.Header.Get("X-API-Key"))
 					},
 				},

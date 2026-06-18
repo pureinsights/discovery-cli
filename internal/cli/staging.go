@@ -210,6 +210,14 @@ func zipRecords(file, dir string) error {
 	return nil
 }
 
+// DumpConfig is a struct that contains fields necessary to dump a bucket.
+type DumpConfig struct {
+	File        string
+	Filters     gjson.Result
+	Projections gjson.Result
+	Size        *int
+}
+
 // DumpBucket scrolls the contents of a bucket based on the given filters, projections and maximum page size.
 func (d discovery) DumpBucket(client StagingContentController, bucketName, file string, filters, projections gjson.Result, size *int, printer Printer) error {
 	records, err := client.Scroll(filters, projections, size)

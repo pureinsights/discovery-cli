@@ -381,3 +381,14 @@ func (d discovery) SearchDeleteEntity(client SearchDeleter, name string, printer
 	}
 	return d.DeleteEntity(client, deleteId, printer)
 }
+
+// SearchDumpBucket searches for the bucket with the given name or UUID and then dumps it.
+func (d discovery) SearchDumpBucket(client Searcher, contentProvider func(string) StagingContentController, nameOrID string, config DumpConfig, printer Printer) error {
+	result, err := d.searchEntity(client, nameOrID)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not find bucket with name or id %q", nameOrID)
+	}
+
+	bucketName := result.Get("name").String()
+	return d.DumpBucket(contentProvider(bucketName), bucketName, config.File, config.Filters, config.Projections, config.Size, printer)
+}
