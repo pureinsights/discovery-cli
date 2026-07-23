@@ -1,0 +1,21 @@
+{
+  "uri": "/my/mcp/server",
+  "name": "My MCP Server",
+  "pipeline": "fieldmmpaer Pipeline",
+  "capabilities": {
+    "logging": {},
+    "tools": {}
+  },
+  "serverInfo": {
+    "name": "mcp-server",
+    "version": "1.0"
+  },
+  "requestTimeout": "60s",
+  "expireAfter": "1h",
+  "labels": [
+        {
+            "key": "A",
+            "value": "A"
+        }
+    ]
+}

@@ -17,6 +17,41 @@ import (
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
+var ExpectedDirectories = map[string][]string{
+	"core": {
+		"credential",
+		"server",
+		"file",
+	},
+	"ingestion": {
+		"processor",
+		"pipeline",
+		"seed",
+		"seed-schedule",
+		"file",
+	},
+	"queryflow": {
+		"processor",
+		"pipeline",
+		"entrypoint/endpoint",
+		"entrypoint/mcp-server",
+		"entrypoint/mcp-server/mcp-server-tool",
+		"file",
+	},
+}
+
+var FolderToClass = map[string]string{
+	"credential":      "Credential",
+	"server":          "Server",
+	"processor":       "Processor",
+	"pipeline":        "Pipeline",
+	"seed":            "Seed",
+	"seed-schedule":   "SeedSchedule",
+	"endpoint":        "Endpoint",
+	"mcp-server":      "MCPServer",
+	"mcp-server-tool": "MCPServerTool",
+}
+
 // BackupRestore defines methods to backup and restore entities in Discovery.
 type BackupRestore interface {
 	Export() ([]byte, string, error)
@@ -304,6 +339,10 @@ func collectJSONFiles(folderPath string) ([]string, error) {
 			return err
 		}
 
+		if d.Name() == "mcp-server-tool" && filepath.Base(folderPath) != "mcp-server-tool" {
+			return filepath.SkipDir
+		}
+
 		if !d.IsDir() && strings.HasSuffix(d.Name(), ".json") {
 			result = append(result, path)
 		}
@@ -389,24 +428,9 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, zipName string) error 
 	return NormalizeWriteFileError(zipName, err)
 }
 
-// Converts the snake case names to title case
-func toTitleCase(input string) string {
-	parts := strings.Split(input, "-")
-
-	for i, part := range parts {
-		if len(part) == 0 {
-			continue
-		}
-
-		parts[i] = strings.ToUpper(part[:1]) + strings.ToLower(part[1:])
-	}
-
-	return strings.Join(parts, "")
-}
-
 // addNDJSONToZip reads the NDJSON files of an entity and adds the entity to the zip.
 func addNDJSONToZip(zipWriter *zip.Writer, subfolder, subfolderPath, tempDir string) error {
-	ndjsonFilename := toTitleCase(subfolder) + ".ndjson"
+	ndjsonFilename := FolderToClass[filepath.Base(subfolder)] + ".ndjson"
 	ndjsonPath := filepath.Join(tempDir, ndjsonFilename)
 
 	err := createNDJSON(subfolderPath, ndjsonPath)
@@ -436,14 +460,17 @@ func createBaseZip(client CoreFileController, basePath, tempDir string) (string,
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
 
-	entries, err := os.ReadDir(basePath)
-	if err != nil {
-		return "", NormalizeReadFileError(basePath, err)
-	}
-
-	for _, entry := range entries {
-		subfolder := entry.Name()
+	for _, subfolder := range ExpectedDirectories[baseName] {
 		subfolderPath := filepath.Join(basePath, subfolder)
+		subFolderFileInfo, err := os.Stat(subfolderPath)
+
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			} else {
+				return "", NormalizeReadFileError(subfolderPath, err)
+			}
+		}
 
 		if strings.HasPrefix(subfolder, "file") {
 			_, err = recursiveStore(client, subfolderPath, subfolderPath, false)
@@ -453,14 +480,7 @@ func createBaseZip(client CoreFileController, basePath, tempDir string) (string,
 			continue
 		}
 
-		if subfolder == "entrypoint" {
-			if endpointInfo, err := os.Stat(filepath.Join(subfolderPath, "endpoint")); err == nil && endpointInfo.IsDir() {
-				subfolder = "endpoint"
-				subfolderPath = filepath.Join(subfolderPath, "endpoint")
-			}
-		}
-
-		if entry.IsDir() {
+		if subFolderFileInfo.IsDir() {
 			err = addNDJSONToZip(zipWriter, subfolder, subfolderPath, tempDir)
 			if err != nil {
 				return "", err
