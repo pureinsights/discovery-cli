@@ -17,7 +17,13 @@ import (
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
-// mcpServerToolString avoids
+// entrypointString avoids duplicating the Entrypoint string
+const entrypointString = "entrypoint"
+
+// mcpServerString avoids duplicating the MCP Server string
+const mcpServerString = "mcp-server"
+
+// mcpServerToolString avoids duplicating the MCP Server Tool string
 const mcpServerToolString = "mcp-server-tool"
 
 // expectedDirectories has the directories that should be in the given directory to deploy
@@ -37,9 +43,9 @@ var expectedDirectories = map[string][]string{
 	"queryflow": {
 		"processor",
 		"pipeline",
-		filepath.Join("entrypoint", "endpoint"),
-		filepath.Join("entrypoint", "mcp-server"),
-		filepath.Join("entrypoint", "mcp-server", mcpServerToolString),
+		filepath.Join(entrypointString, "endpoint"),
+		filepath.Join(entrypointString, mcpServerString),
+		filepath.Join(entrypointString, mcpServerString, mcpServerToolString),
 		"file",
 	},
 }
@@ -53,7 +59,7 @@ var folderToClass = map[string]string{
 	"seed":              "Seed",
 	"seed-schedule":     "SeedSchedule",
 	"endpoint":          "Endpoint",
-	"mcp-server":        "MCPServer",
+	mcpServerString:     "MCPServer",
 	mcpServerToolString: "MCPServerTool",
 }
 
