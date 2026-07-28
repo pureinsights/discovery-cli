@@ -17,7 +17,11 @@ import (
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 )
 
-var ExpectedDirectories = map[string][]string{
+// mcpServerToolString avoids
+const mcpServerToolString = "mcp-server-tool"
+
+// expectedDirectories has the directories that should be in the given directory to deploy
+var expectedDirectories = map[string][]string{
 	"core": {
 		"credential",
 		"server",
@@ -33,23 +37,24 @@ var ExpectedDirectories = map[string][]string{
 	"queryflow": {
 		"processor",
 		"pipeline",
-		"entrypoint/endpoint",
-		"entrypoint/mcp-server",
-		"entrypoint/mcp-server/mcp-server-tool",
+		filepath.Join("entrypoint", "endpoint"),
+		filepath.Join("entrypoint", "mcp-server"),
+		filepath.Join("entrypoint", "mcp-server", mcpServerToolString),
 		"file",
 	},
 }
 
-var FolderToClass = map[string]string{
-	"credential":      "Credential",
-	"server":          "Server",
-	"processor":       "Processor",
-	"pipeline":        "Pipeline",
-	"seed":            "Seed",
-	"seed-schedule":   "SeedSchedule",
-	"endpoint":        "Endpoint",
-	"mcp-server":      "MCPServer",
-	"mcp-server-tool": "MCPServerTool",
+// folderToClass maps the name of the entity folder to the name that the NDJSON should have in the zip
+var folderToClass = map[string]string{
+	"credential":        "Credential",
+	"server":            "Server",
+	"processor":         "Processor",
+	"pipeline":          "Pipeline",
+	"seed":              "Seed",
+	"seed-schedule":     "SeedSchedule",
+	"endpoint":          "Endpoint",
+	"mcp-server":        "MCPServer",
+	mcpServerToolString: "MCPServerTool",
 }
 
 // BackupRestore defines methods to backup and restore entities in Discovery.
@@ -339,7 +344,7 @@ func collectJSONFiles(folderPath string) ([]string, error) {
 			return err
 		}
 
-		if d.Name() == "mcp-server-tool" && filepath.Base(folderPath) != "mcp-server-tool" {
+		if d.Name() == mcpServerToolString && filepath.Base(folderPath) != mcpServerToolString {
 			return filepath.SkipDir
 		}
 
@@ -430,7 +435,7 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, zipName string) error 
 
 // addNDJSONToZip reads the NDJSON files of an entity and adds the entity to the zip.
 func addNDJSONToZip(zipWriter *zip.Writer, subfolder, subfolderPath, tempDir string) error {
-	ndjsonFilename := FolderToClass[filepath.Base(subfolder)] + ".ndjson"
+	ndjsonFilename := folderToClass[filepath.Base(subfolder)] + ".ndjson"
 	ndjsonPath := filepath.Join(tempDir, ndjsonFilename)
 
 	err := createNDJSON(subfolderPath, ndjsonPath)
@@ -460,7 +465,7 @@ func createBaseZip(client CoreFileController, basePath, tempDir string) (string,
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
 
-	for _, subfolder := range ExpectedDirectories[baseName] {
+	for _, subfolder := range expectedDirectories[baseName] {
 		subfolderPath := filepath.Join(basePath, subfolder)
 		subFolderFileInfo, err := os.Stat(subfolderPath)
 
