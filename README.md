@@ -413,7 +413,8 @@ Flags:
 
 Examples:
 
-```json
+```bash
+# Deploy the entities in the directory "entities" to Discovery
 discovery deploy -p cn "entities"
 {
   "core": {
