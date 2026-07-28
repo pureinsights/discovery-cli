@@ -1,7 +1,6 @@
 {
   "uri": "/my/mcp/server",
   "name": "My MCP Server",
-  "pipeline": "fieldmmpaer Pipeline",
   "capabilities": {
     "logging": {},
     "tools": {}
