@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/google/uuid"
@@ -486,6 +487,7 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 		path             string
 		statusCode       int
 		indexConfig      []string
+		unique           bool
 		response         string
 		expectedResponse gjson.Result
 		err              error
@@ -499,6 +501,7 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 			response:         `{"acknowledged":true}`,
 			expectedResponse: gjson.Parse(`{"acknowledged":true}`),
 			indexConfig:      []string{`{"fieldName":"ASC"}`, `{"author":"DESC"}`},
+			unique:           true,
 			err:              nil,
 		},
 
@@ -582,6 +585,7 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
 				assert.Equal(t, tc.method, r.Method)
 				assert.Equal(t, "/bucket"+tc.path, r.URL.Path)
+				assert.Equal(t, strconv.FormatBool(tc.unique), r.URL.Query().Get("unique"))
 				if tc.err == nil {
 					body, _ := io.ReadAll(r.Body)
 					jsonArray := gjson.ParseBytes(body).Array()
@@ -596,7 +600,7 @@ func Test_bucketsClient_CreateIndex(t *testing.T) {
 			bucketsClient := newBucketsClient(srv.URL, "")
 
 			indices := []gjson.Result{gjson.Parse(tc.indexConfig[0]), gjson.Parse(tc.indexConfig[1])}
-			response, err := bucketsClient.CreateIndex(uuid.MustParse(id), "testIndex", indices)
+			response, err := bucketsClient.CreateIndex(uuid.MustParse(id), "testIndex", indices, tc.unique)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)

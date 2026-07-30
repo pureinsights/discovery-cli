@@ -4135,7 +4135,7 @@ discovery staging bucket store bucketConfig.json
         }
       ],
       "name": "myIndexB",
-      "unique": false
+      "unique": true
     }
   ],
   "name": "my-bucket"
