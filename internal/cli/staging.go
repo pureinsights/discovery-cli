@@ -17,7 +17,7 @@ import (
 type StagingBucketController interface {
 	Create(bucket string, options gjson.Result) (gjson.Result, error)
 	Get(bucket string) (gjson.Result, error)
-	CreateIndex(bucket, index string, config []gjson.Result) (gjson.Result, error)
+	CreateIndex(bucket, index string, config []gjson.Result, unique bool) (gjson.Result, error)
 	DeleteIndex(bucket, index string) (gjson.Result, error)
 	Delete(bucket string) (gjson.Result, error)
 }
@@ -44,7 +44,7 @@ func updateIndices(client StagingBucketController, bucketName string, oldIndices
 	for _, index := range newIndices.Array() {
 		indexName := index.Get("name").String()
 
-		indexAck, err := client.CreateIndex(bucketName, indexName, index.Get("fields").Array())
+		indexAck, err := client.CreateIndex(bucketName, indexName, index.Get("fields").Array(), index.Get("unique").Bool())
 		if err != nil || !(indexAck.Get("acknowledged").Bool()) {
 			return NewErrorWithCause(ErrorExitCode, err, "Could not update index with name %q of bucket %q.", indexName, bucketName)
 		}

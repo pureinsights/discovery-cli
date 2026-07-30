@@ -182,14 +182,14 @@ func (b bucketsClient) Purge(bucket uuid.UUID) (gjson.Result, error) {
 }
 
 // CreateIndex adds an index with the given name and configuration to a bucket.
-func (b bucketsClient) CreateIndex(id uuid.UUID, index string, config []gjson.Result) (gjson.Result, error) {
+func (b bucketsClient) CreateIndex(id uuid.UUID, index string, config []gjson.Result, unique bool) (gjson.Result, error) {
 	var parts []string
 	for _, r := range config {
 		parts = append(parts, r.Raw)
 	}
 	jsonArray := "[" + strings.Join(parts, ",") + "]"
 
-	return execute(b.client, http.MethodPut, "/"+id.String()+"/index/"+index, WithJSONBody(jsonArray))
+	return execute(b.client, http.MethodPut, "/"+id.String()+"/index/"+index, WithJSONBody(jsonArray), WithQueryParameters(map[string][]string{"unique": {strconv.FormatBool(unique)}}))
 }
 
 // DeleteIndex removes the index of a bucket.
