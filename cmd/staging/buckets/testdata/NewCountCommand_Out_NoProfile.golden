@@ -1,0 +1,15 @@
+Usage:
+  count [flags]
+
+Examples:
+	# Count the number of records in a bucket by name with filters
+	discovery staging bucket count "my-bucket" -f '{"equals":{"field":"my-field","value":"my-value"}}'
+	
+	# Count the number of records in a bucket by UUID
+	discovery staging bucket count ab0b4548-909d-4b23-aa62-69d8a6f8ed50'
+	
+
+Flags:
+  -f, --filter string   the DSL containing the filters that will be applied to the scroll
+  -h, --help            help for count
+
