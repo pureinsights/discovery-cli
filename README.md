@@ -4099,12 +4099,12 @@ discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"
 
 `count` is the command used to count a bucket's content in the Discovery Staging Repository. The user can send a name or UUID to get the count of a specific bucket. The user can send filters with the `filter` flag, which is a single JSON string that contains all of the filters. 
 
-Usage: `discovery staging bucket count [flags] [<arg>]`
+Usage: `discovery staging bucket count [flags] <arg>`
 
 Arguments:
 
 `arg`:
-(Optional, string) The name or UUID of the bucket that will be retrieved.
+(Required, string) The name or UUID of the bucket that will be counted.
 
 Flags:
 
@@ -4137,7 +4137,7 @@ discovery staging bucket count 69eeb20b-8ded-478f-937f-64caa0a3e8c0
 
 ```bash
 # Get a bucket count by name
-discovery staging bucket get "my-bucket"
+discovery staging bucket count "my-bucket"
 {"total":1000000}
 ```
 
