@@ -1,5 +1,5 @@
 Usage:
-  count [flags]
+  count <bucketName> [flags]
 
 Examples:
 	# Count the number of records in a bucket by name with filters
