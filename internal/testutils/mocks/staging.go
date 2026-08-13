@@ -522,12 +522,22 @@ func (s *WorkingStagingContentController) Scroll(gjson.Result, gjson.Result, *in
 ]`).Array(), nil
 }
 
+// Count returns a working result.
+func (s *WorkingStagingContentController) Count(gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{"total": 2}`), nil
+}
+
 // WorkingStagingContentControllerNoContent mocks when the scroll returns no content.
 type WorkingStagingContentControllerNoContent struct{}
 
 // Scroll returns an empty array.
 func (s *WorkingStagingContentControllerNoContent) Scroll(gjson.Result, gjson.Result, *int) ([]gjson.Result, error) {
 	return []gjson.Result{}, nil
+}
+
+// Count returns a working result with no records.
+func (s *WorkingStagingContentControllerNoContent) Count(gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{"total": 0}`), nil
 }
 
 // FailingStagingContentController mocks a failing content controller.
@@ -542,6 +552,21 @@ func (s *FailingStagingContentController) Scroll(gjson.Result, gjson.Result, *in
   "code": 1002,
   "messages": [
     "The bucket 'my-bucket' was not found."
+  ],
+  "timestamp": "2025-12-23T14:53:32.321524600Z"
+}`),
+	}
+}
+
+// Count returns an error.
+func (s *FailingStagingContentController) Count(gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: entity with name 'my-bucket' does not exist"
   ],
   "timestamp": "2025-12-23T14:53:32.321524600Z"
 }`),

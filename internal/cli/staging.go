@@ -25,6 +25,7 @@ type StagingBucketController interface {
 // StagingContentController defines the methods to interact with a bucket's content.
 type StagingContentController interface {
 	Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error)
+	Count(filters gjson.Result) (gjson.Result, error)
 }
 
 // updateIndices updates the indices in a bucket with the new configuration.
@@ -241,4 +242,18 @@ func (d discovery) DumpBucket(client StagingContentController, bucketName, file 
 	}
 
 	return printer(*d.IOStreams(), gjson.Parse(`{"acknowledged": true}`))
+}
+
+// CountBucket counts the number of records in a bucket based on the given filters.
+func (d discovery) CountBucket(client StagingContentController, bucketName string, filters gjson.Result, printer Printer) error {
+	result, err := client.Count(filters)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not count the bucket with name %q.", bucketName)
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), result)
 }
