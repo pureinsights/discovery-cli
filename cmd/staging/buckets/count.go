@@ -1,6 +1,8 @@
 package buckets
 
 import (
+	"fmt"
+
 	"github.com/pureinsights/discovery-cli/cmd/commands"
 	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
 	"github.com/pureinsights/discovery-cli/internal/cli"
@@ -12,9 +14,9 @@ import (
 func NewCountCommand(d cli.Discovery) *cobra.Command {
 	var filters string
 	count := &cobra.Command{
-		Use:   "count",
+		Use:   "count <bucketName>",
 		Short: "The command that counts the number of records in a bucket in Discovery Staging.",
-		Long:  "count is the command used to count the number of records in a bucket in the Discovery Staging Repository. The bucket's name or UUID is sent as the mandatory argument. The user can send filters with the --filter flag, which is a single JSON string that contains all of the filters.",
+		Long:  fmt.Sprintf(commands.LongCountSearch, "bucket", "Staging"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
