@@ -18,21 +18,13 @@ func NewCountCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command that counts the number of records in a bucket in Discovery Staging.",
 		Long:  fmt.Sprintf(commands.LongCountSearch, "bucket", "Staging"),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			profile, err := cmd.Flags().GetString("profile")
-			if err != nil {
-				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
-			}
-
-			err = commands.CheckCredentials(d, profile, "Staging", "staging_url")
+			profile, printer, err := prepareStagingCommand(d, cmd)
 			if err != nil {
 				return err
 			}
 
 			vpr := d.Config()
-
 			stagingClient := discoveryPackage.NewStaging(vpr.GetString(profile+".staging_url"), vpr.GetString(profile+".staging_key"))
-
-			printer := cli.GetObjectPrinter(d.Config().GetString("output"))
 
 			return commands.SearchCountCommand(args[0], d, stagingClient.Buckets(), func(name string) cli.StagingContentController {
 				return stagingClient.Content(name)
