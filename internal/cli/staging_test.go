@@ -42,6 +42,7 @@ func Test_updateIndices(t *testing.T) {
         { "fieldA": "ASC" },
         { "fieldB": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     },
     {
@@ -50,6 +51,7 @@ func Test_updateIndices(t *testing.T) {
         { "fieldB": "ASC" },
         { "fieldA": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     }
   ]`),
@@ -61,6 +63,7 @@ func Test_updateIndices(t *testing.T) {
           "fieldName": "DESC"
         }
       ],
+	  "scroll": false,
       "unique": false
     },
     {
@@ -70,6 +73,7 @@ func Test_updateIndices(t *testing.T) {
           "my-field": "DESC"
         }
       ],
+	  "scroll": false,
       "unique": false
     }
   ]`).Array(),
@@ -86,6 +90,7 @@ func Test_updateIndices(t *testing.T) {
         { "fieldA": "ASC" },
         { "fieldB": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     },
     {
@@ -94,6 +99,7 @@ func Test_updateIndices(t *testing.T) {
         { "fieldB": "ASC" },
         { "fieldA": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     }
   ]`),
@@ -105,6 +111,7 @@ func Test_updateIndices(t *testing.T) {
           "fieldName": "DESC"
         }
       ],
+	  "scroll": false,
       "unique": false
     },
     {
@@ -114,6 +121,7 @@ func Test_updateIndices(t *testing.T) {
           "my-field": "DESC"
         }
       ],
+	  "scroll": false,
       "unique": false
     }
   ]`).Array(),
@@ -132,6 +140,7 @@ func Test_updateIndices(t *testing.T) {
         { "fieldA": "ASC" },
         { "fieldB": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     },
     {
@@ -140,6 +149,7 @@ func Test_updateIndices(t *testing.T) {
         { "fieldB": "ASC" },
         { "fieldA": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     }
   ]`),
@@ -151,6 +161,7 @@ func Test_updateIndices(t *testing.T) {
           "fieldName": "DESC"
         }
       ],
+	  "scroll": false,
       "unique": false
     },
     {
@@ -160,6 +171,7 @@ func Test_updateIndices(t *testing.T) {
           "my-field": "DESC"
         }
       ],
+	  "scroll": false,
       "unique": false
     }
   ]`).Array(),
@@ -211,6 +223,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldA": "ASC" },
         { "fieldB": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     },
     {
@@ -219,6 +232,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldB": "ASC" },
         { "fieldA": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     }
   ],
@@ -240,6 +254,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldA": "ASC" },
         { "fieldB": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     },
     {
@@ -248,6 +263,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldB": "ASC" },
         { "fieldA": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     }
   ],
@@ -311,6 +327,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldA": "ASC" },
         { "fieldB": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     },
     {
@@ -319,6 +336,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldB": "ASC" },
         { "fieldA": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     }
   ],
@@ -345,6 +363,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldA": "ASC" },
         { "fieldB": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     },
     {
@@ -353,6 +372,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldB": "ASC" },
         { "fieldA": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     }
   ],
@@ -379,6 +399,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldA": "ASC" },
         { "fieldB": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     },
     {
@@ -387,6 +408,7 @@ func Test_discovery_StoreBucket(t *testing.T) {
         { "fieldB": "ASC" },
         { "fieldA": "DESC" }
       ],
+	  "scroll": false,
       "unique": true
     }
   ],

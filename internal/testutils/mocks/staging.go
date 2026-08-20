@@ -184,6 +184,7 @@ func (s *FailingStagingBucketControllerNotDiscoveryError) Get(string) (gjson.Res
           "fieldName": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     },
     {
@@ -193,6 +194,7 @@ func (s *FailingStagingBucketControllerNotDiscoveryError) Get(string) (gjson.Res
           "my-field": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     }
   ]
@@ -248,6 +250,7 @@ func (s *FailingStagingBucketControllerNotFoundError) Get(string) (gjson.Result,
           "fieldName": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     },
     {
@@ -257,6 +260,7 @@ func (s *FailingStagingBucketControllerNotFoundError) Get(string) (gjson.Result,
           "my-field": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     }
   ]
@@ -307,6 +311,7 @@ func (s *FailingStagingBucketControllerIndexCreationFails) Get(string) (gjson.Re
           "fieldName": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     },
     {
@@ -316,6 +321,7 @@ func (s *FailingStagingBucketControllerIndexCreationFails) Get(string) (gjson.Re
           "my-field": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     }
   ]
@@ -370,6 +376,7 @@ func (s *FailingStagingBucketControllerIndexDeletionFails) Get(string) (gjson.Re
           "fieldName": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     },
     {
@@ -379,6 +386,7 @@ func (s *FailingStagingBucketControllerIndexDeletionFails) Get(string) (gjson.Re
           "my-field": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     }
   ]
