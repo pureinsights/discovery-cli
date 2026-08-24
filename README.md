@@ -4009,7 +4009,7 @@ Staging API Key: "discovery.key.staging.cn"
 ```
 
 ##### Bucket
-`bucket` is the command used to manage buckets in Discovery Staging. This command contains various subcommands used to create, scroll, update, and delete.
+`bucket` is the command used to manage buckets in Discovery Staging. This command contains various subcommands used to count, create, scroll, update, and delete.
 
 Usage: `discovery staging bucket [subcommand] [flags]`
 
@@ -4154,6 +4154,58 @@ discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"
   ],
   "name": "my-bucket"
 }
+```
+
+###### Count
+
+`count` is the command used to count a bucket's content in the Discovery Staging Repository. The user can send a name or UUID to get the count of a specific bucket. The user can send filters with the `filter` flag, which is a single JSON string that contains all of the filters. 
+
+Usage: `discovery staging bucket count [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the bucket that will be counted.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`:
+(Optional, string) The [DSL](https://discovery.pureinsights.live/latest/reference/index.html#dsl) containing the filters that will be applied to the scroll. For example:
+
+```json
+{
+	"equals": {
+		"field": "author",
+		"value": "John Doe",
+		"normalize": true
+	}
+}
+```
+
+Examples:
+
+```bash
+# Get a bucket count by id
+discovery staging bucket count 69eeb20b-8ded-478f-937f-64caa0a3e8c0
+{"total":1000000}
+```
+
+```bash
+# Get a bucket count by name
+discovery staging bucket count "my-bucket"
+{"total":1000000}
+```
+
+```bash
+# Get bucket count using filters
+discovery staging bucket count "source-count" --filter "{\"equals\":{\"field\":\"author\",\"value\":\"John Doe\"}}"
+{"total":270000}
 ```
 
 ###### Dump

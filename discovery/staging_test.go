@@ -1307,6 +1307,99 @@ func Test_contentClient_DeleteMany(t *testing.T) {
 	}
 }
 
+func Test_contentClient_Count(t *testing.T) {
+	tests := []struct {
+		name             string
+		method           string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		bucketName       string
+		filters          string
+		err              error
+	}{
+		// Working case
+		{
+			name:             "Count works with no filters",
+			method:           http.MethodPost,
+			statusCode:       http.StatusOK,
+			response:         `{"total":3}`,
+			expectedResponse: gjson.Parse(`{"total":3}`),
+			bucketName:       "testBucket",
+			filters:          ``,
+			err:              nil,
+		},
+		{
+			name:             "Count works with filters",
+			method:           http.MethodPost,
+			statusCode:       http.StatusOK,
+			response:         `{"total":1}`,
+			expectedResponse: gjson.Parse(`{"total":1}`),
+			bucketName:       "testBucket",
+			filters: `{
+			"equals": {
+				"field": "correct_index",
+				"value": "hd_index"
+			}
+			}`,
+			err: nil,
+		},
+
+		// Error case
+		{
+			name:       "Count returns 404 Not found",
+			method:     http.MethodPost,
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: entity with name 'testBucket' does not exist"
+			],
+			"timestamp": "2025-09-09T16:35:57.753512900Z"
+			}`,
+			bucketName:       "testBucket",
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Entity not found: entity with name 'testBucket' does not exist"
+			],
+			"timestamp": "2025-09-09T16:35:57.753512900Z"
+			}`)},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+				assert.Equal(t, tc.method, r.Method)
+				assert.Equal(t, "/content/"+tc.bucketName+"/count", r.URL.Path)
+				if tc.filters != "" {
+					body, _ := io.ReadAll(r.Body)
+					assert.Equal(t, tc.filters, string(body))
+				}
+			}))
+
+			defer srv.Close()
+
+			contentClient := newContentClient(srv.URL, "", tc.bucketName)
+
+			response, err := contentClient.Count(gjson.Parse(tc.filters))
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
+		})
+	}
+}
+
 // Test_scrollWithPagination_HTTPResponseCases tests how the scrollWithPagination() function behaves with various HTTP responses.
 func Test_scrollWithPagination_HTTPResponseCases(t *testing.T) {
 	tests := []struct {

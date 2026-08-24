@@ -1,0 +1,4 @@
+Error: Could not count the bucket with name "my-bucket".
+status: 500, body: {"status": 500, "code": 5000, "messages": ["Internal server error"]}
+
+
