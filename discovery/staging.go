@@ -191,22 +191,6 @@ func (b bucketsClient) Purge(bucket uuid.UUID) (gjson.Result, error) {
 	return execute(b.client, http.MethodDelete, "/"+bucket.String()+"/purge")
 }
 
-// CreateIndex adds an index with the given name and configuration to a bucket.
-func (b bucketsClient) CreateIndex(id uuid.UUID, index string, config []gjson.Result, unique bool) (gjson.Result, error) {
-	var parts []string
-	for _, r := range config {
-		parts = append(parts, r.Raw)
-	}
-	jsonArray := "[" + strings.Join(parts, ",") + "]"
-
-	return execute(b.client, http.MethodPut, "/"+id.String()+"/index/"+index, WithJSONBody(jsonArray), WithQueryParameters(map[string][]string{"unique": {strconv.FormatBool(unique)}}))
-}
-
-// DeleteIndex removes the index of a bucket.
-func (b bucketsClient) DeleteIndex(id uuid.UUID, index string) (gjson.Result, error) {
-	return execute(b.client, http.MethodDelete, "/"+id.String()+"/index/"+index)
-}
-
 // staging is the struct for the client that can carry out every Staging operation.
 type staging struct {
 	Url, ApiKey string
