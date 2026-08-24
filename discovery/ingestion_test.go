@@ -935,6 +935,85 @@ func Test_seedExecutionsClient_Jobs(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution/"+executionId.String()+"/job", ingestionSeedExecutionJobClient.client.client.BaseURL)
 }
 
+// Test_seedExecutionsClient_DPS tests the seedExecutionsClient.DPS() function.
+func Test_seedExecutionsClient_DPS(t *testing.T) {
+	tests := []struct {
+		name             string
+		method           string
+		path             string
+		statusCode       int
+		response         string
+		expectedResponse gjson.Result
+		err              error
+	}{
+		// Working case
+		{
+			name:             "DPS returns a real response",
+			method:           http.MethodGet,
+			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/dps",
+			statusCode:       http.StatusOK,
+			response:         `{ "dps": 1, "from": "2026-08-24T19:24:19Z", to": "2026-08-24T19:26:02.436834Z" }`,
+			expectedResponse: gjson.Parse(`{ "dps": 1, "from": "2026-08-24T19:24:19Z", to": "2026-08-24T19:26:02.436834Z" }`),
+			err:              nil,
+		},
+		// Error cases
+		{
+			name:       "DPS fails because the execution was not found.",
+			method:     http.MethodGet,
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/dps",
+			statusCode: http.StatusNotFound,
+			response: `{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
+			],
+			"timestamp": "2025-09-03T21:37:21.871825500Z"
+			}`,
+			expectedResponse: gjson.Result{},
+			err: Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+			"status": 404,
+			"code": 1003,
+			"messages": [
+				"Seed execution not found: 6b7f0b69-126f-49ab-b2ff-0a876f42e5ed"
+			],
+			"timestamp": "2025-09-03T21:37:21.871825500Z"
+			}`)},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(
+				testutils.HttpHandler(t, tc.statusCode, "application/json", tc.response, func(t *testing.T, r *http.Request) {
+					assert.Equal(t, tc.method, r.Method)
+					assert.Equal(t, "/seed/2acd0a61-852c-4f38-af2b-9c84e152873e/execution/"+strings.TrimLeft(tc.path, "/"), r.URL.Path)
+				}))
+			defer srv.Close()
+
+			apiKey := "Api Key"
+			seedId, err := uuid.Parse("2acd0a61-852c-4f38-af2b-9c84e152873e")
+			require.NoError(t, err)
+			ingestionSeedsClient := newSeedsClient(srv.URL, apiKey)
+			ingestionSeedExecutionsClient := newSeedExecutionsClient(ingestionSeedsClient, seedId)
+
+			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
+			require.NoError(t, err)
+
+			response, err := ingestionSeedExecutionsClient.DPS(executionId)
+			assert.Equal(t, tc.expectedResponse, response)
+			if tc.err == nil {
+				require.NoError(t, err)
+				assert.True(t, response.IsObject())
+			} else {
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			}
+		})
+	}
+}
+
 // Test_seedExecutionsClient_Audit_HTTPResponseCases tests how the seedExecutionsClient.Audit() function behaves when receiving different HTTP responses and errors.
 // It does not test if reading all the pages works.
 func Test_seedExecutionsClient_Audit_HTTPResponseCases(t *testing.T) {

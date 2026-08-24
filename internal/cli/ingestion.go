@@ -152,6 +152,7 @@ type Summarizer interface {
 // SeedExecutionGetter defines the methods to get seed executions and the audited changes.
 type SeedExecutionGetter interface {
 	Getter
+	DPS(executionId uuid.UUID) (gjson.Result, error)
 	Audit(executionId uuid.UUID) ([]gjson.Result, error)
 	GetLast5Executions() (gjson.Result, error)
 }
@@ -165,6 +166,16 @@ func AppendSeedExecutionDetails(seedExecution gjson.Result, seedExecutionId uuid
 
 	auditString := ConvertJSONArrayToString(auditLogs)
 	raw, err := sjson.SetRaw(seedExecution.Raw, "audit", auditString)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	dps, err := client.DPS(seedExecutionId)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+
+	raw, err = sjson.SetRaw(raw, "dps", dps.Get("dps").Raw)
 	if err != nil {
 		return gjson.Result{}, err
 	}

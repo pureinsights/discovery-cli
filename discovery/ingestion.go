@@ -166,6 +166,11 @@ func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClien
 	return newSeedExecutionJobsClient(c, executionId)
 }
 
+// DPS gets the documents per second of a seed execution.
+func (c seedExecutionsClient) DPS(executionId uuid.UUID) (gjson.Result, error) {
+	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/dps")
+}
+
 // ingestionProcessorsClient is the struct that performs the CRUD and cloning of processors.
 type ingestionProcessorsClient struct {
 	crud
