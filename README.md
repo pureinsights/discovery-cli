@@ -4087,8 +4087,6 @@ discovery staging bucket get -p cn
 {"active":true,"creationTimestamp":"2026-06-04T22:06:02Z","description":"description","id":"69eeb20b-8ded-478f-937f-64caa0a3e8c0","labels":[],"lastUpdatedTimestamp":"2026-06-04T22:06:02Z","name":"my-bucket"}
 ```
 
-
-
 ###### Store
 `store` is the command used to create and update buckets in the Discovery Staging Repository. The bucket's configuration, including its name, indices, and other options, must be provided either through the `configFile` argument as a path to a JSON file, or through the `data` flag as a JSON string. The `data` flag and the `configFile` argument are mutually exclusive. When the bucket already exists, the command will try to modify its indices by updating them and deleting the ones no longer needed.
 
