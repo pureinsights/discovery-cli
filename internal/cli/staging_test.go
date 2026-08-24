@@ -978,3 +978,102 @@ func Test_discovery_DumpBucket_writeRecordsToFileFails(t *testing.T) {
 	assert.Contains(t, err.Error(), strings.ToLower(filepath.FromSlash("/does/not/exist")))
 	assert.Contains(t, err.Error(), "Could not write records to temporary folder.")
 }
+
+// Test_discovery_CountBucket tests the discovery.CountBucket() function.
+func Test_discovery_CountBucket(t *testing.T) {
+	filters := `{
+	"equals": {
+		"field": "author",
+		"value": "Stephen King"
+	}
+}`
+
+	tests := []struct {
+		name           string
+		client         StagingContentController
+		printer        Printer
+		expectedOutput string
+		outWriter      io.Writer
+		err            error
+	}{
+		// Working case
+		{
+			name:           "CountBucket correctly prints the total with the ugly printer",
+			client:         new(mocks.WorkingStagingContentController),
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"total\":2}\n",
+			err:            nil,
+		},
+		{
+			name:           "CountBucket correctly prints the total with the JSON pretty printer",
+			client:         new(mocks.WorkingStagingContentController),
+			printer:        nil,
+			expectedOutput: "{\n  \"total\": 2\n}\n",
+			err:            nil,
+		},
+		{
+			name:           "CountBucket correctly prints zero when there is no content",
+			client:         new(mocks.WorkingStagingContentControllerNoContent),
+			printer:        nil,
+			expectedOutput: "{\n  \"total\": 0\n}\n",
+			err:            nil,
+		},
+
+		// Error cases
+		{
+			name:           "Count returns an error",
+			client:         new(mocks.FailingStagingContentController),
+			printer:        nil,
+			expectedOutput: "",
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Entity not found: entity with name 'my-bucket' does not exist"
+  ],
+  "timestamp": "2025-12-23T14:53:32.321524600Z"
+}`),
+			}, "Could not count the bucket with name \"my-bucket\"."),
+		},
+		{
+			name:      "Printing fails",
+			client:    new(mocks.WorkingStagingContentController),
+			printer:   nil,
+			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
+			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.CountBucket(tc.client, "my-bucket", gjson.Parse(filters), tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}

@@ -134,6 +134,16 @@ func (c contentClient) Scroll(filters, projections gjson.Result, size *int) ([]g
 	return scrollWithPagination(c.client, http.MethodPost, "/scroll", options...)
 }
 
+// Count returns the number of records in the bucket that match the given filters.
+func (c contentClient) Count(filters gjson.Result) (gjson.Result, error) {
+	options := []RequestOption{}
+	if filters.Exists() {
+		options = append(options, WithJSONBody(filters.Raw))
+	}
+
+	return execute(c.client, http.MethodPost, "/count", options...)
+}
+
 // Delete deletes the document with the given contentId in the bucket.
 func (c contentClient) Delete(contentId string) (gjson.Result, error) {
 	return execute(c.client, http.MethodDelete, "/"+contentId)

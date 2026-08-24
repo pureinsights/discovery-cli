@@ -2113,3 +2113,87 @@ func Test_discovery_SearchDeleteEntity(t *testing.T) {
 		})
 	}
 }
+
+// Test_discovery_SearchCountBucket tests the discovery.SearchCountBucket() function.
+func Test_discovery_SearchCountBucket(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          Searcher
+		contentProvider func(string) StagingContentController
+		filters         gjson.Result
+		printer         Printer
+		expectedOutput  string
+		outWriter       io.Writer
+		err             error
+	}{
+		// Working case
+		{
+			name:   "SearchCountBucket correctly prints the total",
+			client: new(mocks.WorkingSearcher),
+			contentProvider: func(name string) StagingContentController {
+				return new(mocks.WorkingContentController)
+			},
+			filters:        gjson.Parse(`{"equals": {"field": "author", "value": "Martin Bayton"}}`),
+			printer:        nil,
+			expectedOutput: "{\n  \"total\": 10\n}\n",
+			err:            nil,
+		},
+
+		// Error cases
+		{
+			name:   "SearchCountBucket returns an error when the bucket is not found",
+			client: new(mocks.FailingSearcherWorkingGetter),
+			contentProvider: func(name string) StagingContentController {
+				return new(mocks.WorkingContentController)
+			},
+			printer: nil,
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusNotFound,
+				Body:   gjson.Parse("{\n\t\"status\": 404,\n\t\"code\": 1003,\n\t\"messages\": [\n\t\t\"Entity not found: entity with name \"MongoDB Atlas Server\" does not exist\"\n\t]\n}"),
+			}, "Could not find bucket with name or id \"MongoDB Atlas Server\""),
+		},
+		{
+			name:   "SearchCountBucket returns an error when count fails",
+			client: new(mocks.WorkingSearcher),
+			contentProvider: func(name string) StagingContentController {
+				return new(mocks.FailingContentController)
+			},
+			printer: nil,
+			err: NewErrorWithCause(ErrorExitCode, discoveryPackage.Error{
+				Status: http.StatusInternalServerError,
+				Body:   gjson.Parse(`{"status": 500, "code": 5000, "messages": ["Internal server error"]}`),
+			}, "Could not count the bucket with name \"MongoDB Atlas server\"."),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			var out io.Writer
+			if tc.outWriter != nil {
+				out = tc.outWriter
+			} else {
+				out = buf
+			}
+
+			ios := iostreams.IOStreams{
+				In:  os.Stdin,
+				Out: out,
+				Err: os.Stderr,
+			}
+
+			d := NewDiscovery(&ios, viper.New(), "")
+			err := d.SearchCountBucket(tc.client, tc.contentProvider, "MongoDB Atlas Server", tc.filters, tc.printer)
+
+			if tc.err != nil {
+				require.Error(t, err)
+				var errStruct Error
+				require.ErrorAs(t, err, &errStruct)
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedOutput, buf.String())
+			}
+		})
+	}
+}
