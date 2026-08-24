@@ -1,0 +1,13 @@
+{
+  "name": "my-mcp-server-tool",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+        "name": { "type": "string" },
+        "age": { "type": "integer", "minimum": 0 }
+    },
+    "required": ["name"]
+    },
+  "pipeline": "anthropic-pipeline",
+  "timeout": "60s"
+}

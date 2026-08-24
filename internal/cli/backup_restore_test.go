@@ -923,63 +923,6 @@ func TestImportEntitiesFromClients(t *testing.T) {
 	}
 }
 
-// Test_toTitleCase tests the toTitleCase() function.
-func Test_toTitleCase(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected string
-	}{
-		{
-			name:     "single word",
-			input:    "hello",
-			expected: "Hello",
-		},
-		{
-			name:     "hyphen separated words",
-			input:    "seed-schedule",
-			expected: "SeedSchedule",
-		},
-		{
-			name:     "multiple words",
-			input:    "my-example-string",
-			expected: "MyExampleString",
-		},
-		{
-			name:     "empty string",
-			input:    "",
-			expected: "",
-		},
-		{
-			name:     "leading hyphen",
-			input:    "-hello-world",
-			expected: "HelloWorld",
-		},
-		{
-			name:     "trailing hyphen",
-			input:    "hello-world-",
-			expected: "HelloWorld",
-		},
-		{
-			name:     "consecutive hyphens",
-			input:    "hello--world",
-			expected: "HelloWorld",
-		},
-		{
-			name:     "numbers included",
-			input:    "version-2-config",
-			expected: "Version2Config",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			actual := toTitleCase(tc.input)
-			assert.Equal(t, tc.expected, actual)
-		})
-	}
-}
-
 // Test_collectJSONFiles_NoError tests the collectJSONFiles() function when it works correctly.
 func Test_collectJSONFiles_NoError(t *testing.T) {
 	expectedList := []string{filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint", "project", "hybrid.json"), filepath.Join("testdata", "deploy", "queryflow", "entrypoint", "endpoint", "vector.json")}
@@ -1224,6 +1167,7 @@ func Test_createBaseZip_Working(t *testing.T) {
 }
 
 // Test_createBaseZip_BasePathDoesNotExist tests the createBaseZip() function when the base path does not exist.
+// The path is skipped and nothing happens.
 func Test_createBaseZip_BasePathDoesNotExist(t *testing.T) {
 	tempDir := t.TempDir()
 	basePath := filepath.Join("doesnotexist", "deploy", "core")
@@ -1231,8 +1175,14 @@ func Test_createBaseZip_BasePathDoesNotExist(t *testing.T) {
 	fileClient := new(mocks.WorkingFileClient)
 
 	_, err := createBaseZip(fileClient, basePath, tempDir)
-	require.Error(t, err)
-	assert.EqualError(t, err, "file does not exist: "+basePath)
+	baseZipPath, err := createBaseZip(fileClient, basePath, tempDir)
+	require.NoError(t, err)
+
+	readZip, err := os.ReadFile(baseZipPath)
+	require.NoError(t, err)
+	zipReader, err := zip.NewReader(bytes.NewReader(readZip), int64(len(readZip)))
+	require.NoError(t, err)
+	require.Equal(t, 0, len(zipReader.File))
 }
 
 // Test_createBaseZip_FileUploadFails tests the createBaseZip() function when Core file upload fails.
@@ -1269,7 +1219,7 @@ func Test_createDeployZips_Working(t *testing.T) {
 	expectedFiles := map[string][]string{
 		"core":      {"Credential.ndjson", "Server.ndjson"},
 		"ingestion": {"Processor.ndjson", "Pipeline.ndjson", "Seed.ndjson", "SeedSchedule.ndjson"},
-		"queryflow": {"Processor.ndjson", "Pipeline.ndjson", "Endpoint.ndjson"},
+		"queryflow": {"Processor.ndjson", "Pipeline.ndjson", "Endpoint.ndjson", "MCPServer.ndjson", "MCPServerTool.ndjson"},
 	}
 
 	for product, productZip := range tempZips {

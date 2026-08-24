@@ -1,0 +1,5 @@
+Error: The Discovery Staging URL is missing for profile "default".
+To set the URL for the Discovery Staging API, run any of the following commands:
+      discovery config  --profile "default"
+      discovery staging config --profile "default"
+
