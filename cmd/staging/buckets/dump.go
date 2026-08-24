@@ -21,21 +21,14 @@ func NewDumpCommand(d cli.Discovery) *cobra.Command {
 		Short: "The command that dumps buckets to Discovery Staging.",
 		Long:  "dump is the command used to scroll a bucket's content in the Discovery Staging Repository. The bucket's name or UUID is sent as the mandatory argument. The results are saved in a zip file that contains JSON files with the bucket's records. Each record is stored in its own JSON file that uses the record's transaction as its name. With the --output-file, the user can send the path in which to save the records. If the path is not sent, the dump will be saved in a zip file in the current directory with the name of the bucket. The user can send filters with the --filter flag, which is a single JSON string that contains all of the filters. With the --projection flag, the user can send the fields that will be included or excluded from the results. With the --page-size flag, the user can send the maximum number of elements that will be retrieved with every page.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			profile, err := cmd.Flags().GetString("profile")
-			if err != nil {
-				return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get the profile")
-			}
-
-			err = commands.CheckCredentials(d, profile, "Staging", "staging_url")
+			profile, printer, err := prepareStagingCommand(d, cmd)
 			if err != nil {
 				return err
 			}
 
 			vpr := d.Config()
-
 			stagingClient := discoveryPackage.NewStaging(vpr.GetString(profile+".staging_url"), vpr.GetString(profile+".staging_key"))
 
-			printer := cli.GetObjectPrinter(d.Config().GetString("output"))
 			if cmd.Flags().Changed("page-size") {
 				if pageSize < 1 {
 					return cli.NewError(cli.ErrorExitCode, "The page size flag can only be greater than or equal to 1.")
