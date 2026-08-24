@@ -390,7 +390,9 @@ directory
     ├── pipeline
     ├── processor
     └── entrypoint
-	    └── endpoint
+        ├── endpoint
+        └── mcp-server
+            └── mcp-server-tool
 ```
 The entity directories have JSON files with the configurations that will be imported. Inside these directories, entities can be further divided into subdirectories if desired, but the Discovery product directories must have this structure. The `file` folder is optional. If present, it uploads those files into Discovery Core's object storage. The command will fail if any file upload is unsuccessful. The `file` folder can be in any of the product directories, it does not need to be in Core's directory. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. Entities that already exist are updated. If a Discovery product's entities do not show up in the results JSON, then they could not be read or are not included in the directory.
 
@@ -412,28 +414,28 @@ Flags:
 Examples:
 
 ```bash
-# Import the entities in the directory "entities" to Discovery
+# Deploy the entities in the directory "entities" to Discovery
 discovery deploy -p cn "entities"
 {
   "core": {
     "Credential": [
       {
         "id": "6e2f1c2a-9885-4263-8945-38b0cda4b6d3",
-        "status": 204
+        "status": 200
       },
       {
         "id": "721997cd-b16f-4acb-93cf-b44a959dbcf2",
-        "status": 204
+        "status": 200
       }
     ],
     "Server": [
       {
         "id": "6817ccf5-b4bc-4f97-82f5-c8016d26f2fb",
-        "status": 204
+        "status": 200
       },
       {
         "id": "f7a65744-a3b1-4655-b472-c612bb490ff9",
-        "status": 204
+        "status": 200
       }
     ]
   },
@@ -441,22 +443,79 @@ discovery deploy -p cn "entities"
     "Pipeline": [
       {
         "id": "128b1127-0ea0-4aa5-9a4e-9160285d2f61",
-        "status": 204
+        "status": 200
       }
     ],
     "Processor": [
       {
         "id": "11de1d9b-d037-4d27-8304-37b62e79d044",
-        "status": 204
+        "status": 200
       }
     ],
     "Seed": [
       {
         "id": "bb8d13c6-73b5-47a1-b0fb-06a141e32309",
-        "status": 204
+        "status": 200
       }
     ],
-    "SeedSchedule": []
+    "SeedSchedule": [
+      {
+        "id": "23ecb97f-0287-4cd9-a36d-4a249670569c",
+        "status": 200
+      }
+    ]
+  },
+  "queryflow": {
+    "Endpoint": [
+      {
+        "id": "3f63797a-6649-45b2-b55b-ecc4098c5bd3",
+        "name": "Hybrid Search",
+        "status": 200
+      },
+      {
+        "id": "7b9a782f-01c8-40be-ab66-acca41541985",
+        "name": "Keyword Search",
+        "status": 200
+      }
+    ],
+    "MCPServer": [
+      {
+        "id": "da63007a-0ead-4fa3-8858-4a41546dd3ff",
+        "name": "My MCP Server",
+        "status": 200
+      }
+    ],
+    "MCPServerTool": [
+      {
+        "id": "29936238-400c-410f-85e7-3026b407c3cf",
+        "name": "my-mcp-server-tool",
+        "status": 200
+      }
+    ],
+    "Pipeline": [
+      {
+        "id": "abb9a1a5-0d3f-40a8-9e44-704ec4c3aee8",
+        "name": "Hybrid Query Parser",
+        "status": 200
+      },
+      {
+        "id": "5dde4e75-5525-4ae8-a783-93f9d83de287",
+        "name": "Hybrid Search Pipeline",
+        "status": 200
+      }
+    ],
+    "Processor": [
+      {
+        "id": "23f03d50-9e21-4dee-8de9-52c178e7d0ee",
+        "name": "MongoDB Aggregation",
+        "status": 200
+      },
+      {
+        "id": "a8f08647-a71d-45bb-83a7-f0fdc390a5ae",
+        "name": "OpenAI Embeddings",
+        "status": 200
+      }
+    ]
   }
 }
 ```
@@ -3641,7 +3700,7 @@ discovery queryflow mcp-server store mcp-server-jsonfile.json
 
 ```bash
 # Store an MCP server with the JSON configuration in the data flag
-discovery queryflow mcp-server store --data '{"uri":"/my/mcp/server","name":"My MCP Server","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","capabilities":{"logging":{},"tools":{}},"serverInfo":{"name":"mcp-server","version":"1.0"},"requestTimeout":"60s","expireAfter":"1h","labels":[{"key":"A","value":"A"}]}'
+discovery queryflow mcp-server store --data '{"uri":"/my/mcp/server","name":"My MCP Server","capabilities":{"logging":{},"tools":{}},"serverInfo":{"name":"mcp-server","version":"1.0"},"requestTimeout":"60s","expireAfter":"1h","labels":[{"key":"A","value":"A"}]}'
 {"active":true,"capabilities":{"logging":{},"tools":{}},"creationTimestamp":"2026-05-18T14:40:35Z","expireAfter":"PT1H","id":"c05632a7-e4db-4fc6-b88c-63317f9965a4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"My MCP Server","requestTimeout":"PT1M","serverInfo":{"name":"mcp-server","version":"1.0"},"uri":"/my/mcp/server"}
 ```
 
