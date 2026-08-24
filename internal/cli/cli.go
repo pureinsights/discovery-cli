@@ -38,6 +38,7 @@ type Discovery interface {
 	DeleteEntity(client Deleter, id uuid.UUID, printer Printer) error
 	SearchDeleteEntity(client SearchDeleter, name string, printer Printer) error
 	SearchDumpBucket(client Searcher, contentProvider func(string) StagingContentController, nameOrID string, config DumpConfig, printer Printer) error
+	SearchCountBucket(client Searcher, contentProvider func(string) StagingContentController, nameOrID string, filters gjson.Result, printer Printer) error
 	StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error
 	HaltSeed(client IngestionSeedController, name string, printer Printer) error
 	HaltSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error

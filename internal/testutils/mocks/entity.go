@@ -847,11 +847,22 @@ func (c *WorkingContentController) Scroll(filters, projections gjson.Result, siz
 	return []gjson.Result{}, nil
 }
 
-// FailingContentController mocks a StagingContentController where Scroll fails.
+func (c *WorkingContentController) Count(filters gjson.Result) (gjson.Result, error) {
+	return gjson.Parse(`{"total": 10}`), nil
+}
+
+// FailingContentController mocks a StagingContentController where Scroll and Count fail.
 type FailingContentController struct{}
 
 func (c *FailingContentController) Scroll(filters, projections gjson.Result, size *int) ([]gjson.Result, error) {
 	return nil, discoveryPackage.Error{
+		Status: http.StatusInternalServerError,
+		Body:   gjson.Parse(`{"status": 500, "code": 5000, "messages": ["Internal server error"]}`),
+	}
+}
+
+func (c *FailingContentController) Count(filters gjson.Result) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusInternalServerError,
 		Body:   gjson.Parse(`{"status": 500, "code": 5000, "messages": ["Internal server error"]}`),
 	}
