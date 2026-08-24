@@ -4115,43 +4115,13 @@ Examples:
 ```bash
 # Store a bucket with the configuration file argument.
 discovery staging bucket store bucketConfig.json
-{
-  "name": "my-bucket",
-  "documentCount": {},
-  "indices": [
-    {
-      "fields": [
-        {
-          "fieldName": "ASC"
-        }
-      ],
-      "name": "myIndexA",
-      "unique": false
-    },
-    {
-      "fields": [
-        {
-          "fieldName2": "DESC"
-        }
-      ],
-      "name": "myIndexB",
-      "unique": true
-    }
-  ],
-  "name": "my-bucket"
-}
+{"active":true,"creationTimestamp":"2026-08-24T21:10:50Z","id":"375d2317-fdf3-43f9-aeca-c3e916e35f65","indices":[{"fields":[{"fieldName":"ASC"}],"name":"myIndexA","scroll":false,"unique":false},{"fields":[{"fieldName2":"DESC"}],"name":"myIndexB","scroll":true,"unique":true}],"lastUpdatedTimestamp":"2026-08-24T22:17:21.741510Z","name":"my-bucket"}
 ```
 
 ```bash
 # Store a bucket with the data flag. The indices are omitted in the output.
-discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}]}'
-{
-  "documentCount": {},
-  "indices": [
-    ...
-  ],
-  "name": "my-bucket"
-}
+discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"scroll":false,"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"scroll":false,"unique":false}]}'
+{"active":true,"creationTimestamp":"2026-08-24T22:18:39.023428Z","id":"174bda1e-0186-4190-a13d-e4f22e01ced9","indices":[{"fields":[{"fieldName":"ASC"}],"name":"myIndexA","scroll":false,"unique":false},{"fields":[{"fieldName2":"DESC"}],"name":"myIndexB","scroll":false,"unique":false}],"lastUpdatedTimestamp":"2026-08-24T22:18:39.023428Z","name":"my-bucket"}
 ```
 
 ###### Count

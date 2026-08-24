@@ -53,6 +53,7 @@ func TestNewStoreCommand(t *testing.T) {
 				"fieldName": "ASC"
 				}
 			],
+			"scroll": false,
 			"unique": false
 			},
 			{
@@ -62,6 +63,7 @@ func TestNewStoreCommand(t *testing.T) {
 				"fieldName2": "DESC"
 				}
 			],
+			"scroll": false,
 			"unique": false
 		}
 	]
@@ -83,6 +85,7 @@ func TestNewStoreCommand(t *testing.T) {
           "fieldName": "ASC"
         }
       ],
+	  "scroll": false,
       "unique": false
     },
     {
@@ -92,6 +95,7 @@ func TestNewStoreCommand(t *testing.T) {
           "fieldName2": "DESC"
         }
       ],
+	  "scroll": false,
       "unique": false
     }
   ]
@@ -116,6 +120,7 @@ func TestNewStoreCommand(t *testing.T) {
           "fieldName": "ASC"
         }
       ],
+	  "scroll": false,
       "unique": false
     },
     {
@@ -125,6 +130,7 @@ func TestNewStoreCommand(t *testing.T) {
           "fieldName2": "DESC"
         }
       ],
+	  "scroll": false,
       "unique": false
     }
   ]
@@ -162,6 +168,7 @@ func TestNewStoreCommand(t *testing.T) {
 								}
 								],
 								"name": "myIndexA",
+								"scroll": false,
 								"unique": false
 							},
 							{
@@ -171,6 +178,7 @@ func TestNewStoreCommand(t *testing.T) {
 								}
 								],
 								"name": "myIndexB",
+								"scroll": false,
 								"unique": false
 							}
 							],
@@ -197,6 +205,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"fieldName": "ASC"
 			}
 		],
+		"scroll": false,
 		"unique": false
 	},
 	{
@@ -206,6 +215,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"fieldName2": "DESC"
 			}
 		],
+		"scroll": false,
 		"unique": false
 	}
   ]
@@ -238,6 +248,7 @@ func TestNewStoreCommand(t *testing.T) {
 				"fieldName": "ASC"
 				}
 			],
+			"scroll": false,
 			"unique": false
 			},
 			{
@@ -247,6 +258,7 @@ func TestNewStoreCommand(t *testing.T) {
 				"fieldName2": "DESC"
 				}
 			],
+			"scroll": false,
 			"unique": false
 		}
 	]
@@ -272,6 +284,7 @@ func TestNewStoreCommand(t *testing.T) {
 				"fieldName": "ASC"
 				}
 			],
+			"scroll": false,
 			"unique": false
 			},
 			{
@@ -281,6 +294,7 @@ func TestNewStoreCommand(t *testing.T) {
 				"fieldName2": "DESC"
 				}
 			],
+			"scroll": false,
 			"unique": false
 		}
 	]
@@ -339,6 +353,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"fieldName": "ASC
 			}
 		],
+		"scroll": false,
 		"unique": false
 	},
 	{
@@ -348,6 +363,7 @@ func TestNewStoreCommand(t *testing.T) {
 			"fieldName2": "DESC"
 			}
 		],
+		"scroll": false,
 		"unique": false
 	}
   ]
