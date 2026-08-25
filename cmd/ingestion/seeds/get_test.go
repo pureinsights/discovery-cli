@@ -435,6 +435,19 @@ func TestNewGetCommand(t *testing.T) {
 						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/job/summary", r.URL.Path)
 					},
 				},
+				"GET:/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/dps": {
+					StatusCode: http.StatusOK,
+					Body: `{
+						"dps": 1,
+						"from": "2025-10-10T19:48:31Z",
+						"to": "2025-09-05T20:13:26.602Z"
+					}`,
+					ContentType: "application/json",
+					Assertions: func(t *testing.T, r *http.Request) {
+						assert.Equal(t, http.MethodGet, r.Method)
+						assert.Equal(t, "/v2/seed/3b32e410-2f33-412d-9fb8-17970131921c/execution/f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3/dps", r.URL.Path)
+					},
+				},
 			},
 			err: nil,
 		},
