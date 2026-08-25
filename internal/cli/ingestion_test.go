@@ -808,6 +808,22 @@ func TestAppendSeedExecutionDetails(t *testing.T) {
 			err: discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
 		},
 		{
+			name:   "Getting the DPS fails",
+			client: new(mocks.FailingSeedExecutionGetterDPSFails),
+			summarizers: map[string]Summarizer{
+				"records": new(mocks.WorkingRecordSummarizer),
+				"jobs":    new(mocks.WorkingJobSummarizer),
+			},
+			err: discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f2"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)},
+		},
+		{
 			name:   "Auditing works but a summarizer fails",
 			client: new(mocks.WorkingSeedExecutionGetter),
 			summarizers: map[string]Summarizer{
