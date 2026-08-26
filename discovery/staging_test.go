@@ -49,6 +49,7 @@ func Test_bucketsClient_Create(t *testing.T) {
 				{
 					"name": "indexTest",
 					"fields": [{"author": "ASC"}],
+					"scroll":false,
 					"unique": false
 				}
 			]
@@ -80,6 +81,7 @@ func Test_bucketsClient_Create(t *testing.T) {
 				{
 					"name": "indexTest",
 					"fields": [{"author": "ASC"}],
+					"scroll":false,
 					"unique": false
 				}
 			]
@@ -98,6 +100,7 @@ func Test_bucketsClient_Create(t *testing.T) {
 			"indices": [
 				{
 					"fields": [{"author": "ASC"}],
+					"scroll":false,
 					"unique": false
 				}
 			]
@@ -167,8 +170,8 @@ func Test_bucketsClient_Get(t *testing.T) {
 			method:           http.MethodGet,
 			path:             "/" + id,
 			statusCode:       http.StatusOK,
-			response:         `{"name":"testBucket","id":"` + id + `","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`,
-			expectedResponse: gjson.Parse(`{"name":"testBucket","id":"` + id + `","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"unique":false}]}`),
+			response:         `{"name":"testBucket","id":"` + id + `","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"scroll":false,"unique":false}]}`,
+			expectedResponse: gjson.Parse(`{"name":"testBucket","id":"` + id + `","documentCount":{"STORE":3},"indices":[{"name":"authorIndex","fields":[{"author":"DESC"}],"scroll":false,"unique":false}]}`),
 			err:              nil,
 		},
 

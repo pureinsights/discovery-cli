@@ -94,6 +94,7 @@ func TestNewDeleteCommand(t *testing.T) {
 								}
 							],
 							"name":"myIndexA",
+							"scroll":false,
 							"unique":false
 						},
 						{
@@ -103,6 +104,7 @@ func TestNewDeleteCommand(t *testing.T) {
 								}
 							],
 							"name":"myIndexB",
+							"scroll":false,
 							"unique":false
 						}
 					],
@@ -191,6 +193,7 @@ func TestNewDeleteCommand(t *testing.T) {
 								}
 							],
 							"name":"myIndexA",
+							"scroll":false,
 							"unique":false
 						},
 						{
@@ -200,6 +203,7 @@ func TestNewDeleteCommand(t *testing.T) {
 								}
 							],
 							"name":"myIndexB",
+							"scroll":false,
 							"unique":false
 						}
 					],
@@ -334,6 +338,7 @@ func TestNewDeleteCommand(t *testing.T) {
 							}
 						],
 						"name":"myIndexA",
+						"scroll":false,
 						"unique":false
 					},
 					{
@@ -343,6 +348,7 @@ func TestNewDeleteCommand(t *testing.T) {
 							}
 						],
 						"name":"myIndexB",
+						"scroll":false,
 						"unique":false
 					}
 					],

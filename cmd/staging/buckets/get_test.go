@@ -152,6 +152,7 @@ func TestNewGetCommand(t *testing.T) {
 					"fieldName": "ASC"
 					}
 				],
+				"scroll": false,
 				"unique": false
 				}
 			]
