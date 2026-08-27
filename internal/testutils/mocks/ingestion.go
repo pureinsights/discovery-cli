@@ -234,7 +234,7 @@ func (g *WorkingSeedExecutionGetter) GetLast5Executions() (gjson.Result, error) 
 	]`), nil
 }
 
-// RPS returns the documents per second of a seed execution.
+// RPS returns the records per second of a seed execution.
 func (g *WorkingSeedExecutionGetter) RPS(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
           "rps": 1,

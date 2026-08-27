@@ -166,7 +166,7 @@ func (c seedExecutionsClient) Jobs(executionId uuid.UUID) seedExecutionJobsClien
 	return newSeedExecutionJobsClient(c, executionId)
 }
 
-// RPS gets the documents per second of a seed execution.
+// RPS gets the records per second of a seed execution.
 func (c seedExecutionsClient) RPS(executionId uuid.UUID) (gjson.Result, error) {
 	return execute(c.client, http.MethodGet, "/"+executionId.String()+"/rps")
 }
