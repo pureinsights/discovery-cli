@@ -4087,19 +4087,23 @@ discovery staging bucket get -p cn
 {"active":true,"creationTimestamp":"2026-06-04T22:06:02Z","description":"description","id":"69eeb20b-8ded-478f-937f-64caa0a3e8c0","labels":[],"lastUpdatedTimestamp":"2026-06-04T22:06:02Z","name":"my-bucket"}
 ```
 
-
-
 ###### Store
-`store` is the command used to create and update buckets in the Discovery Staging Repository. The bucket's configuration, including its name, indices, and other options, must be provided either through the `configFile` argument as a path to a JSON file, or through the `data` flag as a JSON string. The `data` flag and the `configFile` argument are mutually exclusive. When the bucket already exists, the command will try to modify its indices by updating them and deleting the ones no longer needed.
+`store` is the command used to create and update Discovery Staging's buckets. With the `data` flag, the user can send a single JSON configuration or an array to upsert buckets. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all buckets will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the bucket with that UUID. If no such bucket exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for a bucket with the given name. If found, it is updated; otherwise, a new bucket is created.
 
-Usage: `discovery staging bucket store [configFile] [flags]`
+Usage: `discovery staging bucket store [<file>...] [flags]`
 
 Arguments:
 
-`configFile`:
-(Optional, string) The path of the file that contains the bucket's configuration.
+`file`:
+(Optional, string) The path of a file that contains buckets to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
 
 Flags:
+
+`-d, --data`:
+(Required, string) Set the JSON configurations of the buckets that will be stored. This flag is mutually exclusive to the file arguments.
+
+`--abort-on-error`:
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
 
 `-h, --help`:
 (Optional, bool) Prints the usage of the command.
@@ -4107,53 +4111,18 @@ Flags:
 `-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-d, --data`:
-(Optional, string) The JSON with the configuration of the bucket.
-
 Examples:
 
 ```bash
 # Store a bucket with the configuration file argument.
 discovery staging bucket store bucketConfig.json
-{
-  "name": "my-bucket",
-  "documentCount": {},
-  "indices": [
-    {
-      "fields": [
-        {
-          "fieldName": "ASC"
-        }
-      ],
-      "name": "myIndexA",
-      "scroll": false,
-      "unique": false
-    },
-    {
-      "fields": [
-        {
-          "fieldName2": "DESC"
-        }
-      ],
-      "name": "myIndexB",
-      "scroll": false,
-      "unique": false
-    }
-  ],
-  "name": "my-bucket"
-}
+{"active":true,"creationTimestamp":"2026-08-24T21:10:50Z","id":"375d2317-fdf3-43f9-aeca-c3e916e35f65","indices":[{"fields":[{"fieldName":"ASC"}],"name":"myIndexA","scroll":false,"unique":false},{"fields":[{"fieldName2":"DESC"}],"name":"myIndexB","scroll":true,"unique":true}],"lastUpdatedTimestamp":"2026-08-24T22:17:21.741510Z","name":"my-bucket"}
 ```
 
 ```bash
 # Store a bucket with the data flag. The indices are omitted in the output.
 discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"scroll":false,"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"scroll":false,"unique":false}]}'
-{
-  "documentCount": {},
-  "indices": [
-    ...
-  ],
-  "name": "my-bucket"
-}
+{"active":true,"creationTimestamp":"2026-08-24T22:18:39.023428Z","id":"174bda1e-0186-4190-a13d-e4f22e01ced9","indices":[{"fields":[{"fieldName":"ASC"}],"name":"myIndexA","scroll":false,"unique":false},{"fields":[{"fieldName2":"DESC"}],"name":"myIndexB","scroll":false,"unique":false}],"lastUpdatedTimestamp":"2026-08-24T22:18:39.023428Z","name":"my-bucket"}
 ```
 
 ###### Count
