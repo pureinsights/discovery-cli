@@ -234,10 +234,10 @@ func (g *WorkingSeedExecutionGetter) GetLast5Executions() (gjson.Result, error) 
 	]`), nil
 }
 
-// DPS returns the documents per second of a seed execution.
-func (g *WorkingSeedExecutionGetter) DPS(uuid.UUID) (gjson.Result, error) {
+// RPS returns the documents per second of a seed execution.
+func (g *WorkingSeedExecutionGetter) RPS(uuid.UUID) (gjson.Result, error) {
 	return gjson.Parse(`{
-          "dps": 1,
+          "rps": 1,
           "from": "2026-08-24T19:24:19Z",
           "to": "2026-08-24T19:26:03Z"
 }`), nil
@@ -282,8 +282,8 @@ func (g *WorkingSeedExecutionGetterNoExecutions) GetLast5Executions() (gjson.Res
 	return gjson.Parse(`[]`), nil
 }
 
-// DPS implements the interface.
-func (g *WorkingSeedExecutionGetterNoExecutions) DPS(uuid.UUID) (gjson.Result, error) {
+// RPS implements the interface.
+func (g *WorkingSeedExecutionGetterNoExecutions) RPS(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
@@ -320,8 +320,8 @@ func (g *FailingSeedExecutionGetterGetExecutionFails) GetLast5Executions() (gjso
 	]`), nil
 }
 
-// DPS returns seed execution not found.
-func (g *FailingSeedExecutionGetterGetExecutionFails) DPS(uuid.UUID) (gjson.Result, error) {
+// RPS returns seed execution not found.
+func (g *FailingSeedExecutionGetterGetExecutionFails) RPS(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
   "status": 404,
   "code": 1003,
@@ -369,36 +369,36 @@ func (g *FailingSeedExecutionGetterAuditFails) GetLast5Executions() (gjson.Resul
 	]`), nil
 }
 
-// DPS implements the interface.
-func (g *FailingSeedExecutionGetterAuditFails) DPS(uuid.UUID) (gjson.Result, error) {
+// RPS implements the interface.
+func (g *FailingSeedExecutionGetterAuditFails) RPS(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
-// FailingSeedExecutionGetterDPSFails mocks when getting the DPS fails.
-type FailingSeedExecutionGetterDPSFails struct{}
+// FailingSeedExecutionGetterRPSFails mocks when getting the RPS fails.
+type FailingSeedExecutionGetterRPSFails struct{}
 
 // Get implements the interface.
-func (g *FailingSeedExecutionGetterDPSFails) Get(uuid.UUID) (gjson.Result, error) {
+func (g *FailingSeedExecutionGetterRPSFails) Get(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 
 // GetAll implements the interface.
-func (g *FailingSeedExecutionGetterDPSFails) GetAll() ([]gjson.Result, error) {
+func (g *FailingSeedExecutionGetterRPSFails) GetAll() ([]gjson.Result, error) {
 	return []gjson.Result{}, nil
 }
 
 // Audit implements the interface.
-func (g *FailingSeedExecutionGetterDPSFails) Audit(uuid.UUID) ([]gjson.Result, error) {
+func (g *FailingSeedExecutionGetterRPSFails) Audit(uuid.UUID) ([]gjson.Result, error) {
 	return []gjson.Result{}, nil
 }
 
 // GetLast5Executions implements the interface.
-func (g *FailingSeedExecutionGetterDPSFails) GetLast5Executions() (gjson.Result, error) {
+func (g *FailingSeedExecutionGetterRPSFails) GetLast5Executions() (gjson.Result, error) {
 	return gjson.Parse(`[]`), nil
 }
 
-// DPS returns a 404 Not Found.
-func (g *FailingSeedExecutionGetterDPSFails) DPS(uuid.UUID) (gjson.Result, error) {
+// RPS returns a 404 Not Found.
+func (g *FailingSeedExecutionGetterRPSFails) RPS(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{
 		Status: http.StatusNotFound,
 		Body: gjson.Parse(`{
@@ -446,8 +446,8 @@ func (g *FailingSeedExecutionGetterLastExecutionsFails) GetLast5Executions() (gj
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
 }
 
-// DPS implements the interface.
-func (g *FailingSeedExecutionGetterLastExecutionsFails) DPS(uuid.UUID) (gjson.Result, error) {
+// RPS implements the interface.
+func (g *FailingSeedExecutionGetterLastExecutionsFails) RPS(uuid.UUID) (gjson.Result, error) {
 	return gjson.Result{}, nil
 }
 

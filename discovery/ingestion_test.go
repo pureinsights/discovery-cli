@@ -935,8 +935,8 @@ func Test_seedExecutionsClient_Jobs(t *testing.T) {
 	assert.Equal(t, url+"/seed/"+seedId.String()+"/execution/"+executionId.String()+"/job", ingestionSeedExecutionJobClient.client.client.BaseURL)
 }
 
-// Test_seedExecutionsClient_DPS tests the seedExecutionsClient.DPS() function.
-func Test_seedExecutionsClient_DPS(t *testing.T) {
+// Test_seedExecutionsClient_RPS tests the seedExecutionsClient.RPS() function.
+func Test_seedExecutionsClient_RPS(t *testing.T) {
 	tests := []struct {
 		name             string
 		method           string
@@ -948,19 +948,19 @@ func Test_seedExecutionsClient_DPS(t *testing.T) {
 	}{
 		// Working case
 		{
-			name:             "DPS returns a real response",
+			name:             "RPS returns a real response",
 			method:           http.MethodGet,
-			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/dps",
+			path:             "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/rps",
 			statusCode:       http.StatusOK,
-			response:         `{ "dps": 1, "from": "2026-08-24T19:24:19Z", to": "2026-08-24T19:26:02.436834Z" }`,
-			expectedResponse: gjson.Parse(`{ "dps": 1, "from": "2026-08-24T19:24:19Z", to": "2026-08-24T19:26:02.436834Z" }`),
+			response:         `{ "rps": 1, "from": "2026-08-24T19:24:19Z", to": "2026-08-24T19:26:02.436834Z" }`,
+			expectedResponse: gjson.Parse(`{ "rps": 1, "from": "2026-08-24T19:24:19Z", to": "2026-08-24T19:26:02.436834Z" }`),
 			err:              nil,
 		},
 		// Error cases
 		{
-			name:       "DPS fails because the execution was not found.",
+			name:       "RPS fails because the execution was not found.",
 			method:     http.MethodGet,
-			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/dps",
+			path:       "/6b7f0b69-126f-49ab-b2ff-0a876f42e5ed/rps",
 			statusCode: http.StatusNotFound,
 			response: `{
 			"status": 404,
@@ -1000,7 +1000,7 @@ func Test_seedExecutionsClient_DPS(t *testing.T) {
 			executionId, err := uuid.Parse("6b7f0b69-126f-49ab-b2ff-0a876f42e5ed")
 			require.NoError(t, err)
 
-			response, err := ingestionSeedExecutionsClient.DPS(executionId)
+			response, err := ingestionSeedExecutionsClient.RPS(executionId)
 			assert.Equal(t, tc.expectedResponse, response)
 			if tc.err == nil {
 				require.NoError(t, err)
