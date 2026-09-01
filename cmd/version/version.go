@@ -34,15 +34,13 @@ func NewVersionCommand(d cli.Discovery) *cobra.Command {
 	return status
 }
 
-// init sets the correct Version based on the LD flags or build info
-func init() {
-	if Version != "dev" && Version != "" {
-		return
-	}
-
-	if info, ok := debug.ReadBuildInfo(); ok {
-		if info.Main.Version != "" && info.Main.Version != "(devel)" {
-			Version = info.Main.Version
+// SetVersion sets the correct Version based on the LD flags or build info
+func SetVersion() {
+	if Version == "dev" || Version == "" {
+		if info, ok := debug.ReadBuildInfo(); ok {
+			if info.Main.Version != "" && info.Main.Version != "(devel)" {
+				Version = info.Main.Version
+			}
 		}
 	}
 }
