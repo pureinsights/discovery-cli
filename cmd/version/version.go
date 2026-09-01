@@ -34,8 +34,8 @@ func NewVersionCommand(d cli.Discovery) *cobra.Command {
 	return status
 }
 
+// init sets the correct Version based on the LD flags or build info
 func init() {
-	// An ldflags release build already supplied the version.
 	if Version != "dev" && Version != "" {
 		return
 	}
