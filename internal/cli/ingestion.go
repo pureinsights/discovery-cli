@@ -5,7 +5,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
 )
 
 // IngestionSeedController defines the methods to start and halt a seed.

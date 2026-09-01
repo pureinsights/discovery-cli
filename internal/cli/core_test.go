@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
 	"github.com/pureinsights/discovery-cli/internal/iostreams"
 	"github.com/pureinsights/discovery-cli/internal/testutils"
 	"github.com/pureinsights/discovery-cli/internal/testutils/mocks"
@@ -30,7 +30,7 @@ func getDirectoryDoesNotExistError(t *testing.T, path string, useReadDir bool) e
 		_, err = os.Stat(path)
 	}
 	require.Error(t, err)
-	return NormalizeReadFileError(path,err)
+	return NormalizeReadFileError(path, err)
 }
 
 // TestRecursiveStore tests the recursiveStore() auxiliary function used by discovery.StoreFiles()

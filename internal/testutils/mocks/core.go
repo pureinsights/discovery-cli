@@ -6,13 +6,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
 )
 
 // WorkingFileClient simulates a working file client.
 type WorkingFileClient struct{}
 
-// simulates a working List() function of the fileClient 
+// simulates a working List() function of the fileClient
 func (w *WorkingFileClient) List() ([]gjson.Result, error) {
 	return gjson.Parse(`[
 		"Credential.ndjson",

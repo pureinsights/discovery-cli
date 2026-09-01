@@ -5,7 +5,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
 )
 
 // WorkingBackupRestore mocks a working backup restore.

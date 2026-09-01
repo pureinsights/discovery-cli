@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
 )
 
 // WorkingGetter mocks the discovery.Getter struct to always answer a working result.
