@@ -76,9 +76,6 @@ func Run() (cli.ExitCode, error) {
 		cliError := cli.FromError(err)
 		return cliError.ExitCode, cliError
 	}
-
-	version.SetVersion()
-
 	d := cli.NewDiscovery(&ios, viper, configPath)
 	root := newRootCommand(d)
 	err = root.Execute()
