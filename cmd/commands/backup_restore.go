@@ -1,8 +1,8 @@
 package commands
 
 import (
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
-	"github.com/pureinsights/discovery-cli/internal/cli"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 )
 
 const (

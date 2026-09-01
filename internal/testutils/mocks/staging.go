@@ -5,7 +5,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 )
 
 // WorkingStagingContentController mocks a working content controller.

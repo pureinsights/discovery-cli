@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 	"github.com/tidwall/gjson"
 )
 

@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery/v2"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 )
 
 // WorkingFileClient simulates a working file client.

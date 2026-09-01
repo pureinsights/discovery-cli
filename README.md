@@ -8,7 +8,7 @@ There are two methods to install the Discovery CLI:
 The easiest way to install the Discovery CLI is using [Go](https://go.dev/doc/install). Then, we can simply run:
 
 ```bash
-go install github.com/pureinsights/discovery-cli/cmd/discovery@latest
+go install github.com/pureinsights/discovery-cli/v2/cmd/discovery@latest
 ```
 
 #### Troubleshooting
@@ -18,7 +18,7 @@ If the installation does not work, make sure you have the `%GOPATH%/bin` added t
 This method requires downloading the binary of the Discovery CLI and making it available globally from a terminal or command prompt.
 
 #### Choosing the Correct Binary
-Go to the [Releases](https://github.com/pureinsights/discovery-cli/releases) section of the GitHub repository. Each downloadable file indicates the **operating system** and **CPU architecture** it was compiled for. Choose the one that matches your device.
+Go to the [Releases](https://github.com/pureinsights/discovery-cli/v2/releases) section of the GitHub repository. Each downloadable file indicates the **operating system** and **CPU architecture** it was compiled for. Choose the one that matches your device.
 
 | Operating System | Architecture | Example Devices | Which File to Download |
 |------------------|--------------|----------------|-------------------------|
