@@ -3,17 +3,17 @@ package cmd
 import (
 	"os"
 
-	"github.com/pureinsights/discovery-cli/cmd/backuprestore"
-	"github.com/pureinsights/discovery-cli/cmd/config"
-	"github.com/pureinsights/discovery-cli/cmd/core"
-	"github.com/pureinsights/discovery-cli/cmd/deploy"
-	"github.com/pureinsights/discovery-cli/cmd/ingestion"
-	"github.com/pureinsights/discovery-cli/cmd/queryflow"
-	"github.com/pureinsights/discovery-cli/cmd/staging"
-	"github.com/pureinsights/discovery-cli/cmd/statuscheck"
-	"github.com/pureinsights/discovery-cli/cmd/version"
-	"github.com/pureinsights/discovery-cli/internal/cli"
-	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/v2/cmd/backuprestore"
+	"github.com/pureinsights/discovery-cli/v2/cmd/config"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core"
+	"github.com/pureinsights/discovery-cli/v2/cmd/deploy"
+	"github.com/pureinsights/discovery-cli/v2/cmd/ingestion"
+	"github.com/pureinsights/discovery-cli/v2/cmd/queryflow"
+	"github.com/pureinsights/discovery-cli/v2/cmd/staging"
+	"github.com/pureinsights/discovery-cli/v2/cmd/statuscheck"
+	"github.com/pureinsights/discovery-cli/v2/cmd/version"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/internal/iostreams"
 	"github.com/spf13/cobra"
 )
 

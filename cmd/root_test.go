@@ -12,9 +12,9 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/pureinsights/discovery-cli/cmd/version"
-	"github.com/pureinsights/discovery-cli/internal/cli"
-	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/v2/cmd/version"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/internal/iostreams"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

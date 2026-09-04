@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"

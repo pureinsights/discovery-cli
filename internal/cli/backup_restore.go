@@ -14,7 +14,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 )
 
 // entrypointString avoids duplicating the Entrypoint string
