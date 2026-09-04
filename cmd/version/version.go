@@ -2,6 +2,7 @@ package version
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/spf13/cobra"
@@ -31,4 +32,21 @@ func NewVersionCommand(d cli.Discovery) *cobra.Command {
 	}
 
 	return status
+}
+
+// computeVersion updates the Version based on the LD Flags or debug.BuildInfo
+func computeVersion(currentVersion string, buildInfo *debug.BuildInfo, ok bool) string {
+	if currentVersion != "dev" && currentVersion != "" {
+		return currentVersion
+	}
+	if !ok || buildInfo.Main.Version == "" || buildInfo.Main.Version == "(devel)" {
+		return currentVersion
+	}
+	return buildInfo.Main.Version
+}
+
+// SetVersion sets the correct Version
+func SetVersion() {
+	info, ok := debug.ReadBuildInfo()
+	Version = computeVersion(Version, info, ok)
 }

@@ -3,6 +3,7 @@ package version
 import (
 	"bytes"
 	"errors"
+	"runtime/debug"
 	"strings"
 	"testing"
 
@@ -69,4 +70,65 @@ func TestNewVersionCommand_versionFails(t *testing.T) {
 	require.ErrorAs(t, err, &errStruct)
 	assert.EqualError(t, err, cli.NewErrorWithCause(cli.ErrorExitCode, errors.New("write failed"), "Could not print CLI version").Error())
 	testutils.CompareBytes(t, "NewVersionCommand_Err_VersionFails", testutils.Read(t, "NewVersionCommand_Err_VersionFails"), errBuf.Bytes())
+}
+
+// Test_computeVersion tests the computeVersion() function.
+func Test_computeVersion(t *testing.T) {
+	tests := []struct {
+		name     string
+		current  string
+		info     *debug.BuildInfo
+		ok       bool
+		expected string
+	}{
+		{
+			name:     "There already is a version",
+			current:  "v2.12.0",
+			info:     &debug.BuildInfo{Main: debug.Module{Version: "v2.11.0"}},
+			ok:       true,
+			expected: "v2.12.0",
+		},
+		{
+			name:     "The version is empty, so it is obtained from debug.BuildInfo",
+			current:  "",
+			info:     &debug.BuildInfo{Main: debug.Module{Version: "v2.12.0"}},
+			ok:       true,
+			expected: "v2.12.0",
+		},
+		{
+			name:     "The version is dev, so it is obtained from debug.BuildInfo",
+			current:  "dev",
+			info:     &debug.BuildInfo{Main: debug.Module{Version: "v2.12.0"}},
+			ok:       true,
+			expected: "v2.12.0",
+		},
+		{
+			name:     "debug.ReadBuildInfo is not ok, so the version is unchanged",
+			current:  "dev",
+			info:     nil,
+			ok:       false,
+			expected: "dev",
+		},
+		{
+			name:     "debug.ReadBuildInfo is (devel), so the version is unchanged",
+			current:  "",
+			info:     &debug.BuildInfo{Main: debug.Module{Version: "(devel)"}},
+			ok:       true,
+			expected: "",
+		},
+		{
+			name:     "debug.ReadBuildInfo is an empty string, so the version is unchanged",
+			current:  "dev",
+			info:     &debug.BuildInfo{Main: debug.Module{Version: ""}},
+			ok:       true,
+			expected: "dev",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := computeVersion(tc.current, tc.info, tc.ok)
+			assert.Equal(t, tc.expected, got)
+		})
+	}
 }
