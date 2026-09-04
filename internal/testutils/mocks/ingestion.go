@@ -234,6 +234,15 @@ func (g *WorkingSeedExecutionGetter) GetLast5Executions() (gjson.Result, error) 
 	]`), nil
 }
 
+// RPS returns the records per second of a seed execution.
+func (g *WorkingSeedExecutionGetter) RPS(uuid.UUID) (gjson.Result, error) {
+	return gjson.Parse(`{
+          "rps": 1,
+          "from": "2026-08-24T19:24:19Z",
+          "to": "2026-08-24T19:26:03Z"
+}`), nil
+}
+
 // WorkingSeedExecutionGetterNoExecutions mocks a working seed execution getter.
 type WorkingSeedExecutionGetterNoExecutions struct{}
 
@@ -273,6 +282,11 @@ func (g *WorkingSeedExecutionGetterNoExecutions) GetLast5Executions() (gjson.Res
 	return gjson.Parse(`[]`), nil
 }
 
+// RPS implements the interface.
+func (g *WorkingSeedExecutionGetterNoExecutions) RPS(uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
 // FailingSeedExecutionGetterGetExecutionFails mocks when getting a seed execution fails.
 type FailingSeedExecutionGetterGetExecutionFails struct{}
 
@@ -304,6 +318,18 @@ func (g *FailingSeedExecutionGetterGetExecutionFails) GetLast5Executions() (gjso
 	{"id":"9afd17f2-8034-4244-b44b-df0662783f15","creationTimestamp":"2026-04-09T17:26:26Z","lastUpdatedTimestamp":"2026-04-09T17:26:47Z","triggerType":"MANUAL","status":"HALTED","scanType":"FULL"},
 	{"id":"3fdddf51-fa6b-406b-9b28-cc40969d908d","creationTimestamp":"2026-04-08T16:33:32Z","lastUpdatedTimestamp":"2026-04-08T16:39:32Z","triggerType":"MANUAL","status":"DONE","scanType":"FULL"}
 	]`), nil
+}
+
+// RPS returns seed execution not found.
+func (g *FailingSeedExecutionGetterGetExecutionFails) RPS(uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f2"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)}
 }
 
 // FailingSeedExecutionGetterAuditFails mocks when getting the audit fails.
@@ -343,6 +369,49 @@ func (g *FailingSeedExecutionGetterAuditFails) GetLast5Executions() (gjson.Resul
 	]`), nil
 }
 
+// RPS implements the interface.
+func (g *FailingSeedExecutionGetterAuditFails) RPS(uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
+// FailingSeedExecutionGetterRPSFails mocks when getting the RPS fails.
+type FailingSeedExecutionGetterRPSFails struct{}
+
+// Get implements the interface.
+func (g *FailingSeedExecutionGetterRPSFails) Get(uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, nil
+}
+
+// GetAll implements the interface.
+func (g *FailingSeedExecutionGetterRPSFails) GetAll() ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+// Audit implements the interface.
+func (g *FailingSeedExecutionGetterRPSFails) Audit(uuid.UUID) ([]gjson.Result, error) {
+	return []gjson.Result{}, nil
+}
+
+// GetLast5Executions implements the interface.
+func (g *FailingSeedExecutionGetterRPSFails) GetLast5Executions() (gjson.Result, error) {
+	return gjson.Parse(`[]`), nil
+}
+
+// RPS returns a 404 Not Found.
+func (g *FailingSeedExecutionGetterRPSFails) RPS(uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, discoveryPackage.Error{
+		Status: http.StatusNotFound,
+		Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f2"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`),
+	}
+}
+
 // FailingSeedExecutionGetterLastExecutionsFails mocks when getting the last executions fails.
 type FailingSeedExecutionGetterLastExecutionsFails struct{}
 
@@ -375,6 +444,11 @@ func (g *FailingSeedExecutionGetterLastExecutionsFails) Audit(uuid.UUID) ([]gjso
 // GetLast5Executions returns the last five seed executions.
 func (g *FailingSeedExecutionGetterLastExecutionsFails) GetLast5Executions() (gjson.Result, error) {
 	return gjson.Result{}, discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)}
+}
+
+// RPS implements the interface.
+func (g *FailingSeedExecutionGetterLastExecutionsFails) RPS(uuid.UUID) (gjson.Result, error) {
+	return gjson.Result{}, nil
 }
 
 // WorkingRecordSummarizer mocks when getting the record summary works.

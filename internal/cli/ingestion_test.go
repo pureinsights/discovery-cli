@@ -808,6 +808,22 @@ func TestAppendSeedExecutionDetails(t *testing.T) {
 			err: discoveryPackage.Error{Status: http.StatusUnauthorized, Body: gjson.Parse(`{"error":"unauthorized"}`)},
 		},
 		{
+			name:   "Getting the RPS fails",
+			client: new(mocks.FailingSeedExecutionGetterRPSFails),
+			summarizers: map[string]Summarizer{
+				"records": new(mocks.WorkingRecordSummarizer),
+				"jobs":    new(mocks.WorkingJobSummarizer),
+			},
+			err: discoveryPackage.Error{Status: http.StatusNotFound, Body: gjson.Parse(`{
+  "status": 404,
+  "code": 1003,
+  "messages": [
+    "Seed execution not found: f85a5e19-8ed9-4f8c-9e2e-e1d5484612f2"
+  ],
+  "timestamp": "2025-11-17T19:32:01.555127800Z"
+}`)},
+		},
+		{
 			name:   "Auditing works but a summarizer fails",
 			client: new(mocks.WorkingSeedExecutionGetter),
 			summarizers: map[string]Summarizer{
@@ -876,7 +892,7 @@ func TestSeedExecution(t *testing.T) {
 				"jobs":    new(mocks.WorkingJobSummarizer),
 			},
 			details:        true,
-			expectedOutput: "{\"audit\":[{\"stages\":[],\"status\":\"CREATED\",\"timestamp\":\"2025-09-05T20:09:22.543Z\"},{\"stages\":[],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:09:26.621Z\"},{\"stages\":[\"BEFORE_HOOKS\"],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:09:37.592Z\"},{\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:13:26.602Z\"}],\"creationTimestamp\":\"2025-10-10T19:48:31Z\",\"id\":\"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\",\"jobs\":{\"DONE\":5,\"RUNNING\":3},\"lastUpdatedTimestamp\":\"2025-10-10T19:48:31Z\",\"properties\":{\"stagingBucket\":\"testBucket\"},\"records\":{\"DONE\":4,\"PROCESSING\":4},\"scanType\":\"FULL\",\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"],\"status\":\"RUNNING\",\"triggerType\":\"MANUAL\"}\n",
+			expectedOutput: "{\"audit\":[{\"stages\":[],\"status\":\"CREATED\",\"timestamp\":\"2025-09-05T20:09:22.543Z\"},{\"stages\":[],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:09:26.621Z\"},{\"stages\":[\"BEFORE_HOOKS\"],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:09:37.592Z\"},{\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"],\"status\":\"RUNNING\",\"timestamp\":\"2025-09-05T20:13:26.602Z\"}],\"creationTimestamp\":\"2025-10-10T19:48:31Z\",\"id\":\"f85a5e19-8ed9-4f8c-9e2e-e1d5484612f3\",\"jobs\":{\"DONE\":5,\"RUNNING\":3},\"lastUpdatedTimestamp\":\"2025-10-10T19:48:31Z\",\"properties\":{\"stagingBucket\":\"testBucket\"},\"records\":{\"DONE\":4,\"PROCESSING\":4},\"rps\":1,\"scanType\":\"FULL\",\"stages\":[\"BEFORE_HOOKS\",\"INGEST\"],\"status\":\"RUNNING\",\"triggerType\":\"MANUAL\"}\n",
 			printer:        JsonObjectPrinter(false),
 			err:            nil,
 		},

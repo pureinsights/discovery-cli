@@ -2284,6 +2284,7 @@ discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --execution 0f
     }
   ],
   "creationTimestamp": "2025-11-18T16:22:24Z",
+  "rps": 1,
   "id": "0f20f984-1854-4741-81ea-30f8b965b007",
   "jobs": {
     "DONE": 3,
@@ -2603,6 +2604,7 @@ discovery ingestion seed status "my-seed" --execution 0f20f984-1854-4741-81ea-30
     }
   ],
   "creationTimestamp": "2025-11-18T16:22:24Z",
+  "rps": 1,
   "id": "0f20f984-1854-4741-81ea-30f8b965b007",
   "jobs": {
     "DONE": 3,
@@ -2645,6 +2647,7 @@ discovery ingestion seed status "my-seed" --latest-execution --details
     }
   ],
   "creationTimestamp": "2026-06-09T17:40:28Z",
+  "rps": 1,
   "id": "d761c937-b2b8-48ee-8e12-c457c809067d",
   "jobs": {},
   "lastUpdatedTimestamp": "2026-06-10T02:50:53Z",
