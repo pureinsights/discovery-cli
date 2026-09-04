@@ -1,14 +1,14 @@
 package queryflow
 
 import (
-	"github.com/pureinsights/discovery-cli/cmd/queryflow/backuprestore"
-	"github.com/pureinsights/discovery-cli/cmd/queryflow/config"
-	"github.com/pureinsights/discovery-cli/cmd/queryflow/endpoints"
-	"github.com/pureinsights/discovery-cli/cmd/queryflow/mcpservers"
-	"github.com/pureinsights/discovery-cli/cmd/queryflow/pipelines"
-	"github.com/pureinsights/discovery-cli/cmd/queryflow/processors"
-	"github.com/pureinsights/discovery-cli/cmd/queryflow/statuscheck"
-	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/cmd/queryflow/backuprestore"
+	"github.com/pureinsights/discovery-cli/v2/cmd/queryflow/config"
+	"github.com/pureinsights/discovery-cli/v2/cmd/queryflow/endpoints"
+	"github.com/pureinsights/discovery-cli/v2/cmd/queryflow/mcpservers"
+	"github.com/pureinsights/discovery-cli/v2/cmd/queryflow/pipelines"
+	"github.com/pureinsights/discovery-cli/v2/cmd/queryflow/processors"
+	"github.com/pureinsights/discovery-cli/v2/cmd/queryflow/statuscheck"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/spf13/cobra"
 )
 
