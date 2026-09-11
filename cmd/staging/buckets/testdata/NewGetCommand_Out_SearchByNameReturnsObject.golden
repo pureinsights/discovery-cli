@@ -8,6 +8,7 @@
         }
       ],
       "name": "myIndexA",
+      "scroll": false,
       "unique": false
     }
   ],

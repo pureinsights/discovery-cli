@@ -1,10 +1,10 @@
 package staging
 
 import (
-	"github.com/pureinsights/discovery-cli/cmd/staging/buckets"
-	"github.com/pureinsights/discovery-cli/cmd/staging/config"
-	"github.com/pureinsights/discovery-cli/cmd/staging/statuscheck"
-	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/cmd/staging/buckets"
+	"github.com/pureinsights/discovery-cli/v2/cmd/staging/config"
+	"github.com/pureinsights/discovery-cli/v2/cmd/staging/statuscheck"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/spf13/cobra"
 )
 

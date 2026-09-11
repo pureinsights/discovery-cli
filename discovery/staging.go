@@ -134,6 +134,16 @@ func (c contentClient) Scroll(filters, projections gjson.Result, size *int) ([]g
 	return scrollWithPagination(c.client, http.MethodPost, "/scroll", options...)
 }
 
+// Count returns the number of records in the bucket that match the given filters.
+func (c contentClient) Count(filters gjson.Result) (gjson.Result, error) {
+	options := []RequestOption{}
+	if filters.Exists() {
+		options = append(options, WithJSONBody(filters.Raw))
+	}
+
+	return execute(c.client, http.MethodPost, "/count", options...)
+}
+
 // Delete deletes the document with the given contentId in the bucket.
 func (c contentClient) Delete(contentId string) (gjson.Result, error) {
 	return execute(c.client, http.MethodDelete, "/"+contentId)
@@ -179,22 +189,6 @@ func newBucketsClient(url, apiKey string) bucketsClient {
 // Purge deletes all of the records in the given bucket.
 func (b bucketsClient) Purge(bucket uuid.UUID) (gjson.Result, error) {
 	return execute(b.client, http.MethodDelete, "/"+bucket.String()+"/purge")
-}
-
-// CreateIndex adds an index with the given name and configuration to a bucket.
-func (b bucketsClient) CreateIndex(id uuid.UUID, index string, config []gjson.Result) (gjson.Result, error) {
-	var parts []string
-	for _, r := range config {
-		parts = append(parts, r.Raw)
-	}
-	jsonArray := "[" + strings.Join(parts, ",") + "]"
-
-	return execute(b.client, http.MethodPut, "/"+id.String()+"/index/"+index, WithJSONBody(jsonArray))
-}
-
-// DeleteIndex removes the index of a bucket.
-func (b bucketsClient) DeleteIndex(id uuid.UUID, index string) (gjson.Result, error) {
-	return execute(b.client, http.MethodDelete, "/"+id.String()+"/index/"+index)
 }
 
 // staging is the struct for the client that can carry out every Staging operation.

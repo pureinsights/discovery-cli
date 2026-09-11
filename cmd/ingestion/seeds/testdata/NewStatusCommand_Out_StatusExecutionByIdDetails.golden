@@ -40,6 +40,7 @@
     "DONE": 4,
     "PROCESSING": 4
   },
+  "rps": 1,
   "scanType": "FULL",
   "stages": [
     "BEFORE_HOOKS",

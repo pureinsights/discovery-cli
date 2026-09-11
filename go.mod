@@ -1,4 +1,4 @@
-module github.com/pureinsights/discovery-cli
+module github.com/pureinsights/discovery-cli/v2
 
 go 1.24.5
 

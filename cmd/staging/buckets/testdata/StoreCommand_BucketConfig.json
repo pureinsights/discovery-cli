@@ -8,6 +8,7 @@
           "fieldName": "ASC"
         }
       ],
+      "scroll": false,
       "unique": false
     },
     {
@@ -17,6 +18,7 @@
           "fieldName2": "DESC"
         }
       ],
+      "scroll": false,
       "unique": false
     }
   ]

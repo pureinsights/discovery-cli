@@ -8,7 +8,7 @@ There are two methods to install the Discovery CLI:
 The easiest way to install the Discovery CLI is using [Go](https://go.dev/doc/install). Then, we can simply run:
 
 ```bash
-go install github.com/pureinsights/discovery-cli/cmd/discovery@latest
+go install github.com/pureinsights/discovery-cli/v2/cmd/discovery@latest
 ```
 
 #### Troubleshooting
@@ -390,7 +390,9 @@ directory
     ├── pipeline
     ├── processor
     └── entrypoint
-	    └── endpoint
+        ├── endpoint
+        └── mcp-server
+            └── mcp-server-tool
 ```
 The entity directories have JSON files with the configurations that will be imported. Inside these directories, entities can be further divided into subdirectories if desired, but the Discovery product directories must have this structure. The `file` folder is optional. If present, it uploads those files into Discovery Core's object storage. The command will fail if any file upload is unsuccessful. The `file` folder can be in any of the product directories, it does not need to be in Core's directory. The command reads each entity's JSON configuration and creates the zip files needed to import them into Core, Ingestion, and QueryFlow. The entities do not need to exist yet in Discovery in order to store them. Entities that already exist are updated. If a Discovery product's entities do not show up in the results JSON, then they could not be read or are not included in the directory.
 
@@ -412,28 +414,28 @@ Flags:
 Examples:
 
 ```bash
-# Import the entities in the directory "entities" to Discovery
+# Deploy the entities in the directory "entities" to Discovery
 discovery deploy -p cn "entities"
 {
   "core": {
     "Credential": [
       {
         "id": "6e2f1c2a-9885-4263-8945-38b0cda4b6d3",
-        "status": 204
+        "status": 200
       },
       {
         "id": "721997cd-b16f-4acb-93cf-b44a959dbcf2",
-        "status": 204
+        "status": 200
       }
     ],
     "Server": [
       {
         "id": "6817ccf5-b4bc-4f97-82f5-c8016d26f2fb",
-        "status": 204
+        "status": 200
       },
       {
         "id": "f7a65744-a3b1-4655-b472-c612bb490ff9",
-        "status": 204
+        "status": 200
       }
     ]
   },
@@ -441,22 +443,79 @@ discovery deploy -p cn "entities"
     "Pipeline": [
       {
         "id": "128b1127-0ea0-4aa5-9a4e-9160285d2f61",
-        "status": 204
+        "status": 200
       }
     ],
     "Processor": [
       {
         "id": "11de1d9b-d037-4d27-8304-37b62e79d044",
-        "status": 204
+        "status": 200
       }
     ],
     "Seed": [
       {
         "id": "bb8d13c6-73b5-47a1-b0fb-06a141e32309",
-        "status": 204
+        "status": 200
       }
     ],
-    "SeedSchedule": []
+    "SeedSchedule": [
+      {
+        "id": "23ecb97f-0287-4cd9-a36d-4a249670569c",
+        "status": 200
+      }
+    ]
+  },
+  "queryflow": {
+    "Endpoint": [
+      {
+        "id": "3f63797a-6649-45b2-b55b-ecc4098c5bd3",
+        "name": "Hybrid Search",
+        "status": 200
+      },
+      {
+        "id": "7b9a782f-01c8-40be-ab66-acca41541985",
+        "name": "Keyword Search",
+        "status": 200
+      }
+    ],
+    "MCPServer": [
+      {
+        "id": "da63007a-0ead-4fa3-8858-4a41546dd3ff",
+        "name": "My MCP Server",
+        "status": 200
+      }
+    ],
+    "MCPServerTool": [
+      {
+        "id": "29936238-400c-410f-85e7-3026b407c3cf",
+        "name": "my-mcp-server-tool",
+        "status": 200
+      }
+    ],
+    "Pipeline": [
+      {
+        "id": "abb9a1a5-0d3f-40a8-9e44-704ec4c3aee8",
+        "name": "Hybrid Query Parser",
+        "status": 200
+      },
+      {
+        "id": "5dde4e75-5525-4ae8-a783-93f9d83de287",
+        "name": "Hybrid Search Pipeline",
+        "status": 200
+      }
+    ],
+    "Processor": [
+      {
+        "id": "23f03d50-9e21-4dee-8de9-52c178e7d0ee",
+        "name": "MongoDB Aggregation",
+        "status": 200
+      },
+      {
+        "id": "a8f08647-a71d-45bb-83a7-f0fdc390a5ae",
+        "name": "OpenAI Embeddings",
+        "status": 200
+      }
+    ]
   }
 }
 ```
@@ -2225,6 +2284,7 @@ discovery ingestion seed get 2acd0a61-852c-4f38-af2b-9c84e152873e --execution 0f
     }
   ],
   "creationTimestamp": "2025-11-18T16:22:24Z",
+  "rps": 1,
   "id": "0f20f984-1854-4741-81ea-30f8b965b007",
   "jobs": {
     "DONE": 3,
@@ -2544,6 +2604,7 @@ discovery ingestion seed status "my-seed" --execution 0f20f984-1854-4741-81ea-30
     }
   ],
   "creationTimestamp": "2025-11-18T16:22:24Z",
+  "rps": 1,
   "id": "0f20f984-1854-4741-81ea-30f8b965b007",
   "jobs": {
     "DONE": 3,
@@ -2586,6 +2647,7 @@ discovery ingestion seed status "my-seed" --latest-execution --details
     }
   ],
   "creationTimestamp": "2026-06-09T17:40:28Z",
+  "rps": 1,
   "id": "d761c937-b2b8-48ee-8e12-c457c809067d",
   "jobs": {},
   "lastUpdatedTimestamp": "2026-06-10T02:50:53Z",
@@ -3641,7 +3703,7 @@ discovery queryflow mcp-server store mcp-server-jsonfile.json
 
 ```bash
 # Store an MCP server with the JSON configuration in the data flag
-discovery queryflow mcp-server store --data '{"uri":"/my/mcp/server","name":"My MCP Server","pipeline":"4b558077-cb0f-4e1c-ab6b-ed96870529e4","capabilities":{"logging":{},"tools":{}},"serverInfo":{"name":"mcp-server","version":"1.0"},"requestTimeout":"60s","expireAfter":"1h","labels":[{"key":"A","value":"A"}]}'
+discovery queryflow mcp-server store --data '{"uri":"/my/mcp/server","name":"My MCP Server","capabilities":{"logging":{},"tools":{}},"serverInfo":{"name":"mcp-server","version":"1.0"},"requestTimeout":"60s","expireAfter":"1h","labels":[{"key":"A","value":"A"}]}'
 {"active":true,"capabilities":{"logging":{},"tools":{}},"creationTimestamp":"2026-05-18T14:40:35Z","expireAfter":"PT1H","id":"c05632a7-e4db-4fc6-b88c-63317f9965a4","labels":[{"key":"A","value":"A"}],"lastUpdatedTimestamp":"2026-05-18T14:40:35Z","name":"My MCP Server","requestTimeout":"PT1M","serverInfo":{"name":"mcp-server","version":"1.0"},"uri":"/my/mcp/server"}
 ```
 
@@ -3950,7 +4012,7 @@ Staging API Key: "discovery.key.staging.cn"
 ```
 
 ##### Bucket
-`bucket` is the command used to manage buckets in Discovery Staging. This command contains various subcommands used to create, scroll, update, and delete.
+`bucket` is the command used to manage buckets in Discovery Staging. This command contains various subcommands used to count, create, scroll, update, and delete.
 
 Usage: `discovery staging bucket [subcommand] [flags]`
 
@@ -4028,17 +4090,54 @@ discovery staging bucket get -p cn
 {"active":true,"creationTimestamp":"2026-06-04T22:06:02Z","description":"description","id":"69eeb20b-8ded-478f-937f-64caa0a3e8c0","labels":[],"lastUpdatedTimestamp":"2026-06-04T22:06:02Z","name":"my-bucket"}
 ```
 
-
-
 ###### Store
-`store` is the command used to create and update buckets in the Discovery Staging Repository. The bucket's configuration, including its name, indices, and other options, must be provided either through the `configFile` argument as a path to a JSON file, or through the `data` flag as a JSON string. The `data` flag and the `configFile` argument are mutually exclusive. When the bucket already exists, the command will try to modify its indices by updating them and deleting the ones no longer needed.
+`store` is the command used to create and update Discovery Staging's buckets. With the `data` flag, the user can send a single JSON configuration or an array to upsert buckets. On the other hand, the user can also send multiple arguments with the paths of files that contain JSON configurations. Each of these files will be processed individually, but all buckets will be upserted. The `data` flag and file arguments are required, but mutually exclusive. The user can only send the `data` flag or file arguments, not both at the same time. If the JSON configuration contains a UUID, the CLI updates the bucket with that UUID. If no such bucket exists, the operation fails. If the configuration does not contain a UUID, the CLI searches for a bucket with the given name. If found, it is updated; otherwise, a new bucket is created.
 
-Usage: `discovery staging bucket store [configFile] [flags]`
+Usage: `discovery staging bucket store [<file>...] [flags]`
 
 Arguments:
 
-`configFile`:
-(Optional, string) The path of the file that contains the bucket's configuration.
+`file`:
+(Optional, string) The path of a file that contains buckets to be stored. When these arguments are present, the `data` flag cannot be used. There can be any amount of `file` arguments.
+
+Flags:
+
+`-d, --data`:
+(Required, string) Set the JSON configurations of the buckets that will be stored. This flag is mutually exclusive to the file arguments.
+
+`--abort-on-error`:
+(Optional, bool) Aborts the operation when an error occurs. The default value is `false`.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Store a bucket with the configuration file argument.
+discovery staging bucket store bucketConfig.json
+{"active":true,"creationTimestamp":"2026-08-24T21:10:50Z","id":"375d2317-fdf3-43f9-aeca-c3e916e35f65","indices":[{"fields":[{"fieldName":"ASC"}],"name":"myIndexA","scroll":false,"unique":false},{"fields":[{"fieldName2":"DESC"}],"name":"myIndexB","scroll":true,"unique":true}],"lastUpdatedTimestamp":"2026-08-24T22:17:21.741510Z","name":"my-bucket"}
+```
+
+```bash
+# Store a bucket with the data flag. The indices are omitted in the output.
+discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"scroll":false,"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"scroll":false,"unique":false}]}'
+{"active":true,"creationTimestamp":"2026-08-24T22:18:39.023428Z","id":"174bda1e-0186-4190-a13d-e4f22e01ced9","indices":[{"fields":[{"fieldName":"ASC"}],"name":"myIndexA","scroll":false,"unique":false},{"fields":[{"fieldName2":"DESC"}],"name":"myIndexB","scroll":false,"unique":false}],"lastUpdatedTimestamp":"2026-08-24T22:18:39.023428Z","name":"my-bucket"}
+```
+
+###### Count
+
+`count` is the command used to count a bucket's content in the Discovery Staging Repository. The user can send a name or UUID to get the count of a specific bucket. The user can send filters with the `filter` flag, which is a single JSON string that contains all of the filters. 
+
+Usage: `discovery staging bucket count [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the bucket that will be counted.
 
 Flags:
 
@@ -4048,51 +4147,37 @@ Flags:
 `-p, --profile`:
 (Optional, string) Set the configuration profile that will execute the command.
 
-`-d, --data`:
-(Optional, string) The JSON with the configuration of the bucket.
+`-f, --filter`:
+(Optional, string) The [DSL](https://discovery.pureinsights.live/latest/reference/index.html#dsl) containing the filters that will be applied to the scroll. For example:
+
+```json
+{
+	"equals": {
+		"field": "author",
+		"value": "John Doe",
+		"normalize": true
+	}
+}
+```
 
 Examples:
 
 ```bash
-# Store a bucket with the configuration file argument.
-discovery staging bucket store bucketConfig.json
-{
-  "name": "my-bucket",
-  "documentCount": {},
-  "indices": [
-    {
-      "fields": [
-        {
-          "fieldName": "ASC"
-        }
-      ],
-      "name": "myIndexA",
-      "unique": false
-    },
-    {
-      "fields": [
-        {
-          "fieldName2": "DESC"
-        }
-      ],
-      "name": "myIndexB",
-      "unique": false
-    }
-  ],
-  "name": "my-bucket"
-}
+# Get a bucket count by id
+discovery staging bucket count 69eeb20b-8ded-478f-937f-64caa0a3e8c0
+{"total":1000000}
 ```
 
 ```bash
-# Store a bucket with the data flag. The indices are omitted in the output.
-discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}]}'
-{
-  "documentCount": {},
-  "indices": [
-    ...
-  ],
-  "name": "my-bucket"
-}
+# Get a bucket count by name
+discovery staging bucket count "my-bucket"
+{"total":1000000}
+```
+
+```bash
+# Get bucket count using filters
+discovery staging bucket count "source-count" --filter "{\"equals\":{\"field\":\"author\",\"value\":\"John Doe\"}}"
+{"total":270000}
 ```
 
 ###### Dump

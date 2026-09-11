@@ -1,7 +1,7 @@
 package buckets
 
 import (
-	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +16,7 @@ func NewBucketCommand(d cli.Discovery) *cobra.Command {
 	bucket.AddCommand(NewStoreCommand(d))
 	bucket.AddCommand(NewDeleteCommand(d))
 	bucket.AddCommand(NewDumpCommand(d))
+	bucket.AddCommand(NewCountCommand(d))
 
 	return bucket
 }

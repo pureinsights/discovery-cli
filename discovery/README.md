@@ -395,6 +395,7 @@ It has the following methods:
 | Store | POST | `{URL}/content/{bucketName}/{contentId}` | `application/json` | • `parentId` |`application/json` | Adds the received content JSON to a document with the given Content ID. The Parent ID can be used to establish hierarchical relationships between documents. |
 | Get | GET | `{URL}/content/{bucketName}/{contentId}` || • `action`: `STORE`, `DELETE`<br>• `include`<br>• `exclude` | `application/json` | Obtains the information of the record with the given Content ID in the bucket. It can receive functional options described later in the docuumentation. |
 | Delete | DELETE | `{URL}/content/{bucketName}/{contentId}` |  |  |`application/json` | Deletes the document with the given content ID in the bucket. |
+| Count | POST | `{URL}/content/{bucketName}/count` | `application/json` |  | `application/json` | Counts the number of records in the bucket that match the given filters. |
 
 The functional options for the `Get` method are the following:
 | Option | Description |

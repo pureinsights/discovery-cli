@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/pureinsights/discovery-cli/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/v2/internal/iostreams"
 	"github.com/spf13/viper"
 )
 

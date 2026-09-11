@@ -3,9 +3,9 @@ package buckets
 import (
 	"fmt"
 
-	"github.com/pureinsights/discovery-cli/cmd/commands"
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
-	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/cmd/commands"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +32,7 @@ func NewStoreCommand(d cli.Discovery) *cobra.Command {
 	discovery staging bucket store configFile.json
 
 	# Store a bucket with the JSON configuration in the data flag
-	discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"unique":false}]}'`,
+	discovery staging bucket store --data '{"name":"my-bucket", "indices":[{"name":"myIndexA","fields":[{"fieldName":"ASC"}],"scroll":false,"unique":false},{"name":"myIndexB","fields":[{"fieldName2":"DESC"}],"scroll":false,"unique":false}]}'`,
 	}
 
 	store.Flags().BoolVar(&abortOnError, "abort-on-error", false, "aborts the operation if there is an error")

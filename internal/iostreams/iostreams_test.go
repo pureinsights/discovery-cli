@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pureinsights/discovery-cli/internal/testutils"
+	"github.com/pureinsights/discovery-cli/v2/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 

@@ -1,14 +1,14 @@
 package ingestion
 
 import (
-	"github.com/pureinsights/discovery-cli/cmd/ingestion/backuprestore"
-	"github.com/pureinsights/discovery-cli/cmd/ingestion/config"
-	"github.com/pureinsights/discovery-cli/cmd/ingestion/pipelines"
-	"github.com/pureinsights/discovery-cli/cmd/ingestion/processors"
-	"github.com/pureinsights/discovery-cli/cmd/ingestion/seed_schedules"
-	"github.com/pureinsights/discovery-cli/cmd/ingestion/seeds"
-	"github.com/pureinsights/discovery-cli/cmd/ingestion/statuscheck"
-	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/cmd/ingestion/backuprestore"
+	"github.com/pureinsights/discovery-cli/v2/cmd/ingestion/config"
+	"github.com/pureinsights/discovery-cli/v2/cmd/ingestion/pipelines"
+	"github.com/pureinsights/discovery-cli/v2/cmd/ingestion/processors"
+	"github.com/pureinsights/discovery-cli/v2/cmd/ingestion/seed_schedules"
+	"github.com/pureinsights/discovery-cli/v2/cmd/ingestion/seeds"
+	"github.com/pureinsights/discovery-cli/v2/cmd/ingestion/statuscheck"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/spf13/cobra"
 )
 

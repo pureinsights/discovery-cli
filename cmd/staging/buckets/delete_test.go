@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
-	"github.com/pureinsights/discovery-cli/internal/cli"
-	"github.com/pureinsights/discovery-cli/internal/iostreams"
-	"github.com/pureinsights/discovery-cli/internal/testutils"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/v2/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -94,6 +94,7 @@ func TestNewDeleteCommand(t *testing.T) {
 								}
 							],
 							"name":"myIndexA",
+							"scroll":false,
 							"unique":false
 						},
 						{
@@ -103,6 +104,7 @@ func TestNewDeleteCommand(t *testing.T) {
 								}
 							],
 							"name":"myIndexB",
+							"scroll":false,
 							"unique":false
 						}
 					],
@@ -191,6 +193,7 @@ func TestNewDeleteCommand(t *testing.T) {
 								}
 							],
 							"name":"myIndexA",
+							"scroll":false,
 							"unique":false
 						},
 						{
@@ -200,6 +203,7 @@ func TestNewDeleteCommand(t *testing.T) {
 								}
 							],
 							"name":"myIndexB",
+							"scroll":false,
 							"unique":false
 						}
 					],
@@ -334,6 +338,7 @@ func TestNewDeleteCommand(t *testing.T) {
 							}
 						],
 						"name":"myIndexA",
+						"scroll":false,
 						"unique":false
 					},
 					{
@@ -343,6 +348,7 @@ func TestNewDeleteCommand(t *testing.T) {
 							}
 						],
 						"name":"myIndexB",
+						"scroll":false,
 						"unique":false
 					}
 					],

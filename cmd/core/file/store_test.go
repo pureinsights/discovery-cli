@@ -1,18 +1,18 @@
 package file
 
 import (
-	"os"
 	"bytes"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/discovery"
-	"github.com/pureinsights/discovery-cli/internal/cli"
-	"github.com/pureinsights/discovery-cli/internal/iostreams"
-	"github.com/pureinsights/discovery-cli/internal/testutils"
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/internal/iostreams"
+	"github.com/pureinsights/discovery-cli/v2/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,7 +24,7 @@ import (
 func getFileAttributesExError(t *testing.T, path string) error {
 	_, err := os.Stat(path)
 	require.Error(t, err)
-	return cli.NormalizeReadFileError(path,err)
+	return cli.NormalizeReadFileError(path, err)
 }
 
 // TestNewStoreCommand tests the NewStoreCommand() function.
@@ -307,7 +307,7 @@ func TestNewStoreCommand(t *testing.T) {
 			errBytes:  testutils.Read(t, "NewStoreCommand_Err_FileDoesNotExist"),
 			err: cli.NewErrorWithCause(
 				cli.ErrorExitCode,
-				getFileAttributesExError(t,"./testdata/NewDownloadCommand_this_file_does_not_exist.py"),
+				getFileAttributesExError(t, "./testdata/NewDownloadCommand_this_file_does_not_exist.py"),
 				"The path \"./testdata/NewDownloadCommand_this_file_does_not_exist.py\" does not exist",
 			),
 		},

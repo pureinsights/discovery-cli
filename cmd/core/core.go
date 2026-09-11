@@ -1,15 +1,15 @@
 package core
 
 import (
-	"github.com/pureinsights/discovery-cli/cmd/core/backuprestore"
-	"github.com/pureinsights/discovery-cli/cmd/core/config"
-	"github.com/pureinsights/discovery-cli/cmd/core/credentials"
-	"github.com/pureinsights/discovery-cli/cmd/core/file"
-	"github.com/pureinsights/discovery-cli/cmd/core/labels"
-	"github.com/pureinsights/discovery-cli/cmd/core/secrets"
-	"github.com/pureinsights/discovery-cli/cmd/core/servers"
-	"github.com/pureinsights/discovery-cli/cmd/core/statuscheck"
-	"github.com/pureinsights/discovery-cli/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/backuprestore"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/config"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/credentials"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/file"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/labels"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/secrets"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/servers"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/statuscheck"
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/spf13/cobra"
 )
 

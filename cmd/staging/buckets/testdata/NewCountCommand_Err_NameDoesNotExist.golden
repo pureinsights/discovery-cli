@@ -1,0 +1,10 @@
+Error: Could not find bucket with name or id "my-bucket"
+status: 404, body: {
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: entity with name "my-bucket" does not exist"
+	]
+}
+
+
