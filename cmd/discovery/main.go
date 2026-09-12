@@ -10,8 +10,6 @@ import (
 	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 )
 
-Version = "2.12.0"
-
 func main() {
 	exitCode, err := cmd.Run()
 	if err != nil {

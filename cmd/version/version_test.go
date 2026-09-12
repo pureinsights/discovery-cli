@@ -3,7 +3,6 @@ package version
 import (
 	"bytes"
 	"errors"
-	"runtime/debug"
 	"strings"
 	"testing"
 
