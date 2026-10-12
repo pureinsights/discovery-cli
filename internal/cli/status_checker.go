@@ -43,6 +43,7 @@ func (d discovery) StatusCheckOfClients(clients []StatusCheckClientEntry, printe
 				return NewErrorWithCause(ErrorExitCode, err, "Could not get the status of the Discovery products")
 			}
 		} else {
+			d.markFailed()
 			results, err = sjson.Set(results, entry.Name, err.Error())
 			if err != nil {
 				return NewErrorWithCause(ErrorExitCode, err, "Could not get the status of the Discovery products")

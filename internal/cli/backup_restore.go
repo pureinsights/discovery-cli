@@ -63,6 +63,21 @@ var folderToClass = map[string]string{
 	mcpServerToolString: "MCPServerTool",
 }
 
+// importFailed reports whether a product could not be imported or any entity in the import results failed.
+func importFailed(results gjson.Result) bool {
+	if strings.Contains(results.Raw, "errorCode") {
+		return true
+	}
+
+	failed := false
+	results.ForEach(func(_, value gjson.Result) bool {
+		// callImports stores the error message as a string when a whole product fails.
+		failed = value.Type == gjson.String
+		return !failed
+	})
+	return failed
+}
+
 // BackupRestore defines methods to backup and restore entities in Discovery.
 type BackupRestore interface {
 	Export() ([]byte, string, error)
@@ -185,11 +200,20 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 		return NewErrorWithCause(ErrorExitCode, err, "Could not export entities")
 	}
 
+	parsed := gjson.Parse(result)
+	parsed.ForEach(func(_, value gjson.Result) bool {
+		if !value.Get("acknowledged").Bool() {
+			d.markFailed()
+			return false
+		}
+		return true
+	})
+
 	if printer == nil {
 		printer = JsonObjectPrinter(true)
 	}
 
-	return printer(*d.IOStreams(), gjson.Parse(result))
+	return printer(*d.IOStreams(), parsed)
 }
 
 // ImportEntitiesToClient imports the entities to a Discovery product by reading them from the given path and using the given conflict resolution strategy.
@@ -203,6 +227,10 @@ func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onC
 
 	if printer == nil {
 		printer = JsonObjectPrinter(true)
+	}
+
+	if importFailed(results) {
+		d.markFailed()
 	}
 
 	return printer(*d.IOStreams(), results)
@@ -337,7 +365,12 @@ func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, p
 		printer = JsonObjectPrinter(true)
 	}
 
-	return printer(*d.IOStreams(), gjson.Parse(results))
+	parsed := gjson.Parse(results)
+	if importFailed(parsed) {
+		d.markFailed()
+	}
+
+	return printer(*d.IOStreams(), parsed)
 }
 
 // collectJSONFiles makes a list of all the JSON files in an entity's directory in order to add them all into the NDJSON.
@@ -563,7 +596,12 @@ func (d discovery) Deploy(fileClient CoreFileController, clients []BackupRestore
 			printer = JsonObjectPrinter(true)
 		}
 
-		return printer(*d.IOStreams(), gjson.Parse(results))
+		parsed := gjson.Parse(results)
+		if importFailed(parsed) {
+			d.markFailed()
+		}
+
+		return printer(*d.IOStreams(), parsed)
 	} else {
 		return NewError(ErrorExitCode, "The path %q is not a directory", filepath.ToSlash(path))
 	}

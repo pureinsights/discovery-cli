@@ -86,5 +86,5 @@ func Run() (cli.ExitCode, error) {
 		cliError := cli.FromError(err)
 		return cliError.ExitCode, cliError
 	}
-	return cli.SuccessExitCode, nil
+	return d.PartialExitCode(), nil
 }

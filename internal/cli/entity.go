@@ -255,6 +255,7 @@ func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, a
 				upsertErr = NewErrorWithCause(ErrorExitCode, err, "Could not store entities")
 				break
 			}
+			d.markFailed()
 
 			var discoveryErr discoveryPackage.Error
 			if errors.As(err, &discoveryErr) {
@@ -319,6 +320,7 @@ func (d discovery) SearchUpsertEntities(client SearchCreator, configurations gjs
 				upsertErr = NewErrorWithCause(ErrorExitCode, err, "Could not store entities")
 				break
 			}
+			d.markFailed()
 
 			var discoveryErr discoveryPackage.Error
 			if errors.As(err, &discoveryErr) {

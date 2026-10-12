@@ -95,49 +95,55 @@ func Test_discovery_StatusCheck(t *testing.T) {
 // Test_discovery_StatusCheckOfClients tests the discoveryStatusCheckOfClients() function.
 func Test_discovery_StatusCheckOfClients(t *testing.T) {
 	tests := []struct {
-		name           string
-		clients        []StatusCheckClientEntry
-		printer        Printer
-		expectedOutput string
-		outWriter      io.Writer
-		err            error
+		name            string
+		clients         []StatusCheckClientEntry
+		printer         Printer
+		expectedOutput  string
+		outWriter       io.Writer
+		err             error
+		partialExitCode ExitCode
 	}{
 		// Working cases
 		{
-			name:           "StatusCheckOfClients correctly prints with the pretty printer when one of the status checks fails",
-			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
-			printer:        nil,
-			expectedOutput: "{\n  \"core\": {\n    \"status\": \"UP\"\n  },\n  \"ingestion\": \"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\n  \"queryflow\": {\n    \"status\": \"UP\"\n  },\n  \"staging\": {\n    \"status\": \"UP\"\n  }\n}\n",
-			err:            nil,
+			name:            "StatusCheckOfClients correctly prints with the pretty printer when one of the status checks fails",
+			clients:         []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
+			printer:         nil,
+			expectedOutput:  "{\n  \"core\": {\n    \"status\": \"UP\"\n  },\n  \"ingestion\": \"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\n  \"queryflow\": {\n    \"status\": \"UP\"\n  },\n  \"staging\": {\n    \"status\": \"UP\"\n  }\n}\n",
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		{
-			name:           "StatusCheckOfClients correctly prints the results with the ugly printer when one of the status checks fails",
-			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.WorkingStatusChecker)}, {Name: "queryflow", Client: new(mocks.FailingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
-			printer:        JsonObjectPrinter(false),
-			expectedOutput: "{\"core\":{\"status\":\"UP\"},\"ingestion\":{\"status\":\"UP\"},\"queryflow\":\"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\"staging\":{\"status\":\"UP\"}}\n",
-			err:            nil,
+			name:            "StatusCheckOfClients correctly prints the results with the ugly printer when one of the status checks fails",
+			clients:         []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.WorkingStatusChecker)}, {Name: "queryflow", Client: new(mocks.FailingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
+			printer:         JsonObjectPrinter(false),
+			expectedOutput:  "{\"core\":{\"status\":\"UP\"},\"ingestion\":{\"status\":\"UP\"},\"queryflow\":\"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\"staging\":{\"status\":\"UP\"}}\n",
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		// Error cases
 		{
-			name:           "A working status has an invalid field name.",
-			clients:        []StatusCheckClientEntry{{Name: "", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
-			printer:        nil,
-			expectedOutput: "",
-			err:            NewErrorWithCause(ErrorExitCode, errors.New("path cannot be empty"), "Could not get the status of the Discovery products"),
+			name:            "A working status has an invalid field name.",
+			clients:         []StatusCheckClientEntry{{Name: "", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
+			printer:         nil,
+			expectedOutput:  "",
+			err:             NewErrorWithCause(ErrorExitCode, errors.New("path cannot be empty"), "Could not get the status of the Discovery products"),
+			partialExitCode: 0,
 		},
 		{
-			name:           "A failing status has an invalid field name.",
-			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
-			printer:        nil,
-			expectedOutput: "",
-			err:            NewErrorWithCause(ErrorExitCode, errors.New("path cannot be empty"), "Could not get the status of the Discovery products"),
+			name:            "A failing status has an invalid field name.",
+			clients:         []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
+			printer:         nil,
+			expectedOutput:  "",
+			err:             NewErrorWithCause(ErrorExitCode, errors.New("path cannot be empty"), "Could not get the status of the Discovery products"),
+			partialExitCode: ErrorExitCode,
 		},
 		{
-			name:      "Printing fails",
-			clients:   []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
-			printer:   nil,
-			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
-			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			name:            "Printing fails",
+			clients:         []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
+			printer:         nil,
+			outWriter:       testutils.ErrWriter{Err: errors.New("write failed")},
+			err:             NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			partialExitCode: ErrorExitCode,
 		},
 	}
 
@@ -168,6 +174,7 @@ func Test_discovery_StatusCheckOfClients(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())
 			}
+			assert.Equal(t, tc.partialExitCode, d.PartialExitCode())
 		})
 	}
 }

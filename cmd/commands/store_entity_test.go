@@ -102,7 +102,7 @@ func Test_readDataFromFile(t *testing.T) {
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tc.expectedJson, result)
+				require.JSONEq(t, tc.expectedJson.Raw, result.Raw)
 			}
 		})
 	}
