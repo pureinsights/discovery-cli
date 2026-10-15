@@ -5,7 +5,10 @@
   "ingestion": {
     "status": "UP"
   },
-  "queryflow": "status: 503, body: {\n    \"status\": \"DOWN\"\n}\n",
+  "queryflow": {
+    "error": "status: 503, body: {\n    \"status\": \"DOWN\"\n}\n",
+    "status": "DOWN"
+  },
   "staging": {
     "status": "UP"
   }

@@ -4,16 +4,29 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"net/url"
 	"os"
 	"testing"
 
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 	"github.com/pureinsights/discovery-cli/v2/internal/iostreams"
 	"github.com/pureinsights/discovery-cli/v2/internal/testutils"
 	"github.com/pureinsights/discovery-cli/v2/internal/testutils/mocks"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/gjson"
 )
+
+// errorStatusChecker is a StatusChecker that fails with the given error.
+type errorStatusChecker struct {
+	err error
+}
+
+// StatusCheck returns the configured error.
+func (c errorStatusChecker) StatusCheck() (gjson.Result, error) {
+	return gjson.Result{}, c.err
+}
 
 // Test_discovery_StatusCheck tests the discovery.StatusCheck() function.
 func Test_discovery_StatusCheck(t *testing.T) {
@@ -44,12 +57,28 @@ func Test_discovery_StatusCheck(t *testing.T) {
 
 		// Error case
 		{
-			name:           "StatusCheck returns error",
+			name:           "StatusCheck prints DOWN and returns error when the product is unreachable",
 			client:         new(mocks.FailingStatusChecker),
 			printer:        nil,
-			expectedOutput: "",
+			expectedOutput: "{\n  \"error\": \"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\n  \"status\": \"DOWN\"\n}\n",
 			product:        "Core",
-			err:            NewErrorWithCause(ErrorExitCode, errors.New("Get \"http://localhost:12030/health\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it."), "Could not check the status of Discovery Core."),
+			err:            NewError(ErrorExitCode, "Could not check the status of Discovery Core."),
+		},
+		{
+			name:           "StatusCheck prints INVALID CONFIGURATION and returns error when the URL is empty",
+			client:         errorStatusChecker{&url.Error{Op: "Get", URL: "/health", Err: errors.New("unsupported protocol scheme \"\"")}},
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"error\":\"Get \\\"/health\\\": unsupported protocol scheme \\\"\\\"\",\"status\":\"INVALID CONFIGURATION\"}\n",
+			product:        "Core",
+			err:            NewError(ErrorExitCode, "Could not check the status of Discovery Core."),
+		},
+		{
+			name:           "StatusCheck prints DOWN and returns error when the product responds with an error",
+			client:         errorStatusChecker{discoveryPackage.Error{Status: 500, Body: gjson.Parse(`{"error":"Internal server error"}`)}},
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"error\":\"status: 500, body: {\\\"error\\\":\\\"Internal server error\\\"}\\n\",\"status\":\"DOWN\"}\n",
+			product:        "Core",
+			err:            NewError(ErrorExitCode, "Could not check the status of Discovery Core."),
 		},
 		{
 			name:      "Printing fails",
@@ -86,8 +115,8 @@ func Test_discovery_StatusCheck(t *testing.T) {
 				assert.EqualError(t, err, tc.err.Error())
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tc.expectedOutput, buf.String())
 			}
+			require.Equal(t, tc.expectedOutput, buf.String())
 		})
 	}
 }
@@ -107,14 +136,26 @@ func Test_discovery_StatusCheckOfClients(t *testing.T) {
 			name:           "StatusCheckOfClients correctly prints with the pretty printer when one of the status checks fails",
 			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.FailingStatusChecker)}, {Name: "queryflow", Client: new(mocks.WorkingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
 			printer:        nil,
-			expectedOutput: "{\n  \"core\": {\n    \"status\": \"UP\"\n  },\n  \"ingestion\": \"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\n  \"queryflow\": {\n    \"status\": \"UP\"\n  },\n  \"staging\": {\n    \"status\": \"UP\"\n  }\n}\n",
+			expectedOutput: "{\n  \"core\": {\n    \"status\": \"UP\"\n  },\n  \"ingestion\": {\n    \"error\": \"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\n    \"status\": \"DOWN\"\n  },\n  \"queryflow\": {\n    \"status\": \"UP\"\n  },\n  \"staging\": {\n    \"status\": \"UP\"\n  }\n}\n",
 			err:            nil,
 		},
 		{
 			name:           "StatusCheckOfClients correctly prints the results with the ugly printer when one of the status checks fails",
 			clients:        []StatusCheckClientEntry{{Name: "core", Client: new(mocks.WorkingStatusChecker)}, {Name: "ingestion", Client: new(mocks.WorkingStatusChecker)}, {Name: "queryflow", Client: new(mocks.FailingStatusChecker)}, {Name: "staging", Client: new(mocks.WorkingStatusChecker)}},
 			printer:        JsonObjectPrinter(false),
-			expectedOutput: "{\"core\":{\"status\":\"UP\"},\"ingestion\":{\"status\":\"UP\"},\"queryflow\":\"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\"staging\":{\"status\":\"UP\"}}\n",
+			expectedOutput: "{\"core\":{\"status\":\"UP\"},\"ingestion\":{\"status\":\"UP\"},\"queryflow\":{\"error\":\"Get \\\"http://localhost:12030/health\\\": dial tcp [::1]:12030: connectex: No connection could be made because the target machine actively refused it.\",\"status\":\"DOWN\"},\"staging\":{\"status\":\"UP\"}}\n",
+			err:            nil,
+		},
+		{
+			name: "StatusCheckOfClients prints INVALID CONFIGURATION or DOWN with the error depending on the failure",
+			clients: []StatusCheckClientEntry{
+				{Name: "core", Client: errorStatusChecker{&url.Error{Op: "Get", URL: "/health", Err: errors.New("unsupported protocol scheme \"\"")}}},
+				{Name: "ingestion", Client: errorStatusChecker{&url.Error{Op: "Get", URL: "localhost:12030/health", Err: errors.New("unsupported protocol scheme \"localhost\"")}}},
+				{Name: "queryflow", Client: errorStatusChecker{discoveryPackage.Error{Status: 503, Body: gjson.Parse(`{"status":"DOWN"}`)}}},
+				{Name: "staging", Client: errorStatusChecker{discoveryPackage.Error{Status: 500}}},
+			},
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"core\":{\"error\":\"Get \\\"/health\\\": unsupported protocol scheme \\\"\\\"\",\"status\":\"INVALID CONFIGURATION\"},\"ingestion\":{\"error\":\"Get \\\"localhost:12030/health\\\": unsupported protocol scheme \\\"localhost\\\"\",\"status\":\"INVALID CONFIGURATION\"},\"queryflow\":{\"error\":\"status: 503, body: {\\\"status\\\":\\\"DOWN\\\"}\\n\",\"status\":\"DOWN\"},\"staging\":{\"error\":\"status: 500, body: \\n\",\"status\":\"DOWN\"}}\n",
 			err:            nil,
 		},
 		// Error cases

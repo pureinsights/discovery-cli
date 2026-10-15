@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"errors"
+	"net/url"
+
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -10,19 +13,42 @@ type StatusChecker interface {
 	StatusCheck() (gjson.Result, error)
 }
 
+// statusFromError converts a failed status check into a readable status that keeps the original error message.
+// An empty or invalid URL is reported as an invalid configuration, and any other failure is reported as down.
+func statusFromError(err error) string {
+	status := "DOWN"
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		if u, parseErr := url.Parse(urlErr.URL); parseErr != nil || (u.Scheme != "http" && u.Scheme != "https") {
+			status = "INVALID CONFIGURATION"
+		}
+	}
+
+	result, _ := sjson.Set(`{}`, "status", status)
+	result, _ = sjson.Set(result, "error", err.Error())
+	return result
+}
+
 // StatusCheck gets the Status of the sent product and prints out the result.
 // If there was an error, the error message indicates the name of the product that is unavailable.
 func (d discovery) StatusCheck(client StatusChecker, product string, printer Printer) error {
-	result, err := client.StatusCheck()
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not check the status of Discovery %s.", product)
+	result, checkErr := client.StatusCheck()
+	if checkErr != nil {
+		result = gjson.Parse(statusFromError(checkErr))
 	}
 
 	if printer == nil {
 		printer = JsonObjectPrinter(true)
 	}
 
-	return printer(*d.iostreams, result)
+	if err := printer(*d.iostreams, result); err != nil {
+		return err
+	}
+
+	if checkErr != nil {
+		return NewError(ErrorExitCode, "Could not check the status of Discovery %s.", product)
+	}
+	return nil
 }
 
 // StatusCheckClientEntry is used to easily store the different status checker structs of the Discovery products.
@@ -37,16 +63,14 @@ func (d discovery) StatusCheckOfClients(clients []StatusCheckClientEntry, printe
 	for _, entry := range clients {
 		client := entry.Client
 		status, err := client.StatusCheck()
-		if err == nil {
-			results, err = sjson.SetRaw(results, entry.Name, status.Raw)
-			if err != nil {
-				return NewErrorWithCause(ErrorExitCode, err, "Could not get the status of the Discovery products")
-			}
-		} else {
-			results, err = sjson.Set(results, entry.Name, err.Error())
-			if err != nil {
-				return NewErrorWithCause(ErrorExitCode, err, "Could not get the status of the Discovery products")
-			}
+		raw := status.Raw
+		if err != nil {
+			raw = statusFromError(err)
+		}
+
+		results, err = sjson.SetRaw(results, entry.Name, raw)
+		if err != nil {
+			return NewErrorWithCause(ErrorExitCode, err, "Could not get the status of the Discovery products")
 		}
 	}
 

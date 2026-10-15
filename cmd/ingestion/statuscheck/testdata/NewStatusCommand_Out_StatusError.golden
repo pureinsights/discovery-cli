@@ -1,0 +1,4 @@
+{
+  "error": "status: 500, body: {\"error\": \"Internal server error\"}\n",
+  "status": "DOWN"
+}
