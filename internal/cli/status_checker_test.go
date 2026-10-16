@@ -81,6 +81,22 @@ func Test_discovery_StatusCheck(t *testing.T) {
 			err:            NewError(ErrorExitCode, "Could not check the status of Discovery Core."),
 		},
 		{
+			name:           "StatusCheck prints INVALID CONFIGURATION and returns error when the API key is missing",
+			client:         errorStatusChecker{discoveryPackage.Error{Status: 403, Body: gjson.Parse(`{"message":"Forbidden"}`)}},
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"error\":\"status: 403, body: {\\\"message\\\":\\\"Forbidden\\\"}\\n\",\"status\":\"INVALID CONFIGURATION\"}\n",
+			product:        "Core",
+			err:            NewError(ErrorExitCode, "Could not check the status of Discovery Core."),
+		},
+		{
+			name:           "StatusCheck prints INVALID CONFIGURATION and returns error when the URL has an unexpected path",
+			client:         errorStatusChecker{discoveryPackage.Error{Status: 404, Body: gjson.Parse(`{"message":["Page Not Found"]}`)}},
+			printer:        JsonObjectPrinter(false),
+			expectedOutput: "{\"error\":\"status: 404, body: {\\\"message\\\":[\\\"Page Not Found\\\"]}\\n\",\"status\":\"INVALID CONFIGURATION\"}\n",
+			product:        "Core",
+			err:            NewError(ErrorExitCode, "Could not check the status of Discovery Core."),
+		},
+		{
 			name:      "Printing fails",
 			client:    new(mocks.WorkingStatusChecker),
 			printer:   nil,

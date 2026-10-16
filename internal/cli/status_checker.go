@@ -2,8 +2,10 @@ package cli
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 
+	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -14,11 +16,17 @@ type StatusChecker interface {
 }
 
 // statusFromError converts a failed status check into a readable status that keeps the original error message.
-// An empty or invalid URL is reported as an invalid configuration, and any other failure is reported as down.
+// An empty or invalid URL or a 4xx response is reported as an invalid configuration, and a 5xx response or any other failure is reported as down.
 func statusFromError(err error) string {
 	status := "DOWN"
+	var discoveryErr discoveryPackage.Error
 	var urlErr *url.Error
-	if errors.As(err, &urlErr) {
+	switch {
+	case errors.As(err, &discoveryErr):
+		if discoveryErr.Status < http.StatusInternalServerError {
+			status = "INVALID CONFIGURATION"
+		}
+	case errors.As(err, &urlErr):
 		if u, parseErr := url.Parse(urlErr.URL); parseErr != nil || (u.Scheme != "http" && u.Scheme != "https") {
 			status = "INVALID CONFIGURATION"
 		}
