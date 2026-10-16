@@ -158,7 +158,7 @@ type ServerPinger interface {
 }
 
 // PingServer pings the server with the given name or ID.
-func (d discovery) PingServer(client ServerPinger, server string, printer Printer) error {
+func (d *discovery) PingServer(client ServerPinger, server string, printer Printer) error {
 	serverId, err := GetEntityId(d, client, server)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get server ID.")

@@ -32,7 +32,7 @@ type StatusCheckClientEntry struct {
 }
 
 // StatusCheckOfClients checks the status of very Discovery product and returns their results.
-func (d discovery) StatusCheckOfClients(clients []StatusCheckClientEntry, printer Printer) error {
+func (d *discovery) StatusCheckOfClients(clients []StatusCheckClientEntry, printer Printer) error {
 	results := "{}"
 	for _, entry := range clients {
 		client := entry.Client
@@ -43,6 +43,7 @@ func (d discovery) StatusCheckOfClients(clients []StatusCheckClientEntry, printe
 				return NewErrorWithCause(ErrorExitCode, err, "Could not get the status of the Discovery products")
 			}
 		} else {
+			d.markFailed()
 			results, err = sjson.Set(results, entry.Name, err.Error())
 			if err != nil {
 				return NewErrorWithCause(ErrorExitCode, err, "Could not get the status of the Discovery products")
