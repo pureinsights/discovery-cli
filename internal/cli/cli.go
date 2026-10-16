@@ -61,22 +61,17 @@ type discovery struct {
 	config          *viper.Viper
 	configPath      string
 	iostreams       *iostreams.IOStreams
-	partialExitCode *ExitCode
+	partialExitCode ExitCode
 }
 
 // PartialExitCode returns the exit code recorded by a command that finished with partial failures.
 func (d discovery) PartialExitCode() ExitCode {
-	if d.partialExitCode == nil {
-		return SuccessExitCode
-	}
-	return *d.partialExitCode
+	return d.partialExitCode
 }
 
 // markFailed records a partial failure so the CLI exits with ErrorExitCode without printing a new error message.
-func (d discovery) markFailed() {
-	if d.partialExitCode != nil {
-		*d.partialExitCode = ErrorExitCode
-	}
+func (d *discovery) markFailed() {
+	d.partialExitCode = ErrorExitCode
 }
 
 // IOStreams is a getter method to obtain the CLI's IO streams.
@@ -90,12 +85,12 @@ func (d discovery) Config() *viper.Viper {
 }
 
 // NewDiscovery is a constructor of the discovery struct.
-func NewDiscovery(io *iostreams.IOStreams, config *viper.Viper, configPath string) discovery {
-	return discovery{
+func NewDiscovery(io *iostreams.IOStreams, config *viper.Viper, configPath string) *discovery {
+	return &discovery{
 		config:          config,
 		iostreams:       io,
 		configPath:      configPath,
-		partialExitCode: new(ExitCode),
+		partialExitCode: SuccessExitCode,
 	}
 }
 

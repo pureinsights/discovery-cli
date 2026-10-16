@@ -243,7 +243,7 @@ func (d discovery) UpsertEntity(client Creator, config gjson.Result) (gjson.Resu
 }
 
 // UpsertEntities creates or updates one or multiple entities based on the array of configurations it receives.
-func (d discovery) UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error {
+func (d *discovery) UpsertEntities(client Creator, configurations gjson.Result, abortOnError bool, printer Printer) error {
 	configArray := configurations.Array()
 	upsertedEntites := []gjson.Result{}
 
@@ -287,7 +287,7 @@ type SearchCreator interface {
 
 // SearchUpsertEntity creates or updates an entity in Discovery with the given configuration.
 // It searches for the entity by name or id to check if it exists and needs to update it.
-func (d discovery) SearchUpsertEntity(client SearchCreator, config gjson.Result) (gjson.Result, error) {
+func (d *discovery) SearchUpsertEntity(client SearchCreator, config gjson.Result) (gjson.Result, error) {
 	if config.Get("id").Exists() {
 		if parsedId, uuidErr := uuid.Parse(config.Get("id").String()); uuidErr == nil {
 			return client.Update(parsedId, config)
@@ -308,7 +308,7 @@ func (d discovery) SearchUpsertEntity(client SearchCreator, config gjson.Result)
 
 // SearchUpsertEntities creates or updates one or multiple entities based on the array of configurations it receives.
 // It searches for the entities by name or id to check if they exist and needs to update them.
-func (d discovery) SearchUpsertEntities(client SearchCreator, configurations gjson.Result, abortOnError bool, printer Printer) error {
+func (d *discovery) SearchUpsertEntities(client SearchCreator, configurations gjson.Result, abortOnError bool, printer Printer) error {
 	configArray := configurations.Array()
 	upsertedEntites := []gjson.Result{}
 

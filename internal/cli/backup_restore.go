@@ -190,7 +190,7 @@ func WriteExportsIntoFile(path string, clients []BackupRestoreClientEntry) (stri
 }
 
 // ExportEntitiesFromClients exports the entities from Discovery Core, Ingestion, and QueryFlow, writes the export files into the given path, and prints out the results.
-func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error {
+func (d *discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry, path string, printer Printer) error {
 	if path == "" {
 		path = filepath.Join(".", "discovery.zip")
 	}
@@ -218,7 +218,7 @@ func (d discovery) ExportEntitiesFromClients(clients []BackupRestoreClientEntry,
 
 // ImportEntitiesToClient imports the entities to a Discovery product by reading them from the given path and using the given conflict resolution strategy.
 // It then prints out the results.
-func (d discovery) ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
+func (d *discovery) ImportEntitiesToClient(client BackupRestore, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	results, err := client.Import(onConflict, path)
 	if err != nil {
 		err = NormalizeReadFileError(path, err)
@@ -343,7 +343,7 @@ func callImports(clients []BackupRestoreClientEntry, zipPaths map[string]string,
 // ImportEntitiesToClients reads a zip file that contains the zip files of exported entities. The files must have the name of the Discovery product in which the entities are going to be restored.
 // The given zip file does not need to have the export files for Core, Ingestion, and QueryFlow. It can have some of them.
 // The results of the imports are then printed out in a JSON to the user.
-func (d discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
+func (d *discovery) ImportEntitiesToClients(clients []BackupRestoreClientEntry, path string, onConflict discoveryPackage.OnConflict, printer Printer) error {
 	zipFile, err := os.ReadFile(path)
 	if err != nil {
 		err = NormalizeReadFileError(path, err)
@@ -565,7 +565,7 @@ func createDeployZips(fileClient CoreFileController, path, tempDir string) (map[
 
 // Deploy is the function that imports every Core, Ingestion, and QueryFlow entity that is contained in a directory into Discovery.
 // The directory must have the entities of each type and Discovery product in their own subfolder.
-func (d discovery) Deploy(fileClient CoreFileController, clients []BackupRestoreClientEntry, path string, printer Printer) error {
+func (d *discovery) Deploy(fileClient CoreFileController, clients []BackupRestoreClientEntry, path string, printer Printer) error {
 	fileInfo, err := os.Stat(path)
 
 	if err != nil {

@@ -74,6 +74,5 @@ func TestPartialExitCode(t *testing.T) {
 	assert.Equal(t, ErrorExitCode, d.PartialExitCode())
 
 	empty := discovery{}
-	empty.markFailed()
 	assert.Equal(t, SuccessExitCode, empty.PartialExitCode())
 }

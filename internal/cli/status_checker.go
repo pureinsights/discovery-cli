@@ -32,7 +32,7 @@ type StatusCheckClientEntry struct {
 }
 
 // StatusCheckOfClients checks the status of very Discovery product and returns their results.
-func (d discovery) StatusCheckOfClients(clients []StatusCheckClientEntry, printer Printer) error {
+func (d *discovery) StatusCheckOfClients(clients []StatusCheckClientEntry, printer Printer) error {
 	results := "{}"
 	for _, entry := range clients {
 		client := entry.Client
