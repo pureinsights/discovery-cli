@@ -16,7 +16,7 @@ type IngestionSeedController interface {
 }
 
 // StartSeed initiates the execution of a seed with the given scanType and execution properties.
-func (d discovery) StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error {
+func (d *discovery) StartSeed(client IngestionSeedController, name string, scanType discoveryPackage.ScanType, properties gjson.Result, printer Printer) error {
 	seedId, err := GetEntityId(d, client, name)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to start execution.")
@@ -35,7 +35,7 @@ func (d discovery) StartSeed(client IngestionSeedController, name string, scanTy
 }
 
 // HaltSeed stops all the seed executions of a seed.
-func (d discovery) HaltSeed(client IngestionSeedController, name string, printer Printer) error {
+func (d *discovery) HaltSeed(client IngestionSeedController, name string, printer Printer) error {
 	seedId, err := GetEntityId(d, client, name)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to halt execution.")
