@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	Version = "v2.12.0"
+	Version = "v2.14.0-develop"
 )
 
 // NewVersionCommand creates the discovery version command that gets the status of every Discovery product.
