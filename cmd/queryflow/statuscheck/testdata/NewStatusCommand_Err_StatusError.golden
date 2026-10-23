@@ -1,4 +1,2 @@
 Error: Could not check the status of Discovery QueryFlow.
-status: 500, body: {"error": "Internal server error"}
-
 

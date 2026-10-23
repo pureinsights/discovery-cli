@@ -23,6 +23,38 @@ import (
 	"github.com/tidwall/sjson"
 )
 
+// TestImportFailed tests the importFailed() function.
+func TestImportFailed(t *testing.T) {
+	tests := []struct {
+		name     string
+		result   gjson.Result
+		expected bool
+	}{
+		{
+			name:     "Import failed returns true if any errorCodes are detected",
+			result:   gjson.Parse(`{"Endpoint":[{"errorCode":2001, "errors":["Duplicated entity: 1b56fa1d-2ef9-4fc6-bcab-8d689c30b245"],"id":"1b56fa1d-2ef9-4fc6-bcab-8d689c30b245","status":409}]}`),
+			expected: true,
+		},
+		{
+			name:     "Import failed returns false if no errorCodes are detected",
+			result:   gjson.Parse(`{"Endpoint":[{"id":"1b56fa1d-2ef9-4fc6-bcab-8d689c30b245","name":"logger-state-el-endpoint","status":204}]}`),
+			expected: false,
+		},
+		{
+			name:     "Import failed returns true if a whole product failed",
+			result:   gjson.Parse(`{"core":{"Credential":[{"id":"3b32e410-2f33-412d-9fb8-17970131921c","status":200}]},"ingestion":"status: 401, body: {\"error\":\"unauthorized\"}"}`),
+			expected: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := importFailed(tc.result)
+			assert.Equal(t, tc.expected, got)
+		})
+	}
+}
+
 // TestRenderExportStatus tests the RenderExportStatus() function.
 func TestRenderExportStatus(t *testing.T) {
 	tests := []struct {
@@ -105,6 +137,16 @@ func (g *WorkingQueryFlowBackupRestore) Export() ([]byte, string, error) {
 // Import implements the interface.
 func (g *WorkingQueryFlowBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
 	return gjson.ParseBytes(queryflowImport), nil
+}
+
+// PartialFailureBackupRestore mocks an import whose request works but where some entities fail.
+type PartialFailureBackupRestore struct {
+	WorkingCoreBackupRestore
+}
+
+// Import returns a result with a failed entity, as if the server rejected part of the import.
+func (g *PartialFailureBackupRestore) Import(discoveryPackage.OnConflict, string) (gjson.Result, error) {
+	return gjson.Parse(`{"Endpoint":[{"errorCode":9999,"errors":["Internal Server Error"],"id":"2fee5e27-4147-48de-ba1e-d7f32476a4a2","status":500}]}`), nil
 }
 
 // TestWriteExport tests the WriteExport() function.
@@ -344,14 +386,15 @@ func TestExportEntitiesFromClients(t *testing.T) {
 	testutils.ChangeDirectoryHelper(t)
 	dir1 := t.TempDir()
 	tests := []struct {
-		name           string
-		clients        []BackupRestoreClientEntry
-		path           string
-		expectedPath   string
-		printer        Printer
-		expectedOutput string
-		outWriter      io.Writer
-		err            error
+		name            string
+		clients         []BackupRestoreClientEntry
+		path            string
+		expectedPath    string
+		printer         Printer
+		expectedOutput  string
+		outWriter       io.Writer
+		err             error
+		partialExitCode ExitCode
 	}{
 		// Working cases
 		{
@@ -364,13 +407,14 @@ func TestExportEntitiesFromClients(t *testing.T) {
 			err:            nil,
 		},
 		{
-			name:           "ExportEntitiesFromClients correctly prints with pretty printer when export works for core and queryflow but fails for ingestion",
-			clients:        []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
-			path:           "",
-			expectedPath:   filepath.Join(".", "discovery.zip"),
-			printer:        nil,
-			expectedOutput: "{\n  \"core\": {\n    \"acknowledged\": true\n  },\n  \"ingestion\": {\n    \"acknowledged\": false,\n    \"error\": \"status: 401, body: {\\\"error\\\":\\\"unauthorized\\\"}\\n\"\n  },\n  \"queryflow\": {\n    \"acknowledged\": true\n  }\n}\n",
-			err:            nil,
+			name:            "ExportEntitiesFromClients correctly prints with pretty printer when export works for core and queryflow but fails for ingestion",
+			clients:         []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:            "",
+			expectedPath:    filepath.Join(".", "discovery.zip"),
+			printer:         nil,
+			expectedOutput:  "{\n  \"core\": {\n    \"acknowledged\": true\n  },\n  \"ingestion\": {\n    \"acknowledged\": false,\n    \"error\": \"status: 401, body: {\\\"error\\\":\\\"unauthorized\\\"}\\n\"\n  },\n  \"queryflow\": {\n    \"acknowledged\": true\n  }\n}\n",
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		// Error cases
 		{
@@ -416,6 +460,7 @@ func TestExportEntitiesFromClients(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, buf.String())
 			}
+			assert.Equal(t, tc.partialExitCode, d.PartialExitCode())
 		})
 	}
 }
@@ -423,14 +468,15 @@ func TestExportEntitiesFromClients(t *testing.T) {
 // TestImportEntitiesFromClient tests the ImportEntitiesFromClient() function.
 func TestImportEntitiesFromClient(t *testing.T) {
 	tests := []struct {
-		name           string
-		client         BackupRestore
-		path           string
-		onConfict      discoveryPackage.OnConflict
-		printer        Printer
-		expectedOutput string
-		outWriter      io.Writer
-		err            error
+		name            string
+		client          BackupRestore
+		path            string
+		onConfict       discoveryPackage.OnConflict
+		printer         Printer
+		expectedOutput  string
+		outWriter       io.Writer
+		err             error
+		partialExitCode ExitCode
 	}{
 		// Working case
 		{
@@ -450,6 +496,16 @@ func TestImportEntitiesFromClient(t *testing.T) {
 			expectedOutput: "{\"Endpoint\":[{\"id\":\"2fee5e27-4147-48de-ba1e-d7f32476a4a2\",\"status\":204},{\"id\":\"4ef9da31-2ba6-442c-86bb-1c9566dac4c2\",\"status\":204},{\"id\":\"c4ffddc0-9e80-4809-ad4d-f01c4e0dba71\",\"status\":204},{\"id\":\"cf56470f-0ab4-4754-b05c-f760669315af\",\"status\":204}],\"Processor\":[{\"id\":\"019ecd8e-76c9-41ee-b047-299b8aa14aba\",\"status\":204},{\"id\":\"0a7caa9b-99aa-4a63-aa6d-a1e40941984d\",\"status\":204},{\"id\":\"3393f6d9-94c1-4b70-ba02-5f582727d998\",\"status\":204},{\"id\":\"5f125024-1e5e-4591-9fee-365dc20eeeed\",\"status\":204},{\"id\":\"628d4b24-84cc-4070-8eed-c3155cf40fe9\",\"status\":204},{\"id\":\"746ba681-246a-4dba-aac0-58848ac97725\",\"status\":204},{\"id\":\"86e7f920-a4e4-4b64-be84-5437a7673db8\",\"status\":204},{\"id\":\"88022257-f5bc-4705-968e-81dae0c486d3\",\"status\":204},{\"id\":\"8a399b1c-95fc-406c-a220-7d321aaa7b0e\",\"status\":204},{\"id\":\"8e9ce4af-0f0b-44c7-bff7-c3c4f546e577\",\"status\":204},{\"id\":\"90b9e14f-1ba2-47cb-be42-77c4081e78a2\",\"status\":204},{\"id\":\"a5ee116b-bd95-474e-9d50-db7be988b196\",\"status\":204},{\"id\":\"aa02b328-76aa-4fcb-9eb1-6086d845adbd\",\"status\":204},{\"id\":\"b5c25cd3-e7c9-4fd2-b7e6-2bcf6e2caf89\",\"status\":204},{\"id\":\"c80758d7-7989-4c23-8f8f-b92497e3ab90\",\"status\":204},{\"id\":\"eb9499c3-e134-4f4a-8aaf-288da68e68f0\",\"status\":204},{\"id\":\"f3d696ca-3c5d-4cdd-a569-b2619f7a1470\",\"status\":204},{\"id\":\"fd2d5f86-bdf0-44f7-ad70-fdd636c52c4e\",\"status\":204}]}\n",
 			printer:        JsonObjectPrinter(false),
 			err:            nil,
+		},
+		{
+			name:            "ImportEntitiesFromClient prints the results and records a partial failure when some entities fail",
+			client:          new(PartialFailureBackupRestore),
+			path:            filepath.Join("testdata", "queryflow-export.zip"),
+			onConfict:       discoveryPackage.OnConflictIgnore,
+			expectedOutput:  "{\"Endpoint\":[{\"errorCode\":9999,\"errors\":[\"Internal Server Error\"],\"id\":\"2fee5e27-4147-48de-ba1e-d7f32476a4a2\",\"status\":500}]}\n",
+			printer:         JsonObjectPrinter(false),
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		// Error case
 		{
@@ -496,6 +552,7 @@ func TestImportEntitiesFromClient(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, tc.expectedOutput, bufString)
 			}
+			assert.Equal(t, tc.partialExitCode, d.PartialExitCode())
 		})
 	}
 }
@@ -832,33 +889,36 @@ func Test_callImports(t *testing.T) {
 // TestImportEntitiesFromClients tests the ImportEntitiesFromClients() function.
 func TestImportEntitiesFromClients(t *testing.T) {
 	tests := []struct {
-		name        string
-		clients     []BackupRestoreClientEntry
-		path        string
-		printer     Printer
-		goldenFile  string
-		goldenBytes []byte
-		outWriter   io.Writer
-		err         error
+		name            string
+		clients         []BackupRestoreClientEntry
+		path            string
+		printer         Printer
+		goldenFile      string
+		goldenBytes     []byte
+		outWriter       io.Writer
+		err             error
+		partialExitCode ExitCode
 	}{
 		// Working cases
 		{
-			name:        "ImportEntitiesFromClients correctly prints with pretty printer when one of the imports fails",
-			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
-			path:        "testdata/discovery.zip",
-			printer:     nil,
-			goldenFile:  "FailingIngestionImport",
-			goldenBytes: testutils.Read(t, "FailingIngestionImport"),
-			err:         nil,
+			name:            "ImportEntitiesFromClients correctly prints with pretty printer when one of the imports fails",
+			clients:         []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:            "testdata/discovery.zip",
+			printer:         nil,
+			goldenFile:      "FailingIngestionImport",
+			goldenBytes:     testutils.Read(t, "FailingIngestionImport"),
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		{
-			name:        "ImportEntitiesFromClients correctly prints the results with ugly printer when the imports succeed",
-			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
-			path:        "testdata/discovery.zip",
-			printer:     JsonObjectPrinter(false),
-			goldenFile:  "UglyImport",
-			goldenBytes: testutils.Read(t, "UglyImport"),
-			err:         nil,
+			name:            "ImportEntitiesFromClients correctly prints the results with ugly printer when some ingestion entities fail",
+			clients:         []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:            "testdata/discovery.zip",
+			printer:         JsonObjectPrinter(false),
+			goldenFile:      "UglyImport",
+			goldenBytes:     testutils.Read(t, "UglyImport"),
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		{
 			name:        "ImportEntitiesFromClients correctly prints with pretty printer when the imports and it only prints the results of the received products",
@@ -883,12 +943,13 @@ func TestImportEntitiesFromClients(t *testing.T) {
 			err:     NewError(ErrorExitCode, "The sent file should only contain the Core, Ingestion, or QueryFlow export files."),
 		},
 		{
-			name:      "Printing fails",
-			clients:   []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
-			path:      "testdata/discovery.zip",
-			printer:   nil,
-			outWriter: testutils.ErrWriter{Err: errors.New("write failed")},
-			err:       NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			name:            "Printing fails",
+			clients:         []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:            "testdata/discovery.zip",
+			printer:         nil,
+			outWriter:       testutils.ErrWriter{Err: errors.New("write failed")},
+			err:             NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			partialExitCode: ErrorExitCode,
 		},
 	}
 
@@ -919,6 +980,7 @@ func TestImportEntitiesFromClients(t *testing.T) {
 				require.NoError(t, err)
 				testutils.CompareBytes(t, tc.goldenFile, tc.goldenBytes, buf.Bytes())
 			}
+			assert.Equal(t, tc.partialExitCode, d.PartialExitCode())
 		})
 	}
 }
@@ -1263,36 +1325,39 @@ func Test_createDeployZips_Failing(t *testing.T) {
 // TestDeploy tests the Deploy() function.
 func TestDeploy(t *testing.T) {
 	tests := []struct {
-		name        string
-		fileClient  CoreFileController
-		clients     []BackupRestoreClientEntry
-		path        string
-		printer     Printer
-		goldenFile  string
-		goldenBytes []byte
-		outWriter   io.Writer
-		err         error
+		name            string
+		fileClient      CoreFileController
+		clients         []BackupRestoreClientEntry
+		path            string
+		printer         Printer
+		goldenFile      string
+		goldenBytes     []byte
+		outWriter       io.Writer
+		err             error
+		partialExitCode ExitCode
 	}{
 		// Working cases
 		{
-			name:        "Deploy correctly prints with pretty printer when one of the imports fails",
-			fileClient:  new(mocks.WorkingFileClient),
-			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
-			path:        filepath.Join("testdata", "deploy"),
-			printer:     nil,
-			goldenFile:  "FailingIngestionImport",
-			goldenBytes: testutils.Read(t, "FailingIngestionImport"),
-			err:         nil,
+			name:            "Deploy correctly prints with pretty printer when one of the imports fails",
+			fileClient:      new(mocks.WorkingFileClient),
+			clients:         []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(mocks.FailingBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:            filepath.Join("testdata", "deploy"),
+			printer:         nil,
+			goldenFile:      "FailingIngestionImport",
+			goldenBytes:     testutils.Read(t, "FailingIngestionImport"),
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		{
-			name:        "Deploy correctly prints the results with ugly printer when the imports succeed",
-			fileClient:  new(mocks.WorkingFileClient),
-			clients:     []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
-			path:        filepath.Join("testdata", "deploy"),
-			printer:     JsonObjectPrinter(false),
-			goldenFile:  "UglyImport",
-			goldenBytes: testutils.Read(t, "UglyImport"),
-			err:         nil,
+			name:            "Deploy correctly prints the results with ugly printer when some ingestion entities fail",
+			fileClient:      new(mocks.WorkingFileClient),
+			clients:         []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:            filepath.Join("testdata", "deploy"),
+			printer:         JsonObjectPrinter(false),
+			goldenFile:      "UglyImport",
+			goldenBytes:     testutils.Read(t, "UglyImport"),
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		{
 			name:        "Deploy correctly prints with pretty printer when the imports and it only prints the results of the received products",
@@ -1337,13 +1402,14 @@ func TestDeploy(t *testing.T) {
 			}, "Could not create the temporary zips to import entities"),
 		},
 		{
-			name:       "Printing fails",
-			fileClient: new(mocks.WorkingFileClient),
-			clients:    []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
-			path:       filepath.Join("testdata", "deploy"),
-			printer:    nil,
-			outWriter:  testutils.ErrWriter{Err: errors.New("write failed")},
-			err:        NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			name:            "Printing fails",
+			fileClient:      new(mocks.WorkingFileClient),
+			clients:         []BackupRestoreClientEntry{{Name: "core", Client: new(WorkingCoreBackupRestore)}, {Name: "ingestion", Client: new(WorkingIngestionBackupRestore)}, {Name: "queryflow", Client: new(WorkingQueryFlowBackupRestore)}},
+			path:            filepath.Join("testdata", "deploy"),
+			printer:         nil,
+			outWriter:       testutils.ErrWriter{Err: errors.New("write failed")},
+			err:             NewErrorWithCause(ErrorExitCode, errors.New("write failed"), "Could not print JSON object"),
+			partialExitCode: ErrorExitCode,
 		},
 	}
 
@@ -1374,6 +1440,7 @@ func TestDeploy(t *testing.T) {
 				require.NoError(t, err)
 				testutils.CompareBytes(t, tc.goldenFile, tc.goldenBytes, buf.Bytes())
 			}
+			assert.Equal(t, tc.partialExitCode, d.PartialExitCode())
 		})
 	}
 }

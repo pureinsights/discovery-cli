@@ -1256,14 +1256,15 @@ func Test_discovery_UpsertEntity(t *testing.T) {
 // Test_discovery_UpsertEntities tests the discovery.UpsertEntities() function.
 func Test_discovery_UpsertEntities(t *testing.T) {
 	tests := []struct {
-		name           string
-		client         Creator
-		configurations gjson.Result
-		abortOnError   bool
-		printer        Printer
-		expectedOutput string
-		outWriter      io.Writer
-		err            error
+		name            string
+		client          Creator
+		configurations  gjson.Result
+		abortOnError    bool
+		printer         Printer
+		expectedOutput  string
+		outWriter       io.Writer
+		err             error
+		partialExitCode ExitCode
 	}{
 		// Working case
 		{
@@ -1346,10 +1347,11 @@ func Test_discovery_UpsertEntities(t *testing.T) {
 		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
 		"secret": "mongo-secret"
 	}]`),
-			abortOnError:   false,
-			printer:        nil,
-			expectedOutput: "{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n{\"code\":1003,\"messages\":[\"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d\"],\"status\":404,\"timestamp\":\"2025-10-29T14:47:36.290329Z\"}\n{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n",
-			err:            nil,
+			abortOnError:    false,
+			printer:         nil,
+			expectedOutput:  "{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n{\"code\":1003,\"messages\":[\"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d\"],\"status\":404,\"timestamp\":\"2025-10-29T14:47:36.290329Z\"}\n{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n",
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		{
 			name:   "Upsert Entities not abort and receives an error that is not a Discovery.Error",
@@ -1381,10 +1383,11 @@ func Test_discovery_UpsertEntities(t *testing.T) {
 		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
 		"secret": "mongo-secret"
 	}]`),
-			abortOnError:   false,
-			printer:        nil,
-			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"error\":\"invalid UUID length: 4\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
-			err:            nil,
+			abortOnError:    false,
+			printer:         nil,
+			expectedOutput:  "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"error\":\"invalid UUID length: 4\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		// Error cases
 		{
@@ -1492,6 +1495,7 @@ func Test_discovery_UpsertEntities(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
+			assert.Equal(t, tc.partialExitCode, d.PartialExitCode())
 		})
 	}
 }
@@ -1678,14 +1682,15 @@ func Test_discovery_SearchUpsertEntity(t *testing.T) {
 // Test_discovery_SearchUpsertEntities tests the discovery.SearchUpsertEntities() function.
 func Test_discovery_SearchUpsertEntities(t *testing.T) {
 	tests := []struct {
-		name           string
-		client         SearchCreator
-		configurations gjson.Result
-		abortOnError   bool
-		printer        Printer
-		expectedOutput string
-		outWriter      io.Writer
-		err            error
+		name            string
+		client          SearchCreator
+		configurations  gjson.Result
+		abortOnError    bool
+		printer         Printer
+		expectedOutput  string
+		outWriter       io.Writer
+		err             error
+		partialExitCode ExitCode
 	}{
 		// Working case
 		{
@@ -1768,10 +1773,11 @@ func Test_discovery_SearchUpsertEntities(t *testing.T) {
 		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
 		"secret": "mongo-secret"
 	}]`),
-			abortOnError:   false,
-			printer:        nil,
-			expectedOutput: "{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n{\"code\":1003,\"messages\":[\"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d\"],\"status\":404,\"timestamp\":\"2025-10-29T14:47:36.290329Z\"}\n{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n",
-			err:            nil,
+			abortOnError:    false,
+			printer:         nil,
+			expectedOutput:  "{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n{\"code\":1003,\"messages\":[\"Entity not found: 9ababe08-0b74-4672-bb7c-e7a8227d6d4d\"],\"status\":404,\"timestamp\":\"2025-10-29T14:47:36.290329Z\"}\n{\"code\":3002,\"messages\":[\"Invalid JSON: Illegal unquoted character ((CTRL-CHAR, code 10)): has to be escaped using backslash to be included in name\\n at [Source: REDACTED (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION disabled); line: 5, column: 17]\"],\"status\":400,\"timestamp\":\"2025-10-29T14:46:48.055840300Z\"}\n",
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		{
 			name:   "Upsert Entities not abort and receives an error that is not a Discovery.Error",
@@ -1803,10 +1809,11 @@ func Test_discovery_SearchUpsertEntities(t *testing.T) {
 		"lastUpdatedTimestamp": "2025-08-14T18:02:11Z",
 		"secret": "mongo-secret"
 	}]`),
-			abortOnError:   false,
-			printer:        nil,
-			expectedOutput: "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"error\":\"invalid UUID length: 4\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
-			err:            nil,
+			abortOnError:    false,
+			printer:         nil,
+			expectedOutput:  "{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n{\"error\":\"invalid UUID length: 4\"}\n{\"active\":true,\"creationTimestamp\":\"2025-08-14T18:02:11Z\",\"id\":\"9ababe08-0b74-4672-bb7c-e7a8227d6d4c\",\"labels\":[],\"lastUpdatedTimestamp\":\"2025-08-14T18:02:11Z\",\"name\":\"MongoDB credential\",\"secret\":\"mongo-secret\",\"type\":\"mongo\"}\n",
+			err:             nil,
+			partialExitCode: ErrorExitCode,
 		},
 		// Error cases
 		{
@@ -1914,6 +1921,7 @@ func Test_discovery_SearchUpsertEntities(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
+			assert.Equal(t, tc.partialExitCode, d.PartialExitCode())
 		})
 	}
 }

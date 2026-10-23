@@ -1,4 +1,2 @@
 Error: Could not check the status of Discovery Core.
-status: 500, body: {"error": "Internal server error"}
-
 

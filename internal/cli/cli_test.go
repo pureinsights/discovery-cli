@@ -65,3 +65,14 @@ func TestNewDiscovery(t *testing.T) {
 	assert.Equal(t, vpr, discovery.Config())
 	assert.Equal(t, configPath, discovery.ConfigPath())
 }
+
+// TestPartialExitCode tests the PartialExitCode() and markFailed() methods.
+func TestPartialExitCode(t *testing.T) {
+	d := NewDiscovery(&iostreams.IOStreams{}, viper.New(), "")
+	assert.Equal(t, SuccessExitCode, d.PartialExitCode())
+	d.markFailed()
+	assert.Equal(t, ErrorExitCode, d.PartialExitCode())
+
+	empty := discovery{}
+	assert.Equal(t, SuccessExitCode, empty.PartialExitCode())
+}

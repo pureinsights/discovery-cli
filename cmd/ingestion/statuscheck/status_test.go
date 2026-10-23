@@ -8,14 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/pureinsights/discovery-cli/v2/internal/iostreams"
 	"github.com/pureinsights/discovery-cli/v2/internal/testutils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tidwall/gjson"
 )
 
 // TestNewStatusCommand tests the NewStatusCommand() function.
@@ -78,13 +76,13 @@ func TestNewStatusCommand(t *testing.T) {
 			name:       "Status returns error",
 			outGolden:  "NewStatusCommand_Out_StatusError",
 			errGolden:  "NewStatusCommand_Err_StatusError",
-			outBytes:   []byte(nil),
+			outBytes:   testutils.Read(t, "NewStatusCommand_Out_StatusError"),
 			errBytes:   testutils.Read(t, "NewStatusCommand_Err_StatusError"),
 			httpStatus: http.StatusInternalServerError,
 			response:   "{\"error\": \"Internal server error\"}",
 			url:        true,
 			apiKey:     "",
-			err:        cli.NewErrorWithCause(cli.ErrorExitCode, discoveryPackage.Error{Status: http.StatusInternalServerError, Body: gjson.Parse("{\"error\": \"Internal server error\"}")}, "Could not check the status of Discovery Ingestion."),
+			err:        cli.NewError(cli.ErrorExitCode, "Could not check the status of Discovery Ingestion."),
 		},
 		{
 			name:       "Printing JSON object fails",
