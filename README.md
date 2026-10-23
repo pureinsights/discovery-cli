@@ -11,6 +11,12 @@ The easiest way to install the Discovery CLI is using [Go](https://go.dev/doc/in
 go install github.com/pureinsights/discovery-cli/v2/cmd/discovery@latest
 ```
 
+When installing in Mac OS, make sure the `PATH` environment variable contains the appropriate Go paths:
+
+```bash
+echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zshrc
+```
+
 #### Troubleshooting
 If the installation does not work, make sure you have the `%GOPATH%/bin` added to the `PATH` environment variable. See this [wiki](https://go.dev/wiki/SettingGOPATH) to set the `GOPATH` variable.
 

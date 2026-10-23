@@ -18,7 +18,7 @@ jobs:
       code-changes: ${{ steps.changes.outputs.code }}
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -33,7 +33,7 @@ jobs:
           fi
 
       - name: Filter changes
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
@@ -49,12 +49,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
@@ -68,12 +68,7 @@ jobs:
 
       - name: Build the Go application
         run: |
-          VERSION=$(awk -F= '/^version.semver=/{print $2}' semver.properties)
-
-          echo "Building version $VERSION"
-
           go build -v \
-            -ldflags "-X github.com/pureinsights/discovery-cli/v2/cmd/version.Version=$VERSION" \
             -o build/discovery \
             ./cmd/discovery
 
@@ -90,7 +85,7 @@ jobs:
           report_paths: 'report.xml'
           
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.3.0
+        uses: SonarSource/sonarqube-scan-action@v8.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -101,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: SonarCloud analysis for untracked changes
-        uses: LouisBrunner/checks-action@v1.1.1
+        uses: LouisBrunner/checks-action@v3.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: SonarCloud Code Analysis
