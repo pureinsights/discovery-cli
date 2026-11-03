@@ -134,6 +134,35 @@ func (fc filesClient) Delete(key string) (gjson.Result, error) {
 	return execute(fc.client, http.MethodDelete, "/"+key)
 }
 
+// serviceAccountsClient is the struct that performs the CRUD of service accounts.
+type serviceAccountsClient struct {
+	crud
+	cloner
+	searcher
+	enabler
+}
+
+// newServiceAccountsClient creates a new serviceAccountsClient.
+func newServiceAccountsClient(url, apiKey string) serviceAccountsClient {
+	client := newClient(url+"/account/service", apiKey)
+	return serviceAccountsClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		cloner: cloner{
+			client: client,
+		},
+		searcher: searcher{
+			client: client,
+		},
+		enabler: enabler{
+			client: client,
+		},
+	}
+}
+
 // LogLevel is used as an enum to easily represent the logging levels.
 type LogLevel string
 
@@ -200,6 +229,11 @@ func (c core) Labels() labelsClient {
 // Files creates a filesClient with the core's URL and API Key.
 func (c core) Files() filesClient {
 	return newFilesClient(c.Url, c.ApiKey)
+}
+
+// ServiceAccounts creates a serviceAccountsClient with the core's URL and API Key.
+func (c core) ServiceAccounts() serviceAccountsClient {
+	return newServiceAccountsClient(c.Url, c.ApiKey)
 }
 
 // Maintenance creates a maintenanceClient with the core's URL and API Key.

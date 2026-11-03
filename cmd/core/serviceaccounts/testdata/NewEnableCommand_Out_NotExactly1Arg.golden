@@ -1,0 +1,13 @@
+Usage:
+  enable <service-account> [flags]
+
+Examples:
+	# Enable a service account by name
+	discovery core service-account enable ci
+
+	# Enable a service account by id
+	discovery core service-account enable 3d51beef-8b90-40aa-84b5-033241dc6239
+
+Flags:
+  -h, --help   help for enable
+

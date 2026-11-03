@@ -53,6 +53,8 @@ type Discovery interface {
 	StatusCheck(client StatusChecker, product string, printer Printer) error
 	StatusCheckOfClients(clients []StatusCheckClientEntry, printer Printer) error
 	PingServer(client ServerPinger, server string, printer Printer) error
+	EnableEntity(client Enabler, nameOrId string, printer Printer) error
+	DisableEntity(client Enabler, nameOrId string, printer Printer) error
 	Deploy(fileClient CoreFileController, clients []BackupRestoreClientEntry, path string, printer Printer) error
 }
 

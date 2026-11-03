@@ -1,0 +1,11 @@
+Error: Could not enable entity with id "06f52112-a2bb-4490-97c2-171fb7d54d5b"
+status: 500, body: {
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2026-11-03T17:02:11.000000000Z"
+}
+
+

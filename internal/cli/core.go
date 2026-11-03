@@ -175,3 +175,44 @@ func (d *discovery) PingServer(client ServerPinger, server string, printer Print
 
 	return printer(*d.IOStreams(), pingResult)
 }
+
+// Enabler defines the interface to enable and disable entities.
+type Enabler interface {
+	Searcher
+	Enable(id uuid.UUID) (gjson.Result, error)
+	Disable(id uuid.UUID) (gjson.Result, error)
+}
+
+// EnableEntity enables the entity with the given name or ID.
+func (d *discovery) EnableEntity(client Enabler, nameOrId string, printer Printer) error {
+	return d.setEntityEnabled(client, nameOrId, true, printer)
+}
+
+// DisableEntity disables the entity with the given name or ID.
+func (d *discovery) DisableEntity(client Enabler, nameOrId string, printer Printer) error {
+	return d.setEntityEnabled(client, nameOrId, false, printer)
+}
+
+// setEntityEnabled is an auxiliary function that enables or disables the entity with the given name or ID.
+func (d *discovery) setEntityEnabled(client Enabler, nameOrId string, enable bool, printer Printer) error {
+	id, err := GetEntityId(d, client, nameOrId)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get entity ID.")
+	}
+
+	action, call := "disable", client.Disable
+	if enable {
+		action, call = "enable", client.Enable
+	}
+
+	result, err := call(id)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not %s entity with id %q", action, id.String())
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), result)
+}

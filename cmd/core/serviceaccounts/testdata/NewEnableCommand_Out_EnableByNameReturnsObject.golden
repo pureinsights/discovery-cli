@@ -1,0 +1,10 @@
+{
+  "active": true,
+  "creationTimestamp": "2026-11-03T16:48:04Z",
+  "description": "Continuous Integration account",
+  "id": "65370d8b-d83c-4245-b702-3fea4ef32814",
+  "labels": [],
+  "lastUpdatedTimestamp": "2026-11-03T17:02:11Z",
+  "name": "ci",
+  "role": "OPERATE"
+}
