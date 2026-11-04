@@ -1,0 +1,1 @@
+Name []: Description []: Role []: Labels []: Active [true]: {"active":true,"creationTimestamp":"2026-11-04T15:37:47Z","description":"Continuous Integration account","id":"06f52112-a2bb-4490-97c2-171fb7d54d5b","labels":[{"key":"keyA","value":"valueA"},{"key":"keyB","value":"valueB"}],"lastUpdatedTimestamp":"2026-11-04T15:37:47Z","name":"ci","role":"OPERATE"}

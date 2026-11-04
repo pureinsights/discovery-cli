@@ -1531,6 +1531,305 @@ discovery core server ping "Elasticsearch Server"
 }
 ```
 
+##### Service Account
+`service-account` is the command used to manage service accounts in Discovery Core. This command contains various subcommands used to create, read, update, enable, disable, and delete.
+
+Usage: `discovery core service-account [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain Discovery Core's service accounts. The user can send a name or UUID to get a specific service account. If no argument is given, then the command retrieves every service account. The command also supports filters with the flag `filter` followed by the filter in the format `filter=key:value`.
+
+Usage: `discovery core service-account get [flags] [<arg>]`
+
+Arguments:
+
+`arg`:
+(Optional, string) The name or UUID of the service account that will be retrieved.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+`-f, --filter`:
+(Optional, Array of strings) Add a filter to the search. The available filters are the following:
+- Label: The format is `label={key}[:{value}]`, where the value is optional.
+
+Examples:
+
+```bash
+# Get a service account by name
+discovery core service-account get ci
+{
+  "active": true,
+  "creationTimestamp": "2026-10-29T15:37:47Z",
+  "description": "Continuous Integration account",
+  "id": "06f52112-a2bb-4490-97c2-171fb7d54d5b",
+  "labels": [
+    {
+      "key": "keyA",
+      "value": "valueA"
+    }
+  ],
+  "lastUpdatedTimestamp": "2026-11-03T11:50:39Z",
+  "name": "ci",
+  "role": "OPERATE"
+}
+```
+
+```bash
+# Get service accounts using filters
+discovery core service-account get --filter label=keyA:valueA
+{"active":true,"creationTimestamp":"2026-10-29T15:37:47Z","description":"Continuous Integration account","id":"06f52112-a2bb-4490-97c2-171fb7d54d5b","labels":[{"key":"keyA","value":"valueA"}],"lastUpdatedTimestamp":"2026-11-03T11:50:39Z","name":"ci"}
+{"active":true,"creationTimestamp":"2026-10-29T15:27:02Z","description":"Admin account","id":"d74aef4e-38b0-4823-9aee-8521ff19bf5b","labels":[{"key":"keyA","value":"valueA"}],"lastUpdatedTimestamp":"2026-10-29T15:57:06Z","name":"admin"}
+```
+
+```bash
+# Get all service accounts using the configuration in profile "cn"
+discovery core service-account get -p cn
+{"active":true,"creationTimestamp":"2026-10-29T15:37:47Z","description":"Continuous Integration account","id":"06f52112-a2bb-4490-97c2-171fb7d54d5b","labels":[{"key":"keyA","value":"valueA"}],"lastUpdatedTimestamp":"2026-11-03T11:50:39Z","name":"ci"}
+{"active":true,"creationTimestamp":"2026-10-29T15:27:02Z","description":"Admin account","id":"d74aef4e-38b0-4823-9aee-8521ff19bf5b","labels":[{"key":"keyA","value":"valueA"}],"lastUpdatedTimestamp":"2026-10-29T15:57:06Z","name":"admin"}
+```
+
+###### Create
+`create` is the command used to create a service account in Discovery Core. The user can send the name as an argument and the rest of the fields with flags. The name and the role are required by Discovery Core. If neither the name nor any flag is sent, the command asks the user for each field interactively. In interactive mode, pressing Enter keeps the value shown and typing a single space sets it empty.
+
+Usage: `discovery core service-account create [flags] [<name>]`
+
+Arguments:
+
+`name`:
+(Optional, string) The name of the service account that will be created. If it is not sent and no flag is set, the command runs in interactive mode.
+
+Flags:
+
+`--description`:
+(Optional, string) The description of the service account.
+
+`--role`:
+(Required, string) The role of the service account, for example `OPERATE` or `ADMIN`.
+
+`--labels`:
+(Optional, string) The labels of the service account in the format `keyA:valueA,keyB:valueB`. Every label must have a key and a value.
+
+`--enabled`:
+(Optional, bool) Whether the service account is enabled. The default value is `true`. To create a disabled service account, use `--enabled=false`.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Create a service account with flags
+discovery core service-account create "ci" --description "Continuous Integration account" --role "OPERATE" --labels "keyA:valueA,keyB:valueB"
+{"active":true,"creationTimestamp":"2026-11-04T15:37:47Z","description":"Continuous Integration account","id":"06f52112-a2bb-4490-97c2-171fb7d54d5b","labels":[{"key":"keyA","value":"valueA"},{"key":"keyB","value":"valueB"}],"lastUpdatedTimestamp":"2026-11-04T15:37:47Z","name":"ci","role":"OPERATE"}
+```
+
+```bash
+# Create a disabled service account with only the required fields
+discovery core service-account create "ci" --role "OPERATE" --enabled=false
+{"active":false,"creationTimestamp":"2026-11-04T15:37:47Z","id":"06f52112-a2bb-4490-97c2-171fb7d54d5b","labels":[],"lastUpdatedTimestamp":"2026-11-04T15:37:47Z","name":"ci","role":"OPERATE"}
+```
+
+```bash
+# Create a service account interactively
+discovery core service-account create
+Name []: ci
+Description []: Continuous Integration account
+Role []: OPERATE
+Labels []: keyA:valueA,keyB:valueB
+Active [true]: 
+{"active":true,"creationTimestamp":"2026-11-04T15:37:47Z","description":"Continuous Integration account","id":"06f52112-a2bb-4490-97c2-171fb7d54d5b","labels":[{"key":"keyA","value":"valueA"},{"key":"keyB","value":"valueB"}],"lastUpdatedTimestamp":"2026-11-04T15:37:47Z","name":"ci","role":"OPERATE"}
+```
+
+```bash
+# Discovery Core validates the service account. In this example, the name is missing.
+discovery core service-account create --role "OPERATE"
+Error: Could not store entities
+status: 400, body: {"status":400,"code":3002,"messages":["dto.name: must not be blank"],"timestamp":"2026-11-04T09:48:20.236954600Z"}
+```
+
+###### Update
+`update` is the command used to update a service account in Discovery Core. The user must send the name or UUID of the service account and the fields to change with flags. Fields without a flag keep their current value. If no flag is sent, the command asks the user for each field interactively, showing the current values. In interactive mode, pressing Enter keeps the value shown and typing a single space sets it empty.
+
+Usage: `discovery core service-account update [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the service account that will be updated.
+
+Flags:
+
+`--description`:
+(Optional, string) The new description of the service account.
+
+`--role`:
+(Optional, string) The new role of the service account.
+
+`--labels`:
+(Optional, string) The new labels of the service account in the format `keyA:valueA,keyB:valueB`. They replace the current labels.
+
+`--enabled`:
+(Optional, bool) Whether the service account is enabled. Use `--enabled=false` to disable it.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Update the role of a service account
+discovery core service-account update "ci" --role "ADMIN"
+{"active":true,"creationTimestamp":"2026-10-29T15:37:47Z","description":"Continuous Integration account","id":"06f52112-a2bb-4490-97c2-171fb7d54d5b","labels":[{"key":"keyA","value":"valueA"},{"key":"keyB","value":"valueB"}],"lastUpdatedTimestamp":"2026-11-04T16:02:11Z","name":"ci","role":"ADMIN"}
+```
+
+```bash
+# Update a service account interactively. The description is cleared by typing a single space.
+discovery core service-account update ci
+Name [ci]: 
+Description [Continuous Integration account]:  
+Role [OPERATE]: ADMIN
+Labels [keyA:valueA,keyB:valueB]: 
+Active [true]: 
+{"active":true,"creationTimestamp":"2026-10-29T15:37:47Z","description":"","id":"06f52112-a2bb-4490-97c2-171fb7d54d5b","labels":[{"key":"keyA","value":"valueA"},{"key":"keyB","value":"valueB"}],"lastUpdatedTimestamp":"2026-11-04T16:02:11Z","name":"ci","role":"ADMIN"}
+```
+
+###### Enable
+`enable` is the command used to enable a service account in Discovery Core. The user must send a name or UUID to enable a specific service account. If it is enabled, it returns the service account with its updated configuration.
+
+Usage: `discovery core service-account enable [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the service account that will be enabled.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Enable a service account by name
+discovery core service-account enable ci
+{
+  "active": true,
+  "creationTimestamp": "2026-10-29T15:37:47Z",
+  "description": "Continuous Integration account",
+  "id": "06f52112-a2bb-4490-97c2-171fb7d54d5b",
+  "labels": [
+    {
+      "key": "keyA",
+      "value": "valueA"
+    }
+  ],
+  "lastUpdatedTimestamp": "2026-11-04T17:02:11Z",
+  "name": "ci",
+  "role": "OPERATE"
+}
+```
+
+###### Disable
+`disable` is the command used to disable a service account in Discovery Core. The user must send a name or UUID to disable a specific service account. If it is disabled, it returns the service account with its updated configuration.
+
+Usage: `discovery core service-account disable [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the service account that will be disabled.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Disable a service account by id
+discovery core service-account disable 06f52112-a2bb-4490-97c2-171fb7d54d5b
+{
+  "active": false,
+  "creationTimestamp": "2026-10-29T15:37:47Z",
+  "description": "Continuous Integration account",
+  "id": "06f52112-a2bb-4490-97c2-171fb7d54d5b",
+  "labels": [
+    {
+      "key": "keyA",
+      "value": "valueA"
+    }
+  ],
+  "lastUpdatedTimestamp": "2026-11-04T17:02:11Z",
+  "name": "ci",
+  "role": "OPERATE"
+}
+```
+
+###### Delete
+`delete` is the command used to delete Discovery Core's service accounts. The user must send a name or UUID to delete a specific service account.
+
+Usage: `discovery core service-account delete [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the service account that will be deleted.
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Delete a service account by id
+discovery core service-account delete 06f52112-a2bb-4490-97c2-171fb7d54d5b
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# Delete a service account by name
+discovery core service-account delete ci
+{
+  "acknowledged": true
+}
+```
+
+
 ##### Status
 `status` is the command used to check the status of Discovery Core. If it is healthy, it should return a JSON with an "UP" status field.
 

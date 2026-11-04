@@ -1,0 +1,17 @@
+Usage:
+  update <service-account> [flags]
+
+Examples:
+	# Update the role of a service account
+	discovery core service-account update "ci" --role "ADMIN"
+
+	# Update a service account interactively
+	discovery core service-account update ci
+
+Flags:
+      --description string   the description of the service account
+      --enabled              whether the service account is enabled (default true)
+  -h, --help                 help for update
+      --labels string        the labels of the service account in the format "keyA:valueA,keyB:valueB"
+      --role string          the role of the service account. It is required to create a service account
+

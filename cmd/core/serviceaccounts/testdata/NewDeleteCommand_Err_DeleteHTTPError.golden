@@ -1,0 +1,11 @@
+Error: Could not delete entity with id "06f52112-a2bb-4490-97c2-171fb7d54d5b"
+status: 404, body: {
+	"status": 404,
+	"code": 1003,
+	"messages": [
+		"Entity not found: 06f52112-a2bb-4490-97c2-171fb7d54d5b"
+	],
+	"timestamp": "2026-11-03T16:50:12.000000000Z"
+}
+
+

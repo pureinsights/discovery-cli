@@ -1,0 +1,52 @@
+package serviceaccounts
+
+import (
+	"bytes"
+	"slices"
+	"strings"
+	"testing"
+
+	"github.com/pureinsights/discovery-cli/v2/internal/cli"
+	"github.com/pureinsights/discovery-cli/v2/internal/iostreams"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+)
+
+// TestNewServiceAccountCommand tests the NewCoreCommand() function.
+func TestNewServiceAccountCommand(t *testing.T) {
+	in := strings.NewReader("In Reader")
+	out := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
+	ios := iostreams.IOStreams{
+		In:  in,
+		Out: out,
+		Err: errBuf,
+	}
+
+	dir := t.TempDir()
+	vpr := viper.New()
+	vpr.SetDefault("profile", "default")
+	d := cli.NewDiscovery(&ios, vpr, dir)
+	coreCmd := NewServiceAccountCommand(d)
+
+	coreCmd.SetIn(ios.In)
+	coreCmd.SetOut(ios.Out)
+	coreCmd.SetErr(ios.Err)
+
+	coreCmd.PersistentFlags().StringP(
+		"profile",
+		"p",
+		d.Config().GetString("profile"),
+		"configuration profile to use",
+	)
+
+	var commandNames []string
+	for _, c := range coreCmd.Commands() {
+		if !slices.Contains([]string{"help", "completion"}, c.Name()) {
+			commandNames = append(commandNames, c.Name())
+		}
+	}
+
+	expectedCommands := []string{"create", "delete", "disable", "enable", "get", "update"}
+	assert.Equal(t, expectedCommands, commandNames)
+}
