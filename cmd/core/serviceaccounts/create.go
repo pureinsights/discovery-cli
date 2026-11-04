@@ -14,7 +14,7 @@ func NewCreateCommand(d cli.Discovery) *cobra.Command {
 	create := &cobra.Command{
 		Use:   "create [<name>]",
 		Short: "The command that creates service accounts in Discovery Core.",
-		Long:  "create is the command used to create a service account in Discovery Core. The user can send the name as an argument and the rest of the fields with flags. If neither the name nor any flag is sent, the command asks the user for each field interactively.",
+		Long:  "create is the command used to create a service account in Discovery Core. The user can send the name as an argument and the rest of the fields with flags. The name and the role are required. If neither the name nor any flag is sent, the command asks the user for each field interactively.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -29,9 +29,10 @@ func NewCreateCommand(d cli.Discovery) *cobra.Command {
 			config := `{"active":true}`
 			if len(args) == 0 && !anyFlagChanged(cmd) {
 				config, err = askAccount(d.IOStreams(), config)
-			} else if len(args) == 0 {
-				return cli.NewError(cli.ErrorExitCode, "The service account name is required")
-			} else if config, err = sjson.Set(config, "name", args[0]); err == nil {
+			} else {
+				if len(args) == 1 {
+					config, _ = sjson.Set(config, "name", args[0])
+				}
 				config, err = applyFlags(cmd, config, flags)
 			}
 			if err != nil {
@@ -46,6 +47,9 @@ func NewCreateCommand(d cli.Discovery) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		Example: `	# Create a service account with flags
 	discovery core service-account create "ci" --description "Continuous Integration account" --role "OPERATE" --labels "keyA:valueA,keyB:valueB" --enabled
+
+	# Create a disabled service account with only the required fields
+	discovery core service-account create "ci" --role "OPERATE" --enabled=false
 
 	# Create a service account interactively
 	discovery core service-account create`,

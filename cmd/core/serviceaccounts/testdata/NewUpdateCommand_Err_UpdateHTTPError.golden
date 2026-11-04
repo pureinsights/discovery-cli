@@ -1,0 +1,11 @@
+Error: Could not store entities
+status: 500, body: {
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2026-11-04T15:37:47.000000000Z"
+}
+
+

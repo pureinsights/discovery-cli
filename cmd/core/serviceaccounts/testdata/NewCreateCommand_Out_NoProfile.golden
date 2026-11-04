@@ -1,0 +1,20 @@
+Usage:
+  create [<name>] [flags]
+
+Examples:
+	# Create a service account with flags
+	discovery core service-account create "ci" --description "Continuous Integration account" --role "OPERATE" --labels "keyA:valueA,keyB:valueB" --enabled
+
+	# Create a disabled service account with only the required fields
+	discovery core service-account create "ci" --role "OPERATE" --enabled=false
+
+	# Create a service account interactively
+	discovery core service-account create
+
+Flags:
+      --description string   the description of the service account
+      --enabled              whether the service account is enabled (default true)
+  -h, --help                 help for create
+      --labels string        the labels of the service account in the format "keyA:valueA,keyB:valueB"
+      --role string          the role of the service account. It is required to create a service account
+

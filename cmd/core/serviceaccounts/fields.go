@@ -31,7 +31,7 @@ var fieldFlags = []struct{ field, flag string }{
 // addAccountFlags adds the service account flags to the given command.
 func addAccountFlags(cmd *cobra.Command, f *accountFlags) {
 	cmd.Flags().StringVar(&f.description, "description", "", "the description of the service account")
-	cmd.Flags().StringVar(&f.role, "role", "", "the role of the service account")
+	cmd.Flags().StringVar(&f.role, "role", "", "the role of the service account. It is required to create a service account")
 	cmd.Flags().StringVar(&f.labels, "labels", "", `the labels of the service account in the format "keyA:valueA,keyB:valueB"`)
 	cmd.Flags().BoolVar(&f.active, "enabled", true, "whether the service account is enabled")
 }
@@ -47,6 +47,7 @@ func anyFlagChanged(cmd *cobra.Command) bool {
 }
 
 // parseLabels converts "keyA:valueA,keyB" into [{"key":"keyA","value":"valueA"},{"key":"keyB"}].
+// Labels are validated by Discovery Core.
 func parseLabels(labels string) []map[string]string {
 	parsed := []map[string]string{}
 	for _, label := range strings.Split(labels, ",") {
@@ -64,7 +65,7 @@ func parseLabels(labels string) []map[string]string {
 	return parsed
 }
 
-// formatLabels converts the labels array of a service account into the "keyA:valueA,keyB" format.
+// formatLabels converts the labels array of a service account into the "keyA:valueA,keyB:valueB" format.
 func formatLabels(labels gjson.Result) string {
 	formatted := []string{}
 	for _, label := range labels.Array() {
