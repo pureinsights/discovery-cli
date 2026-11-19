@@ -10,6 +10,7 @@ import (
 	"github.com/pureinsights/discovery-cli/v2/cmd/core/servers"
 	"github.com/pureinsights/discovery-cli/v2/cmd/core/serviceaccounts"
 	"github.com/pureinsights/discovery-cli/v2/cmd/core/statuscheck"
+	"github.com/pureinsights/discovery-cli/v2/cmd/core/tokens"
 	"github.com/pureinsights/discovery-cli/v2/internal/cli"
 	"github.com/spf13/cobra"
 )
@@ -28,6 +29,7 @@ func NewCoreCommand(d cli.Discovery) *cobra.Command {
 	core.AddCommand(file.NewFileCommand(d))
 	core.AddCommand(servers.NewServerCommand(d))
 	core.AddCommand(serviceaccounts.NewServiceAccountCommand(d))
+	core.AddCommand(tokens.NewTokenCommand(d))
 	core.AddCommand(backuprestore.NewExportCommand(d))
 	core.AddCommand(backuprestore.NewImportCommand(d))
 	core.AddCommand(statuscheck.NewStatusCommand(d))

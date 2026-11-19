@@ -163,6 +163,37 @@ func newServiceAccountsClient(url, apiKey string) serviceAccountsClient {
 	}
 }
 
+// tokensClient is the struct that performs the CRUD of tokens.
+type tokensClient struct {
+	crud
+	searcher
+	enabler
+}
+
+// newTokensClient creates a new tokensClient.
+func newTokensClient(url, apiKey string, accountId string) tokensClient {
+	client := newClient(url+"/account/service/"+accountId+"/token", apiKey)
+	return tokensClient{
+		crud: crud{
+			getter{
+				client: client,
+			},
+		},
+		searcher: searcher{
+			client: client,
+		},
+		enabler: enabler{
+			client: client,
+		},
+	}
+}
+
+// Renew issues a new token value for the token with the given ID and computes its new expiration from the TTL.
+// Returns the renewed token.
+func (tc tokensClient) Renew(id uuid.UUID, ttl string) (gjson.Result, error) {
+	return execute(tc.crud.client, http.MethodPatch, "/"+id.String()+"/renew", WithQueryParameters(map[string][]string{"ttl": {ttl}}))
+}
+
 // LogLevel is used as an enum to easily represent the logging levels.
 type LogLevel string
 
@@ -234,6 +265,11 @@ func (c core) Files() filesClient {
 // ServiceAccounts creates a serviceAccountsClient with the core's URL and API Key.
 func (c core) ServiceAccounts() serviceAccountsClient {
 	return newServiceAccountsClient(c.Url, c.ApiKey)
+}
+
+// Tokens creates a tokensClient with the core's URL and API Key.
+func (c core) Tokens(accountId string) tokensClient {
+	return newTokensClient(c.Url, c.ApiKey, accountId)
 }
 
 // Maintenance creates a maintenanceClient with the core's URL and API Key.

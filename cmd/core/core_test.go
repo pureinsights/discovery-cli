@@ -50,6 +50,6 @@ func TestNewCoreCommand(t *testing.T) {
 		}
 	}
 
-	expectedCommands := []string{"config", "credential", "export", "file", "import", "label", "secret", "server", "service-account", "status"}
+	expectedCommands := []string{"config", "credential", "export", "file", "import", "label", "secret", "server", "service-account", "status", "token"}
 	assert.Equal(t, expectedCommands, commandNames)
 }
