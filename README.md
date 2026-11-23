@@ -1830,6 +1830,351 @@ discovery core service-account delete ci
 ```
 
 
+##### Token
+`token` is the command used to manage the access tokens of Discovery Core's service accounts. This command contains various subcommands used to create, read, update, enable, disable, renew, and revoke. Every subcommand requires the `--service-account` flag with the name or UUID of the service account that owns the tokens.
+
+Usage: `discovery core token [subcommand] [flags]`
+
+Flags:
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+###### Get
+`get` is the command used to obtain the access tokens of a Discovery Core service account. The user can send a name or UUID to get a specific token. If no argument is given, then the command retrieves every token of the service account. The token value is never returned; only its metadata.
+
+Usage: `discovery core token get [flags] [<arg>]`
+
+Arguments:
+
+`arg`:
+(Optional, string) The name or UUID of the token that will be retrieved.
+
+Flags:
+
+`--service-account`:
+(Required, string) The name or UUID of the service account that owns the tokens.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Get a token by name
+discovery core token get "My Token" --service-account "ci"
+{
+  "account": "06f52112-a2bb-4490-97c2-171fb7d54d5b",
+  "active": true,
+  "creationTimestamp": "2026-11-18T16:48:42Z",
+  "expirationTimestamp": "2026-12-18T16:48:42Z",
+  "id": "b4bcd270-e824-4112-913b-65fb89e151d3",
+  "lastUpdatedTimestamp": "2026-11-18T16:48:42Z",
+  "name": "My Token",
+  "scopes": [
+    "core:*"
+  ]
+}
+```
+
+```bash
+# Get all the tokens of a service account using the configuration in profile "cn"
+discovery core token get --service-account "ci" -p cn
+{"account":"06f52112-a2bb-4490-97c2-171fb7d54d5b","active":true,"creationTimestamp":"2026-11-18T16:48:42Z","expirationTimestamp":"2026-12-18T16:48:42Z","id":"b4bcd270-e824-4112-913b-65fb89e151d3","lastUpdatedTimestamp":"2026-11-18T16:48:42Z","name":"My Token","scopes":["core:*"]}
+{"account":"06f52112-a2bb-4490-97c2-171fb7d54d5b","active":true,"creationTimestamp":"2026-11-18T16:45:19Z","id":"5c688285-3a3a-4f93-913e-d828db95a79c","lastUpdatedTimestamp":"2026-11-18T16:45:19Z","name":"token_core_infinite","scopes":["core:*"]}
+```
+
+###### Create
+`create` is the command used to create an access token for a service account in Discovery Core. The user can send the name as an argument and the rest of the fields with flags. The name and the scopes are required by Discovery Core. If no other flag other than `--service-account` is sent, the command asks the user for each field interactively. In interactive mode, pressing Enter keeps the value shown and typing a single space sets it empty.
+
+The response includes the token value in the `token` field. It is shown only once: Discovery Core stores only its hash, so the value can't be retrieved later. To get a new value, renew the token.
+
+Usage: `discovery core token create [flags] [<name>]`
+
+Arguments:
+
+`name`:
+(Optional, string) The name of the token that will be created. It must be unique within the service account. If it is not sent and no flag is set, the command runs in interactive mode.
+
+Flags:
+
+`--service-account`:
+(Required, string) The name or UUID of the service account that will own the token.
+
+`--scopes`:
+(Required, string) The comma-separated scopes of the token, in the format `product:entity:permission`, where the entity or the permission may be `*`. For example: `ingestion:seed:write,core:server:read,queryflow:*`.
+
+`--ttl`:
+(Optional, string) The time-to-live of the token, counted from now. An integer is read as seconds, and the units `s`, `m`, `h` and `d` are also accepted, for example `3600`, `90s`, `15m`, `12h` or `60d`. Use `-1`, or omit the flag, for a token that never expires.
+
+`--enabled`:
+(Optional, bool) Whether the token is enabled. The default value is `true`. To create a disabled token, use `--enabled=false`.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Create a token that expires in 30 days
+discovery core token create "My Token" --service-account "ci" --scopes "ingestion:seed:write,core:server:read,queryflow:*" --ttl "30d"
+{"account":"06f52112-a2bb-4490-97c2-171fb7d54d5b","active":true,"creationTimestamp":"2026-11-18T16:48:42Z","expirationTimestamp":"2026-12-18T16:48:42Z","id":"b4bcd270-e824-4112-913b-65fb89e151d3","lastUpdatedTimestamp":"2026-11-18T16:48:42Z","name":"My Token","scopes":["ingestion:seed:write","core:server:read","queryflow:*"],"token":"pdp_OysmlP790ufVjNQZabxZ2hp2cJsV1nL6b29lXo-ChaI"}
+```
+
+```bash
+# Create a disabled token that never expires, with only the required fields
+discovery core token create "My Token" --service-account "ci" --scopes "core:*" --enabled=false
+{"account":"06f52112-a2bb-4490-97c2-171fb7d54d5b","active":false,"creationTimestamp":"2026-11-18T16:48:42Z","id":"b4bcd270-e824-4112-913b-65fb89e151d3","lastUpdatedTimestamp":"2026-11-18T16:48:42Z","name":"My Token","scopes":["core:*"],"token":"pdp_OysmlP790ufVjNQZabxZ2hp2cJsV1nL6b29lXo-ChaI"}
+```
+
+```bash
+# Create a token interactively
+discovery core token create --service-account "ci"
+Name []: My Token
+Scopes []: core:file:read,core:server:write
+TTL []: 1h
+Active [true]: 
+{"account":"06f52112-a2bb-4490-97c2-171fb7d54d5b","active":true,"creationTimestamp":"2026-11-18T16:48:42Z","expirationTimestamp":"2026-11-18T17:48:42Z","id":"b4bcd270-e824-4112-913b-65fb89e151d3","lastUpdatedTimestamp":"2026-11-18T16:48:42Z","name":"My Token","scopes":["core:file:read","core:server:write"],"token":"pdp_OysmlP790ufVjNQZabxZ2hp2cJsV1nL6b29lXo-ChaI"}
+```
+
+```bash
+# Discovery Core validates the token. In this example, a scope doesn't follow the product:entity:permission format.
+discovery core token create "My Token" --service-account "ci" --scopes "Invalid Scope"
+Error: Could not store entities
+status: 400, body: {"status":400,"code":3002,"messages":["dto.scopes[]: Scopes must be product:entity:permission, where entity or permission may be '*'"],"timestamp":"2026-11-23T10:00:00.000000000Z"}
+```
+
+###### Update
+`update` is the command used to update an access token in Discovery Core. The user must send the name or UUID of the token and the fields to change with flags. Fields without a flag keep their current value. If no flag other than `--service-account` is sent, the command asks the user for each field interactively, showing the current values. In interactive mode, pressing Enter keeps the value shown and typing a single space sets it empty.
+
+The time-to-live can't be updated: to change when a token expires, use `renew`.
+
+Usage: `discovery core token update [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the token that will be updated.
+
+Flags:
+
+`--service-account`:
+(Required, string) The name or UUID of the service account that owns the token.
+
+`--scopes`:
+(Optional, string) The new comma-separated scopes of the token. They replace the current scopes.
+
+`--add-scopes`:
+(Optional, string) The comma-separated scopes to add to the current scopes. Scopes the token already has are kept only once.
+
+`--remove-scopes`:
+(Optional, string) The comma-separated scopes to remove from the current scopes. Scopes the token doesn't have are ignored.
+
+`--enabled`:
+(Optional, bool) Whether the token is enabled. Use `--enabled=false` to disable it.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+When several scope flags are sent, `--scopes` is applied first, then `--add-scopes`, and then `--remove-scopes`.
+
+Examples:
+
+```bash
+# Add and remove scopes of a token
+discovery core token update "My Token" --service-account "ci" --add-scopes "staging:bucket:create,staging:content:*" --remove-scopes "core:*"
+{"account":"06f52112-a2bb-4490-97c2-171fb7d54d5b","active":true,"creationTimestamp":"2026-11-18T16:48:42Z","expirationTimestamp":"2026-12-18T16:48:42Z","id":"b4bcd270-e824-4112-913b-65fb89e151d3","lastUpdatedTimestamp":"2026-11-19T10:00:00Z","name":"My Token","scopes":["staging:bucket:create","staging:content:*"]}
+```
+
+```bash
+# Replace all the scopes of a token
+discovery core token update "My Token" --service-account "ci" --scopes "queryflow:*"
+{"account":"06f52112-a2bb-4490-97c2-171fb7d54d5b","active":true,"creationTimestamp":"2026-11-18T16:48:42Z","expirationTimestamp":"2026-12-18T16:48:42Z","id":"b4bcd270-e824-4112-913b-65fb89e151d3","lastUpdatedTimestamp":"2026-11-19T10:00:00Z","name":"My Token","scopes":["queryflow:*"]}
+```
+
+```bash
+# Update a token interactively: rename it, keep its scopes and disable it
+discovery core token update "My Token" --service-account "ci"
+Name [My Token]: Renamed Token
+Scopes [["core:*"]]: 
+Active [true]: false
+{"account":"06f52112-a2bb-4490-97c2-171fb7d54d5b","active":false,"creationTimestamp":"2026-11-18T16:48:42Z","expirationTimestamp":"2026-12-18T16:48:42Z","id":"b4bcd270-e824-4112-913b-65fb89e151d3","lastUpdatedTimestamp":"2026-11-19T10:00:00Z","name":"Renamed Token","scopes":["core:*"]}
+```
+
+###### Enable
+`enable` is the command used to enable an access token in Discovery Core. The user must send a name or UUID to enable a specific token. If it is enabled, it acknowledges the change.
+
+Usage: `discovery core token enable [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the token that will be enabled.
+
+Flags:
+
+`--service-account`:
+(Required, string) The name or UUID of the service account that owns the token.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Enable a token by name
+discovery core token enable "My Token" --service-account "ci"
+{
+  "acknowledged": true
+}
+```
+
+###### Disable
+`disable` is the command used to disable an access token in Discovery Core. A disabled token can't be used until it is enabled again. The user must send a name or UUID to disable a specific token. If it is disabled, it acknowledges the change.
+
+Usage: `discovery core token disable [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the token that will be disabled.
+
+Flags:
+
+`--service-account`:
+(Required, string) The name or UUID of the service account that owns the token.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Example:
+
+```bash
+# Disable a token by id
+discovery core token disable b4bcd270-e824-4112-913b-65fb89e151d3 --service-account "ci"
+{
+  "acknowledged": true
+}
+```
+
+###### Renew
+`renew` is the command used to renew an access token in Discovery Core. Renewing issues a new token value, which replaces the previous one, and computes the new expiration from now with the given time-to-live. The previous value stops working. The response includes the new value in the `token` field, and it is shown only once.
+
+Usage: `discovery core token renew [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the token that will be renewed.
+
+Flags:
+
+`--service-account`:
+(Required, string) The name or UUID of the service account that owns the token.
+
+`--ttl`:
+(Required, string) The new time-to-live of the token, counted from now. An integer is read as seconds, and the units `s`, `m`, `h` and `d` are also accepted, for example `3600`, `90s`, `15m`, `12h` or `60d`. Use `-1` for a token that never expires.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Renew a token for 60 days
+discovery core token renew "My Token" --service-account "ci" --ttl "60d"
+{
+  "account": "06f52112-a2bb-4490-97c2-171fb7d54d5b",
+  "active": true,
+  "creationTimestamp": "2026-11-18T16:48:42Z",
+  "expirationTimestamp": "2027-01-18T10:00:00Z",
+  "id": "b4bcd270-e824-4112-913b-65fb89e151d3",
+  "lastUpdatedTimestamp": "2026-11-19T10:00:00Z",
+  "name": "My Token",
+  "scopes": [
+    "core:*"
+  ],
+  "token": "pdp_q3K9xV1mZ8bT4nR7wY2cL6hJ0sD5fG1aE9uI3oP8kM4"
+}
+```
+
+```bash
+# Renew a token by id so it never expires
+discovery core token renew b4bcd270-e824-4112-913b-65fb89e151d3 --service-account "ci" --ttl "-1"
+{
+  "account": "06f52112-a2bb-4490-97c2-171fb7d54d5b",
+  "active": true,
+  "creationTimestamp": "2026-11-18T16:48:42Z",
+  "id": "b4bcd270-e824-4112-913b-65fb89e151d3",
+  "lastUpdatedTimestamp": "2026-11-19T10:00:00Z",
+  "name": "My Token",
+  "scopes": [
+    "core:*"
+  ],
+  "token": "pdp_q3K9xV1mZ8bT4nR7wY2cL6hJ0sD5fG1aE9uI3oP8kM4"
+}
+```
+
+###### Revoke
+`revoke` is the command used to revoke an access token in Discovery Core. Revoking deletes the token, so it can't be used anymore. The user must send a name or UUID to revoke a specific token. If the token was already deleted, the command answers with `"acknowledged": false`.
+
+Usage: `discovery core token revoke [flags] <arg>`
+
+Arguments:
+
+`arg`:
+(Required, string) The name or UUID of the token that will be revoked.
+
+Flags:
+
+`--service-account`:
+(Required, string) The name or UUID of the service account that owns the token.
+
+`-h, --help`:
+(Optional, bool) Prints the usage of the command.
+
+`-p, --profile`:
+(Optional, string) Set the configuration profile that will execute the command.
+
+Examples:
+
+```bash
+# Revoke a token by id
+discovery core token revoke b4bcd270-e824-4112-913b-65fb89e151d3 --service-account "ci"
+{
+  "acknowledged": true
+}
+```
+
+```bash
+# Revoke a token by name
+discovery core token revoke "My Token" --service-account "ci"
+{
+  "acknowledged": true
+}
+```
+
 ##### Status
 `status` is the command used to check the status of Discovery Core. If it is healthy, it should return a JSON with an "UP" status field.
 
