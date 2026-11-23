@@ -1,0 +1,14 @@
+Usage:
+  get [<token>] [flags]
+
+Examples:
+	# Get a token by name
+	discovery core token get "My Token for Deployment" --service-account "ci"
+
+	# Get all tokens using the configuration in profile "cn"
+	discovery core token get --service-account "ci" -p cn
+
+Flags:
+  -h, --help                     help for get
+      --service-account string   the name or UUID of the service account that owns the token
+

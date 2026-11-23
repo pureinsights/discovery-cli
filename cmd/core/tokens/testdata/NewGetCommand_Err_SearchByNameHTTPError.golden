@@ -1,0 +1,11 @@
+Error: Could not search for entity with id "b4bcd270-e824-4112-913b-65fb89e151d3"
+status: 500, body: {
+			"status": 500,
+			"code": 1003,
+			"messages": [
+				"Internal server error"
+			],
+			"timestamp": "2025-10-16T17:46:45.386963700Z"
+			}
+
+

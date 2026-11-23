@@ -1,0 +1,11 @@
+Error: Could not store entities
+status: 400, body: {
+	"status": 400,
+	"code": 3002,
+	"messages": [
+		"dto.scopes[]: Scopes must be product:entity:permission, where entity or permission may be '*'"
+	],
+	"timestamp": "2026-11-23T10:00:00.000000000Z"
+}
+
+

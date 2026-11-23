@@ -1,0 +1,20 @@
+Usage:
+  create [<name>] [flags]
+
+Examples:
+	# Create a token with flags
+	discovery core token create "My Token for Deployment" --service-account "ci" --scopes "ingestion:seed:write,core:server:read,queryflow:*" --ttl "30d"
+
+	# Create a disabled token with only the required fields
+	discovery core token create "My Token for Deployment" --service-account "ci" --scopes "ingestion:seed:write,core:server:read,queryflow:*" --enabled=false
+
+	# Create a token interactively
+	discovery core token create --service-account "ci"
+
+Flags:
+      --enabled                  whether the token is enabled (default true)
+  -h, --help                     help for create
+      --scopes string            the comma-separated scopes for the token
+      --service-account string   the name or UUID of the service account that owns the token
+      --ttl string               the time-to-live for the token
+

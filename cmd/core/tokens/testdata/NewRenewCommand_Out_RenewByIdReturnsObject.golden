@@ -1,0 +1,13 @@
+{
+  "account": "8f840aef-4fb2-4ea3-8aac-d743aaf13a90",
+  "active": true,
+  "creationTimestamp": "2026-11-18T16:48:42Z",
+  "expirationTimestamp": "2027-01-18T10:00:00Z",
+  "id": "b4bcd270-e824-4112-913b-65fb89e151d3",
+  "lastUpdatedTimestamp": "2026-11-19T10:00:00Z",
+  "name": "My Token",
+  "scopes": [
+    "core:*"
+  ],
+  "token": "pdp_q3K9xV1mZ8bT4nR7wY2cL6hJ0sD5fG1aE9uI3oP8kM4"
+}

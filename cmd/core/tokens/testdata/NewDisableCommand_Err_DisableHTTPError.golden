@@ -1,0 +1,11 @@
+Error: Could not disable entity with id "b4bcd270-e824-4112-913b-65fb89e151d3"
+status: 500, body: {
+	"status": 500,
+	"code": 1003,
+	"messages": [
+		"Internal server error"
+	],
+	"timestamp": "2026-11-03T17:02:11.000000000Z"
+}
+
+
