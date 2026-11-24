@@ -53,10 +53,30 @@ func (d *discovery) HaltSeed(client IngestionSeedController, name string, printe
 	return printer(*d.IOStreams(), haltResults...)
 }
 
+// ResetSeed resets the execution of a seed.
+func (d *discovery) ResetSeed(client IngestionSeedController, name string, printer Printer) error {
+	seedId, err := GetEntityId(d, client, name)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to reset execution.")
+	}
+
+	resetResults, err := client.Halt(seedId)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not reset seed execution for seed with id %q", seedId.String())
+	}
+
+	if printer == nil {
+		printer = JsonArrayPrinter(false)
+	}
+
+	return printer(*d.IOStreams(), resetResults...)
+}
+
 // IngestionSeedExecutionController defines all of the methods to manage seed executions from commands.
 type IngestionSeedExecutionController interface {
 	Getter
 	Halt(id uuid.UUID) (gjson.Result, error)
+	Reset(id uuid.UUID) (gjson.Result, error)
 }
 
 // HaltSeedExecution stops a single seed execution with its UUID.
@@ -71,6 +91,20 @@ func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, ex
 	}
 
 	return printer(*d.IOStreams(), haltResult)
+}
+
+// ResetSeedExecution resets a single seed execution with its UUID.
+func (d discovery) ResetSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error {
+	resetResult, err := client.Reset(execution)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not reset the seed execution with id %q", execution.String())
+	}
+
+	if printer == nil {
+		printer = JsonObjectPrinter(true)
+	}
+
+	return printer(*d.IOStreams(), resetResult)
 }
 
 // ConvertJSONArrayToString transforms a []gjson.Result into a valid JSON array string.
