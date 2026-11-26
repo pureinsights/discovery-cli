@@ -13,6 +13,7 @@ type IngestionSeedController interface {
 	Searcher
 	Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error)
 	Halt(id uuid.UUID) ([]gjson.Result, error)
+	Reset(id uuid.UUID) ([]gjson.Result, error)
 }
 
 // StartSeed initiates the execution of a seed with the given scanType and execution properties.
@@ -53,16 +54,16 @@ func (d *discovery) HaltSeed(client IngestionSeedController, name string, printe
 	return printer(*d.IOStreams(), haltResults...)
 }
 
-// ResetSeed resets the execution of a seed.
+// ResetSeed resets the metadata of a seed.
 func (d *discovery) ResetSeed(client IngestionSeedController, name string, printer Printer) error {
 	seedId, err := GetEntityId(d, client, name)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to reset execution.")
 	}
 
-	resetResults, err := client.Halt(seedId)
+	resetResults, err := client.Reset(seedId)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not reset seed execution for seed with id %q", seedId.String())
+		return NewErrorWithCause(ErrorExitCode, err, "Could not reset seed metadata for seed with id %q", seedId.String())
 	}
 
 	if printer == nil {
@@ -93,11 +94,11 @@ func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, ex
 	return printer(*d.IOStreams(), haltResult)
 }
 
-// ResetSeedExecution resets a single seed execution with its UUID.
+// ResetSeedExecution resets a single seed metadata with its UUID.
 func (d discovery) ResetSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error {
 	resetResult, err := client.Reset(execution)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not reset the seed execution with id %q", execution.String())
+		return NewErrorWithCause(ErrorExitCode, err, "Could not reset the seed metadata with id %q", execution.String())
 	}
 
 	if printer == nil {

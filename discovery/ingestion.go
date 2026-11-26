@@ -126,8 +126,8 @@ func (c seedExecutionsClient) Halt(executionId uuid.UUID) (gjson.Result, error) 
 	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/halt")
 }
 
-// Reset resets a seed execution based on the seedId and executionId.
-// It cannot reset an execution if it is already in a state that does not allow it.
+// Reset resets a seed metadata based on the seedId and executionId.
+// It cannot reset the metadata if it is already in a state that does not allow it.
 func (c seedExecutionsClient) Reset(executionId uuid.UUID) (gjson.Result, error) {
 	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/reset")
 }
@@ -286,7 +286,7 @@ func (sc seedsClient) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return haltings.Array(), err
 }
 
-// Reset resets all the executions of a seed.
+// Reset resets all the metadata of a seed.
 func (sc seedsClient) Reset(id uuid.UUID) ([]gjson.Result, error) {
 	resets, err := execute(sc.crud.client, http.MethodPost, "/"+id.String()+"/reset")
 	if err != nil {

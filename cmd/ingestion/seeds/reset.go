@@ -8,13 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewResetCommand creates the seed reset command to reset a seed execution.
+// NewResetCommand creates the seed reset command to reset a seed metadata.
 func NewResetCommand(d cli.Discovery) *cobra.Command {
 	var execution string
 	reset := &cobra.Command{
 		Use:   "reset <seed>",
-		Short: "The command that resets a seed execution in Discovery Ingestion.",
-		Long:  "reset is the command used to reset a seed execution in Discovery Ingestion. With the --execution flag, the user can specify the specific execution that will be reseted. If there is no --execution flag, all of the active executions are reseted.",
+		Short: "The command that resets a seed metadata in Discovery Ingestion.",
+		Long:  "reset is the command used to reset a seed metadata in Discovery Ingestion. With the --execution flag, the user can specify the specific execution that will be reseted. If there is no --execution flag, all of the active executions are reseted.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
