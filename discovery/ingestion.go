@@ -280,7 +280,6 @@ func (sc seedsClient) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return haltings.Array(), err
 }
 
-// Reset resets a seed.
 // If the seed has no active executions, then the seed's metadata is reset and its records deleted.
 func (sc seedsClient) Reset(id uuid.UUID) (gjson.Result, error) {
 	return execute(sc.crud.client, http.MethodPost, "/"+id.String()+"/reset")

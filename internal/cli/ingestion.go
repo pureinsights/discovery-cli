@@ -8,11 +8,12 @@ import (
 	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 )
 
-// IngestionSeedController defines the methods to start and halt a seed.
+// IngestionSeedController defines the methods to start, halt and reset a seed.
 type IngestionSeedController interface {
 	Searcher
 	Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error)
 	Halt(id uuid.UUID) ([]gjson.Result, error)
+	Reset(id uuid.UUID) (gjson.Result, error)
 }
 
 // StartSeed initiates the execution of a seed with the given scanType and execution properties.
@@ -51,6 +52,25 @@ func (d *discovery) HaltSeed(client IngestionSeedController, name string, printe
 	}
 
 	return printer(*d.IOStreams(), haltResults...)
+}
+
+// ResetSeed resets the metadata of a seed.
+func (d *discovery) ResetSeed(client IngestionSeedController, name string, printer Printer) error {
+	seedId, err := GetEntityId(d, client, name)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to reset metadata.")
+	}
+
+	resetResult, err := client.Reset(seedId)
+	if err != nil {
+		return NewErrorWithCause(ErrorExitCode, err, "Could not reset seed metadata for seed with id %q", seedId.String())
+	}
+
+	if printer == nil {
+		printer = JsonArrayPrinter(false)
+	}
+
+	return printer(*d.IOStreams(), resetResult)
 }
 
 // IngestionSeedExecutionController defines all of the methods to manage seed executions from commands.
