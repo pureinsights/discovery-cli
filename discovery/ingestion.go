@@ -126,12 +126,6 @@ func (c seedExecutionsClient) Halt(executionId uuid.UUID) (gjson.Result, error) 
 	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/halt")
 }
 
-// Reset resets a seed metadata based on the seedId and executionId.
-// It cannot reset the metadata if it is already in a state that does not allow it.
-func (c seedExecutionsClient) Reset(executionId uuid.UUID) (gjson.Result, error) {
-	return execute(c.client, http.MethodPost, "/"+executionId.String()+"/reset")
-}
-
 // Audit gets the audited changes from a seed execution. It returns an array with the stages the execution has completed.
 func (c seedExecutionsClient) Audit(executionId uuid.UUID) ([]gjson.Result, error) {
 	return executeWithPagination(c.client, http.MethodGet, "/"+executionId.String()+"/audit")
@@ -286,14 +280,9 @@ func (sc seedsClient) Halt(id uuid.UUID) ([]gjson.Result, error) {
 	return haltings.Array(), err
 }
 
-// Reset resets all the metadata of a seed.
-func (sc seedsClient) Reset(id uuid.UUID) ([]gjson.Result, error) {
-	resets, err := execute(sc.crud.client, http.MethodPost, "/"+id.String()+"/reset")
-	if err != nil {
-		return []gjson.Result(nil), err
-	}
-
-	return resets.Array(), err
+// If the seed has no active executions, then the seed's metadata is reset and its records deleted.
+func (sc seedsClient) Reset(id uuid.UUID) (gjson.Result, error) {
+	return execute(sc.crud.client, http.MethodPost, "/"+id.String()+"/reset")
 }
 
 // Records creates a new seedRecordsClient.

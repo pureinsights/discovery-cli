@@ -1,7 +1,6 @@
 package seeds
 
 import (
-	"github.com/google/uuid"
 	"github.com/pureinsights/discovery-cli/v2/cmd/commands"
 	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 	"github.com/pureinsights/discovery-cli/v2/internal/cli"
@@ -10,11 +9,10 @@ import (
 
 // NewResetCommand creates the seed reset command to reset a seed metadata.
 func NewResetCommand(d cli.Discovery) *cobra.Command {
-	var execution string
 	reset := &cobra.Command{
 		Use:   "reset <seed>",
 		Short: "The command that resets a seed metadata in Discovery Ingestion.",
-		Long:  "reset is the command used to reset a seed metadata in Discovery Ingestion. With the --execution flag, the user can specify the specific execution that will be reseted. If there is no --execution flag, all of the active executions are reseted.",
+		Long:  "reset is the command used to reset a seed metadata in Discovery Ingestion. If the seed has no active executions, then the seed's metadata is reset and its records deleted.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			profile, err := cmd.Flags().GetString("profile")
 			if err != nil {
@@ -30,32 +28,12 @@ func NewResetCommand(d cli.Discovery) *cobra.Command {
 
 			ingestionClient := discoveryPackage.NewIngestion(vpr.GetString(profile+".ingestion_url"), vpr.GetString(profile+".ingestion_key"))
 
-			if execution == "" {
-				return d.ResetSeed(ingestionClient.Seeds(), args[0], cli.GetArrayPrinter(vpr.GetString("output")))
-			}
-
-			executionId, err := uuid.Parse(execution)
-			if err == nil {
-				seedsClient := ingestionClient.Seeds()
-				seedId, err := cli.GetEntityId(d, seedsClient, args[0])
-				if err == nil {
-					return d.ResetSeedExecution(seedsClient.Executions(seedId), executionId, cli.GetObjectPrinter(vpr.GetString("output")))
-				} else {
-					return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Could not get seed %q", args[0])
-				}
-			}
-
-			return cli.NewErrorWithCause(cli.ErrorExitCode, err, "Failed to convert the execution ID to UUID")
+			return d.ResetSeed(ingestionClient.Seeds(), args[0], cli.GetObjectPrinter(vpr.GetString("output")))
 		},
 		Args: cobra.ExactArgs(1),
-		Example: `	# Reset all active seed executions
-	discovery ingestion seed reset 0ce1bece-5a01-4d4a-bf92-5ca3cd5327f3
-
-	# Reset a single seed execution
-	discovery ingestion seed reset 1d81d3d5-58a2-44a5-9acf-3fc8358afe09 --execution f63fbdb6-ec49-4fe5-90c9-f5c6de4efc36`,
+		Example: `	# Reset the seed metadata
+	discovery ingestion seed reset 1d81d3d5-58a2-44a5-9acf-3fc8358afe09`,
 	}
-
-	reset.Flags().StringVarP(&execution, "execution", "e", "", "the UUID of the execution that will be reseted")
 
 	return reset
 }

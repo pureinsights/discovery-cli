@@ -8,12 +8,12 @@ import (
 	discoveryPackage "github.com/pureinsights/discovery-cli/v2/discovery"
 )
 
-// IngestionSeedController defines the methods to start and halt a seed.
+// IngestionSeedController defines the methods to start, halt and reset a seed.
 type IngestionSeedController interface {
 	Searcher
 	Start(id uuid.UUID, scan discoveryPackage.ScanType, executionProperties gjson.Result) (gjson.Result, error)
 	Halt(id uuid.UUID) ([]gjson.Result, error)
-	Reset(id uuid.UUID) ([]gjson.Result, error)
+	Reset(id uuid.UUID) (gjson.Result, error)
 }
 
 // StartSeed initiates the execution of a seed with the given scanType and execution properties.
@@ -58,10 +58,10 @@ func (d *discovery) HaltSeed(client IngestionSeedController, name string, printe
 func (d *discovery) ResetSeed(client IngestionSeedController, name string, printer Printer) error {
 	seedId, err := GetEntityId(d, client, name)
 	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to reset execution.")
+		return NewErrorWithCause(ErrorExitCode, err, "Could not get seed ID to reset metadata.")
 	}
 
-	resetResults, err := client.Reset(seedId)
+	resetResult, err := client.Reset(seedId)
 	if err != nil {
 		return NewErrorWithCause(ErrorExitCode, err, "Could not reset seed metadata for seed with id %q", seedId.String())
 	}
@@ -70,14 +70,13 @@ func (d *discovery) ResetSeed(client IngestionSeedController, name string, print
 		printer = JsonArrayPrinter(false)
 	}
 
-	return printer(*d.IOStreams(), resetResults...)
+	return printer(*d.IOStreams(), resetResult)
 }
 
 // IngestionSeedExecutionController defines all of the methods to manage seed executions from commands.
 type IngestionSeedExecutionController interface {
 	Getter
 	Halt(id uuid.UUID) (gjson.Result, error)
-	Reset(id uuid.UUID) (gjson.Result, error)
 }
 
 // HaltSeedExecution stops a single seed execution with its UUID.
@@ -92,20 +91,6 @@ func (d discovery) HaltSeedExecution(client IngestionSeedExecutionController, ex
 	}
 
 	return printer(*d.IOStreams(), haltResult)
-}
-
-// ResetSeedExecution resets a single seed metadata with its UUID.
-func (d discovery) ResetSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error {
-	resetResult, err := client.Reset(execution)
-	if err != nil {
-		return NewErrorWithCause(ErrorExitCode, err, "Could not reset the seed metadata with id %q", execution.String())
-	}
-
-	if printer == nil {
-		printer = JsonObjectPrinter(true)
-	}
-
-	return printer(*d.IOStreams(), resetResult)
 }
 
 // ConvertJSONArrayToString transforms a []gjson.Result into a valid JSON array string.

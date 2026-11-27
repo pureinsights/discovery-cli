@@ -43,7 +43,6 @@ type Discovery interface {
 	HaltSeed(client IngestionSeedController, name string, printer Printer) error
 	HaltSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error
 	ResetSeed(client IngestionSeedController, name string, printer Printer) error
-	ResetSeedExecution(client IngestionSeedExecutionController, execution uuid.UUID, printer Printer) error
 	AppendSeedRecord(seed gjson.Result, client RecordGetter, id string, printer Printer) error
 	AppendSeedRecords(seed gjson.Result, client RecordGetter, printer Printer) error
 	SeedExecution(client SeedExecutionGetter, seedExecutionId uuid.UUID, summarizers map[string]Summarizer, details bool, printer Printer) error
